@@ -1,5 +1,5 @@
 <div align="center">
-<img src=".github/images/banner.png" width="70px">
+<img src=".github/images/logo.png" width="70px">
 <br>
 <br>
 </div>
@@ -15,11 +15,13 @@
 
 > **Find the perfect companion for your furry friend!**
 
-Pegada is the ultimate social app for dogs. It's not just Tinder for dogs - it's a platform designed for socializing our furry friends. Here, users aren't humans, but dogs! Your pet's profile will be the one making connections.
+<div align="center">
+<img src=".github/images/banner.png" width="700px">
+</div>
 
 <br />
 
-<img src="apps/nextjs/public/phone-mockup.png" height="500"/>
+Pegada is the ultimate social app for dogs. It's not just Tinder for dogs - it's a platform designed for socializing our furry friends. Here, users aren't humans, but dogs! Your pet's profile will be the one making connections.
 
 ## ✨ Features
 
