@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "fast": {
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "development": {
+      "extends": "fast",
+      "node": "20.10.0",
+      "developmentClient": true,
+      "distribution": "internal",
+      "autoIncrement": true,
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "extends": "fast",
+      "node": "20.10.0",
+      "channel": "main",
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

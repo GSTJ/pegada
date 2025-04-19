@@ -1,0 +1,48 @@
+{
+  "name": "@pegada/queue",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@pegada/eslint-config/typescript"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
+    "start": "bun dist/index.js",
+    "dev": "tsx src/index.ts",
+    "build": "npx rimraf dist && tsup --sourcemap",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {
+    "@pegada/eslint-config": "workspace:*",
+    "@pegada/prettier-config": "workspace:*",
+    "prettier": "^3.3.3"
+  },
+  "prettier": "@pegada/prettier-config",
+  "dependencies": {
+    "@fastify/http-proxy": "^9.5.0",
+    "@pegada/api": "workspace:*",
+    "@pegada/shared": "workspace:*",
+    "@pegada/tsconfig": "workspace:*",
+    "@tensorflow/tfjs-node": "^4.20.0",
+    "blurhash": "^2.0.5",
+    "bullmq": "^5.12.0",
+    "expo-server-sdk": "^3.10.0",
+    "fastify": "^4.28.1",
+    "nsfwjs": "^4.1.0",
+    "sharp": "^0.33.4",
+    "tsup": "^8.2.4",
+    "tsx": "^4.16.5",
+    "typescript": "*"
+  }
+}

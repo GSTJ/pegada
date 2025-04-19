@@ -1,0 +1,327 @@
+{
+  "likeLimit": {
+    "dailyLikeLimit": "Limite de Curtidas Diário",
+    "description": "Você curtiu <b>{{count}} cachorros</b> em <b>24h</b>. Espere ou vire <b>premium</b> para continuar deslizando.",
+    "remaining": "restantes",
+    "timeHours": "{{time}}h",
+    "winFreeTrial": "Ganhe um Teste Gratuito",
+    "getPremium": "Descubra o Premium"
+  },
+  "appReview": {
+    "areYouLikingTheAppModal": {
+      "description": "Queremos saber sua opinião, você é um dos melhores doguinhos!",
+      "no": "Não",
+      "title": "Está gostando do Pegada?",
+      "yes": "Sim"
+    },
+    "notLikingTheAppModal": {
+      "description": "Como podemos melhorar?",
+      "placeholder": "Escreva aqui",
+      "send": "Enviar",
+      "success": "Obrigado pelo feedback!",
+      "title": "Que pena 😔"
+    }
+  },
+  "askForLocation": {
+    "activateLocation": "Ativar localização",
+    "enableLocation": "Ativar Localização",
+    "activate": "Ativar",
+    "locationUsage": "Sua localização será utilizada para mostrar doguinhos perto de você.",
+    "permissionPrompt": "Você precisa permitir o acesso à localização para usar o Pegada."
+  },
+  "breedPicker": {
+    "error": "⚠️  Não conseguimos carregar no momento",
+    "anyBreed": "Qualquer raça",
+    "breed": "Raça"
+  },
+  "chat": {
+    "sendAMessageToStart": "Envie uma mensagem para iniciar a conversa",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "youMatched": "Vocês deram Match!"
+  },
+  "colors": {
+    "albino": "Albino",
+    "black": "Preto",
+    "brown": "Marrom",
+    "golden": "Golden",
+    "tricolor": "Tricolor",
+    "white": "Branco"
+  },
+  "common": {
+    "back": "Voltar",
+    "nearYou": "Perto de você",
+    "ok": "Ok",
+    "oops": "Oops",
+    "optional": "(Opcional)",
+    "skip": "Pular",
+    "somethingWrong": "Alguma coisa deu errado",
+    "tryAgainLater": "Tente novamente mais tarde.",
+    "somethingWentWrongTryAgainLater": "Alguma coisa deu errado. Tente novamente mais tarde.",
+    "unknown": "Desconhecido"
+  },
+  "completeProfile": {
+    "additionalInfo": "Assim como você poderá selecionar suas preferências para dogs, os outros doguinhos também podem.\n\nEssas informações servem para que possamos te mostrar para os melhores matches!",
+    "birthDate": "Data de Nascimento",
+    "breed": "Raça",
+    "color": "Cor",
+    "female": "Fêmea",
+    "gender": "Sexo",
+    "male": "Macho",
+    "save": "Salvar",
+    "size": "Tamanho",
+    "title": "Detalhes"
+  },
+  "createProfile": {
+    "bio": "Bio",
+    "clickAndHold": "* Clique e segure na foto para alterar a ordem.",
+    "createProfile": "Criar perfil",
+    "dogName": "Nome do Doguinho",
+    "howToCallDog": "Como podemos chamar seu doguinho?",
+    "minimumOnePhoto": "Pelo menos uma foto deve incluir você (dono/a)",
+    "profilePictures": "Fotinhas do Dog",
+    "tellSomethingCool": "Conte alguma coisa legal sobre vocês.",
+    "title": "Crie seu perfil"
+  },
+  "dateFormatting": {
+    "and": "e",
+    "month": "{{unit}} mês",
+    "months": "{{unit}} meses",
+    "year": "{{unit}} ano",
+    "years": "{{unit}} anos",
+    "day": "{{unit}} dia",
+    "days": "{{unit}} dias",
+    "week": "{{unit}} semana",
+    "weeks": "{{unit}} semanas"
+  },
+  "dogProfile": {
+    "profileInfoError": "⚠️ Oops. Tente novamente mais tarde.",
+    "cancel": "Cancelar",
+    "dogProfile": "Perfil do Doguinho",
+    "report": "Denunciar",
+    "reportBody": "Eu gostaria de denunciar a conta número {{id}}, pertencente a {{name}} por:\n",
+    "reportMessage": "Ao denunciar um perfil, você estará nos ajudando a manter a comunidade segura. Deseja continuar?",
+    "reportName": "Denunciar {{name}}",
+    "shareLink": "Se liga nesse perfil de doguinho no Pegada, parece legal:\n{{link}}",
+    "shareProfile": "Compartilhar perfil de {{name}}",
+    "sharingNotAvailableMessage": "Não foi possível compartilhar o perfil de {{name}}. Tente novamente mais tarde.",
+    "sharingNotAvailableTitle": "Não foi possível compartilhar 🙁",
+    "somethingWrong": "Alguma coisa deu errada",
+    "tryAgainLater": "Não foi possível desfazer o match agora. Tente novamente mais tarde.",
+    "unmatch": "Desfazer Match",
+    "yes": "Sim"
+  },
+  "editProfile": {
+    "bio": "Bio",
+    "bioPlaceholder": "Conte alguma coisa legal sobre vocês.",
+    "birthDate": "Data de Nascimento",
+    "color": "Cor",
+    "dogName": "Nome do Doguinho",
+    "dogNamePlaceholder": "Como podemos chamar seu doguinho?",
+    "female": "Fêmea",
+    "gender": "Sexo",
+    "male": "Macho",
+    "profileError": "Não foi possível salvar as informações do perfil",
+    "profileUpdated": "Seu perfil foi atualizado!",
+    "saveProfile": "Salvar Perfil",
+    "size": "Tamanho",
+    "title": "Editar perfil",
+    "weight": "Peso (kg)"
+  },
+  "forceUpdate": {
+    "button": "Atualizar",
+    "description": "Uma nova versão do Pegada está disponível. Por favor, atualize para continuar usando o app.",
+    "title": "Atualização Obrigatória"
+  },
+  "formErrors": {
+    "bioTooLong": "A bio deve conter no máximo {{length}} caracteres",
+    "birthDateTooOld": "O doguinho tem mesmo mais de {{years}} anos?",
+    "dateFormatWrong": "DD/MM/AAAA",
+    "dateIsAfterToday": "A data deve ser anterior a hoje",
+    "insertAtLeastOneImage": "Insira pelo menos uma imagem",
+    "nameTooLong": "O nome deve conter no máximo {{length}} caracteres",
+    "nameTooShort": "O nome deve conter pelo menos {{length}} caracteres",
+    "selectBreed": "Selecione uma raça",
+    "waitImageUpload": "Aguarde o upload das imagens",
+    "weightTooBig": "O peso deve ser menor que {{weight}} kg"
+  },
+  "imagePicker": {
+    "cancel": "Cancelar",
+    "chooseFromLibrary": "Escolher da Galeria",
+    "message": "Tirar uma foto ou escolher da galeria",
+    "permissionsRequiredMessage": "Por favor, conceda as permissões necessárias para acessar a câmera e a galeria de fotos.",
+    "permissionsRequiredTitle": "Desculpe, precisamos dessa permissão para que isso funcione!",
+    "takePhoto": "Tirar Foto",
+    "title": "O que você prefere?"
+  },
+  "insertEmail": {
+    "accountCode": "Vamos enviar um código de 6 dígitos para autorizar sua conta. Se ainda não tem uma, vamos criá-la.",
+    "continue": "Continuar",
+    "emailPlaceholder": "oi@email.com",
+    "findDogsNearYou": "<view><title>Encontre </title><highlight>Dogs</highlight></view><view><title>perto de </title><highlight>Você</highlight><view/>",
+    "insertEmail": "Insira seu <1>email</1>",
+    "loginError": "Ocorreu um erro ao fazer login.",
+    "validEmail": "Insira um email válido"
+  },
+  "locationMap": {
+    "adjustYourPosition": "Ajuste sua posição",
+    "areYouHere": "Você está aqui?",
+    "confirmLocation": "Confirmar Localização",
+    "title": "Localização",
+    "updateLocationError": "Ocorreu um erro ao atualizar sua localização."
+  },
+  "match": {
+    "itsAMatch": "Deu Match!",
+    "itsAMatchDescription": "Você deu match com esse doguinho!"
+  },
+  "matches": {
+    "matchedDogs": "Doguinhos Que Deram Match 🐶",
+    "messages": "Mensagens",
+    "sendFirstMessage": "Envie a primeira mensagem!"
+  },
+  "messages": {
+    "empty": {
+      "clearSearch": "Limpar Busca",
+      "description": " Aqui você irá ver e enviar mensagens para seus Matches.",
+      "searchForDogs": "Procurar Doguinhos",
+      "title": "Não encontramos Matches, procure por novos doguinhos!"
+    }
+  },
+  "newMatch": {
+    "keepSwiping": "Continue Deslizando",
+    "sendMessage": "Enviar Mensagem",
+    "youGotA": "Você deu um",
+    "youLikedEachOther": "Você e {{name}} se curtiram!"
+  },
+  "oneTimeCode": {
+    "insertCode": "Insira o código de verificação que enviamos para:",
+    "invalidCode": "Código inválido",
+    "resendCode": "Reenviar o código"
+  },
+  "pickerSheet": {
+    "search": "Pesquisar"
+  },
+  "preferences": {
+    "ageRange": "Faixa etária",
+    "anyColor": "Qualquer cor",
+    "anySize": "Qualquer tamanho",
+    "color": "Cor",
+    "maxDistance": "Distância máxima",
+    "preferencesUpdated": "Suas preferências foram atualizadas!",
+    "savePreferences": "Salvar Preferências",
+    "size": "Tamanho",
+    "title": "Preferências",
+    "updateError": "Ocorreu um erro ao atualizar suas preferências.",
+    "years": "0-{{maxYears}}+ anos"
+  },
+  "links": {
+    "termsOfUse": "https://www.pegada.app/pt-br/terms-of-use",
+    "privacyPolicy": "https://www.pegada.app/pt-br/privacy-policy"
+  },
+  "profile": {
+    "cancel": "Cancelar",
+    "delete": "Apagar",
+    "deleteAccount": "Apagar conta",
+    "deleteAccountConfirmation": "Tem certeza que deseja apagar sua conta? Essa ação é irreversível.",
+    "editProfile": "Editar perfil",
+    "editProfileDescription": "Atualize suas informações e se destaque para os outros doguinhos.",
+    "error": "Erro",
+    "language": "Linguagem",
+    "loadProfileError": "Ocorreu um erro ao carregar seu perfil.",
+    "logout": "Sair",
+    "logoutConfirmation": "Tem certeza que deseja sair?",
+    "matchPreferences": "Preferências de match",
+    "matchPreferencesDescription": "Defina suas preferências e encontre seu match perfeito!",
+    "privacyPolicy": "Política de privacidade",
+    "privacyPolicyDescription": "Saiba como usamos e protegemos seus dados lendo nossa política de privacidade.",
+    "settings": "Configurações",
+    "termsOfUse": "Termos de uso",
+    "termsOfUseDescription": "Familiarize-se com nossos termos de uso para aproveitar ao máximo.",
+    "theme": "Tema",
+    "updateLocation": "Atualizar localização",
+    "plan": {
+      "currentPlan": "Plano Atual",
+      "errorLoading": "Erro ao carregar o plano",
+      "clickToRetry": "Tente novamente",
+      "upgradeToPremium": "Atualize para Premium",
+      "until": "Até {{date}}"
+    }
+  },
+  "plans": {
+    "FREE": "Grátuito",
+    "PREMIUM": "Premium",
+    "day": "dia",
+    "week": "semana",
+    "M": "mês",
+    "Y": "ano",
+    "D": "dia",
+    "W": "semana",
+    "monthly": "Mensal",
+    "yearly": "Anual",
+    "save": "Economize {{percent}}%",
+    "benefits": {
+      "priorityQueue": "Prioridade na Fila",
+      "getSeenFirst": "Seja visto primeiro pelos populares!",
+      "unlimitedLikes": "Curtidas Ilimitadas",
+      "noDailyLimits": "Sem limites para o amor",
+      "rewind": "Voltar na Lista de Doguinhos",
+      "madeAMistake": "Cometeu um erro? Sem problemas",
+      "noAds": "Sem Anúncios",
+      "noAdsDescription": "Aproveite o app sem distrações"
+    },
+    "restorePurchases": {
+      "restore": "Restaurar Compras"
+    },
+    "errors": {
+      "fetchingOfferingsDevice": "Ocorreu um erro ao buscar as ofertas. Tente em um dispositivo real.",
+      "fetchingOfferings": "Ocorreu um erro ao buscar as ofertas."
+    },
+    "upgradeWall": {
+      "earnedFreeTrial": "Inicie o Teste Gratuito",
+      "getPremium": "Obtenha o Premium",
+      "tryPremiumFree": "Experimente o Premium grátis por {{duration}}",
+      "enjoyFullAccess": "Aproveite o acesso total a todos os recursos e turbine o seu doguinho",
+      "startFreeTrial": "Inicie o Teste Gratuito"
+    }
+  },
+  "networkBoundary": {
+    "offline": {
+      "message": "Aguarde um pouquinho e tente novamente quando a conexão estiver estável.",
+      "retry": "Tentar novamente",
+      "title": "Oops, você está offline"
+    },
+    "requestError": {
+      "message": "Não conseguimos processar sua requisição no momento, mas já estamos trabalhando para resolver o problema.",
+      "retry": "Tentar novamente",
+      "title": "Oops, alguma coisa deu errada"
+    },
+    "unknownError": {
+      "message": "Reinicie o app e tente novamente.",
+      "title": "Oops, alguma coisa deu errada"
+    }
+  },
+  "send": {
+    "placeholder": "Digite uma mensagem"
+  },
+  "session": {
+    "expired": "Sua sessão expirou.",
+    "expiredMessage": "Faça login novamente para continuar."
+  },
+  "sizes": {
+    "extraSmall": "Extra Pequeno",
+    "giant": "Gigante",
+    "large": "Grande",
+    "medium": "Médio",
+    "small": "Pequeno"
+  },
+  "swipeRequestFeedback": {
+    "emptyDescription": "Mas calma! Acabamos de lançar e ainda temos poucos usuários.\n\nEstamos trabalhando para garantir um espaço cheio de doguinhos logo logo 🐶\n\nTente ajustar suas preferências ou volte mais tarde! 😉",
+    "emptyTitle": "Parece que os doguinhos acabaram!",
+    "preferencesButton": "Ver Preferências"
+  },
+  "themes": {
+    "automatic": "Automático",
+    "dark": "Escuro",
+    "light": "Claro"
+  }
+}

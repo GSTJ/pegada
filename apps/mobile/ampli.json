@@ -1,0 +1,15 @@
+{
+  "Zone": "us",
+  "OrgId": "222766",
+  "WorkspaceId": "b431f013-c39d-451b-90a7-1119b86e5253",
+  "SourceId": "ac443172-2896-4532-9ea3-ce806cefd240",
+  "Runtime": "react-native:typescript-ampli-v2",
+  "Platform": "React Native",
+  "Language": "TypeScript",
+  "SDK": "@amplitude/analytics-react-native@^1.0",
+  "Branch": "main",
+  "Version": "1.0.0",
+  "VersionId": "90b24b95-6abc-4c07-8a35-4e8c17e5c225",
+  "OmitApiKeys": true,
+  "Path": "./src/ampli"
+}

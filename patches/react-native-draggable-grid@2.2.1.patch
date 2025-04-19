@@ -1,0 +1,18 @@
+diff --git a/src/draggable-grid.tsx b/src/draggable-grid.tsx
+index 213e515698c2bb0470ad8f9705fb12bc742e4c00..64a0736c5d5b816f715a5809b2beff57b7137933 100644
+--- a/src/draggable-grid.tsx
++++ b/src/draggable-grid.tsx
+@@ -1,3 +1,4 @@
++//@ts-nocheck broken types here
+ import * as React from 'react'
+ import { useState, useEffect } from 'react'
+ import {
+diff --git a/src/utils.ts b/src/utils.ts
+index c8651632646a8074ef941928f6c7b06fd054f9f0..e60835c743c12b8cfff0c5659232d609e3ff9ec8 100644
+--- a/src/utils.ts
++++ b/src/utils.ts
+@@ -1,3 +1,4 @@
++//@ts-nocheck broken types here
+ function findKey<T>(map: { [key: string]: T }, fn: (item: T) => boolean) {
+   const keys = Object.keys(map)
+   for (let i = 0; i < keys.length; i++) {

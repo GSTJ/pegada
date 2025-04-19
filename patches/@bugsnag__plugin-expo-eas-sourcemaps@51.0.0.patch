@@ -1,0 +1,49 @@
+diff --git a/lib/bugsnag-expo-xcode.sh b/lib/bugsnag-expo-xcode.sh
+index 3345711939266156933d19c58cf1c3082b5b3e06..ef3e6e322b452746458f88612fb0d6635368ed02 100755
+--- a/lib/bugsnag-expo-xcode.sh
++++ b/lib/bugsnag-expo-xcode.sh
+@@ -60,4 +60,11 @@ if [ ! -z "$ENDPOINT" ]; then
+   ARGS+=("$ENDPOINT")
+ fi
+ 
+-../node_modules/.bin/bugsnag-source-maps upload-react-native "${ARGS[@]}"
++# Make sure that node binary exists
++source `$NODE_BINARY --print "require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/node-binary.sh'"`
++
++# Retrieve the expo node binary
++BUGSNAG_EXPO_NODE_BINARY=$($NODE_BINARY --print "require('path').dirname(require.resolve('@bugsnag/source-maps/package.json')) + '/bin/cli'")
++
++# Start upload the source maps to bugsnag
++$BUGSNAG_EXPO_NODE_BINARY upload-react-native "${ARGS[@]}"
+diff --git a/src/ios.js b/src/ios.js
+index 5150364c16229665014fa26d4c298558d1ef26ad..7a45a7ece10dac613bdf9bf7bcd6546ddd4d5030 100644
+--- a/src/ios.js
++++ b/src/ios.js
+@@ -24,7 +24,7 @@ function withIosPlugin (config, onPremConfig) {
+ 
+     const initialScript = bundleReactNativePhase.shellScript
+ 
+-    const additionalExports = '"export EXTRA_PACKAGER_ARGS=\\"--sourcemap-output $TMPDIR/$(md5 -qs \\"$CONFIGURATION_BUILD_DIR\\")-main.jsbundle.map\\"\\n'
++    const additionalExports =  '"export EXTRA_PACKAGER_ARGS=\\"--sourcemap-output $TMPDIR/$(md5 -qs \\"$CONFIGURATION_BUILD_DIR\\")-main.jsbundle.map\\"\\n'
+ 
+     if (initialScript.indexOf(additionalExports) < 0) {
+       const modifiedScript = additionalExports + initialScript.substr(1)
+@@ -37,8 +37,16 @@ function withIosPlugin (config, onPremConfig) {
+     const uploadBuildPhase = xcodeProject.pbxItemByComment(uploadBuildPhaseComment, buildPhaseName)
+ 
+     if (!uploadBuildPhase) {
+-      const shellScript = 'SOURCE_MAP="$TMPDIR/$(md5 -qs "$CONFIGURATION_BUILD_DIR")-main.jsbundle.map" ../node_modules/@bugsnag/plugin-expo-eas-sourcemaps/lib/bugsnag-expo-xcode.sh'
+-
++            const shellScript = `
++if [[ -f "$PODS_ROOT/../.xcode.env" ]]; then
++  source "$PODS_ROOT/../.xcode.env"
++fi
++if [[ -f "$PODS_ROOT/../.xcode.env.local" ]]; then
++  source "$PODS_ROOT/../.xcode.env.local"
++fi
++
++SOURCE_MAP="$TMPDIR/$(md5 -qs "$CONFIGURATION_BUILD_DIR")-main.jsbundle.map" \`$NODE_BINARY --print "require('path').dirname(require.resolve('@bugsnag/plugin-expo-eas-sourcemaps/package.json')) + '/lib/bugsnag-expo-xcode.sh'"\`
++`;
+       xcodeProject.addBuildPhase([], buildPhaseName, uploadBuildPhaseComment, null, {
+         shellPath: '/bin/sh',
+         shellScript: shellScript

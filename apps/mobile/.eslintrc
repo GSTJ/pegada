@@ -1,0 +1,7 @@
+{
+  "extends": ["@pegada/eslint-config/expo"],
+  "root": true,
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}

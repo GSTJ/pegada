@@ -1,0 +1,55 @@
+{
+  "name": "pegada",
+  "private": true,
+  "packageManager": "pnpm@9.6.0",
+  "workspaces": [
+    "packages/*",
+    "tools/*",
+    "apps/*"
+  ],
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": [
+        "win32",
+        "darwin",
+        "current"
+      ],
+      "cpu": [
+        "x64",
+        "arm64"
+      ]
+    },
+    "patchedDependencies": {
+      "react-native-draggable-grid@2.2.1": "patches/react-native-draggable-grid@2.2.1.patch",
+      "@bugsnag/plugin-expo-eas-sourcemaps@51.0.0": "patches/@bugsnag__plugin-expo-eas-sourcemaps@51.0.0.patch",
+      "styled-components@6.1.11": "patches/styled-components@6.1.11.patch",
+      "react-native-screens@3.31.1": "patches/react-native-screens@3.31.1.patch"
+    }
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.2",
+    "prettier": "3.3.3",
+    "turbo": "^2.0.11",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "mobile": "dotenv -e .env.dev -- pnpm -F @pegada/mobile",
+    "nextjs": "dotenv -e .env.dev -- pnpm -F @pegada/nextjs",
+    "start:everything": "npx concurrently --kill-others-on-fail \"pnpm nextjs dev\" \"pnpm queue dev\" \"pnpm mobile start\"",
+    "queue": "dotenv -e .env.dev -- pnpm -F @pegada/queue",
+    "api": "dotenv -e .env.dev -- pnpm -F @pegada/api",
+    "database": "dotenv -e .env.dev -- pnpm -F @pegada/database",
+    "database:test": "dotenv -e .env.test -- pnpm -F @pegada/database",
+    "test": "dotenv -e .env.test -- turbo test",
+    "build": "dotenv -e .env.dev -- turbo build",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "format": "turbo format",
+    "format:fix": "turbo format:fix",
+    "i18n:parse": "npx i18next-parser",
+    "typecheck": "turbo typecheck",
+    "convert:images": "./scripts/convert-png-images-to-webp.sh",
+    "download:secrets": "dotenv -- ./scripts/download-secrets.sh"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "title": "Pegada - Aplicativo de Relacionamento para Cachorros",
+    "description": "Pegada é um aplicativo de relacionamento para cachorros. Com ele, você pode encontrar outros cachorros para passear, brincar e até mesmo namorar. O aplicativo é gratuito e está disponível para Android e iOS."
+  },
+
+  "home": {
+    "title": "Dê um Match Pro Seu Dog",
+    "description": "O algoritmo garante que seu cachorrinho encontre o par perfeito baseado na raça, localização e até mesmo personalidade!",
+    "cta": {
+      "googlePlay": "Google Play",
+      "appStore": "App Store"
+    },
+    "madeWithLoveBy": "Feito com ❤️ por "
+  },
+  "privacyPolicy": {
+    "metadata": {
+      "title": "Pegada | Política de Privacidade"
+    },
+    "content": "### Política de Privacidade do Aplicativo\n\nA política de privacidade descreve como coletamos, usamos, protegemos e compartilhamos as informações sobre você e seu pet. Por favor, leia cuidadosamente esta política antes de usar nosso aplicativo.\n\n#### Coleta de Informações\n\nColetamos informações de duas maneiras:\n\n- **Informações que você fornece:** Isso inclui as informações do perfil do seu pet, como nome, raça, idade e fotos. Também podemos coletar suas informações de contato para facilitar a comunicação.\n- **Informações de uso e do dispositivo:** Coletamos automaticamente informações sobre como você usa o aplicativo e sobre o dispositivo que você usa para acessar o nosso serviço. Isso pode incluir seu endereço IP, tipo de dispositivo e atividade no aplicativo.\n\n#### Uso das Informações\n\nUsamos as informações coletadas para:\n\n- Facilitar as correspondências entre os pets.\n- Melhorar nosso aplicativo e personalizar sua experiência.\n- Comunicar-se com você.\n- Proteger a segurança dos nossos usuários e prevenir fraudes.\n\n#### Compartilhamento de Informações\n\nNão vendemos nem compartilhamos suas informações pessoais com terceiros para fins de marketing sem o seu consentimento explícito. Podemos compartilhar informações com prestadores de serviços que nos ajudam a operar e melhorar nosso aplicativo. Esses prestadores de serviços têm acesso apenas às informações necessárias para realizar suas funções e estão obrigados a proteger suas informações.\n\n#### Segurança\n\nAdotamos medidas de segurança razoáveis para proteger suas informações, mas nenhum sistema é completamente seguro. Embora façamos o nosso melhor para proteger suas informações, não podemos garantir a sua segurança absoluta.\n\n#### Alterações à Política de Privacidade\n\nPodemos alterar esta política de privacidade de tempos em tempos. Se fizermos alterações, notificaremos você por meio de uma atualização no aplicativo ou por e-mail.\n\n#### Contato\n\nSe tiver alguma dúvida sobre esta política de privacidade, entre em contato conosco pelo e-mail: [suporte@pegada.app](mailto:suporte@pegada.app)\n\nAo utilizar o nosso aplicativo, você concorda com a coleta, uso e compartilhamento de suas informações conforme descrito nesta política de privacidade.\n\nÚltima atualização: 2 de julho de 2023."
+  },
+  "termsOfUse": {
+    "metadata": {
+      "title": "Pegada | Termos de Uso"
+    },
+    "content": "### Termos de Uso do Aplicativo \"Pegada\"\n\n1. **Definições:** \"Pegada\" refere-se ao aplicativo de relacionamento destinado para cães, incluindo todas as funcionalidades, serviços e interfaces associados. \"Usuário\" refere-se a qualquer pessoa que registre e use o aplicativo.\n\n2. **Aceitação dos Termos:** Ao acessar e usar o Pegada, você concorda, sem restrição ou reserva, com estes Termos de Uso. Se não concordar com qualquer parte destes termos, não deve usar o Pegada.\n\n3. **Elegibilidade:** O Pegada não possui restrições de idade para registro; no entanto, recomendamos que menores de idade obtenham o consentimento de seus responsáveis legais antes de usar o aplicativo.\n\n4. **Uso Responsável e Conteúdo do Usuário:**\n   a. Os usuários devem fornecer informações verdadeiras e precisas ao criar perfis para seus pets.\n   b. É proibido qualquer tipo de conteúdo ofensivo, discriminatório, difamatório ou que promova atividades ilegais.\n   c. O Pegada reserva-se o direito de moderar, remover ou recusar qualquer conteúdo postado pelos usuários que possa ser considerado inapropriado.\n\n5. **Privacidade e Comunicação:** Após um \"match\", os usuários podem trocar mensagens dentro da plataforma. Linguagem ofensiva, assédio ou comportamento inadequado não serão tolerados e podem resultar em ação disciplinar, incluindo a suspensão ou encerramento da conta.\n\n6. **Preferências de Match:** Os usuários têm a liberdade de definir preferências para encontrar matches para seus pets. Embora o Pegada se esforce para sugerir matches relevantes, não garantimos que todos os matches atendam às preferências definidas.\n\n7. **Limitação de Responsabilidade:** O Pegada não será responsável por qualquer lesão, perda ou dano que possa resultar de encontros organizados através do aplicativo. Todos os usuários são incentivados a exercer discernimento e precaução ao se encontrarem com outros usuários.\n\n8. **Indenização:** Você concorda em indenizar e isentar o Pegada, seus diretores, funcionários e agentes, de quaisquer reivindicações, responsabilidades, danos, perdas e despesas, incluindo, sem limitação, honorários advocatícios e custos, resultantes de ou de alguma forma relacionados ao seu uso do aplicativo.\n\n9. **Modificações:** Reservamo-nos o direito de revisar e atualizar estes Termos de Uso periodicamente, sem aviso prévio. A continuação do uso do aplicativo após tais modificações constituirá a sua aceitação dos termos revisados.\n\n10. **Legislação Aplicável e Jurisdição:** Estes Termos de Uso serão regidos e interpretados de acordo com as leis do Brasil. Qualquer litígio relacionado ao Pegada será resolvido nos tribunais competentes do Brasil.\n\n11. **Contato:** Para perguntas, dúvidas ou feedback sobre estes Termos de Uso, entre em contato com a equipe de suporte do Pegada.\n\nAo criar uma conta e usar o Pegada, você concorda com todos os termos e condições acima estabelecidos."
+  },
+  "deleteAccount": {
+    "metadata": {
+      "title": "Pegada | Solicitar Exclusão de Conta"
+    },
+    "content": "### Solicitar Exclusão de Conta\n\nPara solicitar a exclusão da conta e dos dados fora do aplicativo, envie um e-mail para [support@pegada.app](mailto:support@pegada.app) e sua solicitação será processada em breve."
+  }
+}

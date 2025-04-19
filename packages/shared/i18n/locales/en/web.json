@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "title": "Pegada - Dog Dating App",
+    "description": "Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS."
+  },
+  "home": {
+    "title": "Find a Match For Your Dog",
+    "description": "Our algorithm ensures that your puppy finds the perfect match based on breed, location, and even personality!",
+    "cta": {
+      "googlePlay": "Google Play",
+      "appStore": "App Store"
+    },
+    "madeWithLoveBy": "Made with ❤️ by "
+  },
+  "privacyPolicy": {
+    "metadata": {
+      "title": "Pegada | Privacy Policy"
+    },
+    "content": "### Privacy Policy of the Application\n\nThe privacy policy describes how we collect, use, protect, and share information about you and your pet. Please read this policy carefully before using our application.\n\n#### Information Collection\n\nWe collect information in two ways:\n\n- **Information you provide:** This includes your pet's profile information, such as name, breed, age, and photos. We may also collect your contact information to facilitate communication.\n- **Usage and device information:** We automatically collect information about how you use the application and about the device you use to access our service. This may include your IP address, device type, and activity in the application.\n\n#### Use of Information\n\nWe use the information collected to:\n\n- Facilitate matches between pets.\n- Improve our application and personalize your experience.\n- Communicate with you.\n- Protect the security of our users and prevent fraud.\n\n#### Information Sharing\n\nWe do not sell or share your personal information with third parties for marketing purposes without your explicit consent. We may share information with service providers who help us operate and improve our application. These service providers have access only to the information necessary to perform their functions and are obligated to protect your information.\n\n#### Security\n\nWe take reasonable security measures to protect your information, but no system is completely secure. While we do our best to protect your information, we cannot guarantee its absolute security.\n\n#### Changes to the Privacy Policy\n\nWe may change this privacy policy from time to time. If we make changes, we will notify you through an update in the application or by email.\n\n#### Contact\n\nIf you have any questions about this privacy policy, please contact us at the email [support@pegada.app](mailto:support@pegada.app).\n\nBy using our application, you agree to the collection, use, and sharing of your information as described in this privacy policy.\n\nLast updated: July 2, 2023."
+  },
+  "termsOfUse": {
+    "metadata": {
+      "title": "Pegada | Terms of Use"
+    },
+    "content": "### \"Pegada\" Terms of Use\n\n1. **Definitions:** \"Pegada\" refers to the relationship app for dogs, including all associated features, services, and interfaces. \"User\" refers to any person who registers and uses the app.\n\n2. **Acceptance of Terms:** By accessing and using Pegada, you agree, without restriction or reservation, to these Terms of Use. If you do not agree with any part of these terms, you should not use Pegada.\n\n3. **Eligibility:** Pegada has no age restrictions for registration; however, we recommend that minors obtain consent from their legal guardians before using the app.\n\n4. **Responsible Use and User Content:**\n   a. Users must provide true and accurate information when creating profiles for their pets.\n   b. Any type of offensive, discriminatory, defamatory, or content promoting illegal activities is prohibited.\n   c. Pegada reserves the right to moderate, remove, or refuse any content posted by users that may be deemed inappropriate.\n\n5. **Privacy and Communication:** After a \"match,\" users can exchange messages within the platform. Offensive language, harassment, or inappropriate behavior will not be tolerated and may result in disciplinary action, including account suspension or termination.\n\n6. **Match Preferences:** Users have the freedom to set preferences for finding matches for their pets. Although Pegada strives to suggest relevant matches, we do not guarantee that all matches will meet the defined preferences.\n\n7. **Limitation of Liability:** Pegada will not be liable for any injury, loss, or damage that may result from meetings organized through the app. All users are encouraged to exercise discernment and caution when meeting other users.\n\n8. **Indemnification:** You agree to indemnify and hold Pegada, its directors, employees, and agents, harmless from any claims, liabilities, damages, losses, and expenses, including, without limitation, attorney’s fees and costs, resulting from or in any way related to your use of the app.\n\n9. **Modifications:** We reserve the right to revise and update these Terms of Use periodically, without prior notice. Continued use of the app after such modifications will constitute your acceptance of the revised terms.\n\n10. **Applicable Law and Jurisdiction:** These Terms of Use will be governed and interpreted in accordance with the laws of Brazil. Any dispute related to Pegada will be resolved in the competent courts of Brazil.\n\n11. **Contact:** For questions, doubts, or feedback about these Terms of Use, please contact Pegada's support team.\n\nBy creating an account and using Pegada, you agree to all the above terms and conditions."
+  },
+  "deleteAccount": {
+    "metadata": {
+      "title": "Pegada | Request Data Deletion"
+    },
+    "content": "### Request Data Deletion\n\nTo request account and data deletion outside the app, please send an\nemail to [support@pegada.app](mailto:support@pegada.app) and your request will be processed shortly."
+  }
+}

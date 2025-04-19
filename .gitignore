@@ -1,0 +1,58 @@
+# OSX
+#
+.DS_Store
+
+# node.js
+#
+node_modules/
+npm-debug.log
+pnpm-error.log
+.pnpm-debug.log*
+
+# BUCK
+buck-out/
+\.buckd/
+*.keystore
+
+
+# Expo
+.expo/*
+expo-env.d.ts
+web-build/
+
+**/*/.expo
+
+**/*/.next
+
+**/*/ios
+**/*/android
+
+.turbo
+build/**
+
+.pnp.*
+.pnpm/*
+!.pnpm/patches
+!.pnpm/plugins
+!.pnpm/releases
+!.pnpm/sdks
+!.pnpm/versions
+
+.env
+.envrc
+
+.env.dev
+.env.prod
+
+dist/
+build/
+
+# Metro
+.metro*
+
+# Notifications
+GoogleService-Info.plist
+google-services.json
+
+# Turbo cache
+*.tsbuildinfo

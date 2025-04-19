@@ -1,0 +1,87 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "version": "1.2.4",
+    "copyright": "Pegada",
+    "release": {
+      "automaticRelease": true
+    },
+    "info": {
+      "pt-BR": {
+        "description": "Oi, humano! Cansado de ver seu amigo de quatro patas olhando para os pássaros no parque com aquela expressão de quem precisa de companhia? Então você chegou ao lugar certo. Pegada é o app de relacionamentos caninos mais legal do mercado.\n\nMas calma, isso não é só um Tinder para cachorros. Pegada é uma plataforma criada pensando na socialização dos nossos aumigos. Aqui, nossos usuários não são os humanos, mas sim os cães! Isso mesmo, é o perfil do seu pet que estará arrasando por aqui!\n\n- Inclusivo para todos\n\nNão importa se seu cachorro é de raça ou um autêntico vira-lata, aqui todas as patas são bem-vindas!\n\nEntão, que tal ajudar seu pet a dar um passo importante em sua vida social canina? Baixe o Pegada e dê a ele a chance de encontrar a amizade peluda dos sonhos dele!\n\nO mundo é muito mais divertido com um amigo, e seu pet com certeza concorda. Venha para o Pegada, onde cada dia é dia de encontrar um novo melhor amigo!",
+        "keywords": [
+          "Cachorro",
+          "Pet",
+          "Amizade",
+          "Encontro",
+          "Comunidade",
+          "Parceiro",
+          "Relacionamento",
+          "Companheiro",
+          "Namoro",
+          "Cruzar"
+        ],
+        "releaseNotes": "Obrigado por usar o Pegada! Nessa versão, fizemos algumas melhorias e correções de bugs para deixar o app ainda melhor.\n\nSe você tiver alguma dúvida ou sugestão, entre em contato conosco pelo email",
+        "marketingUrl": "https://www.pegada.app/pt-br",
+        "supportUrl": "https://www.pegada.app/pt-br",
+        "title": "Pegada",
+        "subtitle": "Encontros para Doguinhos",
+        "privacyPolicyUrl": "https://www.pegada.app/pt-br/privacy-policy",
+        "privacyChoicesUrl": "https://www.pegada.app/pt-br/delete-account"
+      },
+      "en-GB": {
+        "description": "Hey, human! Tired of seeing your four-legged friend gazing at the birds in the park with that look of needing company? Then you've come to the right place.\n\nPegada is the coolest canine relationship app on the market.\n\nBut hold on, this isn't only a Tinder for dogs. Pegada is a platform designed for the socialization of our furriends. Here, our users aren't the humans, but the dogs! That's right, it's your pet's profile that will be rocking it here!\n\n- Inclusive for all\n\nIt doesn't matter if your dog is a pedigree or a genuine mixed breed, here all paws are welcome!\n\nSo, how about helping your pet take an important step in their canine social life? Download Pegada and give them a chance to find their dream paw friendship!\n\nThe world is much more fun with a friend, and your pet surely agrees. Come to Pegada, where every day is a day to find a new best friend!",
+        "keywords": [
+          "Dog",
+          "Pet",
+          "Friendship",
+          "Meetup",
+          "Partner",
+          "Relationship",
+          "Companion",
+          "Dating",
+          "Match",
+          "Doggie",
+          "Puppy",
+          "Paw"
+        ],
+        "releaseNotes": "Thank you for using Pegada! In this version, we've made enhancements and bug fixes to improve the app.\n\nIf you have any questions or suggestions, contact us via our email!",
+        "marketingUrl": "https://www.pegada.app",
+        "supportUrl": "https://www.pegada.app",
+        "title": "Pegada",
+        "subtitle": "Meetups for Doggies",
+        "privacyPolicyUrl": "https://www.pegada.app/privacy-policy",
+        "privacyChoicesUrl": "https://www.pegada.app/delete-account"
+      }
+    },
+    "categories": ["LIFESTYLE", "SOCIAL_NETWORKING"],
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false,
+      "kidsAgeBand": null,
+      "seventeenPlus": true
+    },
+    "review": {
+      "firstName": "Gabriel",
+      "lastName": "Taveira",
+      "email": "gabrielstaveira@gmail.com",
+      "phone": "+5516981391607",
+      "demoUsername": "pitoca@test.com",
+      "demoPassword": "111111",
+      "demoRequired": true,
+      "notes": "The app contains a passwordless login, via an OTP code sent to the users email. In this case, we've made sure the code sent to pitoca@test.com is always 111111 in order to facilitate testing!\n\nFeel free to contact us in case there are any questions."
+    }
+  }
+}

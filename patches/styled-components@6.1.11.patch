@@ -1,0 +1,516 @@
+diff --git a/native/dist/constructors/constructWithOptions.d.ts b/native/dist/constructors/constructWithOptions.d.ts
+index b8a082849292a0c84641ef8e1147238084ff2b8e..ef320ea1179c56adcab730f6d4d8bfb07d868eba 100644
+--- a/native/dist/constructors/constructWithOptions.d.ts
++++ b/native/dist/constructors/constructWithOptions.d.ts
+@@ -10,7 +10,7 @@ type AttrsTarget<R extends Runtime, T extends Attrs<any>, FallbackTarget extends
+     as: infer RuntimeTarget;
+ } ? RuntimeTarget extends KnownTarget ? RuntimeTarget : FallbackTarget : FallbackTarget;
+ export interface Styled<R extends Runtime, Target extends StyledTarget<R>, OuterProps extends object, OuterStatics extends object = BaseObject> {
+-    <Props extends object = BaseObject, Statics extends object = BaseObject>(initialStyles: Styles<Substitute<OuterProps, NoInfer<Props>>>, ...interpolations: Interpolation<Substitute<OuterProps, NoInfer<Props>>>[]): IStyledComponent<R, Substitute<OuterProps, Props>> & OuterStatics & Statics & (R extends 'web' ? (Target extends string ? {} : Target) : {});
++    <Props extends object = BaseObject, Statics extends object = BaseObject>(initialStyles: Styles<Substitute<OuterProps, NoInfer<Props>>>, ...interpolations: Interpolation<Substitute<OuterProps, NoInfer<Props>>>[]): IStyledComponent<R, Substitute<OuterProps, Props>> & OuterStatics & Statics & (R extends 'web' ? Target extends string ? {} : Omit<Target, keyof React.Component<any>> : {});
+     attrs: <Props extends object = BaseObject, PrivateMergedProps extends object = Substitute<OuterProps, Props>, PrivateAttrsArg extends Attrs<PrivateMergedProps> = Attrs<PrivateMergedProps>, PrivateResolvedTarget extends StyledTarget<R> = AttrsTarget<R, PrivateAttrsArg, Target>>(attrs: PrivateAttrsArg) => Styled<R, PrivateResolvedTarget, PrivateResolvedTarget extends KnownTarget ? Substitute<Substitute<OuterProps, React.ComponentPropsWithRef<PrivateResolvedTarget>>, Props> : PrivateMergedProps, OuterStatics>;
+     withConfig: (config: StyledOptions<R, OuterProps>) => Styled<R, Target, OuterProps, OuterStatics>;
+ }
+diff --git a/native/dist/constructors/styled.d.ts b/native/dist/constructors/styled.d.ts
+index 11bac870f366dee1c51579b584e0129aa2f83726..95a7e7fcf36edc59e26adf261eb135859399bc1c 100644
+--- a/native/dist/constructors/styled.d.ts
++++ b/native/dist/constructors/styled.d.ts
+@@ -1,139 +1,150 @@
+-/// <reference types="react" />
+-import { WebTarget } from '../types';
+-import { Styled } from './constructWithOptions';
+-declare const styled: (<Target extends WebTarget>(tag: Target) => Styled<"web", Target, Target extends import("../types").KnownTarget ? import("react").ComponentPropsWithRef<Target> : import("../types").BaseObject, import("../types").BaseObject>) & {
+-    object: Styled<"web", "object", import("react").DetailedHTMLProps<import("react").ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>, import("../types").BaseObject>;
+-    g: Styled<"web", "g", import("react").SVGProps<SVGGElement>, import("../types").BaseObject>;
+-    big: Styled<"web", "big", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    link: Styled<"web", "link", import("react").DetailedHTMLProps<import("react").LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>, import("../types").BaseObject>;
+-    small: Styled<"web", "small", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    sub: Styled<"web", "sub", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    sup: Styled<"web", "sup", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    a: Styled<"web", "a", import("react").DetailedHTMLProps<import("react").AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, import("../types").BaseObject>;
+-    abbr: Styled<"web", "abbr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    address: Styled<"web", "address", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    area: Styled<"web", "area", import("react").DetailedHTMLProps<import("react").AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>, import("../types").BaseObject>;
+-    article: Styled<"web", "article", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    aside: Styled<"web", "aside", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    audio: Styled<"web", "audio", import("react").DetailedHTMLProps<import("react").AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>, import("../types").BaseObject>;
+-    b: Styled<"web", "b", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    base: Styled<"web", "base", import("react").DetailedHTMLProps<import("react").BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>, import("../types").BaseObject>;
+-    bdi: Styled<"web", "bdi", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    bdo: Styled<"web", "bdo", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    blockquote: Styled<"web", "blockquote", import("react").DetailedHTMLProps<import("react").BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>, import("../types").BaseObject>;
+-    body: Styled<"web", "body", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>, import("../types").BaseObject>;
+-    br: Styled<"web", "br", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLBRElement>, HTMLBRElement>, import("../types").BaseObject>;
+-    button: Styled<"web", "button", import("react").DetailedHTMLProps<import("react").ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, import("../types").BaseObject>;
+-    canvas: Styled<"web", "canvas", import("react").DetailedHTMLProps<import("react").CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>, import("../types").BaseObject>;
+-    caption: Styled<"web", "caption", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    cite: Styled<"web", "cite", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    code: Styled<"web", "code", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    col: Styled<"web", "col", import("react").DetailedHTMLProps<import("react").ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>, import("../types").BaseObject>;
+-    colgroup: Styled<"web", "colgroup", import("react").DetailedHTMLProps<import("react").ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>, import("../types").BaseObject>;
+-    data: Styled<"web", "data", import("react").DetailedHTMLProps<import("react").DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>, import("../types").BaseObject>;
+-    datalist: Styled<"web", "datalist", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>, import("../types").BaseObject>;
+-    dd: Styled<"web", "dd", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    del: Styled<"web", "del", import("react").DetailedHTMLProps<import("react").DelHTMLAttributes<HTMLModElement>, HTMLModElement>, import("../types").BaseObject>;
+-    details: Styled<"web", "details", import("react").DetailedHTMLProps<import("react").DetailsHTMLAttributes<HTMLDetailsElement>, HTMLDetailsElement>, import("../types").BaseObject>;
+-    dfn: Styled<"web", "dfn", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    dialog: Styled<"web", "dialog", import("react").DetailedHTMLProps<import("react").DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>, import("../types").BaseObject>;
+-    div: Styled<"web", "div", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDivElement>, HTMLDivElement>, import("../types").BaseObject>;
+-    dl: Styled<"web", "dl", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDListElement>, HTMLDListElement>, import("../types").BaseObject>;
+-    dt: Styled<"web", "dt", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    em: Styled<"web", "em", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    embed: Styled<"web", "embed", import("react").DetailedHTMLProps<import("react").EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>, import("../types").BaseObject>;
+-    fieldset: Styled<"web", "fieldset", import("react").DetailedHTMLProps<import("react").FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>, import("../types").BaseObject>;
+-    figcaption: Styled<"web", "figcaption", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    figure: Styled<"web", "figure", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    footer: Styled<"web", "footer", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    form: Styled<"web", "form", import("react").DetailedHTMLProps<import("react").FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, import("../types").BaseObject>;
+-    h1: Styled<"web", "h1", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, import("../types").BaseObject>;
+-    h2: Styled<"web", "h2", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, import("../types").BaseObject>;
+-    h3: Styled<"web", "h3", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, import("../types").BaseObject>;
+-    h4: Styled<"web", "h4", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, import("../types").BaseObject>;
+-    h5: Styled<"web", "h5", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, import("../types").BaseObject>;
+-    h6: Styled<"web", "h6", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, import("../types").BaseObject>;
+-    header: Styled<"web", "header", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    hgroup: Styled<"web", "hgroup", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    hr: Styled<"web", "hr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHRElement>, HTMLHRElement>, import("../types").BaseObject>;
+-    html: Styled<"web", "html", import("react").DetailedHTMLProps<import("react").HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>, import("../types").BaseObject>;
+-    i: Styled<"web", "i", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    iframe: Styled<"web", "iframe", import("react").DetailedHTMLProps<import("react").IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>, import("../types").BaseObject>;
+-    img: Styled<"web", "img", import("react").DetailedHTMLProps<import("react").ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>, import("../types").BaseObject>;
+-    input: Styled<"web", "input", import("react").DetailedHTMLProps<import("react").InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, import("../types").BaseObject>;
+-    ins: Styled<"web", "ins", import("react").DetailedHTMLProps<import("react").InsHTMLAttributes<HTMLModElement>, HTMLModElement>, import("../types").BaseObject>;
+-    kbd: Styled<"web", "kbd", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    keygen: Styled<"web", "keygen", import("react").DetailedHTMLProps<import("react").KeygenHTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    label: Styled<"web", "label", import("react").DetailedHTMLProps<import("react").LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, import("../types").BaseObject>;
+-    legend: Styled<"web", "legend", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>, import("../types").BaseObject>;
+-    li: Styled<"web", "li", import("react").DetailedHTMLProps<import("react").LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>, import("../types").BaseObject>;
+-    main: Styled<"web", "main", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    map: Styled<"web", "map", import("react").DetailedHTMLProps<import("react").MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>, import("../types").BaseObject>;
+-    mark: Styled<"web", "mark", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    menu: Styled<"web", "menu", import("react").DetailedHTMLProps<import("react").MenuHTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    menuitem: Styled<"web", "menuitem", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    meta: Styled<"web", "meta", import("react").DetailedHTMLProps<import("react").MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>, import("../types").BaseObject>;
+-    meter: Styled<"web", "meter", import("react").DetailedHTMLProps<import("react").MeterHTMLAttributes<HTMLMeterElement>, HTMLMeterElement>, import("../types").BaseObject>;
+-    nav: Styled<"web", "nav", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    noscript: Styled<"web", "noscript", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    ol: Styled<"web", "ol", import("react").DetailedHTMLProps<import("react").OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>, import("../types").BaseObject>;
+-    optgroup: Styled<"web", "optgroup", import("react").DetailedHTMLProps<import("react").OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>, import("../types").BaseObject>;
+-    option: Styled<"web", "option", import("react").DetailedHTMLProps<import("react").OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>, import("../types").BaseObject>;
+-    output: Styled<"web", "output", import("react").DetailedHTMLProps<import("react").OutputHTMLAttributes<HTMLOutputElement>, HTMLOutputElement>, import("../types").BaseObject>;
+-    p: Styled<"web", "p", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, import("../types").BaseObject>;
+-    param: Styled<"web", "param", import("react").DetailedHTMLProps<import("react").ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>, import("../types").BaseObject>;
+-    picture: Styled<"web", "picture", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    pre: Styled<"web", "pre", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLPreElement>, HTMLPreElement>, import("../types").BaseObject>;
+-    progress: Styled<"web", "progress", import("react").DetailedHTMLProps<import("react").ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>, import("../types").BaseObject>;
+-    q: Styled<"web", "q", import("react").DetailedHTMLProps<import("react").QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>, import("../types").BaseObject>;
+-    rp: Styled<"web", "rp", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    rt: Styled<"web", "rt", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    ruby: Styled<"web", "ruby", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    s: Styled<"web", "s", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    samp: Styled<"web", "samp", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    script: Styled<"web", "script", import("react").DetailedHTMLProps<import("react").ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>, import("../types").BaseObject>;
+-    section: Styled<"web", "section", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    select: Styled<"web", "select", import("react").DetailedHTMLProps<import("react").SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>, import("../types").BaseObject>;
+-    source: Styled<"web", "source", import("react").DetailedHTMLProps<import("react").SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>, import("../types").BaseObject>;
+-    span: Styled<"web", "span", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, import("../types").BaseObject>;
+-    strong: Styled<"web", "strong", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    style: Styled<"web", "style", import("react").DetailedHTMLProps<import("react").StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>, import("../types").BaseObject>;
+-    summary: Styled<"web", "summary", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    table: Styled<"web", "table", import("react").DetailedHTMLProps<import("react").TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>, import("../types").BaseObject>;
+-    tbody: Styled<"web", "tbody", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, import("../types").BaseObject>;
+-    td: Styled<"web", "td", import("react").DetailedHTMLProps<import("react").TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>, import("../types").BaseObject>;
+-    textarea: Styled<"web", "textarea", import("react").DetailedHTMLProps<import("react").TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>, import("../types").BaseObject>;
+-    tfoot: Styled<"web", "tfoot", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, import("../types").BaseObject>;
+-    th: Styled<"web", "th", import("react").DetailedHTMLProps<import("react").ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>, import("../types").BaseObject>;
+-    thead: Styled<"web", "thead", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, import("../types").BaseObject>;
+-    time: Styled<"web", "time", import("react").DetailedHTMLProps<import("react").TimeHTMLAttributes<HTMLTimeElement>, HTMLTimeElement>, import("../types").BaseObject>;
+-    tr: Styled<"web", "tr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>, import("../types").BaseObject>;
+-    track: Styled<"web", "track", import("react").DetailedHTMLProps<import("react").TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>, import("../types").BaseObject>;
+-    u: Styled<"web", "u", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    ul: Styled<"web", "ul", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLUListElement>, HTMLUListElement>, import("../types").BaseObject>;
+-    var: Styled<"web", "var", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    video: Styled<"web", "video", import("react").DetailedHTMLProps<import("react").VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>, import("../types").BaseObject>;
+-    wbr: Styled<"web", "wbr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    svg: Styled<"web", "svg", import("react").SVGProps<SVGSVGElement>, import("../types").BaseObject>;
+-    circle: Styled<"web", "circle", import("react").SVGProps<SVGCircleElement>, import("../types").BaseObject>;
+-    clipPath: Styled<"web", "clipPath", import("react").SVGProps<SVGClipPathElement>, import("../types").BaseObject>;
+-    defs: Styled<"web", "defs", import("react").SVGProps<SVGDefsElement>, import("../types").BaseObject>;
+-    ellipse: Styled<"web", "ellipse", import("react").SVGProps<SVGEllipseElement>, import("../types").BaseObject>;
+-    foreignObject: Styled<"web", "foreignObject", import("react").SVGProps<SVGForeignObjectElement>, import("../types").BaseObject>;
+-    image: Styled<"web", "image", import("react").SVGProps<SVGImageElement>, import("../types").BaseObject>;
+-    line: Styled<"web", "line", import("react").SVGLineElementAttributes<SVGLineElement>, import("../types").BaseObject>;
+-    linearGradient: Styled<"web", "linearGradient", import("react").SVGProps<SVGLinearGradientElement>, import("../types").BaseObject>;
+-    marker: Styled<"web", "marker", import("react").SVGProps<SVGMarkerElement>, import("../types").BaseObject>;
+-    mask: Styled<"web", "mask", import("react").SVGProps<SVGMaskElement>, import("../types").BaseObject>;
+-    path: Styled<"web", "path", import("react").SVGProps<SVGPathElement>, import("../types").BaseObject>;
+-    pattern: Styled<"web", "pattern", import("react").SVGProps<SVGPatternElement>, import("../types").BaseObject>;
+-    polygon: Styled<"web", "polygon", import("react").SVGProps<SVGPolygonElement>, import("../types").BaseObject>;
+-    polyline: Styled<"web", "polyline", import("react").SVGProps<SVGPolylineElement>, import("../types").BaseObject>;
+-    radialGradient: Styled<"web", "radialGradient", import("react").SVGProps<SVGRadialGradientElement>, import("../types").BaseObject>;
+-    rect: Styled<"web", "rect", import("react").SVGProps<SVGRectElement>, import("../types").BaseObject>;
+-    stop: Styled<"web", "stop", import("react").SVGProps<SVGStopElement>, import("../types").BaseObject>;
+-    text: Styled<"web", "text", import("react").SVGTextElementAttributes<SVGTextElement>, import("../types").BaseObject>;
+-    tspan: Styled<"web", "tspan", import("react").SVGProps<SVGTSpanElement>, import("../types").BaseObject>;
+-    use: Styled<"web", "use", import("react").SVGProps<SVGUseElement>, import("../types").BaseObject>;
++import { ComponentPropsWithRef } from 'react';
++import { BaseObject, KnownTarget, WebTarget } from '../types';
++import { Styled as StyledInstance } from './constructWithOptions';
++declare const baseStyled: <Target extends WebTarget, InjectedProps extends object = BaseObject>(tag: Target) => StyledInstance<"web", Target, Target extends KnownTarget ? ComponentPropsWithRef<Target> & InjectedProps : InjectedProps, BaseObject>;
++declare const styled: (<Target extends WebTarget, InjectedProps extends object = BaseObject>(tag: Target) => StyledInstance<"web", Target, Target extends KnownTarget ? ComponentPropsWithRef<Target> & InjectedProps : InjectedProps, BaseObject>) & {
++    object: StyledInstance<"web", "object", import("react").DetailedHTMLProps<import("react").ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>, BaseObject>;
++    a: StyledInstance<"web", "a", import("react").DetailedHTMLProps<import("react").AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, BaseObject>;
++    abbr: StyledInstance<"web", "abbr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    address: StyledInstance<"web", "address", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    area: StyledInstance<"web", "area", import("react").DetailedHTMLProps<import("react").AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>, BaseObject>;
++    article: StyledInstance<"web", "article", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    aside: StyledInstance<"web", "aside", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    audio: StyledInstance<"web", "audio", import("react").DetailedHTMLProps<import("react").AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>, BaseObject>;
++    b: StyledInstance<"web", "b", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    base: StyledInstance<"web", "base", import("react").DetailedHTMLProps<import("react").BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>, BaseObject>;
++    bdi: StyledInstance<"web", "bdi", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    bdo: StyledInstance<"web", "bdo", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    big: StyledInstance<"web", "big", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    blockquote: StyledInstance<"web", "blockquote", import("react").DetailedHTMLProps<import("react").BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>, BaseObject>;
++    body: StyledInstance<"web", "body", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>, BaseObject>;
++    br: StyledInstance<"web", "br", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLBRElement>, HTMLBRElement>, BaseObject>;
++    button: StyledInstance<"web", "button", import("react").DetailedHTMLProps<import("react").ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, BaseObject>;
++    canvas: StyledInstance<"web", "canvas", import("react").DetailedHTMLProps<import("react").CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>, BaseObject>;
++    caption: StyledInstance<"web", "caption", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    cite: StyledInstance<"web", "cite", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    code: StyledInstance<"web", "code", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    col: StyledInstance<"web", "col", import("react").DetailedHTMLProps<import("react").ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>, BaseObject>;
++    colgroup: StyledInstance<"web", "colgroup", import("react").DetailedHTMLProps<import("react").ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>, BaseObject>;
++    data: StyledInstance<"web", "data", import("react").DetailedHTMLProps<import("react").DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>, BaseObject>;
++    datalist: StyledInstance<"web", "datalist", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>, BaseObject>;
++    dd: StyledInstance<"web", "dd", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    del: StyledInstance<"web", "del", import("react").DetailedHTMLProps<import("react").DelHTMLAttributes<HTMLModElement>, HTMLModElement>, BaseObject>;
++    details: StyledInstance<"web", "details", import("react").DetailedHTMLProps<import("react").DetailsHTMLAttributes<HTMLDetailsElement>, HTMLDetailsElement>, BaseObject>;
++    dfn: StyledInstance<"web", "dfn", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    dialog: StyledInstance<"web", "dialog", import("react").DetailedHTMLProps<import("react").DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>, BaseObject>;
++    div: StyledInstance<"web", "div", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDivElement>, HTMLDivElement>, BaseObject>;
++    dl: StyledInstance<"web", "dl", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDListElement>, HTMLDListElement>, BaseObject>;
++    dt: StyledInstance<"web", "dt", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    em: StyledInstance<"web", "em", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    embed: StyledInstance<"web", "embed", import("react").DetailedHTMLProps<import("react").EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>, BaseObject>;
++    fieldset: StyledInstance<"web", "fieldset", import("react").DetailedHTMLProps<import("react").FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>, BaseObject>;
++    figcaption: StyledInstance<"web", "figcaption", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    figure: StyledInstance<"web", "figure", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    footer: StyledInstance<"web", "footer", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    form: StyledInstance<"web", "form", import("react").DetailedHTMLProps<import("react").FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, BaseObject>;
++    h1: StyledInstance<"web", "h1", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, BaseObject>;
++    h2: StyledInstance<"web", "h2", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, BaseObject>;
++    h3: StyledInstance<"web", "h3", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, BaseObject>;
++    h4: StyledInstance<"web", "h4", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, BaseObject>;
++    h5: StyledInstance<"web", "h5", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, BaseObject>;
++    h6: StyledInstance<"web", "h6", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>, BaseObject>;
++    header: StyledInstance<"web", "header", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    hgroup: StyledInstance<"web", "hgroup", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    hr: StyledInstance<"web", "hr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLHRElement>, HTMLHRElement>, BaseObject>;
++    html: StyledInstance<"web", "html", import("react").DetailedHTMLProps<import("react").HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>, BaseObject>;
++    i: StyledInstance<"web", "i", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    iframe: StyledInstance<"web", "iframe", import("react").DetailedHTMLProps<import("react").IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>, BaseObject>;
++    img: StyledInstance<"web", "img", import("react").DetailedHTMLProps<import("react").ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>, BaseObject>;
++    input: StyledInstance<"web", "input", import("react").DetailedHTMLProps<import("react").InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, BaseObject>;
++    ins: StyledInstance<"web", "ins", import("react").DetailedHTMLProps<import("react").InsHTMLAttributes<HTMLModElement>, HTMLModElement>, BaseObject>;
++    kbd: StyledInstance<"web", "kbd", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    keygen: StyledInstance<"web", "keygen", import("react").DetailedHTMLProps<import("react").KeygenHTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    label: StyledInstance<"web", "label", import("react").DetailedHTMLProps<import("react").LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, BaseObject>;
++    legend: StyledInstance<"web", "legend", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>, BaseObject>;
++    li: StyledInstance<"web", "li", import("react").DetailedHTMLProps<import("react").LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>, BaseObject>;
++    link: StyledInstance<"web", "link", import("react").DetailedHTMLProps<import("react").LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>, BaseObject>;
++    main: StyledInstance<"web", "main", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    map: StyledInstance<"web", "map", import("react").DetailedHTMLProps<import("react").MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>, BaseObject>;
++    mark: StyledInstance<"web", "mark", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    menu: StyledInstance<"web", "menu", import("react").DetailedHTMLProps<import("react").MenuHTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    menuitem: StyledInstance<"web", "menuitem", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    meta: StyledInstance<"web", "meta", import("react").DetailedHTMLProps<import("react").MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>, BaseObject>;
++    meter: StyledInstance<"web", "meter", import("react").DetailedHTMLProps<import("react").MeterHTMLAttributes<HTMLMeterElement>, HTMLMeterElement>, BaseObject>;
++    nav: StyledInstance<"web", "nav", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    noscript: StyledInstance<"web", "noscript", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    ol: StyledInstance<"web", "ol", import("react").DetailedHTMLProps<import("react").OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>, BaseObject>;
++    optgroup: StyledInstance<"web", "optgroup", import("react").DetailedHTMLProps<import("react").OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>, BaseObject>;
++    option: StyledInstance<"web", "option", import("react").DetailedHTMLProps<import("react").OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>, BaseObject>;
++    output: StyledInstance<"web", "output", import("react").DetailedHTMLProps<import("react").OutputHTMLAttributes<HTMLOutputElement>, HTMLOutputElement>, BaseObject>;
++    p: StyledInstance<"web", "p", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, BaseObject>;
++    param: StyledInstance<"web", "param", import("react").DetailedHTMLProps<import("react").ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>, BaseObject>;
++    picture: StyledInstance<"web", "picture", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    pre: StyledInstance<"web", "pre", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLPreElement>, HTMLPreElement>, BaseObject>;
++    progress: StyledInstance<"web", "progress", import("react").DetailedHTMLProps<import("react").ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>, BaseObject>;
++    q: StyledInstance<"web", "q", import("react").DetailedHTMLProps<import("react").QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>, BaseObject>;
++    rp: StyledInstance<"web", "rp", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    rt: StyledInstance<"web", "rt", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    ruby: StyledInstance<"web", "ruby", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    s: StyledInstance<"web", "s", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    samp: StyledInstance<"web", "samp", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    script: StyledInstance<"web", "script", import("react").DetailedHTMLProps<import("react").ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>, BaseObject>;
++    section: StyledInstance<"web", "section", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    select: StyledInstance<"web", "select", import("react").DetailedHTMLProps<import("react").SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>, BaseObject>;
++    small: StyledInstance<"web", "small", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    source: StyledInstance<"web", "source", import("react").DetailedHTMLProps<import("react").SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>, BaseObject>;
++    span: StyledInstance<"web", "span", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, BaseObject>;
++    strong: StyledInstance<"web", "strong", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    style: StyledInstance<"web", "style", import("react").DetailedHTMLProps<import("react").StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>, BaseObject>;
++    sub: StyledInstance<"web", "sub", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    summary: StyledInstance<"web", "summary", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    sup: StyledInstance<"web", "sup", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    table: StyledInstance<"web", "table", import("react").DetailedHTMLProps<import("react").TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>, BaseObject>;
++    tbody: StyledInstance<"web", "tbody", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, BaseObject>;
++    td: StyledInstance<"web", "td", import("react").DetailedHTMLProps<import("react").TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>, BaseObject>;
++    textarea: StyledInstance<"web", "textarea", import("react").DetailedHTMLProps<import("react").TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>, BaseObject>;
++    tfoot: StyledInstance<"web", "tfoot", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, BaseObject>;
++    th: StyledInstance<"web", "th", import("react").DetailedHTMLProps<import("react").ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>, BaseObject>;
++    thead: StyledInstance<"web", "thead", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, BaseObject>;
++    time: StyledInstance<"web", "time", import("react").DetailedHTMLProps<import("react").TimeHTMLAttributes<HTMLTimeElement>, HTMLTimeElement>, BaseObject>;
++    tr: StyledInstance<"web", "tr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>, BaseObject>;
++    track: StyledInstance<"web", "track", import("react").DetailedHTMLProps<import("react").TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>, BaseObject>;
++    u: StyledInstance<"web", "u", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    ul: StyledInstance<"web", "ul", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLUListElement>, HTMLUListElement>, BaseObject>;
++    use: StyledInstance<"web", "use", import("react").SVGProps<SVGUseElement>, BaseObject>;
++    var: StyledInstance<"web", "var", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    video: StyledInstance<"web", "video", import("react").DetailedHTMLProps<import("react").VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>, BaseObject>;
++    wbr: StyledInstance<"web", "wbr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, BaseObject>;
++    circle: StyledInstance<"web", "circle", import("react").SVGProps<SVGCircleElement>, BaseObject>;
++    clipPath: StyledInstance<"web", "clipPath", import("react").SVGProps<SVGClipPathElement>, BaseObject>;
++    defs: StyledInstance<"web", "defs", import("react").SVGProps<SVGDefsElement>, BaseObject>;
++    ellipse: StyledInstance<"web", "ellipse", import("react").SVGProps<SVGEllipseElement>, BaseObject>;
++    foreignObject: StyledInstance<"web", "foreignObject", import("react").SVGProps<SVGForeignObjectElement>, BaseObject>;
++    g: StyledInstance<"web", "g", import("react").SVGProps<SVGGElement>, BaseObject>;
++    image: StyledInstance<"web", "image", import("react").SVGProps<SVGImageElement>, BaseObject>;
++    line: StyledInstance<"web", "line", import("react").SVGLineElementAttributes<SVGLineElement>, BaseObject>;
++    linearGradient: StyledInstance<"web", "linearGradient", import("react").SVGProps<SVGLinearGradientElement>, BaseObject>;
++    marker: StyledInstance<"web", "marker", import("react").SVGProps<SVGMarkerElement>, BaseObject>;
++    mask: StyledInstance<"web", "mask", import("react").SVGProps<SVGMaskElement>, BaseObject>;
++    path: StyledInstance<"web", "path", import("react").SVGProps<SVGPathElement>, BaseObject>;
++    pattern: StyledInstance<"web", "pattern", import("react").SVGProps<SVGPatternElement>, BaseObject>;
++    polygon: StyledInstance<"web", "polygon", import("react").SVGProps<SVGPolygonElement>, BaseObject>;
++    polyline: StyledInstance<"web", "polyline", import("react").SVGProps<SVGPolylineElement>, BaseObject>;
++    radialGradient: StyledInstance<"web", "radialGradient", import("react").SVGProps<SVGRadialGradientElement>, BaseObject>;
++    rect: StyledInstance<"web", "rect", import("react").SVGProps<SVGRectElement>, BaseObject>;
++    stop: StyledInstance<"web", "stop", import("react").SVGProps<SVGStopElement>, BaseObject>;
++    svg: StyledInstance<"web", "svg", import("react").SVGProps<SVGSVGElement>, BaseObject>;
++    text: StyledInstance<"web", "text", import("react").SVGTextElementAttributes<SVGTextElement>, BaseObject>;
++    tspan: StyledInstance<"web", "tspan", import("react").SVGProps<SVGTSpanElement>, BaseObject>;
+ };
+ export default styled;
++export { StyledInstance };
++/**
++ * This is the type of the `styled` HOC.
++ */
++export type Styled = typeof styled;
++/**
++ * Use this higher-order type for scenarios where you are wrapping `styled`
++ * and providing extra props as a third-party library.
++ */
++export type LibraryStyled<LibraryProps extends object = BaseObject> = <Target extends WebTarget>(tag: Target) => typeof baseStyled<Target, LibraryProps>;
+diff --git a/native/dist/hoc/withTheme.d.ts b/native/dist/hoc/withTheme.d.ts
+index 7d244d05cbfd990881338c15ec8d53afc578f5bd..e5df0578b7d66be21d216e243b2f7223caf45a88 100644
+--- a/native/dist/hoc/withTheme.d.ts
++++ b/native/dist/hoc/withTheme.d.ts
+@@ -1,3 +1,3 @@
+ import React from 'react';
+ import { AnyComponent, ExecutionProps } from '../types';
+-export default function withTheme<T extends AnyComponent>(Component: T): React.ForwardRefExoticComponent<React.PropsWithoutRef<JSX.LibraryManagedAttributes<T, ExecutionProps>> & React.RefAttributes<T>> & { [key in Exclude<keyof T, T extends React.MemoExoticComponent<any> ? "propTypes" | "defaultProps" | "displayName" | "$$typeof" | "type" | "compare" : T extends React.ForwardRefExoticComponent<any> ? "propTypes" | "defaultProps" | "displayName" | "$$typeof" | "render" : "length" | "propTypes" | "contextType" | "contextTypes" | "childContextTypes" | "defaultProps" | "displayName" | "getDerivedStateFromProps" | "getDerivedStateFromError" | "type" | "getDefaultProps" | "mixins" | "name" | "prototype" | "caller" | "callee" | "arguments" | "arity">]: T[key]; };
++export default function withTheme<T extends AnyComponent>(Component: T): React.ForwardRefExoticComponent<React.PropsWithoutRef<JSX.LibraryManagedAttributes<T, ExecutionProps>> & React.RefAttributes<T>> & { [key in Exclude<keyof T, T extends React.MemoExoticComponent<any> ? "defaultProps" | "displayName" | "$$typeof" | "propTypes" | "type" | "compare" : T extends React.ForwardRefExoticComponent<any> ? "defaultProps" | "displayName" | "$$typeof" | "propTypes" | "render" : "length" | "defaultProps" | "displayName" | "propTypes" | "contextType" | "contextTypes" | "childContextTypes" | "getDerivedStateFromProps" | "getDerivedStateFromError" | "prototype" | "arguments" | "caller" | "name" | "type" | "getDefaultProps" | "mixins" | "callee" | "arity">]: T[key]; };
+diff --git a/native/dist/index.d.ts b/native/dist/index.d.ts
+index f053096ca64002713532d1c01fa68fe1e80cb577..e6db88c0a4c119f65042814d8592602228a44dc7 100644
+--- a/native/dist/index.d.ts
++++ b/native/dist/index.d.ts
+@@ -1,4 +1,4 @@
+-import styled from './constructors/styled';
++import styled, { LibraryStyled, Styled, StyledInstance } from './constructors/styled';
+ export * from './base';
+-export { CSSKeyframes, CSSObject, CSSProp, CSSProperties, CSSPseudos, DataAttributes, DefaultTheme, ExecutionContext, ExecutionProps, IStyledComponent, IStyledComponentFactory, IStyledStatics, Interpolation, PolymorphicComponent, PolymorphicComponentProps, RuleSet, Runtime, StyleFunction, StyledObject, StyledOptions, SupportedHTMLElements, WebTarget, } from './types';
+-export { styled as default, styled };
++export { CSSKeyframes, CSSObject, CSSProp, CSSProperties, CSSPseudos, DataAttributes, DefaultTheme, ExecutionContext, ExecutionProps, FastOmit, IStyledComponent, IStyledComponentFactory, IStyledStatics, Interpolation, PolymorphicComponent, PolymorphicComponentProps, RuleSet, Runtime, StyleFunction, StyledObject, StyledOptions, SupportedHTMLElements, WebTarget, } from './types';
++export { LibraryStyled, Styled, StyledInstance, styled as default, styled };
+diff --git a/native/dist/models/StyledNativeComponent.d.ts b/native/dist/models/StyledNativeComponent.d.ts
+index 69941029d04addf0118d750f8dec73086614350d..0f2a3a5ca666686d147b5cc25c3c4e9660f5fe76 100644
+--- a/native/dist/models/StyledNativeComponent.d.ts
++++ b/native/dist/models/StyledNativeComponent.d.ts
+@@ -1,3 +1,3 @@
+-import type { BaseObject, ExecutionProps, IInlineStyleConstructor, IStyledComponent, IStyledComponentFactory, NativeTarget, RuleSet, StyledOptions } from '../types';
+-declare const _default: (InlineStyle: IInlineStyleConstructor<any>) => <Target extends NativeTarget, OuterProps extends ExecutionProps, Statics extends object = BaseObject>(target: Target, options: StyledOptions<"native", OuterProps>, rules: RuleSet<OuterProps>) => IStyledComponent<"native", import("../types").Substitute<OuterProps, object>> & Statics & object;
++import type { BaseObject, ExecutionProps, IInlineStyleConstructor, IStyledComponentFactory, NativeTarget, RuleSet, StyledOptions } from '../types';
++declare const _default: (InlineStyle: IInlineStyleConstructor<any>) => <Target extends NativeTarget, OuterProps extends ExecutionProps, Statics extends object = BaseObject>(target: Target, options: StyledOptions<'native', OuterProps>, rules: RuleSet<OuterProps>) => ReturnType<IStyledComponentFactory<'native', Target, OuterProps, Statics>>;
+ export default _default;
+diff --git a/native/dist/native/index.d.ts b/native/dist/native/index.d.ts
+index 748430eedf706cd83e8aefea55a60f516a12c5db..b1029188588d6e85025c1627478819a056d59b08 100644
+--- a/native/dist/native/index.d.ts
++++ b/native/dist/native/index.d.ts
+@@ -1,3 +1,4 @@
++/// <reference path="../../src/global.d.ts" />
+ import React from 'react';
+ import { Styled } from '../constructors/constructWithOptions';
+ import css from '../constructors/css';
+diff --git a/native/dist/sheet/Tag.d.ts b/native/dist/sheet/Tag.d.ts
+index 0da9633e25e29344402971294a1d1b2ad011dfa7..abd485d07d4b8e36dcabf988b54a426a3b42e5f6 100644
+--- a/native/dist/sheet/Tag.d.ts
++++ b/native/dist/sheet/Tag.d.ts
+@@ -1,21 +1,21 @@
+ import { SheetOptions } from './types';
+ /** Create a CSSStyleSheet-like tag depending on the environment */
+ export declare const makeTag: ({ isServer, useCSSOMInjection, target }: SheetOptions) => {
+-    element: HTMLStyleElement;
+-    sheet: CSSStyleSheet;
++    rules: string[];
+     length: number;
+     insertRule(index: number, rule: string): boolean;
+     deleteRule(index: number): void;
+     getRule(index: number): string;
+ } | {
+     element: HTMLStyleElement;
+-    nodes: NodeListOf<Node>;
++    sheet: CSSStyleSheet;
+     length: number;
+     insertRule(index: number, rule: string): boolean;
+     deleteRule(index: number): void;
+     getRule(index: number): string;
+ } | {
+-    rules: string[];
++    element: HTMLStyleElement;
++    nodes: NodeListOf<Node>;
+     length: number;
+     insertRule(index: number, rule: string): boolean;
+     deleteRule(index: number): void;
+diff --git a/native/dist/test/types.d.ts b/native/dist/test/types.d.ts
+deleted file mode 100644
+index d87a1aee55c4b0f80d823e11f2331302977b994b..0000000000000000000000000000000000000000
+diff --git a/native/dist/test/utils.d.ts b/native/dist/test/utils.d.ts
+index 5c35895a153dd4dfbca09cd8d0315adb6e599b05..bef3e9e1964803cfafc9c3844f8ae4023b82872d 100644
+--- a/native/dist/test/utils.d.ts
++++ b/native/dist/test/utils.d.ts
+@@ -1,13 +1,7 @@
+ /// <reference types="react" />
+ export declare const seedNextClassnames: (names: string[]) => string[];
+-export declare const resetStyled: (isServer?: boolean) => (<Target extends import("..").WebTarget>(tag: Target) => import("../constructors/constructWithOptions").Styled<"web", Target, Target extends import("../types").KnownTarget ? import("react").ComponentPropsWithRef<Target> : import("../types").BaseObject, import("../types").BaseObject>) & {
++export declare const resetStyled: (isServer?: boolean) => (<Target extends import("..").WebTarget, InjectedProps extends object = import("../types").BaseObject>(tag: Target) => import("../constructors/constructWithOptions").Styled<"web", Target, Target extends import("../types").KnownTarget ? import("react").ComponentPropsWithRef<Target> & InjectedProps : InjectedProps, import("../types").BaseObject>) & {
+     object: import("../constructors/constructWithOptions").Styled<"web", "object", import("react").DetailedHTMLProps<import("react").ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>, import("../types").BaseObject>;
+-    g: import("../constructors/constructWithOptions").Styled<"web", "g", import("react").SVGProps<SVGGElement>, import("../types").BaseObject>;
+-    big: import("../constructors/constructWithOptions").Styled<"web", "big", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    link: import("../constructors/constructWithOptions").Styled<"web", "link", import("react").DetailedHTMLProps<import("react").LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>, import("../types").BaseObject>;
+-    small: import("../constructors/constructWithOptions").Styled<"web", "small", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    sub: import("../constructors/constructWithOptions").Styled<"web", "sub", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    sup: import("../constructors/constructWithOptions").Styled<"web", "sup", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     a: import("../constructors/constructWithOptions").Styled<"web", "a", import("react").DetailedHTMLProps<import("react").AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, import("../types").BaseObject>;
+     abbr: import("../constructors/constructWithOptions").Styled<"web", "abbr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     address: import("../constructors/constructWithOptions").Styled<"web", "address", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+@@ -19,6 +13,7 @@ export declare const resetStyled: (isServer?: boolean) => (<Target extends impor
+     base: import("../constructors/constructWithOptions").Styled<"web", "base", import("react").DetailedHTMLProps<import("react").BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>, import("../types").BaseObject>;
+     bdi: import("../constructors/constructWithOptions").Styled<"web", "bdi", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     bdo: import("../constructors/constructWithOptions").Styled<"web", "bdo", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
++    big: import("../constructors/constructWithOptions").Styled<"web", "big", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     blockquote: import("../constructors/constructWithOptions").Styled<"web", "blockquote", import("react").DetailedHTMLProps<import("react").BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>, import("../types").BaseObject>;
+     body: import("../constructors/constructWithOptions").Styled<"web", "body", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>, import("../types").BaseObject>;
+     br: import("../constructors/constructWithOptions").Styled<"web", "br", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLBRElement>, HTMLBRElement>, import("../types").BaseObject>;
+@@ -66,6 +61,7 @@ export declare const resetStyled: (isServer?: boolean) => (<Target extends impor
+     label: import("../constructors/constructWithOptions").Styled<"web", "label", import("react").DetailedHTMLProps<import("react").LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, import("../types").BaseObject>;
+     legend: import("../constructors/constructWithOptions").Styled<"web", "legend", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>, import("../types").BaseObject>;
+     li: import("../constructors/constructWithOptions").Styled<"web", "li", import("react").DetailedHTMLProps<import("react").LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>, import("../types").BaseObject>;
++    link: import("../constructors/constructWithOptions").Styled<"web", "link", import("react").DetailedHTMLProps<import("react").LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>, import("../types").BaseObject>;
+     main: import("../constructors/constructWithOptions").Styled<"web", "main", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     map: import("../constructors/constructWithOptions").Styled<"web", "map", import("react").DetailedHTMLProps<import("react").MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>, import("../types").BaseObject>;
+     mark: import("../constructors/constructWithOptions").Styled<"web", "mark", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+@@ -93,11 +89,14 @@ export declare const resetStyled: (isServer?: boolean) => (<Target extends impor
+     script: import("../constructors/constructWithOptions").Styled<"web", "script", import("react").DetailedHTMLProps<import("react").ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>, import("../types").BaseObject>;
+     section: import("../constructors/constructWithOptions").Styled<"web", "section", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     select: import("../constructors/constructWithOptions").Styled<"web", "select", import("react").DetailedHTMLProps<import("react").SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>, import("../types").BaseObject>;
++    small: import("../constructors/constructWithOptions").Styled<"web", "small", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     source: import("../constructors/constructWithOptions").Styled<"web", "source", import("react").DetailedHTMLProps<import("react").SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>, import("../types").BaseObject>;
+     span: import("../constructors/constructWithOptions").Styled<"web", "span", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, import("../types").BaseObject>;
+     strong: import("../constructors/constructWithOptions").Styled<"web", "strong", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     style: import("../constructors/constructWithOptions").Styled<"web", "style", import("react").DetailedHTMLProps<import("react").StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>, import("../types").BaseObject>;
++    sub: import("../constructors/constructWithOptions").Styled<"web", "sub", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     summary: import("../constructors/constructWithOptions").Styled<"web", "summary", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
++    sup: import("../constructors/constructWithOptions").Styled<"web", "sup", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     table: import("../constructors/constructWithOptions").Styled<"web", "table", import("react").DetailedHTMLProps<import("react").TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>, import("../types").BaseObject>;
+     tbody: import("../constructors/constructWithOptions").Styled<"web", "tbody", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>, import("../types").BaseObject>;
+     td: import("../constructors/constructWithOptions").Styled<"web", "td", import("react").DetailedHTMLProps<import("react").TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>, import("../types").BaseObject>;
+@@ -110,15 +109,16 @@ export declare const resetStyled: (isServer?: boolean) => (<Target extends impor
+     track: import("../constructors/constructWithOptions").Styled<"web", "track", import("react").DetailedHTMLProps<import("react").TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>, import("../types").BaseObject>;
+     u: import("../constructors/constructWithOptions").Styled<"web", "u", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     ul: import("../constructors/constructWithOptions").Styled<"web", "ul", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLUListElement>, HTMLUListElement>, import("../types").BaseObject>;
++    use: import("../constructors/constructWithOptions").Styled<"web", "use", import("react").SVGProps<SVGUseElement>, import("../types").BaseObject>;
+     var: import("../constructors/constructWithOptions").Styled<"web", "var", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+     video: import("../constructors/constructWithOptions").Styled<"web", "video", import("react").DetailedHTMLProps<import("react").VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>, import("../types").BaseObject>;
+     wbr: import("../constructors/constructWithOptions").Styled<"web", "wbr", import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLElement>, HTMLElement>, import("../types").BaseObject>;
+-    svg: import("../constructors/constructWithOptions").Styled<"web", "svg", import("react").SVGProps<SVGSVGElement>, import("../types").BaseObject>;
+     circle: import("../constructors/constructWithOptions").Styled<"web", "circle", import("react").SVGProps<SVGCircleElement>, import("../types").BaseObject>;
+     clipPath: import("../constructors/constructWithOptions").Styled<"web", "clipPath", import("react").SVGProps<SVGClipPathElement>, import("../types").BaseObject>;
+     defs: import("../constructors/constructWithOptions").Styled<"web", "defs", import("react").SVGProps<SVGDefsElement>, import("../types").BaseObject>;
+     ellipse: import("../constructors/constructWithOptions").Styled<"web", "ellipse", import("react").SVGProps<SVGEllipseElement>, import("../types").BaseObject>;
+     foreignObject: import("../constructors/constructWithOptions").Styled<"web", "foreignObject", import("react").SVGProps<SVGForeignObjectElement>, import("../types").BaseObject>;
++    g: import("../constructors/constructWithOptions").Styled<"web", "g", import("react").SVGProps<SVGGElement>, import("../types").BaseObject>;
+     image: import("../constructors/constructWithOptions").Styled<"web", "image", import("react").SVGProps<SVGImageElement>, import("../types").BaseObject>;
+     line: import("../constructors/constructWithOptions").Styled<"web", "line", import("react").SVGLineElementAttributes<SVGLineElement>, import("../types").BaseObject>;
+     linearGradient: import("../constructors/constructWithOptions").Styled<"web", "linearGradient", import("react").SVGProps<SVGLinearGradientElement>, import("../types").BaseObject>;
+@@ -131,9 +131,9 @@ export declare const resetStyled: (isServer?: boolean) => (<Target extends impor
+     radialGradient: import("../constructors/constructWithOptions").Styled<"web", "radialGradient", import("react").SVGProps<SVGRadialGradientElement>, import("../types").BaseObject>;
+     rect: import("../constructors/constructWithOptions").Styled<"web", "rect", import("react").SVGProps<SVGRectElement>, import("../types").BaseObject>;
+     stop: import("../constructors/constructWithOptions").Styled<"web", "stop", import("react").SVGProps<SVGStopElement>, import("../types").BaseObject>;
++    svg: import("../constructors/constructWithOptions").Styled<"web", "svg", import("react").SVGProps<SVGSVGElement>, import("../types").BaseObject>;
+     text: import("../constructors/constructWithOptions").Styled<"web", "text", import("react").SVGTextElementAttributes<SVGTextElement>, import("../types").BaseObject>;
+     tspan: import("../constructors/constructWithOptions").Styled<"web", "tspan", import("react").SVGProps<SVGTSpanElement>, import("../types").BaseObject>;
+-    use: import("../constructors/constructWithOptions").Styled<"web", "use", import("react").SVGProps<SVGUseElement>, import("../types").BaseObject>;
+ };
+ export declare const rehydrateTestStyles: () => void;
+ export declare const stripComments: (str: string) => string;
+diff --git a/native/dist/types.d.ts b/native/dist/types.d.ts
+index 4a6953c145bbd6c0880378e09e0de80b7a2113f0..67d19f40d9461122a3d012bf225564618a5ea866 100644
+--- a/native/dist/types.d.ts
++++ b/native/dist/types.d.ts
+@@ -1,5 +1,6 @@
+ import type * as CSS from 'csstype';
+ import React from 'react';
++import { Optional } from 'ts-toolbelt/out/Object/Optional';
+ import ComponentStyle from './models/ComponentStyle';
+ import { DefaultTheme } from './models/ThemeProvider';
+ import createWarnTooManyClasses from './utils/createWarnTooManyClasses';
+@@ -132,10 +133,30 @@ export type PolymorphicComponentProps<R extends Runtime, BaseProps extends objec
+ export interface PolymorphicComponent<R extends Runtime, BaseProps extends object> extends React.ForwardRefExoticComponent<BaseProps> {
+     <AsTarget extends StyledTarget<R> | void = void, ForwardedAsTarget extends StyledTarget<R> | void = void>(props: PolymorphicComponentProps<R, BaseProps, AsTarget, ForwardedAsTarget>): JSX.Element;
+ }
+-export interface IStyledComponent<R extends Runtime, Props extends object = BaseObject> extends PolymorphicComponent<R, Props>, IStyledStatics<R, Props>, StyledComponentBrand {
++export interface IStyledComponentBase<R extends Runtime, Props extends object = BaseObject> extends PolymorphicComponent<R, Props>, IStyledStatics<R, Props>, StyledComponentBrand {
+     defaultProps?: (ExecutionProps & Partial<Props>) | undefined;
+     toString: () => string;
+ }
++export type IStyledComponent<R extends Runtime, Props extends object = BaseObject> = IStyledComponentBase<R, Props> & 
++/**
++ * TypeScript doesn't allow using a styled component as a key inside object
++ * styles because "A computed property name must be of type 'string', 'number',
++ * 'symbol', or 'any'.". The toString() method only exists in the web runtime.
++ * This hack intersects the `IStyledComponent` type with the built-in `string`
++ * type to keep TSC happy.
++ *
++ * @example
++ *  const H1 = styled.h1({
++ *    fontSize: '2rem'
++ *  });
++ *
++ *  const Header = styled.header({
++ *    [H1]: {
++ *      marginBottom: '1rem'
++ *    }
++ *  })
++ */
++(R extends 'web' ? string : {});
+ export interface IStyledComponentFactory<R extends Runtime, Target extends StyledTarget<R>, OuterProps extends object, OuterStatics extends object = BaseObject> {
+     <Props extends object = BaseObject, Statics extends object = BaseObject>(target: Target, options: StyledOptions<R, OuterProps & Props>, rules: RuleSet<OuterProps & Props>): IStyledComponent<R, Substitute<OuterProps, Props>> & OuterStatics & Statics;
+ }
+@@ -180,4 +201,4 @@ export interface StyledObject<Props extends object = BaseObject> extends CSSProp
+  */
+ export type CSSProp = Interpolation<any>;
+ export type NoInfer<T> = [T][T extends any ? 0 : never];
+-export type Substitute<A extends object, B extends object> = FastOmit<A, keyof B> & B;
++export type Substitute<A extends object, B extends object> = Optional<A, keyof B> & B;
+diff --git a/native/dist/utils/domElements.d.ts b/native/dist/utils/domElements.d.ts
+index 845445c3736a5dfe6cea81bdd38616798a3ccdfa..1e5ccc850c10e6dc381e83d480dbf96328bb0ec8 100644
+--- a/native/dist/utils/domElements.d.ts
++++ b/native/dist/utils/domElements.d.ts
+@@ -1,4 +1,4 @@
+ declare const elements: readonly ["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "big", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "details", "dfn", "dialog", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "menu", "menuitem", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "picture", "pre", "progress", "q", "rp", "rt", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "time", "tr", "track", "u", "ul", "use", "var", "video", "wbr", "circle", "clipPath", "defs", "ellipse", "foreignObject", "g", "image", "line", "linearGradient", "marker", "mask", "path", "pattern", "polygon", "polyline", "radialGradient", "rect", "stop", "svg", "text", "tspan"];
+-declare const _default: Set<"object" | "g" | "big" | "link" | "small" | "sub" | "sup" | "a" | "abbr" | "address" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "cite" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "del" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "em" | "embed" | "fieldset" | "figcaption" | "figure" | "footer" | "form" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "header" | "hgroup" | "hr" | "html" | "i" | "iframe" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "main" | "map" | "mark" | "menu" | "menuitem" | "meta" | "meter" | "nav" | "noscript" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "picture" | "pre" | "progress" | "q" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "section" | "select" | "source" | "span" | "strong" | "style" | "summary" | "table" | "tbody" | "td" | "textarea" | "tfoot" | "th" | "thead" | "time" | "tr" | "track" | "u" | "ul" | "var" | "video" | "wbr" | "svg" | "circle" | "clipPath" | "defs" | "ellipse" | "foreignObject" | "image" | "line" | "linearGradient" | "marker" | "mask" | "path" | "pattern" | "polygon" | "polyline" | "radialGradient" | "rect" | "stop" | "text" | "tspan" | "use">;
++declare const _default: Set<"object" | "g" | "map" | "big" | "link" | "small" | "sub" | "sup" | "a" | "abbr" | "address" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "cite" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "del" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "em" | "embed" | "fieldset" | "figcaption" | "figure" | "footer" | "form" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "header" | "hgroup" | "hr" | "html" | "i" | "iframe" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "main" | "mark" | "menu" | "menuitem" | "meta" | "meter" | "nav" | "noscript" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "picture" | "pre" | "progress" | "q" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "section" | "select" | "source" | "span" | "strong" | "style" | "summary" | "table" | "tbody" | "td" | "textarea" | "tfoot" | "th" | "thead" | "time" | "tr" | "track" | "u" | "ul" | "var" | "video" | "wbr" | "svg" | "circle" | "clipPath" | "defs" | "ellipse" | "foreignObject" | "image" | "line" | "linearGradient" | "marker" | "mask" | "path" | "pattern" | "polygon" | "polyline" | "radialGradient" | "rect" | "stop" | "text" | "tspan" | "use">;
+ export default _default;
+ export type SupportedHTMLElements = (typeof elements)[number];

@@ -1,0 +1,21 @@
+{
+  "mail": {
+    "verifyCode": {
+      "subject": "Seu código de verificação",
+      "text": "O seu código de verificação é: {{code}}"
+    }
+  },
+  "notification": {
+    "match": {
+      "title": "🐶 {{name}} tem um novo match! 🩷",
+      "body": "Vem descobrir quem é 👀"
+    },
+    "message": {
+      "title": "🐶 {{name}}"
+    },
+    "like": {
+      "title": "🐶 {{name}} recebeu um like! 🩷",
+      "body": "Vem procurar o pretendente misterioso 🕵️‍♂️"
+    }
+  }
+}

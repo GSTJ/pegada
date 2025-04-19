@@ -1,0 +1,94 @@
+name: EAS Publish
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/mobile/**"
+      - "apps/shared/**"
+      - ".github/workflows/deploy-mobile.yml"
+      - ".github/scripts/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: Create Update
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: 🏗 Setup Repo
+        uses: actions/checkout@v4
+
+      - name: 🏗 Setup PNPM
+        uses: pnpm/action-setup@v4.0.0
+
+      - name: 🏗 Get PNPM store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: 🏗 Setup PNPM cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-"
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: "📦 Cache Node Modules"
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: 📦 Install Dependencies
+        run: pnpm install
+
+      # Only done as we are running Typecheck before publishing
+      - name: 🏗 Setup Turborepo Cache
+        uses: dtinth/setup-github-actions-caching-for-turbo@v1
+
+      # That shouldn't be necessary if we are running before merging PR's,
+      # but as commits to main are not protected yet and sometimes happen,
+      # we need to make sure that the code is typechecked before publishing
+      - name: 🧪 Typecheck
+        run: pnpm run typecheck
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🚀 Create Update
+        run: eas update --auto --non-interactive
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_AMPLITUDE_API_KEY: ${{ secrets.EXPO_PUBLIC_AMPLITUDE_API_KEY }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_BUGSNAG_API_KEY: ${{ secrets.EXPO_PUBLIC_BUGSNAG_API_KEY }}
+          EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY }}
+          EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY }}
+          EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY }}
+          EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+          EXPO_PUBLIC_ENV: production
+
+      - name: 📩 Upload Source Maps
+        run: ./.github/scripts/upload-sourcemaps.sh
+        env:
+          EXPO_PUBLIC_BUGSNAG_API_KEY: ${{ secrets.EXPO_PUBLIC_BUGSNAG_API_KEY }}
