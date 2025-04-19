@@ -1,0 +1,15 @@
+{
+  "extends": "@pegada/tsconfig/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "baseUrl": ".",
+    "outDir": "dist",
+    "sourceMap": true,
+    "noEmit": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["*.ts", "src"],
+  "exclude": ["node_modules"]
+}

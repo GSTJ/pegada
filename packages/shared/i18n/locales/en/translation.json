@@ -1,0 +1,327 @@
+{
+  "likeLimit": {
+    "dailyLikeLimit": "Daily Like Limit",
+    "description": "You have liked <b>{{count}} dogs</b> in the last <b>24 hours</b>. Wait or become <b>premium</b> to keep swiping.",
+    "remaining": "remaining",
+    "timeHours": "{{time}}h",
+    "winFreeTrial": "Win a Free Trial",
+    "getPremium": "Discover Premium"
+  },
+  "appReview": {
+    "areYouLikingTheAppModal": {
+      "description": "We would love to know your opinion!",
+      "no": "No",
+      "title": "Are you liking the app? 🐶",
+      "yes": "Yes"
+    },
+    "notLikingTheAppModal": {
+      "description": "Please let us know what we can do to improve the app!",
+      "placeholder": "Tell us what you think!",
+      "send": "Send",
+      "success": "Thanks for your feedback!",
+      "title": "Sorry to hear that 😔"
+    }
+  },
+  "askForLocation": {
+    "activateLocation": "Activate Location",
+    "enableLocation": "Enable Location",
+    "activate": "Continue",
+    "locationUsage": "Your location will be used to show dogs near you.",
+    "permissionPrompt": "You need to allow location access to use Pegada."
+  },
+  "breedPicker": {
+    "error": "⚠️  Could not fetch breeds",
+    "anyBreed": "Any breed",
+    "breed": "Breed"
+  },
+  "chat": {
+    "sendAMessageToStart": "Send a message to start the conversation",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "youMatched": "You two matched!"
+  },
+  "colors": {
+    "albino": "Albino",
+    "black": "Black",
+    "brown": "Brown",
+    "golden": "Golden",
+    "tricolor": "Tricolor",
+    "white": "White"
+  },
+  "common": {
+    "back": "Back",
+    "nearYou": "Near you",
+    "ok": "Ok",
+    "oops": "Oops",
+    "optional": "(Optional)",
+    "skip": "Skip",
+    "somethingWrong": "Something went wrong",
+    "tryAgainLater": "Please try again later.",
+    "somethingWentWrongTryAgainLater": "Something went wrong. Please try again later.",
+    "unknown": "unknown"
+  },
+  "completeProfile": {
+    "additionalInfo": "Just like you can select your preferences, other dogs can do the same.\n\nThese information are used to show the best matches 🐶",
+    "birthDate": "Birth date",
+    "breed": "Breed",
+    "color": "Color",
+    "female": "Female",
+    "gender": "Gender",
+    "male": "Male",
+    "save": "Save",
+    "size": "Size",
+    "title": "Details"
+  },
+  "createProfile": {
+    "bio": "Bio",
+    "clickAndHold": "* Click and hold on the photo to change the order.",
+    "createProfile": "Create Profile",
+    "dogName": "Name",
+    "howToCallDog": "How can we call your dog?",
+    "minimumOnePhoto": "At least one photo must include you (owner).",
+    "profilePictures": "Profile Pictures",
+    "tellSomethingCool": "Tell us something cool about you and your dog.",
+    "title": "Create your profile"
+  },
+  "dateFormatting": {
+    "and": "and",
+    "month": "{{unit}} month",
+    "months": "{{unit}} months",
+    "year": "{{unit}} year",
+    "years": "{{unit}} years",
+    "day": "{{unit}} day",
+    "days": "{{unit}} days",
+    "week": "{{unit}} week",
+    "weeks": "{{unit}} weeks"
+  },
+  "dogProfile": {
+    "profileInfoError": "⚠️ Loading Error. Try again later.",
+    "cancel": "Cancel",
+    "dogProfile": "Dog Profile",
+    "report": "Report",
+    "reportBody": "I would like to report account number {{id}}, owned by {{name}} for:\n",
+    "reportMessage": "By reporting a profile, you are helping us to keep the community safe. Would you like to proceed?",
+    "reportName": "Report {{name}}",
+    "shareLink": "Check out this dog's profile on Pegada:\n{{link}}",
+    "shareProfile": "Share {{name}}'s profile",
+    "sharingNotAvailableMessage": "It was not possible to share {{name}}'s profile. Please try again later.",
+    "sharingNotAvailableTitle": "Oops, that seems unavailable 🙁",
+    "somethingWrong": "Something went wrong",
+    "tryAgainLater": "Couldn't unmatch now. Try again later.",
+    "unmatch": "Unmatch",
+    "yes": "Yes"
+  },
+  "editProfile": {
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us something cool about you and your dog.",
+    "birthDate": "Birth date",
+    "color": "Color",
+    "dogName": "Name",
+    "dogNamePlaceholder": "How can we call your dog?",
+    "female": "Female",
+    "gender": "Gender",
+    "male": "Male",
+    "profileError": "Unable to save profile information",
+    "profileUpdated": "Your profile has been updated!",
+    "saveProfile": "Save Profile",
+    "size": "Size",
+    "title": "Edit profile",
+    "weight": "Weight (kg)"
+  },
+  "forceUpdate": {
+    "button": "Update",
+    "description": "A new version of Pegada is available. Please update to continue using the app.",
+    "title": "Update Required"
+  },
+  "formErrors": {
+    "bioTooLong": "Bio needs less than {{length}} characters",
+    "birthDateTooOld": "Is your dog really {{years}} years old?",
+    "dateFormatWrong": "DD/MM/YYYY",
+    "dateIsAfterToday": "Date must be before today",
+    "insertAtLeastOneImage": "Please insert at least one image",
+    "nameTooLong": "Name needs less than {{length}} characters",
+    "nameTooShort": "Name needs at least {{length}} characters",
+    "selectBreed": "Please select a breed",
+    "waitImageUpload": "Please wait for the image to finish uploading",
+    "weightTooBig": "Weight must be less than {{weight}} kg"
+  },
+  "imagePicker": {
+    "cancel": "Cancel",
+    "chooseFromLibrary": "Choose from Library",
+    "message": "Take a photo or choose from the gallery",
+    "permissionsRequiredMessage": "Please grant the required permissions to access the camera and photo library.",
+    "permissionsRequiredTitle": "Sorry, we need these permissions to make this work!",
+    "takePhoto": "Take Photo",
+    "title": "What do you prefer?"
+  },
+  "insertEmail": {
+    "accountCode": "We will send a 6-digit code to authorize your account. If you don't have one yet, we'll create it.",
+    "continue": "Continue",
+    "emailPlaceholder": "hi@email.com",
+    "findDogsNearYou": "<view><title>Find </title><highlight>Dogs</highlight></view><view><title>Near </title><highlight>You</highlight><view/>",
+    "insertEmail": "Insert your <1>email</1>",
+    "loginError": "An error occurred while logging in.",
+    "validEmail": "Please enter a valid email"
+  },
+  "locationMap": {
+    "adjustYourPosition": "Adjust your position",
+    "areYouHere": "Are you here?",
+    "confirmLocation": "Confirm Location",
+    "title": "Where are you?",
+    "updateLocationError": "An error occurred while updating your location."
+  },
+  "match": {
+    "itsAMatch": "It's a match!",
+    "itsAMatchDescription": "You matched with this dog!"
+  },
+  "matches": {
+    "matchedDogs": "Matched Dogs 🐶",
+    "messages": "Messages",
+    "sendFirstMessage": "Send the first message!"
+  },
+  "messages": {
+    "empty": {
+      "clearSearch": "Clear search",
+      "description": "Here you will be able to start a conversation with them.",
+      "searchForDogs": "Search for doggos",
+      "title": "We couldn't find any matches, go find some!"
+    }
+  },
+  "newMatch": {
+    "keepSwiping": "Keep Swiping",
+    "sendMessage": "Send a Message",
+    "youGotA": "You got a",
+    "youLikedEachOther": "You and {{name}} liked each other!"
+  },
+  "oneTimeCode": {
+    "insertCode": "Insert the verification code we sent to:",
+    "invalidCode": "Invalid code",
+    "resendCode": "Resend the code"
+  },
+  "pickerSheet": {
+    "search": "Search"
+  },
+  "preferences": {
+    "ageRange": "Age Range",
+    "anyColor": "Any color",
+    "anySize": "Any size",
+    "color": "Color",
+    "maxDistance": "Maximum Distance",
+    "preferencesUpdated": "Your preferences have been updated!",
+    "savePreferences": "Save Preferences",
+    "size": "Size",
+    "title": "Preferences",
+    "updateError": "An error occurred while updating your preferences.",
+    "years": "0-{{maxYears}}+ years"
+  },
+  "plans": {
+    "FREE": "Free",
+    "PREMIUM": "Premium",
+    "day": "day",
+    "week": "week",
+    "M": "mo",
+    "Y": "yr",
+    "D": "day",
+    "W": "wk",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save {{percent}}%",
+    "benefits": {
+      "priorityQueue": "Priority on the Queue",
+      "getSeenFirst": "Get seen first by the popular doggies!",
+      "unlimitedLikes": "Unlimited Likes",
+      "noDailyLimits": "No daily limits for love",
+      "rewind": "Rewind to Previous Doggies",
+      "madeAMistake": "Made a mistake? No problem",
+      "noAds": "No Ads",
+      "noAdsDescription": "Enjoy the app without disruptions"
+    },
+    "restorePurchases": {
+      "restore": "Restore"
+    },
+    "errors": {
+      "fetchingOfferingsDevice": "An error occurred while fetching the offerings. Try on a real device.",
+      "fetchingOfferings": "An error occurred while fetching the offerings."
+    },
+    "upgradeWall": {
+      "earnedFreeTrial": "You Earned a Free Trial",
+      "getPremium": "Get Premium",
+      "tryPremiumFree": "Try Premium Free for {{duration}}",
+      "enjoyFullAccess": "Enjoy full access to all features and supercharge your doggie",
+      "startFreeTrial": "Start Free Trial"
+    }
+  },
+  "links": {
+    "termsOfUse": "https://www.pegada.app/terms-of-use",
+    "privacyPolicy": "https://www.pegada.app/privacy-policy"
+  },
+  "profile": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteAccount": "Delete account",
+    "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
+    "editProfile": "Edit Profile",
+    "editProfileDescription": "Edit and keep your profile up to date for the best matches.",
+    "error": "Error",
+    "language": "Language",
+    "loadProfileError": "An error occurred while loading your profile.",
+    "logout": "Logout",
+    "logoutConfirmation": "Are you sure you want to logout?",
+    "matchPreferences": "Match Preferences",
+    "matchPreferencesDescription": "Set your preferences to find your perfect match!",
+    "privacyPolicy": "Privacy Policy",
+    "privacyPolicyDescription": "Know how we use and protect your data by reading our privacy policy.",
+    "settings": "Settings",
+    "termsOfUse": "Terms of Use",
+    "termsOfUseDescription": "Ensure you are familiar with our usage terms to enjoy a smooth experience.",
+    "theme": "Theme",
+    "updateLocation": "Update Location",
+    "plan": {
+      "currentPlan": "Current Plan",
+      "errorLoading": "Error loading plan details",
+      "clickToRetry": "Click to Retry",
+      "upgradeToPremium": "Upgrade to Premium",
+      "until": "Until {{date}}"
+    }
+  },
+  "networkBoundary": {
+    "offline": {
+      "message": "Please wait a moment and try again when the connection is stable",
+      "retry": "Try again",
+      "title": "Oops, you're offline"
+    },
+    "requestError": {
+      "message": "We couldn't process your request at the moment, but we're working to resolve the issue.",
+      "retry": "Try again",
+      "title": "Oops, something went wrong"
+    },
+    "unknownError": {
+      "message": "Please restart the app and try again.",
+      "title": "Oops, something went wrong"
+    }
+  },
+  "send": {
+    "placeholder": "Type a message"
+  },
+  "session": {
+    "expired": "Your session has expired.",
+    "expiredMessage": "Please login again to continue."
+  },
+  "sizes": {
+    "extraSmall": "Extra Small",
+    "giant": "Giant",
+    "large": "Large",
+    "medium": "Medium",
+    "small": "Small"
+  },
+  "swipeRequestFeedback": {
+    "emptyDescription": "But hang tight! We've just launched and still have small user base.\n\nWe're working hard to ensure a space filled with doggos very soon 🐶\n\nTry adjusting your preferences or check back later! 😉",
+    "emptyTitle": "We couldn't find any more dogs!",
+    "preferencesButton": "View Preferences"
+  },
+  "themes": {
+    "automatic": "Automatic",
+    "dark": "Dark",
+    "light": "Light"
+  }
+}

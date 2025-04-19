@@ -1,0 +1,35 @@
+version: "3.1"
+
+name: "pegada-test-environment"
+
+services:
+  postgres:
+    container_name: pegada-postgres-test
+    image: postgis/postgis
+    shm_size: 128mb
+    restart: always
+    environment:
+      POSTGRES_USER: tony
+      POSTGRES_PASSWORD: hawk
+      POSTGRES_DB: pegada
+    ports:
+      - "3355:5432"
+
+  redis:
+    container_name: pegada-redis-test
+    image: redis:alpine
+    command: redis-server
+    restart: always
+    ports:
+      - "6380:6379"
+
+  redis-serverless:
+    container_name: pegada-redis-serverless-test
+    image: hiett/serverless-redis-http:latest
+    restart: always
+    ports:
+      - "8078:80"
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: example_token
+      SRH_CONNECTION_STRING: "redis://redis:6379" # Using `redis` hostname

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": ["expo/tsconfig.base", "@pegada/tsconfig/base.json"],
+  "compilerOptions": {
+    "jsx": "react-native",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "plugins": [
+      {
+        "name": "@styled/typescript-styled-plugin",
+        "lint": {
+          "validProperties": [
+            "shadow-color",
+            "shadow-opacity",
+            "shadow-offset",
+            "shadow-radius",
+            "padding-horizontal",
+            "padding-vertical",
+            "margin-vertical",
+            "margin-horizontal",
+            "tint-color",
+            "aspect-ratio",
+            "elevation"
+          ]
+        }
+      }
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "../nextjs/src/app/global-error.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "android",
+    "ios",
+    "metro.config.js",
+    "babel.config.js"
+  ]
+}

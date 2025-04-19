@@ -1,0 +1,63 @@
+{
+  "name": "@pegada/database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./*": [
+      "./*.ts",
+      "./*/index.ts"
+    ]
+  },
+  "main": "index.ts",
+  "scripts": {
+    "studio": "prisma studio",
+    "build": "npx prisma generate",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "db:up": "docker-compose up --build --detach",
+    "db:seed": "npx prisma db seed",
+    "db:setup": "pnpm db:up && pnpm migrate deploy && pnpm db:seed",
+    "db:push": "npx prisma db push",
+    "prisma": "npx prisma",
+    "test:db:up": "docker-compose -f docker-compose.test.yml up --build --detach",
+    "test:db:setup": "pnpm test:db:up && pnpm migrate deploy",
+    "migrate": "npx prisma migrate",
+    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "pnpm lint --fix",
+    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
+    "format": "prettier --check .  --ignore-path ../../.gitignore",
+    "postinstall": "pnpm run build"
+  },
+  "prisma": {
+    "seed": "tsx ./seed.ts"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@pegada/eslint-config/typescript"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    }
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.4.1"
+  },
+  "devDependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@pegada/eslint-config": "workspace:*",
+    "@pegada/prettier-config": "workspace:*",
+    "@pegada/tsconfig": "workspace:*",
+    "@prisma/client": "^5.17.0",
+    "prisma": "^5.17.0",
+    "tsx": "^4.16.5"
+  },
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "@prisma/client": "*"
+  },
+  "prettier": "@pegada/prettier-config"
+}

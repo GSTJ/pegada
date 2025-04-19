@@ -1,0 +1,43 @@
+{
+  "name": "@pegada/shared",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./*.json": "./*.json",
+    "./*": "./*.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "pnpm lint --fix",
+    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
+    "format": "prettier --check .  --ignore-path ../../.gitignore"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@pegada/eslint-config/typescript"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    }
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "zod-i18n-map": "^2.27.0"
+  },
+  "peerDependencies": {
+    "i18next": "*",
+    "zod": "*"
+  },
+  "devDependencies": {
+    "@pegada/eslint-config": "workspace:*",
+    "@pegada/prettier-config": "workspace:*",
+    "@pegada/tsconfig": "workspace:*",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "i18next": "^23.12.2",
+    "zod": "3.23.8"
+  },
+  "prettier": "@pegada/prettier-config"
+}

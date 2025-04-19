@@ -1,0 +1,6 @@
+{
+  "NSUserTrackingUsageDescription": "The app tracks anonymous data to improve user experience, we respect your privacy.",
+  "NSLocationWhenInUseUsageDescription": "The app uses your location to find doggies near you.",
+  "NSPhotoLibraryUsageDescription": "The app allows you to choose photos for your doggie's profile.",
+  "NSCameraUsageDescription": "The app allows you to take photos for your doggie's profile."
+}

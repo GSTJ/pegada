@@ -1,0 +1,9 @@
+coverage
+dist
+node_modules
+.turbo
+storybook-static
+*.json
+ios
+android
+*-lock.yaml

@@ -1,0 +1,235 @@
+datasource db {
+  provider     = "postgres"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+  extensions   = [postgis]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+enum Color {
+  BLACK
+  WHITE
+  BROWN
+  TRICOLOR
+  ALBINO
+  GOLDEN
+}
+
+enum Size {
+  EXTRASMALL
+  SMALL
+  MEDIUM
+  LARGE
+  GIANT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum SwipeType {
+  INTERESTED
+  NOT_INTERESTED
+  MAYBE
+}
+
+enum PlanType {
+  FREE
+  PREMIUM
+}
+
+model Temperament {
+  id   String @id(map: "idx_57696_PRIMARY") @default(uuid())
+  name String @unique(map: "temperament_name_key")
+  dogs Dog[]  @relation("DogTemperaments")
+}
+
+model User {
+  id    String @id(map: "idx_57699_PRIMARY") @default(cuid())
+  email String @unique(map: "user_email_key")
+
+  dogs          Dog[]
+  // Location
+  city          String?
+  state         String?
+  country       String?
+  latitude      Float?
+  longitude     Float?
+  code          String?
+  codeExpiresAt DateTime?
+
+  // Push notifications
+  pushToken String?
+
+  // Metadata
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Plan
+  plan PlanType @default(FREE)
+
+  @@index([id])
+  @@index([latitude])
+  @@index([longitude])
+}
+
+model Dog {
+  id String @id(map: "idx_57664_PRIMARY") @default(cuid())
+
+  // Dog information for profile
+  images       Image[]       @relation("DogImages")
+  bio          String?       @db.Text
+  name         String
+  // Dog information for preferences
+  gender       Gender
+  color        Color?
+  size         Size?
+  weight       Int?
+  temperaments Temperament[] @relation("DogTemperaments")
+  breed        Breed?        @relation(fields: [breedId], references: [id])
+  breedId      String?
+  birthDate    DateTime?
+
+  // Chat information
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  // Pedigree
+  hasPedigree   Boolean @default(false)
+  pedigreeProof String? // Can store a URL or a unique identification
+
+  // Metadata
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Dog information for authentication
+  banned Boolean @default(false)
+  user   User    @relation(fields: [userId], references: [id])
+  userId String
+
+  // Matches and Interests
+  matchesSent       Match[]    @relation("MatchesSent")
+  matchesReceived   Match[]    @relation("MatchesReceived")
+  interestsSent     Interest[] @relation("InterestsSent")
+  interestsReceived Interest[] @relation("InterestsReceived")
+
+  // Preferences
+  preferredMinAge      Int?
+  preferredMaxAge      Int?
+  preferredColor       Color?
+  preferredSize        Size?
+  preferredMaxDistance Int?
+
+  preferredBreed   Breed?  @relation("DogPreferredBreed", fields: [preferredBreedId], references: [id]) @ignore
+  preferredBreedId String?
+
+  @@index([userId], map: "dog_userid_idx")
+  @@index([deletedAt])
+  @@index([breedId], map: "dog_breedid_idx")
+  @@index([preferredBreedId], map: "dog_preferredbreedid_idx")
+  @@index([gender])
+  @@index([id])
+}
+
+enum ImageStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Image {
+  id  String @id(map: "idx_57672_PRIMARY") @default(uuid())
+  url String
+
+  dog       Dog      @relation("DogImages", fields: [dogId], references: [id])
+  dogId     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status ImageStatus @default(PENDING)
+
+  blurhash String?
+
+  position Int
+
+  @@index([dogId], map: "image_dogid_idx")
+}
+
+model Breed {
+  id            String @id(map: "idx_57659_PRIMARY") @default(uuid())
+  name          String @unique(map: "breed_name_key")
+  slug          String @unique(map: "breed_slug_key")
+  dogs          Dog[]
+  dogsPreferred Dog[]  @relation("DogPreferredBreed") @ignore
+}
+
+model Interest {
+  id String @id(map: "idx_57678_PRIMARY") @default(uuid())
+
+  requester   Dog    @relation("InterestsSent", fields: [requesterId], references: [id])
+  requesterId String
+
+  responder   Dog    @relation("InterestsReceived", fields: [responderId], references: [id])
+  responderId String
+
+  swipeType SwipeType
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  matchId String? @unique(map: "interest_matchid_key")
+  match   Match?  @relation(fields: [matchId], references: [id])
+
+  @@index([responderId], map: "interest_responderid_idx")
+  @@index([requesterId], map: "interest_requesterid_idx")
+  @@index([updatedAt])
+  @@index([deletedAt])
+  @@index([swipeType])
+}
+
+model Match {
+  id          String @id(map: "idx_57684_PRIMARY") @default(uuid())
+  requester   Dog    @relation("MatchesSent", fields: [requesterId], references: [id])
+  requesterId String
+
+  responder   Dog    @relation("MatchesReceived", fields: [responderId], references: [id])
+  responderId String
+
+  messages Message[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  interests Interest[] @relation
+
+  @@index([responderId], map: "match_responderid_idx")
+  @@index([requesterId], map: "match_requesterid_idx")
+}
+
+model Message {
+  id        String    @id(map: "idx_57690_PRIMARY") @default(uuid())
+  content   String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  sender   Dog    @relation("SentMessages", fields: [senderId], references: [id])
+  senderId String
+
+  receiver   Dog    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId String
+
+  match   Match  @relation(fields: [matchId], references: [id])
+  matchId String
+
+  @@index([receiverId], map: "message_receiverid_idx")
+  @@index([senderId], map: "message_senderid_idx")
+  @@index([matchId], map: "message_matchid_idx")
+}

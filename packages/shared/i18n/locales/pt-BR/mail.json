@@ -1,0 +1,9 @@
+{
+  "verifyCode": {
+    "verificationCode": "Código de Verificação",
+    "yourCodeIs": "O seu código OTP para acessar a nossa plataforma é",
+    "codeWarning": "Este código é válido apenas por uma hora. Se você não solicitou este código, por favor, ignore este email.",
+    "thisEmailIsAutomated": "Este é um e-mail automático, por favor não responda a este e-mail.",
+    "allRightsReserved": "© {{year}} Pegada. Todos os direitos reservados."
+  }
+}
