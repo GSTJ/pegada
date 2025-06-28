@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { View } from "react-native";
 import { Image as ExpoImage, ImageProps } from "expo-image";
 import styled from "styled-components/native";
@@ -20,18 +19,22 @@ const ImageWrapper = styled.View`
   overflow: hidden;
 `;
 
-export const Image = forwardRef<View, LocalImageProps>(
-  ({ source, ...props }, ref) => {
-    const blurhash = source?.blurhash;
+export const Image = ({
+  ref,
+  source,
+  ...props
+}: LocalImageProps & {
+  ref: React.RefObject<View>;
+}) => {
+  const blurhash = source?.blurhash;
 
-    return (
-      <ImageWrapper {...props} ref={ref}>
-        {blurhash ? <AbsoluteImage source={{ blurhash }} /> : null}
-        <AbsoluteImage
-          source={blurhash ? { ...source, blurhash: undefined } : source}
-          cachePolicy="memory-disk"
-        />
-      </ImageWrapper>
-    );
-  }
-);
+  return (
+    <ImageWrapper {...props} ref={ref}>
+      {blurhash ? <AbsoluteImage source={{ blurhash }} /> : null}
+      <AbsoluteImage
+        source={blurhash ? { ...source, blurhash: undefined } : source}
+        cachePolicy="memory-disk"
+      />
+    </ImageWrapper>
+  );
+};
