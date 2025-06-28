@@ -17,8 +17,8 @@ export default () => {
 
   return (
     <Tabs
-      sceneContainerStyle={{ backgroundColor: theme.colors.background }}
       screenOptions={{
+        sceneStyle: { backgroundColor: theme.colors.background },
         tabBarInactiveTintColor: theme.colors.text,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarShowLabel: false,
