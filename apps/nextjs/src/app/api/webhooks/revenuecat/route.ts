@@ -13,8 +13,8 @@ export const OPTIONS = () => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Request-Method": "*",
       "Access-Control-Allow-Methods": "OPTIONS, POST",
-      "Access-Control-Allow-Headers": "*"
-    }
+      "Access-Control-Allow-Headers": "*",
+    },
   });
 
   return response;
@@ -22,7 +22,7 @@ export const OPTIONS = () => {
 
 export const POST = async (req: NextRequest) => {
   const session = getSession(
-    req.headers.get(RequestHeaders.Authorization) ?? ""
+    req.headers.get(RequestHeaders.Authorization) ?? "",
   );
 
   if (session?.user.id !== WEBHOOK_USER_ID) {

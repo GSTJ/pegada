@@ -1,7 +1,7 @@
 "use client";
 
 const GlobalError = ({
-  reset
+  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
