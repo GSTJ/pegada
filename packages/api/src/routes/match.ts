@@ -7,5 +7,5 @@ export const matchRouter = createTRPCRouter({
     const dog = await DogService.getDogByUserId(ctx.session.user.id);
     const matches = await MatchService.getMatchesForDog(dog.id);
     return matches;
-  }),
+  })
 });

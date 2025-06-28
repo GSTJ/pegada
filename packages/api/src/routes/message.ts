@@ -8,16 +8,16 @@ const allByMatchSchema = z.object({
   matchId: z.string(),
   limit: z.coerce.number().optional().default(10),
   gt: z.coerce.date().optional(),
-  lt: z.coerce.date().optional(),
+  lt: z.coerce.date().optional()
 });
 
 const sendSchema = z.object({
   matchId: z.string(),
-  content: z.string(),
+  content: z.string()
 });
 
 const deleteSchema = z.object({
-  messageId: z.string(),
+  messageId: z.string()
 });
 
 export const messageRouter = createTRPCRouter({
@@ -33,7 +33,7 @@ export const messageRouter = createTRPCRouter({
         matchId,
         gt,
         lt,
-        limit,
+        limit
       });
 
       return messages;
@@ -49,7 +49,7 @@ export const messageRouter = createTRPCRouter({
       const newMessage = await messageService.sendMessage(
         content,
         dog.id,
-        matchId,
+        matchId
       );
 
       return newMessage;
@@ -63,9 +63,9 @@ export const messageRouter = createTRPCRouter({
 
       const deletedMessage = await MessageService.deleteMessage(
         dog.id,
-        messageId,
+        messageId
       );
 
       return deletedMessage;
-    }),
+    })
 });

@@ -9,7 +9,7 @@ export const t = <T extends Namespace = Namespace.Web>(
   key: ParseKeys<T>,
   options: {
     ns?: T;
-  } & TOptions = {},
+  } & TOptions = {}
 ) => {
   const lng = getSafeLocale();
 

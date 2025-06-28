@@ -9,10 +9,10 @@ export default createMiddleware({
   localePrefix: "as-needed",
 
   // If this locale is matched, pathnames work without a prefix (e.g. `/about`)
-  defaultLocale: "en-us",
+  defaultLocale: "en-us"
 });
 
 export const config = {
   // Skip all paths that should not be internationalized
-  matcher: ["/((?!api|store|_next|.*\\..*).*)"],
+  matcher: ["/((?!api|store|_next|.*\\..*).*)"]
 };

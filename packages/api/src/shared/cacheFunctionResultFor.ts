@@ -1,9 +1,9 @@
 export const cacheFunctionResultFor = <
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends (...props: any[]) => any,
+  T extends (...props: any[]) => any
 >(
   fn: T,
-  ms: number,
+  ms: number
 ) => {
   const cache = new Map();
 

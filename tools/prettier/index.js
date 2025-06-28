@@ -20,8 +20,8 @@ const config = {
     "<TYPES>^[.|..|~]",
     "^@/",
     "^[../]",
-    "^[./]",
-  ],
+    "^[./]"
+  ]
 };
 
 export default config;

@@ -4,6 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    prettier:
+      specifier: ^3.5.3
+      version: 3.6.2
+
 patchedDependencies:
   '@bugsnag/plugin-expo-eas-sourcemaps@51.0.0':
     hash: kcdiaafoqmdl3an64mqbwdaaqe
@@ -26,8 +32,8 @@ importers:
         specifier: ^7.4.2
         version: 7.4.2
       prettier:
-        specifier: 3.3.3
-        version: 3.3.3
+        specifier: 'catalog:'
+        version: 3.6.2
       turbo:
         specifier: ^2.0.11
         version: 2.0.11
@@ -341,6 +347,9 @@ importers:
       babel-plugin-styled-components:
         specifier: ^2.1.4
         version: 2.1.4(@babel/core@7.25.2)(styled-components@6.1.11(patch_hash=rpobciuscng7usb6kdy5cx6apq)(react-dom@18.2.0(react@18.3.1))(react@18.3.1))
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
 
   apps/nextjs:
     dependencies:
@@ -450,6 +459,9 @@ importers:
       '@types/react-dom':
         specifier: ~18.3.0
         version: 18.3.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
 
   apps/queue:
     dependencies:
@@ -503,8 +515,8 @@ importers:
         specifier: workspace:*
         version: link:../../tools/prettier
       prettier:
-        specifier: ^3.3.3
-        version: 3.3.3
+        specifier: 'catalog:'
+        version: 3.6.2
 
   packages/api:
     dependencies:
@@ -602,6 +614,9 @@ importers:
       next:
         specifier: '*'
         version: 14.2.5(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
       typescript:
         specifier: '*'
         version: 5.4.5
@@ -627,6 +642,9 @@ importers:
       '@prisma/client':
         specifier: ^5.17.0
         version: 5.17.0(prisma@5.17.0)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
       prisma:
         specifier: ^5.17.0
         version: 5.17.0
@@ -658,6 +676,9 @@ importers:
       i18next:
         specifier: ^23.12.2
         version: 23.12.2
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -719,6 +740,9 @@ importers:
       '@pegada/prettier-config':
         specifier: workspace:*
         version: link:../prettier
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
 
   tools/prettier:
     dependencies:
@@ -726,7 +750,7 @@ importers:
         specifier: ^4.4.2
         version: 4.4.2(prettier@3.6.2)
       prettier:
-        specifier: ^3.6.2
+        specifier: 'catalog:'
         version: 3.6.2
     devDependencies:
       '@pegada/tsconfig':
@@ -8127,11 +8151,6 @@ packages:
     resolution: {integrity: sha512-GbK2cP9nraSSUF9N2XwUwqfzlAFlMNYYl+ShE/V+H8a9uNl/oUqB1w2EL54Jh0OlyRSd8RfWYJ3coVS4TROP2w==}
     engines: {node: '>=6.0.0'}
 
-  prettier@3.3.3:
-    resolution: {integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==}
-    engines: {node: '>=14'}
-    hasBin: true
-
   prettier@3.6.2:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
     engines: {node: '>=14'}
@@ -10762,7 +10781,7 @@ snapshots:
 
   '@babel/helper-builder-binary-assignment-operator-visitor@7.22.15':
     dependencies:
-      '@babel/types': 7.25.2
+      '@babel/types': 7.27.7
 
   '@babel/helper-compilation-targets@7.25.2':
     dependencies:
@@ -10812,7 +10831,7 @@ snapshots:
 
   '@babel/helper-hoist-variables@7.24.6':
     dependencies:
-      '@babel/types': 7.25.2
+      '@babel/types': 7.27.7
 
   '@babel/helper-member-expression-to-functions@7.24.5':
     dependencies:
@@ -11289,7 +11308,7 @@ snapshots:
       '@babel/helper-hoist-variables': 7.24.6
       '@babel/helper-module-transforms': 7.25.2(@babel/core@7.25.2)
       '@babel/helper-plugin-utils': 7.24.5
-      '@babel/helper-validator-identifier': 7.24.7
+      '@babel/helper-validator-identifier': 7.27.1
     transitivePeerDependencies:
       - supports-color
 
@@ -11592,7 +11611,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.2
       '@babel/helper-plugin-utils': 7.24.5
-      '@babel/types': 7.25.2
+      '@babel/types': 7.27.7
       esutils: 2.0.3
 
   '@babel/preset-react@7.24.1(@babel/core@7.25.2)':
@@ -19728,8 +19747,6 @@ snapshots:
   prettier-linter-helpers@1.0.0:
     dependencies:
       fast-diff: 1.3.0
-
-  prettier@3.3.3: {}
 
   prettier@3.6.2: {}
 

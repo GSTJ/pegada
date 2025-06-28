@@ -6,7 +6,7 @@ import { config } from "../shared/config";
 
 Bugsnag.start({
   apiKey: config.BUGSNAG_API_KEY,
-  releaseStage: config.NODE_ENV,
+  releaseStage: config.NODE_ENV
 });
 
 Bugsnag.setContext("server");

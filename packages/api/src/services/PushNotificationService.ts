@@ -5,7 +5,7 @@ import { sendError } from "../errors/errors";
 import {
   ISendNotificationJobData,
   SEND_PUSH_NOTIFICATION_QUEUE,
-  SendPushNotificationQueue,
+  SendPushNotificationQueue
 } from "../queue/SendPushNotificationQueue";
 import { UserService } from "./UserService";
 
@@ -20,7 +20,7 @@ export class PushNotificationService {
 
       if (!Expo.isExpoPushToken(pushToken)) {
         const error = new Error(
-          `Push token ${pushToken} is not a valid Expo push token`,
+          `Push token ${pushToken} is not a valid Expo push token`
         );
 
         await UserService.blacklistPushToken(pushToken);
@@ -35,7 +35,7 @@ export class PushNotificationService {
       return await SendPushNotificationQueue.add(
         SEND_PUSH_NOTIFICATION_QUEUE,
         notification,
-        { delay: waitingJobCount * DELAY_BETWEEN_NOTIFICATIONS_MS },
+        { delay: waitingJobCount * DELAY_BETWEEN_NOTIFICATIONS_MS }
       );
     } catch (error) {
       sendError(error);

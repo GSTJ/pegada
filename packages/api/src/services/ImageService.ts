@@ -18,13 +18,13 @@ export class ImageService {
     const command = new PutObjectCommand({
       Bucket: config.AWS_S3_BUCKET_NAME,
       Key: key,
-      ACL: "public-read",
+      ACL: "public-read"
     });
 
     const url = await RequestPresigner.getSignedUrl(
       FileUpload.client,
       command,
-      { expiresIn: 60 * 60 },
+      { expiresIn: 60 * 60 }
     );
 
     return { url };
@@ -32,14 +32,14 @@ export class ImageService {
 
   static async getImageById(id: string) {
     return prisma.image.findUnique({
-      where: { id: id },
+      where: { id: id }
     });
   }
 
   static async updateImage({ id, ...data }: Partial<Image> & { id: string }) {
     return prisma.image.update({
       where: { id: id },
-      data,
+      data
     });
   }
 

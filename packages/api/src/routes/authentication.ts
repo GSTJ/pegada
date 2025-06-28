@@ -5,7 +5,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 
 const authenticationBodySchema = z.object({
   email: z.string().email(),
-  code: z.string().optional(),
+  code: z.string().optional()
 });
 
 export const authenticationRouter = createTRPCRouter({
@@ -21,16 +21,16 @@ export const authenticationRouter = createTRPCRouter({
       }
 
       const authenticationService = new AuthenticationService({
-        language: ctx.language,
+        language: ctx.language
       });
 
       const user = await authenticationService.login({
         email: input.email,
-        code: input.code,
+        code: input.code
       });
 
       const token = ctx.jwtSign({ sub: user.id });
 
       return { token };
-    }),
+    })
 });

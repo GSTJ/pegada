@@ -12,8 +12,8 @@ export const getLocalizedMdxData = (pageKey: string) => {
   return {
     content: t(`${pageKey}.content` as any),
     metadata: {
-      title: t(`${pageKey}.metadata.title` as any),
-    },
+      title: t(`${pageKey}.metadata.title` as any)
+    }
   };
 };
 

@@ -59,9 +59,9 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     db: prisma,
     jwtSign: (payload: { sub: string }) => {
       return jwt.sign(payload, config.JWT_SECRET, {
-        expiresIn: "1000d", // TODO: Use refresh tokens
+        expiresIn: "1000d" // TODO: Use refresh tokens
       });
-    },
+    }
   };
 };
 
@@ -83,8 +83,8 @@ export const getSession = (bearer: string) => {
 
     const session = {
       user: {
-        id: decoded.sub,
-      },
+        id: decoded.sub
+      }
     };
 
     return session;
@@ -109,7 +109,7 @@ export const createTRPCContext = (opts: {
   return createInnerTRPCContext({
     session: opts.session,
     req: opts.req,
-    language: opts.req.headers.get(RequestHeaders.AcceptLanguage) as Language,
+    language: opts.req.headers.get(RequestHeaders.AcceptLanguage) as Language
   });
 };
 
@@ -129,7 +129,7 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
     if (intentionalError) {
       return {
         ...shape,
-        data: { error: { ...error } },
+        data: { error: { ...error } }
       };
     }
 
@@ -139,11 +139,10 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null
+      }
     };
-  },
+  }
 });
 
 /**
@@ -186,8 +185,8 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
+      session: { ...ctx.session, user: ctx.session.user }
+    }
   });
 });
 
