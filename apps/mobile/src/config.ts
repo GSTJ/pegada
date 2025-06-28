@@ -2,14 +2,13 @@
 import "react-native-get-random-values";
 import "@/why-did-you-render";
 
+import type { BugsnagErrorBoundary as IBugsnagErrorBoundary } from "@bugsnag/plugin-react";
 import * as React from "react";
 import { LogBox, Text, View } from "react-native";
 import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 import * as Updates from "expo-updates";
 import Bugsnag from "@bugsnag/expo";
-import BugsnagPluginReact, {
-  BugsnagErrorBoundary as IBugsnagErrorBoundary
-} from "@bugsnag/plugin-react";
+import BugsnagPluginReact from "@bugsnag/plugin-react";
 
 import { ampli } from "@/ampli";
 import { config } from "@/services/config";
@@ -59,7 +58,6 @@ const updateGroup =
 Bugsnag.start({
   apiKey: config.BUGSNAG_API_KEY,
   codeBundleId: (updateGroup as string) || "",
-  metadata: { env: config.ENV },
   plugins: [new BugsnagPluginReact()],
   releaseStage: config.ENV,
   enabledReleaseStages: ["production", "staging"],

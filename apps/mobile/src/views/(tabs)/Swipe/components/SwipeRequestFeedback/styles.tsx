@@ -1,3 +1,4 @@
+import * as React from "react";
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
@@ -8,23 +9,22 @@ export const Container = styled(LikeFeedbackStyles.Container)`
   background-color: transparent;
 `;
 
-export const EmptyAnimation = styled(LottieView).attrs({
-  autoPlay: true,
-  source: require("@/assets/animations/empty.json")
-})`
-  width: 100px;
-  height: 100px;
-`;
+export const EmptyAnimation = () => (
+  <LottieView
+    autoPlay
+    source={require("@/assets/animations/empty.json")}
+    style={{ width: 100, height: 100 }}
+  />
+);
 
-export const LogoLoading = styled(LottieView).attrs({
-  autoPlay: true,
-  source: require("@/assets/animations/loadingLogo.json"),
-  speed: 0.5
-})`
-  width: 150px;
-  height: 150px;
-  margin: auto;
-`;
+export const LogoLoading = () => (
+  <LottieView
+    autoPlay
+    source={require("@/assets/animations/loadingLogo.json")}
+    speed={0.5}
+    style={{ width: 150, height: 150, margin: "auto" }}
+  />
+);
 
 export const Title = styled(Text)`
   margin-bottom: ${(props) => props.theme.spacing[1]}px;

@@ -1,18 +1,22 @@
+import * as React from "react";
 import Animated from "react-native-reanimated";
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
 import { Text } from "@/components/Text";
 
-export const Swipe = styled(LottieView).attrs({
-  resizeMode: "cover",
-  autoPlay: true,
-  source: require("@/assets/animations/swipe.json")
-})`
-  width: ${(props) => props.theme.spacing[6]}px;
-  height: ${(props) => props.theme.spacing[6]}px;
-  right: -${(props) => props.theme.spacing[1]}px;
-`;
+export const Swipe = () => (
+  <LottieView
+    resizeMode="cover"
+    autoPlay
+    source={require("@/assets/animations/swipe.json")}
+    style={{
+      width: 24,
+      height: 24,
+      right: -4
+    }}
+  />
+);
 
 export const Container = styled(Animated.View)`
   position: absolute;

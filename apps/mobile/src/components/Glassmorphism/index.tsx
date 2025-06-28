@@ -1,12 +1,15 @@
+import type { BlurViewProps } from "expo-blur";
 import * as React from "react";
-import { BlurViewProps } from "expo-blur";
+import { useTheme } from "styled-components/native";
 
-import { Container, Gradient } from "./styles";
+import { Container, getGradientProps, Gradient } from "./styles";
 
 const Glassmorphism: React.FC<BlurViewProps> = ({ children, ...props }) => {
+  const theme = useTheme();
+  const gradientProps = getGradientProps({ theme });
   return (
     <Container {...props}>
-      <Gradient>{children}</Gradient>
+      <Gradient {...gradientProps}>{children}</Gradient>
     </Container>
   );
 };

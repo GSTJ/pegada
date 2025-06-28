@@ -95,8 +95,8 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
     <Container {...props} style={[props.style, transform]}>
       <Picture
         source={{
-          uri: images[currentImage]?.url,
-          blurhash: images[currentImage]?.blurhash
+          uri: images[currentImage]?.url ?? undefined,
+          blurhash: images[currentImage]?.blurhash ?? undefined
         }}
         key={images[currentImage]?.id}
       />
