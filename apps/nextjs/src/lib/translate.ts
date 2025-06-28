@@ -15,6 +15,6 @@ export const t = <T extends Namespace = Namespace.Web>(
 
   const ns = options.ns ?? Namespace.Web;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
   return TranslationService.translate(key, { lng, ...options, ns } as any);
 };
