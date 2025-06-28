@@ -106,7 +106,7 @@ const LocationMap = () => {
         onTouchStart={() => setTouchStarted(true)}
         onRegionChange={() => {
           if (!touchStarted) return;
-           
+
           dragging.value = withTiming(1, {
             easing: Easing.in(Easing.ease),
             duration: 200

@@ -1,3 +1,4 @@
+import type { RouterOutputs } from "@/contexts/TRPCProvider";
 import { useEffect } from "react";
 import * as React from "react";
 import { useWindowDimensions, View } from "react-native";
@@ -14,8 +15,7 @@ import {
   DefaultLoadingComponent,
   NetworkBoundary
 } from "@/components/NetworkBoundary";
-import { api  } from "@/contexts/TRPCProvider";
-import type {RouterOutputs} from "@/contexts/TRPCProvider";
+import { api } from "@/contexts/TRPCProvider";
 import {
   HeartEyesContainer,
   RotatedImageLeft,
@@ -39,7 +39,6 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
   const CARD_HEIGHT = windowDimensions.height < 800 ? 200 : 325;
 
   useEffect(() => {
-     
     rotateZ.value = withDelay(500, withTiming(ROTATE_Z, { duration: 500 }));
   }, [rotateZ]);
 

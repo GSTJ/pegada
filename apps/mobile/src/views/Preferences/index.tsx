@@ -1,3 +1,4 @@
+import type { RouterInputs } from "@/contexts/TRPCProvider";
 import { useEffect } from "react";
 import * as React from "react";
 import { Dimensions } from "react-native";
@@ -11,9 +12,7 @@ import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components/native";
 import { z } from "zod";
 
-import {
-  dogServerSchema
-} from "@pegada/shared/schemas/dogSchema";
+import { dogServerSchema } from "@pegada/shared/schemas/dogSchema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
@@ -22,8 +21,7 @@ import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import { Slider } from "@/components/Slider";
 import { getTrcpContext } from "@/contexts/trcpContext";
-import { api  } from "@/contexts/TRPCProvider";
-import type {RouterInputs} from "@/contexts/TRPCProvider";
+import { api } from "@/contexts/TRPCProvider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/errorTracking";

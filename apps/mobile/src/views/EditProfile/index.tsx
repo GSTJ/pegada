@@ -1,3 +1,5 @@
+import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
+import type { Picture } from "@/components/ProfileImageUploader/utils";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
 import { magicToast } from "react-native-magic-toast";
@@ -18,13 +20,8 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
-import {
-  ProfileImagesUploader
-  
-} from "@/components/ProfileImageUploader";
-import type {ProfileImagesUploaderProps} from "@/components/ProfileImageUploader";
-import {  pictures } from "@/components/ProfileImageUploader/utils";
-import type {Picture} from "@/components/ProfileImageUploader/utils";
+import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
+import { pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { api } from "@/contexts/TRPCProvider";

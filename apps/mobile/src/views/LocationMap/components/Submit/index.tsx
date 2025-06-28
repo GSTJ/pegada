@@ -1,11 +1,10 @@
+import type { SharedValue } from "react-native-reanimated";
 import * as React from "react";
 import Animated, {
   Extrapolation,
   interpolate,
-  
   useAnimatedStyle
 } from "react-native-reanimated";
-import type {SharedValue} from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 
 import { BottomAction } from "@/components/BottomAction";

@@ -1,5 +1,5 @@
 export const cacheFunctionResultFor = <
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   T extends (...props: any[]) => any
 >(
   fn: T,

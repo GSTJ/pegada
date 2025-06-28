@@ -1,13 +1,12 @@
+import type { SharedValue } from "react-native-reanimated";
 import * as React from "react";
 import Animated, {
   Extrapolation,
   FadeInDown,
   FadeOutUp,
   interpolate,
-  
   useAnimatedStyle
 } from "react-native-reanimated";
-import type {SharedValue} from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "styled-components";
 

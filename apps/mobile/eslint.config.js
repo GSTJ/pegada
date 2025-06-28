@@ -6,12 +6,7 @@ import expoConfig from "@pegada/eslint-config/expo";
 
 /** @type {import('eslint').Linter.Config} */
 const packageOverrides = {
-  ignores: [
-    "**/node_modules/**",
-    "node_modules/**",
-    "babel.config.js",
-    "metro.config.js"
-  ]
+  ignores: ["**/node_modules/**", "*.config.js", "*.config.mjs", "*.yml"]
 };
 
 /** @type {import('typescript-eslint').Config} */
@@ -48,6 +43,10 @@ export default [
       "@typescript-eslint/prefer-optional-chain": "off",
       "@typescript-eslint/no-unnecessary-type-assertion": "off",
       "@typescript-eslint/no-redundant-type-constituents": "off",
+      "import/named": "off",
+      "import/namespace": "off",
+      "import/default": "off",
+      "import/no-named-as-default-member": "off",
       "@typescript-eslint/prefer-regexp-exec": "off",
       "@typescript-eslint/ban-tslint-comment": "off",
       "no-restricted-syntax": "off",

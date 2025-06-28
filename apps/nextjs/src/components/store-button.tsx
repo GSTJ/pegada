@@ -1,6 +1,8 @@
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 
+import { cn } from "@/lib/utils";
+
 interface StoreButtonProps {
   href?: string;
   className?: string;
@@ -21,7 +23,10 @@ export const StoreButton = ({
 }: StoreButtonProps) => {
   return (
     <a
-      className={`bg-card justify-center hover:bg-blue-700 cursor-pointer p-4 text-center rounded-xl gap-3 flex items-center hover:scale-105 transition-all duration-200 ease-in-out ${className}`}
+      className={cn(
+        "bg-card justify-center hover:bg-blue-700 cursor-pointer p-4 text-center rounded-xl gap-3 flex items-center hover:scale-105 transition-all duration-200 ease-in-out",
+        className
+      )}
       {...props}
     >
       {children}
@@ -34,7 +39,7 @@ const StoreButtonText = ({
   children
 }: StoreButtonTextProps) => {
   return (
-    <p className={`text-black font-semibold pt-1 ${className}`}>{children}</p>
+    <p className={cn("text-black font-semibold pt-1", className)}>{children}</p>
   );
 };
 
