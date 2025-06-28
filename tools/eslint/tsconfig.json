@@ -1,0 +1,5 @@
+{
+  "extends": "@pegada/tsconfig/internal-package.json",
+  "include": [".", "types"],
+  "exclude": ["node_modules"]
+}

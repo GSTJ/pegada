@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    eslint:
+      specifier: ^9.24.0
+      version: 9.30.0
     prettier:
       specifier: ^3.5.3
       version: 3.6.2
@@ -689,6 +692,9 @@ importers:
 
   tools/eslint:
     dependencies:
+      eslint:
+        specifier: 'catalog:'
+        version: 9.30.0(jiti@2.4.2)
       magic-eslint-config:
         specifier: ^0.1.9
         version: 0.1.9(@babel/eslint-parser@7.27.5(@babel/core@7.27.7)(eslint@9.30.0(jiti@2.4.2)))(eslint-config-prettier@9.1.0(eslint@9.30.0(jiti@2.4.2)))(jest@30.0.3)(jiti@2.4.2)(prettier@3.6.2)(tailwindcss@4.1.11)(typescript@5.8.3)
@@ -696,6 +702,9 @@ importers:
       '@pegada/prettier-config':
         specifier: workspace:*
         version: link:../prettier
+      '@pegada/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       prettier:
         specifier: 'catalog:'
         version: 3.6.2

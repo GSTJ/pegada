@@ -14,9 +14,11 @@
     "format:fix": "prettier --write . --ignore-path ../../.gitignore"
   },
   "dependencies": {
-    "magic-eslint-config": "^0.1.9"
+    "magic-eslint-config": "^0.1.9",
+    "eslint": "catalog:"
   },
   "devDependencies": {
+    "@pegada/tsconfig": "workspace:*",
     "@pegada/prettier-config": "workspace:*",
     "prettier": "catalog:"
   },

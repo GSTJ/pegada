@@ -8,3 +8,4 @@ catalog:
   prettier: ^3.5.3
   tailwindcss: ^3.4.7
   typescript: ^5.8.3
+  eslint: ^9.24.0
