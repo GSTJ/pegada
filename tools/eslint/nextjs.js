@@ -1,10 +1,11 @@
-/** @type {import('eslint').Linter.Config} */
-const config = {
-  extends: ["plugin:@next/next/recommended", "./react.js"],
-  rules: {
-    "@next/next/no-html-link-for-pages": "off",
-    "react/react-in-jsx-scope": "off"
-  }
-};
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import { includeIgnoreFile } from "@eslint/compat";
+// @ts-ignore - magic-eslint-config doesn't provide TypeScript declarations
+import nextjsConfig from "magic-eslint-config/nextjs";
 
-module.exports = config;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ignoreFile = includeIgnoreFile(join(__dirname, "../../.gitignore"));
+
+/** @type {import('eslint').Linter.Config[]} */
+export default [ignoreFile, ...nextjsConfig];

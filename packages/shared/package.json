@@ -14,15 +14,6 @@
     "format:fix": "prettier --write . --ignore-path ../../.gitignore",
     "format": "prettier --check .  --ignore-path ../../.gitignore"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@pegada/eslint-config/typescript"
-    ],
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    }
-  },
   "dependencies": {
     "date-fns": "^4.1.0",
     "zod-i18n-map": "^2.27.0"

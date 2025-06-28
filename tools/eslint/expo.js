@@ -1,13 +1,11 @@
-/** @type {import("eslint").Linter.Config} */
-const config = {
-  extends: ["./react.js"],
-  plugins: ["react-native", "reanimated"],
-  rules: {
-    "reanimated/js-function-in-worklet": 2,
-    "react-native/no-inline-styles": 1, // TODO: Enforce this rule later
-    "react-native/no-color-literals": 2,
-    "react-native/no-single-element-style-arrays": 2
-  }
-};
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import { includeIgnoreFile } from "@eslint/compat";
+// @ts-ignore - magic-eslint-config doesn't provide TypeScript declarations
+import expoConfig from "magic-eslint-config/expo";
 
-module.exports = config;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ignoreFile = includeIgnoreFile(join(__dirname, "../../.gitignore"));
+
+/** @type {import('eslint').Linter.Config[]} */
+export default [ignoreFile, ...expoConfig];

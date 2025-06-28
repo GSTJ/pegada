@@ -12,15 +12,6 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@pegada/eslint-config/nextjs"
-    ],
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    }
-  },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",

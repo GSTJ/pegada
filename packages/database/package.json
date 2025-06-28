@@ -33,15 +33,6 @@
   "prisma": {
     "seed": "tsx ./seed.ts"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@pegada/eslint-config/typescript"
-    ],
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    }
-  },
   "dependencies": {
     "@faker-js/faker": "^9.8.0"
   },
