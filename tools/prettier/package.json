@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@pegada/tsconfig": "workspace:*",
-    "typescript": "*"
+    "typescript": "catalog:"
   },
   "prettier": "@pegada/prettier-config"
 }

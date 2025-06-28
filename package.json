@@ -30,7 +30,7 @@
     "dotenv-cli": "^7.4.2",
     "prettier": "catalog:",
     "turbo": "^2.0.11",
-    "typescript": "^5.4.5"
+    "typescript": "catalog:"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",

@@ -30,7 +30,7 @@
     "@types/nodemailer": "^6.4.15",
     "expo-server-sdk": "^3.10.0",
     "next": "*",
-    "typescript": "*"
+    "typescript": "catalog:"
   },
   "eslintConfig": {
     "root": true,
