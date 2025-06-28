@@ -40,7 +40,6 @@ export default [
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/prefer-optional-chain": "off",
       "@typescript-eslint/no-unnecessary-type-assertion": "off",
       "@typescript-eslint/no-redundant-type-constituents": "off",
       "import/named": "off",

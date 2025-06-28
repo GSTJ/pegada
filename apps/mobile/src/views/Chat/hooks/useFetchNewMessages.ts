@@ -19,7 +19,7 @@ export const useFetchNewMessages = () => {
           gt: latestPollTimestampRef.current
         });
 
-        if (!newMessages || !newMessages.length) return;
+        if (!newMessages?.length) return;
 
         latestPollTimestampRef.current = new Date();
 
