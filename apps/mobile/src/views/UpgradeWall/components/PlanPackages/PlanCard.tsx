@@ -47,7 +47,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
     periodUnit: "D" | "W" | "M" | "Y";
     periodValue: number;
   } => {
-    const periodMatch = period.match(/P(\d+)(D|W|M|Y)/);
+    const periodMatch = /P(\d+)(D|W|M|Y)/.exec(period);
     const [, num, unit] = periodMatch!;
 
     if (!num || !unit) throw new Error("Invalid period format");

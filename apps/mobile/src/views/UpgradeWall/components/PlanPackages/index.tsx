@@ -11,7 +11,7 @@ import { Container } from "@/views/UpgradeWall/components/PlanPackages/styles";
 import { PlanCard } from "./PlanCard";
 
 const periodToDays = (period: string) => {
-  const match = period.match(/P(\d+)(D|W|M|Y)/);
+  const match = /P(\d+)(D|W|M|Y)/.exec(period);
   if (!match) return 0;
 
   const [, num, unit] = match;

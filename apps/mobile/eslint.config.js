@@ -47,7 +47,6 @@ export default [
       "import/namespace": "off",
       "import/default": "off",
       "import/no-named-as-default-member": "off",
-      "@typescript-eslint/ban-tslint-comment": "off",
       "no-restricted-syntax": "off",
       "no-else-return": "off",
       "react-compiler/react-compiler": "off",

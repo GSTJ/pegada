@@ -1,7 +1,6 @@
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { includeIgnoreFile } from "@eslint/compat";
-// @ts-ignore - magic-eslint-config doesn't provide TypeScript declarations
 import reactNativeConfig from "magic-eslint-config/react-native";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
