@@ -10,6 +10,7 @@ concurrency:
 
 jobs:
   checkup:
+    if: github.event.pull_request.draft != true
     name: Typecheck, Lint and Format
     runs-on: ubuntu-latest
     steps:
