@@ -51,7 +51,7 @@ const OneTimeCode = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const inputRef = useRef<OtpInputRef>(null);
+  const inputRef = useRef<OtpInputRef | null>(null);
 
   const insetTop = Math.max(15 + insets.top, 50);
 

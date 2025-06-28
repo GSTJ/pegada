@@ -12,7 +12,8 @@ enum NotificationUrl {
 export const getNotificationUrl = (
   response: Notifications.NotificationResponse
 ): string | undefined => {
-  return response.notification.request.content.data.url;
+  const data = response.notification.request.content.data as { url?: string };
+  return data.url;
 };
 
 const handleUnknownNotification = (url: string) => {

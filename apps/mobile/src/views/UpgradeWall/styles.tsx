@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
+import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import Color from "color";
 import styled from "styled-components/native";
 
@@ -61,19 +61,26 @@ export const CancelAnytime = styled(Text)`
   text-align: center;
 `;
 
-export const CloseIcon = styled(Close).attrs((props) => ({
-  width: 10,
-  height: 10,
-  fill: props.theme.colors.text
-}))``;
-
-export const GradientEffect = styled(LinearGradient).attrs(() => ({
-  start: { x: 0, y: 0 },
-  end: { x: 1, y: 0 },
-  colors: ["#ffffff00", "#ffffff85", "#ffffff00"]
-}))`
+const GradientEffect_ = styled(LinearGradient)`
   position: absolute;
   top: 0;
   height: 2px;
   width: 100%;
 `;
+
+export const GradientEffect = (props: Partial<LinearGradientProps>) => {
+  return (
+    <GradientEffect_
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      colors={["#ffffff00", "#ffffff85", "#ffffff00"]}
+      {...props}
+    />
+  );
+};
+
+export const CloseIcon = styled(Close).attrs((props) => ({
+  width: 10,
+  height: 10,
+  fill: props.theme.colors.text
+}))``;

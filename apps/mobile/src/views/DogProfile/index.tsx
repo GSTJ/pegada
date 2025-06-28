@@ -298,7 +298,6 @@ const DogProfileErrorState = () => {
         title={t("dogProfile.dogProfile")}
         headerLeft={() => (
           <HeaderBackButton
-            labelVisible={false}
             tintColor={theme.colors.primary}
             onPress={() => router.back()}
           />

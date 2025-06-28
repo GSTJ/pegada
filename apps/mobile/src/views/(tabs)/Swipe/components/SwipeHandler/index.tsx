@@ -54,10 +54,9 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
   // This is a new behavior that caused bugs, and had to be replaced with useEffect
   useEffect(() => {
     if (isFirstCard) {
-      // @ts-expect-error - ref is mutable, ts doesn't know it
       swipeHandlerRef.current = {
         gotoDirection: runOnUI(automaticSwipe)
-      };
+      } as SwipeHandlerRefProps;
     }
   }, [automaticSwipe, isFirstCard]);
 

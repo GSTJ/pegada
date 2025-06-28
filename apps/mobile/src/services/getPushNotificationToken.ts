@@ -9,11 +9,15 @@ import { LightTheme } from "@pegada/shared/themes/themes";
 import { getTrcpContext } from "@/contexts/trcpContext";
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false
-  })
+  handleNotification:
+    async (): Promise<Notifications.NotificationBehavior> => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      // Properties for iOS 15+ notification presentation
+      shouldShowBanner: true,
+      shouldShowList: true
+    })
 });
 
 export enum NotificationTokenError {

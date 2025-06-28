@@ -1,3 +1,7 @@
+import type {
+  TextInput as _TextInput,
+  TextInputProps as _TextInputProps
+} from "react-native";
 import { Dimensions } from "react-native";
 import styled from "styled-components/native";
 
@@ -12,7 +16,8 @@ export const Container = styled.View`
   background-color: ${(props) => props.theme.colors.input};
 `;
 
-export const TextInput = styled.TextInput`
+type TextInputProps = _TextInputProps & { ref?: React.RefObject<_TextInput> };
+export const TextInput = styled.TextInput<TextInputProps>`
   flex: 1;
   text-align: center;
   color: transparent;

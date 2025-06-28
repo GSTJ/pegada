@@ -1,7 +1,7 @@
+import type { PurchasesPackage } from "react-native-purchases";
 import { useState } from "react";
 import * as React from "react";
 import { Alert, Platform, View } from "react-native";
-import { PurchasesPackage } from "react-native-purchases";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { isDevice } from "expo-device";
 import { useRouter } from "expo-router";

@@ -1,15 +1,15 @@
+import type { TextInput } from "react-native";
 import { useState } from "react";
-import { TextInput } from "react-native";
 import { useTheme } from "styled-components/native";
 
 import * as S from "./styles";
 
 export enum KeyboardKeys {
-  Backspace = "Backspace",
+  Backspace = "Backspace"
 }
 
 type OtpDigitProps = {
-  children: string;
+  children?: string;
   length: number;
   index: number;
   handleChange: (text: string, index: number) => void;
@@ -30,7 +30,7 @@ const OtpDigit = ({
   pointerEvents,
   handleChange,
   handleErase,
-  testID,
+  testID
 }: OtpDigitProps) => {
   const [selected, setSelected] = useState(false);
 
@@ -42,14 +42,14 @@ const OtpDigit = ({
   const rightMargin = isLast ? 0 : OTP_INPUT_MARGIN;
   const selectedBorderColor = colors.border;
 
-  const digit = isNaN(Number(children)) ? "" : children;
+  const digit = children && !isNaN(Number(children)) ? children : "";
 
   return (
     <S.Container
       style={{
         marginRight: rightMargin,
         borderColor: selected ? selectedBorderColor : colors.transparent,
-        height: OTP_INPUT_HEIGHT,
+        height: OTP_INPUT_HEIGHT
       }}
     >
       <S.TextInput
@@ -71,19 +71,18 @@ const OtpDigit = ({
         importantForAutofill={isFirst ? "yes" : "no"}
         textContentType={isFirst ? "oneTimeCode" : "none"}
         autoComplete={isFirst ? "sms-otp" : "off"}
-        onKeyPress={({
-          nativeEvent: { key },
-        }: {
-          nativeEvent: { key: KeyboardKeys };
-        }) => {
-          if (key === KeyboardKeys.Backspace) return handleErase(digit, index);
+        onKeyPress={(e) => {
+          const { key } = e.nativeEvent;
+          if (key === KeyboardKeys.Backspace) {
+            return handleErase(digit, index);
+          }
         }}
       />
 
       <S.AbsoluteContainer pointerEvents="none">
         <S.StyledText
           style={{
-            color: digit ? colors.text : colors.placeholder,
+            color: digit ? colors.text : colors.placeholder
           }}
         >
           {digit || "0"}

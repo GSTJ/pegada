@@ -1,7 +1,7 @@
-import { LinearGradient } from "expo-linear-gradient";
+import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import Color from "color";
 import { clamp } from "lodash";
-import styled from "styled-components/native";
+import styled, { useTheme } from "styled-components/native";
 
 import { PressableArea } from "@/components/PressableArea";
 import { Text } from "@/components/Text";
@@ -40,24 +40,27 @@ export const ReportButton = styled(PressableArea).attrs({
   align-self: center;
 `;
 
-export const MatchActionBarGradient = styled(LinearGradient).attrs((props) => {
-  const gradientColor = Color(props.theme.colors.background);
-
-  return {
-    colors: [
-      gradientColor.fade(1).rgb().string(),
-      gradientColor.fade(0.2).rgb().string(),
-      gradientColor.fade(0.2).rgb().string(),
-      gradientColor.fade(0).rgb().string()
-    ],
-    pointerEvents: "none"
-  };
-})`
+const MatchActionBarGradient_ = styled(LinearGradient)`
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
 `;
+
+export const MatchActionBarGradient = (props: Partial<LinearGradientProps>) => {
+  const theme = useTheme();
+
+  const colors = [
+    Color(theme.colors.background).fade(1).rgb().string(),
+    Color(theme.colors.background).fade(0.2).rgb().string(),
+    Color(theme.colors.background).fade(0.2).rgb().string(),
+    Color(theme.colors.background).fade(0).rgb().string()
+  ] as const;
+
+  return (
+    <MatchActionBarGradient_ colors={colors} pointerEvents="none" {...props} />
+  );
+};
 
 export const UnmatchButton = styled(PressableArea).attrs({
   hitSlop: { top: 10, bottom: 10, right: 20, left: 20 }

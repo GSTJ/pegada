@@ -5,7 +5,7 @@ import Bugsnag from "@bugsnag/expo";
 import { analytics } from "@/services/analytics";
 
 export const useTrackScreens = () => {
-  const routeNameRef = useRef<string>();
+  const routeNameRef = useRef<string | undefined>(undefined);
   const pathname = usePathname();
 
   useEffect(() => {

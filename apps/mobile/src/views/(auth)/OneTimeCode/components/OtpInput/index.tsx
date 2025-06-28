@@ -1,6 +1,6 @@
+import type { TextInput } from "react-native";
 import { useImperativeHandle, useRef } from "react";
 import * as React from "react";
-import { TextInput } from "react-native";
 
 import OtpDigit, { OTP_INPUT_HEIGHT, OTP_INPUT_MARGIN } from "../OtpDigit";
 import { VerifyRowView } from "./styles";
@@ -17,16 +17,14 @@ interface OtpInputProps {
   onChangeText: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const OTPInput = (
-  {
-    ref,
-    length,
-    value,
-    onChangeText
-  }: OtpInputProps & {
-    ref: React.RefObject<OtpInputRef>;
-  }
-) => {
+const OTPInput = ({
+  ref,
+  length,
+  value,
+  onChangeText
+}: OtpInputProps & {
+  ref: React.RefObject<OtpInputRef>;
+}) => {
   const inputRefs: { current: (TextInput | null | any)[] } = useRef([]);
 
   const handleFocus = () => {
