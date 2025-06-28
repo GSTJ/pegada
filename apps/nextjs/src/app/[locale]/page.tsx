@@ -17,7 +17,6 @@ const App = () => {
               target="_blank"
               rel="noreferrer"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=465930&theme=light"
                 alt="Pegada - Find&#0032;a&#0032;Match&#0032;For&#0032;Your&#0032;Dog | Product Hunt"

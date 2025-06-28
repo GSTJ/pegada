@@ -1,11 +1,12 @@
-import { NextRequest } from "next/server";
+import type {NextRequest} from "next/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 import { appRouter, createTRPCContext } from "@pegada/api";
 import { config } from "@pegada/api/shared/config";
-import { getSession, Session } from "@pegada/api/trpc";
+import { getSession  } from "@pegada/api/trpc";
+import type {Session} from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
 
 const setCorsHeaders = (res: Response) => {

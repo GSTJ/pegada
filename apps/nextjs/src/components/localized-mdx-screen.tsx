@@ -3,12 +3,11 @@ import { Logo } from "@/components/logo";
 import { Restricter } from "@/components/restricter";
 import { t } from "@/lib/translate";
 
-type DataProps = {
+interface DataProps {
   pageKey: string;
-};
+}
 
 export const getLocalizedMdxData = (pageKey: string) => {
-  console.log(`${pageKey}.content`);
   return {
     content: t(`${pageKey}.content` as any),
     metadata: {

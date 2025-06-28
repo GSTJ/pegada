@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
+import type { BreedSlug } from "@pegada/shared/i18n/i18n";
 import prisma from "@pegada/database";
-import { BreedSlug } from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 import { getFormattedYears } from "@pegada/shared/utils/getFormattedYears";
 
@@ -30,7 +30,6 @@ const DogProfile = async ({ params: { id } }: DogProfileProps) => {
 
   return (
     <div className="pt-8 space-y-8 flex flex-1 flex-col px-4 items-center pb-4 h-[100vh]">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/logo.svg"
         draggable="false"
@@ -45,7 +44,7 @@ const DogProfile = async ({ params: { id } }: DogProfileProps) => {
         >
           {Boolean(dog.breed?.name) && (
             <div className="border border-border/70 rounded-md p-2 py-1 m-4 bg-background/50 backdrop-blur ml-auto mb-auto font-semibold">
-              {t(`${dog.breed?.slug as BreedSlug}`, { ns: Namespace.Breed })}
+              {t(dog.breed?.slug as BreedSlug, { ns: Namespace.Breed })}
             </div>
           )}
         </div>

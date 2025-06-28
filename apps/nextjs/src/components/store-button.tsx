@@ -1,5 +1,6 @@
-import { HTMLProps } from "react";
-import Image, { ImageProps } from "next/image";
+import type {HTMLProps} from "react";
+import Image from "next/image";
+import type {ImageProps} from "next/image";
 
 export const StoreButton = (props: HTMLProps<HTMLAnchorElement>) => {
   return (
