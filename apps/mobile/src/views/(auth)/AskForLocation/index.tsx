@@ -143,7 +143,7 @@ const AskForLocation: React.FC = () => {
                 error instanceof Error &&
                 error.message === UpdateLocationError.PermissionNotGranted
               ) {
-                return Alert.alert(
+                Alert.alert(
                   t("askForLocation.enableLocation"),
                   t("askForLocation.permissionPrompt"),
                   [
@@ -154,7 +154,7 @@ const AskForLocation: React.FC = () => {
                       }
                     }
                   ]
-                );
+                ); return;
               }
 
               sendError(error);

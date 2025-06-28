@@ -9,8 +9,8 @@ const useTimer = (
   useEffect(() => {
     if (!timer) return;
 
-    const interval = setInterval(() => setTimer((count) => count - 1), 1000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => { setTimer((count) => count - 1); }, 1000);
+    return () => { clearInterval(interval); };
   }, [timer]);
 
   return [timer, setTimer];

@@ -19,10 +19,10 @@ export const Preview: React.FC<PreviewProps> = ({ item }) => {
   return (
     <Container
       onPress={() =>
-        router.push({
+        { router.push({
           pathname: `${SceneName.Chat}/[matchId]`,
           params: { dogId: item.dog.id, matchId: item.id }
-        })
+        }); }
       }
     >
       <Picture

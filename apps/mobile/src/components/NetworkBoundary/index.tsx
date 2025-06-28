@@ -31,7 +31,7 @@ export const OfflineComponent = ({ reset }: { reset: () => void }) => {
         <DisconnectedIllustration />
         <Title>{t("networkBoundary.offline.title")}</Title>
         <ContainedText>{t("networkBoundary.offline.message")}</ContainedText>
-        <Button onPress={() => reset()}>
+        <Button onPress={() => { reset(); }}>
           {t("networkBoundary.offline.retry")}
         </Button>
       </Content>
@@ -50,7 +50,7 @@ export const RequestErrorComponent = ({ reset }: { reset: () => void }) => {
         <ContainedText>
           {t("networkBoundary.requestError.message")}
         </ContainedText>
-        <Button variant="outline" onPress={() => reset()}>
+        <Button variant="outline" onPress={() => { reset(); }}>
           {t("networkBoundary.requestError.retry")}
         </Button>
       </Content>

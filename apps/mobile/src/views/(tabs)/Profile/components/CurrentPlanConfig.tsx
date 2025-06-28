@@ -41,7 +41,7 @@ export const CurrentPlanConfig = () => {
     }
 
     if (userPlan === UserPlan.Free) {
-      return router.push(SceneName.UpgradeWall);
+      router.push(SceneName.UpgradeWall); return;
     }
 
     if (Platform.OS === "android") {

@@ -153,7 +153,7 @@ export const showImagePickerOptions = (): Promise<{
           text: i18n.t("imagePicker.takePhoto"),
           onPress: () => {
             takeImage()
-              .then((imageUrl) => resolve(imageUrl))
+              .then((imageUrl) => { resolve(imageUrl); })
               .catch((error: unknown) => {
                 if (
                   error instanceof Error &&
@@ -172,7 +172,7 @@ export const showImagePickerOptions = (): Promise<{
           text: i18n.t("imagePicker.chooseFromLibrary"),
           onPress: () => {
             pickImage()
-              .then((imageUrl) => resolve(imageUrl))
+              .then((imageUrl) => { resolve(imageUrl); })
               .catch((error: unknown) => {
                 if (
                   error instanceof Error &&

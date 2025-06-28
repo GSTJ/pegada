@@ -79,7 +79,7 @@ const NewMatch: React.FC = () => {
       }
     );
 
-    return () => subscription.remove();
+    return () => { subscription.remove(); };
   });
 
   return (

@@ -119,7 +119,7 @@ export const useSendMessage = () => {
       sendError(err);
 
       errorTemp(tempId);
-      setTimeout(() => removeTemp(tempId), 1500);
+      setTimeout(() => { removeTemp(tempId); }, 1500);
     }
   };
 

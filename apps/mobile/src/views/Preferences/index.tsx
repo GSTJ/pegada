@@ -177,7 +177,7 @@ const Preferences: React.FC = () => {
             <BreedPicker
               hasAnyOption
               breed={value}
-              setBreed={(breed) => onChange(breed.id)}
+              setBreed={(breed) => { onChange(breed.id); }}
               error={fieldState.error?.message}
             />
           )}
@@ -204,7 +204,7 @@ const Preferences: React.FC = () => {
                     name: t("preferences.anySize")
                   }
                 }
-                onChange={(size) => onChange(size.id)}
+                onChange={(size) => { onChange(size.id); }}
                 error={fieldState.error?.message}
               />
             )}
@@ -228,7 +228,7 @@ const Preferences: React.FC = () => {
                     name: t("preferences.anyColor")
                   }
                 }
-                onChange={(color) => onChange(color.id)}
+                onChange={(color) => { onChange(color.id); }}
                 error={fieldState.error?.message}
               />
             )}

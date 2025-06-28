@@ -70,7 +70,7 @@ export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
 
   const draggableGridStyle = { zIndex: 20 };
 
-  const onDragStart = () => setGesturesEnabled(false);
+  const onDragStart = () => { setGesturesEnabled(false); };
 
   const onDragRelease = (newImages: GenericPictures) => {
     setGesturesEnabled(true);

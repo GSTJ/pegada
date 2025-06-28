@@ -116,7 +116,7 @@ const OneTimeCode = () => {
           paddingRight: insets.right + 20
         }}
       >
-        <GoBack onPress={() => router.back()} />
+        <GoBack onPress={() => { router.back(); }} />
 
         <Content>
           <TopColumn>

@@ -18,8 +18,7 @@ export default [
       "@typescript-eslint/no-extraneous-class": "off", // That's good, keep it
       "@shopify/no-namespace-imports": "off",
       "@shopify/jsx-no-hardcoded-content": "off", // That's good, keep it
-      "@typescript-eslint/prefer-nullish-coalescing": "off",
-      "@typescript-eslint/no-confusing-void-expression": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unsafe-enum-comparison": "off", // That's good, keep it
@@ -31,7 +30,6 @@ export default [
       "react-hooks/exhaustive-deps": "off",
       "react-native/no-inline-styles": "off", // That's fine, keep it
       "@typescript-eslint/non-nullable-type-assertion-style": "off",
-      "@typescript-eslint/only-throw-error": "off",
       "@typescript-eslint/no-misused-spread": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-return": "off",

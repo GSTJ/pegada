@@ -116,7 +116,7 @@ const CompleteProfile = () => {
                   <BreedPicker
                     title={t("completeProfile.breed")}
                     breed={value}
-                    setBreed={(breed) => onChange(breed.id)}
+                    setBreed={(breed) => { onChange(breed.id); }}
                     error={fieldState.error?.message}
                     optional
                   />
@@ -145,7 +145,7 @@ const CompleteProfile = () => {
                       const currentLength = getValues()[name]?.length ?? 0;
                       const isErasing = value.length < currentLength;
 
-                      if (isErasing) return onChange(value);
+                      if (isErasing) { onChange(value); return; }
 
                       // Mask to MM/DD/YYYY
                       onChange(maskDate(value));
@@ -171,7 +171,7 @@ const CompleteProfile = () => {
                   placeholder={t("sizes.small")}
                   data={sizes}
                   value={sizes.find((sizeValue) => sizeValue.id === value)}
-                  onChange={(size) => onChange(size.id)}
+                  onChange={(size) => { onChange(size.id); }}
                   error={fieldState.error?.message}
                 />
               )}
@@ -189,7 +189,7 @@ const CompleteProfile = () => {
                   placeholder={colors[0]?.name}
                   data={colors}
                   value={colors.find((color) => color.id === value)}
-                  onChange={(color) => onChange(color.id)}
+                  onChange={(color) => { onChange(color.id); }}
                   error={fieldState.error?.message}
                 />
               )}

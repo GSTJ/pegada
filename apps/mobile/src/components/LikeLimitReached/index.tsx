@@ -77,7 +77,7 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
       </OkButton>
       <CloseButton
         style={{ position: "absolute", top: 10, right: 10 }}
-        onPress={() => hide()}
+        onPress={() => { hide(); }}
       >
         <CloseIcon width={10} height={10} />
       </CloseButton>

@@ -68,15 +68,15 @@ const Header = () => {
         height: HEADER_HEIGHT + insets.top
       }}
     >
-      <S.BackTouchArea onPress={() => router.back()}>
+      <S.BackTouchArea onPress={() => { router.back(); }}>
         <BackArrow height={15} width={15} fill={theme.colors.text} />
       </S.BackTouchArea>
       <S.PressableAreaFlex
         onPress={() =>
-          router.push({
+          { router.push({
             pathname: `${SceneName.Profile}/[id]`,
             params: { matchId: matchId ?? "", id: dogId as string }
-          })
+          }); }
         }
       >
         <NetworkBoundary

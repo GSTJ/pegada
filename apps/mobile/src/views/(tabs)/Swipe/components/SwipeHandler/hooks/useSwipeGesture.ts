@@ -113,7 +113,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
   // the card to be swiped again. Otherwise the dog will be able
   // to 'catch' the card on the middle of the animation.
   const safelyEnableWithDelay = (duration: number) => {
-    setTimeout(() => setEnabled(true), duration);
+    setTimeout(() => { setEnabled(true); }, duration);
   };
 
   const gotoDirection = (
@@ -127,7 +127,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
     runOnJS(setEnabled)(false);
 
     const swipeCoordinates = getDirectionCoordinates(swipeDirection);
-    return gotoCoordinate(
+    gotoCoordinate(
       translation,
       swipeCoordinates,
       () => {
@@ -151,7 +151,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
       const swipeType = getSwipeType(event);
 
       if (swipeType) {
-        return gotoDirection(swipeType);
+        gotoDirection(swipeType); return;
       }
 
       translation.x.value = withSpring(0, { stiffness: 50 });

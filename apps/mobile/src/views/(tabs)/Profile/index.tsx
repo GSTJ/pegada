@@ -152,7 +152,7 @@ const Profile = () => {
             <LocationConfig />
             <CurrentPlanConfig />
 
-            <Config.Root onPress={() => router.push(SceneName.Preferences)}>
+            <Config.Root onPress={() => { router.push(SceneName.Preferences); }}>
               <Filters width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.matchPreferences")}</Config.Title>
@@ -164,7 +164,7 @@ const Profile = () => {
               <Config.Arrow />
             </Config.Root>
 
-            <Config.Root onPress={() => router.push(SceneName.EditProfile)}>
+            <Config.Root onPress={() => { router.push(SceneName.EditProfile); }}>
               <Dog width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.editProfile")}</Config.Title>

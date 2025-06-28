@@ -100,7 +100,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
           <PlanCard
             key={planPackage.identifier}
             selected={selectedPackage?.identifier === planPackage.identifier}
-            onPress={() => setSelectedPackage(planPackage)}
+            onPress={() => { setSelectedPackage(planPackage); }}
             planPackage={planPackage}
             oldPrice={oldPrice}
           />

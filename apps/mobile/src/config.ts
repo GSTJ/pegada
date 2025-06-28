@@ -57,7 +57,7 @@ const updateGroup =
 
 Bugsnag.start({
   apiKey: config.BUGSNAG_API_KEY,
-  codeBundleId: (updateGroup as string) || "",
+  codeBundleId: (updateGroup as string) ?? "",
   plugins: [new BugsnagPluginReact()],
   releaseStage: config.ENV,
   enabledReleaseStages: ["production", "staging"],

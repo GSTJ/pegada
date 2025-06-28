@@ -35,10 +35,10 @@ export const Message: React.FC<MessageProps> = ({ item }) => {
   return (
     <Container
       onPress={() =>
-        router.push({
+        { router.push({
           pathname: `${SceneName.Chat}/[matchId]`,
           params: { dogId: item.dog.id, matchId: item.id }
-        })
+        }); }
       }
     >
       <View>

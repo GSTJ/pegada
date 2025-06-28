@@ -12,7 +12,7 @@ export const identifyUser = async (
 ) => {
   try {
     const userId = await getLoggedUserID();
-    return analytics.identify(userId, props);
+    analytics.identify(userId, props); return;
   } catch (e) {
     sendError(e);
   }

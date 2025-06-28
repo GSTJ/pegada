@@ -118,7 +118,7 @@ const useSwipeHandler = (id: string) => {
     router.back();
 
     if (id === currentCardId && swipeHandlerRef.current) {
-      return swipeHandlerRef.current.gotoDirection(swipeType);
+      swipeHandlerRef.current.gotoDirection(swipeType); return;
     }
 
     dispatch(Actions.dogs.swipe.request({ id: id, swipeType }));
@@ -200,7 +200,7 @@ const DogProfile = () => {
           />
         </View>
 
-        <GoBack onPress={() => router.back()} />
+        <GoBack onPress={() => { router.back(); }} />
 
         <S.BottomColumn
           style={{
@@ -240,7 +240,7 @@ const DogProfile = () => {
               <ShareButton dog={dog} />
               <S.ReportButton>
                 <Text
-                  onPress={() => reportUser(dog)}
+                  onPress={() => { reportUser(dog); }}
                   fontWeight="bold"
                   style={{ textAlign: "center" }}
                 >
@@ -275,9 +275,9 @@ const DogProfile = () => {
           />
           <MatchActionBar
             style={{ bottom: topInset }}
-            onNope={() => swipeHandler(Swipe.Dislike)}
-            onYep={() => swipeHandler(Swipe.Like)}
-            onMaybe={() => swipeHandler(Swipe.Maybe)}
+            onNope={() => { swipeHandler(Swipe.Dislike); }}
+            onYep={() => { swipeHandler(Swipe.Like); }}
+            onMaybe={() => { swipeHandler(Swipe.Maybe); }}
           />
         </>
       )}
@@ -296,7 +296,7 @@ const DogProfileErrorState = () => {
         headerLeft={() => (
           <HeaderBackButton
             tintColor={theme.colors.primary}
-            onPress={() => router.back()}
+            onPress={() => { router.back(); }}
           />
         )}
         headerRightContainerStyle={{ paddingRight: 16 }}

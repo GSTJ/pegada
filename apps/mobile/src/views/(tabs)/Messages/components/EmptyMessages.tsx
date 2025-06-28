@@ -58,11 +58,11 @@ export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
         </Text>
       </View>
       {search ? (
-        <Button variant="outline" onPress={() => setSearch("")}>
+        <Button variant="outline" onPress={() => { setSearch(""); }}>
           {t("messages.empty.clearSearch")}
         </Button>
       ) : (
-        <Button variant="outline" onPress={() => router.push(SceneName.Swipe)}>
+        <Button variant="outline" onPress={() => { router.push(SceneName.Swipe); }}>
           {t("messages.empty.searchForDogs")}
         </Button>
       )}

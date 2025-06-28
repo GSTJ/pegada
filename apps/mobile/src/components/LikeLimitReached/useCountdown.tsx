@@ -33,7 +33,7 @@ export const useCountdown = (likeLimitResetAt: Date) => {
       }
     }, 1000); // Update every second
 
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); };
   }, [likeLimitResetAt]);
 
   return timeLeft;

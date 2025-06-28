@@ -36,7 +36,7 @@ const OTPInput = ({
   }));
 
   const changeDigit = (digit: string, index: number) => {
-    return onChangeText((previousValue) => {
+    onChangeText((previousValue) => {
       const newValue = previousValue
         .slice(0, index)
         .concat(digit)

@@ -21,14 +21,14 @@ const handleUnknownNotification = (url: string) => {
 };
 
 const handleMatchNotification = async (matchId: string, dogId: string) => {
-  return router.push({
+  router.push({
     pathname: SceneName.NewMatch,
     params: { matchDogId: dogId, matchId: matchId }
   });
 };
 
 const handleChatNotification = async (matchId: string, dogId: string) => {
-  return router.push({
+  router.push({
     pathname: `${SceneName.Chat}/[matchId]`,
     params: { dogId, matchId }
   });

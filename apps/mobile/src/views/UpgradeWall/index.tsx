@@ -99,14 +99,14 @@ const UpgradeWall: React.FC = () => {
     },
     onError: (e) => {
       if (e instanceof Object && "userCancelled" in e && e.userCancelled) {
-        return analytics.track({
+        analytics.track({
           event_type: "Upgrade",
           event_properties: {
             package: selectedOffering?.product.identifier,
             trial: isEligibleForTrial,
             type: "cancel"
           }
-        });
+        }); return;
       }
 
       sendError(e);

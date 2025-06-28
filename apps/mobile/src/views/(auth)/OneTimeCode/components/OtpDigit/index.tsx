@@ -55,13 +55,13 @@ const OtpDigit = ({
       <S.TextInput
         ref={ref}
         testID={testID}
-        onBlur={() => setSelected(false)}
-        onFocus={() => setSelected(true)}
+        onBlur={() => { setSelected(false); }}
+        onFocus={() => { setSelected(true); }}
         accessibilityLabel="Text input field"
         accessibilityHint="Enter the verification code"
         value={digit}
         keyboardType="number-pad"
-        onChangeText={(text: string) => handleChange(text, index)}
+        onChangeText={(text: string) => { handleChange(text, index); }}
         numberOfLines={1}
         maxLength={length}
         returnKeyType="next"
@@ -74,7 +74,7 @@ const OtpDigit = ({
         onKeyPress={(e) => {
           const { key } = e.nativeEvent;
           if (key === KeyboardKeys.Backspace) {
-            return handleErase(digit, index);
+            handleErase(digit, index); return;
           }
         }}
       />

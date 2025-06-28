@@ -41,7 +41,7 @@ const EmptyState = () => {
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
           <Button
-            onPress={() => router.push(SceneName.Preferences)}
+            onPress={() => { router.push(SceneName.Preferences); }}
             variant="outline"
           >
             {t("swipeRequestFeedback.preferencesButton")}

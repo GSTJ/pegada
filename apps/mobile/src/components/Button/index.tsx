@@ -10,7 +10,7 @@ export interface ButtonProps extends ContainerProps, PressableProps {
 }
 
 export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
-  const disabled = props.loading || props.disabled;
+  const disabled = props.loading ?? props.disabled;
   const onPress = disabled ? null : props.onPress;
 
   return (

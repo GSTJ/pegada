@@ -9,11 +9,11 @@ export const useKeyboardAwareSafeAreaInsets = () => {
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardWillShow",
-      () => setKeyboardOpen(true)
+      () => { setKeyboardOpen(true); }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardWillHide",
-      () => setKeyboardOpen(false)
+      () => { setKeyboardOpen(false); }
     );
 
     return () => {

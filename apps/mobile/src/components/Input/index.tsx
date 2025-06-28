@@ -44,7 +44,7 @@ export const Input = ({
 
   return (
     <S.Container>
-      {Boolean(title || optional) && (
+      {Boolean(title ?? optional) && (
         <S.TitleContainer>
           <Text fontWeight="bold" fontSize="lg">
             {title}

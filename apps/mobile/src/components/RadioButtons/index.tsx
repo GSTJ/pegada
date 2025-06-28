@@ -47,7 +47,7 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
             <RadioButton
               key={item}
               marked={item === value}
-              onPress={() => onChange(item)}
+              onPress={() => { onChange(item); }}
               last={index === data.length - 1}
             >
               {item}

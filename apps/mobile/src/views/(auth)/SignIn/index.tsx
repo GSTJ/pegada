@@ -51,10 +51,10 @@ const InsertEmail = () => {
       if (getError(error, OTPRequiredError)) {
         requestTrackingPermissionsAsync().catch(sendError);
 
-        return router.push({
+        router.push({
           pathname: SceneName.OneTimeCode,
           params: { email }
-        });
+        }); return;
       }
 
       Alert.alert(t("common.oops"), t("insertEmail.loginError"));
@@ -66,14 +66,14 @@ const InsertEmail = () => {
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     if (!isValidEmail) {
-      return setError(t("insertEmail.validEmail"));
+      setError(t("insertEmail.validEmail")); return;
     }
 
     loginMutation.mutate({ email });
   };
 
   return (
-    <PressableContainer onPress={() => Keyboard.dismiss()}>
+    <PressableContainer onPress={() => { Keyboard.dismiss(); }}>
       <KeyboardAvoidingViewStyled
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
