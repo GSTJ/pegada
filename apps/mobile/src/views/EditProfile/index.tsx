@@ -130,12 +130,11 @@ const EditProfile = () => {
       bio: data.bio,
       name: data.name,
       gender: data.gender,
-      // Null so those fields are removed correctly in the database
-      weight: data.weight ? data.weight : null,
-      birthDate: data.birthDate ? data.birthDate : null,
-      breedId: data.breedId ? data.breedId : null,
-      color: data.color ? data.color : null,
-      size: data.size ? data.size : null,
+      weight: data.weight ?? null,
+      birthDate: data.birthDate ?? null,
+      breedId: data.breedId ?? null,
+      color: data.color ?? null,
+      size: data.size ?? null,
       images: data.images?.map((image, index) => ({
         id: image.id,
         url: image.url as string,
@@ -240,7 +239,9 @@ const EditProfile = () => {
                     onBlur={onBlur}
                     onChangeText={(value: string) =>
                       // Only allow numbers
-                      { onChange(value.replace(/[^0-9]/g, "")); }
+                      {
+                        onChange(value.replace(/[^0-9]/g, ""));
+                      }
                     }
                     maxLength={3}
                     numberOfLines={1}
@@ -270,7 +271,10 @@ const EditProfile = () => {
                       const isErasing =
                         value.length < (oldValue ? oldValue.length : 0);
 
-                      if (isErasing) { onChange(value); return; }
+                      if (isErasing) {
+                        onChange(value);
+                        return;
+                      }
 
                       // Mask to MM/DD/YYYY
                       onChange(maskDate(value));
@@ -291,7 +295,9 @@ const EditProfile = () => {
             render={({ field: { onChange, value }, fieldState }) => (
               <BreedPicker
                 breed={value}
-                setBreed={(breed) => { onChange(breed.id); }}
+                setBreed={(breed) => {
+                  onChange(breed.id);
+                }}
                 error={fieldState.error?.message}
               />
             )}
@@ -308,7 +314,9 @@ const EditProfile = () => {
                   placeholder={t("sizes.small")}
                   data={sizes}
                   value={sizes.find((sizeValue) => sizeValue.id === value)}
-                  onChange={(size) => { onChange(size.id); }}
+                  onChange={(size) => {
+                    onChange(size.id);
+                  }}
                   error={fieldState.error?.message}
                 />
               )}
@@ -325,7 +333,9 @@ const EditProfile = () => {
                   placeholder={colors[0]?.name}
                   data={colors}
                   value={colors.find((color) => color.id === value)}
-                  onChange={(color) => { onChange(color.id); }}
+                  onChange={(color) => {
+                    onChange(color.id);
+                  }}
                   error={fieldState.error?.message}
                 />
               )}

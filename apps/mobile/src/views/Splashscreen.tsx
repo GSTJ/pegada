@@ -20,7 +20,7 @@ const AnimatedSplashScreen = () => {
         style={{
           width: "100%",
           height: "100%",
-          resizeMode: Constants.expoConfig?.ios?.splash?.resizeMode || "contain"
+          resizeMode: Constants.expoConfig?.ios?.splash?.resizeMode ?? "contain"
         }}
         source={SplashscreenImage}
       />

@@ -60,7 +60,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
 
   const formattedCurrentPrice = formatPrice(currentPrice, currencyCode);
 
-  const { periodUnit, periodValue } = getPeriodDetails(period || "");
+  const { periodUnit, periodValue } = getPeriodDetails(period ?? "");
 
   const pricePerMonth = (() => {
     if (!periodUnit || !periodValue) return;

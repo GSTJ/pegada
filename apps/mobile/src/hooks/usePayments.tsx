@@ -46,8 +46,8 @@ export const useCustomerInfo = () => {
 
   return {
     ...customerInfoProps,
-    isLoading: loginProps.isLoading || customerInfoProps.isLoading,
-    error: loginProps.error || customerInfoProps.error
+    isLoading: loginProps.isLoading ?? customerInfoProps.isLoading,
+    error: loginProps.error ?? customerInfoProps.error
   };
 };
 
