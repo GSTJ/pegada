@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { Prisma } from "@prisma/client";
+import type {Prisma} from "@prisma/client";
 
 import { prisma } from ".";
 import { breedData } from "./__mocks__/breed-data";

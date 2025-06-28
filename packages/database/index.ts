@@ -5,12 +5,16 @@ const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+/* eslint-disable-next-line no-restricted-syntax -- Reading NODE_ENV is safe here for configuring Prisma logging */
+const isDevelopment = process.env.NODE_ENV === "development";
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query"] : []
+    log: isDevelopment ? ["query"] : []
   });
 
+/* eslint-disable-next-line no-restricted-syntax -- Reading NODE_ENV is safe here */
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;

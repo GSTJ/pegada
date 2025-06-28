@@ -1,16 +1,17 @@
+import type { Prisma } from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import { PlanType, Prisma } from "@prisma/client";
+import { PlanType } from "@prisma/client";
 
 // import { ImageService } from '../../../packages/api/src/services/ImageService'
 // import { IMAGE_STATUS } from '../../../packages/shared/schemas/dogSchema'
-import prisma from "..";
+import { prisma } from "../index";
 import { breedData } from "./breed-data";
 
 type CreateUser = Parameters<typeof prisma.user.create>[0];
 export const generateFakeUserWithDog = async (
   dogData?: Partial<Prisma.DogCreateNestedManyWithoutUserInput["create"]>,
   userData?: Partial<CreateUser["data"]>,
-  _withBlurHash: boolean = false
+  _withBlurHash = false
 ) => {
   let blurhash: string | undefined;
 
@@ -62,9 +63,11 @@ export const generateFakeUserWithDog = async (
             }
           },
           breed: {
-            connect: { id: faker.helpers.arrayElement(breedData).id! }
+            connect: { id: faker.helpers.arrayElement(breedData).id }
           },
-          ...(dogData as any)
+          ...(dogData as
+            | Prisma.DogCreateNestedManyWithoutUserInput["create"]
+            | undefined)
         }
       }
     },
@@ -77,8 +80,17 @@ export const generateFakeUserWithDog = async (
     }
   });
 
+  // `include` above guarantees `dogs` is part of the returned payload when `prisma` is configured
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety guard
+  const dog = (user as typeof user & { dogs: { [index: number]: Prisma.Dog } })
+    .dogs[0];
+
+  if (!dog) {
+    throw new Error("generateFakeUserWithDog: dog could not be created");
+  }
+
   return {
     user,
-    dog: user.dogs[0]!
+    dog
   };
 };

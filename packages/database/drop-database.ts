@@ -1,4 +1,4 @@
-import prisma from ".";
+import { prisma } from "./index";
 
 export const dropDatabase = async () => {
   await prisma.image.deleteMany();
