@@ -4,11 +4,11 @@ import { Language } from "@pegada/shared/i18n/types/types";
 
 import { redisConnection, redisDefaultQueueOptions } from "../constants/redis";
 
-export type IMailJobData = {
+export interface IMailJobData {
   email: string;
   code: string;
   language?: Language;
-};
+}
 
 export const MAIL_QUEUE = "Mail";
 

@@ -5,14 +5,15 @@ import Bugsnag from "@bugsnag/js";
 
 import { config } from "../shared/config";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sendError = (error: any) => {
+export const sendError = (error: unknown) => {
   if (config.NODE_ENV === "development") {
     // eslint-disable-next-line no-console
     console.error(error);
   }
 
-  Bugsnag.notify(error);
+  Bugsnag.notify(
+    error instanceof Error ? error : new Error(JSON.stringify(error))
+  );
 };
 
 export const logDebug = (...props: unknown[]) => {

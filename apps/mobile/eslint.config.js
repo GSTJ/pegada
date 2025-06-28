@@ -6,7 +6,12 @@ import expoConfig from "@pegada/eslint-config/expo";
 
 /** @type {import('eslint').Linter.Config} */
 const packageOverrides = {
-  ignores: ["node_modules/**", "babel.config.js", "metro.config.js"]
+  ignores: [
+    "**/node_modules/**",
+    "node_modules/**",
+    "babel.config.js",
+    "metro.config.js"
+  ]
 };
 
 /** @type {import('typescript-eslint').Config} */
