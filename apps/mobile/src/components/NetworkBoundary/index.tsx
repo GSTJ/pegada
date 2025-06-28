@@ -126,11 +126,11 @@ export const DefaultLoadingComponent = () => {
   );
 };
 
-type NetworkBoundaryProps = {
+interface NetworkBoundaryProps {
   children: React.ReactNode;
   suspenseFallback?: React.ReactNode;
   errorFallback?: IErrorBoundary;
-};
+}
 
 const QueryAwareErrorBoundary = ({
   children,

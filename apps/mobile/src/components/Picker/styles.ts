@@ -13,9 +13,9 @@ export const TitleContainer = styled.View`
   border-color: ${(props) => props.theme.colors.border};
 `;
 
-type SelectedItemProps = {
+interface SelectedItemProps {
   selected?: boolean;
-};
+}
 
 export const SelectItem = styled(PressableArea)<SelectedItemProps>`
   padding: ${(props) => props.theme.spacing[4]}px;

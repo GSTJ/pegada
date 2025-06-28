@@ -8,7 +8,7 @@ export enum KeyboardKeys {
   Backspace = "Backspace"
 }
 
-type OtpDigitProps = {
+interface OtpDigitProps {
   children?: string;
   length: number;
   index: number;
@@ -17,7 +17,7 @@ type OtpDigitProps = {
   pointerEvents?: "auto" | "none";
   testID: string;
   ref: React.RefObject<TextInput>;
-};
+}
 
 export const OTP_INPUT_HEIGHT = S.isSmallDevice ? 62 : 80;
 export const OTP_INPUT_MARGIN = 6;

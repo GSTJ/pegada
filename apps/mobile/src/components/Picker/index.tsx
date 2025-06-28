@@ -20,10 +20,10 @@ import {
   TitleContainer
 } from "./styles";
 
-export type Item = {
+export interface Item {
   id: string | null;
   name: string;
-};
+}
 
 export interface InputPickerProps<T extends Item>
   extends Partial<Omit<BottomSheetFlatListProps<T>, "ref">> {

@@ -25,12 +25,6 @@ export default [
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unsafe-enum-comparison": "off", // That's good, keep it
-      "@typescript-eslint/no-deprecated": "off",
-      "@typescript-eslint/restrict-plus-operands": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/no-misused-promises": "off",
-      "react/no-unstable-nested-components": "off",
-      "react-hooks/exhaustive-deps": "off",
       "react-native/no-inline-styles": "off", // That's fine, keep it
       "@typescript-eslint/non-nullable-type-assertion-style": "off",
       "@typescript-eslint/only-throw-error": "off",

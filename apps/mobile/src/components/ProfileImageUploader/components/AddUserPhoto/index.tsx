@@ -23,11 +23,11 @@ import { sendError } from "@/services/errorTracking";
 import { getMimeType } from "@/services/getMimeType";
 import * as S from "./styles";
 
-type AddUserPhotoProps = {
+interface AddUserPhotoProps {
   picture: Picture;
   onDelete: () => void;
   onAdd: ({ url }: { url: string }) => void;
-};
+}
 
 const hitSlop = {
   top: 150,

@@ -7,9 +7,9 @@ import { VerifyRowView } from "./styles";
 
 const OTP_INPUT_MAX_WIDTH = OTP_INPUT_HEIGHT;
 
-export type OtpInputRef = {
+export interface OtpInputRef {
   focus: () => void;
-};
+}
 
 interface OtpInputProps {
   value: string;
