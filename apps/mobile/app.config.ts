@@ -6,7 +6,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.3.2",
+  version: "1.4.0",
   runtimeVersion: {
     policy: "appVersion"
   },
@@ -183,20 +183,6 @@ const config: ExpoConfig = {
         apiKey: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY
       }
     }
-    // intentFilters: [
-    //   {
-    //     action: 'VIEW',
-    //     autoVerify: true,
-    //     data: [
-    //       {
-    //         scheme: 'https',
-    //         host: '*.pegada.app',
-    //         pathPrefix: '/',
-    //       },
-    //     ],
-    //     category: ['BROWSABLE', 'DEFAULT'],
-    //   },
-    // ],
   },
   userInterfaceStyle: "automatic",
   locales: {
@@ -222,17 +208,8 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false
     },
     bundleIdentifier: "app.pegada"
-    // associatedDomains: [
-    //   'applinks:pegada.app',
-    //   'applinks:www.pegada.app',
-    // ],
-  },
-  packagerOpts: {
-    config: "metro.config.js",
-    sourceExts: ["ts", "tsx", "js", "jsx", "json", "wasm", "svg"]
   },
   extra: {
-    oneSignalAppId: "",
     bugsnag: {
       apiKey: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY
     },
