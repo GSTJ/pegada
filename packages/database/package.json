@@ -46,6 +46,7 @@
     "@faker-js/faker": "^8.4.1"
   },
   "devDependencies": {
+    "prettier": "catalog:",
     "@paralleldrive/cuid2": "^2.2.2",
     "@pegada/eslint-config": "workspace:*",
     "@pegada/prettier-config": "workspace:*",

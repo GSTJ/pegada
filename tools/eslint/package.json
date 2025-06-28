@@ -32,7 +32,8 @@
     "eslint-plugin-unused-imports": "^4.0.1"
   },
   "devDependencies": {
-    "@pegada/prettier-config": "workspace:*"
+    "@pegada/prettier-config": "workspace:*",
+    "prettier": "catalog:"
   },
   "prettier": "@pegada/prettier-config"
 }

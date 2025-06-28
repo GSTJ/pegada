@@ -21,6 +21,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "prettier": "catalog:",
     "@faker-js/faker": "^8.4.1",
     "@pegada/prettier-config": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
