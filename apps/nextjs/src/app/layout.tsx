@@ -22,7 +22,7 @@ export const generateMetadata = () => {
 };
 
 export default async ({ children }: { children: React.ReactNode }) => {
-  const locale = getSafeLocale();
+  const locale = await getSafeLocale();
 
   return (
     <html lang={locale}>

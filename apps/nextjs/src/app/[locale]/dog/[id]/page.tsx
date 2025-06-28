@@ -15,12 +15,13 @@ interface DogProfileProps {
 }
 
 const DogProfile = async ({ params: { id } }: DogProfileProps) => {
-  const dog = await prisma.dog.findFirst({
-    where: { id, deletedAt: null },
-    include: { images: true, breed: true }
-  });
-
-  const lng = getSafeLocale();
+  const [dog, lng] = await Promise.all([
+    prisma.dog.findFirst({
+      where: { id, deletedAt: null },
+      include: { images: true, breed: true }
+    }),
+    getSafeLocale()
+  ]);
 
   if (!dog) {
     return notFound();
