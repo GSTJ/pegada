@@ -110,7 +110,7 @@
     "redux": "^5.0.1",
     "redux-saga": "^1.3.0",
     "reselect": "^5.1.1",
-    "styled-components": "6.1.11",
+    "styled-components": "6.1.19",
     "superjson": "^2.2.1",
     "typesafe-actions": "^5.1.0",
     "uuid": "^10.0.0",

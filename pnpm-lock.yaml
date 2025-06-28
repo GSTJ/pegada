@@ -26,9 +26,6 @@ patchedDependencies:
   react-native-screens@3.31.1:
     hash: er36vmjgpsrlgo4kdceq33qiea
     path: patches/react-native-screens@3.31.1.patch
-  styled-components@6.1.11:
-    hash: rpobciuscng7usb6kdy5cx6apq
-    path: patches/styled-components@6.1.11.patch
 
 importers:
 
@@ -293,8 +290,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       styled-components:
-        specifier: 6.1.11
-        version: 6.1.11(patch_hash=rpobciuscng7usb6kdy5cx6apq)(react-dom@18.2.0(react@18.3.1))(react@18.3.1)
+        specifier: 6.1.19
+        version: 6.1.19(react-dom@18.2.0(react@18.3.1))(react@18.3.1)
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
@@ -352,7 +349,7 @@ importers:
         version: 8.0.3(react@18.3.1)
       babel-plugin-styled-components:
         specifier: ^2.1.4
-        version: 2.1.4(@babel/core@7.25.2)(styled-components@6.1.11(patch_hash=rpobciuscng7usb6kdy5cx6apq)(react-dom@18.2.0(react@18.3.1))(react@18.3.1))
+        version: 2.1.4(@babel/core@7.25.2)(styled-components@6.1.19(react-dom@18.2.0(react@18.3.1))(react@18.3.1))
       prettier:
         specifier: 'catalog:'
         version: 3.6.2
@@ -506,7 +503,7 @@ importers:
         version: 0.33.4
       tsup:
         specifier: ^8.2.4
-        version: 8.2.4(jiti@1.21.0)(postcss@8.4.41)(tsx@4.16.5)(typescript@5.8.3)(yaml@2.4.2)
+        version: 8.2.4(jiti@1.21.0)(postcss@8.4.49)(tsx@4.16.5)(typescript@5.8.3)(yaml@2.4.2)
       tsx:
         specifier: ^4.16.5
         version: 4.16.5
@@ -8041,12 +8038,12 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.4.38:
-    resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
-    engines: {node: ^10 || ^12 || >=14}
-
   postcss@8.4.41:
     resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.4.49:
+    resolution: {integrity: sha512-OCVPnIObs4N29kxTjzLfUryOkvZEq+pf8jTF0lg8E7uETuWHA+v7j3c/xJmiqpX450191LlmZfUKkXxkTry7nA==}
     engines: {node: ^10 || ^12 || >=14}
 
   posthog-node@4.0.1:
@@ -8817,6 +8814,10 @@ packages:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
     engines: {node: '>=0.10.0'}
 
+  source-map-js@1.2.1:
+    resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
+    engines: {node: '>=0.10.0'}
+
   source-map-support@0.5.13:
     resolution: {integrity: sha512-SHSKFHadjVA5oR4PPqhtAVdcBWwRYVd6g6cAXnIbRiIwc2EhPrTuKUBdSLvlEKyIP3GCf89fltvcZiP9MMFA1w==}
 
@@ -9013,8 +9014,8 @@ packages:
   style-to-object@1.0.6:
     resolution: {integrity: sha512-khxq+Qm3xEyZfKd/y9L3oIWQimxuc4STrQKtQn8aSDRHb8mFgpukgX1hdzfrMEW6JCjyJ8p89x+IUMVnCBI1PA==}
 
-  styled-components@6.1.11:
-    resolution: {integrity: sha512-Ui0jXPzbp1phYij90h12ksljKGqF8ncGx+pjrNPsSPhbUUjWT2tD1FwGo2LF6USCnbrsIhNngDfodhxbegfEOA==}
+  styled-components@6.1.19:
+    resolution: {integrity: sha512-1v/e3Dl1BknC37cXMhwGomhO8AkYmN41CqyX9xhUDxry1ns3BFQy2lLDRQXJRdVVWB9OHemv/53xaStimvWyuA==}
     engines: {node: '>= 16'}
     peerDependencies:
       react: '>= 16.8.0'
@@ -15062,14 +15063,14 @@ snapshots:
 
   babel-plugin-react-native-web@0.19.11: {}
 
-  babel-plugin-styled-components@2.1.4(@babel/core@7.25.2)(styled-components@6.1.11(patch_hash=rpobciuscng7usb6kdy5cx6apq)(react-dom@18.2.0(react@18.3.1))(react@18.3.1)):
+  babel-plugin-styled-components@2.1.4(@babel/core@7.25.2)(styled-components@6.1.19(react-dom@18.2.0(react@18.3.1))(react@18.3.1)):
     dependencies:
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-module-imports': 7.24.7
       '@babel/plugin-syntax-jsx': 7.24.1(@babel/core@7.25.2)
       lodash: 4.17.21
       picomatch: 2.3.1
-      styled-components: 6.1.11(patch_hash=rpobciuscng7usb6kdy5cx6apq)(react-dom@18.2.0(react@18.3.1))(react@18.3.1)
+      styled-components: 6.1.19(react-dom@18.2.0(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -19511,12 +19512,12 @@ snapshots:
 
   possible-typed-array-names@1.0.0: {}
 
-  postcss-load-config@6.0.1(jiti@1.21.0)(postcss@8.4.41)(tsx@4.16.5)(yaml@2.4.2):
+  postcss-load-config@6.0.1(jiti@1.21.0)(postcss@8.4.49)(tsx@4.16.5)(yaml@2.4.2):
     dependencies:
       lilconfig: 3.1.1
     optionalDependencies:
       jiti: 1.21.0
-      postcss: 8.4.41
+      postcss: 8.4.49
       tsx: 4.16.5
       yaml: 2.4.2
 
@@ -19535,17 +19536,17 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.0
 
-  postcss@8.4.38:
-    dependencies:
-      nanoid: 3.3.7
-      picocolors: 1.1.1
-      source-map-js: 1.2.0
-
   postcss@8.4.41:
     dependencies:
       nanoid: 3.3.7
       picocolors: 1.1.1
       source-map-js: 1.2.0
+
+  postcss@8.4.49:
+    dependencies:
+      nanoid: 3.3.7
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
 
   posthog-node@4.0.1:
     dependencies:
@@ -20458,6 +20459,8 @@ snapshots:
 
   source-map-js@1.2.0: {}
 
+  source-map-js@1.2.1: {}
+
   source-map-support@0.5.13:
     dependencies:
       buffer-from: 1.1.2
@@ -20653,14 +20656,14 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.3
 
-  styled-components@6.1.11(patch_hash=rpobciuscng7usb6kdy5cx6apq)(react-dom@18.2.0(react@18.3.1))(react@18.3.1):
+  styled-components@6.1.19(react-dom@18.2.0(react@18.3.1))(react@18.3.1):
     dependencies:
       '@emotion/is-prop-valid': 1.2.2
       '@emotion/unitless': 0.8.1
       '@types/stylis': 4.2.5
       css-to-react-native: 3.2.0
       csstype: 3.1.3
-      postcss: 8.4.38
+      postcss: 8.4.49
       react: 18.3.1
       react-dom: 18.2.0(react@18.3.1)
       shallowequal: 1.1.0
@@ -20964,7 +20967,7 @@ snapshots:
 
   tslib@2.6.2: {}
 
-  tsup@8.2.4(jiti@1.21.0)(postcss@8.4.41)(tsx@4.16.5)(typescript@5.8.3)(yaml@2.4.2):
+  tsup@8.2.4(jiti@1.21.0)(postcss@8.4.49)(tsx@4.16.5)(typescript@5.8.3)(yaml@2.4.2):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.23.0)
       cac: 6.7.14
@@ -20976,14 +20979,14 @@ snapshots:
       globby: 11.1.0
       joycon: 3.1.1
       picocolors: 1.1.1
-      postcss-load-config: 6.0.1(jiti@1.21.0)(postcss@8.4.41)(tsx@4.16.5)(yaml@2.4.2)
+      postcss-load-config: 6.0.1(jiti@1.21.0)(postcss@8.4.49)(tsx@4.16.5)(yaml@2.4.2)
       resolve-from: 5.0.0
       rollup: 4.20.0
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tree-kill: 1.2.2
     optionalDependencies:
-      postcss: 8.4.41
+      postcss: 8.4.49
       typescript: 5.8.3
     transitivePeerDependencies:
       - jiti

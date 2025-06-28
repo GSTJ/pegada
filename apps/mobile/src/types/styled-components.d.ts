@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import "styled-components";
 
 import { DefaultTheme as DefaultPegadaTheme } from "@pegada/shared/themes/themes";
@@ -5,9 +6,9 @@ import { DefaultTheme as DefaultPegadaTheme } from "@pegada/shared/themes/themes
 type PegadaTheme = typeof DefaultPegadaTheme;
 
 declare module "styled-components" {
-  export type DefaultTheme = PegadaTheme;
+  export interface DefaultTheme extends PegadaTheme {}
 }
 
 declare module "styled-components/native" {
-  export type DefaultTheme = PegadaTheme;
+  export interface DefaultTheme extends PegadaTheme {}
 }

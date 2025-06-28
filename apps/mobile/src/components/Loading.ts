@@ -7,10 +7,10 @@ interface LoadingProps {
 
 export default styled(LottieView).attrs<LoadingProps>((props) => ({
   autoPlay: true,
+  ...props,
   source: props.inverse
     ? require("@/assets/animations/inverseLoadingDots.json")
     : require("@/assets/animations/primaryLoadingDots.json"),
-  ...props
 }))`
   width: 50px;
   height: 20px;
