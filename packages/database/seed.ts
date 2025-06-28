@@ -1,7 +1,7 @@
+import type { Prisma } from "@prisma/client";
+/* eslint-disable jest/no-mocks-import */
 import { createId } from "@paralleldrive/cuid2";
-import type {Prisma} from "@prisma/client";
 
-import { prisma } from ".";
 import { breedData } from "./__mocks__/breed-data";
 import {
   PITOCA_DOG,
@@ -9,8 +9,10 @@ import {
   PITOCO_DOG,
   PITOCO_USER
 } from "./__mocks__/fixed-dogs-data";
+// eslint-disable-next-line jest/no-mocks-import -- Seed script intentionally uses fixtures from mocks
 import { generateFakeUserWithDog } from "./__mocks__/generate-fake-user-with-dog";
 import { dropDatabase } from "./drop-database";
+import { prisma } from "./index";
 
 const interestData: Prisma.InterestCreateManyInput[] = [
   {
@@ -38,9 +40,9 @@ const seedDatabase = async () => {
   await Promise.all([
     generateFakeUserWithDog(PITOCA_DOG, PITOCA_USER, true),
     generateFakeUserWithDog(PITOCO_DOG, PITOCO_USER, true),
-    Array.from({ length: 100 }).forEach(() => {
-      return generateFakeUserWithDog(undefined, undefined, true);
-    })
+    ...Array.from({ length: 100 }, () =>
+      generateFakeUserWithDog(undefined, undefined, true)
+    )
   ]);
 
   await prisma.interest.createMany({ data: interestData });
