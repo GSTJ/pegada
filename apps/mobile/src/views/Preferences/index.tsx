@@ -47,9 +47,9 @@ export const MAX_FILTER_AGE = 10;
 const schema = z.object({
   preferredColor: dogServerSchema.shape.preferredColor,
   preferredSize: dogServerSchema.shape.preferredSize,
-  preferredMaxDistance: z.array(z.number().nullable()).nullable().optional(),
+  preferredMaxDistance: z.array(z.number()).optional(),
   preferredBreedId: dogServerSchema.shape.preferredBreedId,
-  preferredAgeRange: z.array(z.number().nullable()).nullable().optional(),
+  preferredAgeRange: z.array(z.number()).optional(),
   preferredMaxAge: dogServerSchema.shape.preferredMaxAge
 });
 
@@ -246,7 +246,7 @@ const Preferences: React.FC = () => {
                 subtitle={t("preferences.years", { maxYears: MAX_FILTER_AGE })}
               />
               <Slider.Root
-                values={[value[0] ?? 0, value[1] ?? MAX_FILTER_AGE + 1]}
+                values={[value?.[0] ?? 0, value?.[1] ?? MAX_FILTER_AGE + 1]}
                 sliderLength={width - theme.spacing[4] * 2}
                 onValuesChange={onChange}
                 onValuesChangeFinish={onBlur}
