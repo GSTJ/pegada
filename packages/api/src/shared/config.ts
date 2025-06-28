@@ -49,7 +49,7 @@ const configSchema = z.object({
 
   /** APPLE MAGIC */
   APPLE_MAGIC_EMAIL: z.string().optional(),
-  APPLE_MAGIC_CODE: z.string().optional()
+  APPLE_MAGIC_CODE: z.string().optional(),
 });
 
 const _config = configSchema.safeParse(process.env);

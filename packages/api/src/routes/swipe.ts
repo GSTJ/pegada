@@ -9,12 +9,12 @@ const DEFAULT_LIMIT = 10;
 
 const querySchema = z.object({
   limit: z.coerce.number().optional().default(DEFAULT_LIMIT),
-  notIn: z.array(z.string()).optional()
+  notIn: z.array(z.string()).optional(),
 });
 
 const swipeSchema = z.object({
   id: z.string(),
-  swipeType: z.enum(["NOT_INTERESTED", "MAYBE", "INTERESTED"])
+  swipeType: z.enum(["NOT_INTERESTED", "MAYBE", "INTERESTED"]),
 });
 
 export const swipeRouter = createTRPCRouter({
@@ -28,7 +28,7 @@ export const swipeRouter = createTRPCRouter({
     const potentialMatches = await SuggestionService.getPotentialMatches(
       dog,
       input.limit,
-      input.notIn ?? []
+      input.notIn ?? [],
     );
 
     return potentialMatches;
@@ -47,9 +47,9 @@ export const swipeRouter = createTRPCRouter({
         requester: dog,
         responderId: input.id,
         swipeType: input.swipeType,
-        userId: ctx.session.user.id
+        userId: ctx.session.user.id,
       });
 
       return swipe;
-    })
+    }),
 });

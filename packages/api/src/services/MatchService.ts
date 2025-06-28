@@ -21,9 +21,9 @@ class MatchService {
         deletedAt: null,
         OR: [
           { requesterId: requesterId, responderId: responderId },
-          { requesterId: responderId, responderId: requesterId }
-        ]
-      }
+          { requesterId: responderId, responderId: requesterId },
+        ],
+      },
     });
 
     if (existingMatch) {
@@ -34,15 +34,15 @@ class MatchService {
     const match = await prisma.match.create({
       data: {
         requesterId,
-        responderId
+        responderId,
       },
       include: {
         responder: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     if (match.responder.user.pushToken) {
@@ -50,14 +50,14 @@ class MatchService {
         to: match.responder.user.pushToken,
         title: TranslationService.translate("server:notification.match.title", {
           lng: this.language,
-          replace: { name: match.responder.name }
+          replace: { name: match.responder.name },
         }),
         body: TranslationService.translate("server:notification.match.body", {
-          lng: this.language
+          lng: this.language,
         }),
         data: {
-          url: `match/${match.id}/${match.requesterId}`
-        }
+          url: `match/${match.id}/${match.requesterId}`,
+        },
       });
     }
 
@@ -76,8 +76,8 @@ class MatchService {
             images: {
               // Shadowban
               some: { status: IMAGE_STATUS.APPROVED },
-              none: { status: IMAGE_STATUS.REJECTED }
-            }
+              none: { status: IMAGE_STATUS.REJECTED },
+            },
           },
           responder: {
             deletedAt: null,
@@ -85,29 +85,29 @@ class MatchService {
             images: {
               // Shadowban
               some: { status: IMAGE_STATUS.APPROVED },
-              none: { status: IMAGE_STATUS.REJECTED }
-            }
-          }
-        }
+              none: { status: IMAGE_STATUS.REJECTED },
+            },
+          },
+        },
       },
       include: {
         requester: {
-          select: dogSelect
+          select: dogSelect,
         },
         responder: {
-          select: dogSelect
+          select: dogSelect,
         },
         messages: {
           orderBy: { createdAt: "desc" },
           where: { deletedAt: null },
-          take: 1
-        }
+          take: 1,
+        },
       },
       orderBy: {
         messages: {
-          _count: "desc"
-        }
-      }
+          _count: "desc",
+        },
+      },
     });
 
     // Prepare a list of matched dogs
@@ -120,14 +120,14 @@ class MatchService {
 
       const dog = SwipeService.transformDistanceBetweenUserAndDog(
         otherDog,
-        currentDog.user
+        currentDog.user,
       );
 
       return {
         id: match.id,
         dog,
         lastMessage: match.messages[0],
-        interest: undefined
+        interest: undefined,
         // TODO: Removed to improve performance, implement a better way later
         // interest: await prisma.interest.findFirst({
         //   where: {

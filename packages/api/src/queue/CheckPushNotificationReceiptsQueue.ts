@@ -17,6 +17,6 @@ export const CheckPushNotificationReceiptsQueue =
     CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
     {
       connection: redisConnection,
-      defaultJobOptions: redisDefaultQueueOptions
-    }
+      defaultJobOptions: redisDefaultQueueOptions,
+    },
   );

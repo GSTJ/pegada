@@ -9,5 +9,5 @@ export const PROCESS_IMAGE_QUEUE = "ProcessImage";
 
 export const ProcessImageQueue = new Queue<IProcessImageJobData>(
   PROCESS_IMAGE_QUEUE,
-  { connection: redisConnection, defaultJobOptions: redisDefaultQueueOptions }
+  { connection: redisConnection, defaultJobOptions: redisDefaultQueueOptions },
 );

@@ -20,5 +20,5 @@ export const myDogRouter = createTRPCRouter({
       const dog = await DogService.getDogByUserId(ctx.session.user.id);
       const updatedDog = await DogService.updateDog(dog.id, input);
       return updatedDog;
-    })
+    }),
 });

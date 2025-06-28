@@ -14,13 +14,13 @@ export class SuggestionService {
 
     // Handle null values
     caseExpression.push(
-      Prisma.sql`WHEN "subquery"."distance" IS NULL THEN ${bucketRanges.length + 1} `
+      Prisma.sql`WHEN "subquery"."distance" IS NULL THEN ${bucketRanges.length + 1} `,
     );
 
     // Handle the rest of the ranges
     bucketRanges.forEach((range, index) => {
       caseExpression.push(
-        Prisma.sql`WHEN "subquery"."distance" < ${range} THEN ${index} `
+        Prisma.sql`WHEN "subquery"."distance" < ${range} THEN ${index} `,
       );
     });
 
@@ -33,26 +33,26 @@ export class SuggestionService {
   // Store the clusterizeByDistance result
   static #clusterizedDistancesSql = SuggestionService.#clusterizeByDistance(
     // Bucket ranges in kilometers
-    [10, 20, 30, 40, 50, 75, 100, 250, 500, 1000, 2500, 5000, 10000]
+    [10, 20, 30, 40, 50, 75, 100, 250, 500, 1000, 2500, 5000, 10000],
   );
 
   static #buildPreferenceConditions(dog: Dog | null) {
     const conditions: Sql[] = [
       /* If the dog is the opposite gender, include it in the results */
-      Prisma.sql`"Dog"."gender" = ${dog?.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE}::"Gender"`
+      Prisma.sql`"Dog"."gender" = ${dog?.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE}::"Gender"`,
     ];
 
     if (dog?.preferredColor) {
       /* If the dog has the preferred color or no color, include it in the results */
       conditions.push(
-        Prisma.sql`("Dog"."color" = ${dog.preferredColor}::"Color" OR "Dog"."color" IS NULL)`
+        Prisma.sql`("Dog"."color" = ${dog.preferredColor}::"Color" OR "Dog"."color" IS NULL)`,
       );
     }
 
     if (dog?.preferredSize) {
       /* If the dog has the preferred size or no size, include it in the results */
       conditions.push(
-        Prisma.sql`("Dog"."size" = ${dog.preferredSize}::"Size" OR "Dog"."size" IS NULL)`
+        Prisma.sql`("Dog"."size" = ${dog.preferredSize}::"Size" OR "Dog"."size" IS NULL)`,
       );
     }
 
@@ -62,14 +62,14 @@ export class SuggestionService {
 
       /* If the dog is within the preferred age range or has no birth date, include it in the results */
       conditions.push(
-        Prisma.sql`(EXTRACT(YEAR FROM AGE(NOW(), "Dog"."birthDate")) BETWEEN ${minAge} AND ${maxAge} OR "Dog"."birthDate" IS NULL)`
+        Prisma.sql`(EXTRACT(YEAR FROM AGE(NOW(), "Dog"."birthDate")) BETWEEN ${minAge} AND ${maxAge} OR "Dog"."birthDate" IS NULL)`,
       );
     }
 
     if (dog?.preferredBreedId) {
       /* If the dog is within the preferred breed or no breed, include it in the results */
       conditions.push(
-        Prisma.sql`("Dog"."breedId" = ${dog.preferredBreedId} OR "Dog"."breedId" IS NULL)`
+        Prisma.sql`("Dog"."breedId" = ${dog.preferredBreedId} OR "Dog"."breedId" IS NULL)`,
       );
     }
 
@@ -85,7 +85,7 @@ export class SuggestionService {
             ST_MakePoint("User"."longitude", "User"."latitude"), 
             ST_MakePoint("MainUser"."longitude", "MainUser"."latitude")
           ) / 1000 <= ${dog.preferredMaxDistance}
-        )`
+        )`,
       );
     }
 
@@ -97,7 +97,7 @@ export class SuggestionService {
   static async #anonimizeDistances(dogs: DogSafeSchema[]) {
     return dogs.map((dog) => ({
       ...dog,
-      distance: dog.distance ? Math.round(dog.distance * 10) / 10 : null
+      distance: dog.distance ? Math.round(dog.distance * 10) / 10 : null,
     }));
   }
 

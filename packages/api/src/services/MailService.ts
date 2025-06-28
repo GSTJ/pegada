@@ -14,8 +14,8 @@ const mailer = nodemailer.createTransport({
   port: 587,
   auth: {
     user: "apikey",
-    pass: config.SENDGRID_API_KEY
-  }
+    pass: config.SENDGRID_API_KEY,
+  },
 });
 
 export class MailService {
@@ -27,23 +27,23 @@ export class MailService {
       function (
         this: never,
         key: ParseKeys<Namespace.Mail>,
-        options: { hash: Record<string, string | number> }
+        options: { hash: Record<string, string | number> },
       ): handlebars.SafeString {
         const result = TranslationService.translate(key, {
           lng: language,
           ns: Namespace.Mail,
-          replace: options.hash
+          replace: options.hash,
         });
 
         return new handlebars.SafeString(result);
-      }
+      },
     );
   }
 
   static async parseHandlebars({
     path,
     variables,
-    language = Language.Default
+    language = Language.Default,
   }: {
     path: string;
     variables: Record<string, string | number>;
@@ -66,7 +66,7 @@ export class MailService {
     to,
     subject,
     html,
-    text
+    text,
   }: {
     to: string;
     subject: string;
@@ -76,12 +76,12 @@ export class MailService {
     return mailer.sendMail({
       from: {
         name: config.MAIL_NAME,
-        address: config.MAIL_USER
+        address: config.MAIL_USER,
       },
       to,
       subject,
       html,
-      text
+      text,
     });
   }
 }

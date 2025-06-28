@@ -9,5 +9,5 @@ export const SEND_PUSH_NOTIFICATION_QUEUE = "SendPushNotification";
 
 export const SendPushNotificationQueue = new Queue<ISendNotificationJobData>(
   SEND_PUSH_NOTIFICATION_QUEUE,
-  { connection: redisConnection, defaultJobOptions: redisDefaultQueueOptions }
+  { connection: redisConnection, defaultJobOptions: redisDefaultQueueOptions },
 );
