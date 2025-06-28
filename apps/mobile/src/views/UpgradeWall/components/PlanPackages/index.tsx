@@ -48,15 +48,15 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (isError) {
-      magicToast.alert(
-        Device.isDevice
-          ? t("plans.errors.fetchingOfferingsDevice")
-          : t("plans.errors.fetchingOfferings")
-      );
+    if (!isError) return;
 
-      router.back();
-    }
+    magicToast.alert(
+      Device.isDevice
+        ? t("plans.errors.fetchingOfferingsDevice")
+        : t("plans.errors.fetchingOfferings")
+    );
+
+    router.back();
   }, [isError, router, t]);
 
   const packageList = offeringsData
@@ -78,10 +78,10 @@ const PlanPackages: React.FC<OfferingsProps> = ({
     : undefined;
 
   useEffect(() => {
-    if (packageList[0] && !selectedPackage) {
-      // Optionally set a default package, or leave it to user interaction
-      setSelectedPackage(packageList[0]);
-    }
+    if (!packageList[0] || selectedPackage) return;
+
+    // Optionally set a default package, or leave it to user interaction
+    setSelectedPackage(packageList[0]);
   }, [packageList, selectedPackage, setSelectedPackage]);
 
   return (

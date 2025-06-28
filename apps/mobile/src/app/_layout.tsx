@@ -28,10 +28,10 @@ const App = () => {
   const { initialRouteName } = useProtectedRoute();
 
   useEffect(() => {
-    if (initialRouteName) {
-      SplashScreen.hideAsync()?.catch(sendError);
-      router.replace(initialRouteName);
-    }
+    if (!initialRouteName) return;
+
+    SplashScreen.hideAsync()?.catch(sendError);
+    router.replace(initialRouteName);
   }, [initialRouteName]);
 
   useTrackScreens();

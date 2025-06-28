@@ -16,9 +16,9 @@ onlineManager.setEventListener((setOnline) => {
 });
 
 const onAppStateChange = (status: AppStateStatus) => {
-  if (Platform.OS !== "web") {
-    focusManager.setFocused(status === "active");
-  }
+  if (Platform.OS === "web") return;
+
+  focusManager.setFocused(status === "active");
 };
 
 AppState.addEventListener("change", onAppStateChange);

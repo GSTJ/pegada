@@ -51,21 +51,19 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     gotoDirection(swipeType, { duration: 500 });
   };
 
-  // useImperativeHandle unloads the ref depending on component rendering order
-  // This is a new behavior that caused bugs, and had to be replaced with useEffect
   useEffect(() => {
-    if (isFirstCard) {
-      swipeHandlerRef.current = {
-        gotoDirection: runOnUI(automaticSwipe)
-      } as SwipeHandlerRefProps;
-    }
+    if (!isFirstCard) return;
+
+    swipeHandlerRef.current = {
+      gotoDirection: runOnUI(automaticSwipe)
+    } as SwipeHandlerRefProps;
   }, [automaticSwipe, isFirstCard]);
 
   useDidMountEffect(() => {
-    if (isFirstCard) {
-      translation.x.value = withSpring(0, { stiffness: 50 });
-      translation.y.value = withSpring(0, { stiffness: 50 });
-    }
+    if (!isFirstCard) return;
+
+    translation.x.value = withSpring(0, { stiffness: 50 });
+    translation.y.value = withSpring(0, { stiffness: 50 });
   }, [isFirstCard]);
 
   const transform = useAnimatedStyle(() => {

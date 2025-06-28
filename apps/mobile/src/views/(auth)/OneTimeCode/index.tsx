@@ -99,9 +99,9 @@ const OneTimeCode = () => {
   };
 
   useDidMountEffect(() => {
-    if (keyboardInput.length === CODE_LENGTH) {
-      loginMutation.mutate({ email: email as string, code: keyboardInput });
-    }
+    if (keyboardInput.length !== CODE_LENGTH) return;
+
+    loginMutation.mutate({ email: email as string, code: keyboardInput });
   }, [keyboardInput]);
 
   return (

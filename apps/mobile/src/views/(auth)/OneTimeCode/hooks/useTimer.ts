@@ -7,10 +7,10 @@ const useTimer = (
   const [timer, setTimer] = useState(seconds);
 
   useEffect(() => {
-    if (timer) {
-      const timer = setInterval(() => setTimer((count) => count - 1), 1000);
-      return () => clearInterval(timer);
-    }
+    if (!timer) return;
+
+    const interval = setInterval(() => setTimer((count) => count - 1), 1000);
+    return () => clearInterval(interval);
   }, [timer]);
 
   return [timer, setTimer];

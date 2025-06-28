@@ -31,19 +31,19 @@ export const RadioButtonContainer = styled(PressableArea)<OptionButtonProps>`
   align-items: center;
 
   ${(props) => {
-    if (!props?.last) {
-      return css`
-        margin-right: ${(props) => props.theme.spacing[3]}px;
-      `;
-    }
+    if (props?.last) return undefined;
+
+    return css`
+      margin-right: ${(props) => props.theme.spacing[3]}px;
+    `;
   }};
 
   ${(props) => {
-    if (props?.marked) {
-      return css`
-        background-color: ${(props) => props.theme.colors.primary};
-      `;
-    }
+    if (!props?.marked) return undefined;
+
+    return css`
+      background-color: ${(props) => props.theme.colors.primary};
+    `;
   }};
 `;
 
@@ -51,10 +51,10 @@ export const TextButton = styled(Text)<OptionButtonProps>`
   color: ${(props) => props.theme.colors.primary};
 
   ${(props) => {
-    if (props?.marked) {
-      return css`
-        color: ${(props) => props.theme.colors.background};
-      `;
-    }
+    if (!props?.marked) return undefined;
+
+    return css`
+      color: ${(props) => props.theme.colors.background};
+    `;
   }}
 `;

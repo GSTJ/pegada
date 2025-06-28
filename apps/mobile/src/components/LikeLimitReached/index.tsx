@@ -36,9 +36,9 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
 
   useEffect(() => {
     // Hide the modal when the time is up
-    if (timeLeft === ZERO_TIME_LEFT) {
-      hide();
-    }
+    if (timeLeft !== ZERO_TIME_LEFT) return;
+
+    hide();
   }, [hide, timeLeft]);
 
   return (
