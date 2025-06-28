@@ -14,7 +14,7 @@ export const getGradientProps = (props: { theme: DefaultTheme }) => ({
   colors: [
     Color(props.theme.colors.card).fade(0.3).rgb().string(),
     Color(props.theme.colors.card).fade(0.5).rgb().string()
-  ],
+  ] as const,
   start: { x: 0, y: 1 },
   end: { x: 1, y: 0 }
 });

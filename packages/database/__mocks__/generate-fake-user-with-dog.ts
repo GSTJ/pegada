@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Dog, Prisma } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { PlanType } from "@prisma/client";
 
@@ -65,9 +65,7 @@ export const generateFakeUserWithDog = async (
           breed: {
             connect: { id: faker.helpers.arrayElement(breedData).id }
           },
-          ...(dogData as
-            | Prisma.DogCreateNestedManyWithoutUserInput["create"]
-            | undefined)
+          ...(dogData as Prisma.DogCreateWithoutUserInput | undefined)
         }
       }
     },
@@ -82,7 +80,7 @@ export const generateFakeUserWithDog = async (
 
   // `include` above guarantees `dogs` is part of the returned payload when `prisma` is configured
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety guard
-  const dog = (user as typeof user & { dogs: { [index: number]: Prisma.Dog } })
+  const dog = (user as typeof user & { dogs: { [index: number]: Dog } })
     .dogs[0];
 
   if (!dog) {

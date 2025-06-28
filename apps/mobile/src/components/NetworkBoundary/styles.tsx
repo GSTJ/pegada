@@ -1,3 +1,4 @@
+import * as React from "react";
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
@@ -29,23 +30,20 @@ export const ContainedText = styled(Text)`
   text-align: center;
 `;
 
-export const DisconnectedIllustration = styled(LottieView).attrs({
-  autoPlay: true,
-  loop: true,
-  source: require("@/assets/animations/disconnected.json")
-})`
-  width: 150px;
-  height: 150px;
-  align-self: center;
-`;
+export const DisconnectedIllustration = () => (
+  <LottieView
+    autoPlay
+    loop
+    source={require("@/assets/animations/disconnected.json")}
+    style={{ width: 150, height: 150, alignSelf: "center" }}
+  />
+);
 
-export const ErrorIllustration = styled(LottieView).attrs({
-  autoPlay: true,
-  loop: true,
-  delay: 2000,
-  source: require("@/assets/animations/error.json")
-})`
-  height: 150px;
-  width: 150px;
-  align-self: center;
-`;
+export const ErrorIllustration = () => (
+  <LottieView
+    autoPlay
+    loop
+    source={require("@/assets/animations/error.json")}
+    style={{ width: 150, height: 150, alignSelf: "center" }}
+  />
+);
