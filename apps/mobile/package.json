@@ -36,7 +36,7 @@
     "@bugsnag/plugin-react": "^8.4.0",
     "@expo/config-types": "^53.0.4",
     "@gorhom/bottom-sheet": "^5.1.6",
-    "@hookform/resolvers": "^5.1.1",
+    "@hookform/resolvers": "5.0.1",
     "@pegada/eslint-config": "workspace:*",
     "@pegada/shared": "workspace:*",
     "@ptomasroos/react-native-multi-slider": "^2.2.2",

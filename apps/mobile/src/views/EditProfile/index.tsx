@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { useEffect, useState } from "react";
+import { KeyboardAvoidingView, Platform, View } from "react-native";
 import { magicToast } from "react-native-magic-toast";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -113,7 +113,6 @@ const EditProfile = () => {
   const theme = useTheme();
 
   const { scrollViewProps } = useBottomActionStyle();
-  const scrollViewRef = useRef<ScrollView>(null);
 
   const myDogUpdateMutation = api.myDog.update.useMutation({
     onMutate: () => {
@@ -144,7 +143,7 @@ const EditProfile = () => {
       size: data.size ? data.size : null,
       images: data.images?.map((image, index) => ({
         id: image.id,
-        url: image.url,
+        url: image.url as string,
         position: index
       }))
     };
@@ -159,7 +158,6 @@ const EditProfile = () => {
     >
       <View style={{ flex: 1 }}>
         <Container
-          ref={scrollViewRef}
           style={{ flex: 1 }}
           {...scrollViewProps}
           contentContainerStyle={{

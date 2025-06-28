@@ -63,8 +63,8 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6(@types/react@19.1.8)(react-native-gesture-handler@2.24.0(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(react-native-reanimated@3.17.5(@babel/core@7.27.7)(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.1.8)(react@19.0.0))(react@19.0.0))(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.1.8)(react@19.0.0))(react@19.0.0)
       '@hookform/resolvers':
-        specifier: ^5.1.1
-        version: 5.1.1(react-hook-form@7.55.0(react@19.0.0))
+        specifier: 5.0.1
+        version: 5.0.1(react-hook-form@7.55.0(react@19.0.0))
       '@pegada/eslint-config':
         specifier: workspace:*
         version: link:../../tools/eslint
@@ -1945,8 +1945,8 @@ packages:
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
-  '@hookform/resolvers@5.1.1':
-    resolution: {integrity: sha512-J/NVING3LMAEvexJkyTLjruSm7aOFx7QX21pzkiJfMoNG0wl5aFEjLTl7ay7IQb9EWY6AkrBy7tHL2Alijpdcg==}
+  '@hookform/resolvers@5.0.1':
+    resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
     peerDependencies:
       react-hook-form: ^7.55.0
 
@@ -11570,7 +11570,7 @@ snapshots:
       '@hapi/hoek': 9.3.0
     optional: true
 
-  '@hookform/resolvers@5.1.1(react-hook-form@7.55.0(react@19.0.0))':
+  '@hookform/resolvers@5.0.1(react-hook-form@7.55.0(react@19.0.0))':
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.55.0(react@19.0.0)
