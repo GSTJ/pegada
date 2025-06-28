@@ -11,7 +11,8 @@ import {
   useIsOffline
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
-import { Actions, RootReducer } from "@/store/reducers";
+import { Actions  } from "@/store/reducers";
+import type {RootReducer} from "@/store/reducers";
 import { SceneName } from "@/types/SceneName";
 import { Description, EmptyAnimation, LogoLoading, Title } from "./styles";
 

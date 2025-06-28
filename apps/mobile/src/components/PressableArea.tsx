@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Pressable, PressableProps } from "react-native";
+import { Pressable  } from "react-native";
+import type {PressableProps} from "react-native";
 
 const ACTIVE_OPACITY = 0.9;
 export const PressableArea: React.FC<PressableProps> = ({ style, ...rest }) => {

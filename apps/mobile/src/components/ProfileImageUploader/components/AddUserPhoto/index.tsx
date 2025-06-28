@@ -14,9 +14,10 @@ import { PressableArea } from "@/components/PressableArea";
 import {
   compressImage,
   ImagePickerError,
-  Picture,
+  
   showImagePickerOptions
 } from "@/components/ProfileImageUploader/utils";
+import type {Picture} from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";

@@ -1,5 +1,5 @@
 import * as React from "react";
-import Animated from "react-native-reanimated";
+import type Animated from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 
 import {

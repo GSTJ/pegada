@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
-import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
+import { LinearGradient  } from "expo-linear-gradient";
+import type {LinearGradientProps} from "expo-linear-gradient";
 import Color from "color";
 import styled from "styled-components/native";
 

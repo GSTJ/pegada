@@ -1,5 +1,6 @@
 import { View } from "react-native";
-import { Image as ExpoImage, ImageProps, ImageSource } from "expo-image";
+import { Image as ExpoImage   } from "expo-image";
+import type {ImageProps, ImageSource} from "expo-image";
 import styled from "styled-components/native";
 
 interface LocalImageProps extends Omit<ImageProps, "source"> {

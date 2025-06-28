@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { isBefore } from "date-fns";
 import { all, call, fork, put, select, takeLatest } from "redux-saga/effects";
-import { ActionType } from "typesafe-actions";
+import type {ActionType} from "typesafe-actions";
 
 import { LikeLimitReached } from "@pegada/shared/errors/errors";
 
@@ -10,7 +10,8 @@ import { getTrcpContext } from "@/contexts/trcpContext";
 import { getUnsafeIsPremium } from "@/hooks/usePayments";
 import { sendError } from "@/services/errorTracking";
 import { getError } from "@/services/getError";
-import { Actions, RootReducer } from "@/store/reducers";
+import { Actions  } from "@/store/reducers";
+import type {RootReducer} from "@/store/reducers";
 import { SwipeAction } from "@/store/reducers/dogs/swipe";
 import { SceneName } from "@/types/SceneName";
 import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";

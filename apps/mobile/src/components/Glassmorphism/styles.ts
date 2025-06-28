@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import Color from "color";
-import styled, { DefaultTheme } from "styled-components/native";
+import styled from "styled-components/native";
+import type {DefaultTheme} from "styled-components/native";
 
 import { BlurView } from "@/components/BlurView";
 

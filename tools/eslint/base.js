@@ -11,5 +11,7 @@ const ignoreFile = includeIgnoreFile(join(__dirname, "../../.gitignore"));
 export default [
   ignoreFile,
   ...baseConfig,
-
+  {
+    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  }
 ];

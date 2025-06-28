@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Platform } from "react-native";
-import { BlurViewProps } from "expo-blur";
+import type {BlurViewProps} from "expo-blur";
 import { useTheme } from "styled-components/native";
 
 import { useKeyboardAwareSafeAreaInsets } from "../../hooks/useKeyboardAwareSafeAreaInsets";

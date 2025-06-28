@@ -6,9 +6,10 @@ import Animated, {
   useAnimatedStyle
 } from "react-native-reanimated";
 import {
-  BottomSheetBackdropProps,
+  
   useBottomSheetModal
 } from "@gorhom/bottom-sheet";
+import type {BottomSheetBackdropProps} from "@gorhom/bottom-sheet";
 
 const CustomBackdrop = ({
   style,
@@ -30,7 +31,7 @@ const CustomBackdrop = ({
 
   return (
     <Animated.View
-      // eslint-disable-next-line react-native/no-color-literals, react-native/no-inline-styles
+      // eslint-disable-next-line react-native/no-color-literals
       style={[style, { backgroundColor: "black" }, containerAnimatedStyle]}
     >
       <Pressable style={StyleSheet.absoluteFill} onPress={dismissAll} />

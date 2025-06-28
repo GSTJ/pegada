@@ -21,7 +21,8 @@ import { StorageKeys, storeData } from "@/services/storage";
 import { useDidMountEffect } from "@/services/utils";
 import { Underline } from "../SignIn/components/HeroText";
 import GoBack from "./components/GoBack";
-import OTPInput, { OtpInputRef } from "./components/OtpInput";
+import OTPInput from "./components/OtpInput";
+import type {OtpInputRef} from "./components/OtpInput";
 import useTimer from "./hooks/useTimer";
 import {
   Container,

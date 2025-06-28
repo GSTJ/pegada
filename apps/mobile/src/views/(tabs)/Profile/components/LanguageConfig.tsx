@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type {BottomSheetModal} from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 

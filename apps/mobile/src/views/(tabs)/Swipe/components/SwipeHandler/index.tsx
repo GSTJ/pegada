@@ -14,9 +14,10 @@ import FeedbackCard from "@/components/FeedbackCard";
 import { ACTION_OFFSET } from "@/constants";
 import { useDidMountEffect } from "@/services/utils";
 import { Actions } from "@/store/reducers";
-import { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
-import { Swipe, useSwipeGesture } from "./hooks/useSwipeGesture";
+import {  useSwipeGesture } from "./hooks/useSwipeGesture";
+import type {Swipe} from "./hooks/useSwipeGesture";
 
 const ROTATION_DEG = 8;
 
@@ -62,7 +63,7 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
 
   useDidMountEffect(() => {
     if (isFirstCard) {
-      // eslint-disable-next-line react-compiler/react-compiler -- false positive
+       
       translation.x.value = withSpring(0, { stiffness: 50 });
       translation.y.value = withSpring(0, { stiffness: 50 });
     }

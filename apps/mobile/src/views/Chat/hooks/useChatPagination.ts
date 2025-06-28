@@ -2,8 +2,8 @@ import { useLocalSearchParams } from "expo-router";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 
 import { getTrcpContext } from "@/contexts/trcpContext";
-import { RouterOutputs } from "@/contexts/TRPCProvider";
-import { FeedbackStatus } from "../components/Feedback";
+import type {RouterOutputs} from "@/contexts/TRPCProvider";
+import type {FeedbackStatus} from "../components/Feedback";
 import { useFetchNewMessages } from "./useFetchNewMessages";
 
 const PAGE_SIZE = 20;

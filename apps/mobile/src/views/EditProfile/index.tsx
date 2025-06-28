@@ -19,13 +19,15 @@ import { Input } from "@/components/Input";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import {
-  ProfileImagesUploader,
-  ProfileImagesUploaderProps
+  ProfileImagesUploader
+  
 } from "@/components/ProfileImageUploader";
-import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
+import type {ProfileImagesUploaderProps} from "@/components/ProfileImageUploader";
+import {  pictures } from "@/components/ProfileImageUploader/utils";
+import type {Picture} from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { getTrcpContext } from "@/contexts/trcpContext";
-import { api, RouterInputs } from "@/contexts/TRPCProvider";
+import { api } from "@/contexts/TRPCProvider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/errorTracking";

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import * as React from "react";
 import { magicToast } from "react-native-magic-toast";
-import { PurchasesPackage } from "react-native-purchases";
+import type {PurchasesPackage} from "react-native-purchases";
 import * as Device from "expo-device";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";

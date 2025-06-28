@@ -14,7 +14,8 @@ import {
   DefaultLoadingComponent,
   NetworkBoundary
 } from "@/components/NetworkBoundary";
-import { api, RouterOutputs } from "@/contexts/TRPCProvider";
+import { api  } from "@/contexts/TRPCProvider";
+import type {RouterOutputs} from "@/contexts/TRPCProvider";
 import {
   HeartEyesContainer,
   RotatedImageLeft,
@@ -38,7 +39,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
   const CARD_HEIGHT = windowDimensions.height < 800 ? 200 : 325;
 
   useEffect(() => {
-    // eslint-disable-next-line react-compiler/react-compiler -- false positive
+     
     rotateZ.value = withDelay(500, withTiming(ROTATE_Z, { duration: 500 }));
   }, [rotateZ]);
 

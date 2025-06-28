@@ -1,7 +1,9 @@
 import { Platform, View } from "react-native";
-import { BlurViewProps, BlurView as ExpoBlurView } from "expo-blur";
+import {  BlurView as ExpoBlurView } from "expo-blur";
+import type {BlurViewProps} from "expo-blur";
 import Color from "color";
-import styled, { DefaultTheme } from "styled-components/native";
+import styled from "styled-components/native";
+import type {DefaultTheme} from "styled-components/native";
 
 type MixinProps = { theme: DefaultTheme } & BlurViewProps;
 

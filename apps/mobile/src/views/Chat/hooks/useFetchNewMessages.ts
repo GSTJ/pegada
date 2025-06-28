@@ -4,7 +4,7 @@ import { useLocalSearchParams } from "expo-router";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";
 import { queryClient } from "@/services/queryClient";
-import { MessageProps } from "./useChatPagination";
+import type {MessageProps} from "./useChatPagination";
 
 const REFRESH_INTERVAL = 5000;
 export const useFetchNewMessages = () => {

@@ -9,11 +9,12 @@ import { sendError } from "@/services/errorTracking";
 import {
   deleteData,
   getData,
-  StorageDataTypes,
+  
   StorageKeys,
   storeData,
   Theme
 } from "@/services/storage";
+import type {StorageDataTypes} from "@/services/storage";
 
 export const themes = {
   [Theme.Light]: LightTheme,

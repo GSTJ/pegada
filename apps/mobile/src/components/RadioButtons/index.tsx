@@ -4,10 +4,11 @@ import { Container } from "@/components/Input/styles";
 import { Text } from "@/components/Text";
 import {
   Content,
-  OptionButtonProps,
+  
   RadioButtonContainer,
   TextButton
 } from "./styles";
+import type {OptionButtonProps} from "./styles";
 
 interface RadioButtonsProps {
   title: string;

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { PurchasesPackage } from "react-native-purchases";
+import type {PurchasesPackage} from "react-native-purchases";
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/Text";

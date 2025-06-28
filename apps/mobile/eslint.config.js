@@ -17,7 +17,6 @@ const packageOverrides = {
 /** @type {import('typescript-eslint').Config} */
 export default [
   ...expoConfig,
-  packageOverrides,
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
@@ -56,5 +55,6 @@ export default [
       "react-compiler/react-compiler": "off",
       "@typescript-eslint/prefer-promise-reject-errors": "off"
     }
-  }
+  },
+  packageOverrides
 ];

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import styled from "styled-components/native";
 
-import { BreedSlug } from "@pegada/shared/i18n/i18n";
+import type {BreedSlug} from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { Input } from "@/components/Input";

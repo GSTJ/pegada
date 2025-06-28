@@ -8,18 +8,21 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import {
-  DogQuickClientSchema,
+  
   dogQuickClientSchema
 } from "@pegada/shared/schemas/dogSchema";
+import type {DogQuickClientSchema} from "@pegada/shared/schemas/dogSchema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import {
-  ProfileImagesUploader,
-  ProfileImagesUploaderProps
+  ProfileImagesUploader
+  
 } from "@/components/ProfileImageUploader";
-import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
+import type {ProfileImagesUploaderProps} from "@/components/ProfileImageUploader";
+import {  pictures } from "@/components/ProfileImageUploader/utils";
+import type {Picture} from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";

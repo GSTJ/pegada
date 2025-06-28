@@ -1,4 +1,4 @@
-import * as Notifications from "expo-notifications";
+import type * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";

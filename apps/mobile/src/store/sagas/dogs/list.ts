@@ -3,7 +3,8 @@ import { all, call, put, select, takeLatest } from "redux-saga/effects";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import i18n from "@/i18n";
 import { sendError } from "@/services/errorTracking";
-import { Actions, RootReducer } from "@/store/reducers";
+import { Actions  } from "@/store/reducers";
+import type {RootReducer} from "@/store/reducers";
 import { ListAction } from "@/store/reducers/dogs/list";
 
 // Without marking as unknown, saga complains about the swipe all type inference

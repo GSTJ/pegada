@@ -1,6 +1,6 @@
 import { createSelector } from "reselect";
 
-import { RootReducer } from "@/store/reducers/index";
+import type {RootReducer} from "@/store/reducers/index";
 
 export const getCards = createSelector(
   (state: RootReducer) => state.dogs.request,

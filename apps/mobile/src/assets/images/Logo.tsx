@@ -2,9 +2,10 @@ import Svg, {
   Defs,
   LinearGradient,
   Path,
-  Stop,
-  SvgProps
+  Stop
+  
 } from "react-native-svg";
+import type {SvgProps} from "react-native-svg";
 
 const SvgComponent = ({
   colorStopOne,

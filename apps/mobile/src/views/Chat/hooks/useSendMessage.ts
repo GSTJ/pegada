@@ -5,7 +5,7 @@ import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";
 import { queryClient } from "@/services/queryClient";
 import { FeedbackStatus } from "../components/Feedback";
-import { MessageProps } from "./useChatPagination";
+import type {MessageProps} from "./useChatPagination";
 
 export const useSendMessage = () => {
   const { matchId } = useLocalSearchParams();

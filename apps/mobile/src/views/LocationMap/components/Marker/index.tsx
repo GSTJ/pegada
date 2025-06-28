@@ -4,9 +4,10 @@ import Animated, {
   FadeInDown,
   FadeOutUp,
   interpolate,
-  SharedValue,
+  
   useAnimatedStyle
 } from "react-native-reanimated";
+import type {SharedValue} from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "styled-components";
 

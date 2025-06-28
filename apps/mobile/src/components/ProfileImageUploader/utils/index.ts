@@ -2,7 +2,7 @@ import { Alert, Platform } from "react-native";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 
-import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
+import type {IMAGE_STATUS} from "@pegada/shared/schemas/dogSchema";
 
 import i18n from "@/i18n";
 import { sendError } from "@/services/errorTracking";

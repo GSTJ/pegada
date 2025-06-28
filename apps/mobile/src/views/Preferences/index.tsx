@@ -12,7 +12,6 @@ import { useTheme } from "styled-components/native";
 import { z } from "zod";
 
 import {
-  dogCompleteClientSchema,
   dogServerSchema
 } from "@pegada/shared/schemas/dogSchema";
 
@@ -23,7 +22,8 @@ import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import { Slider } from "@/components/Slider";
 import { getTrcpContext } from "@/contexts/trcpContext";
-import { api, RouterInputs } from "@/contexts/TRPCProvider";
+import { api  } from "@/contexts/TRPCProvider";
+import type {RouterInputs} from "@/contexts/TRPCProvider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/errorTracking";

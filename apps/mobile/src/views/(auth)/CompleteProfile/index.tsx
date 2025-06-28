@@ -6,10 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import {
-  DogCompleteClientSchema,
-  dogCompleteClientSchema
-} from "@pegada/shared/schemas/dogSchema";
+import { dogCompleteClientSchema } from "@pegada/shared/schemas/dogSchema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";

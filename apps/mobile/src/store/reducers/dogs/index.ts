@@ -1,5 +1,5 @@
 import reduceReducers from "reduce-reducers";
-import { Reducer } from "typesafe-actions";
+import type {Reducer} from "typesafe-actions";
 
 import * as list from "./list";
 import * as logout from "./logout";

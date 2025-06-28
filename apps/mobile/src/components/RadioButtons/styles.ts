@@ -1,4 +1,4 @@
-import { PressableProps } from "react-native";
+import type {PressableProps} from "react-native";
 import styled, { css } from "styled-components/native";
 
 import { PressableArea } from "@/components/PressableArea";

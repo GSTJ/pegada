@@ -23,7 +23,7 @@ import { api } from "@/contexts/TRPCProvider";
 import { sendError } from "@/services/errorTracking";
 import { useGetFormattedYears } from "@/services/useGetFormattedYears";
 import { Actions } from "@/store/reducers";
-import { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
 import { SceneName } from "@/types/SceneName";
 import { useCustomTopInset } from "@/views/(tabs)/Swipe";

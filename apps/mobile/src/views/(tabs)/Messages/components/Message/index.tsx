@@ -7,7 +7,7 @@ import { ThinkingEmoji } from "@/components/MatchActionBar/styles";
 import { Text } from "@/components/Text";
 import { SceneName } from "@/types/SceneName";
 import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
-import { Match } from "../..";
+import type {Match} from "../..";
 import { Container, EmojiContainer, Picture } from "./styles";
 
 const getEmojiBySwipeType = (swipeType?: Swipe) => {

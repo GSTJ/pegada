@@ -1,4 +1,5 @@
-import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
+import { LinearGradient  } from "expo-linear-gradient";
+import type {LinearGradientProps} from "expo-linear-gradient";
 import Color from "color";
 import { clamp } from "lodash";
 import styled, { useTheme } from "styled-components/native";

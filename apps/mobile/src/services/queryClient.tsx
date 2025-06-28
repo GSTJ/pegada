@@ -1,4 +1,5 @@
-import { AppState, AppStateStatus, Platform } from "react-native";
+import { AppState,  Platform } from "react-native";
+import type {AppStateStatus} from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import {
   focusManager,

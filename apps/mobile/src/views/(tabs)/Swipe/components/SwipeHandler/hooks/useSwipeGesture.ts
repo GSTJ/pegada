@@ -1,16 +1,18 @@
 import { useState } from "react";
 import {
-  Gesture,
-  GestureEventPayload,
-  PanGestureHandlerEventPayload
+  Gesture
+  
+  
 } from "react-native-gesture-handler";
+import type {GestureEventPayload, PanGestureHandlerEventPayload} from "react-native-gesture-handler";
 import {
   runOnJS,
-  SharedValue,
+  
   useSharedValue,
   withSpring,
   withTiming
 } from "react-native-reanimated";
+import type {SharedValue} from "react-native-reanimated";
 
 import { ACTION_OFFSET, ACTION_VELOCITY, CARD } from "@/constants";
 

@@ -106,7 +106,7 @@ const LocationMap = () => {
         onTouchStart={() => setTouchStarted(true)}
         onRegionChange={() => {
           if (!touchStarted) return;
-          // eslint-disable-next-line react-compiler/react-compiler -- false positive
+           
           dragging.value = withTiming(1, {
             easing: Easing.in(Easing.ease),
             duration: 200

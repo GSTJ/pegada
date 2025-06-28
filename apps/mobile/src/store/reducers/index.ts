@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 
 import * as dogs from "./dogs";
-import * as swipe from "./dogs/swipe";
+import type * as swipe from "./dogs/swipe";
 
 export const Types = {
   ...dogs.Types
