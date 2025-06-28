@@ -19,15 +19,17 @@ const formatDate = (date: Date) => {
 
   if (isToday(date)) {
     return i18n.t("chat.today");
-  } else if (isYesterday(date)) {
-    return i18n.t("chat.yesterday");
-  } else if (isThisWeek(date)) {
-    return format(date, "eeee", { locale: isPtBr ? pt : enUS });
-  } else if (isThisYear(date)) {
-    return format(date, "EEE., d MMM", { locale: isPtBr ? pt : enUS });
-  } else {
-    return format(date, "d MMM, yyyy", { locale: isPtBr ? pt : enUS });
   }
+  if (isYesterday(date)) {
+    return i18n.t("chat.yesterday");
+  }
+  if (isThisWeek(date)) {
+    return format(date, "eeee", { locale: isPtBr ? pt : enUS });
+  }
+  if (isThisYear(date)) {
+    return format(date, "EEE., d MMM", { locale: isPtBr ? pt : enUS });
+  }
+  return format(date, "d MMM, yyyy", { locale: isPtBr ? pt : enUS });
 };
 
 const Component = ({

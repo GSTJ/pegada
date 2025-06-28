@@ -47,7 +47,6 @@ export default [
       "import/default": "off",
       "import/no-named-as-default-member": "off",
       "no-restricted-syntax": "off",
-      "no-else-return": "off",
       "react-compiler/react-compiler": "off",
       "@typescript-eslint/prefer-promise-reject-errors": "off"
     }
