@@ -25,7 +25,7 @@ const OTPInput = ({
 }: OtpInputProps & {
   ref: React.RefObject<OtpInputRef | null>;
 }) => {
-  const inputRefs: { current: (TextInput | null | any)[] } = useRef([]);
+  const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const handleFocus = () => {
     inputRefs.current[0]?.focus();

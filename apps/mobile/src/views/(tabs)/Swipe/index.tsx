@@ -58,8 +58,12 @@ const Matches = () => {
         if (!token) return;
         await setPushNotificationToken(token);
       })
-      .catch((error) => {
-        if (error.message === NotificationTokenError.Denied) return; // We don't need to send this error
+      .catch((error: unknown) => {
+        if (
+          error instanceof Error &&
+          error.message === NotificationTokenError.Denied
+        )
+          return; // Ignore permission denial
         sendError(error);
       });
 

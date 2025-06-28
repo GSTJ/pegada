@@ -50,7 +50,7 @@ function* swipeUserRequest({
     }
 
     yield put(Actions.dogs.swipe.success());
-  } catch (err: any) {
+  } catch (err: unknown) {
     const likeLimitReachedError = getError(err, LikeLimitReached);
     if (likeLimitReachedError) {
       const { likeLimitResetAt } = likeLimitReachedError;

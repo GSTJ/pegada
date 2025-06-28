@@ -20,7 +20,7 @@ const asyncActions = createAsyncAction(
   ListAction.FetchDogsRequest,
   ListAction.FetchDogsSuccess,
   ListAction.FetchDogsFailure
-)<void, { dogs: SwipeDog[]; hasMore: boolean }, { message: string }>();
+)<undefined, { dogs: SwipeDog[]; hasMore: boolean }, { message: string }>();
 
 const refetch = createAction(ListAction.RefetchDogsRequest)();
 

@@ -28,23 +28,19 @@ export default [
       "@typescript-eslint/no-deprecated": "off",
       "@typescript-eslint/restrict-plus-operands": "off",
       "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/no-invalid-void-type": "off",
       "@typescript-eslint/no-misused-promises": "off",
       "react/no-unstable-nested-components": "off",
       "react-hooks/exhaustive-deps": "off",
       "react-native/no-inline-styles": "off", // That's fine, keep it
       "@typescript-eslint/non-nullable-type-assertion-style": "off",
-      "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
       "@typescript-eslint/only-throw-error": "off",
       "@typescript-eslint/no-misused-spread": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-redundant-type-constituents": "off",
       "import/no-cycle": "off", // This one is fine
       "no-restricted-syntax": "off",
-      "react-compiler/react-compiler": "off",
-      "@typescript-eslint/prefer-promise-reject-errors": "off"
+      "react-compiler/react-compiler": "off"
     }
   },
   packageOverrides

@@ -31,7 +31,7 @@ export const deleteAccount = () => {
           getTrcpContext()
             .client.myDog.delete.mutate()
             .then(() => logout())
-            .catch((error) => {
+            .catch((error: unknown) => {
               Alert.alert(t("common.oops"), t("common.tryAgainLater"));
               sendError(error);
             });

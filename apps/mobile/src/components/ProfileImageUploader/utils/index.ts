@@ -154,7 +154,7 @@ export const showImagePickerOptions = (): Promise<{
           onPress: () => {
             takeImage()
               .then((imageUrl) => resolve(imageUrl))
-              .catch((error) => {
+              .catch((error: unknown) => {
                 if (
                   error instanceof Error &&
                   error.message !== ImagePickerError.CANCELED
@@ -173,7 +173,7 @@ export const showImagePickerOptions = (): Promise<{
           onPress: () => {
             pickImage()
               .then((imageUrl) => resolve(imageUrl))
-              .catch((error) => {
+              .catch((error: unknown) => {
                 if (
                   error instanceof Error &&
                   error.message !== ImagePickerError.CANCELED
