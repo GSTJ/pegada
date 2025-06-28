@@ -45,5 +45,8 @@
     "typecheck": "turbo typecheck",
     "convert:images": "./scripts/convert-png-images-to-webp.sh",
     "download:secrets": "dotenv -- ./scripts/download-secrets.sh"
+  },
+  "dependencies": {
+    "intl-pluralrules": "^2.0.1"
   }
 }

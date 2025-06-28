@@ -1,10 +1,14 @@
-import { i18n } from "i18next";
+import type { i18n, InitOptions } from "i18next";
+
+import "intl-pluralrules";
+
 import { z } from "zod";
 import { makeZodI18nMap } from "zod-i18n-map";
 
+import type { LanguageResources } from "./types/types";
 import en from "./locales/en";
 import ptBr from "./locales/pt-BR";
-import { Language, LanguageResources, Namespace } from "./types/types";
+import { Language, Namespace } from "./types/types";
 
 const resources: Record<Language, LanguageResources> = {
   [Language.EnUs]: en,
@@ -22,15 +26,16 @@ z.setErrorMap(
   })
 );
 
-export const initI18n = (i18n: i18n) => {
-  return i18n.init({
-    resources: resources,
+export const initI18n = (i18nInstance: i18n) => {
+  const options: InitOptions = {
+    resources,
     fallbackLng: Language.Default,
-    compatibilityJSON: "v3", // v4 would require an Intl.PluralRules polyfill, and we aren't using it yet
+    compatibilityJSON: "v4",
     ns: Object.keys(resources[Language.EnUs]),
     defaultNS: Namespace.Translation,
     interpolation: {
       escapeValue: false
     }
-  });
+  };
+  return i18nInstance.init(options);
 };

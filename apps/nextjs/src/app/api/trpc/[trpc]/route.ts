@@ -43,7 +43,7 @@ const handleRatelimiter = async ({
     return;
   }
 
-  const ip = req.ip ?? "127.0.0.1";
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "127.0.0.1";
 
   const { limit, remaining, reset, success } =
     await loggedOutRatelimit.limit(ip);

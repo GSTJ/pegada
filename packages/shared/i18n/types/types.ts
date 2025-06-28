@@ -1,4 +1,4 @@
-import en from "../locales/en";
+import type en from "../locales/en";
 
 export enum Namespace {
   Translation = "translation",

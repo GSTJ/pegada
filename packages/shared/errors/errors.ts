@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 export class IntentionalError extends TRPCError {}
 
 export class OTPRequiredError extends IntentionalError {
-  static message: string = "OTP required";
-  static error_code: string = "OTP_REQUIRED";
+  static message = "OTP required";
+  static error_code = "OTP_REQUIRED";
   error_code = OTPRequiredError.error_code;
 
   constructor() {
@@ -16,8 +16,8 @@ export class OTPRequiredError extends IntentionalError {
 }
 
 export class InvalidOTPCodeError extends IntentionalError {
-  static message: string = "Invalid OTP code";
-  static error_code: string = "INVALID_OTP_CODE";
+  static message = "Invalid OTP code";
+  static error_code = "INVALID_OTP_CODE";
   error_code = InvalidOTPCodeError.error_code;
 
   constructor() {
@@ -31,8 +31,8 @@ export class InvalidOTPCodeError extends IntentionalError {
 export class LikeLimitReached extends IntentionalError {
   likeLimitResetAt: Date;
 
-  static message: string = "You have reached the like limit";
-  static error_code: string = "LIKE_LIMIT_REACHED";
+  static message = "You have reached the like limit";
+  static error_code = "LIKE_LIMIT_REACHED";
   error_code = LikeLimitReached.error_code;
 
   constructor({ likeLimitResetAt }: { likeLimitResetAt: Date }) {
