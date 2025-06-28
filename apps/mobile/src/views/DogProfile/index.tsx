@@ -136,7 +136,7 @@ const DogProfile = () => {
     matchId?: string;
   }>();
 
-  const swipeHandler = useSwipeHandler(id as string);
+  const swipeHandler = useSwipeHandler(id);
   const { t } = useTranslation();
 
   const insets = useSafeAreaInsets();
@@ -152,7 +152,7 @@ const DogProfile = () => {
     try {
       setUnmatchLoading(true);
       await getTrcpContext().client.swipe.swipe.mutate({
-        id: id as string,
+        id,
         swipeType: Swipe.Dislike
       });
 
@@ -174,10 +174,7 @@ const DogProfile = () => {
     }
   };
 
-  const [dog] = api.dog.get.useSuspenseQuery(
-    { id: id as string },
-    { refetchOnMount: false }
-  );
+  const [dog] = api.dog.get.useSuspenseQuery({ id }, { refetchOnMount: false });
 
   const firstName = dog.name.split(" ")[0];
 

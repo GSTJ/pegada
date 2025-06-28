@@ -24,7 +24,7 @@ const NewMatch: React.FC = () => {
   }>();
 
   const [matchDog] = api.dog.get.useSuspenseQuery(
-    { id: matchDogId as string },
+    { id: matchDogId },
     { refetchOnMount: false }
   );
 

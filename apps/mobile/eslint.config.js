@@ -40,12 +40,9 @@ export default [
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unnecessary-type-assertion": "off",
       "@typescript-eslint/no-redundant-type-constituents": "off",
-      "import/named": "off",
-      "import/namespace": "off",
-      "import/default": "off",
-      "import/no-named-as-default-member": "off",
+
+      "import/no-cycle": "off",
       "no-restricted-syntax": "off",
       "react-compiler/react-compiler": "off",
       "@typescript-eslint/prefer-promise-reject-errors": "off"
