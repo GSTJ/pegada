@@ -1,18 +1,18 @@
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 
-type StoreButtonProps = {
+interface StoreButtonProps {
   href?: string;
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
   target?: string;
-};
+}
 
-type StoreButtonTextProps = {
+interface StoreButtonTextProps {
   className?: string;
   children?: React.ReactNode;
-};
+}
 
 export const StoreButton = ({
   className = "",

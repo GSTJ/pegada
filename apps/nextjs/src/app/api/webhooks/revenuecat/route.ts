@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 
+import type { WebhookPayload } from "@pegada/api/types/revenuecat";
 import PaymentService from "@pegada/api/services/PaymentService";
 import { getSession } from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
@@ -31,7 +32,8 @@ export const POST = async (req: NextRequest) => {
 
   const paymentService = new PaymentService();
 
-  const reqBody = await req.json();
+  const reqBody = (await req.json()) as WebhookPayload;
+
   await paymentService.handleRevenueCatEvent(reqBody);
 
   return new Response(null, { status: 200 });

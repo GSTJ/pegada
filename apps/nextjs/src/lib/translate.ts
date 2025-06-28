@@ -15,7 +15,6 @@ export const t = <T extends Namespace = Namespace.Web>(
 
   const ns = options.ns ?? Namespace.Web;
 
-  // Not needed, we type the props correctly
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   return TranslationService.translate(key, { lng, ...options, ns } as any);
 };
