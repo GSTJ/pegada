@@ -2,11 +2,12 @@
   "name": "@pegada/eslint-config",
   "version": "0.1.0",
   "private": true,
-  "files": [
-    "./base.js",
-    "./expo.js",
-    "./nextjs.js"
-  ],
+  "type": "module",
+  "exports": {
+    "./base": "./base.js",
+    "./expo": "./expo.js",
+    "./nextjs": "./nextjs.js"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
