@@ -64,7 +64,6 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
 
     if (currentImage !== 0) return setCurrentImage((index) => index - 1);
 
-    // eslint-disable-next-line react-compiler/react-compiler -- false positive
     rotation.value = withSequence(
       withSpring(-0.5, springConfig),
       withSpring(0, springConfig)
