@@ -1,3 +1,4 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, Alert, Linking, Share, View } from "react-native";
@@ -23,7 +24,6 @@ import { api } from "@/contexts/TRPCProvider";
 import { sendError } from "@/services/errorTracking";
 import { useGetFormattedYears } from "@/services/useGetFormattedYears";
 import { Actions } from "@/store/reducers";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
 import { SceneName } from "@/types/SceneName";
 import { useCustomTopInset } from "@/views/(tabs)/Swipe";

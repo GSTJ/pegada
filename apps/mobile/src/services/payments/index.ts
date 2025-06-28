@@ -1,6 +1,6 @@
+import type { CustomerInfo } from "react-native-purchases";
 import { Alert, Platform } from "react-native";
-import Purchases, {  LOG_LEVEL } from "react-native-purchases";
-import type {CustomerInfo} from "react-native-purchases";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import * as Device from "expo-device";
 import { get } from "lodash";
 

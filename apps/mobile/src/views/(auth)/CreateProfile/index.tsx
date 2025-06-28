@@ -1,3 +1,5 @@
+import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
+import type { Picture } from "@/components/ProfileImageUploader/utils";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
 import { magicToast } from "react-native-magic-toast";
@@ -7,22 +9,14 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import {
-  
-  dogQuickClientSchema
-} from "@pegada/shared/schemas/dogSchema";
-import type {DogQuickClientSchema} from "@pegada/shared/schemas/dogSchema";
+import type { DogQuickClientSchema } from "@pegada/shared/schemas/dogSchema";
+import { dogQuickClientSchema } from "@pegada/shared/schemas/dogSchema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import {
-  ProfileImagesUploader
-  
-} from "@/components/ProfileImageUploader";
-import type {ProfileImagesUploaderProps} from "@/components/ProfileImageUploader";
-import {  pictures } from "@/components/ProfileImageUploader/utils";
-import type {Picture} from "@/components/ProfileImageUploader/utils";
+import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
+import { pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";

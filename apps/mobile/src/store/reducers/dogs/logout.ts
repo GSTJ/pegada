@@ -1,6 +1,6 @@
+import type { ActionType } from "typesafe-actions";
 import { produce } from "immer";
-import {  createAction, createReducer } from "typesafe-actions";
-import type {ActionType} from "typesafe-actions";
+import { createAction, createReducer } from "typesafe-actions";
 
 import { initialState } from "@/store/reducers/dogs/swipe";
 

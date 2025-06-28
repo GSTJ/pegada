@@ -1,14 +1,13 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type { SharedValue } from "react-native-reanimated";
 import * as React from "react";
 import {
   Extrapolation,
   interpolate,
-  
   useAnimatedStyle
 } from "react-native-reanimated";
-import type {SharedValue} from "react-native-reanimated";
 
 import { ACTION_OFFSET } from "@/constants";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import LikeFeedback from "./components/LikeFeedback";
 import MaybeFeedback from "./components/MaybeFeedback";
 import NopeFeedback from "./components/NopeFeedback";

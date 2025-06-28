@@ -1,13 +1,12 @@
 import Expo from "expo-server-sdk";
 import { z } from "zod";
 
+import type { ISendNotificationJobData } from "../queue/SendPushNotificationQueue";
 import { sendError } from "../errors/errors";
 import {
-  
   SEND_PUSH_NOTIFICATION_QUEUE,
   SendPushNotificationQueue
 } from "../queue/SendPushNotificationQueue";
-import type {ISendNotificationJobData} from "../queue/SendPushNotificationQueue";
 import { UserService } from "./UserService";
 
 export class PushNotificationService {

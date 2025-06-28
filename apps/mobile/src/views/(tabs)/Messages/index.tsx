@@ -1,3 +1,4 @@
+import type { RouterOutputs } from "@/contexts/TRPCProvider";
 import { useEffect, useRef, useState } from "react";
 import { FlatList, Platform, View } from "react-native";
 import { usePathname } from "expo-router";
@@ -9,8 +10,7 @@ import Divider from "@/components/Divider";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";
-import { api  } from "@/contexts/TRPCProvider";
-import type {RouterOutputs} from "@/contexts/TRPCProvider";
+import { api } from "@/contexts/TRPCProvider";
 import { handleRequestAppReview } from "@/services/appReview";
 import { sendError } from "@/services/errorTracking";
 import { SceneName } from "@/types/SceneName";

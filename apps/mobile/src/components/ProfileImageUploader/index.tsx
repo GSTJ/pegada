@@ -1,14 +1,12 @@
+import type {
+  DeletedPicture,
+  Picture
+} from "@/components/ProfileImageUploader/utils";
 import * as React from "react";
 import { View } from "react-native";
 import { DraggableGrid } from "react-native-draggable-grid";
 
-import {
-  
-  deleteItem,
-  
-  sortByUrl
-} from "@/components/ProfileImageUploader/utils";
-import type {DeletedPicture, Picture} from "@/components/ProfileImageUploader/utils";
+import { deleteItem, sortByUrl } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/Text";
 import { AddUserPhoto } from "./components/AddUserPhoto";
 import {

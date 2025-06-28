@@ -1,4 +1,4 @@
-import type {api} from "./TRPCProvider";
+import type { api } from "./TRPCProvider";
 
 let trcpContext = undefined as unknown as ReturnType<typeof api.useUtils>;
 

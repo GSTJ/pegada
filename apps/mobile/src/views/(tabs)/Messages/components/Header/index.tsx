@@ -2,7 +2,7 @@ import * as React from "react";
 import { FlatList, View } from "react-native";
 import { useTheme } from "styled-components/native";
 
-import type {Match} from "../..";
+import type { Match } from "../..";
 import { Preview } from "../Preview";
 import { Container } from "./styles";
 

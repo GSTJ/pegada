@@ -1,14 +1,9 @@
 import * as React from "react";
 
+import type { OptionButtonProps } from "./styles";
 import { Container } from "@/components/Input/styles";
 import { Text } from "@/components/Text";
-import {
-  Content,
-  
-  RadioButtonContainer,
-  TextButton
-} from "./styles";
-import type {OptionButtonProps} from "./styles";
+import { Content, RadioButtonContainer, TextButton } from "./styles";
 
 interface RadioButtonsProps {
   title: string;

@@ -1,9 +1,9 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 import * as React from "react";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import Location from "@/assets/images/Location.svg";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { Container, Content, DistanceText } from "./styles";
 
 interface DistanceProps {

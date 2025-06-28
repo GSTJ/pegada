@@ -1,5 +1,5 @@
+import type { TextInput, TextInputProps, ViewProps } from "react-native";
 import * as React from "react";
-import type {TextInput, TextInputProps, ViewProps} from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/Text";

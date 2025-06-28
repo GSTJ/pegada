@@ -4,13 +4,13 @@ import { FlashList } from "@shopify/flash-list";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
+import type { MessageProps } from "./hooks/useChatPagination";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/useKeyboardAwareSafeAreaInsets";
 import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 import { HEADER_HEIGHT } from "./components/Header";
 import { SEND_HEIGHT } from "./components/Send";
-import {  useChatPagination } from "./hooks/useChatPagination";
-import type {MessageProps} from "./hooks/useChatPagination";
+import { useChatPagination } from "./hooks/useChatPagination";
 import { Background, CenteredText, CenteredView, Container } from "./styles";
 
 const Empty = () => {

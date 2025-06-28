@@ -1,3 +1,4 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { useEffect } from "react";
 import * as React from "react";
 import { StyleSheet } from "react-native";
@@ -10,14 +11,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { useDispatch, useSelector } from "react-redux";
 
+import type { Swipe } from "./hooks/useSwipeGesture";
 import FeedbackCard from "@/components/FeedbackCard";
 import { ACTION_OFFSET } from "@/constants";
 import { useDidMountEffect } from "@/services/utils";
 import { Actions } from "@/store/reducers";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
-import {  useSwipeGesture } from "./hooks/useSwipeGesture";
-import type {Swipe} from "./hooks/useSwipeGesture";
+import { useSwipeGesture } from "./hooks/useSwipeGesture";
 
 const ROTATION_DEG = 8;
 
@@ -63,7 +63,6 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
 
   useDidMountEffect(() => {
     if (isFirstCard) {
-       
       translation.x.value = withSpring(0, { stiffness: 50 });
       translation.y.value = withSpring(0, { stiffness: 50 });
     }

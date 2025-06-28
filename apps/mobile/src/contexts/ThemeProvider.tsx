@@ -1,3 +1,4 @@
+import type { StorageDataTypes } from "@/services/storage";
 import { useContext, useEffect, useState } from "react";
 import * as React from "react";
 import { Appearance, useColorScheme } from "react-native";
@@ -9,12 +10,10 @@ import { sendError } from "@/services/errorTracking";
 import {
   deleteData,
   getData,
-  
   StorageKeys,
   storeData,
   Theme
 } from "@/services/storage";
-import type {StorageDataTypes} from "@/services/storage";
 
 export const themes = {
   [Theme.Light]: LightTheme,

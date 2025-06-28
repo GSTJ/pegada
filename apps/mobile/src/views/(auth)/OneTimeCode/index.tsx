@@ -11,6 +11,7 @@ import {
   OTPRequiredError
 } from "@pegada/shared/errors/errors";
 
+import type { OtpInputRef } from "./components/OtpInput";
 import { Text } from "@/components/Text";
 import { api } from "@/contexts/TRPCProvider";
 import { analytics } from "@/services/analytics";
@@ -22,7 +23,6 @@ import { useDidMountEffect } from "@/services/utils";
 import { Underline } from "../SignIn/components/HeroText";
 import GoBack from "./components/GoBack";
 import OTPInput from "./components/OtpInput";
-import type {OtpInputRef} from "./components/OtpInput";
 import useTimer from "./hooks/useTimer";
 import {
   Container,

@@ -1,17 +1,14 @@
-import type {ExpoPushMessage} from "expo-server-sdk";
+import type { ExpoPushMessage } from "expo-server-sdk";
 import { Worker } from "bullmq";
 
+import type { ISendNotificationJobData } from "@pegada/api/queue/SendPushNotificationQueue";
 import { redisConnection } from "@pegada/api/constants/redis";
 import { sendError } from "@pegada/api/errors/errors";
 import {
   CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
   CheckPushNotificationReceiptsQueue
 } from "@pegada/api/queue/CheckPushNotificationReceiptsQueue";
-import {
-  
-  SEND_PUSH_NOTIFICATION_QUEUE
-} from "@pegada/api/queue/SendPushNotificationQueue";
-import type {ISendNotificationJobData} from "@pegada/api/queue/SendPushNotificationQueue";
+import { SEND_PUSH_NOTIFICATION_QUEUE } from "@pegada/api/queue/SendPushNotificationQueue";
 
 import { RECEIPT_CHECK_DELAY_MS } from "./CheckPushNotificationReceiptsQueue";
 import { expo } from "./shared/expo";

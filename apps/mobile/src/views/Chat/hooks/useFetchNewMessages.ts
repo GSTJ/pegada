@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
 
+import type { MessageProps } from "./useChatPagination";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";
 import { queryClient } from "@/services/queryClient";
-import type {MessageProps} from "./useChatPagination";
 
 const REFRESH_INTERVAL = 5000;
 export const useFetchNewMessages = () => {

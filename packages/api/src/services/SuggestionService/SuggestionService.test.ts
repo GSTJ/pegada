@@ -1,6 +1,6 @@
+import type { Dog } from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import { Color,  Gender, PlanType, Size, SwipeType } from "@prisma/client";
-import type {Dog} from "@prisma/client";
+import { Color, Gender, PlanType, Size, SwipeType } from "@prisma/client";
 import { z } from "zod";
 
 import prisma from "@pegada/database";

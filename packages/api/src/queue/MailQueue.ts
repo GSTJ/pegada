@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
 
-import type {Language} from "@pegada/shared/i18n/types/types";
+import type { Language } from "@pegada/shared/i18n/types/types";
 
 import { redisConnection, redisDefaultQueueOptions } from "../constants/redis";
 

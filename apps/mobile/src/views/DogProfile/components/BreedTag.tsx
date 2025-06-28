@@ -1,13 +1,13 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components/native";
 
-import type {BreedSlug} from "@pegada/shared/i18n/i18n";
+import type { BreedSlug } from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import Glassmorphism from "@/components/Glassmorphism";
 import { Text } from "@/components/Text";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 
 const GlassmorphismStyled = styled(Glassmorphism)`
   border-radius: ${(props) => props.theme.radii.md}px;

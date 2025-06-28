@@ -1,9 +1,9 @@
+import type { PressableProps } from "react-native";
 import * as React from "react";
-import type {PressableProps} from "react-native";
 
+import type { ContainerProps } from "./styles";
 import Loading from "@/components/Loading";
-import { ButtonText, Container  } from "./styles";
-import type {ContainerProps} from "./styles";
+import { ButtonText, Container } from "./styles";
 
 export interface ButtonProps extends ContainerProps, PressableProps {
   children: string;

@@ -1,3 +1,4 @@
+import type { Picture } from "@/components/ProfileImageUploader/utils";
 import { useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, Alert } from "react-native";
@@ -14,10 +15,8 @@ import { PressableArea } from "@/components/PressableArea";
 import {
   compressImage,
   ImagePickerError,
-  
   showImagePickerOptions
 } from "@/components/ProfileImageUploader/utils";
-import type {Picture} from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";

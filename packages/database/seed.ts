@@ -9,7 +9,6 @@ import {
   PITOCO_DOG,
   PITOCO_USER
 } from "./__mocks__/fixed-dogs-data";
- 
 import { generateFakeUserWithDog } from "./__mocks__/generate-fake-user-with-dog";
 import { dropDatabase } from "./drop-database";
 import { prisma } from "./index";

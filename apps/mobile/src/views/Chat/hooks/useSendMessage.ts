@@ -1,11 +1,11 @@
 import { useLocalSearchParams } from "expo-router";
 import * as uuid from "uuid";
 
+import type { MessageProps } from "./useChatPagination";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";
 import { queryClient } from "@/services/queryClient";
 import { FeedbackStatus } from "../components/Feedback";
-import type {MessageProps} from "./useChatPagination";
 
 export const useSendMessage = () => {
   const { matchId } = useLocalSearchParams();

@@ -1,4 +1,4 @@
-import type {Image} from "@prisma/client";
+import type { Image } from "@prisma/client";
 import { Queue } from "bullmq";
 
 import { redisConnection, redisDefaultQueueOptions } from "../constants/redis";

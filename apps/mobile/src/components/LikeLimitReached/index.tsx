@@ -1,3 +1,4 @@
+import type { LikeLimitReachedProps } from "@/components/LikeLimitReached/useCountdown";
 import { useEffect } from "react";
 import * as React from "react";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
@@ -13,11 +14,9 @@ import {
   Header
 } from "@/components/LikeLimitReached/styles";
 import {
-  
   useCountdown,
   ZERO_TIME_LEFT
 } from "@/components/LikeLimitReached/useCountdown";
-import type {LikeLimitReachedProps} from "@/components/LikeLimitReached/useCountdown";
 import { CloseIcon } from "@/components/Picker/styles";
 import { Text } from "@/components/Text";
 import { useEligibleForTrial } from "@/hooks/usePayments";

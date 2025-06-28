@@ -1,5 +1,5 @@
+import type { CustomerInfo, PurchasesPackage } from "react-native-purchases";
 import { useEffect } from "react";
-import type {CustomerInfo, PurchasesPackage} from "react-native-purchases";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { identifyUser } from "@/services/getInitialRouteName";

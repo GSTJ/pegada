@@ -3,11 +3,11 @@ import { View } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import type { Match } from "../..";
 import { ThinkingEmoji } from "@/components/MatchActionBar/styles";
 import { Text } from "@/components/Text";
 import { SceneName } from "@/types/SceneName";
 import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
-import type {Match} from "../..";
 import { Container, EmojiContainer, Picture } from "./styles";
 
 const getEmojiBySwipeType = (swipeType?: Swipe) => {

@@ -1,3 +1,4 @@
+import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import React from "react";
 import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
@@ -5,11 +6,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle
 } from "react-native-reanimated";
-import {
-  
-  useBottomSheetModal
-} from "@gorhom/bottom-sheet";
-import type {BottomSheetBackdropProps} from "@gorhom/bottom-sheet";
+import { useBottomSheetModal } from "@gorhom/bottom-sheet";
 
 const CustomBackdrop = ({
   style,

@@ -1,5 +1,5 @@
-import {   useEffect, useState } from "react";
-import type {Dispatch, SetStateAction} from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 
 const useTimer = (
   seconds: number

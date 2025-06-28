@@ -1,8 +1,8 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 import * as React from "react";
 import { useRouter } from "expo-router";
 
 import { Text } from "@/components/Text";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { SceneName } from "@/types/SceneName";
 import { Container, Content, Picture } from "./styles";
 

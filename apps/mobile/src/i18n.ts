@@ -1,6 +1,6 @@
+import type { LanguageDetectorAsyncModule } from "i18next";
 import { getLocales } from "expo-localization";
 import i18n from "i18next";
-import type {LanguageDetectorAsyncModule} from "i18next";
 import { initReactI18next } from "react-i18next";
 
 import { initI18n } from "@pegada/shared/i18n/i18n";

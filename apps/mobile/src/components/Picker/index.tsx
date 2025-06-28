@@ -1,10 +1,10 @@
+import type { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
+import type { ListRenderItemInfo } from "react-native";
 import { useState } from "react";
 import * as React from "react";
-import {  Pressable } from "react-native";
-import type {ListRenderItemInfo} from "react-native";
+import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
-import type {BottomSheetFlatListProps} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 

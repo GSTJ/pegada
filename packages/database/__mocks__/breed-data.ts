@@ -1,4 +1,4 @@
-import type {Prisma} from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 export const breedData: Prisma.BreedCreateManyInput[] = [
   { id: "t4ruz0vv97rrrjtueta7xta4", name: "Shih-tzu", slug: "shih-tzu" },

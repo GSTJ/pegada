@@ -1,9 +1,9 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type { ViewProps } from "react-native";
 import * as React from "react";
-import type {ViewProps} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useGetFormattedYears } from "@/services/useGetFormattedYears";
-import type {SwipeDog} from "@/store/reducers/dogs/swipe";
 import { Age, Container, Description, Name } from "./styles";
 
 export const BIO_NUMBER_OF_LINES = 3;

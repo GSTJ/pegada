@@ -1,7 +1,10 @@
+import type {
+  LabelProps,
+  MultiSliderProps
+} from "@ptomasroos/react-native-multi-slider";
 import * as React from "react";
 import { Platform, View } from "react-native";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import type {LabelProps, MultiSliderProps} from "@ptomasroos/react-native-multi-slider";
 import { useTheme } from "styled-components/native";
 
 import { Text } from "@/components/Text";

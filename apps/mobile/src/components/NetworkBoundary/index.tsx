@@ -1,8 +1,8 @@
-import {  Suspense, useEffect, useState } from "react";
-import type {PropsWithChildren} from "react";
+import type { PropsWithChildren } from "react";
+import type { ViewProps } from "react-native";
+import { Suspense, useEffect, useState } from "react";
 import * as React from "react";
-import { ActivityIndicator  } from "react-native";
-import type {ViewProps} from "react-native";
+import { ActivityIndicator } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import {
   QueryErrorResetBoundary,

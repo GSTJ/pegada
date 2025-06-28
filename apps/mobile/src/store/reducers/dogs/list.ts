@@ -1,14 +1,13 @@
+import type { ActionType } from "typesafe-actions";
 import { produce } from "immer";
 import {
-  
   createAction,
   createAsyncAction,
   createReducer
 } from "typesafe-actions";
-import type {ActionType} from "typesafe-actions";
 
-import { initialState  } from "./swipe";
-import type {SwipeDog} from "./swipe";
+import type { SwipeDog } from "./swipe";
+import { initialState } from "./swipe";
 
 export enum ListAction {
   FetchDogsRequest = "FETCH_DOGS_REQUEST",
