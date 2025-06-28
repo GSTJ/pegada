@@ -8,5 +8,13 @@ export default [
     rules: {
       "@shopify/jsx-no-hardcoded-content": "off"
     }
+  },
+  {
+    ignores: [
+      "node_modules/**",
+      "next.config.mjs",
+      "*.config.js",
+      "*.config.mjs"
+    ]
   }
 ];

@@ -52,6 +52,7 @@
     "@trpc/client": "11.4.3",
     "@trpc/react-query": "11.4.3",
     "@trpc/server": "11.4.3",
+    "babel-plugin-react-compiler": "19.0.0-beta-af1b7da-20250417",
     "color": "^5.0.0",
     "date-fns": "^4.1.0",
     "expo": "^53.0.13",

@@ -52,8 +52,8 @@ const DogProfile = async ({ params: { id } }: DogProfileProps) => {
         <div className="absolute bottom-0 right-0 left-0 bg-background/50 backdrop-blur flex flex-col items-center justify-center p-8 border-t border-t-border/70 text-center">
           <p className="text-xl text-text">
             <b>{dog.name}</b>
-            {dog?.birthDate
-              ? `, ${getFormattedYears({ birthDate: dog?.birthDate, lng })}`
+            {dog.birthDate
+              ? `, ${getFormattedYears({ birthDate: dog.birthDate, lng })}`
               : null}
           </p>
           <p>{dog.bio}</p>

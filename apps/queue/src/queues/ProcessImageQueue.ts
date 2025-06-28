@@ -37,7 +37,7 @@ export const worker = new Worker<IProcessImageJobData>(
         }
       }
 
-      return ImageService.updateImage({
+      return await ImageService.updateImage({
         ...image,
         blurhash,
         status

@@ -27,7 +27,7 @@ export const worker = new Worker<IMailJobData>(
       language: language
     });
 
-    MailService.sendMail({
+    await MailService.sendMail({
       to: email,
       html: emailHtml,
       subject: TranslationService.translate("server:mail.verifyCode.subject", {

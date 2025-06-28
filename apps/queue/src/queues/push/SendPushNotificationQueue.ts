@@ -42,21 +42,21 @@ export const worker = new Worker<ISendNotificationJobData>(
         // must handle it appropriately. The error codes are listed in the Expo
         // documentation:
         // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
-        if (ticket.status === "error") {
-          if (ticket.details && ticket.details.error) {
-            handlePushError(ticket.details?.error, pushToken);
-          }
+        if (ticket.status === "error" && ticket.details?.error) {
+          // Fire-and-forget the error handler.
+          void handlePushError(ticket.details.error, pushToken);
+          // Skip further processing for this ticket.
           continue;
         }
 
         // NOTE: Not all tickets have IDs; for example, tickets for notifications
         // that could not be enqueued will have error information and no receipt ID.
-        if (ticket.id) {
+        if ("id" in ticket && ticket.id) {
           receipts.push({ id: ticket.id, pushToken });
         }
       }
 
-      CheckPushNotificationReceiptsQueue.add(
+      void CheckPushNotificationReceiptsQueue.add(
         CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
         { receipts },
         { delay: RECEIPT_CHECK_DELAY_MS }

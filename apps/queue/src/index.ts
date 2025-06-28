@@ -16,10 +16,10 @@ const app = fastify();
 app.register(fastifyProxy, {
   upstream: "https://www.pegada.app/api",
   // Bun workaround
-  undici: new undici.Agent() as any
+  undici: new undici.Agent()
 });
 
-app.listen({
+void app.listen({
   port: config.QUEUE_DEV_PORT ?? config.PORT,
   host: "0.0.0.0"
 });

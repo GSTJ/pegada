@@ -10,9 +10,10 @@ const configSchema = z.object({
   EXPO_ACCESS_TOKEN: z.string()
 });
 
+/* eslint-disable no-restricted-syntax -- Reading from process.env is required for config validation */
 const _config = configSchema.safeParse(process.env);
 
-if (_config.success === false) {
+if (!_config.success) {
   // eslint-disable-next-line no-console
   console.error("❌ Invalid environment variables", _config.error.format());
   throw new Error("Invalid environment variables.");

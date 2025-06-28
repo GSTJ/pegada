@@ -19,29 +19,35 @@ export const worker = new Worker<ICheckPushNotificationReceiptsJobData>(
     try {
       const { receipts: incomingReceiptsData } = job.data;
 
-      if (!incomingReceiptsData) return;
+      // `receipts` field is always present per queue contract
 
       const receipts = await expo.getPushNotificationReceiptsAsync(
         incomingReceiptsData.map(({ id }) => id)
       );
 
-      let nonProcessedReceipts: typeof incomingReceiptsData = [];
+      const nonProcessedReceipts: typeof incomingReceiptsData = [];
 
-      Object.entries(receipts).forEach(([id, receipt]) => {
-        const pushToken = incomingReceiptsData.find(
-          (receipt) => receipt.id === id
-        )?.pushToken as string;
+      for (const [id, receipt] of Object.entries(receipts)) {
+        const found = incomingReceiptsData.find((r) => r.id === id);
 
-        if (receipt.status === "error" && receipt.details?.error) {
-          return handlePushError(receipt.details?.error, pushToken);
+        if (!found) {
+          continue;
         }
 
-        if (receipt.status === "ok") return;
+        const { pushToken } = found;
+
+        if (receipt.status === "error" && receipt.details?.error) {
+          // We don't need to await the error handler here – fire-and-forget.
+          void handlePushError(receipt.details.error, pushToken);
+          continue;
+        }
+
+        if (receipt.status === "ok") continue;
 
         nonProcessedReceipts.push({ id, pushToken });
-      });
+      }
 
-      if (!nonProcessedReceipts.length) return;
+      if (nonProcessedReceipts.length === 0) return;
 
       sendError(
         `Some push notifications weren't processed. Receipts: ${JSON.stringify(nonProcessedReceipts)}`

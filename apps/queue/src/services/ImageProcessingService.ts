@@ -1,3 +1,5 @@
+/* eslint-disable @shopify/no-namespace-imports, @typescript-eslint/no-extraneous-class */
+
 import * as tf from "@tensorflow/tfjs-node";
 import * as Blurhash from "blurhash";
 import * as nsfwjs from "nsfwjs";
