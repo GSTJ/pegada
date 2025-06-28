@@ -41,8 +41,7 @@ export default [
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-redundant-type-constituents": "off",
-
-      "import/no-cycle": "off",
+      "import/no-cycle": "off", // This one is fine
       "no-restricted-syntax": "off",
       "react-compiler/react-compiler": "off",
       "@typescript-eslint/prefer-promise-reject-errors": "off"
