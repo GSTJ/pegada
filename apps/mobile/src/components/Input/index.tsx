@@ -29,19 +29,17 @@ interface InputProps extends TextInputProps {
   error?: string;
 }
 
-export const Input = (
-  {
-    ref,
-    title,
-    canCancel = true,
-    error,
-    loading = false,
-    optional = false,
-    ...props
-  }: InputProps & {
-    ref: React.RefObject<TextInput>;
-  }
-) => {
+export const Input = ({
+  ref,
+  title,
+  canCancel = true,
+  error,
+  loading = false,
+  optional = false,
+  ...props
+}: InputProps & {
+  ref?: React.RefObject<TextInput>;
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -51,9 +49,7 @@ export const Input = (
           <Text fontWeight="bold" fontSize="lg">
             {title}
           </Text>
-          {optional ? (
-            <Text fontSize="xs">{t("common.optional")}</Text>
-          ) : null}
+          {optional ? <Text fontSize="xs">{t("common.optional")}</Text> : null}
         </S.TitleContainer>
       )}
       <TextFieldContainer loading={loading}>

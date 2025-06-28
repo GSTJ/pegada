@@ -6,6 +6,7 @@ type StoreButtonProps = {
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
+  target?: string;
 };
 
 type StoreButtonTextProps = {

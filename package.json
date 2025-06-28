@@ -18,6 +18,9 @@
         "x64",
         "arm64"
       ]
+    },
+    "patchedDependencies": {
+      "react-native-draggable-grid@2.2.2": "patches/react-native-draggable-grid@2.2.2.patch"
     }
   },
   "devDependencies": {

@@ -16,6 +16,11 @@ catalogs:
       specifier: ^5.8.3
       version: 5.8.3
 
+patchedDependencies:
+  react-native-draggable-grid@2.2.2:
+    hash: rg7vmackpfmysozwcklxa2a3p4
+    path: patches/react-native-draggable-grid@2.2.2.patch
+
 importers:
 
   .:
@@ -224,7 +229,7 @@ importers:
         version: 0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0)
       react-native-draggable-grid:
         specifier: ^2.2.2
-        version: 2.2.2(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
+        version: 2.2.2(patch_hash=rg7vmackpfmysozwcklxa2a3p4)(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
       react-native-gesture-handler:
         specifier: ~2.24.0
         version: 2.24.0(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0)
@@ -19212,7 +19217,7 @@ snapshots:
 
   react-is@19.1.0: {}
 
-  react-native-draggable-grid@2.2.2(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
+  react-native-draggable-grid@2.2.2(patch_hash=rg7vmackpfmysozwcklxa2a3p4)(react-native@0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
       react-native: 0.79.4(@babel/core@7.27.7)(@react-native-community/cli@18.0.0(typescript@3.9.10))(@types/react@19.0.14)(react@19.0.0)
