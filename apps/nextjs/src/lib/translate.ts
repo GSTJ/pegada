@@ -1,4 +1,4 @@
-import type {ParseKeys, TOptions} from "i18next";
+import type { ParseKeys, TOptions } from "i18next";
 
 import { TranslationService } from "@pegada/api/services/TranslationService";
 import { Namespace } from "@pegada/shared/i18n/types/types";

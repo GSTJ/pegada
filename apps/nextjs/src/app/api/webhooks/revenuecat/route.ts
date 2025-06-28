@@ -1,4 +1,4 @@
-import type {NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 
 import PaymentService from "@pegada/api/services/PaymentService";
 import { getSession } from "@pegada/api/trpc";

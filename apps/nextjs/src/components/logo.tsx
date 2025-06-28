@@ -1,5 +1,4 @@
 export const Logo = () => (
-   
   <img
     src="/logo.svg"
     draggable="false"
