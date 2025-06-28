@@ -68,7 +68,8 @@ export const trpcQueryClient = api.createClient({
               i18n.t("session.expired"),
               i18n.t("session.expiredMessage")
             );
-            throw logout();
+            await logout();
+            throw new Error("UNAUTHORIZED");
           }
         }
 

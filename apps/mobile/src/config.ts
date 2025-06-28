@@ -28,7 +28,7 @@ mobileAds().initialize().catch(sendError);
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-Text.defaultProps = Text.defaultProps || {};
+Text.defaultProps = Text.defaultProps ?? {};
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 Text.defaultProps.allowFontScaling = false;
@@ -67,4 +67,4 @@ Bugsnag.start({
 Bugsnag.setContext("app");
 
 export const BugsnagErrorBoundary: IBugsnagErrorBoundary =
-  Bugsnag.getPlugin("react")?.createErrorBoundary(React) || View;
+  Bugsnag.getPlugin("react")?.createErrorBoundary(React) ?? View;

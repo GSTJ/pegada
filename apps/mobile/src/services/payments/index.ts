@@ -104,7 +104,8 @@ const purchasePackage = async (
   } catch (e) {
     // On Android, this happens when a transfer is needed (the user already purchased on another account)
     if (get(e, "message") === "This product is already active for the user.") {
-      return restorePurchases();
+      await restorePurchases();
+      return undefined;
     }
 
     throw e;
