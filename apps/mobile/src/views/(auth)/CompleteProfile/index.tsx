@@ -33,14 +33,13 @@ const CompleteProfile = () => {
 
   const { profileImageUrl } = useLocalSearchParams();
 
-  const { control, handleSubmit, getValues, watch } =
-    useForm<DogCompleteClientSchema>({
-      defaultValues: {
-        birthDate: "",
-        breedId: ""
-      },
-      resolver: zodResolver(dogCompleteClientSchema)
-    });
+  const { control, handleSubmit, getValues, watch } = useForm({
+    defaultValues: {
+      birthDate: "",
+      breedId: ""
+    },
+    resolver: zodResolver(dogCompleteClientSchema)
+  });
 
   const form = watch();
 

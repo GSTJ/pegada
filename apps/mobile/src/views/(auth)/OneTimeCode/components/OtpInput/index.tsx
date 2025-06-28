@@ -23,7 +23,7 @@ const OTPInput = ({
   value,
   onChangeText
 }: OtpInputProps & {
-  ref: React.RefObject<OtpInputRef>;
+  ref: React.RefObject<OtpInputRef | null>;
 }) => {
   const inputRefs: { current: (TextInput | null | any)[] } = useRef([]);
 
@@ -72,9 +72,12 @@ const OTPInput = ({
         return (
           <OtpDigit
             key={index}
-            ref={(el: TextInput) => {
-              inputRefs.current[index] = el;
-            }}
+            ref={
+              ((el: TextInput) => {
+                inputRefs.current[index] = el;
+              }) as unknown as React.RefObject<TextInput>
+            }
+            testID={`otp-input-${index}`}
             index={index}
             length={length}
             pointerEvents={previousValue || isFirst ? "auto" : "none"}

@@ -11,6 +11,11 @@ import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components/native";
 import { z } from "zod";
 
+import {
+  dogCompleteClientSchema,
+  dogServerSchema
+} from "@pegada/shared/schemas/dogSchema";
+
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
 import { Button } from "@/components/Button";
@@ -35,29 +40,18 @@ import {
 const { width } = Dimensions.get("window");
 
 type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
+
 export const MAX_FILTER_DISTANCE = 300;
 export const MAX_FILTER_AGE = 10;
-interface Preference
-  extends Pick<
-    MyDogUpdateMutation,
-    "preferredBreedId" | "preferredColor" | "preferredSize"
-  > {
-  preferredMaxDistance: number[];
-  preferredAgeRange: number[];
-}
 
-const schema = z
-  .object({
-    preferredColor: z.string().nullable().optional(),
-    preferredSize: z.string().nullable().optional(),
-    preferredMaxDistance: z.array(z.number().nullable()).nullable().optional(),
-    preferredBreedId: z.string().nullable().optional(),
-    preferredAgeRange: z
-      .array(z.number().nullable().optional())
-      .nullable()
-      .optional()
-  })
-  .optional();
+const schema = z.object({
+  preferredColor: dogServerSchema.shape.preferredColor,
+  preferredSize: dogServerSchema.shape.preferredSize,
+  preferredMaxDistance: z.array(z.number().nullable()).nullable().optional(),
+  preferredBreedId: dogServerSchema.shape.preferredBreedId,
+  preferredAgeRange: z.array(z.number().nullable()).nullable().optional(),
+  preferredMaxAge: dogServerSchema.shape.preferredMaxAge
+});
 
 const Preferences: React.FC = () => {
   const router = useRouter();
@@ -70,16 +64,15 @@ const Preferences: React.FC = () => {
     throw new Error("Dog not found");
   }
 
-  const { control, handleSubmit, setValue } = useForm<Preference>({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
-      preferredColor: undefined,
-      preferredSize: undefined,
+      preferredColor: null,
+      preferredSize: null,
       preferredMaxDistance: [MAX_FILTER_DISTANCE],
-      preferredBreedId: undefined,
+      preferredBreedId: null,
       preferredAgeRange: [0, MAX_FILTER_AGE]
     },
-    // Zod is breaking here, seems to be an issue with the library
-    resolver: zodResolver(schema as any)
+    resolver: zodResolver(schema)
   });
 
   const dispatch = useDispatch();
@@ -101,13 +94,21 @@ const Preferences: React.FC = () => {
   });
 
   const saveUser = handleSubmit(async (data) => {
+    const preferredMaxDistance = data.preferredMaxDistance?.[0];
+    const preferredMinAge = data.preferredAgeRange?.[0];
+    const preferredMaxAge = data.preferredAgeRange?.[1];
+
+    if (!preferredMaxDistance || !preferredMinAge || !preferredMaxAge) {
+      return;
+    }
+
     const body: MyDogUpdateMutation = {
       preferredBreedId: data.preferredBreedId,
       preferredColor: data.preferredColor,
       preferredSize: data.preferredSize,
-      preferredMaxDistance: data.preferredMaxDistance[0],
-      preferredMinAge: data.preferredAgeRange[0],
-      preferredMaxAge: data.preferredAgeRange[1]
+      preferredMaxDistance,
+      preferredMinAge,
+      preferredMaxAge
     };
 
     // Unlimited

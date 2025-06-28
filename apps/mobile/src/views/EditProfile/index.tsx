@@ -33,28 +33,24 @@ import { maskDate } from "@/services/maskDate";
 import { Actions } from "@/store/reducers";
 import { Container } from "./styles";
 
-type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
-type EditProfileForm = Partial<MyDogUpdateMutation>;
-
 const EditProfile = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const { control, handleSubmit, setValue, getValues } =
-    useForm<EditProfileForm>({
-      defaultValues: {
-        name: "",
-        bio: "",
-        gender: "MALE",
-        weight: undefined,
-        birthDate: "",
-        breedId: "",
-        color: undefined,
-        size: undefined,
-        images: pictures
-      },
-      resolver: zodResolver(dogClientSchema)
-    });
+  const { control, handleSubmit, setValue, getValues } = useForm({
+    defaultValues: {
+      name: "",
+      bio: "",
+      gender: "MALE",
+      weight: undefined,
+      birthDate: "",
+      breedId: "",
+      color: undefined,
+      size: undefined,
+      images: pictures
+    },
+    resolver: zodResolver(dogClientSchema)
+  });
 
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
     refetchOnMount: false
