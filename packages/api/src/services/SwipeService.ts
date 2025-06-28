@@ -1,16 +1,16 @@
 import { PlanType } from "@prisma/client";
 import { addDays, setHours } from "date-fns";
 import { getDistance } from "geolib";
-import { z } from "zod";
+import type {z} from "zod";
 
 import prisma from "@pegada/database";
 import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
 import { LikeLimitReached } from "@pegada/shared/errors/errors";
-import { Language } from "@pegada/shared/i18n/types/types";
+import type {Language} from "@pegada/shared/i18n/types/types";
 
-import { dogSafeSchema } from "../dtos/dogDto";
+import type {dogSafeSchema} from "../dtos/dogDto";
 import { sendError } from "../errors/errors";
-import { DogService } from "./DogService";
+import type {DogService} from "./DogService";
 import MatchService from "./MatchService";
 import { PushNotificationService } from "./PushNotificationService";
 import { TranslationService } from "./TranslationService";

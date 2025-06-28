@@ -1,8 +1,9 @@
 import prisma from "@pegada/database";
 import {
-  DogServerSchema,
+  
   IMAGE_STATUS
 } from "@pegada/shared/schemas/dogSchema";
+import type {DogServerSchema} from "@pegada/shared/schemas/dogSchema";
 
 import {
   dogSelect,

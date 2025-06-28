@@ -3,10 +3,11 @@ import { z } from "zod";
 
 import { sendError } from "../errors/errors";
 import {
-  ISendNotificationJobData,
+  
   SEND_PUSH_NOTIFICATION_QUEUE,
   SendPushNotificationQueue
 } from "../queue/SendPushNotificationQueue";
+import type {ISendNotificationJobData} from "../queue/SendPushNotificationQueue";
 import { UserService } from "./UserService";
 
 export class PushNotificationService {

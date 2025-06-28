@@ -1,9 +1,9 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import * as RequestPresigner from "@aws-sdk/s3-request-presigner";
-import { Image } from "@prisma/client";
+import type {Image} from "@prisma/client";
 
 import prisma from "@pegada/database";
-import { DogServerSchema } from "@pegada/shared/schemas/dogSchema";
+import type {DogServerSchema} from "@pegada/shared/schemas/dogSchema";
 
 import { config } from "../shared/config";
 import * as FileUpload from "../shared/fileUpload";

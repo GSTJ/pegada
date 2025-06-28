@@ -4,9 +4,10 @@ import { redisConnection } from "@pegada/api/constants/redis";
 import { sendError } from "@pegada/api/errors/errors";
 import {
   CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
-  CheckPushNotificationReceiptsQueue,
-  ICheckPushNotificationReceiptsJobData
+  CheckPushNotificationReceiptsQueue
+  
 } from "@pegada/api/queue/CheckPushNotificationReceiptsQueue";
+import type {ICheckPushNotificationReceiptsJobData} from "@pegada/api/queue/CheckPushNotificationReceiptsQueue";
 
 import { expo } from "./shared/expo";
 import { handlePushError } from "./shared/handlePushError";

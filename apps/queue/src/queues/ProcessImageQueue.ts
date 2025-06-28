@@ -3,9 +3,10 @@ import { Worker } from "bullmq";
 import { redisConnection } from "@pegada/api/constants/redis";
 import { sendError } from "@pegada/api/errors/errors";
 import {
-  IProcessImageJobData,
+  
   PROCESS_IMAGE_QUEUE
 } from "@pegada/api/queue/ProcessImageQueue";
+import type {IProcessImageJobData} from "@pegada/api/queue/ProcessImageQueue";
 import { ImageService } from "@pegada/api/services/ImageService";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 

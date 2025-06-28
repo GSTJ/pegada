@@ -1,4 +1,4 @@
-import { ConnectionOptions, DefaultJobOptions } from "bullmq";
+import type {ConnectionOptions, DefaultJobOptions} from "bullmq";
 
 import { config } from "../shared/config";
 

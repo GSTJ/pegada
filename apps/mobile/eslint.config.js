@@ -15,4 +15,15 @@ const packageOverrides = {
 };
 
 /** @type {import('typescript-eslint').Config} */
-export default [...expoConfig, packageOverrides];
+export default [
+  ...expoConfig,
+  packageOverrides,
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "@typescript-eslint/no-extraneous-class": "off",
+      "@shopify/no-namespace-imports": "off",
+      "@shopify/jsx-no-hardcoded-content": "off"
+    }
+  }
+];

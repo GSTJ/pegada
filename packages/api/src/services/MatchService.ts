@@ -1,5 +1,5 @@
 import prisma from "@pegada/database";
-import { Language } from "@pegada/shared/i18n/types/types";
+import type {Language} from "@pegada/shared/i18n/types/types";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 
 import { dogSelect } from "../dtos/dogDto";

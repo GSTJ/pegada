@@ -3,7 +3,7 @@ import {
   InvalidOTPCodeError,
   OTPRequiredError
 } from "@pegada/shared/errors/errors";
-import { Language } from "@pegada/shared/i18n/types/types";
+import type {Language} from "@pegada/shared/i18n/types/types";
 
 import { MAIL_QUEUE, MailQueue } from "../queue/MailQueue";
 import { config } from "../shared/config";

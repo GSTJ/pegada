@@ -9,7 +9,7 @@ import {
   PITOCO_DOG,
   PITOCO_USER
 } from "./__mocks__/fixed-dogs-data";
-// eslint-disable-next-line jest/no-mocks-import -- Seed script intentionally uses fixtures from mocks
+ 
 import { generateFakeUserWithDog } from "./__mocks__/generate-fake-user-with-dog";
 import { dropDatabase } from "./drop-database";
 import { prisma } from "./index";

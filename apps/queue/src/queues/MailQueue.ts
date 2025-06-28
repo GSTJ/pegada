@@ -2,7 +2,8 @@ import { resolve } from "path";
 import { Worker } from "bullmq";
 
 import { redisConnection } from "@pegada/api/constants/redis";
-import { IMailJobData, MAIL_QUEUE } from "@pegada/api/queue/MailQueue";
+import {  MAIL_QUEUE } from "@pegada/api/queue/MailQueue";
+import type {IMailJobData} from "@pegada/api/queue/MailQueue";
 import { MailService } from "@pegada/api/services/MailService";
 import { TranslationService } from "@pegada/api/services/TranslationService";
 

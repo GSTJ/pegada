@@ -2,14 +2,14 @@ import { PlanType } from "@prisma/client";
 
 import prisma from "@pegada/database";
 
-import { Event } from "../types/revenuecat";
+import type {Event} from "../types/revenuecat";
 import { UserService } from "./UserService";
 
 enum RevenueCatEntitlement {
   PREMIUM = "premium"
 }
 
-type RevenueCatEvent = { event: Event };
+interface RevenueCatEvent { event: Event }
 
 const isAnonymous = (alias: string) => alias.startsWith("$RCAnonymousID:");
 const findNonAnonymousUserIds = (aliases: string[]): string[] => {

@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import handlebars from "handlebars";
-import { ParseKeys } from "i18next";
+import type {ParseKeys} from "i18next";
 import nodemailer from "nodemailer";
 
 import { Language, Namespace } from "@pegada/shared/i18n/types/types";

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { Color, Dog, Gender, PlanType, Size, SwipeType } from "@prisma/client";
+import { Color,  Gender, PlanType, Size, SwipeType } from "@prisma/client";
+import type {Dog} from "@prisma/client";
 import { z } from "zod";
 
 import prisma from "@pegada/database";
@@ -417,6 +418,7 @@ describe("SuggestionService", () => {
         expect(potentialMatches).toHaveLength(1);
         expect(potentialMatches[0]!.id).toEqual(nearDog.id);
       });
+
       test("breed", async () => {
         const preferredBreedId = faker.helpers.arrayElement(breedData).id!;
         const nonPreferredBreedId = faker.helpers.arrayElement(

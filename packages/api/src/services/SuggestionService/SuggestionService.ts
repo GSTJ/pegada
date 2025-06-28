@@ -1,11 +1,12 @@
-import { Dog, Gender, PlanType, Prisma, SwipeType } from "@prisma/client";
-import { Sql } from "@prisma/client/runtime/library";
-import { z } from "zod";
+import {  Gender, PlanType, Prisma, SwipeType } from "@prisma/client";
+import type {Dog} from "@prisma/client";
+import type {Sql} from "@prisma/client/runtime/library";
+import type {z} from "zod";
 
 import prisma from "@pegada/database";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 
-import { dogSafeSchema } from "../../dtos/dogDto";
+import type {dogSafeSchema} from "../../dtos/dogDto";
 
 type DogSafeSchema = z.infer<typeof dogSafeSchema>;
 export class SuggestionService {
