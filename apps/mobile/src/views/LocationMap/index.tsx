@@ -98,12 +98,14 @@ const LocationMap = () => {
         }
         key={theme.dark ? "dark" : "light"}
         initialRegion={{
-          latitude: location?.latitude,
-          longitude: location?.longitude,
+          latitude: location.latitude,
+          longitude: location.longitude,
           latitudeDelta: 0.005,
           longitudeDelta: 0.005
         }}
-        onTouchStart={() => { setTouchStarted(true); }}
+        onTouchStart={() => {
+          setTouchStarted(true);
+        }}
         onRegionChange={() => {
           if (!touchStarted) return;
 
@@ -130,7 +132,9 @@ const LocationMap = () => {
       <Marker touchStarted={touchStarted} dragging={dragging} />
       <Submit
         loading={userMutation.isPending}
-        onPress={() => { userMutation.mutate(); }}
+        onPress={() => {
+          userMutation.mutate();
+        }}
         dragging={dragging}
       />
     </Container>

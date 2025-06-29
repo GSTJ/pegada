@@ -39,9 +39,9 @@ const Component = ({
   message: { createdAt: Date };
   nextMessage?: { createdAt: Date };
 }) => {
-  const currentMessageDate = message?.createdAt;
+  const currentMessageDate = message.createdAt;
 
-  if (nextMessage && isSameDay(currentMessageDate, nextMessage?.createdAt)) {
+  if (nextMessage && isSameDay(currentMessageDate, nextMessage.createdAt)) {
     return null;
   }
 

@@ -41,12 +41,12 @@ const ChatMessageList = () => {
     <ActivityIndicator color={theme.colors.text} />
   ) : null;
 
-  const FooterComponent = messages ? MessageLoader : null;
+  const FooterComponent = MessageLoader;
 
   const topPadding = insets.top + HEADER_HEIGHT + theme.spacing[3];
   const bottomPadding = insets.bottom + SEND_HEIGHT + theme.spacing[3];
 
-  const inverted = !!messages?.length;
+  const inverted = !!messages.length;
 
   const contentContainerStyle = {
     paddingVertical: theme.spacing[3],
@@ -63,7 +63,7 @@ const ChatMessageList = () => {
       return (
         <>
           {showNextDay ? (
-            <NextDay message={item} nextMessage={messages?.[index + 1]} />
+            <NextDay message={item} nextMessage={messages[index + 1]} />
           ) : null}
           <Message {...item} self={item.senderId !== dogId}>
             {item.content}

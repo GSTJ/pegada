@@ -74,7 +74,12 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
       onAdd({ url: selectedImage.uri });
       setLocalPicture(selectedImage.uri);
 
-      const presignedUrl = await getTrcpContext().image.signedUrl.fetch();
+      const presignedUrlResponse =
+        await getTrcpContext().image.signedUrl.fetch();
+
+      if (typeof presignedUrlResponse !== "string") {
+        throw new Error("Invalid presigned URL response");
+      }
 
       /**
        * Compress the image before uploading. Expensive operation,
@@ -82,17 +87,21 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
        */
       const compressedImage = await compressImage(selectedImage.uri);
 
-      const response = await uploadAsync(presignedUrl, compressedImage.uri, {
-        mimeType: getMimeType(compressedImage.uri),
-        uploadType: FileSystemUploadType.BINARY_CONTENT,
-        httpMethod: "PUT"
-      });
+      const response = await uploadAsync(
+        presignedUrlResponse,
+        compressedImage.uri,
+        {
+          mimeType: getMimeType(compressedImage.uri),
+          uploadType: FileSystemUploadType.BINARY_CONTENT,
+          httpMethod: "PUT"
+        }
+      );
 
       if (response.status !== 200) {
         throw new Error("Failed to upload image");
       }
 
-      const finalUrlPart = presignedUrl.split("?")[0];
+      const finalUrlPart = presignedUrlResponse.split("?")[0];
 
       if (!finalUrlPart) {
         throw new Error("Invalid presigned URL format");

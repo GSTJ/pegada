@@ -65,7 +65,6 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   const { periodUnit, periodValue } = getPeriodDetails(period ?? "");
 
   const pricePerMonth = (() => {
-    if (!periodUnit || !periodValue) return;
     switch (periodUnit) {
       case "D":
         return currentPrice / periodValue;

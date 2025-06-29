@@ -60,10 +60,17 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   const gotoPreviousImage = () => {
     // If there is only one image, open the user profile for now.
     // Not ideal to be here, but improves UX a little - just a quick fix
-    if (images.length <= 1 && shouldShowPersonalInfo) { openUserProfile(); return; }
+    if (images.length <= 1 && shouldShowPersonalInfo) {
+      openUserProfile();
+      return;
+    }
 
-    if (currentImage !== 0) { setCurrentImage((index) => index - 1); return; }
+    if (currentImage !== 0) {
+      setCurrentImage((index) => index - 1);
+      return;
+    }
 
+    // eslint-disable-next-line react-compiler/react-compiler
     rotation.value = withSequence(
       withSpring(-0.5, springConfig),
       withSpring(0, springConfig)
@@ -73,11 +80,16 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   const gotoNextImage = () => {
     // If there is only one image, open the user profile for now.
     // Not ideal to be here, but improves UX a little - just a quick fix
-    if (images.length <= 1 && shouldShowPersonalInfo) { openUserProfile(); return; }
+    if (images.length <= 1 && shouldShowPersonalInfo) {
+      openUserProfile();
+      return;
+    }
 
     if (currentImage + 1 < images.length) {
-      setCurrentImage((index) => index + 1); return;
+      setCurrentImage((index) => index + 1);
+      return;
     }
+    // eslint-disable-next-line react-compiler/react-compiler
     rotation.value = withSequence(
       withSpring(0.5, springConfig),
       withSpring(0, springConfig)

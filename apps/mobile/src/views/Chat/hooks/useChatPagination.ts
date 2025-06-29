@@ -49,7 +49,7 @@ export const useChatPagination = () => {
 
   useFetchNewMessages();
 
-  const messages = data ? data.pages.flatMap((page) => page) : [];
+  const messages = data.pages.flatMap((page) => page);
 
   return {
     messages,

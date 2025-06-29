@@ -1,5 +1,6 @@
 import type { RouterOutputs } from "@/contexts/TRPCProvider";
 import { useEffect, useRef, useState } from "react";
+import * as React from "react";
 import { FlatList, Platform, View } from "react-native";
 import { usePathname } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
@@ -74,8 +75,8 @@ const Messages = () => {
       if (!a.lastMessage) return 1;
       if (!b.lastMessage) return -1;
 
-      if (a.lastMessage?.createdAt < b.lastMessage?.createdAt) return 1;
-      if (a.lastMessage?.createdAt > b.lastMessage?.createdAt) return -1;
+      if (a.lastMessage.createdAt < b.lastMessage.createdAt) return 1;
+      if (a.lastMessage.createdAt > b.lastMessage.createdAt) return -1;
       return 0;
     });
 
@@ -121,7 +122,7 @@ const Messages = () => {
 
   return (
     <Container behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      {Boolean(matches?.length) && (
+      {Boolean(matches.length) && (
         <SearchBar value={search} onChangeText={setSearch} />
       )}
       <FlatList
@@ -129,7 +130,7 @@ const Messages = () => {
         data={data}
         ref={scrollRef}
         keyExtractor={getKeyMemoized}
-        ListHeaderComponent={data?.length ? MemoizedHeader : undefined}
+        ListHeaderComponent={data.length ? MemoizedHeader : undefined}
         ItemSeparatorComponent={MemoizedDivider}
         renderItem={({ item }) => {
           return <Message item={item} />;
@@ -144,7 +145,7 @@ const Messages = () => {
           paddingTop: theme.spacing[1],
           // Increase size only if data is empty
           // Otherwise it bugs stuff
-          flexGrow: data?.length ? undefined : 1
+          flexGrow: data.length ? undefined : 1
         }}
       />
     </Container>

@@ -81,18 +81,18 @@ const EditProfile = () => {
     setValue(
       "images",
       pictures.map((picture, index) => {
-        const matchingImage = dog?.images?.[index];
+        const matchingImage = dog.images[index];
 
         if (!matchingImage) return picture;
 
         return {
           ...picture,
-          id: matchingImage?.id,
-          key: matchingImage?.id,
-          url: matchingImage?.url,
-          status: matchingImage?.status,
-          blurhash: matchingImage?.blurhash,
-          position: matchingImage?.position,
+          id: matchingImage.id,
+          key: matchingImage.id,
+          url: matchingImage.url,
+          status: matchingImage.status,
+          blurhash: matchingImage.blurhash,
+          position: matchingImage.position,
           disabledDrag: false,
           disabledReSorted: false
         };
@@ -137,7 +137,7 @@ const EditProfile = () => {
       color: data.color ?? null,
       size: data.size ?? null,
       images: data.images
-        ?.filter((image) => image.url)
+        .filter((image) => image.url)
         .map((image, index) => {
           if (!image.url) {
             throw new Error("Image URL not available after filtering");

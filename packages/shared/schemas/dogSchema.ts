@@ -187,6 +187,39 @@ export const dogServerSchema = z.object({
     )
 });
 
+export const dogSafeSchema = z
+  .object({
+    id: z.string(),
+    bio: z.string().nullable(),
+    breed: z
+      .object({
+        id: z.string(),
+        slug: z.string()
+      })
+      .nullable(),
+    birthDate: z.date().nullable(),
+    color: z.string().nullable(),
+    gender: z.string(),
+    distance: z.number().nullable(),
+    images: z.array(
+      z.object({
+        id: z.string(),
+        url: z.string(),
+        position: z.number(),
+        blurhash: z.string().nullable()
+      })
+    ),
+    name: z.string(),
+    pedigreeProof: z.string().nullable(),
+    size: z.string().nullable(),
+    weight: z.number().nullable(),
+    hasPedigree: z.boolean().nullable(),
+    user: z.object({
+      plan: z.string()
+    })
+  })
+  .strict();
+
 const clientImages = z
   .array(
     z.object({
@@ -233,9 +266,7 @@ export const dogCompleteClientSchema = z.object({
 });
 
 export type DogServerSchema = z.infer<typeof dogServerSchema>;
-
+export type DogSafeSchema = z.infer<typeof dogSafeSchema>;
 export type DogClientSchema = z.infer<typeof dogClientSchema>;
-
 export type DogQuickClientSchema = z.infer<typeof dogQuickClientSchema>;
-
 export type DogCompleteClientSchema = z.infer<typeof dogCompleteClientSchema>;

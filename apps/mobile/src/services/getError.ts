@@ -7,16 +7,18 @@ export const getError = <
     error_code: string;
   }
 >(
-  error: any,
+  error: unknown,
   instance: T
 ): InstanceType<T> | undefined => {
   if (error instanceof instance) {
-    return error;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return error as InstanceType<T>;
   }
 
   const errorCode = get(error, "data.error.error_code");
 
   if (errorCode === instance.error_code) {
-    return error.data.error;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return get(error, "data.error") as InstanceType<T>;
   }
 };

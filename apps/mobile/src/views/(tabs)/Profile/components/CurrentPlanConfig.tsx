@@ -3,24 +3,13 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import styled, { useTheme } from "styled-components/native";
+import { useTheme } from "styled-components/native";
 
 import Premium from "@/assets/images/Badge.svg";
-import Loading from "@/components/Loading";
 import { useCustomerPlan } from "@/hooks/usePayments";
 import { UserPlan } from "@/services/payments";
 import { SceneName } from "@/types/SceneName";
 import { Config } from "./Config";
-
-const PlanLoading = styled.View`
-  width: 18px;
-  height: 18px;
-  transform: translateY(2px) translateX(-12px);
-`;
-
-const StyledLoading = styled(Loading)`
-  height: 12px;
-`;
 
 export const CurrentPlanConfig = () => {
   const plan = useCustomerPlan();
@@ -32,7 +21,7 @@ export const CurrentPlanConfig = () => {
   const userPlan = plan.data?.userPlan;
 
   const expirationDate = plan.data?.expirationDate
-    ? format(plan.data?.expirationDate, "MMM do")
+    ? format(plan.data.expirationDate, "MMM do")
     : null;
 
   const handlePress = () => {
@@ -41,7 +30,8 @@ export const CurrentPlanConfig = () => {
     }
 
     if (userPlan === UserPlan.Free) {
-      router.push(SceneName.UpgradeWall); return;
+      router.push(SceneName.UpgradeWall);
+      return;
     }
 
     if (Platform.OS === "android") {
@@ -58,11 +48,6 @@ export const CurrentPlanConfig = () => {
       <Premium width={22} height={22} fill={theme.colors.text} />
       <Config.Container>
         <Config.Title>{t("profile.plan.currentPlan")}</Config.Title>
-        {plan.isLoading ? (
-          <PlanLoading>
-            <StyledLoading inverse />
-          </PlanLoading>
-        ) : null}
         {userPlan ? (
           <Config.Description>{t(`plans.${userPlan}`)}</Config.Description>
         ) : null}
@@ -72,14 +57,12 @@ export const CurrentPlanConfig = () => {
           </Config.Description>
         ) : null}
       </Config.Container>
-      {!plan.isLoading ? (
-        <Config.Description style={{ transform: [{ translateY: -2 }] }}>
-          {userPlan === UserPlan.Free && t("profile.plan.upgradeToPremium")}
-          {userPlan === UserPlan.Premium &&
-            t("profile.plan.until", { date: expirationDate })}
-          {plan.isError ? t("profile.plan.clickToRetry") : null}
-        </Config.Description>
-      ) : null}
+      <Config.Description style={{ transform: [{ translateY: -2 }] }}>
+        {userPlan === UserPlan.Free && t("profile.plan.upgradeToPremium")}
+        {userPlan === UserPlan.Premium &&
+          t("profile.plan.until", { date: expirationDate })}
+        {plan.isError ? t("profile.plan.clickToRetry") : null}
+      </Config.Description>
       <Config.Arrow />
     </Config.Root>
   );

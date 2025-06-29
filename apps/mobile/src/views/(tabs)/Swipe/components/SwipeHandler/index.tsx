@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { Swipe } from "./hooks/useSwipeGesture";
 import FeedbackCard from "@/components/FeedbackCard";
 import { ACTION_OFFSET } from "@/constants";
-import { useIsFirstRender } from "@/hooks/useIsFirstRender";
+import { useIsFirstRenderRef } from "@/hooks/useIsFirstRenderRef";
 import { Actions } from "@/store/reducers";
 import { getCurrentCardId } from "@/store/selectors";
 import { useSwipeGesture } from "./hooks/useSwipeGesture";
@@ -57,17 +57,20 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
   useEffect(() => {
     if (!isFirstCard) return;
 
+    // eslint-disable-next-line react-compiler/react-compiler
     swipeHandlerRef.current = {
       gotoDirection: runOnUI(automaticSwipe)
-    } as SwipeHandlerRefProps;
+    };
   }, [automaticSwipe, isFirstCard]);
 
-  const isFirstRender = useIsFirstRender();
+  const isFirstRender = useIsFirstRenderRef();
 
   useEffect(() => {
-    if (!isFirstCard || isFirstRender) return;
+    if (!isFirstCard || isFirstRender.current) return;
 
+    // eslint-disable-next-line react-compiler/react-compiler
     translation.x.value = withSpring(0, { stiffness: 50 });
+    // eslint-disable-next-line react-compiler/react-compiler
     translation.y.value = withSpring(0, { stiffness: 50 });
   }, [isFirstCard, isFirstRender, translation.x, translation.y]);
 

@@ -14,7 +14,7 @@ import {
 import type { OtpInputRef } from "./components/OtpInput";
 import { Text } from "@/components/Text";
 import { api } from "@/contexts/TRPCProvider";
-import { useIsFirstRender } from "@/hooks/useIsFirstRender";
+import { useIsFirstRenderRef } from "@/hooks/useIsFirstRenderRef";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/errorTracking";
 import { getError } from "@/services/getError";
@@ -98,10 +98,10 @@ const OneTimeCode = () => {
     loginMutation.mutate({ email: email as string });
   };
 
-  const isFirstRender = useIsFirstRender();
+  const isFirstRender = useIsFirstRenderRef();
 
   useEffect(() => {
-    if (keyboardInput.length !== CODE_LENGTH || isFirstRender) return;
+    if (keyboardInput.length !== CODE_LENGTH || isFirstRender.current) return;
 
     loginMutation.mutate({ email: email as string, code: keyboardInput });
   }, [isFirstRender, keyboardInput, loginMutation, email]);

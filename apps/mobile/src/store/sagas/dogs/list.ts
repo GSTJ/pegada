@@ -1,6 +1,8 @@
 import type { RootReducer } from "@/store/reducers";
 import { all, call, put, select, takeLatest } from "redux-saga/effects";
 
+import type { DogSafeSchema } from "@pegada/shared/schemas/dogSchema";
+
 import { getTrcpContext } from "@/contexts/trcpContext";
 import i18n from "@/i18n";
 import { sendError } from "@/services/errorTracking";
@@ -14,12 +16,15 @@ export function* fetchUsersRequest(): unknown {
   );
 
   try {
-    const response = yield call(getTrcpContext().client.swipe.all.query, {
-      limit: dogs.config.limit,
+    const response: DogSafeSchema[] = yield call(
+      getTrcpContext().client.swipe.all.query,
+      {
+        limit: dogs.config.limit,
 
-      // Avoids fetching dogs that are already on screen
-      notIn: dogs.request.data.map((dog) => dog.id)
-    });
+        // Avoids fetching dogs that are already on screen
+        notIn: dogs.request.data.map((dog) => dog.id)
+      }
+    );
 
     // For each dog, mutate the cache, so that the dog is not fetched again
     for (const dog of response) {
