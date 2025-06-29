@@ -1,8 +1,8 @@
 import styled from "styled-components/native";
 
-import * as ModalStyles from "@/components/DefaultModal/styles";
+import { Container as ModalContainer } from "@/components/DefaultModal/styles";
 
-export const Container = styled(ModalStyles.Container)`
+export const Container = styled(ModalContainer)`
   gap: ${(props) => props.theme.spacing[2]}px;
   padding-top: ${(props) => props.theme.spacing[7]}px;
 `;

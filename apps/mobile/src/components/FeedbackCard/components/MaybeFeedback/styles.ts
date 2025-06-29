@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 
-import * as LikeFeedbackStyles from "../LikeFeedback/styles";
+import { Container as LikeFeedbackContainer } from "../LikeFeedback/styles";
 
-export const Container = styled(LikeFeedbackStyles.Container)`
+export const Container = styled(LikeFeedbackContainer)`
   background-color: #fffacb;
 `;

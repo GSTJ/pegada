@@ -5,7 +5,7 @@ import { useTheme } from "styled-components/native";
 
 import { useKeyboardAwareSafeAreaInsets } from "../../hooks/useKeyboardAwareSafeAreaInsets";
 import { BUTTON_HEIGHT } from "../Button/styles";
-import * as S from "./styles";
+import { Container } from "./styles";
 
 export const useBottomActionStyle = () => {
   const insets = useKeyboardAwareSafeAreaInsets();
@@ -43,11 +43,11 @@ export const useBottomActionStyle = () => {
   };
 };
 
-const Container: React.FC<BlurViewProps> = (props) => {
+const ContainerFC: React.FC<BlurViewProps> = (props) => {
   const { height, paddingBottom } = useBottomActionStyle();
 
   return (
-    <S.Container
+    <Container
       {...props}
       style={[
         {
@@ -61,5 +61,5 @@ const Container: React.FC<BlurViewProps> = (props) => {
 };
 
 export const BottomAction = {
-  Container
+  Container: ContainerFC
 };

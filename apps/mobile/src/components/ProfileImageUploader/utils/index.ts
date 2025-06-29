@@ -1,6 +1,13 @@
+import type { ImagePickerAsset } from "expo-image-picker";
 import { Alert, Platform } from "react-native";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
-import * as ImagePicker from "expo-image-picker";
+import {
+  launchCameraAsync,
+  launchImageLibraryAsync,
+  MediaTypeOptions,
+  requestCameraPermissionsAsync,
+  requestMediaLibraryPermissionsAsync
+} from "expo-image-picker";
 
 import type { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 
@@ -63,7 +70,7 @@ export const compressImage = async (uri: string) => {
   return manipResult;
 };
 
-const formatImage = (image: ImagePicker.ImagePickerAsset) => {
+const formatImage = (image: ImagePickerAsset) => {
   const pictureUri =
     Platform.OS === "ios" ? image.uri.replace("file://", "") : image.uri;
 
@@ -77,8 +84,7 @@ export enum ImagePickerError {
 }
 
 export const pickImage = async () => {
-  const cameraRollStatus =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const cameraRollStatus = await requestMediaLibraryPermissionsAsync();
 
   if (cameraRollStatus.status !== "granted") {
     Alert.alert(
@@ -88,8 +94,8 @@ export const pickImage = async () => {
     throw new Error(ImagePickerError.NO_PERMISSION);
   }
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  const result = await launchImageLibraryAsync({
+    mediaTypes: MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [9, 16],
     quality: 1
@@ -109,7 +115,7 @@ export const pickImage = async () => {
 };
 
 export const takeImage = async () => {
-  const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
+  const cameraStatus = await requestCameraPermissionsAsync();
 
   if (cameraStatus.status !== "granted") {
     Alert.alert(
@@ -119,8 +125,8 @@ export const takeImage = async () => {
     throw new Error(ImagePickerError.NO_PERMISSION);
   }
 
-  const result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  const result = await launchCameraAsync({
+    mediaTypes: MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [9, 16],
     quality: 1
@@ -153,7 +159,9 @@ export const showImagePickerOptions = (): Promise<{
           text: i18n.t("imagePicker.takePhoto"),
           onPress: () => {
             takeImage()
-              .then((imageUrl) => { resolve(imageUrl); })
+              .then((imageUrl) => {
+                resolve(imageUrl);
+              })
               .catch((error: unknown) => {
                 if (
                   error instanceof Error &&
@@ -172,7 +180,9 @@ export const showImagePickerOptions = (): Promise<{
           text: i18n.t("imagePicker.chooseFromLibrary"),
           onPress: () => {
             pickImage()
-              .then((imageUrl) => { resolve(imageUrl); })
+              .then((imageUrl) => {
+                resolve(imageUrl);
+              })
               .catch((error: unknown) => {
                 if (
                   error instanceof Error &&

@@ -3,7 +3,15 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/Text";
-import * as S from "./styles";
+import {
+  ActivityIndicatorComponent,
+  CancelIcon,
+  CancelTouchArea,
+  Container,
+  Content,
+  TextInput as StyledTextInput,
+  TitleContainer
+} from "./styles";
 
 interface TextFieldContainerProps {
   loading?: boolean;
@@ -15,10 +23,10 @@ const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
   children,
   ...props
 }) => (
-  <S.Content {...props}>
+  <Content {...props}>
     {!loading && children}
-    {loading ? <S.ActivityIndicatorComponent /> : null}
-  </S.Content>
+    {loading ? <ActivityIndicatorComponent /> : null}
+  </Content>
 );
 
 interface InputProps extends TextInputProps {
@@ -43,26 +51,26 @@ export const Input = ({
   const { t } = useTranslation();
 
   return (
-    <S.Container>
+    <Container>
       {Boolean(title ?? optional) && (
-        <S.TitleContainer>
+        <TitleContainer>
           <Text fontWeight="bold" fontSize="lg">
             {title}
           </Text>
           {optional ? <Text fontSize="xs">{t("common.optional")}</Text> : null}
-        </S.TitleContainer>
+        </TitleContainer>
       )}
       <TextFieldContainer loading={loading}>
-        <S.TextInput
+        <StyledTextInput
           value={props.value}
           onChangeText={props.onChangeText}
           ref={ref}
           {...props}
         />
         {Boolean(props.value) && canCancel ? (
-          <S.CancelTouchArea onPress={() => props.onChangeText?.("")}>
-            <S.CancelIcon />
-          </S.CancelTouchArea>
+          <CancelTouchArea onPress={() => props.onChangeText?.("")}>
+            <CancelIcon />
+          </CancelTouchArea>
         ) : null}
       </TextFieldContainer>
       {Boolean(error) && (
@@ -70,6 +78,6 @@ export const Input = ({
           *{error}
         </Text>
       )}
-    </S.Container>
+    </Container>
   );
 };

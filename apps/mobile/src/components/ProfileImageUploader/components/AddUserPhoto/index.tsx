@@ -21,7 +21,15 @@ import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";
 import { getMimeType } from "@/services/getMimeType";
-import * as S from "./styles";
+import {
+  AddRemoveContainer,
+  AnimatedOverlay,
+  DebugImageStatusContainer,
+  FadedDog,
+  UserPicture,
+  UserPictureContainer,
+  UserPictureContent
+} from "./styles";
 
 interface AddUserPhotoProps {
   picture: Picture;
@@ -103,18 +111,18 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
   const isLoading = Boolean(localPicture && !picture.url.includes("http"));
 
   return (
-    <S.UserPictureContainer>
-      <S.UserPictureContent>
-        <S.UserPicture
+    <UserPictureContainer>
+      <UserPictureContent>
+        <UserPicture
           key={localPicture}
           {...(localPicture
             ? { source: { uri: localPicture, blurhash: picture.blurhash } }
             : undefined)}
         />
         {isLoading ? (
-          <S.AnimatedOverlay exiting={FadeOut.duration(150)}>
+          <AnimatedOverlay exiting={FadeOut.duration(150)}>
             <ActivityIndicator color="#FFF" />
-          </S.AnimatedOverlay>
+          </AnimatedOverlay>
         ) : null}
         {!hasPicture && (
           <PressableArea
@@ -122,21 +130,21 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
             // Takes up the whole component,
             hitSlop={hitSlop}
           >
-            <S.FadedDog fill={theme.colors.text} width={40} height={40} />
+            <FadedDog fill={theme.colors.text} width={40} height={40} />
           </PressableArea>
         )}
         {
           /** Picture status is only returned in development mode for debugging */
           picture.status ? (
-            <S.DebugImageStatusContainer>
+            <DebugImageStatusContainer>
               <Text color="white" fontSize="xxs" fontWeight="medium">
                 {picture.status}
               </Text>
-            </S.DebugImageStatusContainer>
+            </DebugImageStatusContainer>
           ) : null
         }
-      </S.UserPictureContent>
-      <S.AddRemoveContainer
+      </UserPictureContent>
+      <AddRemoveContainer
         disabled={isLoading}
         inverted={hasPicture}
         onPress={hasPicture ? handleDelete : handleAdd}
@@ -144,7 +152,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
         <Animated.View style={style}>
           <AddRemove fill={hasPicture ? theme.colors.primary : "white"} />
         </Animated.View>
-      </S.AddRemoveContainer>
-    </S.UserPictureContainer>
+      </AddRemoveContainer>
+    </UserPictureContainer>
   );
 };
