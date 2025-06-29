@@ -68,10 +68,14 @@ const PlanPackages: React.FC<OfferingsProps> = ({
 
   const packageWithLessRelativeValue = offeringsData
     ? Object.values(offeringsData.availablePackages).sort((a, b) => {
+        if (!a.product.subscriptionPeriod || !b.product.subscriptionPeriod) {
+          return 0;
+        }
+
         const relativeValueA =
-          a.product.price / periodToDays(a.product.subscriptionPeriod!);
+          a.product.price / periodToDays(a.product.subscriptionPeriod);
         const relativeValueB =
-          b.product.price / periodToDays(b.product.subscriptionPeriod!);
+          b.product.price / periodToDays(b.product.subscriptionPeriod);
 
         return relativeValueB - relativeValueA;
       })[0]
@@ -87,20 +91,27 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   return (
     <Container>
       {packageList?.map((planPackage) => {
+        if (!planPackage.product.subscriptionPeriod) {
+          return null;
+        }
+
         // Get old price comparing with the package with less relative value / period * this package period
-        const oldPrice = packageWithLessRelativeValue
+        const oldPrice = packageWithLessRelativeValue?.product
+          .subscriptionPeriod
           ? (packageWithLessRelativeValue.product.price /
               periodToDays(
-                packageWithLessRelativeValue.product.subscriptionPeriod!
+                packageWithLessRelativeValue.product.subscriptionPeriod
               )) *
-            periodToDays(planPackage.product.subscriptionPeriod!)
+            periodToDays(planPackage.product.subscriptionPeriod)
           : undefined;
 
         return (
           <PlanCard
             key={planPackage.identifier}
             selected={selectedPackage?.identifier === planPackage.identifier}
-            onPress={() => { setSelectedPackage(planPackage); }}
+            onPress={() => {
+              setSelectedPackage(planPackage);
+            }}
             planPackage={planPackage}
             oldPrice={oldPrice}
           />

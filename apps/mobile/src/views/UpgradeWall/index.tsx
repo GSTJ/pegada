@@ -106,7 +106,8 @@ const UpgradeWall: React.FC = () => {
             trial: isEligibleForTrial,
             type: "cancel"
           }
-        }); return;
+        });
+        return;
       }
 
       sendError(e);
@@ -212,7 +213,9 @@ const UpgradeWall: React.FC = () => {
       <BottomAction.Container>
         <Button
           onPress={() => {
-            purchasePackage.mutate(selectedOffering!);
+            if (!selectedOffering) return;
+
+            purchasePackage.mutate(selectedOffering);
           }}
           disabled={!selectedOffering}
           loading={purchasePackage.isPending || !selectedOffering}

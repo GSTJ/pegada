@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Reducer } from "typesafe-actions";
 import reduceReducers from "reduce-reducers";
 

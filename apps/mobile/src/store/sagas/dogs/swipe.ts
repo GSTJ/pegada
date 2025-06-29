@@ -18,6 +18,7 @@ import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwi
 
 function* swipeUserRequest({
   payload
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: ActionType<typeof Actions.dogs.swipe.request>): any {
   const { id, swipeType: _swipeType } = payload;
 
