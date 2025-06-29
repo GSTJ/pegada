@@ -33,7 +33,7 @@ export const useEligibleForTrial = ({
 };
 
 export const useCustomerInfo = () => {
-  const loginProps = usePaymentsLogin();
+  usePaymentsLogin();
 
   const customerInfoProps = useSuspenseQuery({
     queryFn: payments.getCustomerInfo,
@@ -44,11 +44,7 @@ export const useCustomerInfo = () => {
     refetchOnWindowFocus: true
   });
 
-  return {
-    ...customerInfoProps,
-    isLoading: customerInfoProps.isLoading,
-    error: loginProps.error ?? customerInfoProps.error
-  };
+  return customerInfoProps;
 };
 
 export const useCustomerPlan = () => {

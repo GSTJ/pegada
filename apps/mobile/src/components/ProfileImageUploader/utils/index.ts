@@ -1,3 +1,4 @@
+import type { ImageResult } from "expo-image-manipulator";
 import type { ImagePickerAsset } from "expo-image-picker";
 import { Alert, Platform } from "react-native";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
@@ -60,7 +61,7 @@ export const deleteItem =
     };
   };
 
-export const compressImage = async (uri: string) => {
+export const compressImage = async (uri: string): Promise<ImageResult> => {
   const manipResult = await ImageManipulator.manipulateAsync(uri, [], {
     format: SaveFormat.WEBP,
     compress: 0.8

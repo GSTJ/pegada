@@ -15,7 +15,7 @@ export const getError = <
     return error as InstanceType<T>;
   }
 
-  const errorCode = get(error, "data.error.error_code");
+  const errorCode = get(error, "data.error.error_code") as string | undefined;
 
   if (errorCode === instance.error_code) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
