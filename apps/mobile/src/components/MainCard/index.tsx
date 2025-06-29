@@ -70,7 +70,6 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
       return;
     }
 
-    // eslint-disable-next-line react-compiler/react-compiler
     rotation.value = withSequence(
       withSpring(-0.5, springConfig),
       withSpring(0, springConfig)

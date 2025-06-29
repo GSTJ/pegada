@@ -57,7 +57,6 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
   useEffect(() => {
     if (!isFirstCard) return;
 
-    // eslint-disable-next-line react-compiler/react-compiler
     swipeHandlerRef.current = {
       gotoDirection: runOnUI(automaticSwipe)
     };
@@ -70,7 +69,6 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
 
     // eslint-disable-next-line react-compiler/react-compiler
     translation.x.value = withSpring(0, { stiffness: 50 });
-    // eslint-disable-next-line react-compiler/react-compiler
     translation.y.value = withSpring(0, { stiffness: 50 });
   }, [isFirstCard, isFirstRender, translation.x, translation.y]);
 
