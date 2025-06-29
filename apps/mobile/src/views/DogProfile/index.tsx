@@ -78,33 +78,40 @@ export const reportUser = (dog: SwipeDog) => {
     {
       text: i18n.t("dogProfile.yes"),
       style: "destructive",
-      onPress: async () => {
-        try {
-          await Linking.openURL(
-            `mailto:report@pegada.app?subject=${encodeURIComponent(
-              i18n.t("dogProfile.report")
-            )}&body=${encodeURIComponent(
-              i18n.t("dogProfile.reportBody", {
+      onPress: () => {
+        const handlePress = async () => {
+          try {
+            await Linking.openURL(
+              `mailto:report@pegada.app?subject=${encodeURIComponent(
+                i18n.t("dogProfile.report")
+              )}&body=${encodeURIComponent(
+                i18n.t("dogProfile.reportBody", {
+                  id: dog.id,
+                  name: dog.name
+                })
+              )}`
+            );
+
+            await getTrcpContext()
+              .client.swipe.swipe.mutate({
                 id: dog.id,
-                name: dog.name
+                swipeType: Swipe.Dislike
               })
-            )}`
-          );
+              .then(() => {
+                getTrcpContext().match.getAll.setData(undefined, (request) => {
+                  if (!request) return [];
+                  return request.filter((match) => match.dog.id !== dog.id);
+                });
 
-          await getTrcpContext()
-            .client.swipe.swipe.mutate({ id: dog.id, swipeType: Swipe.Dislike })
-            .then(() => {
-              getTrcpContext().match.getAll.setData(undefined, (request) => {
-                if (!request) return [];
-                return request.filter((match) => match.dog.id !== dog.id);
+                router.back();
               });
+          } catch (err) {
+            // Silently fail
+            sendError(err);
+          }
+        };
 
-              router.back();
-            });
-        } catch (err) {
-          // Silently fail
-          sendError(err);
-        }
+        void handlePress();
       }
     }
   ]);
@@ -118,7 +125,8 @@ const useSwipeHandler = (id: string) => {
     router.back();
 
     if (id === currentCardId && swipeHandlerRef.current) {
-      swipeHandlerRef.current.gotoDirection(swipeType); return;
+      swipeHandlerRef.current.gotoDirection(swipeType);
+      return;
     }
 
     dispatch(Actions.dogs.swipe.request({ id: id, swipeType }));
@@ -200,7 +208,11 @@ const DogProfile = () => {
           />
         </View>
 
-        <GoBack onPress={() => { router.back(); }} />
+        <GoBack
+          onPress={() => {
+            router.back();
+          }}
+        />
 
         <S.BottomColumn
           style={{
@@ -240,7 +252,9 @@ const DogProfile = () => {
               <ShareButton dog={dog} />
               <S.ReportButton>
                 <Text
-                  onPress={() => { reportUser(dog); }}
+                  onPress={() => {
+                    reportUser(dog);
+                  }}
                   fontWeight="bold"
                   style={{ textAlign: "center" }}
                 >
@@ -275,9 +289,15 @@ const DogProfile = () => {
           />
           <MatchActionBar
             style={{ bottom: topInset }}
-            onNope={() => { swipeHandler(Swipe.Dislike); }}
-            onYep={() => { swipeHandler(Swipe.Like); }}
-            onMaybe={() => { swipeHandler(Swipe.Maybe); }}
+            onNope={() => {
+              swipeHandler(Swipe.Dislike);
+            }}
+            onYep={() => {
+              swipeHandler(Swipe.Like);
+            }}
+            onMaybe={() => {
+              swipeHandler(Swipe.Maybe);
+            }}
           />
         </>
       )}
@@ -296,7 +316,9 @@ const DogProfileErrorState = () => {
         headerLeft={() => (
           <HeaderBackButton
             tintColor={theme.colors.primary}
-            onPress={() => { router.back(); }}
+            onPress={() => {
+              router.back();
+            }}
           />
         )}
         headerRightContainerStyle={{ paddingRight: 16 }}

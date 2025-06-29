@@ -75,7 +75,7 @@ const UnForwardedPickerSheet = <T extends Item>(
 
   const insets = useSafeAreaInsets();
 
-  const pickerSheetRef = ref as React.MutableRefObject<BottomSheetModal>;
+  const pickerSheetRef = ref as React.RefObject<BottomSheetModal>;
 
   const onClose = () => {
     pickerSheetRef.current.close();

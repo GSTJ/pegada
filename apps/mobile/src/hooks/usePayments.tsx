@@ -104,6 +104,6 @@ export const useOfferings = () => {
 payments.init();
 
 // Automatically update the query data when the customer info changes
-payments.addCustomerInfoUpdateListener(async (customerInfo: CustomerInfo) => {
+payments.addCustomerInfoUpdateListener((customerInfo: CustomerInfo) => {
   queryClient.setQueryData([PaymentCacheKey.CustomerInfo], customerInfo);
 });

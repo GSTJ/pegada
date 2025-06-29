@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import * as uuid from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import type { MessageProps } from "./useChatPagination";
 import { getTrcpContext } from "@/contexts/trcpContext";
@@ -100,7 +100,7 @@ export const useSendMessage = () => {
   };
 
   const sendMessage = async (content: string) => {
-    const tempId = uuid.v4();
+    const tempId = uuidv4();
 
     try {
       // Add a fake 'sending' message to give an optimistic UI
@@ -119,7 +119,9 @@ export const useSendMessage = () => {
       sendError(err);
 
       errorTemp(tempId);
-      setTimeout(() => { removeTemp(tempId); }, 1500);
+      setTimeout(() => {
+        removeTemp(tempId);
+      }, 1500);
     }
   };
 

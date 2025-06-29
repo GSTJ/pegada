@@ -17,16 +17,15 @@ export default [
     rules: {
       "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-extraneous-class": "off", // That's good, keep it
+      "@shopify/no-namespace-imports": "off",
       "@shopify/jsx-no-hardcoded-content": "off", // That's good, keep it
       "@typescript-eslint/no-confusing-void-expression": "off", // That's good, keep it
       "@typescript-eslint/no-unsafe-enum-comparison": "off", // That's good, keep it
-      "@typescript-eslint/no-deprecated": "off",
-      "@typescript-eslint/restrict-plus-operands": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/no-misused-promises": "off",
-      "react/no-unstable-nested-components": "off",
+      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+      "@typescript-eslint/no-misused-promises": "error",
+      "react/no-unstable-nested-components": "error",
       "react-native/no-inline-styles": "off", // That's fine, keep it
-      "@typescript-eslint/non-nullable-type-assertion-style": "off",
+      "@typescript-eslint/non-nullable-type-assertion-style": "error",
       "@typescript-eslint/no-misused-spread": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-return": "off",

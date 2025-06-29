@@ -2,26 +2,32 @@
 import type { Reducer } from "typesafe-actions";
 import reduceReducers from "reduce-reducers";
 
-import * as list from "./list";
-import * as logout from "./logout";
-import * as swipe from "./swipe";
-import { initialState } from "./swipe";
+import listReducer, { ListAction, Actions as ListActions } from "./list";
+import logoutReducer, {
+  LogoutAction,
+  Actions as LogoutActions
+} from "./logout";
+import swipeReducer, {
+  initialState,
+  SwipeAction,
+  Actions as SwipeActions
+} from "./swipe";
 
 export const Types = {
-  ...list.ListAction,
-  ...swipe.SwipeAction,
-  ...logout.LogoutAction
+  ...ListAction,
+  ...SwipeAction,
+  ...LogoutAction
 };
 
 export const Actions = {
-  swipe: swipe.Actions,
-  list: list.Actions,
-  logout: logout.Actions
+  swipe: SwipeActions,
+  list: ListActions,
+  logout: LogoutActions
 };
 
 export default reduceReducers(
   initialState,
-  swipe.default as Reducer<typeof swipe.initialState, any>,
-  list.default as Reducer<typeof swipe.initialState, any>,
-  logout.default as Reducer<typeof swipe.initialState, any>
+  swipeReducer as Reducer<typeof initialState, any>,
+  listReducer as Reducer<typeof initialState, any>,
+  logoutReducer as Reducer<typeof initialState, any>
 );

@@ -35,7 +35,7 @@ const Send = () => {
         returnKeyType="send"
         autoCapitalize="none"
         enablesReturnKeyAutomatically
-        blurOnSubmit={false}
+        submitBehavior="submit"
         placeholder={t("send.placeholder")}
       />
     </Container>

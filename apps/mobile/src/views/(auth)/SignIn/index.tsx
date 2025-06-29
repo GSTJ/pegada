@@ -54,7 +54,8 @@ const InsertEmail = () => {
         router.push({
           pathname: SceneName.OneTimeCode,
           params: { email }
-        }); return;
+        });
+        return;
       }
 
       Alert.alert(t("common.oops"), t("insertEmail.loginError"));
@@ -66,14 +67,19 @@ const InsertEmail = () => {
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     if (!isValidEmail) {
-      setError(t("insertEmail.validEmail")); return;
+      setError(t("insertEmail.validEmail"));
+      return;
     }
 
     loginMutation.mutate({ email });
   };
 
   return (
-    <PressableContainer onPress={() => { Keyboard.dismiss(); }}>
+    <PressableContainer
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
       <KeyboardAvoidingViewStyled
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
@@ -96,6 +102,7 @@ const InsertEmail = () => {
               enablesReturnKeyAutomatically
               returnKeyType="send"
               onSubmitEditing={handleLogin}
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
               blurOnSubmit={false}
               placeholder={t("insertEmail.emailPlaceholder")}
               value={email}

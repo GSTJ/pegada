@@ -6,7 +6,7 @@ import type { BugsnagErrorBoundary as IBugsnagErrorBoundary } from "@bugsnag/plu
 import * as React from "react";
 import { LogBox, Text, View } from "react-native";
 import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
-import * as Updates from "expo-updates";
+import { manifest as updatesManifest } from "expo-updates";
 import Bugsnag from "@bugsnag/expo";
 import BugsnagPluginReact from "@bugsnag/plugin-react";
 
@@ -50,7 +50,7 @@ ampli.load({
   }
 });
 
-const manifest = Updates.manifest;
+const manifest = updatesManifest;
 const metadata = "metadata" in manifest ? manifest.metadata : undefined;
 const updateGroup =
   metadata && "updateGroup" in metadata ? metadata.updateGroup : undefined;

@@ -9,7 +9,14 @@ import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { Text } from "@/components/Text";
 import { api } from "@/contexts/TRPCProvider";
 import { SceneName } from "@/types/SceneName";
-import * as S from "./styles";
+import {
+  BackTouchArea,
+  Picture,
+  PressableAreaFlex,
+  ProfileInfoContainer,
+  ProfileInfoLoadingContainer,
+  Header as StyledHeader
+} from "./styles";
 
 export const HEADER_HEIGHT = 65;
 
@@ -20,8 +27,8 @@ const DogProfileInfo = ({ dogId }: { dogId: string }) => {
   );
 
   return (
-    <S.ProfileInfoContainer>
-      <S.Picture
+    <ProfileInfoContainer>
+      <Picture
         source={{
           uri: dog.images[0]?.url,
           blurhash: dog.images[0]?.blurhash ?? undefined
@@ -30,25 +37,25 @@ const DogProfileInfo = ({ dogId }: { dogId: string }) => {
       <Text numberOfLines={1} fontWeight="bold">
         {dog.name}
       </Text>
-    </S.ProfileInfoContainer>
+    </ProfileInfoContainer>
   );
 };
 
 const DogProfileError = () => {
   const { t } = useTranslation();
   return (
-    <S.ProfileInfoContainer>
-      <S.Picture />
+    <ProfileInfoContainer>
+      <Picture />
       <Text numberOfLines={1}>{t("dogProfile.profileInfoError")}</Text>
-    </S.ProfileInfoContainer>
+    </ProfileInfoContainer>
   );
 };
 
 const DogProfileInfoLoading = () => {
   return (
-    <S.ProfileInfoLoadingContainer>
+    <ProfileInfoLoadingContainer>
       <ActivityIndicator />
-    </S.ProfileInfoLoadingContainer>
+    </ProfileInfoLoadingContainer>
   );
 };
 
@@ -62,22 +69,26 @@ const Header = () => {
   const insets = useSafeAreaInsets();
 
   return (
-    <S.Header
+    <StyledHeader
       style={{
         paddingTop: insets.top,
         height: HEADER_HEIGHT + insets.top
       }}
     >
-      <S.BackTouchArea onPress={() => { router.back(); }}>
+      <BackTouchArea
+        onPress={() => {
+          router.back();
+        }}
+      >
         <BackArrow height={15} width={15} fill={theme.colors.text} />
-      </S.BackTouchArea>
-      <S.PressableAreaFlex
-        onPress={() =>
-          { router.push({
+      </BackTouchArea>
+      <PressableAreaFlex
+        onPress={() => {
+          router.push({
             pathname: `${SceneName.Profile}/[id]`,
             params: { matchId: matchId ?? "", id: dogId as string }
-          }); }
-        }
+          });
+        }}
       >
         <NetworkBoundary
           errorFallback={DogProfileError}
@@ -85,8 +96,8 @@ const Header = () => {
         >
           <DogProfileInfo dogId={dogId as string} />
         </NetworkBoundary>
-      </S.PressableAreaFlex>
-    </S.Header>
+      </PressableAreaFlex>
+    </StyledHeader>
   );
 };
 

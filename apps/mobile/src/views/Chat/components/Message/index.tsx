@@ -34,7 +34,7 @@ export const MessageComponent: React.FC<MessageComponentProps> = (props) => {
 
   return (
     <Message
-      key={id + status}
+      key={id + (status ?? "")}
       entering={enteringAnimation}
       exiting={exitingAnimation}
       sending={self}

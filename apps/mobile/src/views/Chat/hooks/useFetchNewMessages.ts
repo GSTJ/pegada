@@ -72,7 +72,9 @@ export const useFetchNewMessages = () => {
       }
     };
 
-    const intervalId = setInterval(fetchNewMessages, REFRESH_INTERVAL);
+    const intervalId = setInterval(() => {
+      void fetchNewMessages();
+    }, REFRESH_INTERVAL);
 
     // Clean up on unmount
     return () => {

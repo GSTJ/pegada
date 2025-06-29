@@ -1,23 +1,30 @@
+import type { NotificationBehavior } from "expo-notifications";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
-import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
+import { isDevice } from "expo-device";
+import {
+  AndroidImportance,
+  getExpoPushTokenAsync,
+  getPermissionsAsync,
+  requestPermissionsAsync,
+  setNotificationChannelAsync,
+  setNotificationHandler
+} from "expo-notifications";
 import Color from "color";
 
 import { LightTheme } from "@pegada/shared/themes/themes";
 
 import { getTrcpContext } from "@/contexts/trcpContext";
 
-Notifications.setNotificationHandler({
-  handleNotification:
-    async (): Promise<Notifications.NotificationBehavior> => ({
-      shouldShowAlert: true,
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-      // Properties for iOS 15+ notification presentation
-      shouldShowBanner: true,
-      shouldShowList: true
-    })
+setNotificationHandler({
+  handleNotification: async (): Promise<NotificationBehavior> => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    // Properties for iOS 15+ notification presentation
+    shouldShowBanner: true,
+    shouldShowList: true
+  })
 });
 
 export enum NotificationTokenError {
@@ -25,28 +32,28 @@ export enum NotificationTokenError {
 }
 
 export const getPushNotificationToken = async () => {
-  if (!Device.isDevice) return;
+  if (!isDevice) return;
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
+    await setNotificationChannelAsync("default", {
       name: "default",
-      importance: Notifications.AndroidImportance.MAX,
+      importance: AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: Color(LightTheme.colors.primary).alpha(0.7).hex()
     });
   }
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  const { status: existingStatus } = await getPermissionsAsync();
 
   // Makes sure the user has accepted push notifications permissions
   if (existingStatus !== "granted") {
-    const { status: newStatus } = await Notifications.requestPermissionsAsync();
+    const { status: newStatus } = await requestPermissionsAsync();
     if (newStatus !== "granted") {
       throw new Error(NotificationTokenError.Denied);
     }
   }
 
-  const { data } = await Notifications.getExpoPushTokenAsync({
+  const { data } = await getExpoPushTokenAsync({
     projectId: Constants.expoConfig?.extra?.eas?.projectId
   });
 
@@ -54,7 +61,7 @@ export const getPushNotificationToken = async () => {
 };
 
 export const setPushNotificationToken = (pushToken: string) => {
-  if (!Device.isDevice) return;
+  if (!isDevice) return;
 
   return getTrcpContext().client.user.update.mutate({ pushToken });
 };

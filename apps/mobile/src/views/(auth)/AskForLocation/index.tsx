@@ -2,7 +2,13 @@ import { useState } from "react";
 import * as React from "react";
 import { Alert, Linking, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Location from "expo-location";
+import {
+  Accuracy,
+  getCurrentPositionAsync,
+  getLastKnownPositionAsync,
+  requestForegroundPermissionsAsync,
+  reverseGeocodeAsync
+} from "expo-location";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
@@ -21,14 +27,14 @@ enum UpdateLocationError {
 }
 
 const getApproximatedPosition = async () => {
-  const lastKnownPosition = await Location.getLastKnownPositionAsync({
+  const lastKnownPosition = await getLastKnownPositionAsync({
     maxAge: 1000 * 60 * 60 * 24 * 2 // 2 days
   });
 
   if (lastKnownPosition) return lastKnownPosition.coords;
 
-  const currentPostion = await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.Low
+  const currentPostion = await getCurrentPositionAsync({
+    accuracy: Accuracy.Low
   });
 
   return currentPostion.coords;
@@ -38,7 +44,7 @@ export const updateUserLocation = async (newLocation?: {
   longitude: number;
   latitude: number;
 }) => {
-  const { status } = await Location.requestForegroundPermissionsAsync();
+  const { status } = await requestForegroundPermissionsAsync();
 
   if (status !== "granted") {
     throw new Error(UpdateLocationError.PermissionNotGranted);
@@ -46,7 +52,7 @@ export const updateUserLocation = async (newLocation?: {
 
   const position = newLocation ?? (await getApproximatedPosition());
 
-  const geocode = await Location.reverseGeocodeAsync({
+  const geocode = await reverseGeocodeAsync({
     latitude: position.latitude,
     longitude: position.longitude
   });
@@ -154,7 +160,8 @@ const AskForLocation: React.FC = () => {
                       }
                     }
                   ]
-                ); return;
+                );
+                return;
               }
 
               sendError(error);

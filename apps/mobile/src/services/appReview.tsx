@@ -3,7 +3,7 @@ import * as React from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
 import { magicToast } from "react-native-magic-toast";
-import * as StoreReview from "expo-store-review";
+import { requestReview } from "expo-store-review";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";
 import styled from "styled-components/native";
@@ -55,7 +55,7 @@ const Title = styled(CenterText).attrs({
 const handleReview = async () => {
   try {
     analytics.track({ event_type: "App Review" });
-    await StoreReview.requestReview();
+    await requestReview();
     await storeData(StorageKeys.AppReviewStatus, "completed");
   } catch (error) {
     sendError(error);

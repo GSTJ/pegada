@@ -1,10 +1,9 @@
 import type { ImagePickerAsset } from "expo-image-picker";
 import { Alert, Platform } from "react-native";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import * as ImageManipulator from "expo-image-manipulator";
 import {
   launchCameraAsync,
   launchImageLibraryAsync,
-  MediaTypeOptions,
   requestCameraPermissionsAsync,
   requestMediaLibraryPermissionsAsync
 } from "expo-image-picker";
@@ -62,8 +61,9 @@ export const deleteItem =
   };
 
 export const compressImage = async (uri: string) => {
-  const manipResult = await manipulateAsync(uri, [], {
-    format: SaveFormat.WEBP,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const manipResult = await ImageManipulator.manipulateAsync(uri, [], {
+    format: ImageManipulator.SaveFormat.WEBP,
     compress: 0.8
   });
 
@@ -95,7 +95,7 @@ export const pickImage = async () => {
   }
 
   const result = await launchImageLibraryAsync({
-    mediaTypes: MediaTypeOptions.Images,
+    mediaTypes: "images",
     allowsEditing: true,
     aspect: [9, 16],
     quality: 1
@@ -126,7 +126,7 @@ export const takeImage = async () => {
   }
 
   const result = await launchCameraAsync({
-    mediaTypes: MediaTypeOptions.Images,
+    mediaTypes: "images",
     allowsEditing: true,
     aspect: [9, 16],
     quality: 1

@@ -5,7 +5,12 @@ import { useTheme } from "styled-components/native";
 
 import Premium from "@/assets/images/Premium.svg";
 import { BIO_NUMBER_OF_LINES } from "@/components/MainCard/components/PersonalInfo";
-import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
+import {
+  Age as PersonalInfoAge,
+  Container as PersonalInfoContainer,
+  Description as PersonalInfoDescription,
+  Name as PersonalInfoName
+} from "@/components/MainCard/components/PersonalInfo/styles";
 import { Container, Picture } from "@/components/MainCard/styles";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { api } from "@/contexts/TRPCProvider";
@@ -55,7 +60,7 @@ const UserDogProfileHeader = () => {
           "rgba(0, 0, 0, .7)"
         ]}
       >
-        <PersonalInfo.Container style={{ paddingBottom: 35 }}>
+        <PersonalInfoContainer style={{ paddingBottom: 35 }}>
           <View
             style={{
               flexDirection: "row",
@@ -63,31 +68,31 @@ const UserDogProfileHeader = () => {
               gap: theme.spacing[1.5]
             }}
           >
-            <PersonalInfo.Name
+            <PersonalInfoName
               style={{ fontSize: theme.typography.sizes.xl.size }}
             >
               {dog.name}
               {dog.birthDate ? (
-                <PersonalInfo.Age
+                <PersonalInfoAge
                   style={{ fontSize: theme.typography.sizes.lg.size }}
                 >
                   , {getFormattedYears(dog.birthDate)}
-                </PersonalInfo.Age>
+                </PersonalInfoAge>
               ) : null}
-            </PersonalInfo.Name>
+            </PersonalInfoName>
             {plan.data?.userPlan === UserPlan.Premium ? (
               <Premium fill={theme.colors.premium} width={22} height={22} />
             ) : null}
           </View>
           {dog.bio ? (
-            <PersonalInfo.Description
+            <PersonalInfoDescription
               numberOfLines={BIO_NUMBER_OF_LINES}
               style={{ fontSize: theme.typography.sizes.sm.size }}
             >
               {dog.bio}
-            </PersonalInfo.Description>
+            </PersonalInfoDescription>
           ) : null}
-        </PersonalInfo.Container>
+        </PersonalInfoContainer>
       </LinearGradient>
     </Container>
   );

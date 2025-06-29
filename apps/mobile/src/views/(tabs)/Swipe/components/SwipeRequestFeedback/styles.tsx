@@ -2,10 +2,10 @@ import * as React from "react";
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
-import * as LikeFeedbackStyles from "@/components/FeedbackCard/components/LikeFeedback/styles";
+import { Container as LikeFeedbackContainer } from "@/components/FeedbackCard/components/LikeFeedback/styles";
 import { Text } from "@/components/Text";
 
-export const Container = styled(LikeFeedbackStyles.Container)`
+export const Container = styled(LikeFeedbackContainer)`
   background-color: transparent;
 `;
 

@@ -1,7 +1,7 @@
 import type { CustomerInfo } from "react-native-purchases";
 import { Alert, Platform } from "react-native";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
-import * as Device from "expo-device";
+import { isDevice } from "expo-device";
 import { get } from "lodash";
 
 import { getTrcpContext } from "@/contexts/trcpContext";
@@ -86,7 +86,7 @@ export enum UserPlan {
 const purchasePackage = async (
   ...props: Parameters<typeof Purchases.purchasePackage>
 ) => {
-  const isSimulator = Platform.OS === "ios" && !Device.isDevice;
+  const isSimulator = Platform.OS === "ios" && !isDevice;
 
   if (isSimulator) {
     Alert.alert(
@@ -143,7 +143,7 @@ const getPlan = (customerInfo?: CustomerInfo) => {
 };
 
 const restorePurchases = async () => {
-  if (Platform.OS === "ios" && !Device.isDevice) {
+  if (Platform.OS === "ios" && !isDevice) {
     Alert.alert(
       "Simulator Detected",
       "Restore is not available in the IOS simulator. Please try on a real device."
