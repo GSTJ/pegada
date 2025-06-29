@@ -1,5 +1,5 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import * as React from "react";
 import { StyleSheet } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { Swipe } from "./hooks/useSwipeGesture";
 import FeedbackCard from "@/components/FeedbackCard";
 import { ACTION_OFFSET } from "@/constants";
-import { useDidMountEffect } from "@/services/utils";
+import { useIsFirstRender } from "@/hooks/useIsFirstRender";
 import { Actions } from "@/store/reducers";
 import { getCurrentCardId } from "@/store/selectors";
 import { useSwipeGesture } from "./hooks/useSwipeGesture";
@@ -45,11 +45,14 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     { onSwipeComplete }
   );
 
-  const automaticSwipe = (swipeType: Swipe) => {
-    "worklet";
+  const automaticSwipe = useCallback(
+    (swipeType: Swipe) => {
+      "worklet";
 
-    gotoDirection(swipeType, { duration: 500 });
-  };
+      gotoDirection(swipeType, { duration: 500 });
+    },
+    [gotoDirection]
+  );
 
   useEffect(() => {
     if (!isFirstCard) return;
@@ -59,12 +62,14 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     } as SwipeHandlerRefProps;
   }, [automaticSwipe, isFirstCard]);
 
-  useDidMountEffect(() => {
-    if (!isFirstCard) return;
+  const isFirstRender = useIsFirstRender();
+
+  useEffect(() => {
+    if (!isFirstCard || isFirstRender) return;
 
     translation.x.value = withSpring(0, { stiffness: 50 });
     translation.y.value = withSpring(0, { stiffness: 50 });
-  }, [isFirstCard]);
+  }, [isFirstCard, isFirstRender, translation.x, translation.y]);
 
   const transform = useAnimatedStyle(() => {
     "worklet";

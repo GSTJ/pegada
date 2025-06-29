@@ -349,7 +349,7 @@ describe("SuggestionService", () => {
         expect(potentialMatches).toHaveLength(numberOfGoldenDogs);
         expect(
           potentialMatches.every((match) => match?.color === Color.GOLDEN)
-        );
+        ).toBe(true);
       });
 
       test("age", async () => {

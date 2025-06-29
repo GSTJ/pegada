@@ -26,7 +26,6 @@ export default [
       "@typescript-eslint/consistent-type-definitions": "off",
       "@typescript-eslint/no-misused-promises": "off",
       "react/no-unstable-nested-components": "off",
-      "react-hooks/exhaustive-deps": "off",
       "react-native/no-inline-styles": "off", // That's fine, keep it
       "@typescript-eslint/non-nullable-type-assertion-style": "off",
       "@typescript-eslint/no-misused-spread": "off",

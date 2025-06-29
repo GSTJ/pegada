@@ -1,5 +1,5 @@
 import type { PurchasesPackage } from "react-native-purchases";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import * as React from "react";
 import { magicToast } from "react-native-magic-toast";
 import * as Device from "expo-device";
@@ -59,27 +59,38 @@ const PlanPackages: React.FC<OfferingsProps> = ({
     router.back();
   }, [isError, router, t]);
 
-  const packageList = offeringsData
-    ? Object.values(offeringsData.availablePackages).sort(
-        // Highest price first
-        (a, b) => b.product.price - a.product.price
-      )
-    : [];
+  const packageList = useMemo(
+    () =>
+      offeringsData
+        ? Object.values(offeringsData.availablePackages).sort(
+            // Highest price first
+            (a, b) => b.product.price - a.product.price
+          )
+        : [],
+    [offeringsData]
+  );
 
-  const packageWithLessRelativeValue = offeringsData
-    ? Object.values(offeringsData.availablePackages).sort((a, b) => {
-        if (!a.product.subscriptionPeriod || !b.product.subscriptionPeriod) {
-          return 0;
-        }
+  const packageWithLessRelativeValue = useMemo(
+    () =>
+      offeringsData
+        ? Object.values(offeringsData.availablePackages).sort((a, b) => {
+            if (
+              !a.product.subscriptionPeriod ||
+              !b.product.subscriptionPeriod
+            ) {
+              return 0;
+            }
 
-        const relativeValueA =
-          a.product.price / periodToDays(a.product.subscriptionPeriod);
-        const relativeValueB =
-          b.product.price / periodToDays(b.product.subscriptionPeriod);
+            const relativeValueA =
+              a.product.price / periodToDays(a.product.subscriptionPeriod);
+            const relativeValueB =
+              b.product.price / periodToDays(b.product.subscriptionPeriod);
 
-        return relativeValueB - relativeValueA;
-      })[0]
-    : undefined;
+            return relativeValueB - relativeValueA;
+          })[0]
+        : undefined,
+    [offeringsData]
+  );
 
   useEffect(() => {
     if (!packageList[0] || selectedPackage) return;

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { magicToast } from "react-native-magic-toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,12 +14,12 @@ import {
 import type { OtpInputRef } from "./components/OtpInput";
 import { Text } from "@/components/Text";
 import { api } from "@/contexts/TRPCProvider";
+import { useIsFirstRender } from "@/hooks/useIsFirstRender";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/errorTracking";
 import { getError } from "@/services/getError";
 import { getInitialRouteName } from "@/services/getInitialRouteName";
 import { StorageKeys, storeData } from "@/services/storage";
-import { useDidMountEffect } from "@/services/utils";
 import { Underline } from "../SignIn/components/HeroText";
 import GoBack from "./components/GoBack";
 import OTPInput from "./components/OtpInput";
@@ -98,11 +98,13 @@ const OneTimeCode = () => {
     loginMutation.mutate({ email: email as string });
   };
 
-  useDidMountEffect(() => {
-    if (keyboardInput.length !== CODE_LENGTH) return;
+  const isFirstRender = useIsFirstRender();
+
+  useEffect(() => {
+    if (keyboardInput.length !== CODE_LENGTH || isFirstRender) return;
 
     loginMutation.mutate({ email: email as string, code: keyboardInput });
-  }, [keyboardInput]);
+  }, [isFirstRender, keyboardInput, loginMutation, email]);
 
   return (
     <StyledKeyboardAvoidingView
@@ -116,7 +118,11 @@ const OneTimeCode = () => {
           paddingRight: insets.right + 20
         }}
       >
-        <GoBack onPress={() => { router.back(); }} />
+        <GoBack
+          onPress={() => {
+            router.back();
+          }}
+        />
 
         <Content>
           <TopColumn>
