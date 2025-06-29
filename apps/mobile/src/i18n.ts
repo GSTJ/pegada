@@ -9,7 +9,7 @@ import { sendError } from "./services/errorTracking";
 import { getData, StorageKeys, storeData } from "./services/storage";
 
 export const getSystemLanguage = () => {
-  const phoneLanguage = getLocales()?.[0]?.languageTag;
+  const phoneLanguage = getLocales()[0]?.languageTag;
   return phoneLanguage;
 };
 

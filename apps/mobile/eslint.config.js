@@ -15,7 +15,6 @@ export default [
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
-      "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-extraneous-class": "off", // That's good, keep it
       "@shopify/jsx-no-hardcoded-content": "off", // That's good, keep it
       "@typescript-eslint/no-confusing-void-expression": "off", // That's good, keep it

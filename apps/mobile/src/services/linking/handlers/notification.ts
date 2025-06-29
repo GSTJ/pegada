@@ -1,4 +1,4 @@
-import type * as Notifications from "expo-notifications";
+import type { NotificationResponse } from "expo-notifications";
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
@@ -10,7 +10,7 @@ enum NotificationUrl {
 }
 
 export const getNotificationUrl = (
-  response: Notifications.NotificationResponse
+  response: NotificationResponse
 ): string | undefined => {
   const data = response.notification.request.content.data as { url?: string };
   return data.url;

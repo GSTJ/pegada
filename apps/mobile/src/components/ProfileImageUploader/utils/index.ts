@@ -1,6 +1,6 @@
 import type { ImagePickerAsset } from "expo-image-picker";
 import { Alert, Platform } from "react-native";
-import * as ImageManipulator from "expo-image-manipulator";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import {
   launchCameraAsync,
   launchImageLibraryAsync,
@@ -61,9 +61,8 @@ export const deleteItem =
   };
 
 export const compressImage = async (uri: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
   const manipResult = await ImageManipulator.manipulateAsync(uri, [], {
-    format: ImageManipulator.SaveFormat.WEBP,
+    format: SaveFormat.WEBP,
     compress: 0.8
   });
 

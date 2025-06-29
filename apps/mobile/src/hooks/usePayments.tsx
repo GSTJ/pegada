@@ -27,7 +27,7 @@ export const useEligibleForTrial = ({
   const customerInfo = useCustomerInfo();
 
   const hasIntroPrice = offering?.product.introPrice;
-  const hadPremium = customerInfo.data?.entitlements.all.premium;
+  const hadPremium = customerInfo.data.entitlements.all.premium;
 
   return hasIntroPrice && !hadPremium;
 };
@@ -46,7 +46,7 @@ export const useCustomerInfo = () => {
 
   return {
     ...customerInfoProps,
-    isLoading: loginProps.isLoading ?? customerInfoProps.isLoading,
+    isLoading: customerInfoProps.isLoading,
     error: loginProps.error ?? customerInfoProps.error
   };
 };

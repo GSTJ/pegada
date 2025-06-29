@@ -12,7 +12,8 @@ export const identifyUser = async (
 ) => {
   try {
     const userId = await getLoggedUserID();
-    analytics.identify(userId, props); return;
+    analytics.identify(userId, props);
+    return;
   } catch (e) {
     sendError(e);
   }
@@ -45,7 +46,7 @@ export const getInitialRouteName = async () => {
       return SceneName.CreateProfile;
     }
 
-    if (!response.user?.latitude || !response.user?.longitude) {
+    if (!response.user.latitude || !response.user.longitude) {
       return SceneName.AskForLocation;
     }
 

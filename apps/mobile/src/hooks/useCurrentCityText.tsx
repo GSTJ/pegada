@@ -9,13 +9,17 @@ export const useCurrentCityText = () => {
     refetchOnMount: false
   });
 
-  const hasLatLng = myDog?.user?.latitude && myDog.user.longitude;
+  if (!myDog) {
+    return t("common.unknown");
+  }
+
+  const hasLatLng = myDog.user.latitude && myDog.user.longitude;
 
   const currentCityFallback = hasLatLng
     ? t("common.nearYou")
     : t("common.unknown");
 
-  const currentCityText = myDog?.user?.city ?? currentCityFallback;
+  const currentCityText = myDog.user.city ?? currentCityFallback;
 
   // Use this once we have more specific location data
   // const currentNeighborhoodText = t('changeLocation.nearCurrentLocation', {

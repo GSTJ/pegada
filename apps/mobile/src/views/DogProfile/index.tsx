@@ -31,7 +31,19 @@ import { swipeHandlerRef } from "@/views/(tabs)/Swipe/components/SwipeHandler";
 import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
 import { BreedTag } from "@/views/DogProfile/components/BreedTag";
 import GoBack from "@/views/DogProfile/components/GoBack";
-import * as S from "./styles";
+import {
+  Age,
+  BottomColumn,
+  CARD_HEIGHT,
+  Container,
+  Content,
+  Description,
+  MatchActionBarGradient,
+  Name,
+  ReportButton,
+  ShareButton as ShareButtonComponent,
+  UnmatchButton
+} from "./styles";
 
 export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
   const { t } = useTranslation();
@@ -56,7 +68,7 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
   };
 
   return (
-    <S.ShareButton>
+    <ShareButtonComponent>
       <Text
         onPress={handleShare}
         fontWeight="bold"
@@ -65,7 +77,7 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
       >
         {t("dogProfile.shareProfile", { name: firstName })}
       </Text>
-    </S.ShareButton>
+    </ShareButtonComponent>
   );
 };
 
@@ -189,14 +201,14 @@ const DogProfile = () => {
   const mainCardStyle = {
     paddingTop: Math.max(insets.top, theme.spacing[6]),
     borderRadius: 0,
-    height: S.CARD_HEIGHT
+    height: CARD_HEIGHT
   };
 
   const getFormattedYears = useGetFormattedYears();
 
   return (
     <>
-      <S.Container>
+      <Container>
         <StatusBar style="light" />
 
         <View style={{ backgroundColor: theme.colors.black }}>
@@ -214,23 +226,23 @@ const DogProfile = () => {
           }}
         />
 
-        <S.BottomColumn
+        <BottomColumn
           style={{
             paddingBottom: matchId ? theme.spacing[8] : matchActionBarHeight
           }}
         >
-          <S.Content>
+          <Content>
             <BreedTag breed={dog.breed} />
-            <S.Name numberOfLines={1}>
+            <Name numberOfLines={1}>
               {dog.name}
               {dog.birthDate ? (
-                <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age>
+                <Age>, {getFormattedYears(dog.birthDate)}</Age>
               ) : undefined}
-            </S.Name>
+            </Name>
             <View style={{ gap: theme.spacing[7] }}>
-              <S.Description>{dog.bio}</S.Description>
+              <Description>{dog.bio}</Description>
               {Boolean(matchId) && (
-                <S.UnmatchButton
+                <UnmatchButton
                   disabled={unmatchLoading}
                   onPress={() => {
                     void handleUnmatch();
@@ -247,10 +259,10 @@ const DogProfile = () => {
                       {t("dogProfile.unmatch")}
                     </Text>
                   )}
-                </S.UnmatchButton>
+                </UnmatchButton>
               )}
               <ShareButton dog={dog} />
-              <S.ReportButton>
+              <ReportButton>
                 <Text
                   onPress={() => {
                     reportUser(dog);
@@ -260,9 +272,9 @@ const DogProfile = () => {
                 >
                   {t("dogProfile.reportName", { name: firstName })}
                 </Text>
-              </S.ReportButton>
+              </ReportButton>
               {__DEV__ && matchId ? (
-                <S.ReportButton>
+                <ReportButton>
                   <Text
                     onPress={() => {
                       router.push({
@@ -275,16 +287,16 @@ const DogProfile = () => {
                   >
                     Fake Match Screen
                   </Text>
-                </S.ReportButton>
+                </ReportButton>
               ) : null}
             </View>
-          </S.Content>
-        </S.BottomColumn>
-      </S.Container>
+          </Content>
+        </BottomColumn>
+      </Container>
 
       {!matchId && (
         <>
-          <S.MatchActionBarGradient
+          <MatchActionBarGradient
             style={{ height: matchActionBarHeight + theme.spacing[8] }}
           />
           <MatchActionBar

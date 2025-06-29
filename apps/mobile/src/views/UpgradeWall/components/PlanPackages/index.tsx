@@ -2,7 +2,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import { useEffect, useMemo } from "react";
 import * as React from "react";
 import { magicToast } from "react-native-magic-toast";
-import * as Device from "expo-device";
+import { isDevice } from "expo-device";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
@@ -51,7 +51,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
     if (!isError) return;
 
     magicToast.alert(
-      Device.isDevice
+      isDevice
         ? t("plans.errors.fetchingOfferingsDevice")
         : t("plans.errors.fetchingOfferings")
     );
@@ -61,34 +61,27 @@ const PlanPackages: React.FC<OfferingsProps> = ({
 
   const packageList = useMemo(
     () =>
-      offeringsData
-        ? Object.values(offeringsData.availablePackages).sort(
-            // Highest price first
-            (a, b) => b.product.price - a.product.price
-          )
-        : [],
+      Object.values(offeringsData.availablePackages).sort(
+        // Highest price first
+        (a, b) => b.product.price - a.product.price
+      ),
     [offeringsData]
   );
 
   const packageWithLessRelativeValue = useMemo(
     () =>
-      offeringsData
-        ? Object.values(offeringsData.availablePackages).sort((a, b) => {
-            if (
-              !a.product.subscriptionPeriod ||
-              !b.product.subscriptionPeriod
-            ) {
-              return 0;
-            }
+      Object.values(offeringsData.availablePackages).sort((a, b) => {
+        if (!a.product.subscriptionPeriod || !b.product.subscriptionPeriod) {
+          return 0;
+        }
 
-            const relativeValueA =
-              a.product.price / periodToDays(a.product.subscriptionPeriod);
-            const relativeValueB =
-              b.product.price / periodToDays(b.product.subscriptionPeriod);
+        const relativeValueA =
+          a.product.price / periodToDays(a.product.subscriptionPeriod);
+        const relativeValueB =
+          b.product.price / periodToDays(b.product.subscriptionPeriod);
 
-            return relativeValueB - relativeValueA;
-          })[0]
-        : undefined,
+        return relativeValueB - relativeValueA;
+      })[0],
     [offeringsData]
   );
 
@@ -101,7 +94,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
 
   return (
     <Container>
-      {packageList?.map((planPackage) => {
+      {packageList.map((planPackage) => {
         if (!planPackage.product.subscriptionPeriod) {
           return null;
         }

@@ -52,13 +52,13 @@ const OTPInput = ({
 
     const nextIndex = Math.min(index + digit.length - 1, length - 1);
 
-    inputRefs.current?.[nextIndex]?.focus();
+    inputRefs.current[nextIndex]?.focus();
   };
 
   const handleErase = (_digit: string, index: number) => {
     changeDigit("", index);
 
-    inputRefs.current?.[index - 1]?.focus();
+    inputRefs.current[index - 1]?.focus();
   };
 
   const otp_max_width = (OTP_INPUT_MAX_WIDTH + OTP_INPUT_MARGIN) * length;
@@ -66,7 +66,7 @@ const OTPInput = ({
   return (
     <VerifyRowView style={{ maxWidth: otp_max_width }}>
       {[...Array(length)].map((_, index) => {
-        const previousValue = value?.[index - 1];
+        const previousValue = value[index - 1];
         const isFirst = index === 0;
 
         return (
