@@ -31,7 +31,11 @@ export const OfflineComponent = ({ reset }: { reset: () => void }) => {
         <DisconnectedIllustration />
         <Title>{t("networkBoundary.offline.title")}</Title>
         <ContainedText>{t("networkBoundary.offline.message")}</ContainedText>
-        <Button onPress={() => { reset(); }}>
+        <Button
+          onPress={() => {
+            reset();
+          }}
+        >
           {t("networkBoundary.offline.retry")}
         </Button>
       </Content>
@@ -50,7 +54,12 @@ export const RequestErrorComponent = ({ reset }: { reset: () => void }) => {
         <ContainedText>
           {t("networkBoundary.requestError.message")}
         </ContainedText>
-        <Button variant="outline" onPress={() => { reset(); }}>
+        <Button
+          variant="outline"
+          onPress={() => {
+            reset();
+          }}
+        >
           {t("networkBoundary.requestError.retry")}
         </Button>
       </Content>
@@ -132,23 +141,40 @@ interface NetworkBoundaryProps {
   errorFallback?: IErrorBoundary;
 }
 
+const ErrorAndBugsnagBoundary = ({
+  children,
+  errorFallback,
+  ...queryProps
+}: PropsWithChildren<
+  { errorFallback?: IErrorBoundary } & QueryErrorResetBoundaryValue
+>) => {
+  const ErrorComponent = errorFallback ?? DefaultErrorComponent;
+
+  const Fallback = React.useCallback(
+    () => <ErrorComponent {...queryProps} />,
+    [ErrorComponent, queryProps]
+  );
+
+  return (
+    <BugsnagErrorBoundary FallbackComponent={Fallback}>
+      {children}
+    </BugsnagErrorBoundary>
+  );
+};
+
 const QueryAwareErrorBoundary = ({
   children,
   errorFallback
 }: PropsWithChildren<Pick<NetworkBoundaryProps, "errorFallback">>) => {
-  const handleError = (props: QueryErrorResetBoundaryValue) => {
-    const ErrorComponent = errorFallback ?? DefaultErrorComponent;
-
-    return (
-      <BugsnagErrorBoundary
-        FallbackComponent={() => <ErrorComponent {...props} />}
-      >
-        {children}
-      </BugsnagErrorBoundary>
-    );
-  };
-
-  return <QueryErrorResetBoundary>{handleError}</QueryErrorResetBoundary>;
+  return (
+    <QueryErrorResetBoundary>
+      {(props) => (
+        <ErrorAndBugsnagBoundary {...props} errorFallback={errorFallback}>
+          {children}
+        </ErrorAndBugsnagBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  );
 };
 
 export const NetworkBoundary = ({

@@ -1,6 +1,7 @@
 import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
 import type { Picture } from "@/components/ProfileImageUploader/utils";
 import { useState } from "react";
+import * as React from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
 import { magicToast } from "react-native-magic-toast";
 import { useRouter } from "expo-router";
@@ -83,11 +84,16 @@ const CreateProfile = () => {
       gender: data.gender,
       images: data.images
         .filter((image) => Boolean(image.url))
-        .map((image, index) => ({
-          id: image.id,
-          url: image.url as string,
-          position: index
-        }))
+        .map((image, index) => {
+          if (!image.url) {
+            throw new Error("Image URL not available after filtering");
+          }
+          return {
+            id: image.id,
+            url: image.url,
+            position: index
+          };
+        })
     };
 
     await dogCreateMutation.mutateAsync(dogData);

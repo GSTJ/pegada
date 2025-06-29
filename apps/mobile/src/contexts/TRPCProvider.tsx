@@ -74,6 +74,7 @@ export const trpcQueryClient = api.createClient({
         }
 
         return {
+          // eslint-disable-next-line @typescript-eslint/no-misused-spread
           ...res,
           // Already decoded here
           json: async () => responsesJSON

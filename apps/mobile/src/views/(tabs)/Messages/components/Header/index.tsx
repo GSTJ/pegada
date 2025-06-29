@@ -10,6 +10,11 @@ interface HeaderProps {
   matches?: Match[];
 }
 
+const Separator = () => {
+  const theme = useTheme();
+  return <View style={{ width: theme.spacing[3] }} />;
+};
+
 export const Header: React.FC<HeaderProps> = ({ matches }) => {
   const theme = useTheme();
 
@@ -25,9 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ matches }) => {
         contentContainerStyle={{
           paddingHorizontal: theme.spacing[4]
         }}
-        ItemSeparatorComponent={() => (
-          <View style={{ width: theme.spacing[3] }} />
-        )}
+        ItemSeparatorComponent={Separator}
         showsHorizontalScrollIndicator={false}
       />
     </Container>

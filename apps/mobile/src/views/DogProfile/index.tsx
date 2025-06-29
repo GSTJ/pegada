@@ -305,6 +305,22 @@ const DogProfile = () => {
   );
 };
 
+const HeaderLeft = () => {
+  const theme = useTheme();
+  const router = useRouter();
+
+  return (
+    <HeaderBackButton
+      tintColor={theme.colors.primary}
+      onPress={() => {
+        router.back();
+      }}
+    />
+  );
+};
+
+const CustomHeaderLeft = () => <HeaderLeft />;
+
 const DogProfileErrorState = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -313,14 +329,7 @@ const DogProfileErrorState = () => {
     <View style={{ flexGrow: 1, backgroundColor: theme.colors.background }}>
       <Header
         title={t("dogProfile.dogProfile")}
-        headerLeft={() => (
-          <HeaderBackButton
-            tintColor={theme.colors.primary}
-            onPress={() => {
-              router.back();
-            }}
-          />
-        )}
+        headerLeft={CustomHeaderLeft}
         headerRightContainerStyle={{ paddingRight: 16 }}
         headerLeftContainerStyle={{ paddingLeft: 16 }}
         headerTintColor={theme.colors.text}

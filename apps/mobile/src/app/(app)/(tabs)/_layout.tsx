@@ -6,10 +6,17 @@ import Logo from "@/assets/images/Logo";
 import Messages from "@/assets/images/Messages";
 import Profile from "@/assets/images/Profile";
 
-interface TabBarIconProps {
-  focused: boolean;
-  color: string;
-}
+const getSwipeIcon = ({ color }: { color: string }) => (
+  <Logo colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+);
+
+const getMessagesIcon = ({ color }: { color: string }) => (
+  <Messages colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+);
+
+const getProfileIcon = ({ color }: { color: string }) => (
+  <Profile colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+);
 
 export default () => {
   const theme = useTheme();
@@ -39,40 +46,19 @@ export default () => {
       <Tabs.Screen
         name="swipe"
         options={{
-          tabBarIcon: ({ color }: TabBarIconProps) => (
-            <Logo
-              colorStopOne={color}
-              colorStopTwo={color}
-              width={34}
-              height={34}
-            />
-          )
+          tabBarIcon: getSwipeIcon
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
-          tabBarIcon: ({ color }: TabBarIconProps) => (
-            <Messages
-              colorStopOne={color}
-              colorStopTwo={color}
-              width={34}
-              height={34}
-            />
-          )
+          tabBarIcon: getMessagesIcon
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ color }: TabBarIconProps) => (
-            <Profile
-              colorStopOne={color}
-              colorStopTwo={color}
-              width={34}
-              height={34}
-            />
-          )
+          tabBarIcon: getProfileIcon
         }}
       />
     </Tabs>

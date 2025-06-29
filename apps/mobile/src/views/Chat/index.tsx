@@ -1,3 +1,4 @@
+import * as React from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -23,6 +24,8 @@ const Empty = () => {
     </CenteredView>
   );
 };
+
+const ListEmptyComponent = () => <Empty />;
 
 const keyExtractor = (message: MessageProps) => String(message.id);
 
@@ -52,29 +55,24 @@ const ChatMessageList = () => {
     paddingTop: inverted ? bottomPadding : topPadding
   };
 
-  const ListEmptyComponent = () => <Empty />;
+  const renderItem = React.useCallback(
+    ({ item, index }: { item: MessageProps; index: number }) => {
+      // Don't show the date if it's the first message or if it's loading
+      const showNextDay = index !== messages.length - 1 || !hasNextPage;
 
-  const renderItem = ({
-    item,
-    index
-  }: {
-    item: MessageProps;
-    index: number;
-  }) => {
-    // Don't show the date if it's the first message or if it's loading
-    const showNextDay = index !== messages.length - 1 || !hasNextPage;
-
-    return (
-      <>
-        {showNextDay ? (
-          <NextDay message={item} nextMessage={messages?.[index + 1]} />
-        ) : null}
-        <Message {...item} self={item.senderId !== dogId}>
-          {item.content}
-        </Message>
-      </>
-    );
-  };
+      return (
+        <>
+          {showNextDay ? (
+            <NextDay message={item} nextMessage={messages?.[index + 1]} />
+          ) : null}
+          <Message {...item} self={item.senderId !== dogId}>
+            {item.content}
+          </Message>
+        </>
+      );
+    },
+    [dogId, hasNextPage, messages]
+  );
 
   return (
     <FlashList

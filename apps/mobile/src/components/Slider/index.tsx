@@ -63,6 +63,32 @@ const markerHitSlop = {
   right: 15
 };
 
+const createCustomLabels = (max: number | undefined): React.FC<LabelProps> => {
+  const CustomLabels: React.FC<LabelProps> = (label) => {
+    const oneMarkerValue =
+      Number(label.oneMarkerValue) >= (max ?? 0) ? "∞" : label.oneMarkerValue;
+
+    const twoMarkerValue =
+      Number(label.twoMarkerValue) >= (max ?? 0) ? "∞" : label.twoMarkerValue;
+
+    return (
+      <>
+        {Number(label.oneMarkerValue) >= 0 && (
+          <CustomLabel left={label.oneMarkerLeftPosition}>
+            {oneMarkerValue}
+          </CustomLabel>
+        )}
+        {Number(label.twoMarkerValue) >= 0 && (
+          <CustomLabel left={label.twoMarkerLeftPosition}>
+            {twoMarkerValue}
+          </CustomLabel>
+        )}
+      </>
+    );
+  };
+  return CustomLabels;
+};
+
 const CustomMarker = () => <Marker hitSlop={markerHitSlop} />;
 
 export const Root = (props: MultiSliderProps) => {
@@ -80,6 +106,11 @@ export const Root = (props: MultiSliderProps) => {
 
   const stroke = 3;
 
+  const CustomLabels = React.useMemo(
+    () => createCustomLabels(props.max),
+    [props.max]
+  );
+
   const safeBorderStyle = {
     height: stroke,
     width: safePadding,
@@ -87,33 +118,6 @@ export const Root = (props: MultiSliderProps) => {
     zIndex: -1,
     borderTopRightRadius: theme.radii.md,
     borderBottomRightRadius: theme.radii.md
-  };
-
-  const CustomLabels = (label: LabelProps) => {
-    const oneMarkerValue =
-      Number(label.oneMarkerValue) >= (props.max ?? 0)
-        ? "∞"
-        : label.oneMarkerValue;
-
-    const twoMarkerValue =
-      Number(label.twoMarkerValue) >= (props.max ?? 0)
-        ? "∞"
-        : label.twoMarkerValue;
-
-    return (
-      <>
-        {Number(label.oneMarkerValue) >= 0 && (
-          <CustomLabel left={label.oneMarkerLeftPosition}>
-            {oneMarkerValue}
-          </CustomLabel>
-        )}
-        {Number(label.twoMarkerValue) >= 0 && (
-          <CustomLabel left={label.twoMarkerLeftPosition}>
-            {twoMarkerValue}
-          </CustomLabel>
-        )}
-      </>
-    );
   };
 
   const style = {

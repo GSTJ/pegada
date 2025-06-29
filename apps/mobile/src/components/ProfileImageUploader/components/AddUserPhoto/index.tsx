@@ -92,9 +92,13 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
         throw new Error("Failed to upload image");
       }
 
-      const finalUrl = presignedUrl.split("?")[0] as string;
+      const finalUrlPart = presignedUrl.split("?")[0];
 
-      onAdd({ url: finalUrl });
+      if (!finalUrlPart) {
+        throw new Error("Invalid presigned URL format");
+      }
+
+      onAdd({ url: finalUrlPart });
     } catch (err) {
       // When the user cancels the image picker, we don't want to show an error
       if (err instanceof Error && err.message === ImagePickerError.CANCELED) {
