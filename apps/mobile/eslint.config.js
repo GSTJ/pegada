@@ -18,9 +18,8 @@ export default [
       "@typescript-eslint/no-extraneous-class": "off", // That's good, keep it
       "@shopify/no-namespace-imports": "off",
       "@shopify/jsx-no-hardcoded-content": "off", // That's good, keep it
+      "@typescript-eslint/no-confusing-void-expression": "off", // That's good, keep it
       "@typescript-eslint/no-unnecessary-condition": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unsafe-enum-comparison": "off", // That's good, keep it
       "@typescript-eslint/no-deprecated": "off",
       "@typescript-eslint/restrict-plus-operands": "off",

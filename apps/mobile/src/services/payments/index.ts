@@ -102,8 +102,10 @@ const purchasePackage = async (
     const result = await Purchases.purchasePackage(...props);
     return result;
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+    const message = get(e, "message");
     // On Android, this happens when a transfer is needed (the user already purchased on another account)
-    if (get(e, "message") === "This product is already active for the user.") {
+    if (message === "This product is already active for the user.") {
       await restorePurchases();
       return undefined;
     }
