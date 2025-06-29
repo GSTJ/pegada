@@ -62,7 +62,9 @@ export const deleteItem =
   };
 
 export const compressImage = async (uri: string): Promise<ImageResult> => {
-  const manipResult = await ImageManipulator.manipulateAsync(uri, [], {
+  const renderResult = await ImageManipulator.manipulate(uri).renderAsync();
+
+  const manipResult = await renderResult.saveAsync({
     format: SaveFormat.WEBP,
     compress: 0.8
   });
