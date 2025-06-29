@@ -56,7 +56,7 @@ const PickerSelectItem = <T extends Item>({
     <SelectItem
       selected={value?.id === item.id}
       onPress={() => {
-        onChange?.(item);
+        onChange(item);
         onClose();
       }}
     >

@@ -59,7 +59,7 @@ export const trpcQueryClient = api.createClient({
 
         if (res.status === 401) {
           const unauthorized = responsesJSON.some((responseJSON) => {
-            const errorMessage = responseJSON?.error?.json?.message;
+            const errorMessage = responseJSON.error?.json?.message;
             return errorMessage === "UNAUTHORIZED";
           });
 

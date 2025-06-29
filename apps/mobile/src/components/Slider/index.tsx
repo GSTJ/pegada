@@ -74,7 +74,7 @@ export const Root = (props: MultiSliderProps) => {
   // workaround to prevent that.
   const safePadding = Platform.OS === "android" ? theme.spacing[7] : 0;
 
-  const sliderLength = (props?.sliderLength ?? 0) - safePadding * 2;
+  const sliderLength = (props.sliderLength ?? 0) - safePadding * 2;
 
   const hasSecondMarker = (props.values?.length ?? 0) > 1;
 

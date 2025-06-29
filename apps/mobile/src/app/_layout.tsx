@@ -18,7 +18,7 @@ import { useGetInitialNotifications } from "@/services/linking";
 import { store } from "@/store";
 
 // Wait for the assets to load before hiding the SplashScreen
-SplashScreen.preventAutoHideAsync()?.catch(sendError);
+SplashScreen.preventAutoHideAsync().catch(sendError);
 
 const AppContainer = styled(GestureHandlerRootView)`
   flex: 1;
@@ -30,7 +30,7 @@ const App = () => {
   useEffect(() => {
     if (!initialRouteName) return;
 
-    SplashScreen.hideAsync()?.catch(sendError);
+    SplashScreen.hideAsync().catch(sendError);
     router.replace(initialRouteName);
   }, [initialRouteName]);
 

@@ -35,7 +35,7 @@ const formatDistance = (distance: number, locale: string) => {
 const Distance: React.FC<DistanceProps> = ({ dog }) => {
   const [_t, i18n] = useTranslation();
 
-  if (dog.distance === null || dog.distance === undefined) {
+  if (dog.distance === null) {
     return (
       <Container>
         <View />
@@ -48,7 +48,7 @@ const Distance: React.FC<DistanceProps> = ({ dog }) => {
       <Content>
         <Location width={14} height={14} fill="#fff" />
         <DistanceText>
-          {formatDistance(dog.distance ?? 0, i18n.language)}
+          {formatDistance(dog.distance, i18n.language)}
         </DistanceText>
       </Content>
     </Container>

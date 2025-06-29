@@ -9,7 +9,7 @@ export const useCurrentCityText = () => {
     refetchOnMount: false
   });
 
-  const hasLatLng = myDog?.user?.latitude && myDog.user?.longitude;
+  const hasLatLng = myDog?.user?.latitude && myDog?.user?.longitude;
 
   const currentCityFallback = hasLatLng
     ? t("common.nearYou")
