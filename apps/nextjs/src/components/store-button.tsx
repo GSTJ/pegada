@@ -1,7 +1,7 @@
-import { HTMLProps } from "react";
+import { ComponentProps } from "react";
 import Image, { ImageProps } from "next/image";
 
-export const StoreButton = (props: HTMLProps<HTMLAnchorElement>) => {
+export const StoreButton = (props: ComponentProps<"a">) => {
   return (
     // oxlint-disable-next-line jsx-a11y/anchor-has-content -- content provided by caller via props spread
     <a
@@ -10,7 +10,7 @@ export const StoreButton = (props: HTMLProps<HTMLAnchorElement>) => {
     />
   );
 };
-const StoreButtonText = (props: HTMLProps<HTMLParagraphElement>) => {
+const StoreButtonText = (props: ComponentProps<"p">) => {
   return <p className="text-black font-semibold pt-1" {...props} />;
 };
 const StoreIcon = (props: ImageProps) => {

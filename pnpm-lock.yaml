@@ -350,10 +350,10 @@ importers:
         version: 3.1.1(webpack@5.91.0)
       '@mdx-js/react':
         specifier: ^3.1.1
-        version: 3.1.1(@types/react@18.3.3)(react@18.3.1)
+        version: 3.1.1(@types/react@19.2.14)(react@18.3.1)
       '@next/mdx':
         specifier: ^14.2.5
-        version: 14.2.5(@mdx-js/loader@3.1.1(webpack@5.91.0))(@mdx-js/react@3.1.1(@types/react@18.3.3)(react@18.3.1))
+        version: 14.2.5(@mdx-js/loader@3.1.1(webpack@5.91.0))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@18.3.1))
       '@pegada/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -410,7 +410,7 @@ importers:
         version: 3.17.2(next@14.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       next-mdx-remote:
         specifier: ^5.0.0
-        version: 5.0.0(@types/react@18.3.3)(react@18.3.1)
+        version: 5.0.0(@types/react@19.2.14)(react@18.3.1)
       postcss:
         specifier: 8.5.14
         version: 8.5.14
@@ -446,11 +446,11 @@ importers:
         specifier: 22.1.0
         version: 22.1.0
       '@types/react':
-        specifier: 18.3.3
-        version: 18.3.3
+        specifier: ^19.2.14
+        version: 19.2.14
       '@types/react-dom':
-        specifier: ~18.3.0
-        version: 18.3.0
+        specifier: ~19.2.3
+        version: 19.2.3(@types/react@19.2.14)
 
   apps/queue:
     dependencies:
@@ -3678,12 +3678,6 @@ packages:
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
 
-  '@types/prop-types@15.7.12':
-    resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
-
-  '@types/react-dom@18.3.0':
-    resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
-
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
@@ -3697,9 +3691,6 @@ packages:
 
   '@types/react-test-renderer@18.3.0':
     resolution: {integrity: sha512-HW4MuEYxfDbOHQsVlY/XtOvNHftCVEPhJF2pQXXwcUiUF+Oyb0usgp48HSgpK5rt8m9KZb22yqOeZm+rrVG8gw==}
-
-  '@types/react@18.3.3':
-    resolution: {integrity: sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==}
 
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
@@ -11931,10 +11922,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mdx-js/react@3.1.1(@types/react@18.3.3)(react@18.3.1)':
+  '@mdx-js/react@3.1.1(@types/react@19.2.14)(react@18.3.1)':
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 18.3.3
+      '@types/react': 19.2.14
       react: 18.3.1
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
@@ -11961,12 +11952,12 @@ snapshots:
     dependencies:
       glob: 10.3.10
 
-  '@next/mdx@14.2.5(@mdx-js/loader@3.1.1(webpack@5.91.0))(@mdx-js/react@3.1.1(@types/react@18.3.3)(react@18.3.1))':
+  '@next/mdx@14.2.5(@mdx-js/loader@3.1.1(webpack@5.91.0))(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@18.3.1))':
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
       '@mdx-js/loader': 3.1.1(webpack@5.91.0)
-      '@mdx-js/react': 3.1.1(@types/react@18.3.3)(react@18.3.1)
+      '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@18.3.1)
 
   '@next/swc-darwin-arm64@14.2.5':
     optional: true
@@ -13507,12 +13498,6 @@ snapshots:
 
   '@types/offscreencanvas@2019.7.3': {}
 
-  '@types/prop-types@15.7.12': {}
-
-  '@types/react-dom@18.3.0':
-    dependencies:
-      '@types/react': 19.2.14
-
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
       '@types/react': 19.2.14
@@ -13532,11 +13517,6 @@ snapshots:
   '@types/react-test-renderer@18.3.0':
     dependencies:
       '@types/react': 19.2.14
-
-  '@types/react@18.3.3':
-    dependencies:
-      '@types/prop-types': 15.7.12
-      csstype: 3.2.3
 
   '@types/react@19.2.14':
     dependencies:
@@ -18355,11 +18335,11 @@ snapshots:
       react: 18.3.1
       use-intl: 3.17.2(react@18.3.1)
 
-  next-mdx-remote@5.0.0(@types/react@18.3.3)(react@18.3.1):
+  next-mdx-remote@5.0.0(@types/react@19.2.14)(react@18.3.1):
     dependencies:
       '@babel/code-frame': 7.29.0
       '@mdx-js/mdx': 3.0.1
-      '@mdx-js/react': 3.1.1(@types/react@18.3.3)(react@18.3.1)
+      '@mdx-js/react': 3.1.1(@types/react@19.2.14)(react@18.3.1)
       react: 18.3.1
       unist-util-remove: 3.1.1
       vfile: 6.0.1
