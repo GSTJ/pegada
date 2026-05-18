@@ -12,6 +12,7 @@
     "test": "jest --detectOpenHandles",
     "pretest": "pnpm -F @pegada/database test:db:setup",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "typecheck:tsgo": "tsgo --noEmit",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "pnpm lint --fix",
     "format:fix": "prettier --write . --ignore-path ../../.gitignore",

@@ -27,6 +27,7 @@
     }
   },
   "devDependencies": {
+    "@typescript/native-preview": "7.0.0-dev.20260511.1",
     "dotenv-cli": "^7.4.2",
     "prettier": "3.3.3",
     "turbo": "^2.0.11",
@@ -49,6 +50,7 @@
     "format:fix": "turbo format:fix",
     "i18n:parse": "npx i18next-parser",
     "typecheck": "turbo typecheck",
+    "typecheck:tsgo": "turbo typecheck:tsgo",
     "convert:images": "./scripts/convert-png-images-to-webp.sh",
     "download:secrets": "dotenv -- ./scripts/download-secrets.sh"
   }

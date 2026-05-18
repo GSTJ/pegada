@@ -35,6 +35,16 @@
         "node_modules/.cache/tsbuildinfo.json"
       ]
     },
+    "typecheck:tsgo": {
+      "outputs": [
+        "node_modules/.cache/tsbuildinfo.json"
+      ]
+    },
+    "typecheck:tsc": {
+      "outputs": [
+        "node_modules/.cache/tsbuildinfo.json"
+      ]
+    },
     "build": {
       "outputs": [
         "node_modules/.cache/build.json"
