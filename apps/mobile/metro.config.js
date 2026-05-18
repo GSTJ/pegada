@@ -19,9 +19,8 @@ config.watcher = {
 };
 
 // SVG Support
-config.transformer.babelTransformerPath = require.resolve(
-  "react-native-svg-transformer"
-);
+config.transformer.babelTransformerPath =
+  require.resolve("react-native-svg-transformer");
 config.resolver.assetExts = config.resolver.assetExts.filter(
   (ext) => ext !== "svg"
 );
