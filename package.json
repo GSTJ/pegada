@@ -48,9 +48,11 @@
     },
     "patchedDependencies": {
       "react-native-draggable-grid@2.2.1": "patches/react-native-draggable-grid@2.2.1.patch",
-      "@bugsnag/plugin-expo-eas-sourcemaps@51.0.0": "patches/@bugsnag__plugin-expo-eas-sourcemaps@51.0.0.patch",
-      "styled-components@6.1.11": "patches/styled-components@6.1.11.patch",
-      "react-native-screens@3.31.1": "patches/react-native-screens@3.31.1.patch"
+      "styled-components@6.1.11": "patches/styled-components@6.1.11.patch"
+    },
+    "overrides": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "react-native-svg": "15.15.3"
     }
   }
 }

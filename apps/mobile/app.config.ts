@@ -223,10 +223,6 @@ const config: ExpoConfig = {
     //   'applinks:www.pegada.app',
     // ],
   },
-  packagerOpts: {
-    config: "metro.config.js",
-    sourceExts: ["ts", "tsx", "js", "jsx", "json", "wasm", "svg"],
-  },
   extra: {
     oneSignalAppId: "",
     bugsnag: {

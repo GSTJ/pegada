@@ -58,7 +58,7 @@ const updateGroup = metadata && "updateGroup" in metadata ? metadata.updateGroup
 Bugsnag.start({
   apiKey: config.BUGSNAG_API_KEY,
   codeBundleId: (updateGroup as string) || "",
-  metadata: { env: config.ENV },
+  metadata: { app: { env: config.ENV } },
   plugins: [new BugsnagPluginReact()],
   releaseStage: config.ENV,
   enabledReleaseStages: ["production", "staging"],

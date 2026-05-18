@@ -65,19 +65,22 @@ const ChatMessageList = () => {
     );
   };
 
+  // inverted is passed through to the underlying ScrollView; FlashList v2 types don't expose it
+  const flashListProps = {
+    contentContainerStyle,
+    inverted,
+    data: messages,
+    keyExtractor,
+    ListFooterComponent: FooterComponent,
+    ListEmptyComponent,
+    renderItem,
+    onEndReached: loadMore,
+    onEndReachedThreshold: 0.5
+  };
+
   return (
-    <FlashList
-      contentContainerStyle={contentContainerStyle}
-      estimatedItemSize={77}
-      inverted={inverted}
-      data={messages}
-      keyExtractor={keyExtractor}
-      ListFooterComponent={FooterComponent}
-      ListEmptyComponent={ListEmptyComponent}
-      renderItem={renderItem}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.5}
-    />
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <FlashList {...(flashListProps as any)} />
   );
 };
 

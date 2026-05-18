@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import * as React from "react";
-import { Appearance, useColorScheme } from "react-native";
+import { Appearance, ColorSchemeName, useColorScheme } from "react-native";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
 
 import { DarkTheme, LightTheme } from "@pegada/shared/themes/themes";
@@ -43,17 +43,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
   useEffect(() => {
     const fetchThemeFromStorage = async () => {
       const storedTheme = await getData(StorageKeys.Theme);
-      Appearance.setColorScheme(storedTheme);
+      Appearance.setColorScheme(storedTheme as ColorSchemeName);
       setActiveTheme(storedTheme);
     };
 
     fetchThemeFromStorage().catch(sendError);
   }, []);
 
-  const theme = themes[colorScheme ?? Theme.Default];
+  const theme =
+    themes[(colorScheme as Theme) ?? Theme.Default] ?? themes[Theme.Default];
 
   const handleActiveThemeChange = async (theme: ActiveTheme) => {
-    Appearance.setColorScheme(theme);
+    Appearance.setColorScheme(theme as ColorSchemeName);
     setActiveTheme(theme);
 
     if (!theme) return deleteData(StorageKeys.Theme);
