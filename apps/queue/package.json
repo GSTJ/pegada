@@ -21,7 +21,8 @@
     "build": "npx rimraf dist && tsup --sourcemap",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "typecheck:tsgo": "tsgo --noEmit"
   },
   "devDependencies": {
     "@pegada/eslint-config": "workspace:*",

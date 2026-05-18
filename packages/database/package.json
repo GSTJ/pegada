@@ -16,6 +16,7 @@
     "studio": "prisma studio",
     "build": "npx prisma generate",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "typecheck:tsgo": "tsgo --noEmit",
     "db:up": "docker-compose up --build --detach",
     "db:seed": "npx prisma db seed",
     "db:setup": "pnpm db:up && pnpm migrate deploy && pnpm db:seed",
