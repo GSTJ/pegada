@@ -24,7 +24,7 @@ export const useBottomActionStyle = () => {
 
   const contentContainerStyle = {
     // That moves the content up to account for the bottom action
-    paddingBottom: height - bottomActionKeyboardOpenSize + theme.spacing[4] / 2
+    paddingBottom: height - bottomActionKeyboardOpenSize + theme.spacing[4] / 2,
   };
 
   return {
@@ -35,11 +35,11 @@ export const useBottomActionStyle = () => {
     scrollViewProps: {
       contentInset: {
         // That tells the scrollview to give an inset while focusing on the input, basically
-        bottom: bottomActionKeyboardOpenSize
+        bottom: bottomActionKeyboardOpenSize,
       },
       contentContainerStyle,
-      showsVerticalScrollIndicator: false
-    }
+      showsVerticalScrollIndicator: false,
+    },
   };
 };
 
@@ -53,14 +53,14 @@ const Container: React.FC<BlurViewProps> = React.forwardRef((props, ref) => {
       style={[
         {
           height,
-          paddingBottom
+          paddingBottom,
         },
-        props.style
+        props.style,
       ]}
     />
   );
 });
 
 export const BottomAction = {
-  Container
+  Container,
 };

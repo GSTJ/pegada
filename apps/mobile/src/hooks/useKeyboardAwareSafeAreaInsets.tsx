@@ -7,13 +7,11 @@ export const useKeyboardAwareSafeAreaInsets = () => {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardWillShow",
-      () => setKeyboardOpen(true)
+    const keyboardDidShowListener = Keyboard.addListener("keyboardWillShow", () =>
+      setKeyboardOpen(true),
     );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardWillHide",
-      () => setKeyboardOpen(false)
+    const keyboardDidHideListener = Keyboard.addListener("keyboardWillHide", () =>
+      setKeyboardOpen(false),
     );
 
     return () => {
@@ -26,6 +24,6 @@ export const useKeyboardAwareSafeAreaInsets = () => {
     top: insets.top,
     right: insets.right,
     left: insets.left,
-    bottom: keyboardOpen ? 0 : insets.bottom
+    bottom: keyboardOpen ? 0 : insets.bottom,
   };
 };

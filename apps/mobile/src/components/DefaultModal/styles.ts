@@ -20,7 +20,7 @@ export const Container = styled.View`
 export const Title = styled(Text).attrs((props) => ({
   fontWeight: "bold",
   fontSize: "lg",
-  ...props
+  ...props,
 }))`
   text-align: center;
 `;

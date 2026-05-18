@@ -25,7 +25,7 @@ import {
   LogoStyled,
   PressableContainer,
   Title,
-  TopCard
+  TopCard,
 } from "./styles";
 
 export const useCustomBottomInset = () => {
@@ -53,13 +53,13 @@ const InsertEmail = () => {
 
         return router.push({
           pathname: SceneName.OneTimeCode,
-          params: { email }
+          params: { email },
         });
       }
 
       Alert.alert(t("common.oops"), t("insertEmail.loginError"));
       sendError(error);
-    }
+    },
   });
 
   const handleLogin = async () => {
@@ -74,9 +74,7 @@ const InsertEmail = () => {
 
   return (
     <PressableContainer onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingViewStyled
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      <KeyboardAvoidingViewStyled behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <Container>
           <TopCard
             source={require("@/assets/images/background.webp")}

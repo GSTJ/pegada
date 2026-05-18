@@ -2,8 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 
 import { breedData } from "./breed-data";
 
-const shihtzuId = breedData.find((breed) => breed.name === "Shih-tzu")
-  ?.id as string;
+const shihtzuId = breedData.find((breed) => breed.name === "Shih-tzu")?.id as string;
 
 export const userId = createId();
 export const userTwoId = createId();
@@ -13,7 +12,7 @@ export const PITOCA_USER = {
   email: "pitoca@test.com",
   city: "Ribeirão Preto",
   state: "SP",
-  country: "BR"
+  country: "BR",
 };
 
 export const PITOCA_DOG = {
@@ -25,16 +24,16 @@ export const PITOCA_DOG = {
   size: "SMALL",
   weight: 5,
   breed: {
-    connect: { id: shihtzuId }
+    connect: { id: shihtzuId },
   },
-  bio: "Não resisto a um carinho na barriga."
+  bio: "Não resisto a um carinho na barriga.",
 } as const;
 
 export const PITOCO_USER = {
   id: userTwoId,
   email: "pitoco@test.com",
   latitude: null,
-  longitude: null
+  longitude: null,
 } as const;
 
 export const PITOCO_DOG = {
@@ -46,7 +45,7 @@ export const PITOCO_DOG = {
   size: "SMALL",
   weight: 6,
   breed: {
-    connect: { id: shihtzuId }
+    connect: { id: shihtzuId },
   },
-  bio: "Adoro brincar de bolinha e de morder meia."
+  bio: "Adoro brincar de bolinha e de morder meia.",
 } as const;

@@ -1,11 +1,4 @@
-import {
-  format,
-  isSameDay,
-  isThisWeek,
-  isThisYear,
-  isToday,
-  isYesterday
-} from "date-fns";
+import { format, isSameDay, isThisWeek, isThisYear, isToday, isYesterday } from "date-fns";
 import { enUS, pt } from "date-fns/locale";
 
 import { Language } from "@pegada/shared/i18n/types/types";
@@ -32,7 +25,7 @@ const formatDate = (date: Date) => {
 
 const Component = ({
   message,
-  nextMessage
+  nextMessage,
 }: {
   message: { createdAt: Date };
   nextMessage?: { createdAt: Date };

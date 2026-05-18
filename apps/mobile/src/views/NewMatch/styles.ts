@@ -29,8 +29,7 @@ export const RotatedImageRight = styled(RotatedImageLeft)`
 
 export const HeartEyesContainer = styled.View`
   border-radius: ${(props) => props.theme.radii.round}px;
-  background-color: ${(props) =>
-    Color(props.theme.colors.primary).alpha(0.5).rgb().string()};
+  background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.5).rgb().string()};
   padding: ${(props) => props.theme.spacing[1.5]}px;
   margin-top: -35px;
   margin-bottom: ${(props) => props.theme.spacing[2]}px;

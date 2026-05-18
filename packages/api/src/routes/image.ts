@@ -5,5 +5,5 @@ export const imageRouter = createTRPCRouter({
   signedUrl: protectedProcedure.query(async () => {
     const presignedUrl = await ImageService.getSignedUrl();
     return presignedUrl.url;
-  })
+  }),
 });

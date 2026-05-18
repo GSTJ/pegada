@@ -35,7 +35,7 @@ const languageDetector: LanguageDetectorAsyncModule = {
     } catch (error) {
       sendError(error);
     }
-  }
+  },
 };
 
 initI18n(i18n.use(languageDetector).use(initReactI18next)).catch(sendError);

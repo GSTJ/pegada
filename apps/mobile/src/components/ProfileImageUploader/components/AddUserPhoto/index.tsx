@@ -1,11 +1,7 @@
 import { useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, Alert } from "react-native";
-import Animated, {
-  FadeOut,
-  useAnimatedStyle,
-  withSpring
-} from "react-native-reanimated";
+import Animated, { FadeOut, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { FileSystemUploadType, uploadAsync } from "expo-file-system";
 import { useTheme } from "styled-components/native";
 
@@ -15,7 +11,7 @@ import {
   compressImage,
   ImagePickerError,
   Picture,
-  showImagePickerOptions
+  showImagePickerOptions,
 } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";
@@ -33,14 +29,10 @@ const hitSlop = {
   top: 150,
   bottom: 150,
   left: 100,
-  right: 100
+  right: 100,
 };
 
-export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
-  picture,
-  onDelete,
-  onAdd
-}) => {
+export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, onAdd }) => {
   const [localPicture, setLocalPicture] = useState(picture.url);
 
   const theme = useTheme();
@@ -77,7 +69,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
       const response = await uploadAsync(presignedUrl, compressedImage.uri, {
         mimeType: getMimeType(compressedImage.uri),
         uploadType: FileSystemUploadType.BINARY_CONTENT,
-        httpMethod: "PUT"
+        httpMethod: "PUT",
       });
 
       if (response.status !== 200) {

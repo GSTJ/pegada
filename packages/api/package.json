@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -11,41 +14,13 @@
   "scripts": {
     "test": "jest --detectOpenHandles",
     "pretest": "pnpm -F @pegada/database test:db:setup",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "pnpm lint --fix",
-    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
-    "format": "prettier --check . --ignore-path ../../.gitignore"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@faker-js/faker": "^8.4.1",
-    "@pegada/prettier-config": "workspace:*",
-    "@pegada/tsconfig": "workspace:*",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^22.1.0",
-    "@types/nodemailer": "^6.4.15",
-    "expo-server-sdk": "^3.10.0",
-    "next": "*",
-    "typescript": "*"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@pegada/eslint-config/typescript"
-    ],
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    }
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
     "@aws-sdk/s3-request-presigner": "^3.1045.0",
     "@bugsnag/js": "^7.25.0",
     "@pegada/database": "workspace:*",
-    "@pegada/eslint-config": "workspace:*",
     "@pegada/shared": "workspace:*",
     "@prisma/client": "^5.17.0",
     "@trpc/server": "11.0.0-rc.477",
@@ -65,5 +40,14 @@
     "ts-node": "^10.9.2",
     "zod": "3.23.8"
   },
-  "prettier": "@pegada/prettier-config"
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@pegada/tsconfig": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.1.0",
+    "@types/nodemailer": "^6.4.15",
+    "expo-server-sdk": "^3.10.0",
+    "next": "*",
+    "typescript": "*"
+  }
 }

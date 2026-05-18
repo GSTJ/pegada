@@ -20,8 +20,7 @@ export const Container = styled.View<CheckContainerProps>`
   ${(props) =>
     props.selected &&
     css`
-      background-color: ${({ theme }) =>
-        Color(theme.colors.primary).alpha(0.2).toString()};
+      background-color: ${({ theme }) => Color(theme.colors.primary).alpha(0.2).toString()};
       border-color: ${({ theme }) => theme.colors.primary};
     `}
 `;

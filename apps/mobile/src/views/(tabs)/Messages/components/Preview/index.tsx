@@ -21,14 +21,14 @@ export const Preview: React.FC<PreviewProps> = ({ item }) => {
       onPress={() =>
         router.push({
           pathname: `${SceneName.Chat}/[matchId]`,
-          params: { dogId: item.dog.id, matchId: item.id }
+          params: { dogId: item.dog.id, matchId: item.id },
         })
       }
     >
       <Picture
         source={{
           uri: item.dog.images[0]?.url,
-          blurhash: item.dog.images[0]?.blurhash ?? undefined
+          blurhash: item.dog.images[0]?.blurhash ?? undefined,
         }}
       />
       <Content>

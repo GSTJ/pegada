@@ -17,7 +17,7 @@ const setCorsHeaders = (res: Response) => {
 
 export const OPTIONS = () => {
   const response = new Response(null, {
-    status: 204
+    status: 204,
   });
   setCorsHeaders(response);
   return response;
@@ -25,12 +25,12 @@ export const OPTIONS = () => {
 
 const loggedOutRatelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(15, "30s"),
-  redis: Redis.fromEnv()
+  redis: Redis.fromEnv(),
 });
 
 const handleRatelimiter = async ({
   req,
-  session
+  session,
 }: {
   req: NextRequest;
   session: Session | null;
@@ -44,8 +44,7 @@ const handleRatelimiter = async ({
 
   const ip = req.ip ?? "127.0.0.1";
 
-  const { limit, remaining, reset, success } =
-    await loggedOutRatelimit.limit(ip);
+  const { limit, remaining, reset, success } = await loggedOutRatelimit.limit(ip);
 
   if (success) return;
 
@@ -54,15 +53,13 @@ const handleRatelimiter = async ({
     headers: {
       "X-RateLimit-Limit": limit.toString(),
       "X-RateLimit-Remaining": remaining.toString(),
-      "X-RateLimit-Reset": reset.toString()
-    }
+      "X-RateLimit-Reset": reset.toString(),
+    },
   });
 };
 
 const handler = async (req: NextRequest) => {
-  const session = getSession(
-    req.headers.get(RequestHeaders.Authorization) ?? ""
-  );
+  const session = getSession(req.headers.get(RequestHeaders.Authorization) ?? "");
 
   const ratelimited = await handleRatelimiter({ req, session });
 
@@ -81,7 +78,7 @@ const handler = async (req: NextRequest) => {
             // eslint-disable-next-line no-console
             console.error(`>>> tRPC Error on '${path}'`, error);
           }
-        : undefined
+        : undefined,
   });
 
   setCorsHeaders(response);

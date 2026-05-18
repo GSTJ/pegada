@@ -14,13 +14,12 @@ export const Background = styled.ImageBackground`
 `;
 
 export const CenteredView = styled(Animated.View).attrs(() => ({
-  entering: FadeInUp
+  entering: FadeInUp,
 }))`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding: ${(props) => props.theme.spacing[6]}px
-    ${(props) => props.theme.spacing[3]}px;
+  padding: ${(props) => props.theme.spacing[6]}px ${(props) => props.theme.spacing[3]}px;
 `;
 
 export const CenteredText = styled(Text)`

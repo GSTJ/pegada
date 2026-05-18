@@ -30,7 +30,7 @@ const RestorePurchases: React.FC = () => {
     onSuccess: () => {
       router.back();
       analytics.track({ event_type: "Restore Purchases Success" });
-    }
+    },
   });
   const theme = useTheme();
 
@@ -40,7 +40,7 @@ const RestorePurchases: React.FC = () => {
         bottom: 10,
         left: 10,
         right: 10,
-        top: 10
+        top: 10,
       }}
       disabled={restore.isPending}
       onPress={() => {

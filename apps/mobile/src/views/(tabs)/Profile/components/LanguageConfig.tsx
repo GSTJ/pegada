@@ -14,12 +14,12 @@ import { Config } from "./Config";
 // have them written in the language they represent
 const LANGUAGES = {
   "pt-BR": "Português",
-  "en-US": "English"
+  "en-US": "English",
 };
 
 const languagesPickerData = Object.entries(LANGUAGES).map(([id, name]) => ({
   id,
-  name
+  name,
 }));
 
 export const LanguageConfig = () => {
@@ -29,9 +29,10 @@ export const LanguageConfig = () => {
 
   const theme = useTheme();
 
-  const value = languagesPickerData.find(
-    ({ id }) => id === currentLanguage
-  ) ?? { id: currentLanguage, name: LANGUAGES[Language.Default] };
+  const value = languagesPickerData.find(({ id }) => id === currentLanguage) ?? {
+    id: currentLanguage,
+    name: LANGUAGES[Language.Default],
+  };
 
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
@@ -53,9 +54,7 @@ export const LanguageConfig = () => {
         data={languagesPickerData}
         snapPoints={["40%"]}
         onChange={(item) => {
-          i18n
-            .changeLanguage(item.id as keyof typeof LANGUAGES)
-            .catch(sendError);
+          i18n.changeLanguage(item.id as keyof typeof LANGUAGES).catch(sendError);
         }}
         ref={pickerSheetRef}
       />

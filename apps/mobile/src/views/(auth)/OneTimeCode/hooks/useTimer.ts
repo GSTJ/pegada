@@ -1,8 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-const useTimer = (
-  seconds: number
-): [number, Dispatch<SetStateAction<number>>] => {
+const useTimer = (seconds: number): [number, Dispatch<SetStateAction<number>>] => {
   const [timer, setTimer] = useState(seconds);
 
   useEffect(() => {

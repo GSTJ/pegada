@@ -13,9 +13,9 @@ export const echoRouter = createTRPCRouter({
 
     const { authenticated, forceUpdate } = await EchoService.get(
       currentAppVersion,
-      ctx.session?.user.id
+      ctx.session?.user.id,
     );
 
     return { authenticated, forceUpdate };
-  })
+  }),
 });

@@ -21,6 +21,6 @@ if (config.ENV === "development") {
     exclude: [
       // Uncomment to enable tracking in all components
       // /^Screen/
-    ]
+    ],
   });
 }

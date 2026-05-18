@@ -27,14 +27,14 @@ export const CancelTouchArea = styled(PressableArea).attrs({
     top: 10,
     bottom: 10,
     left: 10,
-    right: 10
-  }
+    right: 10,
+  },
 })`
   padding-left: ${(props) => props.theme.spacing[2.5]}px;
 `;
 
 export const CancelIcon = styled(cancelIcon).attrs((props) => ({
-  fill: props.theme.colors.placeholder
+  fill: props.theme.colors.placeholder,
 }))`
   opacity: 0.5;
   width: ${(props) => props.theme.spacing[4]}px;
@@ -44,7 +44,7 @@ export const CancelIcon = styled(cancelIcon).attrs((props) => ({
 export const TextInput = styled.TextInput.attrs((props) => ({
   placeholderTextColor: props.theme.colors.placeholder,
   selectionColor: props.theme.colors.primary,
-  ...props
+  ...props,
 }))`
   flex: 1;
   color: ${(props) => props.theme.colors.text};

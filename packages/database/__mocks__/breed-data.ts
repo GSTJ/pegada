@@ -5,7 +5,7 @@ export const breedData: Prisma.BreedCreateManyInput[] = [
   {
     id: "fcxy66tjeeoderq7i5hs3rk9",
     name: "Sem raça definida",
-    slug: "mixed-breed"
+    slug: "mixed-breed",
   },
   { id: "eg1cp0mzfqg4btszy07kdevy", name: "Dálmata", slug: "dalmatian" },
   { id: "xdu71pytmrtyu13xuumpztap", name: "Poodle", slug: "poodle" },
@@ -15,25 +15,25 @@ export const breedData: Prisma.BreedCreateManyInput[] = [
   {
     id: "u8y4cc4hrg3fzy9lxwn3rrdd",
     name: "Golden Retriever",
-    slug: "golden-retriever"
+    slug: "golden-retriever",
   },
   {
     id: "mi6hxlqtgfji16ccbw8cp6ee",
     name: "Pastor Alemão",
-    slug: "german-shepherd"
+    slug: "german-shepherd",
   },
   { id: "zmsymqyagpnuyqvby5pkkkg8", name: "Rottweiler", slug: "rottweiler" },
   { id: "m3qphxqmaiivmi9ld81v8ois", name: "Chihuahua", slug: "chihuahua" },
   {
     id: "ortb2u1ixf3ejk4vnn2glxqp",
     name: "Border Collie",
-    slug: "border-collie"
+    slug: "border-collie",
   },
   { id: "ndmnmio5nojm3wrmhnlwwram", name: "Maltês", slug: "maltese" },
   {
     id: "j0wd5tx257dj7s2bop1p7hd8",
     name: "Basset Hound",
-    slug: "basset-hound"
+    slug: "basset-hound",
   },
   { id: "uik8wj2iri0k12g69fejcbga", name: "Lhasa Apso", slug: "lhasa-apso" },
   { id: "e8s3m5z740q0t28ubsk3btfz", name: "Doberman", slug: "doberman" },
@@ -42,14 +42,14 @@ export const breedData: Prisma.BreedCreateManyInput[] = [
   {
     id: "g0fgmxuty55bpks8uc3i7k9x",
     name: "Bull Terrier",
-    slug: "bull-terrier"
+    slug: "bull-terrier",
   },
   { id: "nay182l6gh3av5nqyv0wg6wc", name: "Shiba Inu", slug: "shiba-inu" },
   { id: "y28ilt2nupb9eive46mwivi4", name: "Schnauzer", slug: "schnauzer" },
   {
     id: "hvusiav01aby23s0bno3npta",
     name: "Bichon Frisé",
-    slug: "bichon-frise"
+    slug: "bichon-frise",
   },
   { id: "d7u0ho768xefz04wy3zt0j59", name: "Bullmastiff", slug: "bullmastiff" },
   { id: "z56tk4dfr8yifrbcahsjw7my", name: "Boxer", slug: "boxer" },
@@ -60,43 +60,43 @@ export const breedData: Prisma.BreedCreateManyInput[] = [
   {
     id: "ufv2f8svg6b7i4d6zsdk5u6r",
     name: "Husky Siberiano",
-    slug: "siberian-husky"
+    slug: "siberian-husky",
   },
   {
     id: "k2u1jgdhg9tcfomw5flr0stq",
     name: "Lulu da Pomerânia",
-    slug: "pomeranian"
+    slug: "pomeranian",
   },
   {
     id: "ricskt62czwdjxw2plkciyqd",
     name: "Buldogue Francês",
-    slug: "french-bulldog"
+    slug: "french-bulldog",
   },
   {
     id: "rzye3kahtwqmphsfv0vzh34s",
     name: "Buldogue Inglês",
-    slug: "english-bulldog"
+    slug: "english-bulldog",
   },
   { id: "qc3gqqt6o829aghhxy971di6", name: "Dogue Alemão", slug: "great-dane" },
   {
     id: "ddltrtks2mr3v574m8ihjkdz",
     name: "Dogue de Bordeaux",
-    slug: "dogue-de-bordeaux"
+    slug: "dogue-de-bordeaux",
   },
   {
     id: "fy2po1cx5nm7c9gqob8rlw5j",
     name: "Dogo Argentino",
-    slug: "dogo-argentino"
+    slug: "dogo-argentino",
   },
   {
     id: "c8j1wsbkyq3nuwdig0qux4px",
     name: "Fila Brasileiro",
-    slug: "fila-brasileiro"
+    slug: "fila-brasileiro",
   },
   {
     id: "d9wu0kc56mzppb64bs9lqoi3",
     name: "Fox Paulistinha",
-    slug: "brazilian-terrier"
+    slug: "brazilian-terrier",
   },
   { id: "um7cja33h6ww258kls605yob", name: "Fox Terrier", slug: "fox-terrier" },
   { id: "fk53ijnox9eeqxbqhdyfq8sr", name: "Galgo", slug: "greyhound" },
@@ -106,12 +106,12 @@ export const breedData: Prisma.BreedCreateManyInput[] = [
   {
     id: "fcasjt9ylz6tacyqx5wapo0y",
     name: "Lagotto Romagnolo",
-    slug: "lagotto-romagnolo"
+    slug: "lagotto-romagnolo",
   },
   {
     id: "wbvz2hb12n4cxwhodx2nu8t5",
     name: "Leão da Rodésia",
-    slug: "rhodesian-ridgeback"
+    slug: "rhodesian-ridgeback",
   },
-  { id: "wbvz3hb12n2cxwhodx2nu8t5", name: "Yorkshire", slug: "yorkshire" }
+  { id: "wbvz3hb12n2cxwhodx2nu8t5", name: "Yorkshire", slug: "yorkshire" },
 ];

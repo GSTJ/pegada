@@ -10,8 +10,8 @@ export const Container = styled(PressableArea).attrs({
     top: 15,
     bottom: 15,
     left: 15,
-    right: 15
-  }
+    right: 15,
+  },
 })`
   margin-top: ${-BACK_CONTAINER_SIZE / 2}px;
   right: ${(props) => props.theme.spacing[4]}px;

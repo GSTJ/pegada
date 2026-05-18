@@ -8,11 +8,9 @@ export const PlanContainer = styled(PressableArea)`
   position: absolute;
   top: ${(props) => props.theme.spacing[4]}px;
   right: ${(props) => props.theme.spacing[4]}px;
-  padding: ${(props) => props.theme.spacing[2]}px
-    ${(props) => props.theme.spacing[3]}px;
+  padding: ${(props) => props.theme.spacing[2]}px ${(props) => props.theme.spacing[3]}px;
   border-radius: ${(props) => props.theme.radii.sm}px;
-  background-color: ${({ theme }) =>
-    Color(theme.colors.background).alpha(0.6).string()};
+  background-color: ${({ theme }) => Color(theme.colors.background).alpha(0.6).string()};
   z-index: 10;
 `;
 

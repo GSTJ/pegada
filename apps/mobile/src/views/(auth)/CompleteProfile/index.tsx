@@ -6,10 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import {
-  DogCompleteClientSchema,
-  dogCompleteClientSchema
-} from "@pegada/shared/schemas/dogSchema";
+import { DogCompleteClientSchema, dogCompleteClientSchema } from "@pegada/shared/schemas/dogSchema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
@@ -33,14 +30,13 @@ const CompleteProfile = () => {
 
   const { profileImageUrl } = useLocalSearchParams();
 
-  const { control, handleSubmit, getValues, watch } =
-    useForm<DogCompleteClientSchema>({
-      defaultValues: {
-        birthDate: "",
-        breedId: ""
-      },
-      resolver: zodResolver(dogCompleteClientSchema)
-    });
+  const { control, handleSubmit, getValues, watch } = useForm<DogCompleteClientSchema>({
+    defaultValues: {
+      birthDate: "",
+      breedId: "",
+    },
+    resolver: zodResolver(dogCompleteClientSchema),
+  });
 
   const form = watch();
 
@@ -52,7 +48,7 @@ const CompleteProfile = () => {
     onSuccess: (data) => {
       analytics.track({
         event_type: "Complete Dog Profile",
-        event_properties: data ?? {}
+        event_properties: data ?? {},
       });
       getTrcpContext().myDog.get.setData(undefined, data);
       router.replace(SceneName.AskForLocation);
@@ -60,7 +56,7 @@ const CompleteProfile = () => {
     onError: (error) => {
       magicToast.alert(t("editProfile.profileError"));
       sendError(error);
-    }
+    },
   });
 
   const saveUser = handleSubmit(async (data) => {
@@ -69,7 +65,7 @@ const CompleteProfile = () => {
         ...(data.birthDate && { birthDate: data.birthDate }),
         ...(data.breedId && { breedId: data.breedId }),
         ...(data.color && { color: data.color }),
-        ...(data.size && { size: data.size })
+        ...(data.size && { size: data.size }),
       };
 
       await myDogUpdateMutation.mutateAsync(dogData);
@@ -84,9 +80,7 @@ const CompleteProfile = () => {
   const theme = useTheme();
 
   const { scrollViewProps } = useBottomActionStyle();
-  const continueText = hasChanged
-    ? t("completeProfile.save")
-    : t("common.skip");
+  const continueText = hasChanged ? t("completeProfile.save") : t("common.skip");
 
   return (
     <KeyboardAvoidingView
@@ -100,9 +94,7 @@ const CompleteProfile = () => {
           {...scrollViewProps}
           contentContainerStyle={{
             paddingHorizontal: theme.spacing[4],
-            paddingBottom:
-              theme.spacing[8] +
-              scrollViewProps.contentContainerStyle.paddingBottom
+            paddingBottom: theme.spacing[8] + scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           keyboardDismissMode="interactive"
         >
@@ -135,10 +127,7 @@ const CompleteProfile = () => {
                 name="birthDate"
                 control={control}
                 rules={{ required: true }}
-                render={({
-                  field: { onChange, onBlur, value, name },
-                  fieldState
-                }) => (
+                render={({ field: { onChange, onBlur, value, name }, fieldState }) => (
                   <Input
                     title={t("completeProfile.birthDate")}
                     placeholder="DD/MM/YYYY"
@@ -205,10 +194,7 @@ const CompleteProfile = () => {
           </Text>
         </Container>
         <BottomAction.Container>
-          <Button
-            loading={myDogUpdateMutation.isPending}
-            onPress={() => saveUser()}
-          >
+          <Button loading={myDogUpdateMutation.isPending} onPress={() => saveUser()}>
             {continueText}
           </Button>
         </BottomAction.Container>

@@ -30,11 +30,7 @@ const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
     <Container>
       <Content>
         {Array.from({ length: pages }).map((_, index) => (
-          <DotComponent
-            key={`${index}-dot`}
-            index={index}
-            currentPage={currentPage}
-          />
+          <DotComponent key={`${index}-dot`} index={index} currentPage={currentPage} />
         ))}
       </Content>
     </Container>

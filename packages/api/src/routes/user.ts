@@ -9,15 +9,13 @@ export const userSchema = z.object({
   country: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
-  pushToken: z.string().optional().nullable()
+  pushToken: z.string().optional().nullable(),
 });
 
 export const userRouter = createTRPCRouter({
-  update: protectedProcedure
-    .input(userSchema)
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
-      const updatedDog = await UserService.updateUserById(userId, input);
-      return updatedDog;
-    })
+  update: protectedProcedure.input(userSchema).mutation(async ({ ctx, input }) => {
+    const userId = ctx.session.user.id;
+    const updatedDog = await UserService.updateUserById(userId, input);
+    return updatedDog;
+  }),
 });

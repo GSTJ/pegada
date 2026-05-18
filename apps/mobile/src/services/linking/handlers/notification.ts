@@ -6,11 +6,11 @@ import { SceneName } from "@/types/SceneName";
 
 enum NotificationUrl {
   Match = "match/",
-  Chat = "chat/"
+  Chat = "chat/",
 }
 
 export const getNotificationUrl = (
-  response: Notifications.NotificationResponse
+  response: Notifications.NotificationResponse,
 ): string | undefined => {
   return response.notification.request.content.data.url;
 };
@@ -22,14 +22,14 @@ const handleUnknownNotification = (url: string) => {
 const handleMatchNotification = async (matchId: string, dogId: string) => {
   return router.push({
     pathname: SceneName.NewMatch,
-    params: { matchDogId: dogId, matchId: matchId }
+    params: { matchDogId: dogId, matchId: matchId },
   });
 };
 
 const handleChatNotification = async (matchId: string, dogId: string) => {
   return router.push({
     pathname: `${SceneName.Chat}/[matchId]`,
-    params: { dogId, matchId }
+    params: { dogId, matchId },
   });
 };
 

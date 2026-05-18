@@ -15,9 +15,7 @@ import { SwipeAction } from "@/store/reducers/dogs/swipe";
 import { SceneName } from "@/types/SceneName";
 import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
 
-function* swipeUserRequest({
-  payload
-}: ActionType<typeof Actions.dogs.swipe.request>): any {
+function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.request>): any {
   const { id, swipeType: _swipeType } = payload;
 
   try {
@@ -26,7 +24,7 @@ function* swipeUserRequest({
     // If the user is not premium, check if the like limit has been reached
     if (!isPremium && _swipeType !== Swipe.Dislike) {
       const { likeLimitResetAt }: RootReducer["dogs"]["config"] = yield select(
-        (state: RootReducer) => state.dogs.config
+        (state: RootReducer) => state.dogs.config,
       );
 
       if (likeLimitResetAt && isBefore(new Date(), likeLimitResetAt)) {
@@ -36,13 +34,13 @@ function* swipeUserRequest({
 
     const response = yield call(getTrcpContext().client.swipe.swipe.mutate, {
       id,
-      swipeType: _swipeType
+      swipeType: _swipeType,
     });
 
     if (response?.match) {
       router.push({
         pathname: SceneName.NewMatch,
-        params: { matchDogId: id, matchId: response.match.id }
+        params: { matchDogId: id, matchId: response.match.id },
       });
 
       yield call(getTrcpContext().match.getAll.invalidate);
@@ -66,9 +64,7 @@ function* swipeUserRequest({
 const FETCH_THRESHOLD = 5;
 
 function* handleCardFetching() {
-  const { request, config }: RootReducer["dogs"] = yield select(
-    (state: RootReducer) => state.dogs
-  );
+  const { request, config }: RootReducer["dogs"] = yield select((state: RootReducer) => state.dogs);
 
   if (
     request.data.length >= FETCH_THRESHOLD ||
@@ -82,9 +78,7 @@ function* handleCardFetching() {
   yield put(Actions.dogs.list.request());
 }
 
-export function* handleSwipeUserRequest(
-  props: ActionType<typeof Actions.dogs.swipe.request>
-) {
+export function* handleSwipeUserRequest(props: ActionType<typeof Actions.dogs.swipe.request>) {
   yield all([fork(() => swipeUserRequest(props)), fork(handleCardFetching)]);
 }
 

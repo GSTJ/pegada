@@ -8,7 +8,7 @@ import { Language, LanguageResources, Namespace } from "./types/types";
 
 const resources: Record<Language, LanguageResources> = {
   [Language.EnUs]: en,
-  [Language.PtBr]: ptBr
+  [Language.PtBr]: ptBr,
 };
 
 export type BreedSlug = keyof (typeof en)["breed"];
@@ -17,9 +17,9 @@ z.setErrorMap(
   makeZodI18nMap({
     ns: [Namespace.Zod, Namespace.Translation],
     handlePath: {
-      keyPrefix: "paths"
-    }
-  })
+      keyPrefix: "paths",
+    },
+  }),
 );
 
 export const initI18n = (i18n: i18n) => {
@@ -30,7 +30,7 @@ export const initI18n = (i18n: i18n) => {
     ns: Object.keys(resources[Language.EnUs]),
     defaultNS: Namespace.Translation,
     interpolation: {
-      escapeValue: false
-    }
+      escapeValue: false,
+    },
   });
 };

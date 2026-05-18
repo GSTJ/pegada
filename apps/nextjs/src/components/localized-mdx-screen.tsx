@@ -8,12 +8,11 @@ type DataProps = {
 };
 
 export const getLocalizedMdxData = (pageKey: string) => {
-  console.log(`${pageKey}.content`);
   return {
     content: t(`${pageKey}.content` as any),
     metadata: {
-      title: t(`${pageKey}.metadata.title` as any)
-    }
+      title: t(`${pageKey}.metadata.title` as any),
+    },
   };
 };
 

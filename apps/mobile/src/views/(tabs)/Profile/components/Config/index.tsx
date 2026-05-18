@@ -17,5 +17,5 @@ export const Config = {
   Description,
   Root,
   Title,
-  Arrow
+  Arrow,
 };

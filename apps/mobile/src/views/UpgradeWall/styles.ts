@@ -21,8 +21,7 @@ export const Header = styled(BlurView)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing[2]}px
-    ${({ theme }) => theme.spacing[4]}px;
+  padding: ${({ theme }) => theme.spacing[2]}px ${({ theme }) => theme.spacing[4]}px;
   border-bottom-width: ${({ theme }) => theme.stroke.sm}px;
   border-bottom-color: ${({ theme }) => theme.colors.border};
   position: absolute;
@@ -34,8 +33,7 @@ export const CloseButton = styled(PressableArea)`
   width: ${({ theme }) => theme.spacing[8]}px;
   align-items: center;
   justify-content: center;
-  background-color: ${({ theme }) =>
-    Color(theme.colors.text).alpha(0.05).toString()};
+  background-color: ${({ theme }) => Color(theme.colors.text).alpha(0.05).toString()};
   border-radius: ${({ theme }) => theme.radii.round}px;
 `;
 
@@ -64,13 +62,13 @@ export const CancelAnytime = styled(Text)`
 export const CloseIcon = styled(Close).attrs((props) => ({
   width: 10,
   height: 10,
-  fill: props.theme.colors.text
+  fill: props.theme.colors.text,
 }))``;
 
 export const GradientEffect = styled(LinearGradient).attrs(() => ({
   start: { x: 0, y: 0 },
   end: { x: 1, y: 0 },
-  colors: ["#ffffff00", "#ffffff85", "#ffffff00"]
+  colors: ["#ffffff00", "#ffffff85", "#ffffff00"],
 }))`
   position: absolute;
   top: 0;

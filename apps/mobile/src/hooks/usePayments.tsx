@@ -15,12 +15,12 @@ const usePaymentsLogin = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    staleTime: Infinity
+    staleTime: Infinity,
   });
 };
 
 export const useEligibleForTrial = ({
-  offering
+  offering,
 }: {
   offering?: PurchasesPackage | null | undefined;
 } = {}) => {
@@ -41,13 +41,13 @@ export const useCustomerInfo = () => {
     retryOnMount: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
   });
 
   return {
     ...customerInfoProps,
     isLoading: loginProps.isLoading || customerInfoProps.isLoading,
-    error: loginProps.error || customerInfoProps.error
+    error: loginProps.error || customerInfoProps.error,
   };
 };
 
@@ -62,7 +62,7 @@ export const useCustomerPlan = () => {
 
   return {
     ...props,
-    data: customerPlan
+    data: customerPlan,
   };
 };
 
@@ -81,7 +81,7 @@ export const useUnsafeIsPremium = () => {
  */
 export const getUnsafeIsPremium = () => {
   const customerInfoQueryData = queryClient.getQueryData<CustomerInfo>([
-    PaymentCacheKey.CustomerInfo
+    PaymentCacheKey.CustomerInfo,
   ]);
 
   const plan = payments.getPlan(customerInfoQueryData);
@@ -96,7 +96,7 @@ export const useOfferings = () => {
     retryOnMount: true,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 };
 

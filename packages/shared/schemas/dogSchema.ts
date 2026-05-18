@@ -4,22 +4,9 @@ import { z } from "zod";
 
 const BIRTHDAY_FORMAT = "dd/MM/yyyy";
 
-export const DOG_COLORS = [
-  "BLACK",
-  "WHITE",
-  "BROWN",
-  "TRICOLOR",
-  "ALBINO",
-  "GOLDEN"
-] as const;
+export const DOG_COLORS = ["BLACK", "WHITE", "BROWN", "TRICOLOR", "ALBINO", "GOLDEN"] as const;
 
-export const DOG_SIZES = [
-  "EXTRASMALL",
-  "SMALL",
-  "MEDIUM",
-  "LARGE",
-  "GIANT"
-] as const;
+export const DOG_SIZES = ["EXTRASMALL", "SMALL", "MEDIUM", "LARGE", "GIANT"] as const;
 
 export const DOG_GENDERS = ["MALE", "FEMALE"] as const;
 
@@ -38,18 +25,18 @@ const dogSharedSchema = {
       errorMap: (a) => {
         if (a.code === "too_small") {
           return {
-            message: t("formErrors.nameTooShort", { length: MIN_NAME_LENGTH })
+            message: t("formErrors.nameTooShort", { length: MIN_NAME_LENGTH }),
           };
         }
 
         if (a.code === "too_big") {
           return {
-            message: t("formErrors.nameTooLong", { length: MAX_NAME_LENGTH })
+            message: t("formErrors.nameTooLong", { length: MAX_NAME_LENGTH }),
           };
         }
 
         return { message: a.message ?? "" };
-      }
+      },
     })
     .min(2)
     .max(50),
@@ -58,12 +45,12 @@ const dogSharedSchema = {
       errorMap: (a) => {
         if (a.code === "too_big") {
           return {
-            message: t("formErrors.bioTooLong", { length: MAX_BIO_LENGTH })
+            message: t("formErrors.bioTooLong", { length: MAX_BIO_LENGTH }),
           };
         }
 
         return { message: a.message ?? "" };
-      }
+      },
     })
     .max(MAX_BIO_LENGTH),
   birthDate: z
@@ -83,14 +70,14 @@ const dogSharedSchema = {
         return !isNaN(date.getTime());
       },
       // t('formErrors.dateFormatWrong')
-      { params: { i18n: "formErrors.dateFormatWrong" } }
+      { params: { i18n: "formErrors.dateFormatWrong" } },
     )
     .refine(
       (date) => {
         return isBefore(date, new Date());
       },
       // t('formErrors.dateIsAfterToday')
-      { params: { i18n: "formErrors.dateIsAfterToday" } }
+      { params: { i18n: "formErrors.dateIsAfterToday" } },
     )
     .refine(
       (date) => {
@@ -102,10 +89,10 @@ const dogSharedSchema = {
         params: {
           i18n: {
             key: "formErrors.birthDateTooOld",
-            values: { years: MAX_AGE }
-          }
-        }
-      }
+            values: { years: MAX_AGE },
+          },
+        },
+      },
     )
     .transform((date) => date.toISOString())
     .optional()
@@ -119,7 +106,7 @@ const dogSharedSchema = {
         }
 
         return { message: a.message ?? "" };
-      }
+      },
     })
     .min(1)
     .optional()
@@ -139,22 +126,22 @@ const dogSharedSchema = {
       errorMap: (a) => {
         if (a.code === "too_big") {
           return {
-            message: t("formErrors.weightTooBig", { weight: MAX_WEIGHT })
+            message: t("formErrors.weightTooBig", { weight: MAX_WEIGHT }),
           };
         }
 
         return { message: a.message ?? "" };
-      }
+      },
     })
     .max(MAX_WEIGHT)
     .optional()
-    .nullable()
+    .nullable(),
 } as const;
 
 export const IMAGE_STATUS = {
   APPROVED: "APPROVED",
   REJECTED: "REJECTED",
-  PENDING: "PENDING"
+  PENDING: "PENDING",
 } as const;
 
 export const dogServerSchema = z.object({
@@ -164,8 +151,8 @@ export const dogServerSchema = z.object({
       z.object({
         id: z.string().optional(),
         url: z.string(),
-        position: z.number()
-      })
+        position: z.number(),
+      }),
     )
     .refine(
       (value) => {
@@ -173,26 +160,24 @@ export const dogServerSchema = z.object({
         return hasImage;
       },
       // t('formErrors.insertAtLeastOneImage')
-      { params: { i18n: "formErrors.insertAtLeastOneImage" } }
+      { params: { i18n: "formErrors.insertAtLeastOneImage" } },
     )
     .refine(
       (value) => {
-        const imagesLoading = value.some(
-          (image) => image.url && !image.url.startsWith("http")
-        );
+        const imagesLoading = value.some((image) => image.url && !image.url.startsWith("http"));
         return !imagesLoading;
       },
       // t('formErrors.waitImageUpload')
-      { params: { i18n: "formErrors.waitImageUpload" } }
-    )
+      { params: { i18n: "formErrors.waitImageUpload" } },
+    ),
 });
 
 const clientImages = z
   .array(
     z.object({
       id: z.string().optional(),
-      url: z.string().optional()
-    })
+      url: z.string().optional(),
+    }),
   )
   .refine(
     (value) => {
@@ -200,36 +185,34 @@ const clientImages = z
       return hasImage;
     },
     // t('formErrors.insertAtLeastOneImage')
-    { params: { i18n: "formErrors.insertAtLeastOneImage" } }
+    { params: { i18n: "formErrors.insertAtLeastOneImage" } },
   )
   .refine(
     (value) => {
-      const imagesLoading = value.some(
-        (image) => image.url && !image.url.startsWith("http")
-      );
+      const imagesLoading = value.some((image) => image.url && !image.url.startsWith("http"));
       return !imagesLoading;
     },
     // t('formErrors.waitImageUpload')
-    { params: { i18n: "formErrors.waitImageUpload" } }
+    { params: { i18n: "formErrors.waitImageUpload" } },
   );
 
 export const dogClientSchema = z.object({
   ...dogSharedSchema,
-  images: clientImages
+  images: clientImages,
 });
 
 export const dogQuickClientSchema = z.object({
   name: dogSharedSchema.name,
   bio: dogSharedSchema.bio,
   gender: dogSharedSchema.gender,
-  images: clientImages
+  images: clientImages,
 });
 
 export const dogCompleteClientSchema = z.object({
   size: dogSharedSchema.size,
   color: dogSharedSchema.color,
   breedId: dogSharedSchema.breedId,
-  birthDate: dogSharedSchema.birthDate
+  birthDate: dogSharedSchema.birthDate,
 });
 
 export type DogServerSchema = z.infer<typeof dogServerSchema>;

@@ -12,7 +12,7 @@ export const dogSafeSchema = z
     breed: z
       .object({
         id: z.string(),
-        slug: z.string()
+        slug: z.string(),
       })
       .nullable(),
     birthDate: z.date().nullable(),
@@ -24,8 +24,8 @@ export const dogSafeSchema = z
         id: z.string(),
         url: z.string(),
         position: z.number(),
-        blurhash: z.string().nullable()
-      })
+        blurhash: z.string().nullable(),
+      }),
     ),
     name: z.string(),
     pedigreeProof: z.string().nullable(),
@@ -33,8 +33,8 @@ export const dogSafeSchema = z
     weight: z.number().nullable(),
     hasPedigree: z.boolean().nullable(),
     user: z.object({
-      plan: z.string()
-    })
+      plan: z.string(),
+    }),
   })
   .strict();
 
@@ -53,7 +53,7 @@ export const dogSelect = Prisma.validator<Prisma.DogSelect>()({
     orderBy: { position: "asc" },
     select: { id: true, url: true, position: true, blurhash: true },
     // Only return approved images
-    where: { status: IMAGE_STATUS.APPROVED }
+    where: { status: IMAGE_STATUS.APPROVED },
   },
   name: true,
   pedigreeProof: true,
@@ -64,9 +64,9 @@ export const dogSelect = Prisma.validator<Prisma.DogSelect>()({
     select: {
       latitude: true,
       longitude: true,
-      plan: true
-    }
-  }
+      plan: true,
+    },
+  },
 });
 
 export const selfDogSelect = Prisma.validator<Prisma.DogSelect>()({
@@ -79,8 +79,8 @@ export const selfDogSelect = Prisma.validator<Prisma.DogSelect>()({
       position: true,
       blurhash: true,
       // We don't want to expose softbans to the client, but it's useful while developing
-      status: config.NODE_ENV === "development" ? true : false
-    }
+      status: config.NODE_ENV === "development" ? true : false,
+    },
   },
   user: {
     select: {
@@ -89,15 +89,15 @@ export const selfDogSelect = Prisma.validator<Prisma.DogSelect>()({
       city: true,
       state: true,
       country: true,
-      email: true
-    }
+      email: true,
+    },
   },
   preferredBreedId: true,
   preferredColor: true,
   preferredMaxAge: true,
   preferredMaxDistance: true,
   preferredMinAge: true,
-  preferredSize: true
+  preferredSize: true,
 });
 
 export const serverOnlyFullDogSelect = Prisma.validator<Prisma.DogSelect>()({
@@ -109,8 +109,8 @@ export const serverOnlyFullDogSelect = Prisma.validator<Prisma.DogSelect>()({
       url: true,
       position: true,
       blurhash: true,
-      status: true
-    }
+      status: true,
+    },
   },
   user: {
     select: {
@@ -119,13 +119,13 @@ export const serverOnlyFullDogSelect = Prisma.validator<Prisma.DogSelect>()({
       city: true,
       state: true,
       country: true,
-      email: true
-    }
+      email: true,
+    },
   },
   preferredBreedId: true,
   preferredColor: true,
   preferredMaxAge: true,
   preferredMaxDistance: true,
   preferredMinAge: true,
-  preferredSize: true
+  preferredSize: true,
 });

@@ -6,7 +6,7 @@ import { Event } from "../types/revenuecat";
 import { UserService } from "./UserService";
 
 enum RevenueCatEntitlement {
-  PREMIUM = "premium"
+  PREMIUM = "premium",
 }
 
 type RevenueCatEvent = { event: Event };
@@ -33,7 +33,7 @@ class PaymentService {
       case "TRANSFER": {
         return this.transferSubscription({
           transferredTo: event.transferred_to,
-          transferredFrom: event.transferred_from
+          transferredFrom: event.transferred_from,
         });
       }
       case "RENEWAL":
@@ -54,25 +54,19 @@ class PaymentService {
     }
   }
 
-  async createSubscription({
-    userID,
-    plan
-  }: {
-    userID: string;
-    plan: PlanType;
-  }) {
+  async createSubscription({ userID, plan }: { userID: string; plan: PlanType }) {
     await UserService.updateUserById(userID, { plan });
   }
 
   async cancelSubscription({ userID }: { userID: string }) {
     await UserService.updateUserById(userID, {
-      plan: PlanType.FREE
+      plan: PlanType.FREE,
     });
   }
 
   async transferSubscription({
     transferredFrom,
-    transferredTo
+    transferredTo,
   }: {
     transferredFrom: string[];
     transferredTo: string[];
@@ -82,11 +76,11 @@ class PaymentService {
 
     await prisma.$transaction([
       ...transferredFromIds.map((fromUserID) =>
-        UserService.updateUserById(fromUserID, { plan: PlanType.FREE })
+        UserService.updateUserById(fromUserID, { plan: PlanType.FREE }),
       ),
       ...transferredToIds.map((toUserID) =>
-        UserService.updateUserById(toUserID, { plan: PlanType.PREMIUM })
-      )
+        UserService.updateUserById(toUserID, { plan: PlanType.PREMIUM }),
+      ),
     ]);
   }
 }

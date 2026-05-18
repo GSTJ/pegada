@@ -5,11 +5,11 @@ import { redisConnection } from "@pegada/api/constants/redis";
 import { sendError } from "@pegada/api/errors/errors";
 import {
   CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
-  CheckPushNotificationReceiptsQueue
+  CheckPushNotificationReceiptsQueue,
 } from "@pegada/api/queue/CheckPushNotificationReceiptsQueue";
 import {
   ISendNotificationJobData,
-  SEND_PUSH_NOTIFICATION_QUEUE
+  SEND_PUSH_NOTIFICATION_QUEUE,
 } from "@pegada/api/queue/SendPushNotificationQueue";
 
 import { RECEIPT_CHECK_DELAY_MS } from "./CheckPushNotificationReceiptsQueue";
@@ -28,7 +28,7 @@ export const worker = new Worker<ISendNotificationJobData>(
         channelId: "default", // replace with your channelId
         expiration: Math.floor(Date.now() / 1000) + RECEIPT_EXPIRATION_MIN, // Expires in 24 hours
         badge: 1,
-        ...job.data
+        ...job.data,
       };
 
       const pushToken = job.data.to as string;
@@ -59,7 +59,7 @@ export const worker = new Worker<ISendNotificationJobData>(
       CheckPushNotificationReceiptsQueue.add(
         CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
         { receipts },
-        { delay: RECEIPT_CHECK_DELAY_MS }
+        { delay: RECEIPT_CHECK_DELAY_MS },
       );
     } catch (error) {
       sendError(error);
@@ -67,5 +67,5 @@ export const worker = new Worker<ISendNotificationJobData>(
       throw error;
     }
   },
-  { connection: redisConnection, concurrency: 1 }
+  { connection: redisConnection, concurrency: 1 },
 );

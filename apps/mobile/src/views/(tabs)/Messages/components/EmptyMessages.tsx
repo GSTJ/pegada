@@ -15,10 +15,7 @@ interface EmptyMessagesProps {
   setSearch: (value: string) => void;
 }
 
-export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
-  search,
-  setSearch
-}) => {
+export const EmptyMessages: React.FC<EmptyMessagesProps> = ({ search, setSearch }) => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const theme = useTheme();
@@ -31,7 +28,7 @@ export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
         flexGrow: 1,
         paddingHorizontal: theme.spacing[12],
         paddingBottom: theme.spacing[12],
-        paddingTop: insets.top + theme.spacing[12]
+        paddingTop: insets.top + theme.spacing[12],
       }}
     >
       <EmptyAnimation />
@@ -41,7 +38,7 @@ export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
           style={{
             marginTop: 12,
             marginBottom: 10,
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           {t("messages.empty.title")}
@@ -51,7 +48,7 @@ export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
           style={{
             letterSpacing: 0.5,
             textAlign: "center",
-            marginBottom: 30
+            marginBottom: 30,
           }}
         >
           {t("messages.empty.description")}

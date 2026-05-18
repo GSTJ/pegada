@@ -6,7 +6,7 @@ import Logo from "@/assets/images/Logo";
 import { Text } from "@/components/Text";
 
 export const Container = styled(SafeAreaView).attrs({
-  edges: ["left", "right"]
+  edges: ["left", "right"],
 })`
   flex: 1;
 `;
@@ -27,15 +27,14 @@ export const TopCard = styled.ImageBackground.attrs((props) => ({
   imageStyle: {
     opacity: 0.2,
     backgroundColor: props.theme.colors.background,
-    transform: [{ scale: 1.05 }]
-  }
+    transform: [{ scale: 1.05 }],
+  },
 }))`
   flex: 1;
   background-color: ${(props) => props.theme.colors.background};
   justify-content: center;
   align-items: center;
-  padding: ${(props) => props.theme.spacing[10]}px
-    ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[10]}px ${(props) => props.theme.spacing[4]}px;
 `;
 
 export const BottomCard = styled.View`
@@ -47,7 +46,7 @@ export const BottomCard = styled.View`
 
 export const Title = styled(Text).attrs({
   fontSize: "xl",
-  fontWeight: "bold"
+  fontWeight: "bold",
 })`
   color: ${(props) => props.theme.colors.text};
   margin-bottom: ${(props) => props.theme.spacing[1]}px;

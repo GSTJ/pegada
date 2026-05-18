@@ -9,14 +9,12 @@ export interface ICheckPushNotificationReceiptsJobData {
   }[];
 }
 
-export const CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE =
-  "CheckPushNotificationReceipts";
+export const CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE = "CheckPushNotificationReceipts";
 
-export const CheckPushNotificationReceiptsQueue =
-  new Queue<ICheckPushNotificationReceiptsJobData>(
-    CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
-    {
-      connection: redisConnection,
-      defaultJobOptions: redisDefaultQueueOptions
-    }
-  );
+export const CheckPushNotificationReceiptsQueue = new Queue<ICheckPushNotificationReceiptsJobData>(
+  CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
+  {
+    connection: redisConnection,
+    defaultJobOptions: redisDefaultQueueOptions,
+  },
+);

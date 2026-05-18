@@ -10,14 +10,15 @@ type CreateUser = Parameters<typeof prisma.user.create>[0];
 export const generateFakeUserWithDog = async (
   dogData?: Partial<Prisma.DogCreateNestedManyWithoutUserInput["create"]>,
   userData?: Partial<CreateUser["data"]>,
-  _withBlurHash: boolean = false
+  _withBlurHash: boolean = false,
 ) => {
+  // oxlint-disable-next-line no-unassigned-vars -- assigned in commented-out code below (kept as stub for future blurhash work)
   let blurhash: string | undefined;
 
   const url = faker.image.urlLoremFlickr({
     category: "dogs",
     width: (16 / 9) * 1080,
-    height: 1080
+    height: 1080,
   });
 
   // if (withBlurHash) {
@@ -31,17 +32,17 @@ export const generateFakeUserWithDog = async (
   const user = await prisma.user.create({
     data: {
       email: faker.internet.email({
-        provider: "test"
+        provider: "test",
       }),
       latitude: faker.location.latitude({
         max: -13,
         min: -14,
-        precision: 6
+        precision: 6,
       }),
       longitude: faker.location.longitude({
         max: -38,
         min: -39,
-        precision: 6
+        precision: 6,
       }),
       state: faker.location.state(),
       city: faker.location.city(),
@@ -58,27 +59,27 @@ export const generateFakeUserWithDog = async (
               position: 0,
               status: "APPROVED",
               blurhash,
-              url
-            }
+              url,
+            },
           },
           breed: {
-            connect: { id: faker.helpers.arrayElement(breedData).id! }
+            connect: { id: faker.helpers.arrayElement(breedData).id! },
           },
-          ...(dogData as any)
-        }
-      }
+          ...(dogData as any),
+        },
+      },
     },
     include: {
       dogs: {
         include: {
-          images: true
-        }
-      }
-    }
+          images: true,
+        },
+      },
+    },
   });
 
   return {
     user,
-    dog: user.dogs[0]!
+    dog: user.dogs[0]!,
   };
 };

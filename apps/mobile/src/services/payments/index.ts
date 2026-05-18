@@ -12,14 +12,14 @@ import { queryClient } from "@/services/queryClient";
 export enum PaymentCacheKey {
   CustomerInfo = "PAYMENT_CUSTOMER_INFO_KEY",
   CustomerLogin = "PAYMENT_CUSTOMER_LOGIN_KEY",
-  Offerings = "PAYMENT_OFFERINGS_KEY"
+  Offerings = "PAYMENT_OFFERINGS_KEY",
 }
 
 const revenueCatApiKey = Platform.select({
   ios: config.REVENUE_CAT_IOS_API_KEY,
   macos: config.REVENUE_CAT_IOS_API_KEY,
   android: config.REVENUE_CAT_ANDROID_API_KEY,
-  default: "" // This is not used, but it's needed to make TypeScript happy
+  default: "", // This is not used, but it's needed to make TypeScript happy
 });
 
 const init = () => {
@@ -34,17 +34,12 @@ const logIn = async () => {
   const userID = await getLoggedUserID();
 
   if (!userID) {
-    throw new Error(
-      "Make sure the login is only called when the user is authenticated"
-    );
+    throw new Error("Make sure the login is only called when the user is authenticated");
   }
 
   const userData = await Purchases.logIn(userID);
 
-  queryClient.setQueryData(
-    [PaymentCacheKey.CustomerInfo],
-    () => userData.customerInfo
-  );
+  queryClient.setQueryData([PaymentCacheKey.CustomerInfo], () => userData.customerInfo);
 
   // Asynchronously set the email and display name
   getTrcpContext()
@@ -70,30 +65,28 @@ const getOfferings = async () => {
 
 export enum ProductIdentifier {
   Monthly = "premium_monthly",
-  Yearly = "premium_yearly"
+  Yearly = "premium_yearly",
 }
 
 export enum Entitlement {
-  Premium = "premium"
+  Premium = "premium",
 }
 
 export enum UserPlan {
   Free = "FREE",
-  Premium = "PREMIUM"
+  Premium = "PREMIUM",
 }
 
-const purchasePackage = async (
-  ...props: Parameters<typeof Purchases.purchasePackage>
-) => {
+const purchasePackage = async (...props: Parameters<typeof Purchases.purchasePackage>) => {
   const isSimulator = Platform.OS === "ios" && !Device.isDevice;
 
   if (isSimulator) {
     Alert.alert(
       "Simulator Detected",
-      "Purchases are not available in the IOS simulator. Please try on a real device."
+      "Purchases are not available in the IOS simulator. Please try on a real device.",
     );
     throw new Error(
-      "Purchases are not available in the IOS simulator. Please try on a real device."
+      "Purchases are not available in the IOS simulator. Please try on a real device.",
     );
   }
 
@@ -128,14 +121,14 @@ const getPlan = (customerInfo?: CustomerInfo) => {
     if (typeof customerInfo.entitlements.active[entitlement] !== "undefined") {
       return {
         ...customerInfo.entitlements.active[entitlement],
-        userPlan: getPlanByEntitlement(entitlement)
+        userPlan: getPlanByEntitlement(entitlement),
       };
     }
   }
 
   return {
     expirationDate: undefined,
-    userPlan: UserPlan.Free
+    userPlan: UserPlan.Free,
   };
 };
 
@@ -143,11 +136,9 @@ const restorePurchases = async () => {
   if (Platform.OS === "ios" && !Device.isDevice) {
     Alert.alert(
       "Simulator Detected",
-      "Restore is not available in the IOS simulator. Please try on a real device."
+      "Restore is not available in the IOS simulator. Please try on a real device.",
     );
-    throw new Error(
-      "Restore is not available in the IOS simulator. Please try on a real device."
-    );
+    throw new Error("Restore is not available in the IOS simulator. Please try on a real device.");
   }
 
   await Purchases.restorePurchases();
@@ -162,5 +153,5 @@ export const payments = {
   restorePurchases: restorePurchases,
   logOut: Purchases.logOut,
   getCustomerInfo: Purchases.getCustomerInfo,
-  addCustomerInfoUpdateListener: Purchases.addCustomerInfoUpdateListener
+  addCustomerInfoUpdateListener: Purchases.addCustomerInfoUpdateListener,
 };

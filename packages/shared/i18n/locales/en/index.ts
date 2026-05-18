@@ -13,5 +13,5 @@ export default {
   [Namespace.Server]: server,
   [Namespace.Mail]: mail,
   [Namespace.Zod]: zod,
-  [Namespace.Web]: web
+  [Namespace.Web]: web,
 };

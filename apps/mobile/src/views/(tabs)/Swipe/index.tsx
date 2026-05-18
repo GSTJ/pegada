@@ -9,7 +9,7 @@ import { trackUser } from "@/services/getInitialRouteName";
 import {
   getPushNotificationToken,
   NotificationTokenError,
-  setPushNotificationToken
+  setPushNotificationToken,
 } from "@/services/getPushNotificationToken";
 import { processLinks } from "@/services/linking";
 import { Actions } from "@/store/reducers/dogs";

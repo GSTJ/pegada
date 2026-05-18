@@ -31,10 +31,7 @@ const CurrentLocationLoading = () => {
   const theme = useTheme();
 
   return (
-    <ActivityIndicator
-      style={{ paddingHorizontal: theme.spacing[8] }}
-      color={theme.colors.text}
-    />
+    <ActivityIndicator style={{ paddingHorizontal: theme.spacing[8] }} color={theme.colors.text} />
   );
 };
 export const LocationConfig = () => {

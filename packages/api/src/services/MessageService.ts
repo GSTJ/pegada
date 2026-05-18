@@ -19,7 +19,7 @@ class MessageService {
     dogId,
     lt,
     gt,
-    limit = this.#defaultLimit
+    limit = this.#defaultLimit,
   }: {
     matchId: string;
     dogId: string;
@@ -33,10 +33,10 @@ class MessageService {
         deletedAt: null,
         ...((lt || gt) && { createdAt: { lt, gt } }),
         // Only messages sent or received by the dog, so the dog can't see messages from other matches
-        OR: [{ senderId: dogId }, { receiverId: dogId }]
+        OR: [{ senderId: dogId }, { receiverId: dogId }],
       },
       take: limit,
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
 
     return messages;
@@ -44,32 +44,28 @@ class MessageService {
 
   async sendMessage(content: string, senderId: string, matchId: string) {
     const match = await prisma.match.findUnique({
-      where: { id: matchId, deletedAt: null }
+      where: { id: matchId, deletedAt: null },
     });
 
-    if (
-      !match ||
-      (match.requesterId !== senderId && match.responderId !== senderId)
-    ) {
+    if (!match || (match.requesterId !== senderId && match.responderId !== senderId)) {
       throw new Error("Invalid matchId or senderId");
     }
 
-    const otherDogId =
-      match.requesterId === senderId ? match.responderId : match.requesterId;
+    const otherDogId = match.requesterId === senderId ? match.responderId : match.requesterId;
 
     const newMessage = await prisma.message.create({
       data: {
         content,
         senderId,
         receiverId: otherDogId,
-        matchId
+        matchId,
       },
       include: {
         sender: {
           select: {
             name: true,
-            images: true
-          }
+            images: true,
+          },
         },
         receiver: {
           select: {
@@ -77,12 +73,12 @@ class MessageService {
             user: {
               select: {
                 id: true,
-                pushToken: true
-              }
-            }
-          }
-        }
-      }
+                pushToken: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     const otherDog = newMessage.receiver;
@@ -91,13 +87,13 @@ class MessageService {
       await PushNotificationService.enqueuePushNotification({
         to: otherDog.user.pushToken,
         body: content,
-        title: TranslationService.translate(
-          "server:notification.message.title",
-          { lng: this.language, replace: { name: newMessage.sender.name } }
-        ),
+        title: TranslationService.translate("server:notification.message.title", {
+          lng: this.language,
+          replace: { name: newMessage.sender.name },
+        }),
         data: {
-          url: `chat/${matchId}/${newMessage.senderId}`
-        }
+          url: `chat/${matchId}/${newMessage.senderId}`,
+        },
       });
     }
 
@@ -106,18 +102,16 @@ class MessageService {
 
   static async deleteMessage(messageId: string, senderId: string) {
     const message = await prisma.message.findUnique({
-      where: { id: messageId, deletedAt: null }
+      where: { id: messageId, deletedAt: null },
     });
 
     if (!message || message.senderId !== senderId) {
-      throw new Error(
-        "Invalid messageId or the sender is not the owner of the message"
-      );
+      throw new Error("Invalid messageId or the sender is not the owner of the message");
     }
 
     await prisma.message.update({
       where: { id: messageId },
-      data: { deletedAt: new Date() }
+      data: { deletedAt: new Date() },
     });
   }
 }

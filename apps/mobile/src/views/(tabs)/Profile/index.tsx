@@ -4,7 +4,7 @@ import Animated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
-  useScrollViewOffset
+  useScrollViewOffset,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -31,16 +31,14 @@ import { CurrentPlanConfig } from "./components/CurrentPlanConfig";
 import { LanguageConfig } from "./components/LanguageConfig";
 import { LocationConfig } from "./components/LocationConfig";
 import { ThemeConfig } from "./components/ThemeConfig";
-import UserDogProfileHeader, {
-  useDogProfileHeight
-} from "./components/UserDogProfileHeader";
+import UserDogProfileHeader, { useDogProfileHeight } from "./components/UserDogProfileHeader";
 import {
   BackgroundOverlay,
   BackgroundProfileContainer,
   Container,
   Content,
   ScrollContainer,
-  SettingsList
+  SettingsList,
 } from "./styles";
 import { deleteAccount } from "./utils/deleteAccount";
 import { handleLogout } from "./utils/handleLogout";
@@ -73,15 +71,10 @@ const Profile = () => {
   const imgStyle = useAnimatedStyle(() => {
     "worklet";
     // should scale down the image a little
-    const scale = interpolate(
-      scrollY.value,
-      [0, TRANSITION_POINT],
-      [1, 0.97],
-      Extrapolation.CLAMP
-    );
+    const scale = interpolate(scrollY.value, [0, TRANSITION_POINT], [1, 0.97], Extrapolation.CLAMP);
 
     return {
-      transform: [{ scale }]
+      transform: [{ scale }],
     };
   });
 
@@ -91,7 +84,7 @@ const Profile = () => {
       scrollY.value,
       [0, TRANSITION_POINT],
       [0, 0.7],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
 
     return { opacity };
@@ -123,7 +116,7 @@ const Profile = () => {
         style={{
           marginTop: marginTop,
           borderBottomWidth: theme.stroke.sm,
-          borderColor: theme.colors.border
+          borderColor: theme.colors.border,
         }}
       >
         <SettingsList
@@ -132,7 +125,7 @@ const Profile = () => {
             paddingBottom: theme.spacing[4],
             paddingTop: dogProfileHeight - marginTop,
             flexGrow: 1,
-            zIndex: 10
+            zIndex: 10,
           }}
           ref={scrollRef}
           scrollEventThrottle={16}
@@ -146,7 +139,7 @@ const Profile = () => {
           <View
             style={{
               backgroundColor: theme.colors.background,
-              paddingVertical: theme.spacing[1]
+              paddingVertical: theme.spacing[1],
             }}
           >
             <LocationConfig />
@@ -156,9 +149,7 @@ const Profile = () => {
               <Filters width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.matchPreferences")}</Config.Title>
-                <Config.Description>
-                  {t("profile.matchPreferencesDescription")}
-                </Config.Description>
+                <Config.Description>{t("profile.matchPreferencesDescription")}</Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -168,9 +159,7 @@ const Profile = () => {
               <Dog width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.editProfile")}</Config.Title>
-                <Config.Description>
-                  {t("profile.editProfileDescription")}
-                </Config.Description>
+                <Config.Description>{t("profile.editProfileDescription")}</Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -185,9 +174,7 @@ const Profile = () => {
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.termsOfUse")}</Config.Title>
-                <Config.Description>
-                  {t("profile.termsOfUseDescription")}
-                </Config.Description>
+                <Config.Description>{t("profile.termsOfUseDescription")}</Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -197,9 +184,7 @@ const Profile = () => {
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.privacyPolicy")}</Config.Title>
-                <Config.Description>
-                  {t("profile.privacyPolicyDescription")}
-                </Config.Description>
+                <Config.Description>{t("profile.privacyPolicyDescription")}</Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -217,9 +202,7 @@ const Profile = () => {
             <Config.Root onPress={deleteAccount}>
               <Erase width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
-                <Config.Title color="destructive">
-                  {t("profile.deleteAccount")}
-                </Config.Title>
+                <Config.Title color="destructive">{t("profile.deleteAccount")}</Config.Title>
               </Config.Container>
             </Config.Root>
           </View>

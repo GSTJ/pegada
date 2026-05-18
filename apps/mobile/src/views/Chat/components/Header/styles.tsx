@@ -14,8 +14,7 @@ export const Picture = styled(Image)`
   height: 38px;
   border-radius: ${(props) => props.theme.radii.round}px;
   margin-right: ${(props) => props.theme.spacing[3.5]}px;
-  background-color: ${(props) =>
-    Color(props.theme.colors.text).alpha(0.2).string()};
+  background-color: ${(props) => Color(props.theme.colors.text).alpha(0.2).string()};
 `;
 
 export const ProfileInfoContainer = styled.View`

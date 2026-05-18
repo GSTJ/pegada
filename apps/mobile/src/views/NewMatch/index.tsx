@@ -25,12 +25,12 @@ const NewMatch: React.FC = () => {
 
   const [matchDog] = api.dog.get.useSuspenseQuery(
     { id: matchDogId as string },
-    { refetchOnMount: false }
+    { refetchOnMount: false },
   );
 
   const { safeLoadAndShow } = useForAdRequestTracked({
     ios: "ca-app-pub-6276873083446538/8154113808",
-    android: "ca-app-pub-6276873083446538/5719522151"
+    android: "ca-app-pub-6276873083446538/5719522151",
   });
 
   const theme = useTheme();
@@ -43,15 +43,15 @@ const NewMatch: React.FC = () => {
     analytics.track({
       event_type: "New Match",
       event_properties: {
-        action: "Send Message"
-      }
+        action: "Send Message",
+      },
     });
 
     await safeLoadAndShow();
 
     router.push({
       pathname: `${SceneName.Chat}/[matchId]`,
-      params: { dogId: matchDogId, matchId }
+      params: { dogId: matchDogId, matchId },
     });
   };
 
@@ -59,8 +59,8 @@ const NewMatch: React.FC = () => {
     analytics.track({
       event_type: "New Match",
       event_properties: {
-        action: "Skip"
-      }
+        action: "Skip",
+      },
     });
 
     await safeLoadAndShow();
@@ -71,13 +71,10 @@ const NewMatch: React.FC = () => {
   useFocusEffect(() => {
     // Assume 'skip' if the user presses the back button
     // This is pertinent to Android devices only.
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        void handleSkip();
-        return false;
-      }
-    );
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      void handleSkip();
+      return false;
+    });
 
     return () => subscription.remove();
   });
@@ -91,7 +88,7 @@ const NewMatch: React.FC = () => {
           contentContainerStyle={{
             alignItems: "center",
             justifyContent: "center",
-            flexGrow: 1
+            flexGrow: 1,
           }}
         >
           <AnimatedCards matchDog={matchDog} />
@@ -106,7 +103,7 @@ const NewMatch: React.FC = () => {
             }
             style={{
               height: 50,
-              width: "100%"
+              width: "100%",
             }}
             contentFit="contain"
           />
@@ -114,21 +111,19 @@ const NewMatch: React.FC = () => {
             style={{
               textAlign: "center",
               marginTop: 12,
-              maxWidth: 200
+              maxWidth: 200,
             }}
             fontSize="lg"
             fontWeight="light"
           >
             {t("newMatch.youLikedEachOther", {
-              replace: { name: matchDog.name }
+              replace: { name: matchDog.name },
             })}
           </Text>
         </ScrollView>
 
         <View style={{ padding: theme.spacing[4], gap: theme.spacing[3] }}>
-          <Button onPress={handleSendMessage}>
-            {t("newMatch.sendMessage")}
-          </Button>
+          <Button onPress={handleSendMessage}>{t("newMatch.sendMessage")}</Button>
           <Button variant="outline" onPress={handleSkip}>
             {t("newMatch.keepSwiping")}
           </Button>

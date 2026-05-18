@@ -8,7 +8,7 @@ import { Button } from "@/components/Button";
 import {
   OfflineComponent,
   RequestErrorComponent,
-  useIsOffline
+  useIsOffline,
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
 import { Actions, RootReducer } from "@/store/reducers";
@@ -39,10 +39,7 @@ const EmptyState = () => {
           <Description fontSize="xs" style={{ paddingBottom: 4 }}>
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
-          <Button
-            onPress={() => router.push(SceneName.Preferences)}
-            variant="outline"
-          >
+          <Button onPress={() => router.push(SceneName.Preferences)} variant="outline">
             {t("swipeRequestFeedback.preferencesButton")}
           </Button>
         </Animated.View>

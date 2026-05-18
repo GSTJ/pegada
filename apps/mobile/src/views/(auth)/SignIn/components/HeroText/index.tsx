@@ -8,7 +8,7 @@ import {
   RotatedRectangle,
   Title,
   UnderlineContainer,
-  WhiteTitle
+  WhiteTitle,
 } from "./styles";
 
 export const Underline: React.FC<{
@@ -37,7 +37,7 @@ const HeroText: React.FC = () => {
         components={{
           view: <FlexRowView />,
           title: <Title />,
-          highlight: <RectangleHighLight />
+          highlight: <RectangleHighLight />,
         }}
       />
     </Container>

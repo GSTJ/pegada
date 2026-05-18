@@ -7,7 +7,7 @@ import { Text } from "@/components/Text";
 export const Swipe = styled(LottieView).attrs({
   resizeMode: "cover",
   autoPlay: true,
-  source: require("@/assets/animations/swipe.json")
+  source: require("@/assets/animations/swipe.json"),
 })`
   width: ${(props) => props.theme.spacing[6]}px;
   height: ${(props) => props.theme.spacing[6]}px;
@@ -16,8 +16,7 @@ export const Swipe = styled(LottieView).attrs({
 
 export const Container = styled(Animated.View)`
   position: absolute;
-  padding: ${(props) => props.theme.spacing[2.5]}px
-    ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[2.5]}px ${(props) => props.theme.spacing[4]}px;
   background: ${(props) => props.theme.colors.background};
   border: 1px ${(props) => props.theme.colors.border};
   align-items: center;
@@ -51,9 +50,9 @@ export const Rect = styled.View`
 
 export const Title = styled(Text).attrs({
   fontWeight: "bold",
-  fontSize: "sm"
+  fontSize: "sm",
 })``;
 
 export const Description = styled(Text).attrs({
-  fontSize: "sm"
+  fontSize: "sm",
 })``;

@@ -9,6 +9,6 @@ export default defineConfig((options) => ({
     : undefined,
   format: ["esm"],
   loader: {
-    ".hbs": "copy"
-  }
+    ".hbs": "copy",
+  },
 }));

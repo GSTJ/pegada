@@ -5,7 +5,7 @@ import { cacheFunctionResultFor } from "../shared/cacheFunctionResultFor";
 import { config } from "../shared/config";
 
 const client = new PostHog(config.POSTHOG_API_KEY, {
-  host: config.POSTHOG_HOST
+  host: config.POSTHOG_HOST,
 });
 
 const FIVE_SECONDS = 5000;
@@ -14,18 +14,18 @@ const FIVE_SECONDS = 5000;
 // This prevents our quota from being exceeded.
 const cachedIsFeatureEnabled = cacheFunctionResultFor(
   (feature: string) => client.isFeatureEnabled(feature, ""),
-  FIVE_SECONDS
+  FIVE_SECONDS,
 );
 
 export const FEATURES = {
   PROFANITY_CHECK: "profanity_check",
-  IMAGE_BLURHASH: "image_blurhash"
+  IMAGE_BLURHASH: "image_blurhash",
 } as const;
 
 export class FlagService {
   static async isFeatureEnabled({
     feature,
-    defaultValue
+    defaultValue,
   }: {
     feature: (typeof FEATURES)[keyof typeof FEATURES];
     defaultValue: boolean;

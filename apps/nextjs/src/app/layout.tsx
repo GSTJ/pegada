@@ -10,14 +10,14 @@ import { cn } from "@/lib/utils";
 
 const epilogue = Epilogue({
   variable: "--font-epilogue",
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
 
 export const generateMetadata = () => {
   return {
     title: t("metadata.title"),
     description: t("metadata.description"),
-    other: { "apple-itunes-app": "app-id=6450865592" }
+    other: { "apple-itunes-app": "app-id=6450865592" },
   } satisfies Metadata;
 };
 

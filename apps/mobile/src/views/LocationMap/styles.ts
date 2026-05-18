@@ -9,7 +9,7 @@ export const MapView = styled(RNMap).attrs({
   showsUserLocation: true,
   rotateEnabled: false,
   showsCompass: false,
-  pitchEnabled: false
+  pitchEnabled: false,
 })`
   flex: 1;
 `;

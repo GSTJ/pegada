@@ -25,7 +25,7 @@ const LocationMap = () => {
   const router = useRouter();
 
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
-    refetchOnMount: false
+    refetchOnMount: false,
   });
 
   const user = dog?.user;
@@ -36,7 +36,7 @@ const LocationMap = () => {
 
   const [location, setLocation] = useState({
     latitude: user.latitude ?? 0,
-    longitude: user.longitude ?? 0
+    longitude: user.longitude ?? 0,
   });
 
   const dispatch = useDispatch();
@@ -54,7 +54,7 @@ const LocationMap = () => {
     onError: (error) => {
       Alert.alert(t("common.oops"), t("locationMap.updateLocationError"));
       sendError(error);
-    }
+    },
   });
 
   // onRegionChange fires on first render
@@ -69,7 +69,7 @@ const LocationMap = () => {
     bottom: 15 + buttomActionHeight,
     top: 15 + headerHeight,
     right: 10,
-    left: 10
+    left: 10,
   };
 
   // For some reason Apple Maps has a different padding and already starts offseted
@@ -79,7 +79,7 @@ const LocationMap = () => {
     bottom: buttomActionHeight + verticalMapPadding,
     top: buttomActionHeight + verticalMapPadding,
     right: 10,
-    left: 10
+    left: 10,
   };
 
   const theme = useTheme();
@@ -93,15 +93,13 @@ const LocationMap = () => {
         mapPadding={mapPadding}
         // Android doesn't switch maps to dark mode like IOS does,
         // so we need to set the custom style manually
-        customMapStyle={
-          theme.dark ? require("./assets/map-dark.json") : undefined
-        }
+        customMapStyle={theme.dark ? require("./assets/map-dark.json") : undefined}
         key={theme.dark ? "dark" : "light"}
         initialRegion={{
           latitude: location?.latitude,
           longitude: location?.longitude,
           latitudeDelta: 0.005,
-          longitudeDelta: 0.005
+          longitudeDelta: 0.005,
         }}
         onTouchStart={() => setTouchStarted(true)}
         onRegionChange={() => {
@@ -109,21 +107,18 @@ const LocationMap = () => {
           // eslint-disable-next-line react-compiler/react-compiler -- false positive
           dragging.value = withTiming(1, {
             easing: Easing.in(Easing.ease),
-            duration: 200
+            duration: 200,
           });
         }}
-        onRegionChangeComplete={(newLocation: {
-          latitude: number;
-          longitude: number;
-        }) => {
+        onRegionChangeComplete={(newLocation: { latitude: number; longitude: number }) => {
           setLocation({
             latitude: newLocation.latitude,
-            longitude: newLocation.longitude
+            longitude: newLocation.longitude,
           });
 
           dragging.value = withTiming(0, {
             easing: Easing.out(Easing.ease),
-            duration: 350
+            duration: 350,
           });
         }}
       />

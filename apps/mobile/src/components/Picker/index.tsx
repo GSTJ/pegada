@@ -16,7 +16,7 @@ import {
   SearchContainer,
   SearchInput,
   SelectItem,
-  TitleContainer
+  TitleContainer,
 } from "./styles";
 
 export type Item = {
@@ -45,7 +45,7 @@ const PickerSelectItem = <T extends Item>({
   item,
   value,
   onChange,
-  onClose
+  onClose,
 }: {
   item: T;
   value: T | undefined;
@@ -67,7 +67,7 @@ const PickerSelectItem = <T extends Item>({
 
 const UnForwardedPickerSheet = <T extends Item>(
   props: InputPickerProps<T>,
-  ref: React.ForwardedRef<BottomSheetModal>
+  ref: React.ForwardedRef<BottomSheetModal>,
 ) => {
   const { t } = useTranslation();
 
@@ -97,36 +97,29 @@ const UnForwardedPickerSheet = <T extends Item>(
   } = props;
 
   const data = filter
-    ? props.data.filter((item) =>
-        item.name.toLowerCase().includes(filter.toLowerCase())
-      )
+    ? props.data.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()))
     : props.data;
 
   const backgroundStyle = {
     backgroundColor: theme.colors.background,
     borderColor: theme.colors.border,
-    borderWidth: theme.stroke.sm
+    borderWidth: theme.stroke.sm,
   };
   const handleIndicatorStyle = {
-    backgroundColor: theme.colors.text
+    backgroundColor: theme.colors.text,
   };
   const handleStyle = {
     borderTopLeftRadius: theme.radii.md,
-    borderTopRightRadius: theme.radii.md
+    borderTopRightRadius: theme.radii.md,
   };
   const contentContainerStyle = {
-    paddingBottom: insets.bottom
+    paddingBottom: insets.bottom,
   };
 
   const keyExtractor = (item: T) => `${title}${item.id}`;
 
   const renderItem = ({ item }: ListRenderItemInfo<T>) => (
-    <PickerSelectItem
-      item={item}
-      value={value}
-      onChange={onChange}
-      onClose={onClose}
-    />
+    <PickerSelectItem item={item} value={value} onChange={onChange} onClose={onClose} />
   );
 
   return (
@@ -170,10 +163,8 @@ const UnForwardedPickerSheet = <T extends Item>(
   );
 };
 
-export const PickerSheet = React.forwardRef(UnForwardedPickerSheet) as <
-  T extends Item
->(
-  props: InputPickerProps<T> & { ref?: React.Ref<BottomSheetModal> }
+export const PickerSheet = React.forwardRef(UnForwardedPickerSheet) as <T extends Item>(
+  props: InputPickerProps<T> & { ref?: React.Ref<BottomSheetModal> },
 ) => React.ReactElement;
 
 export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {

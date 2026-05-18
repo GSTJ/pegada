@@ -39,10 +39,7 @@ interface OfferingsProps {
   setSelectedPackage: (pkg: PurchasesPackage) => void;
 }
 
-const PlanPackages: React.FC<OfferingsProps> = ({
-  selectedPackage,
-  setSelectedPackage
-}) => {
+const PlanPackages: React.FC<OfferingsProps> = ({ selectedPackage, setSelectedPackage }) => {
   const router = useRouter();
   const { data: offeringsData, isError } = useOfferings();
   const { t } = useTranslation();
@@ -52,7 +49,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
       magicToast.alert(
         Device.isDevice
           ? t("plans.errors.fetchingOfferingsDevice")
-          : t("plans.errors.fetchingOfferings")
+          : t("plans.errors.fetchingOfferings"),
       );
 
       router.back();
@@ -62,16 +59,14 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   const packageList = offeringsData
     ? Object.values(offeringsData.availablePackages).sort(
         // Highest price first
-        (a, b) => b.product.price - a.product.price
+        (a, b) => b.product.price - a.product.price,
       )
     : [];
 
   const packageWithLessRelativeValue = offeringsData
     ? Object.values(offeringsData.availablePackages).sort((a, b) => {
-        const relativeValueA =
-          a.product.price / periodToDays(a.product.subscriptionPeriod!);
-        const relativeValueB =
-          b.product.price / periodToDays(b.product.subscriptionPeriod!);
+        const relativeValueA = a.product.price / periodToDays(a.product.subscriptionPeriod!);
+        const relativeValueB = b.product.price / periodToDays(b.product.subscriptionPeriod!);
 
         return relativeValueB - relativeValueA;
       })[0]
@@ -90,9 +85,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
         // Get old price comparing with the package with less relative value / period * this package period
         const oldPrice = packageWithLessRelativeValue
           ? (packageWithLessRelativeValue.product.price /
-              periodToDays(
-                packageWithLessRelativeValue.product.subscriptionPeriod!
-              )) *
+              periodToDays(packageWithLessRelativeValue.product.subscriptionPeriod!)) *
             periodToDays(planPackage.product.subscriptionPeriod!)
           : undefined;
 

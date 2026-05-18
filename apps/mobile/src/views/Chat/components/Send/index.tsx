@@ -25,7 +25,7 @@ const Send = () => {
     <Container
       style={{
         height: SEND_HEIGHT + insets.bottom,
-        paddingBottom: insets.bottom
+        paddingBottom: insets.bottom,
       }}
     >
       <Input

@@ -10,7 +10,7 @@ export const Container = styled(LikeFeedbackStyles.Container)`
 
 export const EmptyAnimation = styled(LottieView).attrs({
   autoPlay: true,
-  source: require("@/assets/animations/empty.json")
+  source: require("@/assets/animations/empty.json"),
 })`
   width: 100px;
   height: 100px;
@@ -19,7 +19,7 @@ export const EmptyAnimation = styled(LottieView).attrs({
 export const LogoLoading = styled(LottieView).attrs({
   autoPlay: true,
   source: require("@/assets/animations/loadingLogo.json"),
-  speed: 0.5
+  speed: 0.5,
 })`
   width: 150px;
   height: 150px;

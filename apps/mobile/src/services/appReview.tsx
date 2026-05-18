@@ -47,7 +47,7 @@ const ButtonRow = styled.View`
 
 const Title = styled(CenterText).attrs({
   fontSize: "lg",
-  fontWeight: "bold"
+  fontWeight: "bold",
 })`
   margin-bottom: ${({ theme }) => theme.spacing[1]}px;
 `;
@@ -71,7 +71,7 @@ const NotLikingTheAppModal: React.FC = () => {
   const handleSend = () => {
     analytics.track({
       event_type: "Manual Feedback",
-      event_properties: { feedback }
+      event_properties: { feedback },
     });
 
     hide();
@@ -80,9 +80,7 @@ const NotLikingTheAppModal: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Container>
         <Title>{t("appReview.notLikingTheAppModal.title")}</Title>
         <CenterText style={{ marginBottom: theme.spacing[1] }}>
@@ -98,9 +96,7 @@ const NotLikingTheAppModal: React.FC = () => {
           placeholder={t("appReview.notLikingTheAppModal.placeholder")}
         />
         <ButtonRow>
-          <SmallButton onPress={handleSend}>
-            {t("appReview.notLikingTheAppModal.send")}
-          </SmallButton>
+          <SmallButton onPress={handleSend}>{t("appReview.notLikingTheAppModal.send")}</SmallButton>
         </ButtonRow>
       </Container>
     </KeyboardAvoidingView>
@@ -118,7 +114,7 @@ const AreYouLikingTheAppModal: React.FC = () => {
   const openReviewModal = () => {
     analytics.track({
       event_type: "Feedback",
-      event_properties: { feedback: "liking_the_app" }
+      event_properties: { feedback: "liking_the_app" },
     });
 
     hide();
@@ -129,24 +125,22 @@ const AreYouLikingTheAppModal: React.FC = () => {
   const openNotLikingTheAppModal = () => {
     analytics.track({
       event_type: "Feedback",
-      event_properties: { feedback: "not_liking_the_app" }
+      event_properties: { feedback: "not_liking_the_app" },
     });
 
     hide();
 
     magicModal.show(() => <NotLikingTheAppModal />, {
       style: {
-        justifyContent: "flex-end"
-      }
+        justifyContent: "flex-end",
+      },
     });
   };
 
   return (
     <Container>
       <Title>{t("appReview.areYouLikingTheAppModal.title")}</Title>
-      <CenterText>
-        {t("appReview.areYouLikingTheAppModal.description")}
-      </CenterText>
+      <CenterText>{t("appReview.areYouLikingTheAppModal.description")}</CenterText>
       <ButtonRow>
         <SmallButton onPress={openNotLikingTheAppModal} variant="outline">
           {t("appReview.areYouLikingTheAppModal.no")}

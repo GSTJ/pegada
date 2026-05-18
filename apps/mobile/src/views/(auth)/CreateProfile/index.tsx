@@ -7,17 +7,14 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import {
-  DogQuickClientSchema,
-  dogQuickClientSchema
-} from "@pegada/shared/schemas/dogSchema";
+import { DogQuickClientSchema, dogQuickClientSchema } from "@pegada/shared/schemas/dogSchema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import {
   ProfileImagesUploader,
-  ProfileImagesUploaderProps
+  ProfileImagesUploaderProps,
 } from "@/components/ProfileImageUploader";
 import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
@@ -34,7 +31,7 @@ const DEFAULT_VALUES: DogQuickClientSchema = {
   name: "",
   bio: "",
   images: pictures,
-  gender: "MALE"
+  gender: "MALE",
 };
 
 const CreateProfile = () => {
@@ -42,7 +39,7 @@ const CreateProfile = () => {
 
   const { control, handleSubmit, getValues } = useForm({
     defaultValues: DEFAULT_VALUES,
-    resolver: zodResolver(dogQuickClientSchema)
+    resolver: zodResolver(dogQuickClientSchema),
   });
 
   const headerHeight = useDelayedHeaderHeight();
@@ -60,8 +57,8 @@ const CreateProfile = () => {
         event_type: "Create Dog Profile",
         event_properties: {
           name: data.name,
-          gender: data.gender
-        }
+          gender: data.gender,
+        },
       });
 
       router.replace({
@@ -69,14 +66,14 @@ const CreateProfile = () => {
         params: {
           dogId: data.id,
           // Todo: don't - use caches
-          profileImageUrl: data.images[0]?.url ?? ""
-        }
+          profileImageUrl: data.images[0]?.url ?? "",
+        },
       });
     },
     onError: (error) => {
       magicToast.alert(t("editProfile.profileError"));
       sendError(error);
-    }
+    },
   });
 
   const saveUser = handleSubmit(async (data) => {
@@ -89,8 +86,8 @@ const CreateProfile = () => {
         .map((image, index) => ({
           id: image.id,
           url: image.url as string,
-          position: index
-        }))
+          position: index,
+        })),
     };
 
     await dogCreateMutation.mutateAsync(dogData);
@@ -114,9 +111,7 @@ const CreateProfile = () => {
           {...scrollViewProps}
           contentContainerStyle={{
             padding: theme.spacing[4],
-            paddingBottom:
-              theme.spacing[4] +
-              scrollViewProps.contentContainerStyle.paddingBottom
+            paddingBottom: theme.spacing[4] + scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           scrollEnabled={gesturesEnabled}
           keyboardShouldPersistTaps="handled"
@@ -136,20 +131,14 @@ const CreateProfile = () => {
                 <ProfileImagesUploader
                   setGesturesEnabled={setGesturesEnabled}
                   value={value as Picture[]}
-                  onChange={(
-                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0]
-                  ) => {
+                  onChange={(cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0]) => {
                     // This getValues is needed to ensure the update happens
                     // correctly even when adding images fast.
                     onChange(cb(getValues("images") as Picture[]));
                   }}
                   error={fieldState.error?.message}
                 />
-                <Text
-                  fontSize="xs"
-                  fontWeight="medium"
-                  style={{ marginTop: 5 }}
-                >
+                <Text fontSize="xs" fontWeight="medium" style={{ marginTop: 5 }}>
                   {t("createProfile.clickAndHold")}
                 </Text>
               </>
@@ -199,25 +188,16 @@ const CreateProfile = () => {
               <RadioButtons
                 title={t("completeProfile.gender")}
                 data={[t("completeProfile.male"), t("completeProfile.female")]}
-                value={
-                  value === "MALE"
-                    ? t("completeProfile.male")
-                    : t("completeProfile.female")
-                }
+                value={value === "MALE" ? t("completeProfile.male") : t("completeProfile.female")}
                 onChange={(value) => {
-                  onChange(
-                    value === t("completeProfile.male") ? "MALE" : "FEMALE"
-                  );
+                  onChange(value === t("completeProfile.male") ? "MALE" : "FEMALE");
                 }}
               />
             )}
           />
         </Container>
         <BottomAction.Container>
-          <Button
-            loading={dogCreateMutation.isPending}
-            onPress={() => saveUser()}
-          >
+          <Button loading={dogCreateMutation.isPending} onPress={() => saveUser()}>
             {t("createProfile.createProfile")}
           </Button>
         </BottomAction.Container>

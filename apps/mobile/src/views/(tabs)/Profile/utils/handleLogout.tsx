@@ -12,7 +12,7 @@ export const handleLogout = () => {
       style: "cancel",
       onPress: () => {
         analytics.track({ event_type: "Logout Canceled" });
-      }
+      },
     },
     {
       text: i18n.t("profile.logout"),
@@ -20,7 +20,7 @@ export const handleLogout = () => {
       onPress: () => {
         analytics.track({ event_type: "Logout Confirmed" });
         void logout();
-      }
-    }
+      },
+    },
   ]);
 };

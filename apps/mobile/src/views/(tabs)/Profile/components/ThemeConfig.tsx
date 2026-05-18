@@ -18,16 +18,16 @@ export const ThemeConfig = () => {
   const data = [
     {
       id: "light",
-      name: t("themes.light")
+      name: t("themes.light"),
     },
     {
       id: "dark",
-      name: t("themes.dark")
+      name: t("themes.dark"),
     },
     {
       id: null,
-      name: t("themes.automatic")
-    }
+      name: t("themes.automatic"),
+    },
   ];
 
   const value = data.find((item) => item.id === activeTheme);

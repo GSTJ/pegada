@@ -1,27 +1,20 @@
 {
-  "version": "0.1.0",
   "name": "@pegada/mobile",
-  "main": "index.js",
+  "version": "0.1.0",
   "private": true,
-  "installConfig": {
-    "hoistingLimits": "workspaces"
-  },
   "workspaces": {
     "nohoist": [
       "@bugsnag/plugin-expo-eas-sourcemaps",
       "@bugsnag/source-maps"
     ]
   },
+  "main": "index.js",
   "scripts": {
     "ampli:setup": "ampli pull",
     "start": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "eject": "expo eject",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "pnpm lint --fix",
-    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
     "setup:secret:files": "[ ! -s ./google-services.json ] && echo $GOOGLE_SERVICES_JSON > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && echo $GOOGLE_SERVICE_INFO_PLIST > ./GoogleService-Info.plist || echo \"\"",
@@ -36,7 +29,6 @@
     "@expo/config-types": "^51.0.2",
     "@gorhom/bottom-sheet": "^4.6.4",
     "@hookform/resolvers": "^3.9.0",
-    "@pegada/eslint-config": "workspace:*",
     "@pegada/shared": "workspace:*",
     "@ptomasroos/react-native-multi-slider": "^2.2.2",
     "@react-native-anywhere/polyfill-base64": "0.0.1-alpha.0",
@@ -121,7 +113,6 @@
     "@bugsnag/plugin-expo-eas-sourcemaps": "^51.0.0",
     "@bugsnag/source-maps": "^2.3.3",
     "@pegada/api": "workspace:*",
-    "@pegada/prettier-config": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.17.7",
@@ -133,5 +124,7 @@
     "@welldone-software/why-did-you-render": "^8.0.3",
     "babel-plugin-styled-components": "^2.1.4"
   },
-  "prettier": "@pegada/prettier-config"
+  "installConfig": {
+    "hoistingLimits": "workspaces"
+  }
 }

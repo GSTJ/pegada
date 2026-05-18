@@ -9,18 +9,18 @@ import { initialState } from "./swipe";
 export const Types = {
   ...list.ListAction,
   ...swipe.SwipeAction,
-  ...logout.LogoutAction
+  ...logout.LogoutAction,
 };
 
 export const Actions = {
   swipe: swipe.Actions,
   list: list.Actions,
-  logout: logout.Actions
+  logout: logout.Actions,
 };
 
 export default reduceReducers(
   initialState,
   swipe.default as Reducer<typeof swipe.initialState, any>,
   list.default as Reducer<typeof swipe.initialState, any>,
-  logout.default as Reducer<typeof swipe.initialState, any>
+  logout.default as Reducer<typeof swipe.initialState, any>,
 );

@@ -5,7 +5,7 @@ import {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
-  withSpring
+  withSpring,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -21,16 +21,14 @@ import {
   NextImage,
   Picture,
   PreviousImage,
-  UpperPart
+  UpperPart,
 } from "./styles";
 
 const springConfig = { mass: 0.2 };
 
 const START_IMAGE_INDEX = 0;
 
-export interface VisitingCardProps extends React.ComponentProps<
-  typeof Container
-> {
+export interface VisitingCardProps extends React.ComponentProps<typeof Container> {
   dog: SwipeDog;
   shouldShowPersonalInfo?: boolean;
   startImageIndex?: number;
@@ -53,8 +51,8 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
       pathname: `${SceneName.Profile}/[id]`,
       params: {
         id: dog.id,
-        currentImageIndex: currentImage
-      }
+        currentImageIndex: currentImage,
+      },
     });
   };
 
@@ -66,10 +64,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
     if (currentImage !== 0) return setCurrentImage((index) => index - 1);
 
     // eslint-disable-next-line react-compiler/react-compiler -- false positive
-    rotation.value = withSequence(
-      withSpring(-0.5, springConfig),
-      withSpring(0, springConfig)
-    );
+    rotation.value = withSequence(withSpring(-0.5, springConfig), withSpring(0, springConfig));
   };
 
   const gotoNextImage = () => {
@@ -80,16 +75,13 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
     if (currentImage + 1 < images.length) {
       return setCurrentImage((index) => index + 1);
     }
-    rotation.value = withSequence(
-      withSpring(0.5, springConfig),
-      withSpring(0, springConfig)
-    );
+    rotation.value = withSequence(withSpring(0.5, springConfig), withSpring(0, springConfig));
   };
 
   const transform = useAnimatedStyle(() => {
     "worklet";
     return {
-      transform: [{ perspective: 100 }, { rotateY: `${rotation.value}deg` }]
+      transform: [{ perspective: 100 }, { rotateY: `${rotation.value}deg` }],
     };
   });
 
@@ -98,7 +90,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
       <Picture
         source={{
           uri: images[currentImage]?.url,
-          blurhash: images[currentImage]?.blurhash
+          blurhash: images[currentImage]?.blurhash,
         }}
         key={images[currentImage]?.id}
       />
@@ -108,14 +100,9 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0
+          bottom: 0,
         }}
-        colors={[
-          "rgba(0, 0, 0, .5)",
-          "rgba(0, 0, 0, 0)",
-          "rgba(0, 0, 0, 0)",
-          "rgba(0, 0, 0, 0)"
-        ]}
+        colors={["rgba(0, 0, 0, .5)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
       />
       <UpperPart>
         <Distance dog={dog} />

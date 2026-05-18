@@ -10,7 +10,7 @@ import {
   BenefitContainer,
   BenefitIconContainer,
   Container,
-  ContentContainer
+  ContentContainer,
 } from "@/views/UpgradeWall/components/Benefits/styles";
 
 const Benefits: React.FC = () => {

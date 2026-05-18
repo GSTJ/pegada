@@ -9,7 +9,7 @@ import {
   PercentContainer,
   PercentText,
   PlanContainer,
-  Price
+  Price,
 } from "@/views/UpgradeWall/components/PlanPackages/styles";
 
 interface PlanCardProps {
@@ -23,26 +23,21 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   selected,
   onPress,
   planPackage: pkg,
-  oldPrice
+  oldPrice,
 }) => {
   const { t } = useTranslation();
   const { product } = pkg;
 
-  const {
-    price: currentPrice,
-    currencyCode,
-    subscriptionPeriod: period,
-    identifier
-  } = product;
+  const { price: currentPrice, currencyCode, subscriptionPeriod: period, identifier } = product;
 
   const formatPrice = (value: number, currency: string) =>
     Intl.NumberFormat("default", {
       style: "currency",
-      currency
+      currency,
     }).format(value);
 
   const getPeriodDetails = (
-    period: string
+    period: string,
   ): {
     periodUnit: "D" | "W" | "M" | "Y";
     periodValue: number;
@@ -54,7 +49,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
 
     return {
       periodUnit: unit as "D" | "W" | "M" | "Y",
-      periodValue: parseInt(num, 10)
+      periodValue: parseInt(num, 10),
     };
   };
 

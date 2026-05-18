@@ -2,10 +2,7 @@ import { PropsWithChildren, Suspense, useEffect, useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, ViewProps } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
-import {
-  QueryErrorResetBoundary,
-  useQueryErrorResetBoundary
-} from "@tanstack/react-query";
+import { QueryErrorResetBoundary, useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
@@ -17,7 +14,7 @@ import {
   Content,
   DisconnectedIllustration,
   ErrorIllustration,
-  Title
+  Title,
 } from "./styles";
 
 export const OfflineComponent = ({ reset }: { reset: () => void }) => {
@@ -29,9 +26,7 @@ export const OfflineComponent = ({ reset }: { reset: () => void }) => {
         <DisconnectedIllustration />
         <Title>{t("networkBoundary.offline.title")}</Title>
         <ContainedText>{t("networkBoundary.offline.message")}</ContainedText>
-        <Button onPress={() => reset()}>
-          {t("networkBoundary.offline.retry")}
-        </Button>
+        <Button onPress={() => reset()}>{t("networkBoundary.offline.retry")}</Button>
       </Content>
     </Container>
   );
@@ -45,9 +40,7 @@ export const RequestErrorComponent = ({ reset }: { reset: () => void }) => {
       <Content>
         <ErrorIllustration />
         <Title>{t("networkBoundary.requestError.title")}</Title>
-        <ContainedText>
-          {t("networkBoundary.requestError.message")}
-        </ContainedText>
+        <ContainedText>{t("networkBoundary.requestError.message")}</ContainedText>
         <Button variant="outline" onPress={() => reset()}>
           {t("networkBoundary.requestError.retry")}
         </Button>
@@ -64,9 +57,7 @@ export const UnknownErrorComponent = (props: ViewProps) => {
       <Content>
         <ErrorIllustration />
         <Title>{t("networkBoundary.unknownError.title")}</Title>
-        <ContainedText>
-          {t("networkBoundary.unknownError.message")}
-        </ContainedText>
+        <ContainedText>{t("networkBoundary.unknownError.message")}</ContainedText>
       </Content>
     </Container>
   );
@@ -100,9 +91,7 @@ interface QueryErrorResetBoundaryValue {
   reset: () => void;
 }
 
-export type IErrorBoundary = (
-  props: QueryErrorResetBoundaryValue
-) => React.ReactNode;
+export type IErrorBoundary = (props: QueryErrorResetBoundaryValue) => React.ReactNode;
 
 export const DefaultErrorComponent: IErrorBoundary = ({ reset, isReset }) => {
   const offline = useIsOffline();
@@ -132,15 +121,13 @@ type NetworkBoundaryProps = {
 
 const QueryAwareErrorBoundary = ({
   children,
-  errorFallback
+  errorFallback,
 }: PropsWithChildren<Pick<NetworkBoundaryProps, "errorFallback">>) => {
   const handleError = (props: QueryErrorResetBoundaryValue) => {
     const ErrorComponent = errorFallback ?? DefaultErrorComponent;
 
     return (
-      <BugsnagErrorBoundary
-        FallbackComponent={() => <ErrorComponent {...props} />}
-      >
+      <BugsnagErrorBoundary FallbackComponent={() => <ErrorComponent {...props} />}>
         {children}
       </BugsnagErrorBoundary>
     );
@@ -152,13 +139,11 @@ const QueryAwareErrorBoundary = ({
 export const NetworkBoundary = ({
   children,
   suspenseFallback,
-  errorFallback
+  errorFallback,
 }: NetworkBoundaryProps) => {
   return (
     <QueryAwareErrorBoundary errorFallback={errorFallback}>
-      <Suspense fallback={suspenseFallback ?? <DefaultLoadingComponent />}>
-        {children}
-      </Suspense>
+      <Suspense fallback={suspenseFallback ?? <DefaultLoadingComponent />}>{children}</Suspense>
     </QueryAwareErrorBoundary>
   );
 };

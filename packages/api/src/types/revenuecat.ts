@@ -12,12 +12,7 @@ export type EventType =
   | "TRANSFER"
   | "SUBSCRIBER_ALIAS";
 
-export type PeriodType =
-  | "TRIAL"
-  | "INTRO"
-  | "NORMAL"
-  | "PROMOTIONAL"
-  | "PREPAID";
+export type PeriodType = "TRIAL" | "INTRO" | "NORMAL" | "PROMOTIONAL" | "PREPAID";
 
 export type StoreKind =
   | "AMAZON"
@@ -152,12 +147,7 @@ export type ObjectType =
   | "product"
   | "package"
   | "offering";
-export type AppType =
-  | "amazon"
-  | "app_store"
-  | "mac_app_store"
-  | "play_store"
-  | "stripe";
+export type AppType = "amazon" | "app_store" | "mac_app_store" | "play_store" | "stripe";
 export type ProductType = "subscription" | "one_time";
 
 export interface BaseObject {
