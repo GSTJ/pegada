@@ -27,9 +27,9 @@
     }
   },
   "devDependencies": {
-    "dotenv-cli": "^7.4.2",
-    "prettier": "3.3.3",
-    "turbo": "^2.0.11",
+    "dotenv-cli": "^7.4.4",
+    "prettier": "3.8.3",
+    "turbo": "^2.9.12",
     "typescript": "^5.4.5"
   },
   "scripts": {

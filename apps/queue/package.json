@@ -26,7 +26,7 @@
   "devDependencies": {
     "@pegada/eslint-config": "workspace:*",
     "@pegada/prettier-config": "workspace:*",
-    "prettier": "^3.3.3"
+    "prettier": "^3.8.3"
   },
   "prettier": "@pegada/prettier-config",
   "dependencies": {
@@ -34,15 +34,15 @@
     "@pegada/api": "workspace:*",
     "@pegada/shared": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
-    "@tensorflow/tfjs-node": "^4.20.0",
+    "@tensorflow/tfjs-node": "^4.22.0",
     "blurhash": "^2.0.5",
-    "bullmq": "^5.12.0",
+    "bullmq": "^5.76.7",
     "expo-server-sdk": "^3.10.0",
     "fastify": "^4.28.1",
-    "nsfwjs": "^4.1.0",
+    "nsfwjs": "^4.3.0",
     "sharp": "^0.33.4",
-    "tsup": "^8.2.4",
-    "tsx": "^4.16.5",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
     "typescript": "*"
   }
 }
