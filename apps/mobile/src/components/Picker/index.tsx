@@ -24,8 +24,9 @@ export type Item = {
   name: string;
 };
 
-export interface InputPickerProps<T extends Item>
-  extends Partial<Omit<BottomSheetFlatListProps<T>, "ref">> {
+export interface InputPickerProps<T extends Item> extends Partial<
+  Omit<BottomSheetFlatListProps<T>, "ref">
+> {
   title: string;
   placeholder?: string;
   value: T | undefined;

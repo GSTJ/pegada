@@ -28,8 +28,9 @@ const springConfig = { mass: 0.2 };
 
 const START_IMAGE_INDEX = 0;
 
-export interface VisitingCardProps
-  extends React.ComponentProps<typeof Container> {
+export interface VisitingCardProps extends React.ComponentProps<
+  typeof Container
+> {
   dog: SwipeDog;
   shouldShowPersonalInfo?: boolean;
   startImageIndex?: number;

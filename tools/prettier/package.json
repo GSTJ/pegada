@@ -15,8 +15,8 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
-    "prettier": "^3.3.3"
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "prettier": "^3.8.3"
   },
   "devDependencies": {
     "@pegada/tsconfig": "workspace:*",

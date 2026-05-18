@@ -52,7 +52,7 @@
     "@pegada/tsconfig": "workspace:*",
     "@prisma/client": "^5.17.0",
     "prisma": "^5.17.0",
-    "tsx": "^4.16.5"
+    "tsx": "^4.21.0"
   },
   "author": "",
   "license": "ISC",
