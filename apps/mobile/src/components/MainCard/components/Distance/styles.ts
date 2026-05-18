@@ -20,7 +20,7 @@ export const Content = styled.View`
 
 export const DistanceText = styled(Text).attrs({
   fontWeight: "semibold",
-  fontSize: "sm"
+  fontSize: "sm",
 })`
   margin-left: ${(props) => props.theme.spacing[1]}px;
   margin-bottom: ${(props) => props.theme.spacing[1]}px;

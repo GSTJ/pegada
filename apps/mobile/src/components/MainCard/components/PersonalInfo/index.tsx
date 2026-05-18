@@ -8,28 +8,17 @@ import { Age, Container, Description, Name } from "./styles";
 
 export const BIO_NUMBER_OF_LINES = 3;
 
-const PersonalInfo: React.FC<{ dog: SwipeDog } & ViewProps> = ({
-  dog,
-  ...rest
-}) => {
+const PersonalInfo: React.FC<{ dog: SwipeDog } & ViewProps> = ({ dog, ...rest }) => {
   const getFormattedYears = useGetFormattedYears();
 
   return (
-    <LinearGradient
-      colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, .7)", "rgba(0, 0, 0, .8)"]}
-    >
+    <LinearGradient colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, .7)", "rgba(0, 0, 0, .8)"]}>
       <Container {...rest}>
         <Name>
           {dog.name}
-          {dog.birthDate ? (
-            <Age>, {getFormattedYears(dog.birthDate)}</Age>
-          ) : null}
+          {dog.birthDate ? <Age>, {getFormattedYears(dog.birthDate)}</Age> : null}
         </Name>
-        {dog.bio ? (
-          <Description numberOfLines={BIO_NUMBER_OF_LINES}>
-            {dog.bio}
-          </Description>
-        ) : null}
+        {dog.bio ? <Description numberOfLines={BIO_NUMBER_OF_LINES}>{dog.bio}</Description> : null}
       </Container>
     </LinearGradient>
   );

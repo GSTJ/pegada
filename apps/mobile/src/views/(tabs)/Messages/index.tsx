@@ -37,7 +37,7 @@ const Messages = () => {
   useScrollToTop(scrollRef);
 
   const [matches] = api.match.getAll.useSuspenseQuery(undefined, {
-    refetchInterval: pathname === SceneName.Messages ? 5000 : false
+    refetchInterval: pathname === SceneName.Messages ? 5000 : false,
   });
 
   useEffect(() => {
@@ -93,7 +93,7 @@ const Messages = () => {
           gap: theme.spacing[3],
           borderBottomWidth: theme.stroke.sm,
           borderColor: theme.colors.border,
-          paddingBottom: theme.spacing[4]
+          paddingBottom: theme.spacing[4],
         }}
       >
         <Title>
@@ -104,7 +104,7 @@ const Messages = () => {
       <View
         style={{
           marginTop: theme.spacing[3],
-          marginBottom: theme.spacing[1]
+          marginBottom: theme.spacing[1],
         }}
       >
         <Title>
@@ -114,15 +114,11 @@ const Messages = () => {
     </>
   );
 
-  const MemoizedEmptyMessages = (
-    <EmptyMessages search={search} setSearch={setSearch} />
-  );
+  const MemoizedEmptyMessages = <EmptyMessages search={search} setSearch={setSearch} />;
 
   return (
     <Container behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      {Boolean(matches?.length) && (
-        <SearchBar value={search} onChangeText={setSearch} />
-      )}
+      {Boolean(matches?.length) && <SearchBar value={search} onChangeText={setSearch} />}
       <FlatList
         keyboardShouldPersistTaps="handled"
         data={data}
@@ -136,14 +132,14 @@ const Messages = () => {
         ListEmptyComponent={MemoizedEmptyMessages}
         style={{
           borderBottomWidth: theme.stroke.sm,
-          borderColor: theme.colors.border
+          borderColor: theme.colors.border,
         }}
         contentContainerStyle={{
           paddingBottom: theme.spacing[4],
           paddingTop: theme.spacing[1],
           // Increase size only if data is empty
           // Otherwise it bugs stuff
-          flexGrow: data?.length ? undefined : 1
+          flexGrow: data?.length ? undefined : 1,
         }}
       />
     </Container>

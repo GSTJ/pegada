@@ -8,7 +8,7 @@ type MixinProps = { theme: DefaultTheme } & BlurViewProps;
 const getProps = (props: MixinProps) => ({
   tint: "prominent",
   intensity: props.theme.dark ? 70 : 40,
-  ...props
+  ...props,
 });
 
 const ContainerComponent = Platform.OS === "ios" ? ExpoBlurView : View;
@@ -19,9 +19,7 @@ const ContainerComponent = Platform.OS === "ios" ? ExpoBlurView : View;
  * content inside the container blurry as well sometimes and bugging
  * navigation
  */
-export const BlurView = styled(ContainerComponent).attrs(
-  getProps
-)<BlurViewProps>`
+export const BlurView = styled(ContainerComponent).attrs(getProps)<BlurViewProps>`
   background-color: ${(props) => {
     if (Platform.OS === "android") return props.theme.colors.background;
     return Color(props.theme.colors.background).alpha(0.5).string();
@@ -33,7 +31,7 @@ export const BlurView = styled(ContainerComponent).attrs(
  */
 export const TransparentAndroidDarkBlurView = styled(ContainerComponent).attrs({
   intensity: 90,
-  tint: "dark"
+  tint: "dark",
 })`
   background-color: ${(props) => {
     if (Platform.OS === "android") return "#00000090";

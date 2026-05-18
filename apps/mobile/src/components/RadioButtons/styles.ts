@@ -18,8 +18,7 @@ export const Content = styled.View`
 `;
 
 export const RadioButtonContainer = styled(PressableArea)<OptionButtonProps>`
-  padding: ${(props) => props.theme.spacing[3]}px
-    ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[3]}px ${(props) => props.theme.spacing[4]}px;
 
   background-color: ${(props) => props.theme.colors.background};
 

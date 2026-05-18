@@ -8,7 +8,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 export const store = configureStore({
   reducer,
-  middleware: () => new Tuple(sagaMiddleware)
+  middleware: () => new Tuple(sagaMiddleware),
 });
 
 sagaMiddleware.run(sagas);

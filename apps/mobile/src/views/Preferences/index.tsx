@@ -24,13 +24,7 @@ import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/errorTracking";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/SceneName";
-import {
-  Container,
-  DistanceContainer,
-  InputRow,
-  InputSpace,
-  SliderContainer
-} from "./styles";
+import { Container, DistanceContainer, InputRow, InputSpace, SliderContainer } from "./styles";
 
 const { width } = Dimensions.get("window");
 
@@ -51,10 +45,7 @@ const schema = z
     preferredSize: z.string().nullable().optional(),
     preferredMaxDistance: z.array(z.number().nullable()).nullable().optional(),
     preferredBreedId: z.string().nullable().optional(),
-    preferredAgeRange: z
-      .array(z.number().nullable().optional())
-      .nullable()
-      .optional()
+    preferredAgeRange: z.array(z.number().nullable().optional()).nullable().optional(),
   })
   .optional();
 
@@ -62,7 +53,7 @@ const Preferences: React.FC = () => {
   const router = useRouter();
 
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
-    refetchOnMount: false
+    refetchOnMount: false,
   });
 
   if (!dog) {
@@ -75,10 +66,10 @@ const Preferences: React.FC = () => {
       preferredSize: undefined,
       preferredMaxDistance: [MAX_FILTER_DISTANCE],
       preferredBreedId: undefined,
-      preferredAgeRange: [0, MAX_FILTER_AGE]
+      preferredAgeRange: [0, MAX_FILTER_AGE],
     },
     // Zod is breaking here, seems to be an issue with the library
-    resolver: zodResolver(schema as any)
+    resolver: zodResolver(schema as any),
   });
 
   const dispatch = useDispatch();
@@ -96,7 +87,7 @@ const Preferences: React.FC = () => {
     onError: (error) => {
       magicToast.alert(t("preferences.updateError"));
       sendError(error);
-    }
+    },
   });
 
   const saveUser = handleSubmit(async (data) => {
@@ -106,14 +97,11 @@ const Preferences: React.FC = () => {
       preferredSize: data.preferredSize,
       preferredMaxDistance: data.preferredMaxDistance[0],
       preferredMinAge: data.preferredAgeRange[0],
-      preferredMaxAge: data.preferredAgeRange[1]
+      preferredMaxAge: data.preferredAgeRange[1],
     };
 
     // Unlimited
-    if (
-      body.preferredMaxDistance &&
-      body.preferredMaxDistance >= MAX_FILTER_DISTANCE
-    ) {
+    if (body.preferredMaxDistance && body.preferredMaxDistance >= MAX_FILTER_DISTANCE) {
       body.preferredMaxDistance = undefined;
     }
 
@@ -143,12 +131,10 @@ const Preferences: React.FC = () => {
     setValue("preferredBreedId", dog.preferredBreedId);
     setValue("preferredColor", dog.preferredColor);
     setValue("preferredSize", dog.preferredSize);
-    setValue("preferredMaxDistance", [
-      dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE
-    ]);
+    setValue("preferredMaxDistance", [dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE]);
     setValue("preferredAgeRange", [
       dog.preferredMinAge ?? 0,
-      dog.preferredMaxAge ?? MAX_FILTER_AGE + 1
+      dog.preferredMaxAge ?? MAX_FILTER_AGE + 1,
     ]);
   }, [dog, setValue]);
 
@@ -164,9 +150,7 @@ const Preferences: React.FC = () => {
         contentContainerStyle={{
           paddingHorizontal: theme.spacing[4],
           paddingTop: headerHeight,
-          paddingBottom:
-            scrollViewProps.contentContainerStyle.paddingBottom +
-            theme.spacing[4]
+          paddingBottom: scrollViewProps.contentContainerStyle.paddingBottom + theme.spacing[4],
         }}
       >
         <Controller
@@ -194,14 +178,14 @@ const Preferences: React.FC = () => {
                 data={[
                   {
                     id: null,
-                    name: t("preferences.anySize")
+                    name: t("preferences.anySize"),
                   },
-                  ...sizes
+                  ...sizes,
                 ]}
                 value={
                   sizes.find((s) => s.id === value) ?? {
                     id: null,
-                    name: t("preferences.anySize")
+                    name: t("preferences.anySize"),
                   }
                 }
                 onChange={(size) => onChange(size.id)}
@@ -218,14 +202,11 @@ const Preferences: React.FC = () => {
               <InputPicker
                 title={t("preferences.color")}
                 placeholder={t("preferences.anyColor")}
-                data={[
-                  { id: null, name: t("preferences.anyColor") },
-                  ...colors
-                ]}
+                data={[{ id: null, name: t("preferences.anyColor") }, ...colors]}
                 value={
                   colors.find((color) => color.id === value) ?? {
                     id: null,
-                    name: t("preferences.anyColor")
+                    name: t("preferences.anyColor"),
                   }
                 }
                 onChange={(color) => onChange(color.id)}

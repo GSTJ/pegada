@@ -10,9 +10,7 @@ export const semverSchema = z.string().refine((version) => {
 
 const configSchema = z.object({
   /** GENERAL */
-  NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
   /** LOGGING */
   BUGSNAG_API_KEY: z.string(),
@@ -49,7 +47,7 @@ const configSchema = z.object({
 
   /** APPLE MAGIC */
   APPLE_MAGIC_EMAIL: z.string().optional(),
-  APPLE_MAGIC_CODE: z.string().optional()
+  APPLE_MAGIC_CODE: z.string().optional(),
 });
 
 const _config = configSchema.safeParse(process.env);

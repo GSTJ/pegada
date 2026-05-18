@@ -17,7 +17,7 @@ const formatTimeLeft = (totalSeconds: number) => {
 };
 export const useCountdown = (likeLimitResetAt: Date) => {
   const [timeLeft, setTimeLeft] = useState(
-    formatTimeLeft(differenceInSeconds(likeLimitResetAt, new Date()))
+    formatTimeLeft(differenceInSeconds(likeLimitResetAt, new Date())),
   );
 
   useEffect(() => {

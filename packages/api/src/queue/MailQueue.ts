@@ -14,5 +14,5 @@ export const MAIL_QUEUE = "Mail";
 
 export const MailQueue = new Queue<IMailJobData>(MAIL_QUEUE, {
   connection: redisConnection,
-  defaultJobOptions: redisDefaultQueueOptions
+  defaultJobOptions: redisDefaultQueueOptions,
 });

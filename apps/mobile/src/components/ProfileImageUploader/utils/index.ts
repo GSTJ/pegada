@@ -29,13 +29,13 @@ export const pictures: Picture[] = Array(6)
       url: "",
       disabledDrag: true,
       disabledReSorted: true,
-      position: index
-    })
+      position: index,
+    }),
   );
 
 export const sortByUrl = (
   firstItem: Picture | DeletedPicture,
-  secondItem: Picture | DeletedPicture
+  secondItem: Picture | DeletedPicture,
 ): number => {
   return firstItem.url && !secondItem.url ? -1 : 1;
 };
@@ -50,22 +50,21 @@ export const deleteItem =
       key: currentPic.key,
       url: "",
       disabledDrag: true,
-      disabledReSorted: true
+      disabledReSorted: true,
     };
   };
 
 export const compressImage = async (uri: string) => {
   const manipResult = await manipulateAsync(uri, [], {
     format: SaveFormat.WEBP,
-    compress: 0.8
+    compress: 0.8,
   });
 
   return manipResult;
 };
 
 const formatImage = (image: ImagePicker.ImagePickerAsset) => {
-  const pictureUri =
-    Platform.OS === "ios" ? image.uri.replace("file://", "") : image.uri;
+  const pictureUri = Platform.OS === "ios" ? image.uri.replace("file://", "") : image.uri;
 
   return { uri: pictureUri, name: image.fileName, type: image.type };
 };
@@ -73,17 +72,16 @@ const formatImage = (image: ImagePicker.ImagePickerAsset) => {
 export enum ImagePickerError {
   CANCELED = "User canceled",
   NO_PERMISSION = "User did not grant permission",
-  NO_IMAGE = "No image selected"
+  NO_IMAGE = "No image selected",
 }
 
 export const pickImage = async () => {
-  const cameraRollStatus =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const cameraRollStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (cameraRollStatus.status !== "granted") {
     Alert.alert(
       i18n.t("imagePicker.permissionsRequiredTitle"),
-      i18n.t("imagePicker.permissionsRequiredMessage")
+      i18n.t("imagePicker.permissionsRequiredMessage"),
     );
     throw new Error(ImagePickerError.NO_PERMISSION);
   }
@@ -92,7 +90,7 @@ export const pickImage = async () => {
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [9, 16],
-    quality: 1
+    quality: 1,
   });
 
   if (result.canceled) {
@@ -114,7 +112,7 @@ export const takeImage = async () => {
   if (cameraStatus.status !== "granted") {
     Alert.alert(
       i18n.t("imagePicker.permissionsRequiredTitle"),
-      i18n.t("imagePicker.permissionsRequiredMessage")
+      i18n.t("imagePicker.permissionsRequiredMessage"),
     );
     throw new Error(ImagePickerError.NO_PERMISSION);
   }
@@ -123,7 +121,7 @@ export const takeImage = async () => {
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [9, 16],
-    quality: 1
+    quality: 1,
   });
 
   if (result.canceled) {
@@ -155,16 +153,13 @@ export const showImagePickerOptions = (): Promise<{
             takeImage()
               .then((imageUrl) => resolve(imageUrl))
               .catch((error) => {
-                if (
-                  error instanceof Error &&
-                  error.message !== ImagePickerError.CANCELED
-                ) {
+                if (error instanceof Error && error.message !== ImagePickerError.CANCELED) {
                   sendError(error);
                 }
 
                 reject(error);
               });
-          }
+          },
         },
         {
           text: i18n.t("imagePicker.chooseFromLibrary"),
@@ -172,26 +167,23 @@ export const showImagePickerOptions = (): Promise<{
             pickImage()
               .then((imageUrl) => resolve(imageUrl))
               .catch((error) => {
-                if (
-                  error instanceof Error &&
-                  error.message !== ImagePickerError.CANCELED
-                ) {
+                if (error instanceof Error && error.message !== ImagePickerError.CANCELED) {
                   sendError(error);
                 }
 
                 reject(error);
               });
-          }
+          },
         },
         {
           text: i18n.t("imagePicker.cancel"),
           onPress: () => {
             reject(new Error(ImagePickerError.CANCELED));
           },
-          style: "cancel"
-        }
+          style: "cancel",
+        },
       ],
-      { cancelable: false }
+      { cancelable: false },
     );
   });
 };

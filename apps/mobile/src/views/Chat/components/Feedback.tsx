@@ -7,7 +7,7 @@ import Tick from "../assets/tick.svg";
 export enum FeedbackStatus {
   Error = "error",
   Loading = "loading",
-  Success = "success"
+  Success = "success",
 }
 
 interface FeedbackProps extends React.ComponentProps<typeof Tick> {

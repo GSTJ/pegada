@@ -2,12 +2,7 @@ import * as React from "react";
 
 import { Container } from "@/components/Input/styles";
 import { Text } from "@/components/Text";
-import {
-  Content,
-  OptionButtonProps,
-  RadioButtonContainer,
-  TextButton
-} from "./styles";
+import { Content, OptionButtonProps, RadioButtonContainer, TextButton } from "./styles";
 
 interface RadioButtonsProps {
   title: string;
@@ -22,11 +17,7 @@ interface RadioButtonProps extends OptionButtonProps {
 
 const RadioButton: React.FC<RadioButtonProps> = (props) => {
   return (
-    <RadioButtonContainer
-      onPress={props.onPress}
-      marked={props.marked}
-      last={props.last}
-    >
+    <RadioButtonContainer onPress={props.onPress} marked={props.marked} last={props.last}>
       <TextButton marked={props.marked} fontWeight="bold" fontSize="md">
         {props.children}
       </TextButton>
@@ -34,12 +25,7 @@ const RadioButton: React.FC<RadioButtonProps> = (props) => {
   );
 };
 
-export const RadioButtons: React.FC<RadioButtonsProps> = ({
-  title,
-  data,
-  onChange,
-  value
-}) => {
+export const RadioButtons: React.FC<RadioButtonsProps> = ({ title, data, onChange, value }) => {
   return (
     <Container>
       <Text fontWeight="bold" fontSize="lg">

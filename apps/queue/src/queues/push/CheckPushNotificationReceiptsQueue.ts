@@ -5,7 +5,7 @@ import { sendError } from "@pegada/api/errors/errors";
 import {
   CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
   CheckPushNotificationReceiptsQueue,
-  ICheckPushNotificationReceiptsJobData
+  ICheckPushNotificationReceiptsJobData,
 } from "@pegada/api/queue/CheckPushNotificationReceiptsQueue";
 
 import { expo } from "./shared/expo";
@@ -22,15 +22,14 @@ export const worker = new Worker<ICheckPushNotificationReceiptsJobData>(
       if (!incomingReceiptsData) return;
 
       const receipts = await expo.getPushNotificationReceiptsAsync(
-        incomingReceiptsData.map(({ id }) => id)
+        incomingReceiptsData.map(({ id }) => id),
       );
 
       let nonProcessedReceipts: typeof incomingReceiptsData = [];
 
       Object.entries(receipts).forEach(([id, receipt]) => {
-        const pushToken = incomingReceiptsData.find(
-          (receipt) => receipt.id === id
-        )?.pushToken as string;
+        const pushToken = incomingReceiptsData.find((receipt) => receipt.id === id)
+          ?.pushToken as string;
 
         if (receipt.status === "error" && receipt.details?.error) {
           return handlePushError(receipt.details?.error, pushToken);
@@ -44,7 +43,7 @@ export const worker = new Worker<ICheckPushNotificationReceiptsJobData>(
       if (!nonProcessedReceipts.length) return;
 
       sendError(
-        `Some push notifications weren't processed. Receipts: ${JSON.stringify(nonProcessedReceipts)}`
+        `Some push notifications weren't processed. Receipts: ${JSON.stringify(nonProcessedReceipts)}`,
       );
 
       // If there are remaining receipts (e.g. due to 'error' status), save them back to Redis.
@@ -52,7 +51,7 @@ export const worker = new Worker<ICheckPushNotificationReceiptsJobData>(
       await CheckPushNotificationReceiptsQueue.add(
         CHECK_PUSH_NOTIFICATION_RECEIPTS_QUEUE,
         { receipts: nonProcessedReceipts },
-        { delay: RECEIPT_CHECK_DELAY_MS }
+        { delay: RECEIPT_CHECK_DELAY_MS },
       );
     } catch (error) {
       sendError(error);
@@ -60,5 +59,5 @@ export const worker = new Worker<ICheckPushNotificationReceiptsJobData>(
     }
   },
 
-  { connection: redisConnection, concurrency: 1 }
+  { connection: redisConnection, concurrency: 1 },
 );

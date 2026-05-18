@@ -22,24 +22,21 @@ export const useChatPagination = () => {
     const response = await getTrcpContext().message.allByMatch.fetch({
       matchId: matchId as string,
       limit: PAGE_SIZE,
-      lt: pageParam
+      lt: pageParam,
     });
 
     return response;
   };
 
-  const { data, fetchNextPage, isFetchingNextPage, hasNextPage } =
-    useSuspenseInfiniteQuery({
-      queryKey: ["messages", matchId],
-      queryFn: fetchMessages,
-      initialPageParam: undefined,
-      getNextPageParam: (lastPage) => {
-        const morePagesExist = lastPage.length === PAGE_SIZE;
-        return morePagesExist
-          ? lastPage[lastPage.length - 1]?.createdAt
-          : undefined;
-      }
-    });
+  const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useSuspenseInfiniteQuery({
+    queryKey: ["messages", matchId],
+    queryFn: fetchMessages,
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => {
+      const morePagesExist = lastPage.length === PAGE_SIZE;
+      return morePagesExist ? lastPage[lastPage.length - 1]?.createdAt : undefined;
+    },
+  });
 
   const loadMore = () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -54,6 +51,6 @@ export const useChatPagination = () => {
   return {
     messages,
     loadMore,
-    hasNextPage
+    hasNextPage,
   };
 };

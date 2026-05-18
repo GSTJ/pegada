@@ -43,7 +43,7 @@ src/
 - `pnpm android` - Start for Android
 - `pnpm ios` - Start for iOS
 - `pnpm web` - Start for web
-- `pnpm lint` - Run ESLint
+- `pnpm lint` - Run oxlint (from the repo root)
 - `pnpm test` - Run tests
 
 ## Integration with Monorepo

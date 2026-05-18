@@ -1,13 +1,7 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
 
-import {
-  ActionItem,
-  ConfusedEmoji,
-  Container,
-  HeartEyesEmoji,
-  ThinkingEmoji
-} from "./styles";
+import { ActionItem, ConfusedEmoji, Container, HeartEyesEmoji, ThinkingEmoji } from "./styles";
 
 interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   onNope: () => void;

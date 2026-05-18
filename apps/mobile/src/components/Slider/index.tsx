@@ -1,19 +1,10 @@
 import * as React from "react";
 import { Platform, View } from "react-native";
-import MultiSlider, {
-  LabelProps,
-  MultiSliderProps
-} from "@ptomasroos/react-native-multi-slider";
+import MultiSlider, { LabelProps, MultiSliderProps } from "@ptomasroos/react-native-multi-slider";
 import { useTheme } from "styled-components/native";
 
 import { Text } from "@/components/Text";
-import {
-  LabelContainer,
-  Marker,
-  TitleContainer,
-  Triangle,
-  WIDTH
-} from "./styles";
+import { LabelContainer, Marker, TitleContainer, Triangle, WIDTH } from "./styles";
 
 interface TitleProps {
   title: string;
@@ -44,7 +35,7 @@ const CustomLabel: React.FC<CustomLabelProps> = ({ left, children }) => {
     <LabelContainer
       style={{
         left: left - WIDTH / 2,
-        paddingBottom: ADJUSTMENT_PADDING
+        paddingBottom: ADJUSTMENT_PADDING,
       }}
     >
       <Text color="background" fontWeight="semibold">
@@ -59,7 +50,7 @@ const markerHitSlop = {
   top: 15,
   bottom: 15,
   left: 15,
-  right: 15
+  right: 15,
 };
 
 const CustomMarker = () => <Marker hitSlop={markerHitSlop} />;
@@ -85,31 +76,23 @@ export const Root = (props: MultiSliderProps) => {
     backgroundColor: theme.colors.border,
     zIndex: -1,
     borderTopRightRadius: theme.radii.md,
-    borderBottomRightRadius: theme.radii.md
+    borderBottomRightRadius: theme.radii.md,
   };
 
   const CustomLabels = (label: LabelProps) => {
     const oneMarkerValue =
-      Number(label.oneMarkerValue) >= (props.max ?? 0)
-        ? "∞"
-        : label.oneMarkerValue;
+      Number(label.oneMarkerValue) >= (props.max ?? 0) ? "∞" : label.oneMarkerValue;
 
     const twoMarkerValue =
-      Number(label.twoMarkerValue) >= (props.max ?? 0)
-        ? "∞"
-        : label.twoMarkerValue;
+      Number(label.twoMarkerValue) >= (props.max ?? 0) ? "∞" : label.twoMarkerValue;
 
     return (
       <>
         {Number(label.oneMarkerValue) >= 0 && (
-          <CustomLabel left={label.oneMarkerLeftPosition}>
-            {oneMarkerValue}
-          </CustomLabel>
+          <CustomLabel left={label.oneMarkerLeftPosition}>{oneMarkerValue}</CustomLabel>
         )}
         {Number(label.twoMarkerValue) >= 0 && (
-          <CustomLabel left={label.twoMarkerLeftPosition}>
-            {twoMarkerValue}
-          </CustomLabel>
+          <CustomLabel left={label.twoMarkerLeftPosition}>{twoMarkerValue}</CustomLabel>
         )}
       </>
     );
@@ -117,15 +100,15 @@ export const Root = (props: MultiSliderProps) => {
 
   const style = {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   } as const;
 
   const trackStyle = {
     backgroundColor: theme.colors.border,
-    height: stroke
+    height: stroke,
   };
   const selectedStyle = {
-    backgroundColor: theme.colors.primary
+    backgroundColor: theme.colors.primary,
   };
   return (
     <View style={style}>
@@ -133,10 +116,8 @@ export const Root = (props: MultiSliderProps) => {
         style={[
           safeBorderStyle,
           {
-            backgroundColor: hasSecondMarker
-              ? theme.colors.border
-              : theme.colors.primary
-          }
+            backgroundColor: hasSecondMarker ? theme.colors.border : theme.colors.primary,
+          },
         ]}
       />
       <MultiSlider
@@ -157,5 +138,5 @@ export const Root = (props: MultiSliderProps) => {
 export const Slider = {
   Root,
   Title,
-  Label: CustomLabel
+  Label: CustomLabel,
 };

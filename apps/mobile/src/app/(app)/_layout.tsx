@@ -19,7 +19,7 @@ export default () => {
         headerTintColor: theme.colors.primary,
 
         contentStyle: {
-          backgroundColor: theme.colors.background
+          backgroundColor: theme.colors.background,
         },
 
         headerBlurEffect: "prominent",
@@ -29,7 +29,7 @@ export default () => {
           backgroundColor:
             Platform.OS === "ios"
               ? Color(theme.colors.background).alpha(0.5).toString()
-              : theme.colors.background
+              : theme.colors.background,
         },
 
         headerTransparent: true,
@@ -41,9 +41,9 @@ export default () => {
           ...(Platform.OS !== "ios" && {
             fontFamily: theme.typography.fontFamily.bold,
             fontWeight: "bold",
-            fontSize: theme.typography.sizes.lg.size
-          })
-        }
+            fontSize: theme.typography.sizes.lg.size,
+          }),
+        },
       }}
     >
       <Stack.Screen
@@ -51,7 +51,7 @@ export default () => {
         options={{
           headerTitle: t("editProfile.title"),
           headerShown: true,
-          animation: "default"
+          animation: "default",
         }}
       />
       <Stack.Screen name="profile/[id]" />
@@ -60,14 +60,14 @@ export default () => {
         options={{
           headerTitle: t("preferences.title"),
           headerShown: true,
-          animation: "default"
+          animation: "default",
         }}
       />
       <Stack.Screen name="force-update" />
       <Stack.Screen
         name="new-match"
         options={{
-          gestureEnabled: false
+          gestureEnabled: false,
         }}
       />
       <Stack.Screen
@@ -76,14 +76,14 @@ export default () => {
           headerTitle: t("locationMap.title"),
           headerShown: true,
           animation: "default",
-          presentation: "modal"
+          presentation: "modal",
         }}
       />
       <Stack.Screen
         name="upgrade-wall"
         options={{
           animation: "slide_from_bottom",
-          presentation: "modal"
+          presentation: "modal",
         }}
       />
       <Stack.Screen name="chat/[matchId]" options={{ animation: "default" }} />

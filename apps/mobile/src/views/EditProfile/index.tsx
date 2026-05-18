@@ -20,7 +20,7 @@ import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import {
   ProfileImagesUploader,
-  ProfileImagesUploaderProps
+  ProfileImagesUploaderProps,
 } from "@/components/ProfileImageUploader";
 import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
@@ -40,24 +40,23 @@ const EditProfile = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const { control, handleSubmit, setValue, getValues } =
-    useForm<EditProfileForm>({
-      defaultValues: {
-        name: "",
-        bio: "",
-        gender: "MALE",
-        weight: undefined,
-        birthDate: "",
-        breedId: "",
-        color: undefined,
-        size: undefined,
-        images: pictures
-      },
-      resolver: zodResolver(dogClientSchema)
-    });
+  const { control, handleSubmit, setValue, getValues } = useForm<EditProfileForm>({
+    defaultValues: {
+      name: "",
+      bio: "",
+      gender: "MALE",
+      weight: undefined,
+      birthDate: "",
+      breedId: "",
+      color: undefined,
+      size: undefined,
+      images: pictures,
+    },
+    resolver: zodResolver(dogClientSchema),
+  });
 
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
-    refetchOnMount: false
+    refetchOnMount: false,
   });
 
   if (!dog) {
@@ -98,9 +97,9 @@ const EditProfile = () => {
           blurhash: matchingImage?.blurhash,
           position: matchingImage?.position,
           disabledDrag: false,
-          disabledReSorted: false
+          disabledReSorted: false,
         };
-      })
+      }),
     );
   }, [dog, setValue]);
 
@@ -128,7 +127,7 @@ const EditProfile = () => {
     onError: (error) => {
       magicToast.alert(t("editProfile.profileError"));
       sendError(error);
-    }
+    },
   });
 
   const saveUser = handleSubmit(async (data) => {
@@ -145,8 +144,8 @@ const EditProfile = () => {
       images: data.images?.map((image, index) => ({
         id: image.id,
         url: image.url,
-        position: index
-      }))
+        position: index,
+      })),
     };
 
     await myDogUpdateMutation.mutateAsync(updateData);
@@ -164,10 +163,8 @@ const EditProfile = () => {
           {...scrollViewProps}
           contentContainerStyle={{
             padding: theme.spacing[4],
-            paddingBottom:
-              theme.spacing[4] +
-              scrollViewProps.contentContainerStyle.paddingBottom,
-            paddingTop: nonDelayedHeaderHeight + theme.spacing[4]
+            paddingBottom: theme.spacing[4] + scrollViewProps.contentContainerStyle.paddingBottom,
+            paddingTop: nonDelayedHeaderHeight + theme.spacing[4],
           }}
           scrollEnabled={gesturesEnabled}
           keyboardShouldPersistTaps="handled"
@@ -180,9 +177,7 @@ const EditProfile = () => {
               return (
                 <ProfileImagesUploader
                   value={value as Picture[]}
-                  onChange={(
-                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0]
-                  ) => {
+                  onChange={(cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0]) => {
                     // This getValues is needed to ensure the update happens
                     // correctly even when adding images fast.
                     onChange(cb(getValues("images") as Picture[]));
@@ -236,10 +231,7 @@ const EditProfile = () => {
                 name="weight"
                 control={control}
                 rules={{ required: true }}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState
-                }) => (
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
                   <Input
                     title={t("editProfile.weight")}
                     placeholder="1"
@@ -263,10 +255,7 @@ const EditProfile = () => {
                 name="birthDate"
                 control={control}
                 rules={{ required: true }}
-                render={({
-                  field: { onChange, onBlur, value, name },
-                  fieldState
-                }) => (
+                render={({ field: { onChange, onBlur, value, name }, fieldState }) => (
                   <Input
                     title={t("editProfile.birthDate")}
                     placeholder="DD/MM/YYYY"
@@ -274,8 +263,7 @@ const EditProfile = () => {
                     onBlur={onBlur}
                     onChangeText={(value: string) => {
                       const oldValue = getValues()[name];
-                      const isErasing =
-                        value.length < (oldValue ? oldValue.length : 0);
+                      const isErasing = value.length < (oldValue ? oldValue.length : 0);
 
                       if (isErasing) return onChange(value);
 
@@ -346,11 +334,7 @@ const EditProfile = () => {
               <RadioButtons
                 title={t("editProfile.gender")}
                 data={[t("editProfile.male"), t("editProfile.female")]}
-                value={
-                  value === "MALE"
-                    ? t("editProfile.male")
-                    : t("editProfile.female")
-                }
+                value={value === "MALE" ? t("editProfile.male") : t("editProfile.female")}
                 onChange={(value) => {
                   onChange(value === t("editProfile.male") ? "MALE" : "FEMALE");
                 }}
@@ -359,10 +343,7 @@ const EditProfile = () => {
           />
         </Container>
         <BottomAction.Container>
-          <Button
-            loading={myDogUpdateMutation.isPending}
-            onPress={() => saveUser()}
-          >
+          <Button loading={myDogUpdateMutation.isPending} onPress={() => saveUser()}>
             {t("editProfile.saveProfile")}
           </Button>
         </BottomAction.Container>

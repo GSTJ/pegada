@@ -6,20 +6,7 @@
     "dev": "next dev",
     "build": "pnpm -F @pegada/database build && next build",
     "start": "next start",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "pnpm lint --fix",
-    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@pegada/eslint-config/nextjs"
-    ],
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    }
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
@@ -27,7 +14,6 @@
     "@next/mdx": "^14.2.5",
     "@pegada/api": "workspace:*",
     "@pegada/database": "workspace:*",
-    "@pegada/eslint-config": "workspace:*",
     "@pegada/shared": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
     "@types/mdx": "^2.0.13",
@@ -54,11 +40,9 @@
     "typescript": "*"
   },
   "devDependencies": {
-    "@pegada/prettier-config": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
     "@types/node": "22.1.0",
     "@types/react": "18.3.3",
     "@types/react-dom": "~18.3.0"
-  },
-  "prettier": "@pegada/prettier-config"
+  }
 }

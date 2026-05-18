@@ -1,13 +1,8 @@
 "use client";
 
-const GlobalError = ({
-  reset
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) => {
+const GlobalError = ({ reset }: { error: Error & { digest?: string }; reset: () => void }) => {
   return (
-    <html>
+    <html lang="en">
       <body>
         <section className="bg-white dark:bg-gray-900 min-h-screen flex items-center">
           <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">

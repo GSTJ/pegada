@@ -13,28 +13,15 @@ export const CTA = () => {
         </p>
       </div>
       <div className="appearFromBottom flex gap-3 flex-col lg:flex-row">
-        <StoreButton
-          href="https://apps.apple.com/br/app/pegada/id6450865592"
-          target="_blank"
-        >
-          <StoreButton.Icon
-            width={20}
-            height={20}
-            src="/app-store-icon.svg"
-            alt="App Store"
-          />
+        <StoreButton href="https://apps.apple.com/br/app/pegada/id6450865592" target="_blank">
+          <StoreButton.Icon width={20} height={20} src="/app-store-icon.svg" alt="App Store" />
           <StoreButton.Text>{t("home.cta.appStore")}</StoreButton.Text>
         </StoreButton>
         <StoreButton
           href="https://play.google.com/store/apps/details?id=app.pegada"
           target="_blank"
         >
-          <StoreButton.Icon
-            width={24}
-            height={24}
-            src="/google-play-icon.svg"
-            alt="Google Play"
-          />
+          <StoreButton.Icon width={24} height={24} src="/google-play-icon.svg" alt="Google Play" />
           <StoreButton.Text>{t("home.cta.googlePlay")}</StoreButton.Text>
         </StoreButton>
       </div>

@@ -29,7 +29,7 @@ export const Message: React.FC<MessageProps> = ({ item }) => {
 
   const Emoji = getEmojiBySwipeType(
     // TODO: Return this when we get swipeType back
-    undefined // item.interest?.swipeType
+    undefined, // item.interest?.swipeType
   );
 
   return (
@@ -37,7 +37,7 @@ export const Message: React.FC<MessageProps> = ({ item }) => {
       onPress={() =>
         router.push({
           pathname: `${SceneName.Chat}/[matchId]`,
-          params: { dogId: item.dog.id, matchId: item.id }
+          params: { dogId: item.dog.id, matchId: item.id },
         })
       }
     >
@@ -45,7 +45,7 @@ export const Message: React.FC<MessageProps> = ({ item }) => {
         <Picture
           source={{
             uri: item.dog.images[0]?.url,
-            blurhash: item.dog.images[0]?.blurhash ?? undefined
+            blurhash: item.dog.images[0]?.blurhash ?? undefined,
           }}
         />
         {Emoji ? (

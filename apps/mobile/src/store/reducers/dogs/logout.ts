@@ -4,7 +4,7 @@ import { ActionType, createAction, createReducer } from "typesafe-actions";
 import { initialState } from "@/store/reducers/dogs/swipe";
 
 export enum LogoutAction {
-  Logout = "LOGOUT"
+  Logout = "LOGOUT",
 }
 
 const logout = createAction(LogoutAction.Logout)();
@@ -19,5 +19,5 @@ const logoutHandler = (state = initialState) =>
   });
 
 export default createReducer<typeof initialState, ActionType<typeof Actions>>(
-  initialState
+  initialState,
 ).handleAction(Actions.logout, logoutHandler);

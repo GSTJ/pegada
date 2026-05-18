@@ -11,14 +11,14 @@ export const useTrackScreens = () => {
   useEffect(() => {
     analytics.screenViewed({
       screen: pathname,
-      referringScreen: routeNameRef.current
+      referringScreen: routeNameRef.current,
     });
 
     // https://github.com/bugsnag/bugsnag-js/blob/next/packages/plugin-react-navigation/react-navigation.js
     Bugsnag.leaveBreadcrumb(
       "Navigation State Change",
       { to: pathname, from: routeNameRef.current },
-      "navigation"
+      "navigation",
     );
 
     routeNameRef.current = pathname;

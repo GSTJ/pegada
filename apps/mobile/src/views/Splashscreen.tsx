@@ -12,15 +12,12 @@ const AnimatedSplashScreen = () => {
     : Constants.expoConfig?.ios?.splash?.backgroundColor;
 
   return (
-    <Animated.View
-      pointerEvents="none"
-      style={[StyleSheet.absoluteFill, { backgroundColor }]}
-    >
+    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor }]}>
       <Animated.Image
         style={{
           width: "100%",
           height: "100%",
-          resizeMode: Constants.expoConfig?.ios?.splash?.resizeMode || "contain"
+          resizeMode: Constants.expoConfig?.ios?.splash?.resizeMode || "contain",
         }}
         source={SplashscreenImage}
       />

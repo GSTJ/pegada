@@ -1,8 +1,5 @@
 import prisma from "@pegada/database";
-import {
-  InvalidOTPCodeError,
-  OTPRequiredError
-} from "@pegada/shared/errors/errors";
+import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/errors";
 import { Language } from "@pegada/shared/i18n/types/types";
 
 import { MAIL_QUEUE, MailQueue } from "../queue/MailQueue";
@@ -23,7 +20,7 @@ export class AuthenticationService {
 
     const isValid = await AuthenticationService.checkVerification({
       email,
-      code
+      code,
     });
 
     if (!isValid) {
@@ -34,8 +31,8 @@ export class AuthenticationService {
       where: { email },
       update: { deletedAt: null },
       create: {
-        email
-      }
+        email,
+      },
     });
 
     return user;
@@ -63,19 +60,13 @@ export class AuthenticationService {
     await prisma.user.upsert({
       where: { email },
       update: { code, codeExpiresAt: expiresAt },
-      create: { email, code, codeExpiresAt: expiresAt }
+      create: { email, code, codeExpiresAt: expiresAt },
     });
 
     await MailQueue.add(MAIL_QUEUE, { email, code, language: this.language });
   }
 
-  static async checkVerification({
-    email,
-    code
-  }: {
-    email: string;
-    code: string;
-  }) {
+  static async checkVerification({ email, code }: { email: string; code: string }) {
     // Used for apple to review the app
     if (
       config.APPLE_MAGIC_EMAIL &&
@@ -87,7 +78,7 @@ export class AuthenticationService {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) throw new Error("User not found");

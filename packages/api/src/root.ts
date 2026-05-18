@@ -20,7 +20,7 @@ export const appRouter = createTRPCRouter({
   dog: dogRouter,
   authentication: authenticationRouter,
   match: matchRouter,
-  echo: echoRouter
+  echo: echoRouter,
 });
 
 // export type definition of API

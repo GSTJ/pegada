@@ -6,7 +6,7 @@ export const CARD = {
   CARD_WIDTH: width * 0.9,
   CARD_HEIGHT: height * 0.78,
   CARD_OUT_HEIGHT: height * 1.7,
-  CARD_OUT_WIDTH: width * 1.7
+  CARD_OUT_WIDTH: width * 1.7,
 };
 
 export const ACTION_OFFSET = 100;

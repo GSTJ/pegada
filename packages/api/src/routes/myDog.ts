@@ -14,11 +14,9 @@ export const myDogRouter = createTRPCRouter({
     return { ok: true };
   }),
 
-  update: protectedProcedure
-    .input(dogServerSchema.partial())
-    .mutation(async ({ ctx, input }) => {
-      const dog = await DogService.getDogByUserId(ctx.session.user.id);
-      const updatedDog = await DogService.updateDog(dog.id, input);
-      return updatedDog;
-    })
+  update: protectedProcedure.input(dogServerSchema.partial()).mutation(async ({ ctx, input }) => {
+    const dog = await DogService.getDogByUserId(ctx.session.user.id);
+    const updatedDog = await DogService.updateDog(dog.id, input);
+    return updatedDog;
+  }),
 });

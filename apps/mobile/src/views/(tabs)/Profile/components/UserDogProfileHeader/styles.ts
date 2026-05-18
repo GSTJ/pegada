@@ -1,9 +1,6 @@
 import styled from "styled-components/native";
 
-import {
-  OfflineComponent,
-  UnknownErrorComponent
-} from "@/components/NetworkBoundary";
+import { OfflineComponent, UnknownErrorComponent } from "@/components/NetworkBoundary";
 
 export const ProfileContainer = styled.View`
   justify-content: center;

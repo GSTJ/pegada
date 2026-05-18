@@ -32,7 +32,7 @@ export const TopColumn = styled.View`
 
 export const Timer = styled(Text).attrs({
   fontSize: "xxxl",
-  fontWeight: "bold"
+  fontWeight: "bold",
 })`
   color: ${(props) => props.theme.colors.text};
 `;

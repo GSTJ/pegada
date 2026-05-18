@@ -8,16 +8,14 @@ import { ListAction } from "@/store/reducers/dogs/list";
 
 // Without marking as unknown, saga complains about the swipe all type inference
 export function* fetchUsersRequest(): unknown {
-  const dogs: RootReducer["dogs"] = yield select(
-    (state: RootReducer) => state.dogs
-  );
+  const dogs: RootReducer["dogs"] = yield select((state: RootReducer) => state.dogs);
 
   try {
     const response = yield call(getTrcpContext().client.swipe.all.query, {
       limit: dogs.config.limit,
 
       // Avoids fetching dogs that are already on screen
-      notIn: dogs.request.data.map((dog) => dog.id)
+      notIn: dogs.request.data.map((dog) => dog.id),
     });
 
     // For each dog, mutate the cache, so that the dog is not fetched again
@@ -28,8 +26,8 @@ export function* fetchUsersRequest(): unknown {
     yield put(
       Actions.dogs.list.success({
         dogs: response,
-        hasMore: response.length === dogs.config.limit
-      })
+        hasMore: response.length === dogs.config.limit,
+      }),
     );
   } catch (err) {
     sendError(err);
@@ -41,5 +39,5 @@ export function* fetchUsersRequest(): unknown {
 
 export default all([
   takeLatest(ListAction.RefetchDogsRequest, fetchUsersRequest),
-  takeLatest(ListAction.FetchDogsRequest, fetchUsersRequest)
+  takeLatest(ListAction.FetchDogsRequest, fetchUsersRequest),
 ]);

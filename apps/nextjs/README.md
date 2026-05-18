@@ -41,7 +41,7 @@ src/
 - `pnpm dev` - Start the development server
 - `pnpm build` - Build for production
 - `pnpm start` - Start the production server
-- `pnpm lint` - Run ESLint
+- `pnpm lint` - Run oxlint (from the repo root)
 - `pnpm typecheck` - Run TypeScript type checking
 
 ## Integration with Monorepo

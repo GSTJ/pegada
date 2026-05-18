@@ -1,0 +1,93 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "react",
+    "react-perf",
+    "unicorn",
+    "oxc",
+    "import",
+    "promise",
+    "node",
+    "jsx-a11y"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true,
+    "jest": true
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.turbo/**",
+    "**/.next/**",
+    "**/node_modules/**",
+    "**/ios/**",
+    "**/android/**",
+    "**/.expo/**",
+    "**/storybook-static/**",
+    "patches/**",
+    "pnpm-lock.yaml",
+    "**/generated/**",
+    "packages/database/prisma/migrations/**",
+    "apps/mobile/google-services.json",
+    "apps/mobile/GoogleService-Info.plist"
+  ],
+  "rules": {
+    "no-console": "error",
+    "no-void": "off",
+    "import/no-duplicates": "error",
+    "react/jsx-key": "error",
+    "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }],
+    "react/jsx-boolean-value": ["error", "never"],
+    "react/self-closing-comp": "error",
+    "react/jsx-curly-brace-presence": ["error", { "props": "never", "children": "never" }],
+    "react/jsx-handler-names": "warn",
+    "react/no-children-prop": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react-hooks/exhaustive-deps": "warn",
+    "jsx-a11y/no-autofocus": "off",
+    "typescript/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-require-imports": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "react-native-gesture-handler",
+            "importNames": ["ScrollView", "FlatList", "SectionList"],
+            "message": "Import ScrollView/FlatList/SectionList from react-native instead."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/jest.config.*",
+        "**/jest.setup.*",
+        "packages/database/seed.ts",
+        "scripts/**"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}

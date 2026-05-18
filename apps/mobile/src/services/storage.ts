@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-duplicate-enum-values -- `Default` aliases another enum member by design */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export enum StorageKeys {
@@ -5,14 +6,13 @@ export enum StorageKeys {
   Theme = "theme",
   Language = "language",
   AppReviewRequestDate = "appReviewRequestDate",
-  AppReviewStatus = "appReviewStatus"
+  AppReviewStatus = "appReviewStatus",
 }
 
 export enum Theme {
   Light = "light",
   Dark = "dark",
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  Default = "light"
+  Default = "light",
 }
 
 export interface StorageDataTypes {
@@ -23,10 +23,7 @@ export interface StorageDataTypes {
   [StorageKeys.AppReviewStatus]: "completed";
 }
 
-export const storeData = async <T extends StorageKeys>(
-  key: T,
-  value: StorageDataTypes[T]
-) => {
+export const storeData = async <T extends StorageKeys>(key: T, value: StorageDataTypes[T]) => {
   await AsyncStorage.setItem(key, value);
   return value;
 };

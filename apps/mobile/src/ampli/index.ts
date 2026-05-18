@@ -30,7 +30,7 @@ export type Environment = "development" | "production";
 
 export const ApiKey: Record<Environment, string> = {
   development: "",
-  production: ""
+  production: "",
 };
 
 /**
@@ -41,14 +41,14 @@ export const DefaultConfiguration: ReactNativeOptions = {
     version: "1",
     branch: "main",
     source: "app",
-    versionId: "90b24b95-6abc-4c07-8a35-4e8c17e5c225"
+    versionId: "90b24b95-6abc-4c07-8a35-4e8c17e5c225",
   },
   ...{
     ingestionMetadata: {
       sourceName: "react-native-typescript-ampli",
-      sourceVersion: "2.0.0"
-    }
-  }
+      sourceVersion: "2.0.0",
+    },
+  },
 };
 
 export interface LoadOptionsBase {

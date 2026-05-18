@@ -12,12 +12,12 @@ Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: false,
-    shouldSetBadge: false
-  })
+    shouldSetBadge: false,
+  }),
 });
 
 export enum NotificationTokenError {
-  Denied = "Push notifications denied"
+  Denied = "Push notifications denied",
 }
 
 export const getPushNotificationToken = async () => {
@@ -28,7 +28,7 @@ export const getPushNotificationToken = async () => {
       name: "default",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: Color(LightTheme.colors.primary).alpha(0.7).hex()
+      lightColor: Color(LightTheme.colors.primary).alpha(0.7).hex(),
     });
   }
 
@@ -43,7 +43,7 @@ export const getPushNotificationToken = async () => {
   }
 
   const { data } = await Notifications.getExpoPushTokenAsync({
-    projectId: Constants.expoConfig?.extra?.eas?.projectId
+    projectId: Constants.expoConfig?.extra?.eas?.projectId,
   });
 
   return data;

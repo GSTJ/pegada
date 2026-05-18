@@ -58,13 +58,13 @@ export const ChangeLocation = () => {
         flexDirection: "row",
         alignItems: "center",
         alignSelf: "center",
-        marginBottom: theme.spacing[2]
+        marginBottom: theme.spacing[2],
       }}
     >
       <Location
         style={{
           marginRight: theme.spacing[2],
-          marginTop: theme.spacing[0.5]
+          marginTop: theme.spacing[0.5],
         }}
         width={15}
         height={15}
@@ -81,7 +81,7 @@ export const ChangeLocation = () => {
         height={10}
         style={{
           marginTop: theme.spacing[1.5],
-          marginLeft: theme.spacing[2]
+          marginLeft: theme.spacing[2],
         }}
         fill={theme.colors.primary}
       />

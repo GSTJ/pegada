@@ -23,11 +23,9 @@ export const Header: React.FC<HeaderProps> = ({ matches }) => {
         renderItem={({ item }) => <Preview item={item} />}
         horizontal
         contentContainerStyle={{
-          paddingHorizontal: theme.spacing[4]
+          paddingHorizontal: theme.spacing[4],
         }}
-        ItemSeparatorComponent={() => (
-          <View style={{ width: theme.spacing[3] }} />
-        )}
+        ItemSeparatorComponent={() => <View style={{ width: theme.spacing[3] }} />}
         showsHorizontalScrollIndicator={false}
       />
     </Container>

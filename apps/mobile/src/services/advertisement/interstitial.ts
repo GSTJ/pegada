@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import {
-  AdEventType,
-  InterstitialAd,
-  TestIds
-} from "react-native-google-mobile-ads";
+import { AdEventType, InterstitialAd, TestIds } from "react-native-google-mobile-ads";
 
 import { useUnsafeIsPremium } from "@/hooks/usePayments";
 import { analytics } from "@/services/analytics";
@@ -14,7 +10,7 @@ const DEFAULT_AD_KEYWORDS = ["dog", "animals", "pets", "puppies"];
 
 export const createForAdRequestTracked = (
   interstitialAdIds: { ios: string; android: string },
-  keywords = DEFAULT_AD_KEYWORDS
+  keywords = DEFAULT_AD_KEYWORDS,
 ): {
   interstitial: {
     load: () => void;
@@ -27,7 +23,7 @@ export const createForAdRequestTracked = (
 
   const interstitial = InterstitialAd.createForAdRequest(adId, {
     requestNonPersonalizedAdsOnly: false,
-    keywords
+    keywords,
   });
 
   const waitForEvent = (type: AdEventType) => {
@@ -42,14 +38,14 @@ export const createForAdRequestTracked = (
       AdEventType.LOADED,
       AdEventType.OPENED,
       AdEventType.CLOSED,
-      AdEventType.CLICKED
+      AdEventType.CLICKED,
     ];
 
     for (const eventType of trackEventTypes) {
       interstitial.addAdEventListener(eventType, () => {
         analytics.track({
           event_type: "Advertisement",
-          event_properties: { action: eventType, type: "Interstitial" }
+          event_properties: { action: eventType, type: "Interstitial" },
         });
       });
     }
@@ -60,10 +56,7 @@ export const createForAdRequestTracked = (
   const adLoadedPromise = waitForEvent(AdEventType.LOADED);
 
   // Used to catch errors before the AD is loaded
-  const removeErrorListener = interstitial.addAdEventListener(
-    AdEventType.ERROR,
-    sendError
-  );
+  const removeErrorListener = interstitial.addAdEventListener(AdEventType.ERROR, sendError);
 
   const safeLoadAndShow = async () => {
     try {
@@ -88,14 +81,14 @@ export const createForAdRequestTracked = (
 
   return {
     interstitial,
-    safeLoadAndShow
+    safeLoadAndShow,
   };
 };
 
 /** The same as above, but mocked for Premium users. We don't show them ads, ever. */
 const useCreateFreeOnlyForAdRequestTracked: typeof createForAdRequestTracked = (
   interstitialAdIds,
-  keywords
+  keywords,
 ) => {
   const isPremium = useUnsafeIsPremium();
 
@@ -103,7 +96,7 @@ const useCreateFreeOnlyForAdRequestTracked: typeof createForAdRequestTracked = (
     // Mock the interstitial ad
     return {
       interstitial: { load: () => {} },
-      safeLoadAndShow: async () => {}
+      safeLoadAndShow: async () => {},
     };
   }
 
@@ -112,12 +105,9 @@ const useCreateFreeOnlyForAdRequestTracked: typeof createForAdRequestTracked = (
 
 export const useForAdRequestTracked: typeof createForAdRequestTracked = (
   interstitialAdIds,
-  keywords
+  keywords,
 ) => {
-  const result = useCreateFreeOnlyForAdRequestTracked(
-    interstitialAdIds,
-    keywords
-  );
+  const result = useCreateFreeOnlyForAdRequestTracked(interstitialAdIds, keywords);
 
   useEffect(() => {
     result.interstitial.load();

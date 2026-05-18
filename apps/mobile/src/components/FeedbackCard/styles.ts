@@ -9,8 +9,7 @@ interface IContainer {
 }
 
 export const Container = styled(Animated.View)<IContainer>`
-  margin: ${(props) => props.theme.spacing[1]}px
-    ${(props) => props.theme.spacing[1.5]}px;
+  margin: ${(props) => props.theme.spacing[1]}px ${(props) => props.theme.spacing[1.5]}px;
   flex: 1;
   border-radius: ${(props) => props.theme.radii.lg}px;
   background-color: ${(props) => props.theme.colors.background};
@@ -29,7 +28,7 @@ export const Container = styled(Animated.View)<IContainer>`
 
 export const AbsolutePosition = styled(Animated.View).attrs((props) => ({
   pointerEvents: "none",
-  ...props
+  ...props,
 }))`
   flex: 1;
   ${absoluteFill}

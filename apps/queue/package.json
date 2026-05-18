@@ -1,34 +1,15 @@
 {
   "name": "@pegada/queue",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@pegada/eslint-config/typescript"
-    ],
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    }
-  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "format:fix": "prettier --write . --ignore-path ../../.gitignore",
     "start": "bun dist/index.js",
     "dev": "tsx src/index.ts",
     "build": "npx rimraf dist && tsup --sourcemap",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
-  "devDependencies": {
-    "@pegada/eslint-config": "workspace:*",
-    "@pegada/prettier-config": "workspace:*",
-    "prettier": "^3.8.3"
-  },
-  "prettier": "@pegada/prettier-config",
   "dependencies": {
     "@fastify/http-proxy": "^9.5.0",
     "@pegada/api": "workspace:*",

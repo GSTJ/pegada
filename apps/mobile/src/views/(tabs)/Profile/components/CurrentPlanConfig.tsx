@@ -46,7 +46,7 @@ export const CurrentPlanConfig = () => {
 
     if (Platform.OS === "android") {
       return Linking.openURL(
-        `https://play.google.com/store/account/subscriptions?package=${Constants.expoConfig?.android?.package}`
+        `https://play.google.com/store/account/subscriptions?package=${Constants.expoConfig?.android?.package}`,
       );
     }
 
@@ -63,9 +63,7 @@ export const CurrentPlanConfig = () => {
             <StyledLoading inverse />
           </PlanLoading>
         ) : null}
-        {userPlan ? (
-          <Config.Description>{t(`plans.${userPlan}`)}</Config.Description>
-        ) : null}
+        {userPlan ? <Config.Description>{t(`plans.${userPlan}`)}</Config.Description> : null}
         {plan.isError ? (
           <Config.Description color="destructive">
             {t("profile.plan.errorLoading")}
@@ -75,8 +73,7 @@ export const CurrentPlanConfig = () => {
       {!plan.isLoading ? (
         <Config.Description style={{ transform: [{ translateY: -2 }] }}>
           {userPlan === UserPlan.Free && t("profile.plan.upgradeToPremium")}
-          {userPlan === UserPlan.Premium &&
-            t("profile.plan.until", { date: expirationDate })}
+          {userPlan === UserPlan.Premium && t("profile.plan.until", { date: expirationDate })}
           {plan.isError ? t("profile.plan.clickToRetry") : null}
         </Config.Description>
       ) : null}

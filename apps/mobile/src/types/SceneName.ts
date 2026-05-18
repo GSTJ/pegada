@@ -13,5 +13,5 @@ export enum SceneName {
   LocationMap = "/location-map",
   ForceUpdate = "/force-update",
   NewMatch = "/new-match",
-  UpgradeWall = "/upgrade-wall"
+  UpgradeWall = "/upgrade-wall",
 }

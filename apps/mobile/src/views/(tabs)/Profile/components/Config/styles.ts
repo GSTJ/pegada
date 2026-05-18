@@ -22,11 +22,11 @@ export const Title = styled(Text).attrs((props) => ({
   numberOfLines: 1,
   fontWeight: "semibold",
   fontSize: "sm",
-  ...props
+  ...props,
 }))``;
 
 export const Description = styled(Text).attrs((props) => ({
   numberOfLines: 2,
   fontSize: "xs",
-  ...props
+  ...props,
 }))``;

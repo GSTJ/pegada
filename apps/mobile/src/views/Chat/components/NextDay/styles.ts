@@ -4,13 +4,10 @@ import styled from "styled-components/native";
 import { Text } from "@/components/Text";
 
 export const Container = styled.View`
-  margin: ${(props) => props.theme.spacing[4]}px auto
-    ${(props) => props.theme.spacing[5]}px auto;
+  margin: ${(props) => props.theme.spacing[4]}px auto ${(props) => props.theme.spacing[5]}px auto;
 
-  padding: ${(props) => props.theme.spacing[0.5]}px
-    ${(props) => props.theme.spacing[2.5]}px
-    ${(props) => props.theme.spacing[1.5]}px
-    ${(props) => props.theme.spacing[2.5]}px;
+  padding: ${(props) => props.theme.spacing[0.5]}px ${(props) => props.theme.spacing[2.5]}px
+    ${(props) => props.theme.spacing[1.5]}px ${(props) => props.theme.spacing[2.5]}px;
 
   border-radius: ${(props) => props.theme.radii.round}px;
   background-color: ${(props) => props.theme.colors.card};

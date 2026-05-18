@@ -20,7 +20,7 @@ export const useSendMessage = () => {
       matchId: matchId as string,
       senderId: "ME_MYSELF_AND_I",
       status: FeedbackStatus.Loading,
-      newMessage: true
+      newMessage: true,
     };
 
     queryClient.setQueryData(
@@ -29,12 +29,12 @@ export const useSendMessage = () => {
         let updatedPages = [...(oldData?.pages ?? [[]])];
 
         updatedPages = updatedPages.map((page) =>
-          page.map((message) => ({ ...message, newMessage: false }))
+          page.map((message) => ({ ...message, newMessage: false })),
         );
 
         updatedPages[0] = [tempMessage, ...(updatedPages[0] ?? [])];
         return { ...oldData, pages: updatedPages };
-      }
+      },
     );
   };
 
@@ -52,7 +52,7 @@ export const useSendMessage = () => {
             return message;
           }) ?? [];
         return { ...oldData, pages: updatedPages };
-      }
+      },
     );
   };
 
@@ -61,10 +61,9 @@ export const useSendMessage = () => {
       ["messages", matchId],
       (oldData: { pages: MessageProps[][] } | undefined) => {
         const updatedPages = [...(oldData?.pages ?? [[]])];
-        updatedPages[0] =
-          updatedPages[0]?.filter((message) => message.id !== id) ?? [];
+        updatedPages[0] = updatedPages[0]?.filter((message) => message.id !== id) ?? [];
         return { ...oldData, pages: updatedPages };
-      }
+      },
     );
   };
 
@@ -81,7 +80,7 @@ export const useSendMessage = () => {
             return message;
           }) ?? [];
         return { ...oldData, pages: updatedPages };
-      }
+      },
     );
 
     // Update last message for this match
@@ -93,8 +92,8 @@ export const useSendMessage = () => {
         ...matches.filter((match) => match.id !== matchId),
         {
           ...match,
-          lastMessage: newMessage
-        }
+          lastMessage: newMessage,
+        },
       ];
     });
   };
@@ -108,12 +107,12 @@ export const useSendMessage = () => {
 
       const newMessage = await getTrcpContext().client.message.send.mutate({
         matchId: matchId as string,
-        content
+        content,
       });
 
       confirmMessage(tempId, {
         ...newMessage,
-        newMessage: true
+        newMessage: true,
       });
     } catch (err) {
       sendError(err);

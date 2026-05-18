@@ -6,7 +6,7 @@ import { DogService } from "../services/DogService";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const getDogSchema = z.object({
-  id: z.string()
+  id: z.string(),
 });
 
 export const dogRouter = createTRPCRouter({
@@ -15,14 +15,12 @@ export const dogRouter = createTRPCRouter({
     return dog;
   }),
 
-  create: protectedProcedure
-    .input(dogServerSchema)
-    .mutation(async ({ ctx, input }) => {
-      const dog = await DogService.createDog({
-        ...input,
-        userId: ctx.session.user.id
-      });
+  create: protectedProcedure.input(dogServerSchema).mutation(async ({ ctx, input }) => {
+    const dog = await DogService.createDog({
+      ...input,
+      userId: ctx.session.user.id,
+    });
 
-      return dog;
-    })
+    return dog;
+  }),
 });

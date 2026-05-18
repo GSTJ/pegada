@@ -15,7 +15,7 @@ const IDEAL_HEIGHT = width * ASPECT_RATIO;
 export const CARD_HEIGHT = clamp(IDEAL_HEIGHT, MIN_HEIGHT, MAX_HEIGHT);
 
 export const Container = styled.ScrollView.attrs({
-  bounces: false
+  bounces: false,
 })`
   flex-grow: 1;
 `;
@@ -29,13 +29,13 @@ export const Content = styled.View`
 `;
 
 export const ShareButton = styled(PressableArea).attrs({
-  hitSlop: { top: 10, bottom: 10, right: 20, left: 20 }
+  hitSlop: { top: 10, bottom: 10, right: 20, left: 20 },
 })`
   align-self: center;
 `;
 
 export const ReportButton = styled(PressableArea).attrs({
-  hitSlop: { top: 10, bottom: 10, right: 20, left: 20 }
+  hitSlop: { top: 10, bottom: 10, right: 20, left: 20 },
 })`
   align-self: center;
 `;
@@ -48,9 +48,9 @@ export const MatchActionBarGradient = styled(LinearGradient).attrs((props) => {
       gradientColor.fade(1).rgb().string(),
       gradientColor.fade(0.2).rgb().string(),
       gradientColor.fade(0.2).rgb().string(),
-      gradientColor.fade(0).rgb().string()
+      gradientColor.fade(0).rgb().string(),
     ],
-    pointerEvents: "none"
+    pointerEvents: "none",
   };
 })`
   position: absolute;
@@ -60,20 +60,20 @@ export const MatchActionBarGradient = styled(LinearGradient).attrs((props) => {
 `;
 
 export const UnmatchButton = styled(PressableArea).attrs({
-  hitSlop: { top: 10, bottom: 10, right: 20, left: 20 }
+  hitSlop: { top: 10, bottom: 10, right: 20, left: 20 },
 })`
   align-self: center;
 `;
 
 export const Name = styled(Text).attrs({
   fontWeight: "black",
-  fontSize: "xl"
+  fontSize: "xl",
 })`
   margin-bottom: ${(props) => props.theme.spacing[1]}px;
 `;
 
 export const Age = styled(Name).attrs({
-  fontWeight: "medium"
+  fontWeight: "medium",
 })`
   font-size: 18px;
 `;

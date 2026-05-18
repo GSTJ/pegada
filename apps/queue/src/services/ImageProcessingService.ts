@@ -9,14 +9,14 @@ import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 export class ImageProcessingService {
   static checkForProfanity = async ({
     arrayBuffer,
-    threshold = 0.7
+    threshold = 0.7,
   }: {
     arrayBuffer: ArrayBuffer;
     threshold?: number;
   }) => {
     const isProfanityCheckEnabled = await FlagService.isFeatureEnabled({
       feature: FEATURES.PROFANITY_CHECK,
-      defaultValue: false
+      defaultValue: false,
     });
 
     // In case this isn't working as intended or consuming too much bandwidth
@@ -36,8 +36,7 @@ export class ImageProcessingService {
     const predictions = await model.classify(imageTensor);
 
     const isNotSafe = predictions.some(
-      (prediction) =>
-        prediction.className !== "Neutral" && prediction.probability > threshold
+      (prediction) => prediction.className !== "Neutral" && prediction.probability > threshold,
     );
 
     return isNotSafe ? IMAGE_STATUS.REJECTED : IMAGE_STATUS.APPROVED;
@@ -46,7 +45,7 @@ export class ImageProcessingService {
   static async createBlurhash({ arrayBuffer }: { arrayBuffer: ArrayBuffer }) {
     const isBlurhashEnabled = await FlagService.isFeatureEnabled({
       feature: FEATURES.IMAGE_BLURHASH,
-      defaultValue: true
+      defaultValue: true,
     });
 
     // In case this isn't working as intended or consuming too much bandwidth
@@ -62,13 +61,7 @@ export class ImageProcessingService {
 
     const clamped = new Uint8ClampedArray(pixels);
 
-    const blurhash = Blurhash.encode(
-      clamped,
-      metadata.width,
-      metadata.height,
-      4,
-      4
-    );
+    const blurhash = Blurhash.encode(clamped, metadata.width, metadata.height, 4, 4);
 
     return blurhash;
   }

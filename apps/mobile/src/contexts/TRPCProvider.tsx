@@ -64,10 +64,7 @@ export const trpcQueryClient = api.createClient({
           });
 
           if (unauthorized) {
-            Alert.alert(
-              i18n.t("session.expired"),
-              i18n.t("session.expiredMessage")
-            );
+            Alert.alert(i18n.t("session.expired"), i18n.t("session.expiredMessage"));
             throw logout();
           }
         }
@@ -75,11 +72,11 @@ export const trpcQueryClient = api.createClient({
         return {
           ...res,
           // Already decoded here
-          json: async () => responsesJSON
+          json: async () => responsesJSON,
         };
-      }
-    })
-  ]
+      },
+    }),
+  ],
 });
 
 const ImperativeTRPCProvider = (props: { children: React.ReactNode }) => {

@@ -6,14 +6,12 @@ export const useCurrentCityText = () => {
   const { t } = useTranslation();
 
   const [myDog] = api.myDog.get.useSuspenseQuery(undefined, {
-    refetchOnMount: false
+    refetchOnMount: false,
   });
 
   const hasLatLng = myDog?.user?.latitude && myDog.user?.longitude;
 
-  const currentCityFallback = hasLatLng
-    ? t("common.nearYou")
-    : t("common.unknown");
+  const currentCityFallback = hasLatLng ? t("common.nearYou") : t("common.unknown");
 
   const currentCityText = myDog?.user?.city ?? currentCityFallback;
 

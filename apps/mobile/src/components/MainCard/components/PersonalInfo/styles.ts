@@ -10,14 +10,14 @@ export const Container = styled.View`
 
 export const Name = styled(Text).attrs({
   fontWeight: "black",
-  fontSize: "xl"
+  fontSize: "xl",
 })`
   color: #fff;
   margin-bottom: ${(props) => props.theme.spacing[1]}px;
 `;
 
 export const Age = styled(Name).attrs({
-  fontWeight: "medium"
+  fontWeight: "medium",
 })`
   font-size: 18px;
 `;

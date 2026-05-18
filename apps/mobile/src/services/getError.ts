@@ -4,10 +4,10 @@ type GenericClass = new (...args: any[]) => any;
 export const getError = <
   T extends GenericClass & {
     error_code: string;
-  }
+  },
 >(
   error: any,
-  instance: T
+  instance: T,
 ): InstanceType<T> | undefined => {
   if (error instanceof instance) {
     return error;

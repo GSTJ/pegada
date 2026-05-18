@@ -2,14 +2,14 @@ import { useState } from "react";
 import {
   Gesture,
   GestureEventPayload,
-  PanGestureHandlerEventPayload
+  PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
 import {
   runOnJS,
   SharedValue,
   useSharedValue,
   withSpring,
-  withTiming
+  withTiming,
 } from "react-native-reanimated";
 
 import { ACTION_OFFSET, ACTION_VELOCITY, CARD } from "@/constants";
@@ -27,7 +27,7 @@ interface Coordinate {
 export enum Swipe {
   Dislike = "NOT_INTERESTED",
   Like = "INTERESTED",
-  Maybe = "MAYBE"
+  Maybe = "MAYBE",
 }
 
 export const getDirectionCoordinates = (swipe: Swipe) => {
@@ -48,20 +48,18 @@ export const getDirectionCoordinates = (swipe: Swipe) => {
 };
 
 const getSwipeType = (
-  event: Readonly<GestureEventPayload & PanGestureHandlerEventPayload>
+  event: Readonly<GestureEventPayload & PanGestureHandlerEventPayload>,
 ): Swipe | undefined => {
   "worklet";
 
   const horizontalTrigger =
-    Math.abs(event.translationX) > ACTION_OFFSET ||
-    Math.abs(event.velocityX) > ACTION_VELOCITY;
+    Math.abs(event.translationX) > ACTION_OFFSET || Math.abs(event.velocityX) > ACTION_VELOCITY;
 
   if (horizontalTrigger && event.translationX < 0) return Swipe.Dislike;
   if (horizontalTrigger && event.translationX > 0) return Swipe.Like;
 
   const verticalTrigger =
-    Math.abs(event.translationY) > ACTION_OFFSET ||
-    Math.abs(event.velocityY) > ACTION_VELOCITY;
+    Math.abs(event.translationY) > ACTION_OFFSET || Math.abs(event.velocityY) > ACTION_VELOCITY;
 
   if (verticalTrigger && event.translationY < 0) return Swipe.Maybe;
 };
@@ -70,7 +68,7 @@ const gotoCoordinate = (
   translation: Translation,
   coordinates: Coordinate,
   callback: () => void,
-  animationConfig = { duration: 250 }
+  animationConfig = { duration: 250 },
 ) => {
   "worklet";
 
@@ -81,19 +79,11 @@ const gotoCoordinate = (
   const callbackY = willMoveX ? undefined : callback;
 
   if (willMoveX) {
-    translation.x.value = withTiming(
-      coordinates.x ?? 0,
-      animationConfig,
-      callback
-    );
+    translation.x.value = withTiming(coordinates.x ?? 0, animationConfig, callback);
   }
 
   if (willMoveY) {
-    translation.y.value = withTiming(
-      coordinates.y ?? 0,
-      animationConfig,
-      callbackY
-    );
+    translation.y.value = withTiming(coordinates.y ?? 0, animationConfig, callbackY);
   }
 };
 
@@ -106,7 +96,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
 
   const translation: Translation = {
     x: useSharedValue(0),
-    y: useSharedValue(0)
+    y: useSharedValue(0),
   };
 
   // We want to guarantee the animation has finished before enabling
@@ -116,10 +106,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
     setTimeout(() => setEnabled(true), duration);
   };
 
-  const gotoDirection = (
-    swipeDirection: Swipe,
-    animationConfig = { duration: 250 }
-  ) => {
+  const gotoDirection = (swipeDirection: Swipe, animationConfig = { duration: 250 }) => {
     "worklet";
 
     // Avoid concurrency, should gotoDirection only once
@@ -134,7 +121,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
         runOnJS(onSwipeComplete)(swipeDirection);
         runOnJS(safelyEnableWithDelay)(animationConfig.duration);
       },
-      animationConfig
+      animationConfig,
     );
   };
 

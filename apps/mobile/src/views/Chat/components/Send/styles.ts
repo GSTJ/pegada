@@ -4,11 +4,10 @@ import { BlurView } from "@/components/BlurView";
 
 export const Input = styled.TextInput.attrs((props) => ({
   placeholderTextColor: props.theme.colors.placeholder,
-  selectionColor: props.theme.colors.primary
+  selectionColor: props.theme.colors.primary,
 }))`
   border-radius: ${(props) => props.theme.radii.md}px;
-  padding: ${(props) => props.theme.spacing[2]}px
-    ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[2]}px ${(props) => props.theme.spacing[4]}px;
 
   background-color: ${(props) => props.theme.colors.card};
 

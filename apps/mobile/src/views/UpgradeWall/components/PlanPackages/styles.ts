@@ -29,8 +29,7 @@ export const PlanContainer = styled(PressableArea)<CheckContainerProps>`
   ${(props) =>
     props.selected &&
     css`
-      background-color: ${({ theme }) =>
-        Color(theme.colors.primary).alpha(0.1).toString()};
+      background-color: ${({ theme }) => Color(theme.colors.primary).alpha(0.1).toString()};
       border-color: ${({ theme }) => theme.colors.primary};
     `}
 `;
@@ -40,8 +39,7 @@ export const PercentContainer = styled.View`
   top: ${({ theme }) => -theme.spacing[3]}px;
   right: ${({ theme }) => theme.spacing[3]}px;
   background-color: ${({ theme }) => theme.colors.primary};
-  padding: ${({ theme }) => theme.spacing[1]}px
-    ${({ theme }) => theme.spacing[2]}px;
+  padding: ${({ theme }) => theme.spacing[1]}px ${({ theme }) => theme.spacing[2]}px;
   border-radius: ${({ theme }) => theme.radii.sm}px;
 `;
 

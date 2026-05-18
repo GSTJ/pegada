@@ -14,18 +14,18 @@ export default () => {
         headerBackTitle: t("common.back"),
         headerTitleAlign: "center",
         contentStyle: {
-          backgroundColor: theme.colors.background
+          backgroundColor: theme.colors.background,
         },
         animation: "fade",
         headerTintColor: theme.colors.primary,
         headerStyle: {
-          backgroundColor: theme.colors.background
+          backgroundColor: theme.colors.background,
         },
         headerTitleStyle: {
           fontFamily: theme.typography.fontFamily.bold,
           fontSize: 20,
-          color: theme.colors.text
-        }
+          color: theme.colors.text,
+        },
       }}
       initialRouteName="sign-in"
     >
@@ -35,14 +35,14 @@ export default () => {
         name="create-profile"
         options={{
           headerTitle: t("createProfile.title"),
-          headerShown: true
+          headerShown: true,
         }}
       />
       <Stack.Screen
         name="complete-profile"
         options={{
           headerTitle: t("completeProfile.title"),
-          headerShown: true
+          headerShown: true,
         }}
       />
       <Stack.Screen name="ask-for-location" />

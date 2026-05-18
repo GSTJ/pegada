@@ -33,9 +33,7 @@ const ChatMessageList = () => {
 
   const insets = useKeyboardAwareSafeAreaInsets();
 
-  const MessageLoader = hasNextPage ? (
-    <ActivityIndicator color={theme.colors.text} />
-  ) : null;
+  const MessageLoader = hasNextPage ? <ActivityIndicator color={theme.colors.text} /> : null;
 
   const FooterComponent = messages ? MessageLoader : null;
 
@@ -48,26 +46,18 @@ const ChatMessageList = () => {
     paddingVertical: theme.spacing[3],
     paddingHorizontal: theme.spacing[3],
     paddingBottom: inverted ? topPadding : bottomPadding,
-    paddingTop: inverted ? bottomPadding : topPadding
+    paddingTop: inverted ? bottomPadding : topPadding,
   };
 
   const ListEmptyComponent = () => <Empty />;
 
-  const renderItem = ({
-    item,
-    index
-  }: {
-    item: MessageProps;
-    index: number;
-  }) => {
+  const renderItem = ({ item, index }: { item: MessageProps; index: number }) => {
     // Don't show the date if it's the first message or if it's loading
     const showNextDay = index !== messages.length - 1 || !hasNextPage;
 
     return (
       <>
-        {showNextDay ? (
-          <NextDay message={item} nextMessage={messages?.[index + 1]} />
-        ) : null}
+        {showNextDay ? <NextDay message={item} nextMessage={messages?.[index + 1]} /> : null}
         <Message {...item} self={item.senderId !== dogId}>
           {item.content}
         </Message>

@@ -10,7 +10,7 @@ export const Container = styled.View`
 
 export const Title = styled(Text).attrs({
   fontSize: "xxl",
-  fontWeight: "bold"
+  fontWeight: "bold",
 })`
   color: ${(props) => props.theme.colors.text};
 `;

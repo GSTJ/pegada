@@ -10,7 +10,7 @@ export class OTPRequiredError extends IntentionalError {
   constructor() {
     super({
       code: "UNAUTHORIZED",
-      message: OTPRequiredError.message
+      message: OTPRequiredError.message,
     });
   }
 }
@@ -23,7 +23,7 @@ export class InvalidOTPCodeError extends IntentionalError {
   constructor() {
     super({
       code: "UNAUTHORIZED",
-      message: InvalidOTPCodeError.message
+      message: InvalidOTPCodeError.message,
     });
   }
 }
@@ -38,7 +38,7 @@ export class LikeLimitReached extends IntentionalError {
   constructor({ likeLimitResetAt }: { likeLimitResetAt: Date }) {
     super({
       code: "TOO_MANY_REQUESTS",
-      message: LikeLimitReached.message
+      message: LikeLimitReached.message,
     });
 
     this.likeLimitResetAt = likeLimitResetAt;

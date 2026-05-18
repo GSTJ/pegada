@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-duplicate-enum-values -- `Default` aliases another enum member by design */
 import en from "../locales/en";
 
 export enum Namespace {
@@ -6,7 +7,7 @@ export enum Namespace {
   Zod = "zod",
   Server = "server",
   Mail = "mail",
-  Web = "web"
+  Web = "web",
 }
 
 // This makes TS complain if a key is missing, making our JSON files type-safe
@@ -15,8 +16,7 @@ export type LanguageResources = typeof en;
 export enum Language {
   EnUs = "en-US",
   PtBr = "pt-BR",
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-  Default = "en-US"
+  Default = "en-US",
 }
 
 // Overwrite the existing interface so we can add our custom namespace

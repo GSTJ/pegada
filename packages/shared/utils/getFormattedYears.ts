@@ -5,7 +5,7 @@ import { Language } from "../i18n/types/types";
 
 export const getFormattedYears = ({
   birthDate,
-  lng = Language.Default
+  lng = Language.Default,
 }: {
   birthDate: string | Date;
   lng: string;

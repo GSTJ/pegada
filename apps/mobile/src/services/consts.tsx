@@ -5,7 +5,7 @@ export const sizes = [
   { id: "SMALL", name: i18n.t("sizes.small") },
   { id: "MEDIUM", name: i18n.t("sizes.medium") },
   { id: "LARGE", name: i18n.t("sizes.large") },
-  { id: "GIANT", name: i18n.t("sizes.giant") }
+  { id: "GIANT", name: i18n.t("sizes.giant") },
 ];
 
 export const colors = [
@@ -14,5 +14,5 @@ export const colors = [
   { id: "BROWN", name: i18n.t("colors.brown") },
   { id: "TRICOLOR", name: i18n.t("colors.tricolor") },
   { id: "ALBINO", name: i18n.t("colors.albino") },
-  { id: "GOLDEN", name: i18n.t("colors.golden") }
+  { id: "GOLDEN", name: i18n.t("colors.golden") },
 ];

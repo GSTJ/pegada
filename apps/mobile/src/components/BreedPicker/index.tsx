@@ -18,23 +18,18 @@ interface BreedPickerProps {
   optional?: boolean;
 }
 
-const BreedPicker = ({
-  breed,
-  setBreed,
-  hasAnyOption = false,
-  ...props
-}: BreedPickerProps) => {
+const BreedPicker = ({ breed, setBreed, hasAnyOption = false, ...props }: BreedPickerProps) => {
   const { t } = useTranslation();
   const [breedsData] = api.breed.all.useSuspenseQuery(undefined, {
-    refetchOnMount: false
+    refetchOnMount: false,
   });
 
   const breeds = [
     ...(hasAnyOption ? [{ id: null, name: t("breedPicker.anyBreed") }] : []),
     ...breedsData.map((breed) => ({
       id: breed.id,
-      name: t(breed.slug as BreedSlug, { ns: Namespace.Breed })
-    }))
+      name: t(breed.slug as BreedSlug, { ns: Namespace.Breed }),
+    })),
   ];
 
   const selectedBreed = breeds.find((item) => item.id === breed);
@@ -59,13 +54,7 @@ const DisabledInput = styled(Input)`
 const BreedPickerLoading = () => {
   const { t } = useTranslation();
 
-  return (
-    <DisabledInput
-      title={t("breedPicker.breed")}
-      loading
-      pointerEvents="none"
-    />
-  );
+  return <DisabledInput title={t("breedPicker.breed")} loading pointerEvents="none" />;
 };
 
 const BreedPickerError = () => {
@@ -82,10 +71,7 @@ const BreedPickerError = () => {
 };
 
 export default (props: BreedPickerProps) => (
-  <NetworkBoundary
-    suspenseFallback={<BreedPickerLoading />}
-    errorFallback={BreedPickerError}
-  >
+  <NetworkBoundary suspenseFallback={<BreedPickerLoading />} errorFallback={BreedPickerError}>
     <BreedPicker {...props} />
   </NetworkBoundary>
 );

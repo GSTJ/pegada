@@ -6,7 +6,7 @@ export enum Font {
   GilroyBold = "Gilroy-Bold",
   GilroySemiBold = "Gilroy-SemiBold",
   GilroyExtraBold = "Gilroy-ExtraBold",
-  GilroyRegular = "Gilroy-Regular"
+  GilroyRegular = "Gilroy-Regular",
 }
 
 const BASE_SPACING = 4;
@@ -17,7 +17,7 @@ export const DefaultConfigs = {
     md: 12,
     lg: 24,
     xl: 32,
-    round: 9999
+    round: 9999,
   },
   // https://tailwindcss.com/docs/space
   spacing: {
@@ -42,14 +42,14 @@ export const DefaultConfigs = {
     20: BASE_SPACING * 20,
     24: BASE_SPACING * 24,
     28: BASE_SPACING * 28,
-    32: BASE_SPACING * 32
+    32: BASE_SPACING * 32,
   },
   stroke: {
     sm: minimumStrokeSize,
     md: minimumStrokeSize * 2,
     lg: minimumStrokeSize * 3,
     xl: minimumStrokeSize * 4,
-    xxl: minimumStrokeSize * 5
+    xxl: minimumStrokeSize * 5,
   },
   typography: {
     fontFamily: {
@@ -58,36 +58,36 @@ export const DefaultConfigs = {
       regular: Font.GilroyRegular,
       semibold: Font.GilroySemiBold,
       bold: Font.GilroyBold,
-      black: Font.GilroyExtraBold
+      black: Font.GilroyExtraBold,
     },
 
     sizes: {
       xxxl: {
-        size: 38
+        size: 38,
       },
       xxl: {
-        size: 32
+        size: 32,
       },
       xl: {
-        size: 24
+        size: 24,
       },
       lg: {
-        size: 18
+        size: 18,
       },
       md: {
-        size: 16
+        size: 16,
       },
       sm: {
-        size: 15
+        size: 15,
       },
       xs: {
-        size: 14
+        size: 14,
       },
       xxs: {
-        size: 11
-      }
-    }
-  }
+        size: 11,
+      },
+    },
+  },
 } as const;
 
 export const LightTheme = {
@@ -122,8 +122,8 @@ export const LightTheme = {
 
     border: "hsl(214.3, 31.8%, 91.4%)",
 
-    input: "hsl(0, 0%, 98%)"
-  }
+    input: "hsl(0, 0%, 98%)",
+  },
 };
 
 export const DarkTheme: typeof LightTheme = {
@@ -158,8 +158,8 @@ export const DarkTheme: typeof LightTheme = {
 
     border: "hsl(0, 0%, 12%)", // Dark gray border for separation
 
-    input: "hsl(0, 0%, 7%)" // Slightly lighter black for inputs
-  }
+    input: "hsl(0, 0%, 7%)", // Slightly lighter black for inputs
+  },
 };
 
 export const DefaultTheme = LightTheme;

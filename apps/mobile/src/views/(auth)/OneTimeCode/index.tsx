@@ -6,10 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { format, set } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-import {
-  InvalidOTPCodeError,
-  OTPRequiredError
-} from "@pegada/shared/errors/errors";
+import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/errors";
 
 import { Text } from "@/components/Text";
 import { api } from "@/contexts/TRPCProvider";
@@ -31,7 +28,7 @@ import {
   ResendCode,
   StyledKeyboardAvoidingView,
   Timer,
-  TopColumn
+  TopColumn,
 } from "./styles";
 
 const CODE_LENGTH = 6;
@@ -89,7 +86,7 @@ const OneTimeCode = () => {
 
       magicToast.alert(t("common.tryAgainLater"), 1000);
       sendError(error);
-    }
+    },
   });
 
   const handleResendCode = () => {
@@ -104,15 +101,13 @@ const OneTimeCode = () => {
   }, [keyboardInput]);
 
   return (
-    <StyledKeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <StyledKeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Container
         style={{
           paddingTop: insetTop,
           paddingBottom: Math.max(insets.bottom, 16),
           paddingLeft: insets.left + 20,
-          paddingRight: insets.right + 20
+          paddingRight: insets.right + 20,
         }}
       >
         <GoBack onPress={() => router.back()} />
@@ -121,8 +116,7 @@ const OneTimeCode = () => {
           <TopColumn>
             <Timer>{formattedTime}</Timer>
             <Description>
-              {t("oneTimeCode.insertCode")}{" "}
-              <Text fontWeight="medium">{email}</Text>
+              {t("oneTimeCode.insertCode")} <Text fontWeight="medium">{email}</Text>
             </Description>
 
             <OTPInput

@@ -6,7 +6,7 @@ import Animated, {
   interpolate,
   runOnUI,
   useAnimatedStyle,
-  withSpring
+  withSpring,
 } from "react-native-reanimated";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -40,9 +40,9 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     dispatch(Actions.dogs.swipe.request({ id: card.id, swipeType }));
   };
 
-  const [translation, gestureHandler, gotoDirection, enabled] = useSwipeGesture(
-    { onSwipeComplete }
-  );
+  const [translation, gestureHandler, gotoDirection, enabled] = useSwipeGesture({
+    onSwipeComplete,
+  });
 
   const automaticSwipe = (swipeType: Swipe) => {
     "worklet";
@@ -56,7 +56,7 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     if (isFirstCard) {
       // @ts-expect-error - ref is mutable, ts doesn't know it
       swipeHandlerRef.current = {
-        gotoDirection: runOnUI(automaticSwipe)
+        gotoDirection: runOnUI(automaticSwipe),
       };
     }
   }, [automaticSwipe, isFirstCard]);
@@ -74,27 +74,23 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     const deg = interpolate(
       translation.x.value * -1,
       [-ACTION_OFFSET, 0, ACTION_OFFSET],
-      [ROTATION_DEG, 0, -ROTATION_DEG]
+      [ROTATION_DEG, 0, -ROTATION_DEG],
     );
 
     return {
       transform: [
         { translateX: translation.x.value },
         { translateY: translation.y.value },
-        { rotate: `${deg}deg` }
+        { rotate: `${deg}deg` },
       ],
-      ...(isFirstCard && { zIndex: 2 })
+      ...(isFirstCard && { zIndex: 2 }),
     };
   });
 
   return (
     <GestureDetector gesture={gestureHandler.enabled(isFirstCard && enabled)}>
       <Animated.View style={[StyleSheet.absoluteFill, transform]}>
-        <FeedbackCard
-          isFirst={isFirstCard}
-          dog={card}
-          translation={translation}
-        />
+        <FeedbackCard isFirst={isFirstCard} dog={card} translation={translation} />
       </Animated.View>
     </GestureDetector>
   );

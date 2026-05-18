@@ -18,25 +18,25 @@ export const worker = new Worker<IMailJobData>(
         "api",
         "src",
         "mails",
-        "verify_code.hbs"
+        "verify_code.hbs",
       ),
       variables: {
         otp: code,
-        year: new Date().getFullYear()
+        year: new Date().getFullYear(),
       },
-      language: language
+      language: language,
     });
 
     MailService.sendMail({
       to: email,
       html: emailHtml,
       subject: TranslationService.translate("server:mail.verifyCode.subject", {
-        lng: language
+        lng: language,
       }),
       text: TranslationService.translate("server:mail.verifyCode.text", {
-        lng: language
-      })
+        lng: language,
+      }),
     });
   },
-  { connection: redisConnection, concurrency: 1 }
+  { connection: redisConnection, concurrency: 1 },
 );

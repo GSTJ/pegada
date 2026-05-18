@@ -7,7 +7,7 @@ const configSchema = z.object({
   QUEUE_DEV_PORT: z.coerce.number().optional(),
 
   /** EXPO */
-  EXPO_ACCESS_TOKEN: z.string()
+  EXPO_ACCESS_TOKEN: z.string(),
 });
 
 const _config = configSchema.safeParse(process.env);

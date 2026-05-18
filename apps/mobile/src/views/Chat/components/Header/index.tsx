@@ -14,17 +14,14 @@ import * as S from "./styles";
 export const HEADER_HEIGHT = 65;
 
 const DogProfileInfo = ({ dogId }: { dogId: string }) => {
-  const [dog] = api.dog.get.useSuspenseQuery(
-    { id: dogId },
-    { refetchOnMount: false }
-  );
+  const [dog] = api.dog.get.useSuspenseQuery({ id: dogId }, { refetchOnMount: false });
 
   return (
     <S.ProfileInfoContainer>
       <S.Picture
         source={{
           uri: dog.images[0]?.url,
-          blurhash: dog.images[0]?.blurhash ?? undefined
+          blurhash: dog.images[0]?.blurhash ?? undefined,
         }}
       />
       <Text numberOfLines={1} fontWeight="bold">
@@ -65,7 +62,7 @@ const Header = () => {
     <S.Header
       style={{
         paddingTop: insets.top,
-        height: HEADER_HEIGHT + insets.top
+        height: HEADER_HEIGHT + insets.top,
       }}
     >
       <S.BackTouchArea onPress={() => router.back()}>
@@ -75,7 +72,7 @@ const Header = () => {
         onPress={() =>
           router.push({
             pathname: `${SceneName.Profile}/[id]`,
-            params: { matchId: matchId ?? "", id: dogId as string }
+            params: { matchId: matchId ?? "", id: dogId as string },
           })
         }
       >

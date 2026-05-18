@@ -9,10 +9,7 @@ interface DefaultModalProps {
   description: string;
 }
 
-export const DefaultModal: React.FC<DefaultModalProps> = ({
-  title,
-  description
-}) => {
+export const DefaultModal: React.FC<DefaultModalProps> = ({ title, description }) => {
   const { t } = useTranslation();
   const { hide } = useMagicModal();
 

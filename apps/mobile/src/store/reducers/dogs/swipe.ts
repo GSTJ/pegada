@@ -1,10 +1,5 @@
 import { produce } from "immer";
-import {
-  ActionType,
-  createAction,
-  createAsyncAction,
-  createReducer
-} from "typesafe-actions";
+import { ActionType, createAction, createAsyncAction, createReducer } from "typesafe-actions";
 
 import type { RouterOutputs } from "@pegada/api";
 
@@ -30,14 +25,14 @@ export const initialState: IInitialState = {
   request: {
     data: [],
     loading: true,
-    error: undefined
+    error: undefined,
   },
   config: {
     limit: 15,
     hasMore: true,
     lastCardId: undefined,
-    likeLimitResetAt: undefined
-  }
+    likeLimitResetAt: undefined,
+  },
 };
 
 export enum SwipeAction {
@@ -45,13 +40,13 @@ export enum SwipeAction {
   SwipeDogSuccess = "SWIPE_DOG_SUCCESS",
   SwipeDogFailure = "SWIPE_DOG_FAILURE",
   SwipeBack = "SWIPE_BACK",
-  ClearLikeLimit = "CLEAR_LIKE_LIMIT"
+  ClearLikeLimit = "CLEAR_LIKE_LIMIT",
 }
 
 const asyncActions = createAsyncAction(
   SwipeAction.SwipeDogRequest,
   SwipeAction.SwipeDogSuccess,
-  SwipeAction.SwipeDogFailure
+  SwipeAction.SwipeDogFailure,
 )<{ id: string; swipeType: Swipe }, undefined, { likeLimitResetAt?: Date }>();
 
 const swipeBack = createAction(SwipeAction.SwipeBack)();
@@ -60,10 +55,7 @@ const clearLikeLimit = createAction(SwipeAction.ClearLikeLimit)();
 
 export const Actions = { ...asyncActions, swipeBack, clearLikeLimit };
 
-const swipeUserRequest = (
-  state = initialState,
-  { payload }: ActionType<typeof Actions.request>
-) =>
+const swipeUserRequest = (state = initialState, { payload }: ActionType<typeof Actions.request>) =>
   produce(state, (draft) => {
     const { lastCardId } = draft.config;
     const { data: dogs } = draft.request;
@@ -90,7 +82,7 @@ const swipeUserSuccess = (state = initialState) =>
 
 const swipeUserError = (
   state = initialState,
-  { payload }: ActionType<typeof asyncActions.failure>
+  { payload }: ActionType<typeof asyncActions.failure>,
 ) =>
   produce(state, (draft) => {
     draft.config.likeLimitResetAt = payload.likeLimitResetAt;
@@ -115,9 +107,7 @@ const swipeBackHandler = (state = initialState) =>
     return draft;
   });
 
-export default createReducer<typeof initialState, ActionType<typeof Actions>>(
-  initialState
-)
+export default createReducer<typeof initialState, ActionType<typeof Actions>>(initialState)
   .handleAction(Actions.request, swipeUserRequest)
   .handleAction(Actions.swipeBack, swipeBackHandler)
   .handleAction(asyncActions.failure, swipeUserError)

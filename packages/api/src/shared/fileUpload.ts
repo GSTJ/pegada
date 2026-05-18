@@ -1,8 +1,4 @@
-import {
-  CopyObjectCommand,
-  DeleteObjectCommand,
-  S3Client
-} from "@aws-sdk/client-s3";
+import { CopyObjectCommand, DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { config } from "../shared/config";
 
@@ -10,8 +6,8 @@ export const client = new S3Client({
   region: config.AWS_REGION,
   credentials: {
     accessKeyId: config.AWS_ACCESS_KEY_ID,
-    secretAccessKey: config.AWS_SECRET_ACCESS_KEY
-  }
+    secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
 export const deleteImageFromS3 = async (url: string) => {
@@ -19,7 +15,7 @@ export const deleteImageFromS3 = async (url: string) => {
 
   const command = new DeleteObjectCommand({
     Bucket: config.AWS_S3_BUCKET_NAME,
-    Key: key
+    Key: key,
   });
 
   await client.send(command);
@@ -36,7 +32,7 @@ export const moveImageToFolder = async (url: string, folder: string) => {
     Bucket: config.AWS_S3_BUCKET_NAME,
     CopySource: `${config.AWS_S3_BUCKET_NAME}/${oldKey}`,
     Key: newKey,
-    ACL: "public-read"
+    ACL: "public-read",
   });
 
   await client.send(command);

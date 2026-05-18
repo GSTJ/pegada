@@ -12,12 +12,12 @@ import {
   StorageDataTypes,
   StorageKeys,
   storeData,
-  Theme
+  Theme,
 } from "@/services/storage";
 
 export const themes = {
   [Theme.Light]: LightTheme,
-  [Theme.Dark]: DarkTheme
+  [Theme.Dark]: DarkTheme,
 };
 
 export type ActiveTheme = StorageDataTypes[StorageKeys.Theme] | null;
@@ -27,7 +27,7 @@ const ThemeContext = React.createContext<{
   setActiveTheme: (theme: ActiveTheme) => Promise<unknown>;
 }>({
   activeTheme: null,
-  setActiveTheme: async () => {}
+  setActiveTheme: async () => {},
 });
 
 export const useActiveTheme = () => {
@@ -35,9 +35,7 @@ export const useActiveTheme = () => {
   return context;
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
-  children
-}) => {
+export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const colorScheme = useColorScheme();
   const [activeTheme, setActiveTheme] = useState<ActiveTheme>(null);
 
@@ -66,7 +64,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
     <ThemeContext.Provider
       value={{
         activeTheme,
-        setActiveTheme: handleActiveThemeChange
+        setActiveTheme: handleActiveThemeChange,
       }}
     >
       <StyledThemeProvider theme={theme}>{children}</StyledThemeProvider>

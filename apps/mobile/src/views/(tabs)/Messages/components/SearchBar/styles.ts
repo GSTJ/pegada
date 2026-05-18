@@ -4,7 +4,7 @@ import styled from "styled-components/native";
 export const TextField = styled.TextInput.attrs((props) => ({
   placeholderTextColor: props.theme.colors.placeholder,
   selectionColor: props.theme.colors.primary,
-  ...props
+  ...props,
 }))`
   color: ${(props) => props.theme.colors.text};
   padding: ${(props) => props.theme.spacing[2]}px;

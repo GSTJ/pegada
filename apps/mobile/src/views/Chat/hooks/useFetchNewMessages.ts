@@ -16,7 +16,7 @@ export const useFetchNewMessages = () => {
       try {
         const newMessages = await getTrcpContext().message.allByMatch.fetch({
           matchId: matchId as string,
-          gt: latestPollTimestampRef.current
+          gt: latestPollTimestampRef.current,
         });
 
         if (!newMessages || !newMessages.length) return;
@@ -31,14 +31,14 @@ export const useFetchNewMessages = () => {
             updatedPages[0] = [
               ...newMessages.map((message) => ({
                 ...message,
-                newMessage: true
+                newMessage: true,
               })),
-              ...(updatedPages[0] ?? [])
+              ...(updatedPages[0] ?? []),
             ]
               .filter(
                 (message, index, self) =>
                   // Remove duplicates, for example our own messages
-                  index === self.findIndex((m) => m.id === message.id)
+                  index === self.findIndex((m) => m.id === message.id),
               )
               .sort((a, b) => {
                 // Sorting might not be necessary, but better safe than sorry
@@ -58,13 +58,13 @@ export const useFetchNewMessages = () => {
                 ...matches.filter((match) => match.id !== matchId),
                 {
                   ...match,
-                  lastMessage: lastMessage
-                }
+                  lastMessage: lastMessage,
+                },
               ];
             });
 
             return { ...oldData, pages: updatedPages };
-          }
+          },
         );
       } catch (err) {
         // Deals with pooling errors silently
@@ -83,11 +83,11 @@ export const useFetchNewMessages = () => {
         ["messages", matchId],
         (oldData: { pages: MessageProps[][] } | undefined) => {
           const updatedPages = [...(oldData?.pages ?? [])].map((page) =>
-            page.map((message) => ({ ...message, newMessage: false }))
+            page.map((message) => ({ ...message, newMessage: false })),
           );
 
           return { ...oldData, pages: updatedPages };
-        }
+        },
       );
     };
   }, [dogId, matchId]);

@@ -6,14 +6,11 @@ import {
   DeletedPicture,
   deleteItem,
   Picture,
-  sortByUrl
+  sortByUrl,
 } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/Text";
 import { AddUserPhoto } from "./components/AddUserPhoto";
-import {
-  dogPictureHeight,
-  numOfColumns
-} from "./components/AddUserPhoto/styles";
+import { dogPictureHeight, numOfColumns } from "./components/AddUserPhoto/styles";
 
 type GenericPictures = (Picture | DeletedPicture)[];
 
@@ -26,7 +23,7 @@ export interface ProfileImagesUploaderProps {
 
 const AddUserPhotoWrapper = ({
   picture,
-  onChange
+  onChange,
 }: {
   picture: Picture;
   onChange: ProfileImagesUploaderProps["onChange"];
@@ -49,10 +46,10 @@ const AddUserPhotoWrapper = ({
             ...currentPicture,
             url,
             disabledDrag: false,
-            disabledReSorted: false
+            disabledReSorted: false,
           };
         })
-        .sort(sortByUrl)
+        .sort(sortByUrl),
     );
   };
   return <AddUserPhoto picture={picture} onDelete={onDelete} onAdd={onAdd} />;
@@ -62,11 +59,11 @@ export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
   onChange,
   value,
   error,
-  setGesturesEnabled
+  setGesturesEnabled,
 }) => {
   const style = {
     // Prevent blinking on first render
-    minHeight: (value.length / numOfColumns) * dogPictureHeight
+    minHeight: (value.length / numOfColumns) * dogPictureHeight,
   };
 
   const draggableGridStyle = { zIndex: 20 };

@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 
 const WEBSITE_URL = "https://www.pegada.app/";
 const APP_STORE_URL = "https://apps.apple.com/br/app/pegada/id6450865592";
-const PLAY_STORE_URL =
-  "https://play.google.com/store/apps/details?id=app.pegada";
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=app.pegada";
 
 export const GET = async (request: Request) => {
   const userAgent = request.headers.get("user-agent") ?? "";
