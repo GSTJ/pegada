@@ -37,10 +37,7 @@ export const LanguageConfig = () => {
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
   return (
-    <Config.Root
-      testID="profile-open-language"
-      onPress={() => pickerSheetRef?.current?.present()}
-    >
+    <Config.Root testID="profile-open-language" onPress={() => pickerSheetRef?.current?.present()}>
       <Translate width={22} height={22} fill={theme.colors.text} />
 
       <Config.Container>

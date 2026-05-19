@@ -35,10 +35,7 @@ export const ThemeConfig = () => {
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
   return (
-    <Config.Root
-      testID="profile-open-theme"
-      onPress={() => pickerSheetRef?.current?.present()}
-    >
+    <Config.Root testID="profile-open-theme" onPress={() => pickerSheetRef?.current?.present()}>
       <LightMode width={22} height={22} fill={theme.colors.text} />
 
       <Config.Container>
