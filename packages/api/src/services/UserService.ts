@@ -49,7 +49,6 @@ export class UserService {
     });
   }
 
-
   static blacklistPushToken(pushToken: string) {
     return prisma.user.updateMany({
       where: { pushToken },
