@@ -103,7 +103,13 @@ export const useOfferings = () => {
 // Automatically initialize the payments service
 payments.init();
 
-// Automatically update the query data when the customer info changes
-payments.addCustomerInfoUpdateListener(async (customerInfo: CustomerInfo) => {
-  queryClient.setQueryData([PaymentCacheKey.CustomerInfo], customerInfo);
-});
+// Automatically update the query data when the customer info changes.
+// Guarded so that a misbehaving / unconfigured RevenueCat (e.g. stub API key)
+// can't take down the rest of the app at module-import time.
+try {
+  payments.addCustomerInfoUpdateListener(async (customerInfo: CustomerInfo) => {
+    queryClient.setQueryData([PaymentCacheKey.CustomerInfo], customerInfo);
+  });
+} catch {
+  // Listener attach failed (e.g. RC not configured because of stub API key). Safe to ignore.
+}

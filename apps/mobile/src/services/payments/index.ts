@@ -22,12 +22,38 @@ const revenueCatApiKey = Platform.select({
   default: "", // This is not used, but it's needed to make TypeScript happy
 });
 
+/**
+ * Some build environments (CI, local sims, preview builds) ship with placeholder
+ * RevenueCat keys (e.g. "ci-stub", "placeholder_revenuecat", empty). RevenueCat
+ * throws on every call when the key is invalid, which would crash the app to
+ * the global ErrorBoundary if a useSuspenseQuery hook propagated the error.
+ * Detect those keys up-front so the payments service can degrade gracefully
+ * without making real network calls. Real RevenueCat iOS keys start with
+ * "appl_" and Android keys start with "goog_".
+ */
+const isStubRevenueCatKey =
+  !revenueCatApiKey ||
+  revenueCatApiKey === "ci-stub" ||
+  revenueCatApiKey.startsWith("ci-stub") ||
+  revenueCatApiKey.startsWith("placeholder") ||
+  (!revenueCatApiKey.startsWith("appl_") && !revenueCatApiKey.startsWith("goog_"));
+
 const init = () => {
   if (__DEV__) {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE).catch(sendError);
   }
 
-  Purchases.configure({ apiKey: revenueCatApiKey });
+  if (isStubRevenueCatKey) {
+    // Skip configure with a known-bad key. Every subsequent call would otherwise
+    // throw "Invalid API Key" and propagate through the suspense boundary.
+    return;
+  }
+
+  try {
+    Purchases.configure({ apiKey: revenueCatApiKey });
+  } catch (error) {
+    sendError(error);
+  }
 };
 
 const logIn = async () => {
@@ -37,30 +63,64 @@ const logIn = async () => {
     throw new Error("Make sure the login is only called when the user is authenticated");
   }
 
-  const userData = await Purchases.logIn(userID);
+  if (isStubRevenueCatKey) {
+    return null;
+  }
 
-  queryClient.setQueryData([PaymentCacheKey.CustomerInfo], () => userData.customerInfo);
+  try {
+    const userData = await Purchases.logIn(userID);
 
-  // Asynchronously set the email and display name
-  getTrcpContext()
-    .myDog.get.fetch()
-    .then(async (response) => {
-      await Purchases.setEmail(response?.user.email ?? "");
-      await Purchases.setDisplayName(response?.name ?? "");
-    })
-    .catch(sendError);
+    queryClient.setQueryData([PaymentCacheKey.CustomerInfo], () => userData.customerInfo);
 
-  return userData;
+    // Asynchronously set the email and display name
+    getTrcpContext()
+      .myDog.get.fetch()
+      .then(async (response) => {
+        await Purchases.setEmail(response?.user.email ?? "");
+        await Purchases.setDisplayName(response?.name ?? "");
+      })
+      .catch(sendError);
+
+    return userData;
+  } catch (error) {
+    // RevenueCat login can fail in CI/preview builds with placeholder API keys,
+    // or for transient backend issues. Swallow the error so the rest of the app
+    // (swipe, messages, profile) stays usable. Premium features will be unavailable.
+    sendError(error);
+    return null;
+  }
 };
 
 const getOfferings = async () => {
-  const offerings = await Purchases.getOfferings();
-
-  if (!offerings.current) {
-    throw new Error("No offerings available");
+  if (isStubRevenueCatKey) {
+    return null;
   }
 
-  return offerings.current;
+  try {
+    const offerings = await Purchases.getOfferings();
+
+    if (!offerings.current) {
+      return null;
+    }
+
+    return offerings.current;
+  } catch (error) {
+    sendError(error);
+    return null;
+  }
+};
+
+const getCustomerInfo = async (): Promise<CustomerInfo | null> => {
+  if (isStubRevenueCatKey) {
+    return null;
+  }
+
+  try {
+    return await Purchases.getCustomerInfo();
+  } catch (error) {
+    sendError(error);
+    return null;
+  }
 };
 
 export enum ProductIdentifier {
@@ -112,7 +172,7 @@ const getPlanByEntitlement = (entitlement: Entitlement) => {
   }
 };
 
-const getPlan = (customerInfo?: CustomerInfo) => {
+const getPlan = (customerInfo?: CustomerInfo | null) => {
   if (!customerInfo) {
     return undefined;
   }
@@ -152,6 +212,6 @@ export const payments = {
   logIn,
   restorePurchases: restorePurchases,
   logOut: Purchases.logOut,
-  getCustomerInfo: Purchases.getCustomerInfo,
+  getCustomerInfo,
   addCustomerInfoUpdateListener: Purchases.addCustomerInfoUpdateListener,
 };
