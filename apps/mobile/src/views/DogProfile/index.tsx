@@ -221,7 +221,7 @@ const DogProfile = () => {
                 </S.UnmatchButton>
               )}
               <ShareButton dog={dog} />
-              <S.ReportButton>
+              <S.ReportButton testID="dog-profile-report">
                 <Text
                   onPress={() => reportUser(dog)}
                   fontWeight="bold"
