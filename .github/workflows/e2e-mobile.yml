@@ -228,11 +228,14 @@ jobs:
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
-          # Detect the workspace and scheme produced by prebuild rather than
-          # hardcoding casing — the app is named Pegada, prior runs guessed pegada.
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
+          # Pick the first app scheme, skipping Pods-* schemes which build no .app.
           SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
-            | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['workspace']['schemes'][0])")
+            | python3 -c "
+          import json,sys
+          schemes=json.load(sys.stdin)['workspace']['schemes']
+          app_schemes=[s for s in schemes if not s.startswith('Pods')]
+          print(app_schemes[0] if app_schemes else schemes[0])")
           echo "Building workspace=$WORKSPACE scheme=$SCHEME"
           set -o pipefail
           xcodebuild \
@@ -243,7 +246,16 @@ jobs:
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
+            build \
             | xcpretty
+          # Verify the .app actually exists before moving on.
+          PROD_DIR=build/Build/Products/Debug-iphonesimulator
+          if ! ls "$PROD_DIR"/*.app >/dev/null 2>&1; then
+            echo "::error::xcodebuild reported success but produced no .app in $PROD_DIR"
+            ls -la "$PROD_DIR" || true
+            exit 1
+          fi
+          echo "Produced: $(ls -d $PROD_DIR/*.app)"
 
       # ------------------------------------------------------------------
       # 11. Boot simulator and install app
