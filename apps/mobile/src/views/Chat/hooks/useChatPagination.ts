@@ -50,7 +50,12 @@ export const useChatPagination = () => {
   // FlashList v2 dropped the `inverted` prop, so the list renders top-down.
   // Reverse so the oldest message renders at the top and the newest renders
   // at the bottom — adjacent to the Send composer, matching chat UX.
-  const messages = data ? data.pages.flatMap((page) => page).slice().reverse() : [];
+  const messages = data
+    ? data.pages
+        .flatMap((page) => page)
+        .slice()
+        .reverse()
+    : [];
 
   return {
     messages,
