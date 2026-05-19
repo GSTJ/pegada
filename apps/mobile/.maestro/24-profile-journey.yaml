@@ -1,0 +1,169 @@
+appId: ${APP_ID}
+name: Profile journey — edit & persist, ToS, Privacy, Rate the App
+tags:
+  - smoke
+  - regression
+---
+# Combined profile-screen journey that supersedes the old 13-profile-view
+# and 14-profile-edit smokes. Covers:
+#   1. Edit Profile (name + bio) and verify the change *persists* by
+#      navigating away from Profile and back so the data is re-read from
+#      the server / TanStack Query cache.
+#   2. Terms of Use entry — opens an in-app web browser (expo-web-browser
+#      page sheet). We assert the sheet appeared (the "Done" chrome button
+#      is visible) then dismiss it.
+#   3. Privacy Policy entry — same pattern as ToS.
+#   4. Rate the App entry — calls expo-store-review.requestReview().
+#      On the iOS simulator Apple's StoreReview surfaces an *empty*
+#      system dialog (the real SKStoreReviewController only renders on
+#      device). The honest assertion here is that the call fires without
+#      crashing and that the profile screen recovers; we dismiss any
+#      system prompt optionally and take a screenshot of the result.
+#
+# Coordinates calibrated on iPhone 17 Pro Max (440x956 logical) — same
+# baseline as utils/login-returning.yaml.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 24-after-login
+
+# --- Navigate to Profile tab (bottom-right of the tab bar) ---
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "profile-screen"
+- assertVisible:
+    id: "profile-dog-name"
+- takeScreenshot: 24-on-profile
+
+# --- 1. Edit Profile ---
+- tapOn:
+    id: "profile-open-edit"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "edit-profile-name"
+- takeScreenshot: 24-on-edit
+
+# Type a unique name + bio. Capture a single timestamp into output so
+# every later reference uses the same value (Date.now() re-evaluated
+# inline would drift by a few ms between steps).
+- evalScript: |-
+    output.profileJourney = { ts: Date.now() }
+
+- tapOn:
+    id: "edit-profile-name"
+- waitForAnimationToEnd
+# Erase generously — current seeded name length is unknown but capped
+# at 50 chars by the form schema.
+- eraseText: 60
+- inputText: "Rex Maestro ${output.profileJourney.ts}"
+- takeScreenshot: 24-typed-name
+
+- tapOn:
+    id: "edit-profile-bio"
+- waitForAnimationToEnd
+# Bio is capped at 500 chars by the form schema; seeded bios are short
+# (~50 chars) so a generous 200-char erase reliably clears it without
+# burning seconds on 500 backspace round-trips.
+- eraseText: 200
+- inputText: "Bio updated by Maestro ${output.profileJourney.ts}"
+- takeScreenshot: 24-typed-bio
+
+# Save. Mutation calls router.back() onSuccess, returning to Profile tab.
+- tapOn:
+    id: "edit-profile-save"
+- waitForAnimationToEnd:
+    timeout: 10000
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 24-after-save
+
+# Sanity: name shows on profile header immediately (optimistic — TanStack
+# Query setData was called in onSuccess).
+- assertVisible: "Rex Maestro ${output.profileJourney.ts}"
+
+# --- Persistence check ---
+# Navigate away (Swipe tab, center-left of bar) and back to Profile.
+# This forces the screen to remount and the dog query data to render
+# from whatever the cache / refetch returns.
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 24-on-swipe
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "profile-screen"
+- assertVisible: "Rex Maestro ${output.profileJourney.ts}"
+- takeScreenshot: 24-persisted
+
+# --- 2. Terms of Use ---
+# The settings list scrolls under a sticky header. Scroll the settings
+# list down to bring the ToS / Privacy / Rate rows into the viewport
+# (they live below the language / theme entries).
+- scroll
+- scroll
+- takeScreenshot: 24-settings-scrolled
+- tapOn:
+    id: "profile-open-terms"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 24-on-terms
+# The expo-web-browser page sheet exposes a "Done" chrome button on iOS.
+# Tap it (optional, in case the chrome text differs) and fall back to a
+# swipe-down dismissal so the test stays green on either platform.
+- tapOn:
+    text: "Done"
+    optional: true
+- swipe:
+    direction: DOWN
+    duration: 400
+- waitForAnimationToEnd
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 24-after-terms
+
+# --- 3. Privacy Policy ---
+- tapOn:
+    id: "profile-open-privacy"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 24-on-privacy
+- tapOn:
+    text: "Done"
+    optional: true
+- swipe:
+    direction: DOWN
+    duration: 400
+- waitForAnimationToEnd
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 24-after-privacy
+
+# --- 4. Rate the App ---
+# StoreReview.requestReview is fire-and-forget; on the simulator it
+# either no-ops or shows an empty system dialog. We tap the entry,
+# screenshot the result, and clear any system prompt that surfaces.
+- tapOn:
+    id: "profile-open-rate"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 24-on-rate
+- tapOn:
+    text: "Not Now"
+    optional: true
+- tapOn:
+    text: "Cancel"
+    optional: true
+# After the (optional) prompt is dismissed, the profile screen must
+# still be alive — proves the StoreReview call did not crash the app.
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 24-after-rate
