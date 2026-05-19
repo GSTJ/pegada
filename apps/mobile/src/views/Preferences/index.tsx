@@ -164,6 +164,7 @@ const Preferences: React.FC = () => {
               breed={value}
               setBreed={(breed) => onChange(breed.id)}
               error={fieldState.error?.message}
+              testID="preferences-breed-picker"
             />
           )}
         />
@@ -174,6 +175,8 @@ const Preferences: React.FC = () => {
             rules={{ required: true }}
             render={({ field: { onChange, value }, fieldState }) => (
               <InputPicker
+                testID="preferences-size-picker"
+                itemTestIDPrefix="preferences-size-item-"
                 title={t("preferences.size")}
                 placeholder={t("preferences.anySize")}
                 data={[
@@ -201,6 +204,8 @@ const Preferences: React.FC = () => {
             rules={{ required: true }}
             render={({ field: { onChange, value }, fieldState }) => (
               <InputPicker
+                testID="preferences-color-picker"
+                itemTestIDPrefix="preferences-color-item-"
                 title={t("preferences.color")}
                 placeholder={t("preferences.anyColor")}
                 data={[{ id: null, name: t("preferences.anyColor") }, ...colors]}
