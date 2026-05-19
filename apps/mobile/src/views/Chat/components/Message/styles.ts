@@ -10,7 +10,7 @@ interface MessageProps {
   status?: FeedbackStatus;
 }
 
-export const Message = styled(Animated.View)<MessageProps>`
+export const Message = styled(Animated.View).attrs({ accessible: true })<MessageProps>`
   padding: ${(props) => props.theme.spacing[2.5]}px;
   padding-top: ${(props) => props.theme.spacing[1.5]}px;
   padding-bottom: ${(props) => props.theme.spacing[2.5]}px;

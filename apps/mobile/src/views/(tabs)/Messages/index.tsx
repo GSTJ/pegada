@@ -117,7 +117,7 @@ const Messages = () => {
   const MemoizedEmptyMessages = <EmptyMessages search={search} setSearch={setSearch} />;
 
   return (
-    <Container behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <Container testID="messages-screen" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       {Boolean(matches?.length) && <SearchBar value={search} onChangeText={setSearch} />}
       <FlatList
         keyboardShouldPersistTaps="handled"

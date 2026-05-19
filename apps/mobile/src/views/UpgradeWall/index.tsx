@@ -137,7 +137,7 @@ const UpgradeWall: React.FC = () => {
   const headerHeight = 40 + paddingTop;
 
   return (
-    <Container>
+    <Container testID="upgrade-wall-screen">
       <Content
         {...bottomActionStyle.scrollViewProps}
         contentContainerStyle={{
@@ -182,6 +182,7 @@ const UpgradeWall: React.FC = () => {
       >
         <RestorePurchases />
         <CloseButton
+          testID="upgrade-wall-close"
           onPress={() => {
             router.back();
           }}

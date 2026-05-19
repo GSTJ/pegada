@@ -1,0 +1,23 @@
+appId: ${APP_ID}
+name: Ask for location — tap allow
+tags:
+  - smoke
+---
+# Logs in (returning user → likely already at swipe; if AskForLocation appears,
+# tap the large allow CTA). Permissions auto-accepted via launchApp.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      location: inuse
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 05-after-login
+- tapOn:
+    point: "50%, 80%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: 05-final

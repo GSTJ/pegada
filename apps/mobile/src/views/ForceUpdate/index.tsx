@@ -15,19 +15,20 @@ const ForceUpdate: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <Container>
+    <Container testID="force-update-screen">
       <Logo
         style={{ marginBottom: theme.spacing[4] }}
         width={55}
         height={55}
         fill={theme.colors.primary}
       />
-      <CenterText fontWeight="bold" fontSize="lg">
+      <CenterText testID="force-update-title" fontWeight="bold" fontSize="lg">
         {t("forceUpdate.title")}
       </CenterText>
       <CenterText fontSize="md">{t("forceUpdate.description")}</CenterText>
       <BottomAction.Container>
         <Button
+          testID="force-update-button"
           onPress={() => {
             // Store automatically redirects to the app store or play store
             Linking.openURL(`${APP_SHARE_LINK_BASE}/store`).catch(sendError);

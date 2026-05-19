@@ -1,1 +1,24 @@
-appId: app.pegada
+flows:
+excludeTags:
+  - util
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 01-launch
+    - 02-sign-in
+    - 03-create-profile
+    - 04-complete-profile
+    - 05-ask-location
+    - 06-force-update
+    - 07-tabs-navigation
+    - 08-swipe-like
+    - 09-swipe-dislike
+    - 10-dog-profile
+    - 11-messages-list
+    - 12-chat-conversation
+    - 13-profile-view
+    - 14-profile-edit
+    - 15-preferences
+    - 16-upgrade-wall
+    - 17-location-map
+    - 18-new-match

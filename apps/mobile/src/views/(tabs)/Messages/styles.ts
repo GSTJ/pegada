@@ -2,7 +2,7 @@ import styled from "styled-components/native";
 
 import { PICTURE_SIZE } from "./components/Message/styles";
 
-export const Container = styled.KeyboardAvoidingView`
+export const Container = styled.KeyboardAvoidingView.attrs({ accessible: true })`
   background-color: ${(props) => props.theme.colors.background};
   flex: 1;
 `;

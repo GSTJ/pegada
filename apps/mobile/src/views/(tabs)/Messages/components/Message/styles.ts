@@ -3,7 +3,7 @@ import styled from "styled-components/native";
 import { Image } from "@/components/Image";
 import { PressableArea } from "@/components/PressableArea";
 
-export const Container = styled(PressableArea)`
+export const Container = styled(PressableArea).attrs({ accessible: true })`
   padding: ${(props) => props.theme.spacing[4]}px;
   flex-direction: row;
   align-items: center;

@@ -65,7 +65,7 @@ const Header = () => {
         height: HEADER_HEIGHT + insets.top,
       }}
     >
-      <S.BackTouchArea onPress={() => router.back()}>
+      <S.BackTouchArea testID="chat-back" onPress={() => router.back()}>
         <BackArrow height={15} width={15} fill={theme.colors.text} />
       </S.BackTouchArea>
       <S.PressableAreaFlex

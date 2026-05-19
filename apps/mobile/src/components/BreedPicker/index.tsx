@@ -16,6 +16,7 @@ interface BreedPickerProps {
   hasAnyOption?: boolean;
   title?: string;
   optional?: boolean;
+  testID?: string;
 }
 
 const BreedPicker = ({ breed, setBreed, hasAnyOption = false, ...props }: BreedPickerProps) => {

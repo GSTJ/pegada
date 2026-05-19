@@ -195,6 +195,7 @@ const EditProfile = () => {
             render={({ field: { onChange, onBlur, value }, fieldState }) => {
               return (
                 <Input
+                  testID="edit-profile-name"
                   title={t("editProfile.dogName")}
                   placeholder={t("editProfile.dogNamePlaceholder")}
                   value={value}
@@ -343,7 +344,11 @@ const EditProfile = () => {
           />
         </Container>
         <BottomAction.Container>
-          <Button loading={myDogUpdateMutation.isPending} onPress={() => saveUser()}>
+          <Button
+            testID="edit-profile-save"
+            loading={myDogUpdateMutation.isPending}
+            onPress={() => saveUser()}
+          >
             {t("editProfile.saveProfile")}
           </Button>
         </BottomAction.Container>

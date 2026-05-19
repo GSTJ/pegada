@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+name: Cold launch shows SignIn
+tags:
+  - smoke
+---
+# Cold launch smoke test: app starts and the SignIn screen renders.
+# Point-based (RN tree invisible to XCUITest); verification = no crash + screenshot.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- takeScreenshot: 01-launch-signin

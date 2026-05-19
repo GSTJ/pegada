@@ -1,0 +1,28 @@
+appId: ${APP_ID}
+name: New match celebration screen
+tags:
+  - smoke
+  - manual
+---
+# NOT reachable in a deterministic CI run. The NewMatch screen is only
+# pushed when a swipe-like is reciprocated by another account, which we
+# cannot guarantee without backend seeding both sides of the match.
+#
+# DogProfile has a __DEV__-only "Fake Match Screen" button (see
+# views/DogProfile/index.tsx) that pushes this screen with valid params;
+# use that path to exercise NewMatch manually against a dev build.
+#
+# When triggered, the flow is:
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- runFlow: utils/login.yaml
+- assertVisible:
+    id: new-match-screen
+    timeout: 15000
+- assertVisible:
+    id: new-match-send
+- assertVisible:
+    id: new-match-skip
+- tapOn:
+    id: new-match-skip

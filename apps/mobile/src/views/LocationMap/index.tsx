@@ -85,7 +85,7 @@ const LocationMap = () => {
   const theme = useTheme();
 
   return (
-    <Container>
+    <Container testID="location-map-screen">
       <MapView
         ref={mapRef}
         showsUserLocation

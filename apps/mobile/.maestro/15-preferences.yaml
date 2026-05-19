@@ -1,0 +1,30 @@
+appId: ${APP_ID}
+name: Match preferences — open and save
+tags:
+  - smoke
+---
+# Returning user → Profile tab → Preferences → save without changes.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 15-after-login
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 15-on-profile
+# Preferences row is the second settings entry, ~50%, 47% Y
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd
+- takeScreenshot: 15-on-preferences
+# Save button at bottom ~50%, 92% Y
+- tapOn:
+    point: "50%, 92%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: 15-after-save

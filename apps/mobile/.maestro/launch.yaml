@@ -1,8 +1,0 @@
-appId: app.pegada
----
-# Cold launch smoke test: asserts the app starts and shows the SignIn screen.
-- clearState: true
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: signin-email

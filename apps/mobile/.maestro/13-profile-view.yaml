@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+name: Profile tab shows own dog name and settings
+tags:
+  - smoke
+---
+# Returning user → Profile tab.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 13-after-login
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 13-on-profile

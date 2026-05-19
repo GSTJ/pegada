@@ -80,7 +80,7 @@ const NewMatch: React.FC = () => {
   });
 
   return (
-    <Container>
+    <Container testID="new-match-screen">
       <StatusBar style={theme.dark ? "light" : "dark"} />
       <ConfettiAnimation />
       <Content>
@@ -123,8 +123,10 @@ const NewMatch: React.FC = () => {
         </ScrollView>
 
         <View style={{ padding: theme.spacing[4], gap: theme.spacing[3] }}>
-          <Button onPress={handleSendMessage}>{t("newMatch.sendMessage")}</Button>
-          <Button variant="outline" onPress={handleSkip}>
+          <Button testID="new-match-send" onPress={handleSendMessage}>
+            {t("newMatch.sendMessage")}
+          </Button>
+          <Button testID="new-match-skip" variant="outline" onPress={handleSkip}>
             {t("newMatch.keepSwiping")}
           </Button>
         </View>

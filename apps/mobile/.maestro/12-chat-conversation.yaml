@@ -1,0 +1,36 @@
+appId: ${APP_ID}
+name: Chat — open first conversation and send message
+tags:
+  - smoke
+---
+# Returning user has match with Bella + 2 chats. Open Messages → first row →
+# type and send a message → back.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 12-after-login
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 12-on-messages
+# First chat row is right under the list header — around 50%, 25% Y
+- tapOn:
+    point: "50%, 25%"
+- waitForAnimationToEnd
+- takeScreenshot: 12-on-chat
+# Chat input is at the bottom above the keyboard — ~50%, 92% Y when keyboard down
+- tapOn:
+    point: "50%, 92%"
+- waitForAnimationToEnd
+- inputText: "Hello from maestro"
+- takeScreenshot: 12-typed
+# Send button (icon on the right of the input) around 92%, 70% Y when keyboard up
+- tapOn:
+    point: "92%, 70%"
+- waitForAnimationToEnd
+- takeScreenshot: 12-sent
+# Back to messages list
+- runFlow: utils/back.yaml
+- takeScreenshot: 12-back-on-messages

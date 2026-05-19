@@ -1,0 +1,17 @@
+appId: ${APP_ID}
+name: Swipe dislike
+tags:
+  - smoke
+---
+# Sign in returning → swipe tab. Tap the dislike action button (left side).
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 09-on-swipe
+# Dislike button is left side of action bar around 25%, 86% Y
+- tapOn:
+    point: "25%, 86%"
+- waitForAnimationToEnd
+- takeScreenshot: 09-after-dislike

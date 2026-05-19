@@ -1,0 +1,9 @@
+appId: ${APP_ID}
+name: util - tap back arrow (top-left)
+tags:
+  - util
+---
+# Tap the standard back chevron at top-left. Coordinates calibrated on iPhone 17 Pro Max.
+- tapOn:
+    point: "10%, 9%"
+- waitForAnimationToEnd

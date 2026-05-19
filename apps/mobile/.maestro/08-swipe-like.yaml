@@ -1,0 +1,17 @@
+appId: ${APP_ID}
+name: Swipe like
+tags:
+  - smoke
+---
+# Sign in returning → swipe tab. Tap the like action button.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 08-on-swipe
+# Like button is right side of action bar around 75%, 86% Y
+- tapOn:
+    point: "75%, 86%"
+- waitForAnimationToEnd
+- takeScreenshot: 08-after-like

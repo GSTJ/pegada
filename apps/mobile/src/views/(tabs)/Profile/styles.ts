@@ -23,7 +23,7 @@ export const SettingsList = styled(Animated.ScrollView)`
   background-color: transparent;
 `;
 
-export const Container = styled.View`
+export const Container = styled.View.attrs({ accessible: true })`
   flex-grow: 1;
 `;
 

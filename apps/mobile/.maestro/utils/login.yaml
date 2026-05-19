@@ -1,0 +1,31 @@
+appId: ${APP_ID}
+name: util - login via magic OTP (point-based)
+tags:
+  - util
+---
+# Reusable subflow: sign-in using magic email + OTP (424242).
+# Point-based because the RN view tree is invisible to the XCUITest
+# accessibility snapshot for this app (see /tmp/pegada-maestro-status.md).
+# Coordinates calibrated on iPhone 17 Pro Max (440x956 logical, 1320x2868 px).
+# Requires env vars APPLE_MAGIC_EMAIL and APPLE_MAGIC_CODE.
+# Caller must already have launchApp'd. Leaves user on whichever post-OTP
+# route the API resolves to (CreateProfile / CompleteProfile / AskForLocation
+# / tabs).
+- tapOn:
+    point: "50%, 55%"
+- waitForAnimationToEnd
+- inputText: ${APPLE_MAGIC_EMAIL}
+- tapOn:
+    point: "50%, 62%"
+- extendedWaitUntil:
+    notVisible: "__wait_for_otp_screen__"
+    timeout: 10000
+    optional: true
+- tapOn:
+    point: "12%, 40%"
+- waitForAnimationToEnd
+- inputText: ${APPLE_MAGIC_CODE}
+- extendedWaitUntil:
+    notVisible: "__wait_for_post_otp__"
+    timeout: 15000
+    optional: true

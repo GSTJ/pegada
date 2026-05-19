@@ -29,6 +29,7 @@ export const MessageComponent: React.FC<MessageComponentProps> = (props) => {
 
   return (
     <Message
+      testID={self ? "chat-message-self" : "chat-message-other"}
       key={id + status}
       entering={enteringAnimation}
       exiting={exitingAnimation}

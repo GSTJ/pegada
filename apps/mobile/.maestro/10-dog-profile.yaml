@@ -1,0 +1,23 @@
+appId: ${APP_ID}
+name: Open dog profile from swipe deck
+tags:
+  - smoke
+---
+# Returning user on swipe → tap card name/info area → DogProfile → scroll → back.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 10-on-swipe
+# Tap the bottom personal-info area of the swipe card (~50%, 75% Y).
+- tapOn:
+    point: "50%, 75%"
+- waitForAnimationToEnd
+- takeScreenshot: 10-on-dog-profile
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 10-after-scroll
+# Close (back arrow top-left)
+- runFlow: utils/back.yaml
+- takeScreenshot: 10-back-on-swipe
