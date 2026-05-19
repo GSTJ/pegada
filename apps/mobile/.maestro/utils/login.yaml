@@ -1,31 +1,59 @@
 appId: ${APP_ID}
-name: util - login via magic OTP (point-based)
+name: util - login via magic OTP (point-based) - new user
 tags:
   - util
 ---
-# Reusable subflow: sign-in using magic email + OTP (424242).
+# Reusable subflow: sign-in as fresh test user (no dog, no match) so the
+# auth router lands on CreateProfile after OTP.
+# Email is hardcoded (test account, not a secret) because env var
+# interpolation was producing the literal string "undefined" in inputText.
 # Point-based because the RN view tree is invisible to the XCUITest
-# accessibility snapshot for this app (see /tmp/pegada-maestro-status.md).
+# accessibility snapshot for this app.
 # Coordinates calibrated on iPhone 17 Pro Max (440x956 logical, 1320x2868 px).
-# Requires env vars APPLE_MAGIC_EMAIL and APPLE_MAGIC_CODE.
-# Caller must already have launchApp'd. Leaves user on whichever post-OTP
-# route the API resolves to (CreateProfile / CompleteProfile / AskForLocation
-# / tabs).
+# Caller must already have launchApp'd.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Allow Once"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
 - tapOn:
     point: "50%, 55%"
 - waitForAnimationToEnd
-- inputText: ${APPLE_MAGIC_EMAIL}
+- inputText: "test@pegada.app"
+- hideKeyboard
 - tapOn:
     point: "50%, 62%"
 - extendedWaitUntil:
     notVisible: "__wait_for_otp_screen__"
     timeout: 10000
     optional: true
+# OTP — type one digit at a time into the 6-digit input row.
+# Row is at ~40% Y, cells distributed roughly 12%/25%/38%/51%/64%/77% X.
 - tapOn:
     point: "12%, 40%"
 - waitForAnimationToEnd
-- inputText: ${APPLE_MAGIC_CODE}
+- inputText: "4"
+- tapOn:
+    point: "25%, 40%"
+- inputText: "2"
+- tapOn:
+    point: "38%, 40%"
+- inputText: "4"
+- tapOn:
+    point: "51%, 40%"
+- inputText: "2"
+- tapOn:
+    point: "64%, 40%"
+- inputText: "4"
+- tapOn:
+    point: "77%, 40%"
+- inputText: "2"
+- hideKeyboard
 - extendedWaitUntil:
     notVisible: "__wait_for_post_otp__"
-    timeout: 15000
+    timeout: 20000
     optional: true
