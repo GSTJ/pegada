@@ -229,13 +229,19 @@ jobs:
         run: |
           set -euo pipefail
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
-          # Pick the first app scheme, skipping Pods-* schemes which build no .app.
+          # The app scheme matches the .xcodeproj name (Pegada). Workspace
+          # also lists every Pod scheme — pick the one tied to the .xcodeproj.
+          export APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
           SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
             | python3 -c "
-          import json,sys
+          import json,sys,os
+          app=os.environ['APP_NAME']
           schemes=json.load(sys.stdin)['workspace']['schemes']
-          app_schemes=[s for s in schemes if not s.startswith('Pods')]
-          print(app_schemes[0] if app_schemes else schemes[0])")
+          if app in schemes: print(app)
+          else:
+              hit=[s for s in schemes if s.lower()==app.lower()]
+              print(hit[0] if hit else app)
+          ")
           echo "Building workspace=$WORKSPACE scheme=$SCHEME"
           set -o pipefail
           xcodebuild \
