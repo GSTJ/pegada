@@ -50,8 +50,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
     fetchThemeFromStorage().catch(sendError);
   }, []);
 
-  const theme =
-    themes[(colorScheme as Theme) ?? Theme.Default] ?? themes[Theme.Default];
+  const theme = themes[(colorScheme as Theme) ?? Theme.Default] ?? themes[Theme.Default];
 
   const handleActiveThemeChange = async (theme: ActiveTheme) => {
     Appearance.setColorScheme(theme as ColorSchemeName);

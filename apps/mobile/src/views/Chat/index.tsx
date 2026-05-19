@@ -75,7 +75,7 @@ const ChatMessageList = () => {
     ListEmptyComponent,
     renderItem,
     onEndReached: loadMore,
-    onEndReachedThreshold: 0.5
+    onEndReachedThreshold: 0.5,
   };
 
   return (
