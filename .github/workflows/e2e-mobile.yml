@@ -77,6 +77,22 @@ jobs:
 
     steps:
       # ------------------------------------------------------------------
+      # 0. Select Xcode 16+ (Expo SDK 55 / expo-modules-core uses Swift 6
+      #    features like MainActor isolation that need Xcode 16+).
+      # ------------------------------------------------------------------
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          # Pick the newest installed Xcode (macos-latest typically ships 15.x and 16.x).
+          XCODE=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$XCODE" ]; then
+            XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          fi
+          echo "Selecting $XCODE"
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+
+      # ------------------------------------------------------------------
       # 1. Checkout
       # ------------------------------------------------------------------
       - name: Checkout
