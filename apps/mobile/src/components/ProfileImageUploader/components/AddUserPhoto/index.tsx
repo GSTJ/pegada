@@ -1,8 +1,10 @@
 import { useState } from "react";
 import * as React from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator } from "react-native";
+import { magicToast } from "react-native-magic-toast";
 import Animated, { FadeOut, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { FileSystemUploadType, uploadAsync } from "expo-file-system/legacy";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import AddRemove from "@/assets/images/AddRemove.svg";
@@ -34,6 +36,7 @@ const hitSlop = {
 
 export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, onAdd }) => {
   const [localPicture, setLocalPicture] = useState(picture.url);
+  const { t } = useTranslation();
 
   const theme = useTheme();
 
@@ -51,6 +54,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
   };
 
   const handleAdd = async () => {
+    let stage: "pick" | "presign" | "compress" | "upload" | "finalize" = "pick";
     try {
       const selectedImage = await showImagePickerOptions();
 
@@ -58,14 +62,17 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
       onAdd({ url: selectedImage.uri });
       setLocalPicture(selectedImage.uri);
 
+      stage = "presign";
       const presignedUrl = await getTrcpContext().image.signedUrl.fetch();
 
       /**
        * Compress the image before uploading. Expensive operation,
        * so we do it only after the visual feedback is shown.
        */
+      stage = "compress";
       const compressedImage = await compressImage(selectedImage.uri);
 
+      stage = "upload";
       const response = await uploadAsync(presignedUrl, compressedImage.uri, {
         mimeType: getMimeType(compressedImage.uri),
         uploadType: FileSystemUploadType.BINARY_CONTENT,
@@ -73,9 +80,10 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
       });
 
       if (response.status !== 200) {
-        throw new Error("Failed to upload image");
+        throw new Error(`S3 PUT returned ${response.status}`);
       }
 
+      stage = "finalize";
       const finalUrl = presignedUrl.split("?")[0] as string;
 
       onAdd({ url: finalUrl });
@@ -85,9 +93,28 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
         return;
       }
 
-      sendError(err);
+      // Permissions denied — pickImage/takeImage already showed a native alert
+      // explaining what to do. Don't double-toast.
+      if (err instanceof Error && err.message === ImagePickerError.NO_PERMISSION) {
+        handleDelete();
+        return;
+      }
 
-      Alert.alert("Erro ao adicionar imagem");
+      const reason = err instanceof Error ? err.message : String(err);
+
+      const trackedError =
+        err instanceof Error
+          ? Object.assign(err, { context: "ProfileImageUploader.handleAdd", stage })
+          : new Error(`ProfileImageUploader.handleAdd[${stage}]: ${reason}`);
+      sendError(trackedError);
+
+      // Surface a real error to the user (was a silent Portuguese-only Alert).
+      // In dev mode include the underlying reason so devs/QA can debug.
+      if (__DEV__) {
+        magicToast.alert(t("imagePicker.uploadFailedDev", { reason: `[${stage}] ${reason}` }));
+      } else {
+        magicToast.alert(t("imagePicker.uploadFailed"));
+      }
       handleDelete();
     }
   };
