@@ -71,7 +71,7 @@ const Matches = () => {
   }, [dispatch]);
 
   return (
-    <Container style={{ marginTop: topInset }}>
+    <Container style={{ paddingTop: topInset }}>
       <ChangeLocation />
       <Container>
         <SwipeBackButton />
