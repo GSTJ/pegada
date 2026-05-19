@@ -6,7 +6,7 @@ tags:
 # Reusable subflow: sign-in as fresh test user (no dog, no match) so the
 # auth router lands on CreateProfile after OTP.
 # Email is hardcoded (test account, not a secret) because env var
-# interpolation was producing the literal string "undefined" in inputText.
+# interpolation produced the literal string "undefined" in inputText.
 # Point-based because the RN view tree is invisible to the XCUITest
 # accessibility snapshot for this app.
 # Coordinates calibrated on iPhone 17 Pro Max (440x956 logical, 1320x2868 px).
@@ -20,40 +20,50 @@ tags:
 - tapOn:
     text: "Don.t Allow"
     optional: true
+# Email screen: tap email field, type address, submit with Enter.
+# The Continue button cannot be hit reliably via point taps on this build;
+# the email TextInput has returnKeyType=Done|next so Enter submits the form.
 - tapOn:
-    point: "50%, 55%"
+    point: "50%, 65%"
 - waitForAnimationToEnd
 - inputText: "test@pegada.app"
-- hideKeyboard
-- tapOn:
-    point: "50%, 62%"
-- extendedWaitUntil:
-    notVisible: "__wait_for_otp_screen__"
-    timeout: 10000
-    optional: true
-# OTP — type one digit at a time into the 6-digit input row.
-# Row is at ~40% Y, cells distributed roughly 12%/25%/38%/51%/64%/77% X.
-- tapOn:
-    point: "12%, 40%"
+- pressKey: Enter
 - waitForAnimationToEnd
+# OTP screen: first digit cell autoFocuses (isFirst=true).
+# Each cell is a separate TextInput with maxLength=6, so OtpInput.handleChange
+# concatenates into shared `value` state and advances focus as digits accumulate.
+# Sending the entire "424242" as one inputText is race-prone because Maestro
+# can emit the string faster than React schedules re-renders, leaving cells
+# partially filled. Per-digit inputs with a tiny waitForAnimationToEnd
+# (timeout 25ms) between each give React enough time to commit state +
+# advance focus to the next cell. 25ms is the Maestro driver round-trip
+# floor; below this we'd be measuring driver overhead, not React commits.
+# Auto-submits at length 6.
+- waitForAnimationToEnd:
+    timeout: 8000
 - inputText: "4"
-- tapOn:
-    point: "25%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "2"
-- tapOn:
-    point: "38%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "4"
-- tapOn:
-    point: "51%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "2"
-- tapOn:
-    point: "64%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "4"
-- tapOn:
-    point: "77%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "2"
-- hideKeyboard
-- extendedWaitUntil:
-    notVisible: "__wait_for_post_otp__"
+- waitForAnimationToEnd:
     timeout: 20000
+# ATT dialog may appear during/after OTP submission — dismiss if shown.
+- tapOn:
+    text: "Ask App Not to Track"
     optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd
