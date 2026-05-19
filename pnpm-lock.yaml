@@ -12,6 +12,9 @@ patchedDependencies:
   react-native-draggable-grid@2.2.1:
     hash: v6ayathkzbndn3dcqvsojpmote
     path: patches/react-native-draggable-grid@2.2.1.patch
+  redux-saga@1.3.0:
+    hash: fuqywzq4jqd6wsmilvg6dhxzpi
+    path: patches/redux-saga@1.3.0.patch
   styled-components@6.1.11:
     hash: rpobciuscng7usb6kdy5cx6apq
     path: patches/styled-components@6.1.11.patch
@@ -277,7 +280,7 @@ importers:
         version: 5.0.1
       redux-saga:
         specifier: ^1.3.0
-        version: 1.3.0
+        version: 1.3.0(patch_hash=fuqywzq4jqd6wsmilvg6dhxzpi)
       reselect:
         specifier: ^5.1.1
         version: 5.1.1
@@ -17830,7 +17833,7 @@ snapshots:
 
   reduce-reducers@1.0.4: {}
 
-  redux-saga@1.3.0:
+  redux-saga@1.3.0(patch_hash=fuqywzq4jqd6wsmilvg6dhxzpi):
     dependencies:
       '@redux-saga/core': 1.3.0
 

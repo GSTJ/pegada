@@ -1,0 +1,13 @@
+diff --git a/import-condition-proxy.mjs b/import-condition-proxy.mjs
+index 14b6309fb80122789d838be316dbcb73537bf44d..b6606a1eff4cd995989799c02bdbf2add635844d 100644
+--- a/import-condition-proxy.mjs
++++ b/import-condition-proxy.mjs
+@@ -1,4 +1,7 @@
+ export * from './dist/redux-saga-core-npm-proxy.cjs.js'
+ import _default from './dist/redux-saga-core-npm-proxy.cjs.js'
+ 
+-export default _default.default
++// Metro / RN bundler applies CJS default-interop already, so `_default`
++// is the function itself, not `{ default: fn }`. Upstream double-unwrap
++// produced `undefined`. See redux-saga GH issue #2384.
++export default _default.default || _default
