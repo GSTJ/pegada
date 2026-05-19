@@ -227,30 +227,55 @@ jobs:
       - name: Build iOS (Debug simulator)
         working-directory: apps/mobile/ios
         run: |
+          set -euo pipefail
+          # Detect the workspace and scheme produced by prebuild rather than
+          # hardcoding casing — the app is named Pegada, prior runs guessed pegada.
+          WORKSPACE=$(ls -d *.xcworkspace | head -1)
+          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
+            | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['workspace']['schemes'][0])")
+          echo "Building workspace=$WORKSPACE scheme=$SCHEME"
+          set -o pipefail
           xcodebuild \
-            -workspace pegada.xcworkspace \
-            -scheme pegada \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
             -configuration Debug \
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty || true
+            | xcpretty
 
       # ------------------------------------------------------------------
       # 11. Boot simulator and install app
       # ------------------------------------------------------------------
       - name: Boot iOS simulator
         run: |
-          DEVICE_ID=$(xcrun simctl list devices available | grep 'iPhone 15 Pro' | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+          set -euo pipefail
+          # Parse the JSON device list so we never grab a section header
+          # like "-- iOS 18.0 --" or the word "Shutdown" by accident.
+          DEVICE_ID=$(xcrun simctl list devices available --json \
+            | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          # Prefer iPhone 17/16/15 Pro then any iPhone in the newest iOS runtime
+          best=None
+          for runtime in sorted(d.keys(), reverse=True):
+              for dev in d[runtime]:
+                  name=dev.get('name','')
+                  if not name.startswith('iPhone'): continue
+                  if best is None: best=dev['udid']
+                  if 'Pro' in name: best=dev['udid']; break
+              if best and any('Pro' in x.get('name','') for x in d[runtime]): break
+          print(best or '')")
           if [ -z "$DEVICE_ID" ]; then
-            DEVICE_ID=$(xcrun simctl list devices available | grep 'iPhone' | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+            echo "::error::No iPhone simulator available"
+            xcrun simctl list devices available
+            exit 1
           fi
           echo "Booting simulator: $DEVICE_ID"
           xcrun simctl boot "$DEVICE_ID" || true
-          echo "SIMULATOR_UDID=$DEVICE_ID" >> $GITHUB_ENV
-          # Wait for boot
           xcrun simctl bootstatus "$DEVICE_ID" -b
+          echo "SIMULATOR_UDID=$DEVICE_ID" >> $GITHUB_ENV
 
       - name: Install app on simulator
         run: |
