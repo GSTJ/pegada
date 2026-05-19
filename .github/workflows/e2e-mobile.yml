@@ -253,26 +253,26 @@ jobs:
         run: |
           set -euo pipefail
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
-          python3 - "$PBXPROJ" <<'PY'
-          import re, sys
-          p = sys.argv[1]
-          s = open(p).read()
-          # Find the Bugsnag upload phase shell script. It's a JSON-ish field:
-          # shellScript = "...Upload source maps to Bugsnag..."
-          # Inject `exit 0\\n` at the start of every shellScript that mentions Bugsnag.
-          def patch(m):
-              body = m.group(1)
-              if 'Bugsnag' in body or 'bugsnag' in body:
-                  if body.lstrip().startswith('exit 0'):
-                      return m.group(0)
-                  return m.group(0).replace(body, 'exit 0\\n' + body, 1)
-              return m.group(0)
-          new = re.sub(r'shellScript = "((?:[^"\\\\]|\\\\.)*?)";', patch, s, flags=re.DOTALL)
-          if new != s:
-              open(p, 'w').write(new)
-              print('Patched Bugsnag phase')
+          python3 <<PY
+          import re
+          path = "$PBXPROJ"
+          src = open(path).read()
+          # Each build phase object spans from "= { isa = PBXShellScriptBuildPhase;"
+          # to the matching "};". Target the one whose name field references
+          # "Bugsnag" and rewrite its shellScript = "..." to a single exit 0.
+          phase_re = re.compile(
+              r'(/\* [^*]*Bugsnag[^*]*\*/ = \{[^{}]*?shellScript = ")([^"]*)(";)',
+              re.DOTALL,
+          )
+          new, n = phase_re.subn(r'\1exit 0 # disabled in CI: no BUGSNAG_API_KEY\3', src)
+          if n:
+              open(path, 'w').write(new)
+              print(f"Patched {n} Bugsnag phase(s)")
           else:
-              print('No Bugsnag phase found (nothing to patch)')
+              print("No Bugsnag-named phase found")
+              # Surface every shell phase name for debugging.
+              for m in re.finditer(r'/\* ([^*]+) \*/ = \{\s*isa = PBXShellScriptBuildPhase', src):
+                  print(" phase:", m.group(1).strip())
           PY
 
       # ------------------------------------------------------------------
