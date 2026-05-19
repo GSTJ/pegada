@@ -77,19 +77,25 @@ jobs:
 
     steps:
       # ------------------------------------------------------------------
-      # 0. Select Xcode 16+ (Expo SDK 55 / expo-modules-core uses Swift 6
-      #    features like MainActor isolation that need Xcode 16+).
+      # 0. Select newest installed Xcode (Expo SDK 55 / expo-modules-core
+      #    needs Swift 6 features like MainActor isolation — Xcode 16+).
       # ------------------------------------------------------------------
       - name: Select Xcode
         run: |
           set -euo pipefail
-          # Pick the newest installed Xcode (macos-latest typically ships 15.x and 16.x).
-          XCODE=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1 || true)
+          # Pick the highest-version Xcode_*.app available on the runner.
+          # macos-latest typically has Xcode 16 and Xcode 26 side by side.
+          XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null \
+            | sed 's|.*/Xcode_||;s|\.app$||' \
+            | sort -V \
+            | tail -1)
           if [ -z "$XCODE" ]; then
-            XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+            echo "::error::No Xcode_*.app installed on runner"
+            ls /Applications/ | grep -i xcode || true
+            exit 1
           fi
-          echo "Selecting $XCODE"
-          sudo xcode-select -s "$XCODE/Contents/Developer"
+          echo "Selecting Xcode $XCODE"
+          sudo xcode-select -s "/Applications/Xcode_${XCODE}.app/Contents/Developer"
           xcodebuild -version
 
       # ------------------------------------------------------------------
