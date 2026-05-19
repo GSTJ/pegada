@@ -246,8 +246,8 @@ importers:
         specifier: ^2.5.0
         version: 2.5.0
       react-native-purchases:
-        specifier: ^8.0.0
-        version: 8.0.0(react-native@0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
+        specifier: ^8.12.0
+        version: 8.12.0(react-native@0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       react-native-reanimated:
         specifier: 4.3.1
         version: 4.3.1(react-native-worklets@0.8.3(@babel/core@7.29.0)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(react-native@0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
@@ -3184,8 +3184,8 @@ packages:
       react-redux:
         optional: true
 
-  '@revenuecat/purchases-typescript-internal@13.0.0':
-    resolution: {integrity: sha512-3G1dKuOXBq91i5eeR2sPd6MFvXEngl4IzfEIGLrNyskaFFUzjexvNFyC1Q22gbCot4xIrBKBlbGcylwYiLXxlg==}
+  '@revenuecat/purchases-typescript-internal@14.3.0':
+    resolution: {integrity: sha512-P3IhlWvH4wJAM9ypv8HamdIBMQfnLdU9PbjURw+s7NxHOL8LmPGhKuyv+gBINpka27mt1CAsDoOhNHjkexJhkg==}
 
   '@rollup/rollup-android-arm-eabi@4.60.4':
     resolution: {integrity: sha512-F5QXMSiFebS9hKZj02XhWLLnRpJ3B3AROP0tWbFBSj+6kCbg5m9j5JoHKd4mmSVy5mS/IMQloYgYxCuJC0fxEQ==}
@@ -7600,8 +7600,8 @@ packages:
     resolution: {integrity: sha512-l1NIGxa0MBFPGBFDd3yeGe2f8+Qb+U4M1FEK7l3Fob0R7kOecwgRau2CCCmu6W5QzyhKdBxRC8SOTuTIEKKAUw==}
     engines: {node: '>= 0.6'}
 
-  react-native-purchases@8.0.0:
-    resolution: {integrity: sha512-GnFqVoYfiugUv0XtPVld365ixoPdM9U4EH9IKJIvJBXcwyKqJ2Uno5ubmNOlNbcAeuR8X7+1V+rQVbAReGdwDA==}
+  react-native-purchases@8.12.0:
+    resolution: {integrity: sha512-0T6WtSDN96swsS6iLeTh7GEGLSedBr4FWP5JsGLnP6Ri7Rp754pf3UJ+S0+ZnT1cqUZ4W2z2oB6zTLyyfNfuKw==}
     peerDependencies:
       react: '>= 16.6.3'
       react-native: '*'
@@ -12247,7 +12247,7 @@ snapshots:
       react: 19.2.0
       react-redux: 9.1.2(@types/react@19.2.14)(react@19.2.0)(redux@5.0.1)
 
-  '@revenuecat/purchases-typescript-internal@13.0.0': {}
+  '@revenuecat/purchases-typescript-internal@14.3.0': {}
 
   '@rollup/rollup-android-arm-eabi@4.60.4':
     optional: true
@@ -17580,9 +17580,9 @@ snapshots:
     dependencies:
       mime-db: 1.52.0
 
-  react-native-purchases@8.0.0(react-native@0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0):
+  react-native-purchases@8.12.0(react-native@0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0):
     dependencies:
-      '@revenuecat/purchases-typescript-internal': 13.0.0
+      '@revenuecat/purchases-typescript-internal': 14.3.0
       react: 19.2.0
       react-native: 0.83.6(@babel/core@7.29.0)(@react-native-community/cli@13.6.9)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0)
 
