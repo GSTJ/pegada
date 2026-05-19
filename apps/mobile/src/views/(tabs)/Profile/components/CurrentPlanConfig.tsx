@@ -53,8 +53,13 @@ export const CurrentPlanConfig = () => {
     return Linking.openURL(`https://apps.apple.com/account/subscriptions`);
   };
 
+  // testID disambiguates the upgrade CTA vs the manage-subscription CTA
+  // so Maestro can assert on the pre/post-purchase state of this row.
+  const testID =
+    userPlan === UserPlan.Premium ? "profile-current-plan-premium" : "profile-current-plan-upgrade";
+
   return (
-    <Config.Root disabled={plan.isLoading} onPress={handlePress}>
+    <Config.Root testID={testID} disabled={plan.isLoading} onPress={handlePress}>
       <Premium width={22} height={22} fill={theme.colors.text} />
       <Config.Container>
         <Config.Title>{t("profile.plan.currentPlan")}</Config.Title>

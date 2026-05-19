@@ -1,5 +1,5 @@
 import { Alert, Platform } from "react-native";
-import Purchases, { CustomerInfo, LOG_LEVEL } from "react-native-purchases";
+import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesPackage } from "react-native-purchases";
 import * as Device from "expo-device";
 import { get } from "lodash";
 
@@ -112,6 +112,13 @@ const getOfferings = async () => {
 
 const getCustomerInfo = async (): Promise<CustomerInfo | null> => {
   if (isStubRevenueCatKey) {
+    // Maestro-mock-only: once the test has granted premium, every subsequent
+    // getCustomerInfo (e.g. on window-focus refetch) must keep returning the
+    // synthetic payload, or React Query will overwrite the premium state
+    // with null and the UI will flip back to "Free" while still on screen.
+    if (maestroSyntheticCustomerInfo) {
+      return maestroSyntheticCustomerInfo;
+    }
     return null;
   }
 
@@ -137,7 +144,104 @@ export enum UserPlan {
   Premium = "PREMIUM",
 }
 
+/**
+ * Maestro-only path. RevenueCat's native purchase sheet cannot be driven
+ * from an iOS simulator in CI, so under BOTH gates
+ * (`EXPO_PUBLIC_MAESTRO_E2E === "1"` AND `isStubRevenueCatKey`) we route
+ * the purchase tap to a dev-only tRPC mutation that updates the user's
+ * plan on the backend, then synthesize a `CustomerInfo`-shaped payload
+ * and push it into the queryClient. This triggers the same React state
+ * transitions a real RC `addCustomerInfoUpdateListener` callback would,
+ * giving Maestro a deterministic way to assert the post-purchase UI.
+ *
+ * This branch is impossible to hit on a production build:
+ *   - The Maestro env var is never set in non-CI builds.
+ *   - The stub-key guard already short-circuits when RC has a real key.
+ *   - The backend endpoint itself is gated by NODE_ENV !== "production"
+ *     AND MAESTRO_E2E=1 (see packages/api/src/routes/payment.ts).
+ */
+const isMaestroMockMode = config.MAESTRO_E2E === "1" && isStubRevenueCatKey;
+
+// Holds the synthetic CustomerInfo created by a successful mock purchase
+// so subsequent refetches (window-focus) keep returning premium instead of
+// dropping back to `null`. Module-level — lives for the lifetime of the
+// process, which matches a Maestro flow's single-launch lifecycle.
+let maestroSyntheticCustomerInfo: CustomerInfo | null = null;
+
+const maestroMockPurchase = async (pkg: PurchasesPackage) => {
+  const trpc = getTrcpContext();
+  if (!trpc) {
+    throw new Error("tRPC context unavailable for Maestro mock purchase");
+  }
+
+  await trpc.client.payment.maestroGrantPremium.mutate();
+
+  // Synthesize the minimum shape consumers (useCustomerPlan, getPlan,
+  // useEligibleForTrial, the upgrade-wall analytics) read from
+  // CustomerInfo. The full RC type has ~30 fields; only entitlements is
+  // load-bearing for the UI under test.
+  const now = new Date();
+  const farFuture = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+  const premiumEntitlement = {
+    identifier: Entitlement.Premium,
+    isActive: true,
+    willRenew: true,
+    periodType: "NORMAL",
+    latestPurchaseDate: now.toISOString(),
+    latestPurchaseDateMillis: now.getTime(),
+    originalPurchaseDate: now.toISOString(),
+    originalPurchaseDateMillis: now.getTime(),
+    expirationDate: farFuture.toISOString(),
+    expirationDateMillis: farFuture.getTime(),
+    store: "APP_STORE",
+    productIdentifier: pkg.product.identifier,
+    productPlanIdentifier: pkg.product.identifier,
+    isSandbox: true,
+    unsubscribeDetectedAt: null,
+    billingIssueDetectedAt: null,
+    ownershipType: "PURCHASED",
+    verification: "NOT_REQUESTED",
+  };
+
+  const synthetic = {
+    entitlements: {
+      all: { [Entitlement.Premium]: premiumEntitlement },
+      active: { [Entitlement.Premium]: premiumEntitlement },
+      verification: "NOT_REQUESTED",
+    },
+    activeSubscriptions: [pkg.product.identifier],
+    allPurchasedProductIdentifiers: [pkg.product.identifier],
+    nonSubscriptionTransactions: [],
+    latestExpirationDate: farFuture.toISOString(),
+    firstSeen: now.toISOString(),
+    originalAppUserId: (await getLoggedUserID()) ?? "maestro",
+    requestDate: now.toISOString(),
+    allExpirationDates: { [pkg.product.identifier]: farFuture.toISOString() },
+    allPurchaseDates: { [pkg.product.identifier]: now.toISOString() },
+    originalApplicationVersion: null,
+    originalPurchaseDate: now.toISOString(),
+    managementURL: null,
+  } as unknown as CustomerInfo;
+
+  maestroSyntheticCustomerInfo = synthetic;
+  queryClient.setQueryData([PaymentCacheKey.CustomerInfo], synthetic);
+
+  // Return a shape compatible with Purchases.purchasePackage's resolved
+  // value so the UpgradeWall mutation's onSuccess handler is happy.
+  return {
+    productIdentifier: pkg.product.identifier,
+    customerInfo: synthetic,
+    transaction: null,
+  };
+};
+
 const purchasePackage = async (...props: Parameters<typeof Purchases.purchasePackage>) => {
+  if (isMaestroMockMode) {
+    const [pkg] = props;
+    return maestroMockPurchase(pkg) as unknown as ReturnType<typeof Purchases.purchasePackage>;
+  }
+
   const isSimulator = Platform.OS === "ios" && !Device.isDevice;
 
   if (isSimulator) {

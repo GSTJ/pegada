@@ -9,6 +9,12 @@ const configSchema = z.object({
   REVENUE_CAT_IOS_API_KEY: z.string(),
   REVENUE_CAT_ANDROID_API_KEY: z.string(),
   API_URL: z.string(),
+  /**
+   * When "1", routes RevenueCat purchase taps through the Maestro mock
+   * endpoint (see packages/api/src/routes/payment.ts). NEVER set in
+   * production builds — read alongside ENV !== "production" before use.
+   */
+  MAESTRO_E2E: z.string().optional().default("0"),
 });
 
 const _config = configSchema.safeParse({
@@ -20,6 +26,7 @@ const _config = configSchema.safeParse({
   REVENUE_CAT_IOS_API_KEY: process.env.EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY,
   REVENUE_CAT_ANDROID_API_KEY: process.env.EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY,
   API_URL: process.env.EXPO_PUBLIC_API_URL,
+  MAESTRO_E2E: process.env.EXPO_PUBLIC_MAESTRO_E2E,
 });
 
 if (!_config.success) {

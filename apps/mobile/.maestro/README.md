@@ -76,3 +76,22 @@ maestro test apps/mobile/.maestro/launch.yaml
 | `APPLE_MAGIC_EMAIL_REGEX` | Optional. Regex matched against the submitted email — every match is treated as a disposable Maestro user, hard-purged on each login. Honored only when `NODE_ENV !== 'production'`. Required for `20-account-creation-journey`. |
 
 Set these in **Settings → Secrets and variables → Actions** in the repository.
+
+## Maestro-only mocks
+
+The premium upgrade journey (`25-upgrade-journey.yaml`) is the **only** flow
+that uses a backend-side mock. RevenueCat's native purchase sheet can't be
+driven from a simulator in CI, so the flow routes the purchase tap through a
+dev-only tRPC mutation (`payment.maestroGrantPremium`) that calls the same
+`PaymentService.createSubscription` path the real RC webhook does.
+
+Both sides of the mock are gated:
+
+| Side   | Required env                                            | File                                         |
+| ------ | ------------------------------------------------------- | -------------------------------------------- |
+| API    | `NODE_ENV !== "production"` **AND** `MAESTRO_E2E=1`     | `packages/api/src/routes/payment.ts`         |
+| Mobile | Stub RevenueCat key **AND** `EXPO_PUBLIC_MAESTRO_E2E=1` | `apps/mobile/src/services/payments/index.ts` |
+
+Both halves must be configured for the mock to function. The mock branch is
+unreachable in production builds (env vars are never set and the stub-key
+guard short-circuits when a real RevenueCat key is present).

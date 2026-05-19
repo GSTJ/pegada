@@ -195,6 +195,7 @@ const UpgradeWall: React.FC = () => {
 
       <BottomAction.Container>
         <Button
+          testID="upgrade-wall-purchase-cta"
           onPress={() => {
             purchasePackage.mutate(selectedOffering!);
           }}

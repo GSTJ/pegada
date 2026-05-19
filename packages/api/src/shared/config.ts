@@ -68,6 +68,14 @@ const configSchema = z.object({
    * Example: `^maestro-fresh.*@pegada\.app$`
    */
   APPLE_MAGIC_EMAIL_REGEX: z.string().optional(),
+
+  /** MAESTRO E2E
+   * When set to "1", unlocks dev-only endpoints used by the Maestro E2E
+   * suite to mock RevenueCat purchase flows (RC's native purchase sheet
+   * cannot be driven from CI simulators). This is gated BOTH by
+   * NODE_ENV !== "production" AND this flag — belt + suspenders.
+   * Never set in production environments. */
+  MAESTRO_E2E: z.string().optional(),
 });
 
 const _config = configSchema.safeParse(process.env);
