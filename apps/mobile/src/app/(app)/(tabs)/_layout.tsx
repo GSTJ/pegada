@@ -39,6 +39,7 @@ export default () => {
       <Tabs.Screen
         name="swipe"
         options={{
+          tabBarTestID: "tab-swipe",
           tabBarIcon: ({ color }: TabBarIconProps) => (
             <Logo colorStopOne={color} colorStopTwo={color} width={34} height={34} />
           ),
@@ -47,6 +48,7 @@ export default () => {
       <Tabs.Screen
         name="messages"
         options={{
+          tabBarTestID: "tab-messages",
           tabBarIcon: ({ color }: TabBarIconProps) => (
             <Messages colorStopOne={color} colorStopTwo={color} width={34} height={34} />
           ),
@@ -55,6 +57,7 @@ export default () => {
       <Tabs.Screen
         name="profile"
         options={{
+          tabBarTestID: "tab-profile",
           tabBarIcon: ({ color }: TabBarIconProps) => (
             <Profile colorStopOne={color} colorStopTwo={color} width={34} height={34} />
           ),

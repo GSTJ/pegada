@@ -86,7 +86,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   });
 
   return (
-    <Container {...props} style={[props.style, transform]}>
+    <Container testID="swipe-card" {...props} style={[props.style, transform]}>
       <Picture
         source={{
           uri: images[currentImage]?.url,

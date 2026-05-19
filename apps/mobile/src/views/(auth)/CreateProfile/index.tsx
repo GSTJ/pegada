@@ -150,6 +150,7 @@ const CreateProfile = () => {
             rules={{ required: true }}
             render={({ field: { onChange, onBlur, value }, fieldState }) => (
               <Input
+                testID="profile-name"
                 title={t("createProfile.dogName")}
                 placeholder={t("createProfile.howToCallDog")}
                 value={value}
@@ -197,7 +198,7 @@ const CreateProfile = () => {
           />
         </Container>
         <BottomAction.Container>
-          <Button loading={dogCreateMutation.isPending} onPress={() => saveUser()}>
+          <Button loading={dogCreateMutation.isPending} onPress={() => saveUser()} testID="profile-submit">
             {t("createProfile.createProfile")}
           </Button>
         </BottomAction.Container>

@@ -124,6 +124,7 @@ const AskForLocation: React.FC = () => {
         </InformationRow>
 
         <Button
+          testID="location-allow"
           loading={loading}
           onPress={async () => {
             try {

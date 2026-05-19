@@ -1,0 +1,45 @@
+appId: app.pegada
+---
+# Sign-in flow using APPLE_MAGIC_EMAIL + APPLE_MAGIC_CODE bypass.
+# Requires env vars: APPLE_MAGIC_EMAIL and APPLE_MAGIC_CODE (6-digit string).
+# The API's AuthenticationService.checkVerification() returns true when both match,
+# so no real email is ever sent.
+- clearState: true
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: signin-email
+- tapOn:
+    id: signin-email
+- clearText
+- inputText: ${APPLE_MAGIC_EMAIL}
+- tapOn:
+    id: signin-submit
+# Wait for OTP screen — the API returns OTPRequiredError for magic email (no email sent)
+- assertVisible:
+    id: otp-digit-0
+# Enter each digit of the 6-digit magic code
+- tapOn:
+    id: otp-digit-0
+- inputText: ${APPLE_MAGIC_CODE[0]}
+- tapOn:
+    id: otp-digit-1
+- inputText: ${APPLE_MAGIC_CODE[1]}
+- tapOn:
+    id: otp-digit-2
+- inputText: ${APPLE_MAGIC_CODE[2]}
+- tapOn:
+    id: otp-digit-3
+- inputText: ${APPLE_MAGIC_CODE[3]}
+- tapOn:
+    id: otp-digit-4
+- inputText: ${APPLE_MAGIC_CODE[4]}
+- tapOn:
+    id: otp-digit-5
+- inputText: ${APPLE_MAGIC_CODE[5]}
+# After the 6th digit is entered the mutation fires automatically.
+# Depending on user state we land on CreateProfile or on a tab.
+# We just assert the OTP screen is gone (either destination is acceptable).
+- assertNotVisible:
+    id: otp-digit-0
+    timeout: 10000

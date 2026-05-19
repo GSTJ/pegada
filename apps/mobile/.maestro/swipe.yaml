@@ -1,0 +1,20 @@
+appId: app.pegada
+---
+# Swipe smoke test: sign in (assumes profile + location already set → lands on tabs),
+# taps swipe-like once, asserts no crash (app stays visible).
+- runFlow: sign-in.yaml
+# Expect to be on the swipe tab after a fully onboarded account.
+- assertVisible:
+    id: tab-swipe
+    timeout: 10000
+- tapOn:
+    id: tab-swipe
+# Wait for the swipe card to appear (requires a non-empty deck from the API).
+# If the deck is empty the MatchActionBar is hidden — we assert it conditionally.
+- waitForAnimationToEnd
+- tapOn:
+    id: swipe-like
+    optional: true
+# Assert app has not crashed by checking the tab bar is still visible.
+- assertVisible:
+    id: tab-swipe

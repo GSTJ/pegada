@@ -192,7 +192,7 @@ const Profile = () => {
 
             <Divider style={{ margin: theme.spacing[4] }} />
 
-            <Config.Root onPress={handleLogout}>
+            <Config.Root testID="profile-logout" onPress={handleLogout}>
               <SignOut width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.logout")}</Config.Title>

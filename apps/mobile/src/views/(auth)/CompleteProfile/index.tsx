@@ -194,7 +194,7 @@ const CompleteProfile = () => {
           </Text>
         </Container>
         <BottomAction.Container>
-          <Button loading={myDogUpdateMutation.isPending} onPress={() => saveUser()}>
+          <Button loading={myDogUpdateMutation.isPending} onPress={() => saveUser()} testID="profile-submit">
             {continueText}
           </Button>
         </BottomAction.Container>

@@ -24,7 +24,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   return (
     <Container exiting={ZoomOutDown} {...props}>
       <Animated.View entering={dislikeAnimation}>
-        <ActionItem onPress={onNope}>
+        <ActionItem testID="swipe-dislike" onPress={onNope}>
           <ConfusedEmoji />
         </ActionItem>
       </Animated.View>
@@ -34,7 +34,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
         </ActionItem>
       </Animated.View>
       <Animated.View entering={likeAnimation}>
-        <ActionItem onPress={onYep}>
+        <ActionItem testID="swipe-like" onPress={onYep}>
           <HeartEyesEmoji />
         </ActionItem>
       </Animated.View>
