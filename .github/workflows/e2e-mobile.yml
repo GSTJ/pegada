@@ -198,6 +198,23 @@ jobs:
           EXPO_NO_TELEMETRY: 1
 
       # ------------------------------------------------------------------
+      # 8b. Patch Podfile: @expo/config-plugins emits `react-native-google-maps`
+      # but react-native-maps@1.27.2 ships as `react-native-maps`. Rewrite
+      # the pod name in the generated Podfile so CocoaPods can resolve it.
+      # ------------------------------------------------------------------
+      - name: Patch Podfile (react-native-maps pod name)
+        working-directory: apps/mobile/ios
+        run: |
+          if grep -q "react-native-google-maps" Podfile; then
+            sed -i.bak "s|pod 'react-native-google-maps'|pod 'react-native-maps'|g" Podfile
+            sed -i.bak "s|:path => '../../../node_modules/react-native-maps/google'|:path => '../../../node_modules/react-native-maps'|g" Podfile
+            rm -f Podfile.bak
+            echo "::group::Patched Podfile"
+            grep -n "react-native-maps" Podfile || true
+            echo "::endgroup::"
+          fi
+
+      # ------------------------------------------------------------------
       # 9. CocoaPods install
       # ------------------------------------------------------------------
       - name: CocoaPods install
