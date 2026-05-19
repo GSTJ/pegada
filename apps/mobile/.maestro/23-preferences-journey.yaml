@@ -1,0 +1,193 @@
+appId: ${APP_ID}
+name: Preferences journey — match prefs, location, language, theme (persistence)
+tags:
+  - regression
+---
+# End-to-end journey that asserts settings actually persist (the real bug
+# class) and that language/theme switches re-render the UI. Replaces the
+# old smoke flows #15 (preferences open+save) and #17 (location-map render).
+#
+# What we cover and WHY it matters:
+#   1. Match preferences: change Size + Color via the bottom-sheet pickers,
+#      Save, navigate AWAY to swipe, then BACK into Preferences and assert
+#      the new values are still selected. Catches dropped tRPC mutations
+#      and stale react-query cache (preferences screen reads myDog.get).
+#   2. Language: switch en-US -> pt-BR, assert a translated profile-screen
+#      string appears ("Configurações"), then revert to en-US so downstream
+#      flows see the default locale.
+#   3. Theme: switch Light -> Dark, screenshot for visual diff, revert to
+#      Light. Screenshot hash diff is the honest cross-platform assertion
+#      since we cannot read styled-components colors from Maestro.
+#   4. Location: open the map, drag the pin to a new region, confirm,
+#      and assert we land back on the profile screen (router.back on
+#      successful mutation). The fact that mutation success drives the
+#      navigation is itself the persistence proof — onError stays on the
+#      map. We capture screenshots before/after for visual diff.
+#
+# All testIDs referenced here are added in the same PR:
+#   profile-open-{preferences,language,theme,location}
+#   preferences-{size,color}-picker
+#   preferences-{size,color}-item-<ID>     (e.g. preferences-size-item-MEDIUM)
+#   language-item-{en-US,pt-BR}
+#   theme-item-{light,dark}
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      location: inuse
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 23-00-after-login
+# ---------- Open Profile tab (bottom-right) ----------
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 23-01-on-profile
+# =====================================================
+# 1) MATCH PREFERENCES — change Size & Color, persist
+# =====================================================
+- tapOn:
+    id: "profile-open-preferences"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "preferences-screen"
+- takeScreenshot: 23-02-preferences-initial
+# --- Size: open picker sheet, choose Medium ---
+- tapOn:
+    id: "preferences-size-picker"
+- waitForAnimationToEnd
+- tapOn:
+    id: "preferences-size-item-MEDIUM"
+- waitForAnimationToEnd
+- assertVisible: "Medium"
+- takeScreenshot: 23-03-size-medium
+# --- Color: open picker sheet, choose Golden ---
+- tapOn:
+    id: "preferences-color-picker"
+- waitForAnimationToEnd
+- tapOn:
+    id: "preferences-color-item-GOLDEN"
+- waitForAnimationToEnd
+- assertVisible: "Golden"
+- takeScreenshot: 23-04-color-golden
+# NOTE: distance / age sliders use @ptomasroos/react-native-multi-slider
+# with custom labels. The label nodes do not expose stable testIDs, so any
+# Maestro assertion on slider value would be brittle. The persistence
+# check below validates Size + Color survive a round trip — those use
+# pickers with deterministic testIDs and prove the mutation + cache wiring
+# end-to-end, which is the real bug class this flow guards against.
+# --- Save preferences ---
+- tapOn:
+    id: "preferences-save"
+- extendedWaitUntil:
+    notVisible: "__wait__"
+    timeout: 10000
+    optional: true
+- waitForAnimationToEnd
+# onSuccess of myDog.update -> router.back() -> back on profile
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 23-06-after-save
+# --- Navigate AWAY (Swipe tab bottom-left) and BACK to Profile ---
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 23-07-on-swipe
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "profile-screen"
+# --- Re-open Preferences and assert values persisted ---
+- tapOn:
+    id: "profile-open-preferences"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "preferences-screen"
+- assertVisible: "Medium"
+- assertVisible: "Golden"
+- takeScreenshot: 23-08-preferences-persisted
+# --- Back to Profile so we can drive Language / Theme / Location ---
+- runFlow: utils/back.yaml
+- assertVisible:
+    id: "profile-screen"
+# =====================================================
+# 2) LANGUAGE — en-US -> pt-BR -> assert -> revert
+# =====================================================
+- tapOn:
+    id: "profile-open-language"
+- waitForAnimationToEnd
+- tapOn:
+    id: "language-item-pt-BR"
+- waitForAnimationToEnd
+# "Settings" -> "Configurações" — sticky header on profile screen.
+- assertVisible: "Configurações"
+- assertNotVisible: "Settings"
+- takeScreenshot: 23-09-language-pt
+# Revert to English so downstream flows see the default locale.
+- tapOn:
+    id: "profile-open-language"
+- waitForAnimationToEnd
+- tapOn:
+    id: "language-item-en-US"
+- waitForAnimationToEnd
+- assertVisible: "Settings"
+- takeScreenshot: 23-10-language-en-restored
+# =====================================================
+# 3) THEME — light -> dark (screenshot diff) -> revert
+# =====================================================
+- takeScreenshot: 23-11-theme-before-light
+- tapOn:
+    id: "profile-open-theme"
+- waitForAnimationToEnd
+- tapOn:
+    id: "theme-item-dark"
+- waitForAnimationToEnd
+# Profile screen re-renders with dark theme. The label text changes too:
+# en "themes.dark" = "Dark", which now shows in the theme row description.
+- assertVisible: "Dark"
+- takeScreenshot: 23-12-theme-dark
+# Revert to light.
+- tapOn:
+    id: "profile-open-theme"
+- waitForAnimationToEnd
+- tapOn:
+    id: "theme-item-light"
+- waitForAnimationToEnd
+- assertVisible: "Light"
+- takeScreenshot: 23-13-theme-light-restored
+# =====================================================
+# 4) LOCATION — open map, drag pin, confirm, persist
+# =====================================================
+- tapOn:
+    id: "profile-open-location"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "location-map-screen"
+- takeScreenshot: 23-14-location-map-initial
+# Drag the map to move the pin. Center of map is roughly mid-screen.
+- swipe:
+    start: "50%, 50%"
+    end: "50%, 30%"
+- waitForAnimationToEnd
+- swipe:
+    start: "50%, 50%"
+    end: "30%, 50%"
+- waitForAnimationToEnd
+- takeScreenshot: 23-15-location-pin-moved
+# Confirm — on success the userMutation calls router.back().
+- tapOn:
+    id: "location-map-confirm"
+- extendedWaitUntil:
+    notVisible: "__wait__"
+    timeout: 10000
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 8000
+# Back on profile, location row reflects the new city/coords lookup.
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 23-16-after-location-save

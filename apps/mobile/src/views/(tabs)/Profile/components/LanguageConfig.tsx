@@ -37,7 +37,7 @@ export const LanguageConfig = () => {
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
   return (
-    <Config.Root onPress={() => pickerSheetRef?.current?.present()}>
+    <Config.Root testID="profile-open-language" onPress={() => pickerSheetRef?.current?.present()}>
       <Translate width={22} height={22} fill={theme.colors.text} />
 
       <Config.Container>
@@ -53,6 +53,7 @@ export const LanguageConfig = () => {
         value={value}
         data={languagesPickerData}
         snapPoints={["40%"]}
+        itemTestIDPrefix="language-item-"
         onChange={(item) => {
           i18n.changeLanguage(item.id as keyof typeof LANGUAGES).catch(sendError);
         }}
