@@ -38,6 +38,12 @@ export interface InputPickerProps<T extends Item> extends Partial<
   snapPoints?: string[];
   data: T[];
   testID?: string;
+  /**
+   * When provided, each row in the picker sheet receives
+   * `testID={itemTestIDPrefix + item.id}`. Used by Maestro flows to
+   * reliably tap a known option (e.g. language/theme switches).
+   */
+  itemTestIDPrefix?: string;
 }
 
 const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
@@ -47,14 +53,17 @@ const PickerSelectItem = <T extends Item>({
   value,
   onChange,
   onClose,
+  testID,
 }: {
   item: T;
   value: T | undefined;
   onChange: (value: T) => void;
   onClose: () => void;
+  testID?: string;
 }) => {
   return (
     <SelectItem
+      testID={testID}
       selected={value?.id === item.id}
       onPress={() => {
         onChange?.(item);
@@ -94,6 +103,8 @@ const UnForwardedPickerSheet = <T extends Item>(
     optional: _optional,
     searchable,
     snapPoints = ["70%", "93%"],
+    itemTestIDPrefix,
+    testID: _testID,
     ...flatlistProps
   } = props;
 
@@ -120,7 +131,13 @@ const UnForwardedPickerSheet = <T extends Item>(
   const keyExtractor = (item: T) => `${title}${item.id}`;
 
   const renderItem = ({ item }: ListRenderItemInfo<T>) => (
-    <PickerSelectItem item={item} value={value} onChange={onChange} onClose={onClose} />
+    <PickerSelectItem
+      item={item}
+      value={value}
+      onChange={onChange}
+      onClose={onClose}
+      testID={itemTestIDPrefix ? `${itemTestIDPrefix}${item.id ?? "any"}` : undefined}
+    />
   );
 
   return (

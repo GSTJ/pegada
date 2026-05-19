@@ -41,7 +41,10 @@ export const LocationConfig = () => {
   const theme = useTheme();
 
   return (
-    <Config.Root onPress={() => router.push(SceneName.LocationMap)}>
+    <Config.Root
+      testID="profile-open-location"
+      onPress={() => router.push(SceneName.LocationMap)}
+    >
       <View style={{ width: 22, alignItems: "center" }}>
         <Location width={19} height={19} fill={theme.colors.text} />
       </View>

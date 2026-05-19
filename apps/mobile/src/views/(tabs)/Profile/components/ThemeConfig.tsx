@@ -35,7 +35,10 @@ export const ThemeConfig = () => {
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
   return (
-    <Config.Root onPress={() => pickerSheetRef?.current?.present()}>
+    <Config.Root
+      testID="profile-open-theme"
+      onPress={() => pickerSheetRef?.current?.present()}
+    >
       <LightMode width={22} height={22} fill={theme.colors.text} />
 
       <Config.Container>
@@ -51,6 +54,7 @@ export const ThemeConfig = () => {
         value={value}
         data={data}
         snapPoints={["40%"]}
+        itemTestIDPrefix="theme-item-"
         onChange={(item) => {
           setActiveTheme(item.id as ActiveTheme).catch(sendError);
         }}
