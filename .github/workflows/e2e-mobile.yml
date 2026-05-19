@@ -244,6 +244,38 @@ jobs:
         run: pod install
 
       # ------------------------------------------------------------------
+      # 9b. Neutralize Bugsnag source-map upload build phase.
+      # The phase fails when BUGSNAG_API_KEY is unset (CI never has it).
+      # Prepend `exit 0` so it short-circuits without blocking the build.
+      # ------------------------------------------------------------------
+      - name: Disable Bugsnag source-map upload phase
+        working-directory: apps/mobile/ios
+        run: |
+          set -euo pipefail
+          PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
+          python3 - "$PBXPROJ" <<'PY'
+          import re, sys
+          p = sys.argv[1]
+          s = open(p).read()
+          # Find the Bugsnag upload phase shell script. It's a JSON-ish field:
+          # shellScript = "...Upload source maps to Bugsnag..."
+          # Inject `exit 0\\n` at the start of every shellScript that mentions Bugsnag.
+          def patch(m):
+              body = m.group(1)
+              if 'Bugsnag' in body or 'bugsnag' in body:
+                  if body.lstrip().startswith('exit 0'):
+                      return m.group(0)
+                  return m.group(0).replace(body, 'exit 0\\n' + body, 1)
+              return m.group(0)
+          new = re.sub(r'shellScript = "((?:[^"\\\\]|\\\\.)*?)";', patch, s, flags=re.DOTALL)
+          if new != s:
+              open(p, 'w').write(new)
+              print('Patched Bugsnag phase')
+          else:
+              print('No Bugsnag phase found (nothing to patch)')
+          PY
+
+      # ------------------------------------------------------------------
       # 10. Build for iOS simulator
       # ------------------------------------------------------------------
       - name: Build iOS (Debug simulator)
