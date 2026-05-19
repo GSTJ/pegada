@@ -52,13 +52,13 @@ maestro test apps/mobile/.maestro/launch.yaml
 
 ## Flows
 
-| File                  | What it does                                                             |
-| --------------------- | ------------------------------------------------------------------------ |
-| `launch.yaml`         | Cold-launches the app, asserts the sign-in screen is visible.            |
-| `sign-in.yaml`        | Enters magic email + 6-digit code, asserts OTP screen exits.             |
-| `create-profile.yaml` | Runs sign-in, fills dog name, asserts location screen appears.           |
-| `swipe.yaml`          | Runs sign-in (assumes full profile), taps like button, asserts no crash. |
-| `26-logout-journey.yaml` | Login → Profile → Logout → confirm → assert sign-in screen + cold relaunch stays logged out (Keychain wiped). |
+| File                             | What it does                                                                                                                                                                                                     |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `launch.yaml`                    | Cold-launches the app, asserts the sign-in screen is visible.                                                                                                                                                    |
+| `sign-in.yaml`                   | Enters magic email + 6-digit code, asserts OTP screen exits.                                                                                                                                                     |
+| `create-profile.yaml`            | Runs sign-in, fills dog name, asserts location screen appears.                                                                                                                                                   |
+| `swipe.yaml`                     | Runs sign-in (assumes full profile), taps like button, asserts no crash.                                                                                                                                         |
+| `26-logout-journey.yaml`         | Login → Profile → Logout → confirm → assert sign-in screen + cold relaunch stays logged out (Keychain wiped).                                                                                                    |
 | `27-delete-account-journey.yaml` | Login as disposable `delete-me@pegada.app` → Profile → Delete Account → confirm → assert sign-in. Wrap with `maestro:seed` (before) and `maestro:check-deleted` (after) to seed the user and verify DB deletion. |
 
 ## Required GitHub Secrets
