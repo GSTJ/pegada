@@ -24,34 +24,33 @@ tags:
 #
 # Coordinates calibrated on iPhone 17 Pro Max (440x956 logical) — see
 # utils/login.yaml for the rationale on point-based taps + per-digit OTP entry.
+# Email screen: tap field (point fallback for RN Fabric/iOS 26 hierarchy gap).
+- tapOn:
+    point: "50%, 84%"
+- waitForAnimationToEnd
+- inputText: "maestro-fresh@pegada.app"
+# iOS 26: pressKey: Enter does NOT advance from email → OTP screen.
+# Tap the "Continue" button that sits above the keyboard (~59% Y).
+- tapOn:
+    point: "50%, 59%"
+- waitForAnimationToEnd:
+    timeout: 8000
+# ATT dialog fires asynchronously after email submit and can block the OTP
+# screen. Dismiss before attempting to enter digits.
 - tapOn:
     text: "Ask App Not to Track"
     optional: true
 - tapOn:
-    text: "Allow Once"
-    optional: true
-- tapOn:
     text: "Don.t Allow"
     optional: true
-# Email screen: tap the input via testID (added in apps/mobile/src/views/(auth)/SignIn/components/EmailInput),
-# fall back to point tap if accessibility tree is unreadable (RN Fabric issue
-# on iOS 26 + XCUITest). Submit with Enter — the Continue button is not
-# point-tap reliable on this build.
-- tapOn:
-    id: "signin-email"
-    optional: true
-- tapOn:
-    point: "50%, 84%"
-    optional: true
 - waitForAnimationToEnd
-- inputText: "maestro-fresh@pegada.app"
-- pressKey: Enter
+# iOS 26: first OTP cell does not auto-focus. Tap center of OTP row first.
+- tapOn:
+    point: "50%, 43%"
 - waitForAnimationToEnd
-# OTP: per-digit entry — see utils/login.yaml for why `inputText: "424242"`
-# in one shot races React's commit phase. Each cell auto-advances focus, and
-# the 25ms gap between digits is the Maestro driver round-trip floor.
-- waitForAnimationToEnd:
-    timeout: 8000
+# OTP: per-digit entry — see utils/login-returning.yaml for why a single
+# inputText: "424242" races React's commit phase. Each cell auto-advances
+# focus; 25ms gap is the Maestro driver round-trip floor.
 - inputText: "4"
 - waitForAnimationToEnd:
     timeout: 25
@@ -70,11 +69,11 @@ tags:
 - inputText: "2"
 - waitForAnimationToEnd:
     timeout: 20000
-# ATT dialog may appear during/after OTP submission.
+# ATT dialog may also appear during OTP submission — dismiss if present.
 - tapOn:
     text: "Ask App Not to Track"
     optional: true
 - tapOn:
-    text: "Allow"
+    text: "Don.t Allow"
     optional: true
 - waitForAnimationToEnd
