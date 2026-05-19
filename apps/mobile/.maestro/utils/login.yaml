@@ -24,7 +24,7 @@ tags:
 # The Continue button cannot be hit reliably via point taps on this build;
 # the email TextInput has returnKeyType=Done|next so Enter submits the form.
 - tapOn:
-    point: "50%, 65%"
+    point: "50%, 84%"
 - waitForAnimationToEnd
 - inputText: "test@pegada.app"
 - pressKey: Enter

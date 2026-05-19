@@ -27,7 +27,7 @@ tags:
 # Email screen: tap email field, type, submit with Enter (Continue button
 # point taps are unreliable on this build).
 - tapOn:
-    point: "50%, 65%"
+    point: "50%, 84%"
 - waitForAnimationToEnd
 - inputText: "test@pegada.app"
 - pressKey: Enter
