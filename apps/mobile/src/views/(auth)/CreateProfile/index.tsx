@@ -198,7 +198,11 @@ const CreateProfile = () => {
           />
         </Container>
         <BottomAction.Container>
-          <Button loading={dogCreateMutation.isPending} onPress={() => saveUser()} testID="profile-submit">
+          <Button
+            loading={dogCreateMutation.isPending}
+            onPress={() => saveUser()}
+            testID="profile-submit"
+          >
             {t("createProfile.createProfile")}
           </Button>
         </BottomAction.Container>
