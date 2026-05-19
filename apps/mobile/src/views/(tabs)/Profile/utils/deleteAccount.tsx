@@ -25,8 +25,13 @@ export const deleteAccount = () => {
       style: "destructive",
       onPress: () => {
         analytics.track({ event_type: "Delete Account Confirmed" });
+        // App Store Guideline 5.1.1(v) requires actual account deletion,
+        // not just a dog soft-delete. user.deleteMe wipes the user row plus
+        // all dependent records (dogs, images, matches, interests, messages)
+        // in a single transaction server-side, then we clear the local
+        // session via logout().
         getTrcpContext()
-          .client.myDog.delete.mutate()
+          .client.user.deleteMe.mutate()
           .then(() => logout())
           .catch((error) => {
             Alert.alert(t("common.oops"), t("common.tryAgainLater"));

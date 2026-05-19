@@ -18,4 +18,14 @@ export const userRouter = createTRPCRouter({
     const updatedDog = await UserService.updateUserById(userId, input);
     return updatedDog;
   }),
+
+  /**
+   * Hard-delete the current user's account and every dependent record.
+   * Required for App Store compliance (Guideline 5.1.1(v)).
+   */
+  deleteMe: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    await UserService.deleteAccount(userId);
+    return { ok: true };
+  }),
 });

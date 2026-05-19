@@ -4,39 +4,57 @@
  * The default `seed.ts` builds a generic Pitoca/Pitoco fixture for local dev.
  * Maestro flows need a more specific shape:
  *
- *   - The "magic" user `test@pegada.app` (APPLE_MAGIC_EMAIL) must exist with
- *     a Rex dog and a finished profile so `login-returning.yaml` lands on the
- *     swipe tab.
- *   - Bella must exist as a separate user with an active match + seeded chat
- *     history with Rex (required by `12-chat-conversation` and
- *     `19-chat-message-order`).
- *   - MatchMe must exist as a swipeable FEMALE dog whose owner has ALREADY
- *     liked Rex via a one-sided `Interest` row. When Rex swipes INTERESTED
- *     on MatchMe in `22-new-match-journey.yaml`, the swipe service finds the
- *     mutual interest and creates a real match, pushing the NewMatch modal.
+ *   1. APPLE_MAGIC_EMAIL (test@pegada.app) — the long-lived returning user
+ *      with a Rex dog, a Bella match with chat history, and a MatchMe dog that
+ *      has already pre-liked Rex. Required by every non-destructive flow.
+ *
+ *   2. delete-me@pegada.app — a disposable account used ONLY by the
+ *      delete-account journey (27-delete-account-journey.yaml). It must be
+ *      re-created before each delete-account run because the flow hard-deletes
+ *      it. Sharing #1 would blow away the seeded Dog/Match/chats.
+ *
+ * The API treats APPLE_MAGIC_EMAIL as a comma-separated list (see
+ * packages/api/src/shared/config.ts → isMagicEmail). CI must set
+ * APPLE_MAGIC_EMAIL="test@pegada.app,delete-me@pegada.app" so the OTP
+ * bypass accepts both addresses.
  *
  * MatchMe is co-located with Rex in San Francisco so the SuggestionService
  * orders her FIRST (ORDER BY distance ASC). All 100 random fake users from
- * the default seed live in Brazil (~9000km away from SF), so distance
- * ordering reliably puts MatchMe at the top of Rex's stack.
+ * the default seed live in Brazil (~9000km away from SF).
  *
  * Run AFTER the default seed (or against a fresh DB seeded via
  * `pnpm database db:seed`) — this script is purely additive and idempotent:
  * re-runs upsert existing rows rather than duplicating them.
  *
- *   pnpm database tsx ./maestro-seed.ts
+ *   pnpm -F @pegada/database tsx maestro-seed.ts            # seed all
+ *   pnpm -F @pegada/database tsx maestro-seed.ts seed-delete-me
+ *   pnpm -F @pegada/database tsx maestro-seed.ts purge-delete-me
+ *   pnpm -F @pegada/database tsx maestro-seed.ts check-delete-me
  */
 
+import { createId } from "@paralleldrive/cuid2";
+
 import prisma from ".";
+import { breedData } from "./__mocks__/breed-data";
+
+// ---------------------------------------------------------------------------
+// Shared constants
+// ---------------------------------------------------------------------------
 
 const SF = { lat: 37.7749, lon: -122.4194 };
 const GOLDEN_ID = "u8y4cc4hrg3fzy9lxwn3rrdd";
+
+export const DELETE_ME_EMAIL = "delete-me@pegada.app";
 
 const yearsAgo = (n: number) => {
   const d = new Date();
   d.setFullYear(d.getFullYear() - n);
   return d;
 };
+
+// ---------------------------------------------------------------------------
+// Rex / Bella / MatchMe seed (non-destructive flows)
+// ---------------------------------------------------------------------------
 
 async function ensureBreed() {
   await prisma.breed.upsert({
@@ -268,13 +286,7 @@ async function ensureMatchMeWithPreLike(rexId: string) {
   }
 
   // Tear down any state from a previous run so the swipe stack and match
-  // creation behave deterministically:
-  //  - Delete any existing Match between Rex and MatchMe (we want the maestro
-  //    swipe to CREATE the match for real).
-  //  - Delete Rex's existing Interest in MatchMe (would mark MatchMe as
-  //    already-swiped and exclude her from the suggestion stack).
-  //  - Delete MatchMe's existing Interest in Rex so we can recreate it as
-  //    the single source of truth for the mutual interest.
+  // creation behave deterministically.
   await prisma.message.deleteMany({
     where: {
       match: {
@@ -316,7 +328,7 @@ async function ensureMatchMeWithPreLike(rexId: string) {
   return { matchMeUser, matchMe, preLike };
 }
 
-async function main() {
+async function seedMain() {
   await ensureBreed();
   const { magic, rex } = await ensureMagicUserWithRex();
   const { bella, match } = await ensureBellaWithMatch(rex.id);
@@ -342,10 +354,154 @@ async function main() {
   );
 }
 
-main()
-  .catch((e) => {
-    // eslint-disable-next-line no-console
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+// ---------------------------------------------------------------------------
+// delete-me@pegada.app helpers (destructive flow only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Hard-delete the disposable account if it exists, then recreate it with a
+ * minimal profile (User + Dog + one approved Image) so the auth router lands
+ * on the swipe tabs after login. Idempotent — safe to call before every test
+ * run, including after the previous run already deleted the account.
+ */
+export const seedDeleteMeUser = async () => {
+  await purgeDeleteMeUser();
+
+  const breed = breedData.find((b) => b.name === "Shih-tzu") ?? breedData[0];
+  if (!breed?.id) {
+    throw new Error("maestro-seed: no breed available to attach to delete-me dog");
+  }
+
+  const dogId = createId();
+  await prisma.user.create({
+    data: {
+      email: DELETE_ME_EMAIL,
+      city: "Ribeirão Preto",
+      state: "SP",
+      country: "BR",
+      latitude: -21.1775,
+      longitude: -47.8103,
+      dogs: {
+        create: {
+          id: dogId,
+          name: "DeleteMe",
+          gender: "FEMALE",
+          color: "BROWN",
+          size: "SMALL",
+          weight: 5,
+          birthDate: new Date("2020-01-01"),
+          bio: "Disposable Maestro account — recreated on every test run.",
+          breed: { connect: { id: breed.id } },
+          images: {
+            create: {
+              position: 0,
+              status: "APPROVED",
+              url: "https://placedog.net/640/480?id=42",
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+/**
+ * Remove the delete-me user and everything that references it, in the
+ * dependency order Prisma needs. Used both before re-seeding and as a
+ * teardown verification helper for CI.
+ */
+export const purgeDeleteMeUser = async () => {
+  const user = await prisma.user.findUnique({
+    where: { email: DELETE_ME_EMAIL },
+    select: { id: true, dogs: { select: { id: true } } },
+  });
+  if (!user) return;
+
+  const dogIds = user.dogs.map((d) => d.id);
+
+  await prisma.$transaction(async (tx) => {
+    if (dogIds.length > 0) {
+      await tx.message.deleteMany({
+        where: {
+          OR: [{ senderId: { in: dogIds } }, { receiverId: { in: dogIds } }],
+        },
+      });
+      await tx.interest.deleteMany({
+        where: {
+          OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+        },
+      });
+      await tx.match.deleteMany({
+        where: {
+          OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+        },
+      });
+      await tx.image.deleteMany({ where: { dogId: { in: dogIds } } });
+      await tx.dog.deleteMany({ where: { id: { in: dogIds } } });
+    }
+    await tx.user.delete({ where: { id: user.id } });
+  });
+};
+
+/**
+ * Verification helper: returns true iff the delete-me user row still exists.
+ * Call this after the Maestro flow finishes to prove the in-app delete
+ * actually reached the database.
+ */
+export const deleteMeExists = async (): Promise<boolean> => {
+  const user = await prisma.user.findUnique({
+    where: { email: DELETE_ME_EMAIL },
+    select: { id: true },
+  });
+  return Boolean(user);
+};
+
+// ---------------------------------------------------------------------------
+// CLI entry point
+// ---------------------------------------------------------------------------
+
+const isMain = (() => {
+  try {
+    const url = new URL(import.meta.url);
+    return process.argv[1] === url.pathname;
+  } catch {
+    return false;
+  }
+})();
+
+if (isMain) {
+  const command = process.argv[2] ?? "seed";
+
+  const run = async () => {
+    if (command === "seed") {
+      await seedMain();
+    } else if (command === "seed-delete-me") {
+      await seedDeleteMeUser();
+      // eslint-disable-next-line no-console
+      console.log(`[maestro-seed] seeded ${DELETE_ME_EMAIL}`);
+    } else if (command === "purge-delete-me") {
+      await purgeDeleteMeUser();
+      // eslint-disable-next-line no-console
+      console.log(`[maestro-seed] purged ${DELETE_ME_EMAIL}`);
+    } else if (command === "check-delete-me") {
+      const exists = await deleteMeExists();
+      // eslint-disable-next-line no-console
+      console.log(`[maestro-seed] ${DELETE_ME_EMAIL} exists=${exists}`);
+      if (exists) process.exit(1);
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[maestro-seed] unknown command "${command}" — use seed|seed-delete-me|purge-delete-me|check-delete-me`,
+      );
+      process.exit(1);
+    }
+  };
+
+  run()
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+}
