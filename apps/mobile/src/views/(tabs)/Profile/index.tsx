@@ -9,6 +9,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import * as StoreReview from "expo-store-review";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused, useScrollToTop } from "@react-navigation/native";
 import { t } from "i18next";
@@ -26,6 +27,7 @@ import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/errorTracking";
 import { openWebBrowser } from "@/services/openWebBrowser";
+import { StorageKeys, storeData } from "@/services/storage";
 import { SceneName } from "@/types/SceneName";
 import { Config } from "./components/Config";
 import { CurrentPlanConfig } from "./components/CurrentPlanConfig";
@@ -52,6 +54,16 @@ const openTermsOfUse = () => {
 const openPrivacyPolicy = () => {
   analytics.track({ event_type: "Open Privacy Policy" });
   openWebBrowser(t("links.privacyPolicy")).catch(sendError);
+};
+
+const openRateTheApp = async () => {
+  try {
+    analytics.track({ event_type: "App Review" });
+    await StoreReview.requestReview();
+    await storeData(StorageKeys.AppReviewStatus, "completed");
+  } catch (error) {
+    sendError(error);
+  }
 };
 
 const Profile = () => {
@@ -179,7 +191,7 @@ const Profile = () => {
 
             <Divider style={{ margin: theme.spacing[4] }} />
 
-            <Config.Root onPress={openTermsOfUse}>
+            <Config.Root testID="profile-open-terms" onPress={openTermsOfUse}>
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.termsOfUse")}</Config.Title>
@@ -189,11 +201,21 @@ const Profile = () => {
               <Config.Arrow />
             </Config.Root>
 
-            <Config.Root onPress={openPrivacyPolicy}>
+            <Config.Root testID="profile-open-privacy" onPress={openPrivacyPolicy}>
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.privacyPolicy")}</Config.Title>
                 <Config.Description>{t("profile.privacyPolicyDescription")}</Config.Description>
+              </Config.Container>
+
+              <Config.Arrow />
+            </Config.Root>
+
+            <Config.Root testID="profile-open-rate" onPress={openRateTheApp}>
+              <Paperwork width={22} height={22} fill={theme.colors.text} />
+              <Config.Container>
+                <Config.Title>{t("profile.rateTheApp")}</Config.Title>
+                <Config.Description>{t("profile.rateTheAppDescription")}</Config.Description>
               </Config.Container>
 
               <Config.Arrow />
