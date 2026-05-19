@@ -2,7 +2,7 @@ import { useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import Animated, { FadeOut, useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { FileSystemUploadType, uploadAsync } from "expo-file-system";
+import { FileSystemUploadType, uploadAsync } from "expo-file-system/legacy";
 import { useTheme } from "styled-components/native";
 
 import AddRemove from "@/assets/images/AddRemove.svg";

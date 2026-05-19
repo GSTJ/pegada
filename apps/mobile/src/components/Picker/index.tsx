@@ -163,6 +163,7 @@ const UnForwardedPickerSheet = <T extends Item>(
   );
 };
 
+// @ts-expect-error generic forwardRef pattern not fully typed in React 19
 export const PickerSheet = React.forwardRef(UnForwardedPickerSheet) as <T extends Item>(
   props: InputPickerProps<T> & { ref?: React.Ref<BottomSheetModal> },
 ) => React.ReactElement;
