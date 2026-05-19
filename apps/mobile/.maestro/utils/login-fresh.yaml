@@ -1,0 +1,80 @@
+appId: ${APP_ID}
+name: util - login via magic-regex email (always-fresh user) - lands on CreateProfile
+tags:
+  - util
+---
+# Reusable subflow: sign-in as a FRESH test user via the API's
+# APPLE_MAGIC_EMAIL_REGEX bypass (see packages/api/src/services/AuthenticationService.ts).
+#
+# How it differs from login.yaml:
+#   - login.yaml uses the single APPLE_MAGIC_EMAIL (test@pegada.app). That
+#     address is shared across runs and can be left in any onboarding state.
+#   - login-fresh.yaml uses an email matching APPLE_MAGIC_EMAIL_REGEX
+#     (default: ^maestro-fresh.*@pegada\.app$). On every successful OTP the
+#     API hard-purges the matching user (and cascading dog/match/message rows)
+#     BEFORE upserting, guaranteeing the auth router lands on CreateProfile.
+#
+# Maestro does not interpolate dynamic shell expressions, but every flow that
+# `runFlow`s this one runs in its own JS engine — so two back-to-back runs
+# share the same email. That is intentional: the API delete-then-upsert keeps
+# state clean regardless of email collision.
+#
+# Caller MUST have launchApp'd already with `clearState: true` and
+# `clearKeychain: true`.
+#
+# Coordinates calibrated on iPhone 17 Pro Max (440x956 logical) — see
+# utils/login.yaml for the rationale on point-based taps + per-digit OTP entry.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Allow Once"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
+# Email screen: tap the input via testID (added in apps/mobile/src/views/(auth)/SignIn/components/EmailInput),
+# fall back to point tap if accessibility tree is unreadable (RN Fabric issue
+# on iOS 26 + XCUITest). Submit with Enter — the Continue button is not
+# point-tap reliable on this build.
+- tapOn:
+    id: "signin-email"
+    optional: true
+- tapOn:
+    point: "50%, 84%"
+    optional: true
+- waitForAnimationToEnd
+- inputText: "maestro-fresh@pegada.app"
+- pressKey: Enter
+- waitForAnimationToEnd
+# OTP: per-digit entry — see utils/login.yaml for why `inputText: "424242"`
+# in one shot races React's commit phase. Each cell auto-advances focus, and
+# the 25ms gap between digits is the Maestro driver round-trip floor.
+- waitForAnimationToEnd:
+    timeout: 8000
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 20000
+# ATT dialog may appear during/after OTP submission.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd

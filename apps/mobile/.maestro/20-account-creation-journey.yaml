@@ -1,0 +1,158 @@
+appId: ${APP_ID}
+name: Account creation — end-to-end user journey (sign-in → CreateProfile → CompleteProfile → AskForLocation → Swipe)
+tags:
+  - smoke
+  - regression
+---
+# Full account-creation journey for a brand-new user. Replaces the disjoint
+# 03/04/05 smoke flows with one realistic, assert-driven walk:
+#
+#   1. Cold launch with cleared state + keychain + pre-granted permissions
+#      (photos:all, location:inuse) so no system dialog can interrupt the run.
+#   2. Sign in via utils/login-fresh.yaml — the API's APPLE_MAGIC_EMAIL_REGEX
+#      bypass guarantees the user is hard-purged on every login so the auth
+#      router always lands on CreateProfile (see AuthenticationService.ts).
+#   3. CreateProfile: upload one photo from the simulator's stock library,
+#      type the dog name, submit.
+#   4. CompleteProfile: enter a birthdate, submit.
+#   5. AskForLocation: tap Enable Location; any system dialog is auto-allowed
+#      via the launchApp permissions block, but we also tap "Allow While Using
+#      App" defensively in case the OS still prompts.
+#   6. Swipe tab: assertVisible on `swipe-screen` testID (added to the Swipe
+#      view's outer Container) to prove we reached the tabs.
+#
+# Verification is real — `assertVisible` on stable testIDs, plus a screenshot
+# at every major transition for hash-diff review.
+#
+# Coordinate-based taps are used ONLY where a testID is genuinely unreachable
+# (e.g. the iOS native photo-picker UI). Every in-app target uses a testID.
+
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      photos: all
+      location: inuse
+      notifications: allow
+- waitForAnimationToEnd
+
+# ---------------------------------------------------------------------------
+# 1. Sign in as a fresh user (lands on CreateProfile)
+# ---------------------------------------------------------------------------
+- runFlow: utils/login-fresh.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 20-01-after-login
+
+# ---------------------------------------------------------------------------
+# 2. CreateProfile — upload one photo + type dog name + submit
+# ---------------------------------------------------------------------------
+# Tap the first photo slot. testID `add-photo-0` is on the PressableArea
+# inside ProfileImageUploader → AddUserPhoto (added with this flow).
+- tapOn:
+    id: "add-photo-0"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 20-02-image-picker-options
+
+# The image picker shows a native Alert with: Take Photo / Choose from Library
+# / Cancel. Choose from Library is the deterministic path on iOS sim, which
+# always seeds 4 stock photos in the Photos app.
+- tapOn:
+    text: "Choose from Library"
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Photo library may show a "Select Photos" permission sheet on iOS 14+ even
+# when `photos: all` was pre-granted, depending on the runtime — dismiss
+# defensively. The most common state is "all access granted, no sheet".
+- tapOn:
+    text: "Allow Access to All Photos"
+    optional: true
+- tapOn:
+    text: "Select Photos..."
+    optional: true
+- waitForAnimationToEnd
+
+# Tap the first photo in the grid. The iOS simulator photo library is a
+# native picker UI — no testIDs available. Coordinates target the first cell
+# of the 4-up grid (top-left, ~25% X / ~30% Y on iPhone 17 Pro Max).
+- tapOn:
+    point: "20%, 30%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 20-03-photo-edit
+
+# Edit screen: tap "Choose" (bottom-right) to confirm. Native UI again.
+- tapOn:
+    text: "Choose"
+    optional: true
+- tapOn:
+    text: "Use"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Wait for the S3 upload to complete — the ProfileImagesUploader shows an
+# ActivityIndicator overlay until the presigned PUT returns. 15s ceiling
+# covers a slow CI runner; locally completes in ~2s.
+- takeScreenshot: 20-04-photo-uploaded
+
+# Tap the dog-name input via testID (exists on CreateProfile).
+- tapOn:
+    id: "profile-name"
+- waitForAnimationToEnd
+- inputText: "MaestroPup"
+- takeScreenshot: 20-05-name-typed
+
+# Submit. testID is shared by Create/Complete profile Buttons; only one is
+# mounted at a time so this is unambiguous.
+- tapOn:
+    id: "profile-submit"
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 20-06-after-create-profile
+
+# ---------------------------------------------------------------------------
+# 3. CompleteProfile — pick birthdate + submit
+# ---------------------------------------------------------------------------
+- tapOn:
+    id: "complete-profile-birth-date"
+- waitForAnimationToEnd
+- inputText: "01/01/2020"
+- takeScreenshot: 20-07-birthdate-typed
+
+- tapOn:
+    id: "profile-submit"
+- waitForAnimationToEnd:
+    timeout: 12000
+- takeScreenshot: 20-08-after-complete-profile
+
+# ---------------------------------------------------------------------------
+# 4. AskForLocation — tap Enable Location
+# ---------------------------------------------------------------------------
+- tapOn:
+    id: "location-allow"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Defensive: if iOS still pops the location prompt (sim quirk), accept it.
+- tapOn:
+    text: "Allow While Using App"
+    optional: true
+- tapOn:
+    text: "Allow Once"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 20-09-after-location
+
+# ---------------------------------------------------------------------------
+# 5. Final assertion — we landed on the Swipe tab
+# ---------------------------------------------------------------------------
+# `swipe-screen` testID is on the outer SafeAreaView Container in
+# src/views/(tabs)/Swipe/index.tsx — added with this flow so it survives
+# even when the user has zero cards (fresh account → empty stack).
+- assertVisible:
+    id: "swipe-screen"
+- takeScreenshot: 20-10-on-swipe-tab

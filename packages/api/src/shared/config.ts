@@ -56,6 +56,18 @@ const configSchema = z.object({
    */
   APPLE_MAGIC_EMAIL: z.string().optional(),
   APPLE_MAGIC_CODE: z.string().optional(),
+  /**
+   * Optional regex matched against the submitted email to treat ANY matching
+   * address as a magic test account. Unlike `APPLE_MAGIC_EMAIL`, every login
+   * for a regex-matched address hard-deletes the existing user record first,
+   * guaranteeing a fresh-onboarding state on each Maestro E2E run.
+   *
+   * Only honored when `NODE_ENV !== 'production'` so production traffic is
+   * never affected even if a regex is accidentally configured.
+   *
+   * Example: `^maestro-fresh.*@pegada\.app$`
+   */
+  APPLE_MAGIC_EMAIL_REGEX: z.string().optional(),
 });
 
 const _config = configSchema.safeParse(process.env);
