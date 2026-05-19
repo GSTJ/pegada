@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+name: Tabs navigation — swipe / messages / profile
+tags:
+  - smoke
+---
+# Sign in as returning user (lands on swipe tab) then tap each tab in turn.
+# Point-based: tab bar bottom row at ~95% Y, three tabs at ~17%, 50%, 83% X.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 07-after-login
+# Tap Swipe tab (left)
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 07-on-swipe
+# Messages tab (center)
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 07-on-messages
+# Profile tab (right)
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 07-on-profile
+# Back to swipe
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 07-back-to-swipe

@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+name: util - login as returning user (lands on swipe tabs)
+tags:
+  - util
+---
+# Logs in as test+returning@pegada.app which has dog Rex + match Bella + chats,
+# so the auth router pushes straight to the swipe tab. Caller must already
+# launchApp'd. Coordinates calibrated on iPhone 17 Pro Max.
+- tapOn:
+    point: "50%, 55%"
+- waitForAnimationToEnd
+- inputText: "test+returning@pegada.app"
+- tapOn:
+    point: "50%, 62%"
+- extendedWaitUntil:
+    notVisible: "__wait_for_otp_screen__"
+    timeout: 10000
+    optional: true
+- tapOn:
+    point: "12%, 40%"
+- waitForAnimationToEnd
+- inputText: "424242"
+- extendedWaitUntil:
+    notVisible: "__wait_for_tabs__"
+    timeout: 20000
+    optional: true

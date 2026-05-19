@@ -189,7 +189,7 @@ const DogProfile = () => {
           />
         </View>
 
-        <GoBack onPress={() => router.back()} />
+        <GoBack testID="dog-profile-close" onPress={() => router.back()} />
 
         <S.BottomColumn
           style={{
@@ -198,7 +198,7 @@ const DogProfile = () => {
         >
           <S.Content>
             <BreedTag breed={dog.breed} />
-            <S.Name numberOfLines={1}>
+            <S.Name testID="dog-profile-name" numberOfLines={1}>
               {dog.name}
               {dog.birthDate ? <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age> : undefined}
             </S.Name>

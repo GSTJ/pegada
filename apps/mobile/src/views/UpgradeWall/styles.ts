@@ -8,7 +8,7 @@ import { BlurView } from "@/components/BlurView";
 import { PressableArea } from "@/components/PressableArea";
 import { Text } from "@/components/Text";
 
-export const Container = styled.View`
+export const Container = styled.View.attrs({ accessible: true })`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;
@@ -28,7 +28,7 @@ export const Header = styled(BlurView)`
   width: 100%;
 `;
 
-export const CloseButton = styled(PressableArea)`
+export const CloseButton = styled(PressableArea).attrs({ accessible: true })`
   height: ${({ theme }) => theme.spacing[8]}px;
   width: ${({ theme }) => theme.spacing[8]}px;
   align-items: center;

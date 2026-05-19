@@ -34,6 +34,7 @@ export const Message: React.FC<MessageProps> = ({ item }) => {
 
   return (
     <Container
+      testID="messages-chat-row"
       onPress={() =>
         router.push({
           pathname: `${SceneName.Chat}/[matchId]`,

@@ -88,7 +88,7 @@ const Chat = () => {
   const theme = useTheme();
 
   return (
-    <Container behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <Container testID="chat-screen" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Background
         source={
           theme.dark

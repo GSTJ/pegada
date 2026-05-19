@@ -29,6 +29,7 @@ const Send = () => {
       }}
     >
       <Input
+        testID="chat-input"
         value={message}
         onChangeText={setMessage}
         onSubmitEditing={handleSubmit}

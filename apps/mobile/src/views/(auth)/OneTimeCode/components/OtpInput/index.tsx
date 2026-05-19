@@ -73,6 +73,7 @@ const OTPInput = forwardRef<OtpInputRef, OtpInputProps>(({ length, value, onChan
             pointerEvents={previousValue || isFirst ? "auto" : "none"}
             handleChange={handleChange}
             handleErase={handleErase}
+            testID={`otp-digit-${index}`}
           >
             {value[index]}
           </OtpDigit>

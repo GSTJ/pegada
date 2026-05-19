@@ -35,7 +35,7 @@ export const Submit: React.FC<SubmitProps> = ({ loading, onPress, dragging }) =>
   return (
     <Animated.View style={buttonAnimatedStyle}>
       <BottomAction.Container>
-        <StyledButton loading={loading} onPress={onPress}>
+        <StyledButton testID="location-map-confirm" loading={loading} onPress={onPress}>
           {t("locationMap.confirmLocation")}
         </StyledButton>
       </BottomAction.Container>

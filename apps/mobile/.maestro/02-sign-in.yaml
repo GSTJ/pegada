@@ -1,0 +1,13 @@
+appId: ${APP_ID}
+name: Sign in with magic OTP
+tags:
+  - smoke
+---
+# Sign-in via APPLE_MAGIC_EMAIL + APPLE_MAGIC_CODE.
+# Uses point-based util because RN tree is invisible to XCUITest snapshot.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login.yaml
+- takeScreenshot: 02-sign-in-after-otp

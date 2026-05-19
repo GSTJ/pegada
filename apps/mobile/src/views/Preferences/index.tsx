@@ -145,6 +145,7 @@ const Preferences: React.FC = () => {
   return (
     <>
       <Container
+        testID="preferences-screen"
         {...scrollViewProps}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -258,7 +259,11 @@ const Preferences: React.FC = () => {
         />
       </Container>
       <BottomAction.Container>
-        <Button loading={myDogUpdateMutation.isPending} onPress={saveUser}>
+        <Button
+          testID="preferences-save"
+          loading={myDogUpdateMutation.isPending}
+          onPress={saveUser}
+        >
           {t("preferences.savePreferences")}
         </Button>
       </BottomAction.Container>

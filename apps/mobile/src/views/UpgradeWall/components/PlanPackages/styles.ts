@@ -16,7 +16,7 @@ export const Container = styled.View`
   gap: ${({ theme }) => theme.spacing[2.5]}px;
 `;
 
-export const PlanContainer = styled(PressableArea)<CheckContainerProps>`
+export const PlanContainer = styled(PressableArea).attrs({ accessible: true })<CheckContainerProps>`
   border-width: ${({ theme }) => theme.stroke.lg}px;
   border-color: ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.md}px;

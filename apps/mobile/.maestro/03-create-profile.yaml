@@ -1,0 +1,29 @@
+appId: ${APP_ID}
+name: Create dog profile (fresh account)
+tags:
+  - smoke
+---
+# Sign in as fresh user (test@pegada.app) → CreateProfile screen → fill name → submit.
+# Point-based. Verification = no crash + screenshot trail.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login.yaml
+- takeScreenshot: 03-on-create-profile
+# Name input field center is at ~50%, 66% Y on Pro Max CreateProfile screen
+- tapOn:
+    point: "50%, 66%"
+- waitForAnimationToEnd
+- inputText: "Buddy"
+- takeScreenshot: 03-name-typed
+# With keyboard up, Create Profile button moves up to ~50%, 60% Y.
+# (Submission will fail without uploaded photos but flow still smokes the UI.)
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_for_next__"
+    timeout: 12000
+    optional: true
+- takeScreenshot: 03-after-submit

@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+name: Messages tab renders chat list
+tags:
+  - smoke
+---
+# Returning user → Messages tab.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 11-after-login
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 11-on-messages

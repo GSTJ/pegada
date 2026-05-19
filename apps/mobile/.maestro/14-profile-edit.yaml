@@ -1,0 +1,37 @@
+appId: ${APP_ID}
+name: Edit dog profile — change name and save
+tags:
+  - smoke
+---
+# Returning user → Profile tab → Edit → change name → Save.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: 14-after-login
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 14-on-profile
+# Edit profile row is typically first item in the settings list, ~50%, 40% Y
+- tapOn:
+    point: "50%, 40%"
+- waitForAnimationToEnd
+- takeScreenshot: 14-on-edit
+# Name field on edit screen is around 50%, 38% Y (varies). Tap and type.
+- tapOn:
+    point: "50%, 38%"
+- waitForAnimationToEnd
+- eraseText: 30
+- inputText: "Buddy Maestro"
+- takeScreenshot: 14-typed
+# Save button at bottom — ~50%, 60% Y with keyboard up
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: 14-after-save

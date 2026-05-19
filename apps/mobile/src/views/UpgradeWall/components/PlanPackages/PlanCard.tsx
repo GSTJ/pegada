@@ -89,7 +89,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   })();
 
   return (
-    <PlanContainer selected={selected} onPress={onPress}>
+    <PlanContainer testID={`upgrade-wall-plan-${identifier}`} selected={selected} onPress={onPress}>
       <Checkbox selected={selected} />
       <Flex>
         <Text fontSize="sm" fontWeight="semibold">

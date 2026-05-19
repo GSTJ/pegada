@@ -1,0 +1,37 @@
+appId: ${APP_ID}
+name: Complete profile (optional fields)
+tags:
+  - smoke
+---
+# Sign in. May land on CreateProfile, CompleteProfile, AskForLocation, or tabs
+# depending on fixture state. Point-based smoke that walks through likely steps.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login.yaml
+- takeScreenshot: 04-after-login
+# Best-effort attempts at the next two screens. Visibility cannot be asserted, so
+# we run each step blindly; the no-crash outcome plus the final screenshot tells us
+# what surface we landed on.
+- tapOn:
+    point: "50%, 66%"
+- waitForAnimationToEnd
+- inputText: "Buddy"
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd
+- takeScreenshot: 04-after-create-attempt
+# If CompleteProfile loaded next, the birth-date field is around 50%, 55% Y.
+- tapOn:
+    point: "50%, 55%"
+- waitForAnimationToEnd
+- inputText: "01/01/2020"
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: 04-final

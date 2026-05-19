@@ -21,6 +21,7 @@ const EmailInput: React.FC<EmailInputProps> = (props) => {
           value={email}
           onChangeText={setEmailNumber}
           autoFocus
+          testID="signin-email"
           {...props}
         />
       </Content>

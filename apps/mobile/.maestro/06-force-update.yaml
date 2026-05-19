@@ -1,0 +1,27 @@
+appId: ${APP_ID}
+name: Force-update screen renders
+tags:
+  - smoke
+  - manual
+---
+# NOT testable in CI without backend mocking. The ForceUpdate screen is
+# rendered when the server returns a minimum-version header that the app
+# fails to satisfy. There is no in-app way to trigger it.
+#
+# Two manual workarounds:
+#   1. Run against a staging server with the min-version bumped past the
+#      current build's app.json version.
+#   2. Add a temporary toggle in dev to force-mount the screen and run this
+#      flow against that build.
+#
+# When testable, the flow is:
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- assertVisible:
+    id: force-update-screen
+    timeout: 15000
+- assertVisible:
+    id: force-update-title
+- assertVisible:
+    id: force-update-button

@@ -58,7 +58,10 @@ const UserDogProfileHeader = () => {
               gap: theme.spacing[1.5],
             }}
           >
-            <PersonalInfo.Name style={{ fontSize: theme.typography.sizes.xl.size }}>
+            <PersonalInfo.Name
+              testID="profile-dog-name"
+              style={{ fontSize: theme.typography.sizes.xl.size }}
+            >
               {dog.name}
               {dog.birthDate ? (
                 <PersonalInfo.Age style={{ fontSize: theme.typography.sizes.lg.size }}>

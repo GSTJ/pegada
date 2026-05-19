@@ -37,6 +37,7 @@ export interface InputPickerProps<T extends Item> extends Partial<
   searchable?: boolean;
   snapPoints?: string[];
   data: T[];
+  testID?: string;
 }
 
 const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
@@ -174,6 +175,7 @@ export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
   return (
     <Container>
       <Pressable
+        testID={props.testID}
         disabled={props.loading}
         onPress={() => pickerSheetRef.current?.present()}
         pointerEvents="box-only"

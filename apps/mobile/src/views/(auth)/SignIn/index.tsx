@@ -100,7 +100,7 @@ const InsertEmail = () => {
               onChangeText={setEmail}
               error={error}
             />
-            <Button loading={loginMutation.isPending} onPress={handleLogin}>
+            <Button loading={loginMutation.isPending} onPress={handleLogin} testID="signin-submit">
               {t("insertEmail.continue")}
             </Button>
           </BottomCard>

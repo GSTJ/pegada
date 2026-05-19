@@ -24,7 +24,7 @@ export const Container = styled(Animated.View).attrs({
   padding: 0 ${(props) => props.theme.spacing[2]}px;
 `;
 
-export const ActionItem = styled(PressableArea)`
+export const ActionItem = styled(PressableArea).attrs({ accessible: true })`
   padding: ${(props) => props.theme.spacing[2.5]}px;
   background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
 

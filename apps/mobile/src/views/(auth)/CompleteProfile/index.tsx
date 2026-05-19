@@ -110,6 +110,7 @@ const CompleteProfile = () => {
                 rules={{ required: true }}
                 render={({ field: { onChange, value }, fieldState }) => (
                   <BreedPicker
+                    testID="complete-profile-breed"
                     title={t("completeProfile.breed")}
                     breed={value}
                     setBreed={(breed) => onChange(breed.id)}
@@ -129,6 +130,7 @@ const CompleteProfile = () => {
                 rules={{ required: true }}
                 render={({ field: { onChange, onBlur, value, name }, fieldState }) => (
                   <Input
+                    testID="complete-profile-birth-date"
                     title={t("completeProfile.birthDate")}
                     placeholder="DD/MM/YYYY"
                     value={value ?? ""}
@@ -159,6 +161,7 @@ const CompleteProfile = () => {
               rules={{ required: true }}
               render={({ field: { onChange, value }, fieldState }) => (
                 <InputPicker
+                  testID="complete-profile-size"
                   optional
                   title={t("completeProfile.size")}
                   placeholder={t("sizes.small")}
@@ -177,6 +180,7 @@ const CompleteProfile = () => {
               rules={{ required: true }}
               render={({ field: { onChange, value }, fieldState }) => (
                 <InputPicker
+                  testID="complete-profile-color"
                   optional
                   title={t("completeProfile.color")}
                   placeholder={colors[0]?.name}
@@ -194,7 +198,11 @@ const CompleteProfile = () => {
           </Text>
         </Container>
         <BottomAction.Container>
-          <Button loading={myDogUpdateMutation.isPending} onPress={() => saveUser()}>
+          <Button
+            loading={myDogUpdateMutation.isPending}
+            onPress={() => saveUser()}
+            testID="profile-submit"
+          >
             {continueText}
           </Button>
         </BottomAction.Container>

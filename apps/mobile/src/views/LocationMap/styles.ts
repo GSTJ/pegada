@@ -1,7 +1,7 @@
 import RNMap from "react-native-maps";
 import styled from "styled-components/native";
 
-export const Container = styled.View`
+export const Container = styled.View.attrs({ accessible: true })`
   flex: 1;
 `;
 

@@ -16,6 +16,7 @@ export const Content = styled.View`
 
 export const TextInput = styled.TextInput.attrs((props) => ({
   placeholderTextColor: props.theme.colors.placeholder,
+  accessible: true,
 }))`
   padding: ${(props) => props.theme.spacing[4]}px 20px;
   font-family: ${(props) => props.theme.typography.fontFamily.medium};
