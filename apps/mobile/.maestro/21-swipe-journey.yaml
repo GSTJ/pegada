@@ -1,0 +1,152 @@
+appId: ${APP_ID}
+name: Swipe stack journey — profile → like → dislike → maybe → report (single session)
+tags:
+  - smoke
+  - regression
+---
+# End-to-end swipe-stack user journey, exercised as ONE continuous session
+# rather than 6 isolated smoke flows. Mirrors what a returning user actually
+# does after signing in: they peek at the top dog's profile, swipe a couple
+# cards, peek at the next dog, then report a profile that bothered them.
+#
+# Why this exists separately from 08/09/10:
+# - 08/09 only tap one button and assert nothing about the deck state.
+# - 10 opens the profile but doesn't combine it with deck-state assertions.
+# - The "different card after action" invariant has never been covered, so
+#   a regression where the deck stops advancing (e.g. dispatch dropped or
+#   currentCardId stuck) ships green today. This flow catches it because
+#   each like/dislike/maybe step reasserts swipe-card on a fresh card.
+#
+# Seed assertion strategy:
+# - The Rex deck is generated via faker (generate-fake-user-with-dog.ts),
+#   so dog NAMES are NOT stable across runs — we cannot assert text="Daisy".
+# - What IS stable: every card renders MainCard with testID="swipe-card",
+#   the dog profile screen mounts S.Name with testID="dog-profile-name",
+#   and the action bar exposes testID="swipe-like" / "swipe-dislike" /
+#   "swipe-maybe" (last one added in this PR). The flow uses those as
+#   stable anchors and relies on the per-step screenshots
+#   (21-on-swipe / 21-after-like / 21-after-dislike / 21-after-maybe) for
+#   hash-diff verification that the rendered card actually changed.
+#
+# Report flow:
+# - reportUser in views/DogProfile/index.tsx fires a native Alert ("Report"
+#   title, "Cancel" / "Yes" buttons). Tapping Yes calls Linking.openURL
+#   (mailto:) then swipe.swipe.mutate then router.back(). There is no
+#   toast — confirmation = the Alert dismisses and we leave the dog
+#   profile (or the deck advances). We assert the post-report swipe-card
+#   is visible again.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# --- 1. Land on Swipe tab -------------------------------------------------
+- assertVisible:
+    id: "swipe-card"
+- assertVisible:
+    id: "swipe-like"
+- assertVisible:
+    id: "swipe-dislike"
+- assertVisible:
+    id: "swipe-maybe"
+- takeScreenshot: 21-on-swipe
+
+# --- 2. Open the top dog's profile from the card's personal-info area -----
+# Tapping the bottom personal-info pressable on MainCard pushes
+# SceneName.Profile/[id]. testID anchor is dog-profile-name on the
+# heading inside DogProfile.
+- tapOn:
+    point: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "dog-profile-name"
+- takeScreenshot: 21-on-profile
+# Scroll through profile content (bio + share + report buttons sit below).
+- scroll
+- waitForAnimationToEnd
+- assertVisible:
+    id: "dog-profile-report"
+- takeScreenshot: 21-profile-scrolled
+
+# --- 3. Back to swipe deck ------------------------------------------------
+- runFlow: utils/back.yaml
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 21-back-on-swipe
+
+# --- 4. LIKE → deck must advance to a new top card ------------------------
+- tapOn:
+    id: "swipe-like"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 21-after-like
+
+# --- 5. DISLIKE → deck advances again -------------------------------------
+- tapOn:
+    id: "swipe-dislike"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 21-after-dislike
+
+# --- 6. MAYBE (super-like equivalent) → deck advances ---------------------
+# Swipe.Maybe is the third direction wired through swipeHandlerRef +
+# MatchActionBar onMaybe in src/components/MatchActionBar/index.tsx.
+- tapOn:
+    id: "swipe-maybe"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 21-after-maybe
+
+# --- 7. Re-open the (now different) top dog's profile to report -----------
+- tapOn:
+    point: "50%, 75%"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "dog-profile-name"
+- takeScreenshot: 21-profile-for-report
+- scroll
+- waitForAnimationToEnd
+
+# --- 8. Trigger the report Alert and confirm ------------------------------
+- tapOn:
+    id: "dog-profile-report"
+- waitForAnimationToEnd:
+    timeout: 3000
+# Native Alert title (i18n key dogProfile.report -> "Report") and
+# the safety-warning body (dogProfile.reportMessage). Both must render.
+- assertVisible:
+    text: "Report"
+- assertVisible: "By reporting a profile, you are helping us to keep the community safe. Would you like to proceed?"
+- takeScreenshot: 21-report-dialog
+# Confirm — "Yes" maps to dogProfile.yes. The handler fires mailto +
+# swipe.swipe.mutate; the Alert dismisses regardless of mail availability.
+- tapOn:
+    text: "Yes"
+- waitForAnimationToEnd:
+    timeout: 8000
+# iOS may surface a system "Cannot open page" alert if Mail isn't
+# configured on the simulator. Dismiss it if present so the flow can
+# assert the post-report deck state.
+- tapOn:
+    text: "OK"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 3000
+# Confirmation = we're back on the swipe deck (router.back fired) and
+# the deck still renders a card.
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 21-after-report

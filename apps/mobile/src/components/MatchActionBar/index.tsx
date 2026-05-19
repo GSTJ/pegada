@@ -29,7 +29,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
         </ActionItem>
       </Animated.View>
       <Animated.View entering={maybeAnimation}>
-        <ActionItem onPress={onMaybe}>
+        <ActionItem testID="swipe-maybe" onPress={onMaybe}>
           <ThinkingEmoji />
         </ActionItem>
       </Animated.View>

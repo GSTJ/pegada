@@ -23,3 +23,4 @@ executionOrder:
     - 17-location-map
     - 18-new-match
     - 19-chat-message-order
+    - 21-swipe-journey
