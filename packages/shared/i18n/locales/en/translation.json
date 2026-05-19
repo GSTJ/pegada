@@ -152,7 +152,9 @@
     "permissionsRequiredMessage": "Please grant the required permissions to access the camera and photo library.",
     "permissionsRequiredTitle": "Sorry, we need these permissions to make this work!",
     "takePhoto": "Take Photo",
-    "title": "What do you prefer?"
+    "title": "What do you prefer?",
+    "uploadFailed": "Couldn't upload image. Please try again.",
+    "uploadFailedDev": "Upload failed: {{reason}}"
   },
   "insertEmail": {
     "accountCode": "We will send a 6-digit code to authorize your account. If you don't have one yet, we'll create it.",

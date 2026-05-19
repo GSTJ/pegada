@@ -152,7 +152,9 @@
     "permissionsRequiredMessage": "Por favor, conceda as permissões necessárias para acessar a câmera e a galeria de fotos.",
     "permissionsRequiredTitle": "Desculpe, precisamos dessa permissão para que isso funcione!",
     "takePhoto": "Tirar Foto",
-    "title": "O que você prefere?"
+    "title": "O que você prefere?",
+    "uploadFailed": "Não foi possível enviar a imagem. Tente novamente.",
+    "uploadFailedDev": "Falha no upload: {{reason}}"
   },
   "insertEmail": {
     "accountCode": "Vamos enviar um código de 6 dígitos para autorizar sua conta. Se ainda não tem uma, vamos criá-la.",
