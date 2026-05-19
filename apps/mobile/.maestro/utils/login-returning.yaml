@@ -3,9 +3,18 @@ name: util - login as returning user (lands on swipe tabs)
 tags:
   - util
 ---
-# Logs in as test+returning@pegada.app which has dog Rex + match Bella + chats,
-# so the auth router pushes straight to the swipe tab. Caller must already
-# have launchApp'd. Coordinates calibrated on iPhone 17 Pro Max.
+# Logs in as test@pegada.app — the magic email. The user must be seeded
+# with a Dog + Match + chats so the auth router pushes straight to swipe
+# (see packages/database/local-seed.ts / /tmp/pegada-magic-seed.ts).
+#
+# IMPORTANT: do NOT use test+returning|bella|max here. Those emails are
+# NOT in APPLE_MAGIC_EMAIL, so sendVerification ROTATES their DB code on
+# every email submit, and 424242 will be rejected as "Invalid code".
+# Only test@pegada.app (the actual APPLE_MAGIC_EMAIL) is exempt from the
+# overwrite and reliably accepts 424242 every time.
+#
+# Caller must already have launchApp'd. Coordinates calibrated on
+# iPhone 17 Pro Max (440x956 logical, 1320x2868 px).
 - tapOn:
     text: "Ask App Not to Track"
     optional: true
@@ -15,39 +24,44 @@ tags:
 - tapOn:
     text: "Don.t Allow"
     optional: true
+# Email screen: tap email field, type, submit with Enter (Continue button
+# point taps are unreliable on this build).
 - tapOn:
-    point: "50%, 55%"
+    point: "50%, 65%"
 - waitForAnimationToEnd
-- inputText: "test+returning@pegada.app"
-- hideKeyboard
-- tapOn:
-    point: "50%, 62%"
-- extendedWaitUntil:
-    notVisible: "__wait_for_otp_screen__"
-    timeout: 10000
-    optional: true
-# OTP — type one digit at a time, tapping each cell first to give it focus.
-- tapOn:
-    point: "12%, 40%"
+- inputText: "test@pegada.app"
+- pressKey: Enter
 - waitForAnimationToEnd
+# OTP: per-digit entry to avoid race where Maestro emits "424242" faster
+# than React commits state. Each cell is a separate TextInput; handleChange
+# concatenates digits into shared value and advances focus. Auto-submits
+# at length 6. Per-digit wait shortened to 25ms (Maestro driver round-trip
+# floor) so the full OTP entry takes ~150ms instead of ~1s.
+- waitForAnimationToEnd:
+    timeout: 8000
 - inputText: "4"
-- tapOn:
-    point: "25%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "2"
-- tapOn:
-    point: "38%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "4"
-- tapOn:
-    point: "51%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "2"
-- tapOn:
-    point: "64%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "4"
-- tapOn:
-    point: "77%, 40%"
+- waitForAnimationToEnd:
+    timeout: 25
 - inputText: "2"
-- hideKeyboard
-- extendedWaitUntil:
-    notVisible: "__wait_for_tabs__"
+- waitForAnimationToEnd:
     timeout: 25000
+# ATT dialog may appear during/after OTP submission.
+- tapOn:
+    text: "Ask App Not to Track"
     optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd
