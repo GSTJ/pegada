@@ -16,6 +16,7 @@ export const PlanContainer = styled(PressableArea)`
 
 export const ScrollContainer = styled.View`
   overflow: hidden;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 export const SettingsList = styled(Animated.ScrollView)`
@@ -25,6 +26,7 @@ export const SettingsList = styled(Animated.ScrollView)`
 
 export const Container = styled.View.attrs({ accessible: true })`
   flex-grow: 1;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 export const BackgroundProfileContainer = styled.View`

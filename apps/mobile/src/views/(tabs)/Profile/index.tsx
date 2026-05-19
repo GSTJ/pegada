@@ -9,6 +9,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused, useScrollToTop } from "@react-navigation/native";
 import { t } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -103,6 +104,8 @@ const Profile = () => {
 
   const dogProfileHeight = useDogProfileHeight();
 
+  const tabBarHeight = useBottomTabBarHeight();
+
   return (
     <Container testID="profile-screen">
       {isFocused ? <StatusBar style="light" /> : null}
@@ -122,7 +125,7 @@ const Profile = () => {
         <SettingsList
           bounces={false}
           contentContainerStyle={{
-            paddingBottom: theme.spacing[4],
+            paddingBottom: theme.spacing[4] + tabBarHeight,
             paddingTop: dogProfileHeight - marginTop,
             flexGrow: 1,
             zIndex: 10,
