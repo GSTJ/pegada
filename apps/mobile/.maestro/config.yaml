@@ -16,11 +16,10 @@ executionOrder:
     - 10-dog-profile
     - 11-messages-list
     - 12-chat-conversation
-    - 13-profile-view
-    - 14-profile-edit
     - 15-preferences
     - 16-upgrade-wall
     - 17-location-map
     - 19-chat-message-order
     - 21-swipe-journey
     - 22-new-match-journey
+    - 24-profile-journey

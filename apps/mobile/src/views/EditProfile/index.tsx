@@ -214,6 +214,7 @@ const EditProfile = () => {
             rules={{ required: true }}
             render={({ field: { onChange, onBlur, value }, fieldState }) => (
               <Input
+                testID="edit-profile-bio"
                 title={t("editProfile.bio")}
                 placeholder={t("editProfile.bioPlaceholder")}
                 value={value}
