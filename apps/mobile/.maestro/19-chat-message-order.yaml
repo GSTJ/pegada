@@ -1,0 +1,54 @@
+appId: ${APP_ID}
+name: Chat — new sent message appears at the bottom (regression for FlashList v2 inverted drop)
+tags:
+  - smoke
+  - regression
+---
+# Regression: a user-caught bug where new messages appeared at the TOP of the
+# conversation instead of the BOTTOM. Root cause: FlashList v2 dropped the
+# `inverted` prop; the API returns messages newest-first (DESC), so without
+# reversing in the UI, newest renders at top. Fixed by reversing in
+# useChatPagination so newest is at the bottom adjacent to the Send composer.
+#
+# This flow opens the seeded chat with Bella, sends a unique message, then
+# asserts both the unique text and the OLDEST seeded message ("Hey Bella!")
+# are visible. With the bug active, the oldest is offscreen-above and only
+# the newest two messages render in the visible viewport.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 19-after-login
+# Messages tab is at the bottom-center of the tab bar
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 19-on-messages
+# First chat row near the top of the list (~50%, 25% Y)
+- tapOn:
+    point: "50%, 25%"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 19-on-chat
+# Send a unique new message — it MUST render at the bottom.
+- tapOn:
+    id: "chat-input"
+- waitForAnimationToEnd:
+    timeout: 1000
+- inputText: "REGRESSION_BOTTOM_CHECK"
+- takeScreenshot: 19-typed
+# Send button on the right of the input (~92%, 70% Y when keyboard is up)
+- tapOn:
+    point: "92%, 70%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 19-after-send
+# The unique text must be on screen.
+- assertVisible: "REGRESSION_BOTTOM_CHECK"
+# The seeded greeting is the OLDEST message and must appear ABOVE the new
+# message (visible in the viewport, scrolled to top of conversation).
+- assertVisible:
+    text: "Hey Bella! Want to meet up at the dog park?"

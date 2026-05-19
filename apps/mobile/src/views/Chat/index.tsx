@@ -40,24 +40,28 @@ const ChatMessageList = () => {
   const topPadding = insets.top + HEADER_HEIGHT + theme.spacing[3];
   const bottomPadding = insets.bottom + SEND_HEIGHT + theme.spacing[3];
 
-  const inverted = !!messages?.length;
-
+  // FlashList v2 dropped the `inverted` prop; the list now always renders
+  // top-down. `useChatPagination` returns messages oldest→newest so the
+  // newest message renders at the bottom (next to the Send composer) and
+  // older history paginates by scrolling up (onStartReached).
   const contentContainerStyle = {
-    paddingVertical: theme.spacing[3],
     paddingHorizontal: theme.spacing[3],
-    paddingBottom: inverted ? topPadding : bottomPadding,
-    paddingTop: inverted ? bottomPadding : topPadding,
+    paddingTop: topPadding,
+    paddingBottom: bottomPadding,
   };
 
   const ListEmptyComponent = () => <Empty />;
 
   const renderItem = ({ item, index }: { item: MessageProps; index: number }) => {
-    // Don't show the date if it's the first message or if it's loading
-    const showNextDay = index !== messages.length - 1 || !hasNextPage;
+    // Show the date separator above this message when the previous (older)
+    // message is on a different day. Hide it for the very first item when
+    // older pages may still load — we don't yet know if it's truly first.
+    const previousMessage = messages?.[index - 1];
+    const showNextDay = index !== 0 || !hasNextPage;
 
     return (
       <>
-        {showNextDay ? <NextDay message={item} nextMessage={messages?.[index + 1]} /> : null}
+        {showNextDay ? <NextDay message={item} nextMessage={previousMessage} /> : null}
         <Message {...item} self={item.senderId !== dogId}>
           {item.content}
         </Message>
@@ -65,17 +69,18 @@ const ChatMessageList = () => {
     );
   };
 
-  // inverted is passed through to the underlying ScrollView; FlashList v2 types don't expose it
+  // Older messages are at the top, so the loading spinner goes in the
+  // header and pagination triggers via onStartReached.
   const flashListProps = {
     contentContainerStyle,
-    inverted,
     data: messages,
     keyExtractor,
-    ListFooterComponent: FooterComponent,
+    ListHeaderComponent: FooterComponent,
     ListEmptyComponent,
     renderItem,
-    onEndReached: loadMore,
-    onEndReachedThreshold: 0.5,
+    onStartReached: loadMore,
+    onStartReachedThreshold: 0.5,
+    maintainVisibleContentPosition: { autoscrollToBottomThreshold: 0.2 },
   };
 
   return (
