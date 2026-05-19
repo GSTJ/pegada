@@ -153,11 +153,14 @@ jobs:
         run: |
           # Create minimal stub files so prebuild doesn't error.
           # These are not used for the auth flow under test.
-          if [ ! -f google-services.json ]; then
+          # Use -s (non-empty) instead of -f: the apps/mobile preinstall
+          # script writes a single newline when GOOGLE_SERVICES_JSON env is
+          # unset, leaving a 1-byte file that passes -f but breaks parsers.
+          if [ ! -s google-services.json ]; then
             echo '{"project_info":{"project_number":"000","project_id":"ci-stub","storage_bucket":""},"client":[]}' \
               > google-services.json
           fi
-          if [ ! -f GoogleService-Info.plist ]; then
+          if [ ! -s GoogleService-Info.plist ] || ! head -1 GoogleService-Info.plist | grep -q '<?xml'; then
             # Use printf to avoid heredoc/YAML indentation interactions.
             printf '%s\n' \
               '<?xml version="1.0" encoding="UTF-8"?>' \
