@@ -254,7 +254,7 @@ jobs:
           APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
 
       - name: Run Maestro full flows (requires EXPO_PUBLIC_API_URL secret)
-        if: ${{ secrets.EXPO_PUBLIC_API_URL != '' }}
+        if: env.EXPO_PUBLIC_API_URL != ''
         run: |
           maestro test apps/mobile/.maestro/ \
             --format junit \
@@ -263,6 +263,7 @@ jobs:
         env:
           APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
           APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
+          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
         continue-on-error: true
 
       # ------------------------------------------------------------------
