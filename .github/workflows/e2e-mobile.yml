@@ -279,7 +279,16 @@ jobs:
 
       - name: Install app on simulator
         run: |
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d | head -1)
+          set -euo pipefail
+          echo "::group::derivedData tree"
+          find apps/mobile/ios/build -name "*.app" -type d 2>/dev/null || true
+          ls apps/mobile/ios/build/Build/Products/ 2>/dev/null || true
+          echo "::endgroup::"
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::No .app produced under apps/mobile/ios/build — xcodebuild likely failed silently. Check the build step log."
+            exit 1
+          fi
           echo "Installing: $APP_PATH"
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
