@@ -20,15 +20,42 @@ tags:
 - tapOn:
     text: "Don.t Allow"
     optional: true
-# Email screen: tap email field, type address, submit with Enter.
-# The Continue button cannot be hit reliably via point taps on this build;
-# the email TextInput has returnKeyType=Done|next so Enter submits the form.
+# Email screen: tap email field, type address, then tap Continue.
+#
+# Calibration (issue #40): with the autoFocus keyboard open on iPhone 17
+# Pro Max iOS 26 the keyboard occupies the bottom ~29% of the viewport
+# (Y ≥ 71%). The OLD coord `50%, 84%` landed inside the keyboard's `v`
+# key, prepending a stray `v` to the typed email. Pixel-measured coords
+# from a 1320×2868 keyboard-up screenshot:
+#   - email TextInput vertical center ≈ 53% Y
+#   - Continue button vertical center ≈ 62% Y
+#
+# pressKey:Enter was previously used here because the Continue tap was
+# (mis-)calibrated to the keyboard region; with the correct Continue
+# coord the explicit tap is reliable across iOS 26 + RN Fabric where
+# pressKey:Enter does not always advance.
 - tapOn:
-    point: "50%, 84%"
+    point: "50%, 53%"
+- waitForAnimationToEnd
+# Defense-in-depth for issue #40: if a future calibration drift puts the
+# focus tap inside the keyboard region, that tap types a stray character
+# into the field. Erase 50 chars (well above any sane manual prefix) so
+# the field is empty before we input the real email.
+- eraseText: 50
 - waitForAnimationToEnd
 - inputText: "test@pegada.app"
-- pressKey: Enter
+- tapOn:
+    point: "50%, 62%"
 - waitForAnimationToEnd
+# Regression guard for issue #40: if the email tap lands in the keyboard
+# (as the OLD 84% coord did with the v-key), inputText prepends junk to
+# the email, the magic-email check rejects it, and the flow gets stuck on
+# the email screen with a QWERTY keyboard. The OTP screen swaps in iOS's
+# system number-pad which exposes a "Next" accessory button that XCUITest
+# CAN see even though app-rendered RN text cannot. Assert it here so a
+# coord regression fails LOUDLY at the utility level instead of cascading
+# into "OTP cells never filled" timeouts in every dependent flow.
+- assertVisible: "Next"
 # OTP screen: first digit cell autoFocuses (isFirst=true).
 # Each cell is a separate TextInput with maxLength=6, so OtpInput.handleChange
 # concatenates into shared `value` state and advances focus as digits accumulate.
