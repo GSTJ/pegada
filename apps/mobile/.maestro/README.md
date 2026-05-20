@@ -45,15 +45,38 @@
 
 ## Running locally
 
-Boot an iOS simulator and install the debug build, then:
+Boot an iOS simulator and install the debug build, then use the wrapper
+script — it seeds the local Postgres into a known-good state before
+invoking `maestro test` so every run starts deterministically (12 dogs
+near SF, magic user `test@pegada.app` with Rex, Rex<->Bella match + 2
+chat messages, OTP `424242` valid on every test user):
 
 ```sh
 # Run all flows
-maestro test apps/mobile/.maestro/
+apps/mobile/.maestro/scripts/run-flow.sh apps/mobile/.maestro/
 
 # Run a single flow
-maestro test apps/mobile/.maestro/launch.yaml
+apps/mobile/.maestro/scripts/run-flow.sh apps/mobile/.maestro/B-returning-user-tabs-tour.yaml
 ```
+
+Calling `maestro test` directly still works but you must run the seed
+yourself first (otherwise the swipe deck will be empty and the matches
+the flows assert on will be missing):
+
+```sh
+DATABASE_URL='postgresql://tony:hawk@localhost:3356/pegada' \
+  pnpm -F @pegada/database maestro:seed
+maestro test apps/mobile/.maestro/
+```
+
+> ### Why a wrapper script and not `runScript:` inside each YAML?
+>
+> Maestro's `- runScript:` step only executes JavaScript inside a
+> sandboxed GraalJS runtime — no shell exec, no process spawn, no file
+> I/O. The seed needs `tsx` + `@prisma/client` + a live Postgres
+> connection, which the JS sandbox cannot provide. Wrapping
+> `maestro test` mirrors the pattern other E2E tools (Playwright's
+> `globalSetup`, Jest's `setupFiles`) use for this exact problem.
 
 ## Flows
 
