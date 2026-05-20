@@ -2,13 +2,13 @@
 .pbxproj patcher: find the PBXShellScriptBuildPhase whose name field contains
 'Bugsnag' and replace its shellScript value with 'exit 0 # disabled in CI'.
 
-Three strategies (tried in order):
-  A. Section-based parser — scan inside the PBXShellScriptBuildPhase section
-     using a name-field check (most reliable, doesn't depend on UUID comments).
-  B. DOTALL comment regex — match the UUID comment that contains 'Bugsnag'
-     then crawl forward to shellScript (handles standard pbxproj format).
-  C. Per-block name search — find any block where name contains 'Bugsnag'
-     and replace the shellScript within that block extent.
+Strategy:
+  1. Find the PBXShellScriptBuildPhase section via text markers.
+  2. For each phase block UUID, extract the block via brace counting.
+  3. Identify Bugsnag blocks by checking for 'Bugsnag' in block content.
+  4. Replace the shellScript line in the Bugsnag block by splitting into
+     lines and replacing the line that starts with 'shellScript = "'.
+     This is line-level, so embedded quotes don't matter.
 
 Usage:
     PBXPROJ=path/to/project.pbxproj python3 patch-bugsnag-phase.py
@@ -17,140 +17,123 @@ import re
 import sys
 import os
 
+print("patch-bugsnag-phase.py: starting", flush=True)
+
 pbxproj = os.environ.get("PBXPROJ", "")
 if not pbxproj:
     print("ERROR: PBXPROJ environment variable is not set", file=sys.stderr)
     sys.exit(1)
 
+print(f"Reading: {pbxproj}", flush=True)
 try:
-    src = open(pbxproj).read()
+    src = open(pbxproj, encoding="utf-8", errors="replace").read()
 except OSError as exc:
     print(f"ERROR: cannot read {pbxproj}: {exc}", file=sys.stderr)
     sys.exit(1)
 
-REPLACEMENT = r'\1exit 0 # disabled in CI: no BUGSNAG_API_KEY\2'
-shell_re = re.compile(r'(shellScript = ")[^"]*(")')
+print(f"File size: {len(src)} bytes", flush=True)
 
+# ── Locate the PBXShellScriptBuildPhase section ───────────────────────────────
+SECTION_BEGIN = "/* Begin PBXShellScriptBuildPhase section */"
+SECTION_END   = "/* End PBXShellScriptBuildPhase section */"
 
-def patch_block(block_text):
-    """Replace shellScript value in a single block text. Returns (new_text, changed)."""
-    new_text, n = shell_re.subn(
-        lambda m: m.group(1) + "exit 0 # disabled in CI: no BUGSNAG_API_KEY" + m.group(2),
-        block_text,
-    )
-    return new_text, n > 0
+begin_pos = src.find(SECTION_BEGIN)
+end_pos   = src.find(SECTION_END)
 
-
-def write_and_exit(new_src, strategy, count):
-    open(pbxproj, "w").write(new_src)
-    print(f"Patched {count} Bugsnag shellScript(s) via {strategy}")
-    sys.exit(0)
-
-
-# ── Strategy A: PBXShellScriptBuildPhase section parser ──────────────────────
-section_re = re.compile(
-    r"(/\* Begin PBXShellScriptBuildPhase section \*/)(.*?)(/\* End PBXShellScriptBuildPhase section \*/)",
-    re.DOTALL,
-)
-sm = section_re.search(src)
-if sm:
-    section_content = sm.group(2)
-    # Each block: from "UUID /* ... */ = {" to the matching closing "};".
-    # We track brace depth to find the end of each block.
-    lines = section_content.split("\n")
-    # Collect blocks as (start_idx, end_idx) in lines list.
-    blocks = []
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        # Block start: any line with "= {" that looks like a pbxproj object entry.
-        if "= {" in line and (line.strip().startswith("/*") or re.match(r"\s*\w", line)):
-            depth = line.count("{") - line.count("}")
-            start = i
-            j = i + 1
-            while j < len(lines) and depth > 0:
-                depth += lines[j].count("{") - lines[j].count("}")
-                j += 1
-            blocks.append((start, j))
-            i = j
-        else:
-            i += 1
-
-    patched = 0
-    new_lines = list(lines)
-    for start, end in blocks:
-        block_text = "\n".join(lines[start:end])
-        if re.search(r'name\s*=\s*"[^"]*Bugsnag[^"]*"', block_text):
-            print(f"Strategy A: found Bugsnag block at line {start}")
-            new_block, changed = patch_block(block_text)
-            if changed:
-                new_lines[start:end] = new_block.split("\n")
-                patched += 1
-            else:
-                print("  WARNING: shellScript not found inside Bugsnag block")
-
-    if patched:
-        new_section_content = "\n".join(new_lines)
-        new_src = src.replace(
-            sm.group(0),
-            sm.group(1) + new_section_content + sm.group(3),
-            1,
-        )
-        write_and_exit(new_src, "Strategy A (section parser)", patched)
-    else:
-        print("Strategy A: section found but no Bugsnag name in any block.")
-        # Fall through to Strategy B.
+if begin_pos != -1 and end_pos != -1:
+    section_text = src[begin_pos : end_pos + len(SECTION_END)]
+    print(f"PBXShellScriptBuildPhase section found ({len(section_text)} bytes).", flush=True)
 else:
-    print("Strategy A: section markers not found, trying Strategy B.")
+    print("WARNING: PBXShellScriptBuildPhase section markers not found. Scanning full file.", flush=True)
+    section_text = src
 
-# ── Strategy B: UUID-comment DOTALL regex ────────────────────────────────────
-# Matches: /* ... Bugsnag ... */ = { ... shellScript = "..."; ...
-# Using .*? (lazy, DOTALL) to traverse nested braces to reach shellScript.
-phase_re = re.compile(
-    r"(/\*[^*]*Bugsnag[^*]*\*/[^{]*=\s*\{.*?shellScript\s*=\s*\")([^\"]*)(\";)",
-    re.DOTALL,
-)
-new_src, n = phase_re.subn(
-    r"\1exit 0 # disabled in CI: no BUGSNAG_API_KEY\3", src
-)
-if n:
-    write_and_exit(new_src, "Strategy B (DOTALL comment regex)", n)
-else:
-    print("Strategy B: no match. Trying Strategy C.")
+# ── For each phase UUID in the section, extract block and check for Bugsnag ───
+# UUID lines look like: \t\tXXXXXXXXXXXXXXXXXXXXXXXX /* ... */ = {
+uuid_line_re = re.compile(r'\t\t([0-9A-Fa-f]{24}) /\* ([^*]+) \*/ = \{')
 
-# ── Strategy C: name-field block search ──────────────────────────────────────
-# Find any block containing name = "... Bugsnag ..." and patch its shellScript.
-# We do this on the whole file (no section markers required).
-name_block_re = re.compile(
-    r"((?:[A-F0-9a-f]{24}|\S+)\s+/\*[^*]+\*/\s*=\s*\{)"  # UUID block opener
-    r"((?:[^{}]|\{[^{}]*\})*?)"  # block body (single nesting level)
-    r"(\};)",
-    re.DOTALL,
-)
 patched = 0
-new_src = src
-for bm in name_block_re.finditer(src):
-    body = bm.group(2)
-    if re.search(r'name\s*=\s*"[^"]*Bugsnag[^"]*"', body):
-        print(f"Strategy C: found Bugsnag block.")
-        new_body, changed = patch_block(body)
-        if changed:
-            new_src = new_src.replace(
-                bm.group(0), bm.group(1) + new_body + bm.group(3), 1
-            )
-            patched += 1
+new_src_chars = list(src)  # Mutable character list for in-place patching.
+
+for m in uuid_line_re.finditer(section_text):
+    uuid = m.group(1)
+    comment = m.group(2).strip()
+
+    # Find the same line in the full source (new_src_chars built from src).
+    # We search for the UUID to locate the block start precisely.
+    line_start_in_src = src.find(m.group(0))
+    if line_start_in_src == -1:
+        print(f"  UUID {uuid} not found in full source. Skipping.", flush=True)
+        continue
+
+    # Scan to find the matching closing "};".
+    # Start at the '{' in "= {" at the end of the match.
+    scan_pos = line_start_in_src + len(m.group(0)) - 1  # points at '{'
+    depth = 1
+    pos = scan_pos + 1
+    while pos < len(src) and depth > 0:
+        if src[pos] == '{':
+            depth += 1
+        elif src[pos] == '}':
+            depth -= 1
+        pos += 1
+    block_end_pos = pos  # Just after the closing '}'.
+
+    block_content = src[line_start_in_src:block_end_pos]
+
+    # Only care about PBXShellScriptBuildPhase blocks.
+    if 'isa = PBXShellScriptBuildPhase' not in block_content:
+        continue
+
+    # Check for Bugsnag (in name, comment, or anywhere).
+    if 'Bugsnag' not in block_content:
+        nm = re.search(r'\s*name = "([^"]+)"', block_content)
+        print(f"  Phase {comment!r}: no Bugsnag mention. Skipping.", flush=True)
+        continue
+
+    nm = re.search(r'\s*name = "([^"]+)"', block_content)
+    phase_name = nm.group(1) if nm else comment
+    print(f"Found Bugsnag phase: {phase_name!r}", flush=True)
+
+    # Patch the shellScript line inside this block.
+    # Split block into lines and find the shellScript line.
+    block_lines = block_content.split("\n")
+    block_patched = False
+    new_block_lines = []
+    for bl in block_lines:
+        stripped = bl.strip()
+        if stripped.startswith('shellScript = "'):
+            # Replace the ENTIRE line with the exit-0 script.
+            indent = bl[: len(bl) - len(bl.lstrip())]
+            new_bl = indent + 'shellScript = "exit 0 # disabled in CI: no BUGSNAG_API_KEY";'
+            new_block_lines.append(new_bl)
+            block_patched = True
+            print(f"  Replaced shellScript line.", flush=True)
+        else:
+            new_block_lines.append(bl)
+
+    if block_patched:
+        new_block_content = "\n".join(new_block_lines)
+        # Replace the original block in new_src_chars.
+        # We operate on the ORIGINAL src positions (not the mutable list)
+        # because we only patch one block.
+        new_src = (
+            src[:line_start_in_src]
+            + new_block_content
+            + src[block_end_pos:]
+        )
+        # Update src for subsequent block searches (in case of multiple Bugsnag blocks).
+        src = new_src
+        patched += 1
+    else:
+        print(f"  WARNING: shellScript line not found in Bugsnag block.", flush=True)
+        print(f"  Block:\n{block_content[:500]}", flush=True)
 
 if patched:
-    write_and_exit(new_src, "Strategy C (name-field block search)", patched)
-
-# ── All strategies failed ─────────────────────────────────────────────────────
-print("All strategies failed. Listing all PBXShellScriptBuildPhase names for debugging:")
-for m in re.finditer(
-    r"/\* ([^*]+) \*/ = \{[^{]*?isa = PBXShellScriptBuildPhase",
-    src,
-    re.DOTALL,
-):
-    print(f"  phase: {m.group(1).strip()!r}")
-# Also try name field search.
-for m in re.finditer(r'isa = PBXShellScriptBuildPhase[^}]*?name = "([^"]+)"', src, re.DOTALL):
-    print(f"  name field: {m.group(1)!r}")
+    open(pbxproj, "w", encoding="utf-8").write(src)
+    print(f"Wrote patched pbxproj ({len(src)} bytes, {patched} patch(es)).", flush=True)
+else:
+    print("No Bugsnag phase was patched.", flush=True)
+    print("All PBXShellScriptBuildPhase blocks (by UUID) found in section:", flush=True)
+    for m in uuid_line_re.finditer(section_text):
+        line_start = src.find(m.group(0)) if 'src' in dir() else -1
+        print(f"  UUID={m.group(1)} comment={m.group(2).strip()!r}", flush=True)
