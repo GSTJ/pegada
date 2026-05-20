@@ -144,6 +144,11 @@ const config: ExpoConfig = {
       },
     ],
     "@bugsnag/plugin-expo-eas-sourcemaps",
+    // Wires the source-controlled `Pegada.storekit` fixture into the iOS
+    // scheme so simulator runs (local + CI) can resolve real product pricing
+    // without an App Store sandbox session. Plugin is a no-op when the file
+    // is missing or when the platform isn't iOS.
+    "./plugins/withStoreKitConfiguration",
   ],
   androidStatusBar: {
     barStyle: "dark-content",
