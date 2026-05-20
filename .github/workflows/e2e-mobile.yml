@@ -255,27 +255,8 @@ jobs:
         run: |
           set -euo pipefail
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
-          python3 <<PY
-          import re
-          path = "$PBXPROJ"
-          src = open(path).read()
-          # Each build phase object spans from "= { isa = PBXShellScriptBuildPhase;"
-          # to the matching "};". Target the one whose name field references
-          # "Bugsnag" and rewrite its shellScript = "..." to a single exit 0.
-          phase_re = re.compile(
-              r'(/\* [^*]*Bugsnag[^*]*\*/ = \{[^{}]*?shellScript = ")([^"]*)(";)',
-              re.DOTALL,
-          )
-          new, n = phase_re.subn(r'\1exit 0 # disabled in CI: no BUGSNAG_API_KEY\3', src)
-          if n:
-              open(path, 'w').write(new)
-              print(f"Patched {n} Bugsnag phase(s)")
-          else:
-              print("No Bugsnag-named phase found")
-              # Surface every shell phase name for debugging.
-              for m in re.finditer(r'/\* ([^*]+) \*/ = \{\s*isa = PBXShellScriptBuildPhase', src):
-                  print(" phase:", m.group(1).strip())
-          PY
+          # Brace-aware .pbxproj patcher — see .github/scripts/patch-bugsnag-phase.py
+          PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
 
       # ------------------------------------------------------------------
       # 10. Build for iOS simulator

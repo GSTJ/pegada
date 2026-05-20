@@ -24,9 +24,11 @@ export interface ProfileImagesUploaderProps {
 const AddUserPhotoWrapper = ({
   picture,
   onChange,
+  index,
 }: {
   picture: Picture;
   onChange: ProfileImagesUploaderProps["onChange"];
+  index: number;
 }) => {
   const onDelete = () => {
     onChange((images) => {
@@ -52,7 +54,7 @@ const AddUserPhotoWrapper = ({
         .sort(sortByUrl),
     );
   };
-  return <AddUserPhoto picture={picture} onDelete={onDelete} onAdd={onAdd} />;
+  return <AddUserPhoto picture={picture} onDelete={onDelete} onAdd={onAdd} index={index} />;
 };
 
 export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
@@ -75,11 +77,14 @@ export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
     onChange(() => newImages);
   };
 
-  const renderItem = (item: Picture) => (
-    <View>
-      <AddUserPhotoWrapper picture={item} onChange={onChange} />
-    </View>
-  );
+  const renderItem = (item: Picture) => {
+    const index = value.findIndex((p) => p.id === item.id);
+    return (
+      <View>
+        <AddUserPhotoWrapper picture={item} onChange={onChange} index={Math.max(index, 0)} />
+      </View>
+    );
+  };
 
   return (
     <View style={style}>

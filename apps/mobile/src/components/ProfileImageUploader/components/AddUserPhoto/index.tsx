@@ -25,6 +25,12 @@ type AddUserPhotoProps = {
   picture: Picture;
   onDelete: () => void;
   onAdd: ({ url }: { url: string }) => void;
+  /**
+   * Position of this slot inside the photo grid. Used to derive a stable
+   * `testID` (`add-photo-{index}` / `remove-photo-{index}`) so Maestro flows
+   * can target a specific cell without depending on screen coordinates.
+   */
+  index?: number;
 };
 
 const hitSlop = {
@@ -34,7 +40,7 @@ const hitSlop = {
   right: 100,
 };
 
-export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, onAdd }) => {
+export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, onAdd, index }) => {
   const [localPicture, setLocalPicture] = useState(picture.url);
   const { t } = useTranslation();
 
@@ -137,6 +143,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
         ) : null}
         {!hasPicture && (
           <PressableArea
+            testID={typeof index === "number" ? `add-photo-${index}` : undefined}
             onPress={handleAdd}
             // Takes up the whole component,
             hitSlop={hitSlop}
@@ -156,6 +163,13 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
         }
       </S.UserPictureContent>
       <S.AddRemoveContainer
+        testID={
+          typeof index === "number"
+            ? hasPicture
+              ? `remove-photo-${index}`
+              : `add-photo-button-${index}`
+            : undefined
+        }
         disabled={isLoading}
         inverted={hasPicture}
         onPress={hasPicture ? handleDelete : handleAdd}

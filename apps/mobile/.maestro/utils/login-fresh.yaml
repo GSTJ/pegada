@@ -1,0 +1,79 @@
+appId: ${APP_ID}
+name: util - login via magic-regex email (always-fresh user) - lands on CreateProfile
+tags:
+  - util
+---
+# Reusable subflow: sign-in as a FRESH test user via the API's
+# APPLE_MAGIC_EMAIL_REGEX bypass (see packages/api/src/services/AuthenticationService.ts).
+#
+# How it differs from login.yaml:
+#   - login.yaml uses the single APPLE_MAGIC_EMAIL (test@pegada.app). That
+#     address is shared across runs and can be left in any onboarding state.
+#   - login-fresh.yaml uses an email matching APPLE_MAGIC_EMAIL_REGEX
+#     (default: ^maestro-fresh.*@pegada\.app$). On every successful OTP the
+#     API hard-purges the matching user (and cascading dog/match/message rows)
+#     BEFORE upserting, guaranteeing the auth router lands on CreateProfile.
+#
+# Maestro does not interpolate dynamic shell expressions, but every flow that
+# `runFlow`s this one runs in its own JS engine — so two back-to-back runs
+# share the same email. That is intentional: the API delete-then-upsert keeps
+# state clean regardless of email collision.
+#
+# Caller MUST have launchApp'd already with `clearState: true` and
+# `clearKeychain: true`.
+#
+# Coordinates calibrated on iPhone 17 Pro Max (440x956 logical) — see
+# utils/login.yaml for the rationale on point-based taps + per-digit OTP entry.
+# Email screen: tap field (point fallback for RN Fabric/iOS 26 hierarchy gap).
+- tapOn:
+    point: "50%, 84%"
+- waitForAnimationToEnd
+- inputText: "maestro-fresh@pegada.app"
+# iOS 26: pressKey: Enter does NOT advance from email → OTP screen.
+# Tap the "Continue" button that sits above the keyboard (~59% Y).
+- tapOn:
+    point: "50%, 59%"
+- waitForAnimationToEnd:
+    timeout: 8000
+# ATT dialog fires asynchronously after email submit and can block the OTP
+# screen. Dismiss before attempting to enter digits.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
+- waitForAnimationToEnd
+# iOS 26: first OTP cell does not auto-focus. Tap center of OTP row first.
+- tapOn:
+    point: "50%, 43%"
+- waitForAnimationToEnd
+# OTP: per-digit entry — see utils/login-returning.yaml for why a single
+# inputText: "424242" races React's commit phase. Each cell auto-advances
+# focus; 25ms gap is the Maestro driver round-trip floor.
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 20000
+# ATT dialog may also appear during OTP submission — dismiss if present.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
+- waitForAnimationToEnd
