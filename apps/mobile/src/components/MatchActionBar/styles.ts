@@ -9,7 +9,14 @@ import thinkingEmoji from "@/assets/images/ThinkingEmoji.webp";
 import { Image } from "@/components/Image";
 import { PressableArea } from "@/components/PressableArea";
 
+// Apple HIG recommends a minimum 44x44pt hit area for tappable targets.
+const MIN_TOUCH_TARGET = 44;
+
 export const Container = styled(Animated.View).attrs({
+  // box-none keeps the bar itself non-blocking so the card below stays
+  // pannable in the gaps, but lifts the bar above the card visually so
+  // each ActionItem reliably wins taps over the card's PersonalInfo
+  // pressable that sits underneath.
   pointerEvents: "box-none",
 })`
   width: 100%;
@@ -22,13 +29,29 @@ export const Container = styled(Animated.View).attrs({
   align-self: center;
   bottom: ${(props) => props.theme.spacing[6]}px;
   padding: 0 ${(props) => props.theme.spacing[2]}px;
+
+  z-index: 10;
+  elevation: 10;
 `;
 
-export const ActionItem = styled(PressableArea).attrs({ accessible: true })`
+export const ActionItem = styled(PressableArea).attrs({
+  accessible: true,
+  // Hit target expansion so taps that land just outside the visible
+  // button still register on the action, never falling through to the
+  // card's PersonalInfo pressable underneath (which would open the
+  // dog profile instead).
+  hitSlop: { top: 12, bottom: 12, left: 12, right: 12 },
+})`
   padding: ${(props) => props.theme.spacing[2.5]}px;
   background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
 
   border-radius: ${(props) => props.theme.radii.round}px;
+
+  /* Guarantee the Apple HIG minimum even when the emoji shrinks. */
+  min-width: ${MIN_TOUCH_TARGET}px;
+  min-height: ${MIN_TOUCH_TARGET}px;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const ConfusedEmoji = styled(Image).attrs({

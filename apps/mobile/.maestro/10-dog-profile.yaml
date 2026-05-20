@@ -18,6 +18,11 @@ tags:
 - scroll
 - waitForAnimationToEnd
 - takeScreenshot: 10-after-scroll
-# Close (back arrow top-left)
-- runFlow: utils/back.yaml
+# Close (DogProfile renders its close button as a top-RIGHT glass button,
+# not the standard top-left chevron — tap by testID for stability).
+- tapOn:
+    id: "dog-profile-close"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "swipe-card"
 - takeScreenshot: 10-back-on-swipe

@@ -33,6 +33,7 @@
  */
 
 import { createId } from "@paralleldrive/cuid2";
+import { PlanType } from "@prisma/client";
 
 import prisma from ".";
 import { breedData } from "./__mocks__/breed-data";
@@ -241,6 +242,11 @@ async function ensureBellaWithMatch(rexId: string) {
  * swipe service's `notIn` filter would hide MatchMe from the swipe stack).
  */
 async function ensureMatchMeWithPreLike(rexId: string) {
+  // MatchMe's owner is marked PREMIUM so the SuggestionService priority
+  // column evaluates to 1 (premium pre-liker), which forces MatchMe to the
+  // TOP of Rex's swipe stack ahead of the new SwipeDog pool below — both
+  // sets are co-located in SF (~0km) so they otherwise tie on distance,
+  // and Postgres makes no guarantee about tie ordering.
   const matchMeUser = await prisma.user.upsert({
     where: { email: "test+matchme@pegada.app" },
     update: {
@@ -249,6 +255,7 @@ async function ensureMatchMeWithPreLike(rexId: string) {
       country: "USA",
       latitude: SF.lat,
       longitude: SF.lon,
+      plan: PlanType.PREMIUM,
     },
     create: {
       email: "test+matchme@pegada.app",
@@ -257,6 +264,7 @@ async function ensureMatchMeWithPreLike(rexId: string) {
       country: "USA",
       latitude: SF.lat,
       longitude: SF.lon,
+      plan: PlanType.PREMIUM,
     },
     include: { dogs: { where: { deletedAt: null } } },
   });
@@ -328,11 +336,103 @@ async function ensureMatchMeWithPreLike(rexId: string) {
   return { matchMeUser, matchMe, preLike };
 }
 
+/**
+ * SwipeDogN: a small pool of nearby dogs that keep Rex's swipe deck
+ * populated AFTER MatchMe gets consumed by flow #22 (or any like in
+ * flow #21). Without these, the deck would be empty as soon as Rex
+ * swipes MatchMe — the 100 default-seed fake users live in Brazil
+ * (~9000km from SF) and are filtered out by Rex's 50km
+ * preferredMaxDistance.
+ *
+ * These dogs deliberately have NO reciprocal Interest, so swiping
+ * INTERESTED on them never creates a match — flow #21 can exercise
+ * like / dislike / maybe / report on a fresh card every step without
+ * accidentally triggering the new-match modal.
+ *
+ * Stable names (SwipeDog1..SwipeDogN) and email addresses make the
+ * seed idempotent: re-runs upsert the same rows rather than
+ * duplicating.
+ */
+const SWIPE_DOG_COUNT = 6;
+
+async function ensureSwipePoolDogs(rexId: string) {
+  const created: { name: string; id: string }[] = [];
+
+  for (let i = 1; i <= SWIPE_DOG_COUNT; i++) {
+    const email = `test+swipedog${i}@pegada.app`;
+    const name = `SwipeDog${i}`;
+
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {
+        city: "San Francisco",
+        state: "CA",
+        country: "USA",
+        latitude: SF.lat,
+        longitude: SF.lon,
+      },
+      create: {
+        email,
+        city: "San Francisco",
+        state: "CA",
+        country: "USA",
+        latitude: SF.lat,
+        longitude: SF.lon,
+      },
+      include: { dogs: { where: { deletedAt: null } } },
+    });
+
+    let dog = user.dogs.find((d) => d.name === name);
+    if (!dog) {
+      dog = await prisma.dog.create({
+        data: {
+          userId: user.id,
+          name,
+          // All FEMALE — Rex is MALE and the SuggestionService preference
+          // filter shows ONLY opposite-gender dogs. Mixing in MALEs would
+          // make half the pool invisible to Rex's stack.
+          gender: "FEMALE",
+          color: "GOLDEN",
+          size: "MEDIUM",
+          weight: 15 + i,
+          breedId: GOLDEN_ID,
+          birthDate: yearsAgo(2 + (i % 4)),
+          bio: `${name} — nearby SF dog seeded to keep Rex's swipe stack populated.`,
+          images: {
+            create: {
+              position: 0,
+              status: "APPROVED",
+              url: `https://placedog.net/640/480?id=${100 + i}`,
+            },
+          },
+        },
+      });
+    }
+
+    // Defensive: ensure NO reciprocal Interest exists from prior runs that
+    // might have flipped one of these dogs into a match. Keeps swiping
+    // INTERESTED on them inert (no new-match modal).
+    await prisma.interest.deleteMany({
+      where: {
+        OR: [
+          { requesterId: dog.id, responderId: rexId },
+          { requesterId: rexId, responderId: dog.id },
+        ],
+      },
+    });
+
+    created.push({ name: dog.name, id: dog.id });
+  }
+
+  return created;
+}
+
 async function seedMain() {
   await ensureBreed();
   const { magic, rex } = await ensureMagicUserWithRex();
   const { bella, match } = await ensureBellaWithMatch(rex.id);
   const { matchMe, preLike } = await ensureMatchMeWithPreLike(rex.id);
+  const swipePool = await ensureSwipePoolDogs(rex.id);
 
   // eslint-disable-next-line no-console
   console.log(
@@ -344,6 +444,7 @@ async function seedMain() {
         bellaMatch: { id: match.id },
         matchMe: { id: matchMe.id, name: matchMe.name },
         matchMePreLike: { id: preLike.id, swipeType: preLike.swipeType },
+        swipePool,
         messageCount: await prisma.message.count({
           where: { matchId: match.id, deletedAt: null },
         }),

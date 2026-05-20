@@ -28,6 +28,13 @@ tags:
 #   (21-on-swipe / 21-after-like / 21-after-dislike / 21-after-maybe) for
 #   hash-diff verification that the rendered card actually changed.
 #
+# IMPORTANT: MatchMe sits at the TOP of Rex's deck (priority=1, premium
+# pre-liker — see packages/database/maestro-seed.ts). Liking her would
+# fire the new-match modal and derail this flow. Step 4 below DISLIKES
+# her first to clear her out, then the like/dislike/maybe/report cycle
+# runs against the SwipeDog1..SwipeDog6 nearby pool that keeps the deck
+# populated.
+#
 # Report flow:
 # - reportUser in views/DogProfile/index.tsx fires a native Alert ("Report"
 #   title, "Cancel" / "Yes" buttons). Tapping Yes calls Linking.openURL
@@ -73,14 +80,35 @@ tags:
 - takeScreenshot: 21-profile-scrolled
 
 # --- 3. Back to swipe deck ------------------------------------------------
-- runFlow: utils/back.yaml
+# Tap the DogProfile close button by testID. The standard utils/back.yaml
+# helper assumes a top-LEFT chevron, but DogProfile renders its close as a
+# top-RIGHT glass button (GoBack, align-self: flex-end). Tapping by
+# testID is the only stable anchor across screen sizes / safe-area
+# insets and proves the dedicated close handler fires.
+- tapOn:
+    id: "dog-profile-close"
 - waitForAnimationToEnd:
     timeout: 5000
 - assertVisible:
     id: "swipe-card"
+- assertVisible:
+    id: "swipe-like"
 - takeScreenshot: 21-back-on-swipe
 
-# --- 4. LIKE → deck must advance to a new top card ------------------------
+# --- 4. DISLIKE MatchMe first → clears the pre-liked dog without firing ----
+# the new-match modal. The next top card will be SwipeDog1 (no
+# reciprocal interest), safe to like/maybe/report in subsequent steps.
+- tapOn:
+    id: "swipe-dislike"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 21-after-dislike-matchme
+
+# --- 5. LIKE → deck must advance to a new top card ------------------------
+# SwipeDog pool dogs have no reciprocal interest, so liking never opens
+# the new-match modal — the deck simply advances.
 - tapOn:
     id: "swipe-like"
 - waitForAnimationToEnd:
@@ -89,7 +117,7 @@ tags:
     id: "swipe-card"
 - takeScreenshot: 21-after-like
 
-# --- 5. DISLIKE → deck advances again -------------------------------------
+# --- 6. DISLIKE → deck advances again -------------------------------------
 - tapOn:
     id: "swipe-dislike"
 - waitForAnimationToEnd:
@@ -98,7 +126,7 @@ tags:
     id: "swipe-card"
 - takeScreenshot: 21-after-dislike
 
-# --- 6. MAYBE (super-like equivalent) → deck advances ---------------------
+# --- 7. MAYBE (super-like equivalent) → deck advances ---------------------
 # Swipe.Maybe is the third direction wired through swipeHandlerRef +
 # MatchActionBar onMaybe in src/components/MatchActionBar/index.tsx.
 - tapOn:
@@ -109,7 +137,7 @@ tags:
     id: "swipe-card"
 - takeScreenshot: 21-after-maybe
 
-# --- 7. Re-open the (now different) top dog's profile to report -----------
+# --- 8. Re-open the (now different) top dog's profile to report -----------
 - tapOn:
     point: "50%, 75%"
 - waitForAnimationToEnd:
@@ -120,7 +148,7 @@ tags:
 - scroll
 - waitForAnimationToEnd
 
-# --- 8. Trigger the report Alert and confirm ------------------------------
+# --- 9. Trigger the report Alert and confirm ------------------------------
 - tapOn:
     id: "dog-profile-report"
 - waitForAnimationToEnd:
