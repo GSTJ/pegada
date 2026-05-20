@@ -74,6 +74,11 @@ jobs:
       EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ci-stub
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
+      # Activates the Maestro-only mock-purchase path in apps/mobile/src/services/payments.
+      # Mirrors MAESTRO_E2E on the API side (see packages/api/src/shared/config.ts);
+      # both halves must be set for the dev-only payment.maestroGrantPremium endpoint
+      # to function. NEVER set this in production builds.
+      EXPO_PUBLIC_MAESTRO_E2E: "1"
       # EXPO_PUBLIC_API_URL: set via secret or leave empty to skip API-dependent flows.
       EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL || 'http://localhost:3009' }}
 

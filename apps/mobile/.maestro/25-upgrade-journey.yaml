@@ -1,0 +1,97 @@
+appId: ${APP_ID}
+name: Upgrade journey — Free user navigates to upgrade wall, mock-purchases premium, sees premium badge
+tags:
+  - smoke
+  - regression
+---
+# REGRESSION + COVERAGE for the premium upgrade path.
+#
+# Why a BE mock instead of a real RevenueCat purchase?
+#   RevenueCat's native purchase sheet (StoreKit on iOS, Play Billing on
+#   Android) cannot be driven from a simulator in CI. There is no
+#   reliable way to tap through the system payment dialog from Maestro.
+#   This is THE explicitly approved BE mock for the whole E2E suite.
+#
+# How the mock works:
+#   When EXPO_PUBLIC_MAESTRO_E2E=1 AND the RevenueCat key is a stub
+#   (`ci-stub` etc), `payments.purchasePackage` routes the tap to a
+#   dev-only tRPC mutation (`payment.maestroGrantPremium`) which in turn
+#   calls the same `PaymentService.createSubscription` path the real
+#   RevenueCat INITIAL_PURCHASE webhook hits. The mobile then synthesizes
+#   a `CustomerInfo` payload with active premium entitlement and writes
+#   it into the queryClient — the same key the real RC update listener
+#   uses. UI consumers (`useCustomerPlan`, the profile premium badge,
+#   the upgrade-wall guard) react exactly as they would in production.
+#
+# Gating (belt + suspenders):
+#   - BE: NODE_ENV !== "production" AND MAESTRO_E2E=1 — refuses otherwise.
+#   - Mobile: EXPO_PUBLIC_MAESTRO_E2E=1 AND stub RC key — falls through to
+#     the real Purchases.purchasePackage call otherwise.
+#
+# Supersedes the 16-upgrade-wall smoke flow (deleted in the same PR).
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 25-after-login
+# ---------------------------------------------------------------
+# Step 1: assert user is NOT premium yet (Profile tab → upgrade CTA visible)
+# ---------------------------------------------------------------
+# Profile tab is bottom-right (~83%, 95%).
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 25-on-profile-free
+# The Free user's Plan row carries the upgrade testID; Premium rows
+# carry the premium testID. Asserting the upgrade row is visible AND the
+# premium row is NOT visible pins the starting state precisely.
+- assertVisible:
+    id: "profile-current-plan-upgrade"
+- assertNotVisible:
+    id: "profile-current-plan-premium"
+- assertNotVisible:
+    id: "profile-premium-badge"
+# ---------------------------------------------------------------
+# Step 2: open the upgrade wall (deep-link, matches 16-upgrade-wall behavior)
+# ---------------------------------------------------------------
+- openLink: ${APP_SCHEME}://upgrade-wall
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "upgrade-wall-screen"
+- takeScreenshot: 25-on-upgrade-wall
+# ---------------------------------------------------------------
+# Step 3: select a plan (yearly is the default selection via PlanPackages'
+# useEffect, but we tap it explicitly so the flow is deterministic even
+# if the auto-select effect changes).
+# ---------------------------------------------------------------
+- tapOn:
+    id: "upgrade-wall-plan-premium_yearly"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 25-plan-selected
+# ---------------------------------------------------------------
+# Step 4: tap purchase. In Maestro mode this hits the BE mock instead of
+# opening StoreKit. The mock returns success → mobile synthesizes a
+# CustomerInfo with premium entitlement → queryClient update → all
+# useCustomerPlan consumers re-render → upgrade-wall calls router.back().
+# ---------------------------------------------------------------
+- tapOn:
+    id: "upgrade-wall-purchase-cta"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 25-after-purchase
+# ---------------------------------------------------------------
+# Step 5: assert the post-purchase premium UI is live.
+# After router.back() the user lands back on the Profile tab.
+# ---------------------------------------------------------------
+- assertVisible:
+    id: "profile-current-plan-premium"
+- assertNotVisible:
+    id: "profile-current-plan-upgrade"
+- assertVisible:
+    id: "profile-premium-badge"
+- takeScreenshot: 25-profile-premium

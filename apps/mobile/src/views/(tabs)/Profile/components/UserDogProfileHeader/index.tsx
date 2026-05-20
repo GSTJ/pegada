@@ -70,7 +70,12 @@ const UserDogProfileHeader = () => {
               ) : null}
             </PersonalInfo.Name>
             {plan.data?.userPlan === UserPlan.Premium ? (
-              <Premium fill={theme.colors.premium} width={22} height={22} />
+              <Premium
+                testID="profile-premium-badge"
+                fill={theme.colors.premium}
+                width={22}
+                height={22}
+              />
             ) : null}
           </View>
           {dog.bio ? (

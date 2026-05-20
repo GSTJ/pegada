@@ -16,8 +16,8 @@ executionOrder:
     - 10-dog-profile
     - 11-messages-list
     - 12-chat-conversation
-    - 16-upgrade-wall
     - 19-chat-message-order
+    - 25-upgrade-journey
     - 20-account-creation-journey
     - 21-swipe-journey
     - 22-new-match-journey
