@@ -1,0 +1,85 @@
+appId: ${APP_ID}
+name: Delete Account — Settings → confirm → row gone from DB, back on sign-in
+tags:
+  - smoke
+  - regression
+  - destructive
+---
+# App Store Guideline 5.1.1(v): apps that allow account creation MUST allow
+# in-app account deletion. This flow proves the path end-to-end:
+#
+#   1. Re-seed delete-me@pegada.app (caller side — see WRAPPER below).
+#   2. Login as delete-me@pegada.app (a magic email reserved for this flow).
+#   3. Open Profile tab → tap Delete Account row.
+#   4. Confirm the native destructive Alert.
+#   5. Assert we land back on sign-in.
+#   6. Verify in the DB the User row is actually gone (wrapper side).
+#
+# We intentionally do NOT log in as test@pegada.app — deleting the primary
+# Apple-review user would break every other Maestro flow.
+#
+# === WRAPPER (must run around this flow) ===
+#   pnpm -F @pegada/database maestro:seed         # before
+#   maestro test apps/mobile/.maestro/27-delete-account-journey.yaml
+#   pnpm -F @pegada/database maestro:check-deleted # after — exits 1 if the row remains
+#
+# The check-deleted command is the DB verification step (#5 in the spec).
+# It runs outside Maestro because Maestro YAML has no DB client, and we
+# don't want to bake one into the mobile app just for tests.
+#
+# === REQUIRED ENV ===
+#   APPLE_MAGIC_EMAIL=test@pegada.app,delete-me@pegada.app
+#   APPLE_MAGIC_CODE=424242
+# See packages/api/src/shared/config.ts → isMagicEmail.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-delete-me.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 27-after-login
+# Profile tab — same coordinate as 13/14/26 (rightmost bottom-tab item).
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 27-on-profile
+# Delete Account row sits at the very bottom of the settings list, below
+# Logout. Scroll until visible to be robust to dynamic content above
+# (CurrentPlanConfig, LocationConfig, etc.).
+- scrollUntilVisible:
+    element:
+      id: "profile-delete-account"
+    direction: DOWN
+    timeout: 5000
+    speed: 40
+- takeScreenshot: 27-delete-visible
+- tapOn:
+    id: "profile-delete-account"
+- waitForAnimationToEnd
+- takeScreenshot: 27-delete-confirm-dialog
+# Native iOS Alert: destructive button "Delete" (i18n profile.delete),
+# cancel button "Cancel". Title is "Delete account".
+- tapOn:
+    text: "Delete"
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 27-after-delete
+# After successful deletion the mutation resolves → logout() is called →
+# router.replace(SignIn). We must land on the sign-in screen.
+- assertVisible:
+    id: "signin-submit"
+- assertVisible:
+    id: "signin-email"
+# Cold-relaunch to prove session was wiped from the Keychain too, just like
+# in 26-logout-journey.yaml — a half-deleted account is still a bug.
+- launchApp:
+    clearState: false
+    clearKeychain: false
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 27-after-cold-relaunch
+- assertVisible:
+    id: "signin-submit"
+- assertVisible:
+    id: "signin-email"

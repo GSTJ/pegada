@@ -1,0 +1,77 @@
+appId: ${APP_ID}
+name: Logout — Settings → confirm → sign-in screen, session cleared from Keychain
+tags:
+  - smoke
+  - regression
+---
+# Full logout journey:
+#   1. Login as the returning magic user (test@pegada.app).
+#   2. Open Profile tab (logout lives there, not in a dedicated Settings screen).
+#   3. Tap the Logout row → confirm the native iOS Alert.
+#   4. Assert we land back on the sign-in screen (Continue button + email field).
+#   5. Cold-relaunch the app and assert we are STILL on sign-in. This catches
+#      the regression where logout clears redux but leaves the JWT in the
+#      iOS Keychain (StorageKeys.Token) and the next launch silently
+#      re-authenticates the user. See apps/mobile/src/services/logout.ts —
+#      deleteData(StorageKeys.Token) must run before the navigation replace.
+#
+# The Logout row has testID="profile-logout" and the Delete Account row has
+# testID="profile-delete-account" (see apps/mobile/src/views/(tabs)/Profile/index.tsx).
+# We use point-based taps for the Profile tab and dialog buttons because the
+# RN view tree is invisible to the XCUITest accessibility snapshot for this
+# build (see utils/login-returning.yaml).
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 26-after-login
+# Profile tab is the rightmost item in the bottom tab bar (~83%, 95% Y on
+# iPhone 17 Pro Max). Matches the coordinate used by 13-profile-view.yaml
+# and 14-profile-edit.yaml.
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: 26-on-profile
+# Logout row sits below the legal links — scroll until visible. The settings
+# list bounces=false so a swipe up reliably moves it.
+- scrollUntilVisible:
+    element:
+      id: "profile-logout"
+    direction: DOWN
+    timeout: 5000
+    speed: 40
+- takeScreenshot: 26-logout-visible
+- tapOn:
+    id: "profile-logout"
+- waitForAnimationToEnd
+- takeScreenshot: 26-logout-confirm-dialog
+# Native iOS Alert: title "Log out", destructive "Log out" button on the
+# right, "Cancel" on the left. i18n key profile.logout = "Log out".
+- tapOn:
+    text: "Log out"
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 26-after-logout
+# Back on sign-in: the Continue button (testID="signin-submit") and the
+# email TextInput (testID="signin-email") should both be visible.
+- assertVisible:
+    id: "signin-submit"
+- assertVisible:
+    id: "signin-email"
+# Cold-relaunch with clearState=false / clearKeychain=false so we exercise
+# the real persisted state — proves the JWT was wiped from the Keychain.
+# If logout left the token behind, the AppRouter would skip sign-in and
+# push straight to (tabs), and this assertion would fail.
+- launchApp:
+    clearState: false
+    clearKeychain: false
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 26-after-cold-relaunch
+- assertVisible:
+    id: "signin-submit"
+- assertVisible:
+    id: "signin-email"

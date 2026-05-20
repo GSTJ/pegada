@@ -3,7 +3,7 @@ import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/err
 import { Language } from "@pegada/shared/i18n/types/types";
 
 import { MAIL_QUEUE, MailQueue } from "../queue/MailQueue";
-import { config } from "../shared/config";
+import { config, isMagicEmail } from "../shared/config";
 
 export class AuthenticationService {
   language?: Language;
@@ -48,7 +48,10 @@ export class AuthenticationService {
   }
 
   async sendVerification(email: string) {
-    if (email === config.APPLE_MAGIC_EMAIL) {
+    // Magic emails bypass real OTP delivery. APPLE_MAGIC_EMAIL accepts a
+    // comma-separated list (see config.ts) so destructive E2E flows can use
+    // a dedicated disposable account without nuking the primary review user.
+    if (isMagicEmail(email)) {
       return;
     }
 
@@ -67,13 +70,9 @@ export class AuthenticationService {
   }
 
   static async checkVerification({ email, code }: { email: string; code: string }) {
-    // Used for apple to review the app
-    if (
-      config.APPLE_MAGIC_EMAIL &&
-      config.APPLE_MAGIC_CODE &&
-      email === config.APPLE_MAGIC_EMAIL &&
-      code === config.APPLE_MAGIC_CODE
-    ) {
+    // Used for apple to review the app — any email in APPLE_MAGIC_EMAIL
+    // (single value or comma-separated list) accepts APPLE_MAGIC_CODE.
+    if (config.APPLE_MAGIC_CODE && code === config.APPLE_MAGIC_CODE && isMagicEmail(email)) {
       return true;
     }
 

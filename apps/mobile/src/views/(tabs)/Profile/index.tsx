@@ -230,7 +230,7 @@ const Profile = () => {
               </Config.Container>
             </Config.Root>
 
-            <Config.Root onPress={deleteAccount}>
+            <Config.Root testID="profile-delete-account" onPress={deleteAccount}>
               <Erase width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title color="destructive">{t("profile.deleteAccount")}</Config.Title>

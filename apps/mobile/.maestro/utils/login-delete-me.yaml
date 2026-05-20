@@ -1,0 +1,78 @@
+appId: ${APP_ID}
+name: util - login as the disposable delete-me account
+tags:
+  - util
+---
+# Logs in as delete-me@pegada.app — a magic email reserved for the
+# delete-account journey (apps/mobile/.maestro/27-delete-account-journey.yaml).
+# This account is hard-deleted by the test itself, so it must be re-seeded
+# before every run via `pnpm -F @pegada/database maestro:seed` (see
+# packages/database/maestro-seed.ts).
+#
+# Requires the API to recognize delete-me@pegada.app as a magic email.
+# APPLE_MAGIC_EMAIL is now a comma-separated list — set it to
+# "test@pegada.app,delete-me@pegada.app" in your environment. See
+# packages/api/src/shared/config.ts → isMagicEmail.
+#
+# Caller must already have launchApp'd. Coordinates calibrated on
+# iPhone 17 Pro Max (440x956 logical, 1320x2868 px) — identical to
+# utils/login-returning.yaml.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Allow Once"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
+# Email screen: tap the email field, type, then tap Continue (above keyboard).
+# pressKey:Enter does not advance to OTP on iOS 26 + RN Fabric.
+# Continue button sits at ~59% Y when keyboard is open.
+- tapOn:
+    point: "50%, 84%"
+- waitForAnimationToEnd
+- inputText: "delete-me@pegada.app"
+- tapOn:
+    point: "50%, 59%"
+- waitForAnimationToEnd:
+    timeout: 8000
+# ATT dialog fires asynchronously after email submit — dismiss before OTP.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
+- waitForAnimationToEnd
+# OTP: first cell does not auto-focus on iOS 26 — tap center of OTP row
+# then enter digits. Same pattern as utils/login-returning.yaml.
+- tapOn:
+    point: "50%, 43%"
+- waitForAnimationToEnd
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25000
+# ATT dialog may surface again after OTP submission.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd

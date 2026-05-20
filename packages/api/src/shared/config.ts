@@ -45,7 +45,15 @@ const configSchema = z.object({
   /** APP */
   MIN_APP_VERSION: semverSchema,
 
-  /** APPLE MAGIC */
+  /**
+   * APPLE MAGIC
+   *
+   * APPLE_MAGIC_EMAIL accepts a single email or a comma-separated list of
+   * emails. All listed emails bypass real OTP delivery and accept
+   * APPLE_MAGIC_CODE during verification — required for Apple App Review and
+   * Maestro E2E flows. The list form is needed for destructive flows
+   * (delete-account) that must not nuke the primary review account.
+   */
   APPLE_MAGIC_EMAIL: z.string().optional(),
   APPLE_MAGIC_CODE: z.string().optional(),
 });
@@ -59,3 +67,18 @@ if (!_config.success) {
 }
 
 export const config = _config.data;
+
+/** Parsed list of magic emails (lowercased, trimmed). Empty if unset. */
+export const getMagicEmails = (): string[] => {
+  if (!config.APPLE_MAGIC_EMAIL) return [];
+  return config.APPLE_MAGIC_EMAIL.split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+};
+
+/** Case-insensitive check: is `email` one of the configured magic emails? */
+export const isMagicEmail = (email: string): boolean => {
+  const list = getMagicEmails();
+  if (list.length === 0) return false;
+  return list.includes(email.trim().toLowerCase());
+};

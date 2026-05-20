@@ -22,3 +22,9 @@ executionOrder:
     - 22-new-match-journey
     - 23-preferences-journey
     - 24-profile-journey
+    - 26-logout-journey
+    # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
+    # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before
+    # every test run (see packages/database/maestro-seed.ts), but other
+    # flows have no reason to rerun this expensive teardown mid-suite.
+    - 27-delete-account-journey

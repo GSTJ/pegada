@@ -83,6 +83,7 @@
         "**/jest.config.*",
         "**/jest.setup.*",
         "packages/database/seed.ts",
+        "packages/database/maestro-seed.ts",
         "scripts/**"
       ],
       "rules": {
