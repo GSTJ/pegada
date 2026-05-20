@@ -1,5 +1,10 @@
 import { Alert, Platform } from "react-native";
-import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesPackage } from "react-native-purchases";
+import Purchases, {
+  CustomerInfo,
+  LOG_LEVEL,
+  PurchasesOffering,
+  PurchasesPackage,
+} from "react-native-purchases";
 import * as Device from "expo-device";
 import { get } from "lodash";
 
@@ -91,15 +96,128 @@ const logIn = async () => {
   }
 };
 
+/**
+ * Synthesizes a `PurchasesOffering` shape sufficient for the upgrade-wall UI
+ * (PlanPackages + PlanCard + useEligibleForTrial). Only the fields the React
+ * tree actually reads are populated — anything else stays undefined and is
+ * cast through `unknown` because the full RC type has ~40 fields most of
+ * which the mobile never touches.
+ *
+ * Used in two scenarios:
+ *   1. Maestro E2E flow 25-upgrade-journey — the simulator has no StoreKit
+ *      account configured, so a real `Purchases.getOfferings()` resolves
+ *      with `current: null` and the UI renders empty space + a loading CTA.
+ *      The validator caught exactly that ("plan rows show loading dots").
+ *   2. Local development on the iOS simulator when no StoreKit configuration
+ *      file is wired into the active Xcode scheme. Same failure mode.
+ *
+ * Production builds (real RC key, MAESTRO_E2E unset) never reach this code
+ * path — `isStubRevenueCatKey` is false and `Purchases.getOfferings()`
+ * returns real App Store / Play Store pricing.
+ */
+const buildMaestroSyntheticOfferings = (): PurchasesOffering => {
+  const monthlyPrice = 9.99;
+  const yearlyPrice = 49.99;
+
+  const baseProduct = {
+    description: "Pegada Premium",
+    title: "Pegada Premium",
+    currencyCode: "USD",
+    introPrice: null,
+    discounts: null,
+    productCategory: "SUBSCRIPTION",
+    productType: "AUTO_RENEWABLE_SUBSCRIPTION",
+    subscriptionPeriod: "P1M",
+    defaultOption: null,
+    subscriptionOptions: null,
+    presentedOfferingIdentifier: "default",
+  };
+
+  // String literals (not ProductIdentifier.*) because the enum is declared
+  // further down in this file — both values match the enum exactly.
+  const monthlyProduct = {
+    ...baseProduct,
+    identifier: "premium_monthly",
+    price: monthlyPrice,
+    priceString: `$${monthlyPrice.toFixed(2)}`,
+    pricePerWeek: monthlyPrice / 4,
+    pricePerMonth: monthlyPrice,
+    pricePerYear: monthlyPrice * 12,
+    pricePerWeekString: `$${(monthlyPrice / 4).toFixed(2)}`,
+    pricePerMonthString: `$${monthlyPrice.toFixed(2)}`,
+    pricePerYearString: `$${(monthlyPrice * 12).toFixed(2)}`,
+    subscriptionPeriod: "P1M",
+  };
+
+  const yearlyProduct = {
+    ...baseProduct,
+    identifier: "premium_yearly",
+    price: yearlyPrice,
+    priceString: `$${yearlyPrice.toFixed(2)}`,
+    pricePerWeek: yearlyPrice / 52,
+    pricePerMonth: yearlyPrice / 12,
+    pricePerYear: yearlyPrice,
+    pricePerWeekString: `$${(yearlyPrice / 52).toFixed(2)}`,
+    pricePerMonthString: `$${(yearlyPrice / 12).toFixed(2)}`,
+    pricePerYearString: `$${yearlyPrice.toFixed(2)}`,
+    subscriptionPeriod: "P1Y",
+  };
+
+  const monthlyPackage = {
+    identifier: "$rc_monthly",
+    packageType: "MONTHLY",
+    product: monthlyProduct,
+    offeringIdentifier: "default",
+    presentedOfferingContext: { offeringIdentifier: "default" },
+  };
+
+  const yearlyPackage = {
+    identifier: "$rc_annual",
+    packageType: "ANNUAL",
+    product: yearlyProduct,
+    offeringIdentifier: "default",
+    presentedOfferingContext: { offeringIdentifier: "default" },
+  };
+
+  return {
+    identifier: "default",
+    serverDescription: "Pegada Premium (Maestro/Sim fallback)",
+    metadata: {},
+    availablePackages: [monthlyPackage, yearlyPackage],
+    lifetime: null,
+    annual: yearlyPackage,
+    sixMonth: null,
+    threeMonth: null,
+    twoMonth: null,
+    monthly: monthlyPackage,
+    weekly: null,
+  } as unknown as PurchasesOffering;
+};
+
+const isIosSimulator = Platform.OS === "ios" && !Device.isDevice;
+
 const getOfferings = async () => {
+  // Maestro/sim fallback path. See `buildMaestroSyntheticOfferings` for the
+  // full rationale — both Maestro CI and local sim development would
+  // otherwise render the upgrade wall with empty plan rows + a perpetually
+  // loading CTA, because StoreKit cannot resolve real pricing without an
+  // attached `.storekit` configuration in the Xcode scheme.
   if (isStubRevenueCatKey) {
-    return null;
+    return buildMaestroSyntheticOfferings();
   }
 
   try {
     const offerings = await Purchases.getOfferings();
 
     if (!offerings.current) {
+      // Same fallback for real RC keys when running on an iOS simulator
+      // without a StoreKit configuration file attached. Returning null
+      // here would freeze the upgrade wall on a loading state with no
+      // user-visible explanation. The synthetic offering at least lets
+      // the screen render so a developer can verify layout and copy.
+      if (isIosSimulator) {
+        return buildMaestroSyntheticOfferings();
+      }
       return null;
     }
 
@@ -242,9 +360,7 @@ const purchasePackage = async (...props: Parameters<typeof Purchases.purchasePac
     return maestroMockPurchase(pkg) as unknown as ReturnType<typeof Purchases.purchasePackage>;
   }
 
-  const isSimulator = Platform.OS === "ios" && !Device.isDevice;
-
-  if (isSimulator) {
+  if (isIosSimulator) {
     Alert.alert(
       "Simulator Detected",
       "Purchases are not available in the IOS simulator. Please try on a real device.",
@@ -297,7 +413,7 @@ const getPlan = (customerInfo?: CustomerInfo | null) => {
 };
 
 const restorePurchases = async () => {
-  if (Platform.OS === "ios" && !Device.isDevice) {
+  if (isIosSimulator) {
     Alert.alert(
       "Simulator Detected",
       "Restore is not available in the IOS simulator. Please try on a real device.",

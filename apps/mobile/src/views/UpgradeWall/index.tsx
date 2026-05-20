@@ -183,6 +183,13 @@ const UpgradeWall: React.FC = () => {
         <RestorePurchases />
         <CloseButton
           testID="upgrade-wall-close"
+          // Generous hitSlop — the visible target is 32x32 (theme.spacing[8])
+          // which is below Apple's 44pt minimum; Maestro's tap-by-id resolves
+          // to the *center* of the view, but human taps (and validator
+          // coord-based fallbacks) frequently miss when the target sits
+          // flush against the screen corner. Expanding the touch area to
+          // ~64x64 covers safe-area + finger drift without changing layout.
+          hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
           onPress={() => {
             router.back();
           }}

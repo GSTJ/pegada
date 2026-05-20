@@ -95,3 +95,17 @@ Both sides of the mock are gated:
 Both halves must be configured for the mock to function. The mock branch is
 unreachable in production builds (env vars are never set and the stub-key
 guard short-circuits when a real RevenueCat key is present).
+
+## StoreKit configuration for simulator runs
+
+The iOS simulator can't talk to the real App Store. Without a StoreKit
+configuration in the active Xcode scheme, `Purchases.getOfferings()` resolves
+with `current: null` — the upgrade wall then renders empty plan rows and a
+CTA stuck in loading. To avoid that, the repo ships `apps/mobile/Pegada.storekit`
+(checked in — product IDs are not secrets) and `plugins/withStoreKitConfiguration.js`
+wires it into the generated scheme on every `expo prebuild`.
+
+Belt-and-suspenders: the mobile payment service also has a JS-side fallback
+(`buildMaestroSyntheticOfferings`) that returns the same synthetic offering
+shape when StoreKit returns null on a simulator — so flow `25-upgrade-journey`
+stays deterministic even on a fresh clone before prebuild has run.

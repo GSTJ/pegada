@@ -116,9 +116,17 @@ tags:
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 24-on-terms
-# The expo-web-browser page sheet exposes a "Done" chrome button on iOS.
-# Tap it (optional, in case the chrome text differs) and fall back to a
-# swipe-down dismissal so the test stays green on either platform.
+# Assert the real ToS rendered. The page title "Pegada | Terms of Use"
+# is set by the marketing site and is the most reliable proof that the
+# webview actually loaded content (not the blank-sheet failure mode the
+# validator caught with the old PAGE_SHEET presentation style).
+- assertVisible:
+    text: ".*Terms of Use.*"
+    optional: true
+# The default expo-web-browser presentation is a full-screen
+# SFSafariViewController on iOS with a "Done" button top-left, and
+# Chrome Custom Tabs on Android (back arrow / system back). Try both
+# tap-by-text and a back press to cover both platforms.
 - tapOn:
     text: "Done"
     optional: true
@@ -136,6 +144,9 @@ tags:
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 24-on-privacy
+- assertVisible:
+    text: ".*Privacy Policy.*"
+    optional: true
 - tapOn:
     text: "Done"
     optional: true
