@@ -48,10 +48,14 @@ tags:
     id: "profile-logout"
 - waitForAnimationToEnd
 - takeScreenshot: 26-logout-confirm-dialog
-# Native iOS Alert: title "Log out", destructive "Log out" button on the
-# right, "Cancel" on the left. i18n key profile.logout = "Log out".
+# Native iOS Alert presented by Alert.alert in services/handleLogout.tsx.
+# Buttons: destructive "Logout" (right), "Cancel" (left). i18n key
+# profile.logout = "Logout" (one word — see packages/shared/i18n/locales/
+# en/translation.json). Maestro's tapOn:text matches the visible label
+# rendered by the native iOS dialog, which is included in the XCUITest
+# accessibility tree even when the underlying RN view tree is not.
 - tapOn:
-    text: "Log out"
+    text: "Logout"
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 26-after-logout
