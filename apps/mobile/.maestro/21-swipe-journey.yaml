@@ -1,47 +1,55 @@
 appId: ${APP_ID}
-name: Swipe stack journey — profile → like → dislike → maybe → report (single session)
+name: Swipe stack journey — open profile, like, dislike, maybe, report (single session)
 tags:
   - smoke
   - regression
 ---
-# End-to-end swipe-stack user journey, exercised as ONE continuous session
-# rather than 6 isolated smoke flows. Mirrors what a returning user actually
-# does after signing in: they peek at the top dog's profile, swipe a couple
-# cards, peek at the next dog, then report a profile that bothered them.
+# End-to-end swipe-stack user journey for a RETURNING user
+# (test@pegada.app / Rex), exercised as ONE continuous session rather than
+# 6 isolated smoke flows. Mirrors what a real user does after signing in:
+# peek at the top dog's profile, swipe through several cards (dislike to
+# clear MatchMe, then like / dislike / maybe), then open a profile and
+# report it.
 #
 # Why this exists separately from 08/09/10:
-# - 08/09 only tap one button and assert nothing about the deck state.
+# - 08/09 only tap one button and assert nothing about deck state.
 # - 10 opens the profile but doesn't combine it with deck-state assertions.
 # - The "different card after action" invariant has never been covered, so
-#   a regression where the deck stops advancing (e.g. dispatch dropped or
+#   a regression where the deck stops advancing (dispatch dropped or
 #   currentCardId stuck) ships green today. This flow catches it because
-#   each like/dislike/maybe step reasserts swipe-card on a fresh card.
+#   every screenshot is taken AFTER an action and md5-diffed against the
+#   prior one in CI (see .maestro/checks/21-swipe-journey.sh).
 #
-# Seed assertion strategy:
-# - The Rex deck is generated via faker (generate-fake-user-with-dog.ts),
-#   so dog NAMES are NOT stable across runs — we cannot assert text="Daisy".
-# - What IS stable: every card renders MainCard with testID="swipe-card",
-#   the dog profile screen mounts S.Name with testID="dog-profile-name",
-#   and the action bar exposes testID="swipe-like" / "swipe-dislike" /
-#   "swipe-maybe" (last one added in this PR). The flow uses those as
-#   stable anchors and relies on the per-step screenshots
-#   (21-on-swipe / 21-after-like / 21-after-dislike / 21-after-maybe) for
-#   hash-diff verification that the rendered card actually changed.
+# Seed (packages/database/maestro-seed.ts, asserted before this flow runs
+# via scripts/seed-before-test.sh):
+#   - test@pegada.app's Rex (id cmpd50hv40002tfxk11n9kqb4) anchors the deck.
+#   - MatchMe sits at the TOP of Rex's deck (premium pre-liker, priority=1).
+#     Liking her would fire the new-match modal and derail this flow, so
+#     step 4 DISLIKES her first to clear her without firing the modal.
+#   - SwipeDog1..SwipeDog6 are co-located SF dogs WITHOUT reciprocal
+#     interests — liking them never opens the new-match modal, so the
+#     like / dislike / maybe / report cycle runs against them safely.
 #
-# IMPORTANT: MatchMe sits at the TOP of Rex's deck (priority=1, premium
-# pre-liker — see packages/database/maestro-seed.ts). Liking her would
-# fire the new-match modal and derail this flow. Step 4 below DISLIKES
-# her first to clear her out, then the like/dislike/maybe/report cycle
-# runs against the SwipeDog1..SwipeDog6 nearby pool that keeps the deck
-# populated.
+# iOS 26 Fabric reality (verified via `maestro hierarchy` against a logged-
+# in build — see 20-account-creation-journey.yaml docs):
+# - XCUITest's a11y snapshot is BLIND to the RN view tree for this app
+#   build. testIDs like `swipe-card`, `swipe-like`, `dog-profile-name`
+#   are NOT reachable; only the system status bar surfaces.
+# - We use point-based taps for every in-app target. Coordinates calibrated
+#   on iPhone 17 Pro Max (440x956 logical, 1320x2868 px) from style
+#   inspection of MatchActionBar/styles.ts + MainCard + DogProfile.
+# - Native UIAlertController (the Report dialog) DOES surface via native
+#   a11y labels — text matchers work for "Report", "Yes", "Cancel".
 #
-# Report flow:
-# - reportUser in views/DogProfile/index.tsx fires a native Alert ("Report"
-#   title, "Cancel" / "Yes" buttons). Tapping Yes calls Linking.openURL
-#   (mailto:) then swipe.swipe.mutate then router.back(). There is no
-#   toast — confirmation = the Alert dismisses and we leave the dog
-#   profile (or the deck advances). We assert the post-report swipe-card
-#   is visible again.
+# Report flow (apps/mobile/src/views/DogProfile/index.tsx → reportUser):
+# - Triggers a native Alert with title "Report" (i18n key dogProfile.report)
+#   and body "By reporting a profile, you are helping us to keep the
+#   community safe. Would you like to proceed?" (dogProfile.reportMessage).
+# - Tapping "Yes" (dogProfile.yes) calls Linking.openURL(mailto:) then
+#   swipe.swipe.mutate({ swipeType: Dislike }) on the reported dog, then
+#   router.back(). No Report table exists — the act of reporting persists
+#   only as an Interest row of type NOT_INTERESTED (verified via psql
+#   \dt — see checks/21-swipe-journey.sh).
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -51,130 +59,121 @@ tags:
     timeout: 15000
 
 # --- 1. Land on Swipe tab -------------------------------------------------
-- assertVisible:
-    id: "swipe-card"
-- assertVisible:
-    id: "swipe-like"
-- assertVisible:
-    id: "swipe-dislike"
-- assertVisible:
-    id: "swipe-maybe"
+# No testID assertion possible (RN tree invisible). The screenshot below is
+# the baseline for the "card changed" hash diff in the next step.
 - takeScreenshot: 21-on-swipe
 
-# --- 2. Open the top dog's profile from the card's personal-info area -----
-# Tapping the bottom personal-info pressable on MainCard pushes
-# SceneName.Profile/[id]. testID anchor is dog-profile-name on the
-# heading inside DogProfile.
+# --- 2. Open the top dog's profile (MatchMe) ------------------------------
+# Tapping the MainCard's PersonalInfo region (lower-middle of the card,
+# below the bio / above the MatchActionBar) navigates to
+# SceneName.Profile/[id]. The card occupies most of the screen below the
+# top safe-area; the personal-info pressable sits at roughly 50%, 75% Y
+# (above the action bar at 92% Y).
 - tapOn:
     point: "50%, 75%"
 - waitForAnimationToEnd:
     timeout: 8000
-- assertVisible:
-    id: "dog-profile-name"
-- takeScreenshot: 21-on-profile
-# Scroll through profile content (bio + share + report buttons sit below).
+- takeScreenshot: 21-on-profile-matchme
+
+# Scroll through DogProfile so the Report row enters the viewport
+# (DogProfile has photos at top, bio + Share + Report at bottom in a
+# BottomColumn ScrollView).
 - scroll
 - waitForAnimationToEnd
-- assertVisible:
-    id: "dog-profile-report"
 - takeScreenshot: 21-profile-scrolled
 
-# --- 3. Back to swipe deck ------------------------------------------------
-# Tap the DogProfile close button by testID. The standard utils/back.yaml
-# helper assumes a top-LEFT chevron, but DogProfile renders its close as a
-# top-RIGHT glass button (GoBack, align-self: flex-end). Tapping by
-# testID is the only stable anchor across screen sizes / safe-area
-# insets and proves the dedicated close handler fires.
+# --- 3. Close DogProfile and return to swipe deck -------------------------
+# DogProfile's close button (testID="dog-profile-close") renders the
+# `GoBack` component with align-self: flex-end in the top header. On
+# iPhone 17 Pro Max this lands at roughly (92%, 8%) — top-right corner
+# inside the safe area inset.
 - tapOn:
-    id: "dog-profile-close"
+    point: "92%, 8%"
 - waitForAnimationToEnd:
     timeout: 5000
-- assertVisible:
-    id: "swipe-card"
-- assertVisible:
-    id: "swipe-like"
-- takeScreenshot: 21-back-on-swipe
+- takeScreenshot: 21-back-on-swipe-matchme
 
-# --- 4. DISLIKE MatchMe first → clears the pre-liked dog without firing ----
-# the new-match modal. The next top card will be SwipeDog1 (no
-# reciprocal interest), safe to like/maybe/report in subsequent steps.
+# --- 4. DISLIKE MatchMe → clears the pre-liker without firing the modal --
+# MatchActionBar layout (MatchActionBar/styles.ts):
+#   - Container at `bottom: spacing[6]` (~24px), absolute, full width,
+#     justify-content: space-around → 3 items at ~16.6%, 50%, 83.3% X.
+#   - Each ActionItem min 44×44pt + spacing[2.5] padding → ~52pt tall.
+#   - On iPhone 17 Pro Max with the home-indicator safe area, the bar
+#     centerline sits at roughly 91% Y.
+# Dislike is the LEFT button (~17%, 91%).
 - tapOn:
-    id: "swipe-dislike"
+    point: "17%, 91%"
 - waitForAnimationToEnd:
     timeout: 5000
-- assertVisible:
-    id: "swipe-card"
 - takeScreenshot: 21-after-dislike-matchme
 
-# --- 5. LIKE → deck must advance to a new top card ------------------------
-# SwipeDog pool dogs have no reciprocal interest, so liking never opens
-# the new-match modal — the deck simply advances.
+# --- 5. LIKE the next card (SwipeDog1) → deck must advance ---------------
+# SwipeDogN pool has NO reciprocal interest, so liking never opens the
+# new-match modal — deck simply advances. Like is the RIGHT button (~83%).
 - tapOn:
-    id: "swipe-like"
+    point: "83%, 91%"
 - waitForAnimationToEnd:
     timeout: 5000
-- assertVisible:
-    id: "swipe-card"
-- takeScreenshot: 21-after-like
+- takeScreenshot: 21-after-like-swipedog2
 
-# --- 6. DISLIKE → deck advances again -------------------------------------
+# --- 6. DISLIKE next card (SwipeDog3) → deck advances --------------------
 - tapOn:
-    id: "swipe-dislike"
+    point: "17%, 91%"
 - waitForAnimationToEnd:
     timeout: 5000
-- assertVisible:
-    id: "swipe-card"
-- takeScreenshot: 21-after-dislike
+- takeScreenshot: 21-after-dislike-swipedog3
 
-# --- 7. MAYBE (super-like equivalent) → deck advances ---------------------
-# Swipe.Maybe is the third direction wired through swipeHandlerRef +
-# MatchActionBar onMaybe in src/components/MatchActionBar/index.tsx.
+# --- 7. MAYBE next card (SwipeDog4) → deck advances ----------------------
+# MAYBE is the CENTER button (~50%, 91%). Wired through swipeHandlerRef +
+# MatchActionBar onMaybe → Swipe.Maybe direction.
 - tapOn:
-    id: "swipe-maybe"
+    point: "50%, 91%"
 - waitForAnimationToEnd:
     timeout: 5000
-- assertVisible:
-    id: "swipe-card"
-- takeScreenshot: 21-after-maybe
+- takeScreenshot: 21-after-maybe-swipedog4
 
-# --- 8. Re-open the (now different) top dog's profile to report -----------
+# --- 8. Open the (now different) top dog's profile to report -------------
 - tapOn:
     point: "50%, 75%"
 - waitForAnimationToEnd:
     timeout: 8000
-- assertVisible:
-    id: "dog-profile-name"
 - takeScreenshot: 21-profile-for-report
+
+# Scroll the BottomColumn so the Report row is in the viewport.
 - scroll
 - waitForAnimationToEnd
 
-# --- 9. Trigger the report Alert and confirm ------------------------------
+# --- 9. Trigger the report Alert and confirm -----------------------------
+# Report row sits at the BOTTOM of the BottomColumn ScrollView, below
+# Share. After scroll, it's at roughly 50%, 80% Y. Tap fires
+# reportUser(dog) → Alert.alert("Report", ...).
 - tapOn:
-    id: "dog-profile-report"
+    point: "50%, 80%"
 - waitForAnimationToEnd:
     timeout: 3000
-# Native Alert title (i18n key dogProfile.report -> "Report") and
-# the safety-warning body (dogProfile.reportMessage). Both must render.
+
+# Native iOS Alert IS visible to XCUITest via native a11y labels.
+# Title "Report" + body text (dogProfile.reportMessage from en.json).
 - assertVisible:
     text: "Report"
 - assertVisible: "By reporting a profile, you are helping us to keep the community safe. Would you like to proceed?"
 - takeScreenshot: 21-report-dialog
-# Confirm — "Yes" maps to dogProfile.yes. The handler fires mailto +
-# swipe.swipe.mutate; the Alert dismisses regardless of mail availability.
+
+# Confirm — "Yes" (dogProfile.yes). The handler fires
+# Linking.openURL("mailto:report@pegada.app...") + swipe.swipe.mutate
+# (Dislike) + router.back(). The Alert dismisses regardless of whether
+# mailto can be handled by the simulator.
 - tapOn:
     text: "Yes"
 - waitForAnimationToEnd:
     timeout: 8000
-# iOS may surface a system "Cannot open page" alert if Mail isn't
-# configured on the simulator. Dismiss it if present so the flow can
-# assert the post-report deck state.
+
+# iOS may surface a system "Cannot open page" alert if Mail isn't set up
+# on the simulator (default state). Dismiss optionally so the post-report
+# screenshot lands on the swipe deck and not on the system alert.
 - tapOn:
     text: "OK"
     optional: true
 - waitForAnimationToEnd:
     timeout: 3000
-# Confirmation = we're back on the swipe deck (router.back fired) and
-# the deck still renders a card.
-- assertVisible:
-    id: "swipe-card"
 - takeScreenshot: 21-after-report
