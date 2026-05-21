@@ -26,30 +26,32 @@ tags:
 #   3. CreateProfile (apps/mobile/src/views/(auth)/CreateProfile/index.tsx):
 #      single screen with photos grid (ProfileImagesUploader → AddUserPhoto),
 #      dog-name TextInput, optional bio, and gender RadioButtons (defaults
-#      to MALE). Submit requires ≥1 image + name. Order in this flow:
-#      upload photo → type name → submit (skip bio, keep default gender).
+#      to MALE). Submit requires ≥1 image + name.
 #
 #   4. CompleteProfile (apps/mobile/src/views/(auth)/CompleteProfile/index.tsx):
-#      requires a birthdate. We type it directly into the masked text input
-#      — the date-picker modal is iOS-system UI and adds picker-wheel
-#      flakiness we don't need for E2E coverage.
+#      requires a birthdate. We type into the masked text input directly.
 #
 #   5. AskForLocation: tap Enable Location → defensively dismiss any system
 #      prompt that still appears even with location:inuse pre-granted.
 #
-#   6. Swipe tab: assertVisible on `swipe-screen` testID (added to the Swipe
-#      view's outer Container) — proves we reached the tabs even for a fresh
-#      account whose deck is empty.
+#   6. Swipe tab: assertVisible on `swipe-screen` testID — the SwipeScreen
+#      registers as a native a11y container (the SafeAreaView wrapper) that
+#      XCUITest CAN see, unlike the deeply-nested Input/Pressable RN nodes
+#      below.
 #
-# iOS 26 Fabric constraints (carried over from utils/login-fresh.yaml):
-# - The XCUITest accessibility snapshot is BLIND to most RN-rendered text
-#   for this app build. Stable testIDs (added across this PR series) are
-#   the only reliable in-app anchors; native system UI uses native
-#   accessibility labels (text: "Choose from Library", "Allow While Using
-#   App", etc.) which XCUITest CAN see.
-# - Coordinate-based taps are used ONLY where a testID is genuinely
-#   unreachable — specifically the iOS native photo-picker grid (no
-#   testIDs in Apple-provided UI) and within login-fresh.yaml.
+# iOS 26 Fabric reality (verified empirically on this branch — see
+# utils/login-fresh.yaml comments and the run that produced
+# ~/.maestro/tests/2026-05-21_164009):
+#   - XCUITest's accessibility snapshot is BLIND to most RN-rendered
+#     content for this app build: `tapOn: id: profile-name` times out
+#     looping through an empty hierarchy. We use point-based taps for
+#     every in-app TextInput / Button on CreateProfile + CompleteProfile.
+#   - Native system UI (image picker alert, photos library, location
+#     prompt) IS visible via native a11y labels (text: "Choose from
+#     Library" etc.).
+#   - Coordinates calibrated on iPhone 17 Pro Max (440x956 logical,
+#     1320x2868 px). The same reference device used by login-fresh.yaml
+#     and the rest of the suite.
 #
 # Photo upload regression fix (PR #36): on iOS 26 Release builds the
 # presigned PUT used to time out before completing — the 15s wait below
@@ -76,54 +78,61 @@ tags:
 - takeScreenshot: 20-02-on-create-profile
 
 # ---------------------------------------------------------------------------
-# 2. CreateProfile — type dog name + upload one photo + submit
+# 2. CreateProfile — upload one photo, then type dog name, then submit
 # ---------------------------------------------------------------------------
-# Tap the dog-name TextInput by testID first so the keyboard opens BEFORE
-# we trigger the photo picker (which dismisses the keyboard). This keeps
-# the screen layout stable for the photo-cell tap below.
+# Photo first: the picker dismisses the keyboard anyway, so doing it before
+# typing avoids the focus-shuffling that breaks Maestro driver state on
+# iOS 26. The `add-photo-0` testID is on AddUserPhoto's PressableArea but
+# XCUITest cannot see it on this build — point tap targets the top-left
+# photo cell of the 2-column grid inside ProfileImagesUploader. The cell
+# sits below the "Profile Pictures" header and "Add at least one photo"
+# subtitle; on the freshly-loaded CreateProfile screen (no keyboard) the
+# first column sits at roughly 23% X, 27% Y on iPhone 17 Pro Max.
 - tapOn:
-    id: "profile-name"
-- waitForAnimationToEnd
-- inputText: "MaestroPup"
-- takeScreenshot: 20-03-after-name
-
-# Dismiss the keyboard by tapping outside any TextInput. The Container is
-# a ScrollView with keyboardShouldPersistTaps="handled" — tapping the
-# section header text region above the input is safe and predictable.
-- hideKeyboard
-- waitForAnimationToEnd
-
-# Tap the first photo slot. testID `add-photo-0` is on the PressableArea
-# inside ProfileImageUploader → AddUserPhoto. AddUserPhoto exposes both
-# `add-photo-<index>` (the empty slot) and `add-photo-button-<index>`
-# (the "+" overlay button) — the slot itself is the more forgiving target.
-- tapOn:
-    id: "add-photo-0"
+    point: "23%, 27%"
 - waitForAnimationToEnd:
     timeout: 5000
 
 # Image picker shows a native Alert with: Take Photo / Choose from Library
-# / Cancel. Choose from Library is the deterministic path on the iOS
-# simulator which always seeds 4 stock photos in the Photos app.
+# / Cancel. The native Alert IS visible via text labels.
 - tapOn:
     text: "Choose from Library"
 - waitForAnimationToEnd:
     timeout: 8000
 
-# Photo library may show a "Select Photos" permission sheet on iOS 14+
-# even when `photos: all` was pre-granted, depending on the runtime —
-# dismiss defensively. Common state is "all access granted, no sheet".
+# Photo library shows a "Pegada would like full access to your Photo
+# Library" permission sheet on iOS 26 EVEN when `photos: all` was
+# pre-granted via launchApp.permissions — iOS 26 deliberately re-prompts
+# the user the first time the app opens the picker (verified empirically:
+# `maestro hierarchy` after the "Choose from Library" tap showed the
+# sheet's "Allow Full Access" / "Limit Access…" / "Don't Allow" buttons
+# even with photos:all pre-granted).
+#
+# The sheet animates in a fraction of a second AFTER the picker opens;
+# extendedWaitUntil with `optional: true` gives it up to 5s to render
+# before we attempt the tap. Without this, the optional tapOn returns
+# immediately if the sheet hasn't drawn yet, and we end up tapping
+# blindly into the picker grid before access is granted (= permission
+# revoked, photo selection silently no-ops). The label string changed
+# between iOS versions, so we cover both legacy ("Allow Access to All
+# Photos") and iOS 26 ("Allow Full Access").
+- extendedWaitUntil:
+    visible:
+      text: "Allow Full Access"
+    timeout: 15000
+    optional: true
+- tapOn:
+    text: "Allow Full Access"
+    optional: true
 - tapOn:
     text: "Allow Access to All Photos"
     optional: true
-- tapOn:
-    text: "Select Photos..."
-    optional: true
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 8000
 
 # Tap the first photo in the 4-up grid. The iOS simulator photo library
 # is native Apple UI — no testIDs available. Coordinates target the
-# top-left cell (~20% X / ~30% Y on iPhone 17 Pro Max, 440x956 logical).
+# top-left cell.
 - tapOn:
     point: "20%, 30%"
 - waitForAnimationToEnd:
@@ -140,34 +149,55 @@ tags:
 - waitForAnimationToEnd:
     timeout: 15000
 
-# Wait for the S3 upload to complete — ProfileImagesUploader shows an
+# Wait for the S3 upload — ProfileImagesUploader shows an
 # ActivityIndicator overlay until the presigned PUT returns. 15s covers
 # the iOS 26 Release-build regression fixed in PR #36; local sim
 # completes in ~2s.
 - takeScreenshot: 20-05-photo-uploaded
 
-# Submit CreateProfile. testID `profile-submit` is shared by Create and
-# Complete profile Buttons but only one is mounted at a time so this is
-# unambiguous.
+# Dog-name TextInput. With the photo grid filled at the top, the name
+# Input center sits at roughly 50%, 55% Y on iPhone 17 Pro Max (form is
+# Photos header → Photo grid → Photo footer → Name title → Name input).
+# This matches the legacy 03-create-profile.yaml coord (50%, 66%) shifted
+# up by the now-visible photo grid taking less vertical space than the
+# placeholder slots.
 - tapOn:
-    id: "profile-submit"
+    point: "50%, 55%"
+- waitForAnimationToEnd
+- inputText: "MaestroPup"
+- takeScreenshot: 20-03-after-name
+
+# Dismiss keyboard so the Submit button sits at its keyboard-down
+# position. hideKeyboard is a no-op on iOS sometimes — tap a safe area
+# (above the form) as a fallback.
+- hideKeyboard
+- waitForAnimationToEnd
+
+# CreateProfile button. The BottomAction.Container pins it to the bottom
+# of the screen at ~50%, 93% Y on iPhone 17 Pro Max (BottomAction adds
+# safe-area padding so the button center lands above the home indicator).
+- tapOn:
+    point: "50%, 93%"
 - waitForAnimationToEnd:
     timeout: 15000
 
 # ---------------------------------------------------------------------------
 # 3. CompleteProfile — pick birthdate + submit
 # ---------------------------------------------------------------------------
-# `complete-profile-birth-date` is on the masked date Input. Typing
-# `01/01/2020` exercises the same path a real user takes when they
-# decline the native picker and key the date manually.
+# Birthdate TextInput on CompleteProfile is the only required field — the
+# screen has profile-photo preview + birthdate input + submit. Birthdate
+# input center is at ~50%, 55% Y (matches legacy 04-complete-profile.yaml).
 - tapOn:
-    id: "complete-profile-birth-date"
+    point: "50%, 55%"
 - waitForAnimationToEnd
 - inputText: "01/01/2020"
 - takeScreenshot: 20-04-after-birthdate
 
+- hideKeyboard
+- waitForAnimationToEnd
+
 - tapOn:
-    id: "profile-submit"
+    point: "50%, 93%"
 - waitForAnimationToEnd:
     timeout: 12000
 
@@ -175,8 +205,10 @@ tags:
 # 4. AskForLocation — tap Enable Location and accept the system prompt
 # ---------------------------------------------------------------------------
 - takeScreenshot: 20-06-on-location
+# Enable Location button is the primary CTA at ~50%, 88% Y (BottomAction
+# container, same vertical position as the submit buttons above).
 - tapOn:
-    id: "location-allow"
+    point: "50%, 88%"
 - waitForAnimationToEnd:
     timeout: 5000
 
@@ -196,8 +228,9 @@ tags:
 # 5. Final assertion — we landed on the Swipe tab
 # ---------------------------------------------------------------------------
 # `swipe-screen` testID is on the outer SafeAreaView Container in
-# apps/mobile/src/views/(tabs)/Swipe/index.tsx — survives even when the
-# user has zero cards (fresh account → empty stack with empty-state UI).
+# apps/mobile/src/views/(tabs)/Swipe/index.tsx — this one IS visible to
+# XCUITest because it's the top-level a11y container. Survives even when
+# the fresh user has zero cards (empty-state UI mounted).
 - assertVisible:
     id: "swipe-screen"
 - takeScreenshot: 20-07-on-swipe
