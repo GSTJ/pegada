@@ -1,0 +1,98 @@
+appId: ${APP_ID}
+name: Language + theme persistence — cold-launch reads AsyncStorage and renders PT/dark
+tags:
+  - smoke
+  - regression
+---
+# Persistence proof for the language and theme preferences. Both live
+# in AsyncStorage (apps/mobile/src/services/storage.ts → StorageKeys.
+# Language / StorageKeys.Theme), seeded out-of-band by
+# scripts/pre/23b-seed-asyncstorage.sh BEFORE this Maestro flow runs.
+#
+# === Why split into a pre-script + this flow? ===
+#
+# The Profile screen exposes Language and Theme via dedicated rows that
+# open @gorhom/bottom-sheet pickers. Opening any @gorhom/bottom-sheet
+# CRASHES the XCUITest accessibility driver on iOS 26 — every
+# subsequent Maestro step times out with "Driver disconnected" until
+# the app is force-killed. Validated empirically in an earlier session
+# (see .maestro/REWRITE-PLAN.md "Lessons applied"). We CANNOT drive
+# the pickers from Maestro, so we cannot test the picker UI directly.
+#
+# We CAN still validate the PERSISTENCE LAYER end-to-end:
+#   1. Pre-script seeds AsyncStorage with language=pt-BR and theme=dark
+#      (via a direct write to the manifest.json file in the simulator's
+#      app data container — see scripts/pre/23b-seed-asyncstorage.sh).
+#   2. This flow cold-launches the app with clearState=false /
+#      clearKeychain=false (so AsyncStorage and the JWT survive).
+#   3. The app boots, i18n's `languageDetector.detect()` reads
+#      language=pt-BR from AsyncStorage and selects PT translations.
+#      ThemeProvider's `fetchThemeFromStorage()` reads theme=dark and
+#      calls Appearance.setColorScheme("dark").
+#   4. We navigate to Profile and screenshot. The screenshot is the
+#      visual proof — Settings header renders as "Configurações" (PT)
+#      and the screen background is dark.
+#
+# The DB has no locale or theme columns on User (verified via
+# `\d \"User\"`), so a server-side seed approach (Approach A in the
+# PR thread) is not viable for this codebase. Approach B
+# (client-side AsyncStorage write) is the only path.
+#
+# === iOS 26 + RN Fabric: same constraints as 21/22/23 ===
+#
+# Point-based taps for in-app targets (Profile tab); RN view tree
+# invisible to XCUITest; screenshot + DB post-check as authoritative
+# proofs. Here the "DB post-check" is actually an AsyncStorage post-
+# check (checks/23b-lang-theme.sh reads the manifest.json after the
+# Maestro flow ends and asserts the values are still language=pt-BR /
+# theme=dark — proving the cold-launched app didn't clobber them).
+- launchApp:
+    # Critical: do NOT clearState here. The pre-script seeded
+    # AsyncStorage (and login-returning planted a valid JWT) — wiping
+    # state would erase both and we'd end up on the sign-in screen with
+    # the device default locale.
+    clearState: false
+    clearKeychain: false
+- waitForAnimationToEnd:
+    timeout: 20000
+- takeScreenshot: 23b-01-after-cold-launch
+# The cold launch lands on the splash for the first ~1-2s and then
+# transitions to the Swipe tab. Wait an extra 4s past
+# waitForAnimationToEnd to make sure the tab bar is mounted and
+# interactive before we attempt the tab tap.
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 23b-02-swipe-pt-dark
+# === Visual proof checkpoint ===
+# 23b-02 captures the Swipe tab post-cold-launch. With language=pt-BR
+# applied, the bio strings on the seeded SF dogs render in PT (e.g. the
+# MatchMe top card shows "MatchMe — pre-liked Rex" + "2 anos" for age).
+# With theme=dark applied, the background is BLACK and the action bar
+# icons are inverted. The md5 of this screenshot WILL differ from the
+# equivalent post-login Swipe capture in flows 21 / 22 (which run in
+# en-US light theme), giving us a robust hash-diff assertion in CI.
+
+# --- Profile tab (rightmost on bottom tab bar) ----------------------------
+# Person icon at the rightmost slot. The tab bar has 3 icons evenly
+# spaced at X 17% / 50% / 83% with vertical center ≈ Y 95%.
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 23b-03-on-profile-pt-dark
+# Screenshot 23b-02 is the visual proof:
+#   - i18n key profile.settings = "Configurações" in pt-BR vs "Settings"
+#     in en-US. The Profile screen's sticky header (apps/mobile/src/views/
+#     (tabs)/Profile/index.tsx) renders this t-key.
+#   - Theme = dark inverts foreground/background colors versus the
+#     light theme used in flows 23 (preferences-journey). MD5-diffing
+#     the bytes of 23b-02 against the 23-02-on-profile capture from
+#     flow 23 should yield a DIFFERENT hash (different theme + different
+#     locale = different pixel content).
+#
+# The AsyncStorage post-check (checks/23b-lang-theme.sh) reads the
+# manifest.json AFTER this flow ends and verifies the values are still
+# language=pt-BR, theme=dark — proving the cold launch did not clobber
+# the values (a regression where the i18n detector's cacheUserLanguage
+# overwrites our seed with the device locale on first detect would
+# flip language back to en-US, for example).

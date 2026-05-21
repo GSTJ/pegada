@@ -33,6 +33,11 @@ MAESTRO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 # 1. Always seed first — idempotent.
 "$SCRIPT_DIR/seed-before-test.sh"
 
+# 1b. Optional per-flow pre-test setup (e.g. inject AsyncStorage values
+# for flow 23b). Looked up by the same prefix convention as the post-
+# check (`pre/<NN>-*.sh`). Runs ONLY when the wrapper resolves a numeric
+# flow id; explicit-path invocations skip it.
+
 # 2. Resolve the flow argument. Numeric (with optional single-letter
 # suffix like 23b) => look up by prefix; everything else is treated as a
 # direct path / folder for maestro.
@@ -57,6 +62,13 @@ if [[ "$RAW_ARG" =~ ^[0-9]+[a-z]?$ ]]; then
   CHECK_MATCH=("$MAESTRO_DIR/checks/$PREFIX"-*.sh)
   if [[ -e "${CHECK_MATCH[0]}" ]]; then
     CHECK_SCRIPT="${CHECK_MATCH[0]}"
+  fi
+  PRE_MATCH=("$SCRIPT_DIR/pre/$PREFIX"-*.sh)
+  if [[ -e "${PRE_MATCH[0]}" ]]; then
+    echo ""
+    echo "==> running pre-test setup: ${PRE_MATCH[0]}"
+    bash "${PRE_MATCH[0]}"
+    echo "==> pre-test setup OK"
   fi
   shift
 else
