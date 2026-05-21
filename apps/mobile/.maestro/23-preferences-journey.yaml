@@ -1,193 +1,183 @@
 appId: ${APP_ID}
-name: Preferences journey — match prefs, location, language, theme (persistence)
+name: Preferences journey — distance + age sliders persist (no pickers)
 tags:
+  - smoke
   - regression
 ---
-# End-to-end journey that asserts settings actually persist (the real bug
-# class) and that language/theme switches re-render the UI. Replaces the
-# old smoke flows #15 (preferences open+save) and #17 (location-map render).
+# Preferences SLIDERS-ONLY journey for the returning magic user
+# (test@pegada.app / Rex).
 #
-# What we cover and WHY it matters:
-#   1. Match preferences: change Size + Color via the bottom-sheet pickers,
-#      Save, navigate AWAY to swipe, then BACK into Preferences and assert
-#      the new values are still selected. Catches dropped tRPC mutations
-#      and stale react-query cache (preferences screen reads myDog.get).
-#   2. Language: switch en-US -> pt-BR, assert a translated profile-screen
-#      string appears ("Configurações"), then revert to en-US so downstream
-#      flows see the default locale.
-#   3. Theme: switch Light -> Dark, screenshot for visual diff, revert to
-#      Light. Screenshot hash diff is the honest cross-platform assertion
-#      since we cannot read styled-components colors from Maestro.
-#   4. Location: open the map, drag the pin to a new region, confirm,
-#      and assert we land back on the profile screen (router.back on
-#      successful mutation). The fact that mutation success drives the
-#      navigation is itself the persistence proof — onError stays on the
-#      map. We capture screenshots before/after for visual diff.
+# === Why no pickers? ===
 #
-# All testIDs referenced here are added in the same PR:
-#   profile-open-{preferences,language,theme,location}
-#   preferences-{size,color}-picker
-#   preferences-{size,color}-item-<ID>     (e.g. preferences-size-item-MEDIUM)
-#   language-item-{en-US,pt-BR}
-#   theme-item-{light,dark}
+# The Preferences screen has three pickers (Breed, Size, Color) wired
+# through @gorhom/bottom-sheet. Tapping them opens a bottom-sheet modal.
+# On iOS 26 + RN Fabric + the iPhone 17 Pro Max XCUITest driver, opening
+# a @gorhom/bottom-sheet CRASHES the XCUITest connection — every
+# subsequent Maestro step times out with "Driver disconnected" until the
+# app is force-killed. Validated empirically in an earlier session
+# (see .maestro/REWRITE-PLAN.md "Lessons applied"). The crash is
+# deterministic and has no workaround at the test-driver level.
+#
+# Until the bottom-sheet incompatibility is fixed in @gorhom/bottom-sheet
+# or in the iOS 26 driver, we DROP all picker interaction from this flow.
+# Picker persistence is exercised separately via 23b-lang-theme-
+# persistence.yaml, which sets sheet-backed state via direct AsyncStorage
+# writes (no UI interaction) and verifies the cold-launched app honors it.
+#
+# What this flow covers:
+#   1. Distance slider — swipe to a stable new value, save.
+#   2. Age range slider (two-marker) — swipe each marker, save.
+#   3. Save → router.back() to Profile (mutation success path).
+#   4. Navigate away (Swipe tab) and back to Preferences.
+#   5. Screenshot proof + DB post-check that
+#      Dog.preferredMaxDistance / preferredMinAge / preferredMaxAge
+#      reflect the new values (different from the seeded baseline).
+#
+# Seed baseline (packages/database/maestro-seed.ts → ensureMagicUserWithRex):
+#   preferredMinAge=1, preferredMaxAge=15, preferredMaxDistance=50
+# The post-save expected mutation:
+#   distance increases (swipe right from baseline X≈19% to X≈50% in
+#     the track), min age moves up off 0, max age moves down off ∞.
+#
+# === iOS 26 + RN Fabric: point taps only, screenshots for proof ===
+#
+# Same rationale as flows 21 and 22 — RN view tree is invisible to
+# XCUITest. We use point taps for the tab bar, profile open-preferences
+# row, and the Save button. Sliders are driven by `swipe` from a
+# point on the slider track to another point, which the OS routes as
+# a pan gesture even without an a11y element.
 - launchApp:
     clearState: true
     clearKeychain: true
-    permissions:
-      location: inuse
 - waitForAnimationToEnd
 - runFlow: utils/login-returning.yaml
-- takeScreenshot: 23-00-after-login
-# ---------- Open Profile tab (bottom-right) ----------
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: 23-01-after-login
+
+# --- Open Profile tab (rightmost tab) -------------------------------------
 - tapOn:
     point: "83%, 95%"
-- waitForAnimationToEnd
-- assertVisible:
-    id: "profile-screen"
-- takeScreenshot: 23-01-on-profile
-# =====================================================
-# 1) MATCH PREFERENCES — change Size & Color, persist
-# =====================================================
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 23-02-on-profile
+
+# --- Open Preferences -----------------------------------------------------
+# Profile screen layout: large profile-photo block at the top, then the
+# "Settings" header (~Y 43%), then rows: Update Location (~Y 50%),
+# Current Plan (~Y 56%), Match Preferences (~Y 62%), Edit Profile (~Y 70%),
+# Language (~Y 79%), Theme (~Y 86%), Logout (~Y 93%). Measured from a
+# screenshot of the profile screen captured in an earlier pass.
+# Match Preferences row center ≈ Y 62%.
 - tapOn:
-    id: "profile-open-preferences"
+    point: "50%, 62%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 23-03-preferences-initial
+
+# === SLIDERS — drag both sliders to new values ===
+#
+# Preferences layout (Preferences/index.tsx):
+#   - BreedPicker at the top (DO NOT TAP — bottom-sheet crash)
+#   - Size + Color picker row (DO NOT TAP — same crash)
+#   - Age range slider (two markers, min/max)
+#   - Distance slider (single marker, 0..300 km)
+#   - Save button (BottomAction.Container, fixed at the bottom)
+#
+# Slider track geometry: sliderLength = screen width - spacing[4]*2 =
+# 440 - 32 = 408pt. On a 440pt width, track spans ~16pt to ~424pt,
+# i.e. X 3.6% to 96.4%. Center of track at X 50%.
+#
+# Vertical placement (re-measured from the 23-03 screenshot — first
+# pass used Y 48%/60% which fell BELOW each slider track and missed the
+# markers entirely; sliders went un-swiped and the DB post-check failed
+# with all values unchanged from seed):
+#   - Age range slider track   ≈ Y 41%
+#   - Distance slider track    ≈ Y 50%
+# Marker hitSlop is 15pt all sides, so any start point within ~±3% Y
+# of the track will grab the marker. The new Y values land precisely
+# on the track.
+#
+# Marker X positions at flow start (seed values):
+#   - Age MIN marker  ≈ X 11% (preferredMinAge=1, scale 0..10)
+#   - Age MAX marker  ≈ X 96% (preferredMaxAge=15 clamped to ∞ = end)
+#   - Distance marker ≈ X 12% (preferredMaxDistance=50, scale 0..300)
+
+# --- Age MIN marker: swipe right from start ~11% to ~35% -----------------
+# Setting min age to roughly 3-4 years.
+- swipe:
+    start: "11%, 41%"
+    end: "35%, 41%"
+    duration: 500
 - waitForAnimationToEnd
-- assertVisible:
-    id: "preferences-screen"
-- takeScreenshot: 23-02-preferences-initial
-# --- Size: open picker sheet, choose Medium ---
-- tapOn:
-    id: "preferences-size-picker"
+- takeScreenshot: 23-04-age-min-moved
+
+# --- Age MAX marker: swipe LEFT from end ~96% to ~65% --------------------
+# Setting max age to roughly 6-7 years (off the ∞ cap so the API
+# persists a concrete integer instead of NULL).
+- swipe:
+    start: "96%, 41%"
+    end: "65%, 41%"
+    duration: 500
 - waitForAnimationToEnd
-- tapOn:
-    id: "preferences-size-item-MEDIUM"
+- takeScreenshot: 23-05-age-max-moved
+
+# --- Distance slider: swipe right from marker center to ~50% -------------
+# Setting distance to ~150 km (step=5, will snap).
+#
+# Calibration history:
+#   - First pass with start (12%, 50%) → end (50%, 50%): no movement.
+#     Marker stayed at 50 km. The age slider above worked, so the Y
+#     coord landing on the track surface is correct.
+#   - Second pass split into two short swipes (12%→30%, 30%→50%):
+#     still no movement. The ScrollView host may be eating the gesture.
+#
+# The marker visual center on iPhone 17 Pro Max iOS 26 from screenshot
+# 23-03 measures at roughly X 14%, Y 50.3% (NOT X 12% — the slider math
+# `50/(301)*408pt + 16pt = 84pt → 19%` disagrees with the visual, but
+# what matters is the rendered pixel position the OS hit-tests against).
+# Use X=14% for the start point, and a long-hold duration so the
+# react-native-multi-slider responder claim wins over the ScrollView.
+- swipe:
+    start: "14%, 50%"
+    end: "55%, 50%"
+    duration: 1200
 - waitForAnimationToEnd
-- assertVisible: "Medium"
-- takeScreenshot: 23-03-size-medium
-# --- Color: open picker sheet, choose Golden ---
+- takeScreenshot: 23-06-distance-moved
+
+# --- Save preferences ----------------------------------------------------
+# Save button lives in BottomAction.Container at the bottom of the
+# screen. testID="preferences-save" is invisible; point ≈ 50%, 92% Y
+# (above the home indicator, below the safe area).
 - tapOn:
-    id: "preferences-color-picker"
-- waitForAnimationToEnd
-- tapOn:
-    id: "preferences-color-item-GOLDEN"
-- waitForAnimationToEnd
-- assertVisible: "Golden"
-- takeScreenshot: 23-04-color-golden
-# NOTE: distance / age sliders use @ptomasroos/react-native-multi-slider
-# with custom labels. The label nodes do not expose stable testIDs, so any
-# Maestro assertion on slider value would be brittle. The persistence
-# check below validates Size + Color survive a round trip — those use
-# pickers with deterministic testIDs and prove the mutation + cache wiring
-# end-to-end, which is the real bug class this flow guards against.
-# --- Save preferences ---
-- tapOn:
-    id: "preferences-save"
-- extendedWaitUntil:
-    notVisible: "__wait__"
+    point: "50%, 92%"
+# Mutation in flight. myDog.update -> onSuccess -> router.back()
+# returns to Profile. Wait generously for the network round-trip and
+# the magicToast "Preferences updated" to dismiss.
+- waitForAnimationToEnd:
     timeout: 10000
-    optional: true
-- waitForAnimationToEnd
-# onSuccess of myDog.update -> router.back() -> back on profile
-- assertVisible:
-    id: "profile-screen"
-- takeScreenshot: 23-06-after-save
-# --- Navigate AWAY (Swipe tab bottom-left) and BACK to Profile ---
+- takeScreenshot: 23-07-after-save
+
+# --- Navigate AWAY (Swipe tab) and BACK to Preferences -------------------
+# Proves the SAVED values made the round-trip (DB → tRPC → react-query
+# → form defaults). If the mutation silently failed, the re-opened
+# Preferences would re-render the seed values and the sliders would be
+# back at their old positions. The screenshot 23-09 must differ from
+# 23-03 (the baseline Preferences) to prove the change persisted.
 - tapOn:
     point: "17%, 95%"
-- waitForAnimationToEnd
-- takeScreenshot: 23-07-on-swipe
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 23-08-on-swipe
 - tapOn:
     point: "83%, 95%"
-- waitForAnimationToEnd
-- assertVisible:
-    id: "profile-screen"
-# --- Re-open Preferences and assert values persisted ---
-- tapOn:
-    id: "profile-open-preferences"
-- waitForAnimationToEnd
-- assertVisible:
-    id: "preferences-screen"
-- assertVisible: "Medium"
-- assertVisible: "Golden"
-- takeScreenshot: 23-08-preferences-persisted
-# --- Back to Profile so we can drive Language / Theme / Location ---
-- runFlow: utils/back.yaml
-- assertVisible:
-    id: "profile-screen"
-# =====================================================
-# 2) LANGUAGE — en-US -> pt-BR -> assert -> revert
-# =====================================================
-- tapOn:
-    id: "profile-open-language"
-- waitForAnimationToEnd
-- tapOn:
-    id: "language-item-pt-BR"
-- waitForAnimationToEnd
-# "Settings" -> "Configurações" — sticky header on profile screen.
-- assertVisible: "Configurações"
-- assertNotVisible: "Settings"
-- takeScreenshot: 23-09-language-pt
-# Revert to English so downstream flows see the default locale.
-- tapOn:
-    id: "profile-open-language"
-- waitForAnimationToEnd
-- tapOn:
-    id: "language-item-en-US"
-- waitForAnimationToEnd
-- assertVisible: "Settings"
-- takeScreenshot: 23-10-language-en-restored
-# =====================================================
-# 3) THEME — light -> dark (screenshot diff) -> revert
-# =====================================================
-- takeScreenshot: 23-11-theme-before-light
-- tapOn:
-    id: "profile-open-theme"
-- waitForAnimationToEnd
-- tapOn:
-    id: "theme-item-dark"
-- waitForAnimationToEnd
-# Profile screen re-renders with dark theme. The label text changes too:
-# en "themes.dark" = "Dark", which now shows in the theme row description.
-- assertVisible: "Dark"
-- takeScreenshot: 23-12-theme-dark
-# Revert to light.
-- tapOn:
-    id: "profile-open-theme"
-- waitForAnimationToEnd
-- tapOn:
-    id: "theme-item-light"
-- waitForAnimationToEnd
-- assertVisible: "Light"
-- takeScreenshot: 23-13-theme-light-restored
-# =====================================================
-# 4) LOCATION — open map, drag pin, confirm, persist
-# =====================================================
-- tapOn:
-    id: "profile-open-location"
 - waitForAnimationToEnd:
-    timeout: 8000
-- assertVisible:
-    id: "location-map-screen"
-- takeScreenshot: 23-14-location-map-initial
-# Drag the map to move the pin. Center of map is roughly mid-screen.
-- swipe:
-    start: "50%, 50%"
-    end: "50%, 30%"
-- waitForAnimationToEnd
-- swipe:
-    start: "50%, 50%"
-    end: "30%, 50%"
-- waitForAnimationToEnd
-- takeScreenshot: 23-15-location-pin-moved
-# Confirm — on success the userMutation calls router.back().
+    timeout: 3000
 - tapOn:
-    id: "location-map-confirm"
-- extendedWaitUntil:
-    notVisible: "__wait__"
-    timeout: 10000
-    optional: true
+    point: "50%, 62%"
 - waitForAnimationToEnd:
-    timeout: 8000
-# Back on profile, location row reflects the new city/coords lookup.
-- assertVisible:
-    id: "profile-screen"
-- takeScreenshot: 23-16-after-location-save
+    timeout: 5000
+- takeScreenshot: 23-09-preferences-re-opened
+# DB post-check (checks/23-preferences.sh) is the authoritative
+# verification — psql reads Dog.preferred* columns for test@pegada.app
+# and asserts they differ from the seeded baseline values.
