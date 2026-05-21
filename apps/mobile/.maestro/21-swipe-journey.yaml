@@ -98,11 +98,17 @@ tags:
 #   - Container at `bottom: spacing[6]` (~24px), absolute, full width,
 #     justify-content: space-around → 3 items at ~16.6%, 50%, 83.3% X.
 #   - Each ActionItem min 44×44pt + spacing[2.5] padding → ~52pt tall.
-#   - On iPhone 17 Pro Max with the home-indicator safe area, the bar
-#     centerline sits at roughly 91% Y.
-# Dislike is the LEFT button (~17%, 91%).
+#   - On iPhone 17 Pro Max the visually-hittable button row sits at
+#     ~86% Y — verified empirically by 08-swipe-like.yaml /
+#     09-swipe-dislike.yaml which use exactly Y=86 (X=25 / 75) and
+#     pass reliably. The theoretical layout math from the styles
+#     suggested Y≈91% but iOS 26 lands the home-indicator inset higher
+#     than the raw style padding implies, so the visual centerline is
+#     actually 86%. First-attempt run with Y=91% missed the buttons and
+#     no Interest rows were created — fixed in this iteration.
+# Dislike is the LEFT button (~25%, 86%).
 - tapOn:
-    point: "17%, 91%"
+    point: "25%, 86%"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-dislike-matchme
@@ -111,23 +117,23 @@ tags:
 # SwipeDogN pool has NO reciprocal interest, so liking never opens the
 # new-match modal — deck simply advances. Like is the RIGHT button (~83%).
 - tapOn:
-    point: "83%, 91%"
+    point: "75%, 86%"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-like-swipedog2
 
 # --- 6. DISLIKE next card (SwipeDog3) → deck advances --------------------
 - tapOn:
-    point: "17%, 91%"
+    point: "25%, 86%"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-dislike-swipedog3
 
 # --- 7. MAYBE next card (SwipeDog4) → deck advances ----------------------
-# MAYBE is the CENTER button (~50%, 91%). Wired through swipeHandlerRef +
+# MAYBE is the CENTER button (~50%, 86%). Wired through swipeHandlerRef +
 # MatchActionBar onMaybe → Swipe.Maybe direction.
 - tapOn:
-    point: "50%, 91%"
+    point: "50%, 86%"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-maybe-swipedog4
