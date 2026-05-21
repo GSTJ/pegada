@@ -95,48 +95,124 @@ tags:
 # RN content is invisible to XCUITest so we cannot assertVisible the
 # new-match-screen testID. The screenshot above + the DB post-check
 # (Match row created + Message row inserted in next step) prove the
-# screen actually mounted. CTA is the FIRST Button in the stack at
-# the bottom of Content (Send → Y≈82%, Skip → Y≈90%, both X=50%).
+# screen actually mounted.
+#
+# Button geometry (measured from screenshot 22-03 captured by an
+# earlier pass — a 1320x2868 frame on iPhone 17 Pro Max iOS 26):
+#   - Send a Message button center ≈ Y 83% (Y 2380 / 2868)
+#   - Keep Swiping button center   ≈ Y 91% (Y 2610 / 2868)
+# First-pass guesses (82% then 90%) both missed: 82% landed above the
+# Send button, 90% landed on Keep Swiping → router.back() → bounced
+# back to the swipe deck. Verified by inspecting 22-04 in that run —
+# it showed a SwipeDog2 profile (post-tap on the swipe card's personal
+# info area), NOT the chat. Y=83% targets the Send button center.
 - tapOn:
-    point: "50%, 82%"
+    point: "50%, 83%"
+# === CRITICAL: AdMob interstitial blocks navigation ===
+# NewMatch.handleSendMessage calls `await safeLoadAndShow()` BEFORE
+# router.push(chat) — see views/NewMatch/index.tsx + services/advertise-
+# ment/interstitial.ts. The ad is a full-screen Google interstitial
+# (TestIds.INTERSTITIAL in __DEV__, real id otherwise). It can take
+# several seconds to load + show + close. During that window every
+# downstream tap lands on the ad UI instead of the chat.
+#
+# We wait a generous 20s for the ad to complete and the chat to mount.
+# The ad will auto-close once shown; if it never shows (e.g. no net /
+# RevenueCat marked premium), the wait is benign.
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 20000
 - takeScreenshot: 22-04-on-chat-screen
 
 # --- 4. Type a unique message and send via keyboard -----------------------
-# The chat input sits just above the keyboard. With the keyboard up,
-# the TextInput vertical center is ≈ Y 68% (above the keyboard top
-# edge at ~71%). Tap to focus, then inputText, then pressKey Enter to
-# fire onSubmitEditing → useSendMessage → tRPC message.send mutation.
+# The chat input sits at the bottom of the screen (Send/styles.ts:
+# absolute bottom:0, height SEND_HEIGHT(65) + insets.bottom). When the
+# chat first mounts the keyboard is NOT auto-focused — the input is at
+# its resting position with vertical center at Y≈94% (measured from
+# screenshot 22-04 captured by an earlier pass: input top edge at Y
+# 2706/2868 = 94.3%, height ~125px, center at Y 2768/2868 ≈ 96.5%
+# accounting for the home-indicator inset). Tap there to focus, which
+# brings the keyboard up.
+#
+# First-pass guess of Y=68% landed on the empty chat body (the
+# "You two matched!" placeholder area sits at the top, with a huge
+# empty middle before the input bar). Verified in 22-05: the input
+# placeholder "Type a message" was still rendered (input never gained
+# focus, keyboard never came up).
 - tapOn:
-    point: "50%, 68%"
+    point: "50%, 94%"
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 3000
 # Static literal — the post-check asserts a Message row exists whose
 # content matches the MATCH22_ prefix and whose matchId JOINs to the
 # Rex↔MatchMe Match. Using a literal (not ${ts}) keeps the assertion
-# trivial — Maestro env interpolation does not expose timestamps.
+# trivial; Maestro env interpolation does not expose timestamps.
 - inputText: "MATCH22_HI_FROM_REX"
 - takeScreenshot: 22-05-chat-typed
-# Keyboard "send" return key. returnKeyType="send" on the input.
-- pressKey: Enter
+# Send the message via the iOS keyboard.
+#
+# Send/index.tsx has NO on-screen send button — the ONLY trigger is the
+# TextInput's onSubmitEditing callback, which the keyboard return key
+# fires. Because returnKeyType="send", iOS renders the bottom-right
+# keyboard key as the "send" submit key.
+#
+# Tried in earlier iterations (FAILED):
+#   - `pressKey: Enter` — routed as a hardware-keyboard event, ignored
+#     by the focused RN TextInput on iOS 26 (22-05 == 22-06, no Message
+#     row inserted).
+#   - Point-tap (87%, 93%) inside the keyboard — landed on the 123 /
+#     emoji modifier key. No Message row.
+#   - "\n" suffix in inputText — Maestro sets the TextInput value
+#     directly without going through the IME so onSubmitEditing was
+#     never invoked. Just stored a literal newline in the input.
+#   - `tapOn: { text: "Send" }` — Maestro's a11y snapshot on iOS 26
+#     does NOT expose the system-keyboard return key label for
+#     returnKeyType="send" specifically. The keyboard a11y tree is
+#     completely empty (`maestro hierarchy` mid-flight showed 4069
+#     lines but zero "send"/"return" references — verified empirically).
+#   - Point taps at (87%, 93%) / (88%, 97%) — landed in the wrong
+#     rows of the keyboard.
+#
+# What WORKS: tap the iOS Send key by point, measured from a real
+# screenshot (22-05 captured by an earlier pass). With the keyboard
+# up, iOS renders returnKeyType="send" as a BLUE UP-ARROW button at
+# the bottom-right of the keyboard (NOT a labeled "Send" text key).
+# Measured center: X 88%, Y 90% on iPhone 17 Pro Max iOS 26.
+- tapOn:
+    point: "88%, 90%"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 22-06-chat-after-send
 
-# --- 5. Back to Messages list ---------------------------------------------
-# The chat header's `chat-back` testID is invisible to XCUITest. Use
-# the navigation chevron at top-left (~10%, 8%) instead. utils/back.yaml
-# uses the same point. We don't use the util because we want to be
-# explicit about what we're tapping in this flow.
+# --- 5. Back to NewMatch, then over to Messages list ----------------------
+# Tap the chat header chevron at top-left (~10%, 8%). The nav stack is
+# /swipe → /new-match → /chat/[matchId], so chat.back() returns to
+# /new-match (NOT directly to the messages list — verified by the
+# screenshot below matching the 22-03 hash). testID="chat-back" is
+# invisible to XCUITest on iOS 26.
 - tapOn:
     point: "10%, 8%"
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: 22-07-back-on-messages-list
-# Messages list content is invisible to XCUITest. The DB post-check
-# verifies (a) the new Match row exists between Rex and MatchMe, and
-# (b) the Message row with our MATCH22_ prefix exists and JOINs to that
-# Match. That is the authoritative "new match shows in list with the
-# message as preview" assertion — the API's match.getAll endpoint that
-# powers the Messages list reads the same rows the post-check asserts.
+- takeScreenshot: 22-07-back-on-new-match
+# Tap "Keep Swiping" (~Y 91%) on NewMatch to call router.back() and
+# return to the swipe tab. This is a Skip CTA but it's the standard
+# nav-out path from /new-match — there's no direct "go to messages"
+# affordance on this screen.
+- tapOn:
+    point: "50%, 91%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 22-08-back-on-swipe
+# Tap the Messages tab (center-bottom on the tab bar, ~50%, 95%).
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 22-09-on-messages-list
+# Messages list RN content is invisible to XCUITest. The DB post-check
+# is the authoritative assertion that:
+#   (a) the new Match row exists between Rex and MatchMe, AND
+#   (b) the Message row with prefix "MATCH22_" exists and JOINs to that
+#       Match.
+# The API endpoint `match.getAll` that powers the Messages list reads
+# the exact rows the post-check asserts, so DB pass == list-renderable.
