@@ -130,11 +130,17 @@ tags:
 - waitForAnimationToEnd:
     timeout: 8000
 
-# Tap the first photo in the 4-up grid. The iOS simulator photo library
-# is native Apple UI — no testIDs available. Coordinates target the
-# top-left cell.
+# Tap the first photo in the picker grid. iOS 26 renders the photo
+# library as a HALF-SHEET (verified via `maestro hierarchy` after the
+# Choose-from-Library tap: sheet bounds [60,200][380,783] on iPhone 17
+# Pro Max). Inside the sheet, the photo grid is 3 columns × N rows
+# below a small search/nav header. First row of cells centers at
+# roughly Y=290 (sheet-relative ~90), X=113 (left cell) / 220 (middle)
+# / 327 (right). In screen percentages: ~26%, 50%, 74% X; Y≈30%.
+# Targeting the middle cell of the first row maximises the chance of
+# hitting an actual photo even if the grid layout shifts slightly.
 - tapOn:
-    point: "20%, 30%"
+    point: "50%, 30%"
 - waitForAnimationToEnd:
     timeout: 5000
 
@@ -174,10 +180,10 @@ tags:
 - waitForAnimationToEnd
 
 # CreateProfile button. The BottomAction.Container pins it to the bottom
-# of the screen at ~50%, 93% Y on iPhone 17 Pro Max (BottomAction adds
+# of the screen at ~50%, 92% Y on iPhone 17 Pro Max (BottomAction adds
 # safe-area padding so the button center lands above the home indicator).
 - tapOn:
-    point: "50%, 93%"
+    point: "50%, 92%"
 - waitForAnimationToEnd:
     timeout: 15000
 
@@ -197,7 +203,7 @@ tags:
 - waitForAnimationToEnd
 
 - tapOn:
-    point: "50%, 93%"
+    point: "50%, 92%"
 - waitForAnimationToEnd:
     timeout: 12000
 
@@ -205,10 +211,10 @@ tags:
 # 4. AskForLocation — tap Enable Location and accept the system prompt
 # ---------------------------------------------------------------------------
 - takeScreenshot: 20-06-on-location
-# Enable Location button is the primary CTA at ~50%, 88% Y (BottomAction
+# Enable Location button is the primary CTA at ~50%, 92% Y (BottomAction
 # container, same vertical position as the submit buttons above).
 - tapOn:
-    point: "50%, 88%"
+    point: "50%, 92%"
 - waitForAnimationToEnd:
     timeout: 5000
 
