@@ -1,36 +1,70 @@
 name: E2E Mobile (Maestro)
 
 # ---------------------------------------------------------------------------
+# DESIGN: required + extended split (Option D), with retry on required
+# ---------------------------------------------------------------------------
+# Why two jobs instead of one with continue-on-error:
+#
+#   - The previous single-job design used `continue-on-error: true` at the
+#     job level, which made every red run report green on the dashboard.
+#     A spot-check of the last 5 runs (2026-05-20) showed the `launch`
+#     step had `conclusion: failure` in 3/5 runs while the workflow
+#     reported `success` to PR checks. That is the failure mode we are
+#     eliminating here.
+#
+#   - We can't simply flip the flag off: most flows depend on a live API
+#     (Postgres + PostGIS + Redis + serverless-redis-http + the tRPC
+#     server), and GitHub-hosted macOS runners can't run Docker services.
+#     Until we either (a) stand up a staging API and wire its URL into
+#     EXPO_PUBLIC_API_URL, or (b) split the API onto a Linux runner with
+#     services and proxy it to the macOS runner, the API-dependent flows
+#     can't run reliably in CI.
+#
+#   - The split lets us hard-gate what we CAN run reliably today (cold
+#     launch) while keeping the rest of the suite visible and reportable
+#     via a soft-gated extended job. As flows become reliable they get
+#     promoted to required via REQUIRED_FLOWS below.
+#
+# Flow classifications (see also apps/mobile/.maestro/quarantined.txt):
+#
+#   required:  01-launch
+#     Cold launch, no API needed, no RN-tree assertions. Currently the
+#     only flow that meets the bar.
+#
+#   extended:  every other flow under apps/mobile/.maestro/
+#     Soft-gated. Runs only when EXPO_PUBLIC_API_URL secret is set so a
+#     staging backend is reachable. Per-flow status is reported in the
+#     job summary even though the job itself never fails.
+#
+#   quarantined: listed in apps/mobile/.maestro/quarantined.txt
+#     Known-flaky, do-not-block. The quarantine-lint step fails the
+#     workflow if any entry is older than 30 days, so the list cannot
+#     grow unbounded.
+#
+# Retry semantics:
+#
+#   The required job retries the maestro invocation up to 3 times. Real
+#   regressions fail consistently across retries; single-run noise (e.g.
+#   the iOS 26 keyboard accessory pop occasionally eating a tap) does
+#   not. This is Option C layered on top of Option D.
+#
+# Simulator pinning:
+#
+#   We pin to iPhone 17 Pro Max on the newest available iOS 26 runtime.
+#   The previous "best available" heuristic picked different devices on
+#   different runner images, which is itself a flake source.
+# ---------------------------------------------------------------------------
 # REQUIRED GITHUB SECRETS
 # ---------------------------------------------------------------------------
-# Set these in Settings → Secrets and variables → Actions:
+# Set these in Settings -> Secrets and variables -> Actions:
 #
-#   APPLE_MAGIC_EMAIL  – email accepted by the API bypass (default: test@pegada.app)
-#   APPLE_MAGIC_CODE   – 6-digit OTP accepted by the API bypass (default: 424242)
-#
-# EXPO_PUBLIC_API_URL must also be configured (see "API backend" note below).
-#
-# ---------------------------------------------------------------------------
-# API BACKEND NOTE (KNOWN PARTIAL BLOCKER)
-# ---------------------------------------------------------------------------
-# The sign-in, create-profile, and swipe Maestro flows all call the tRPC API
-# (via EXPO_PUBLIC_API_URL). The API server (apps/nextjs) requires:
-#   - PostgreSQL with PostGIS extension
-#   - Redis (BullMQ queues)
-#   - Serverless-Redis-HTTP (Upstash-compatible, used by the rate-limiter)
-#
-# GitHub-hosted macOS runners do not support Docker services, so spinning up
-# these containers in CI is not straightforward. Options:
-#   1. Use a persistent staging API — set EXPO_PUBLIC_API_URL to its URL.
-#      The APPLE_MAGIC_EMAIL/CODE bypass means no real email is ever sent.
-#   2. Swap to a Linux runner for the API step and use Docker services there,
-#      then build/run Maestro on macOS. Requires a matrix approach.
-#   3. Replace the tRPC calls with an MSW service-worker mock baked into
-#      a dedicated "e2e" build variant.
-#
-# For now this workflow ONLY runs launch.yaml (cold-launch assertion, no API
-# needed) by default. The remaining flows are present but gated behind the
-# EXPO_PUBLIC_API_URL secret. Set it to enable them.
+#   APPLE_MAGIC_EMAIL    - email accepted by the API bypass
+#                          (default: test@pegada.app)
+#   APPLE_MAGIC_CODE     - 6-digit OTP accepted by the API bypass
+#                          (default: 424242)
+#   EXPO_PUBLIC_API_URL  - URL of a reachable backend with the same
+#                          APPLE_MAGIC_* + MAESTRO_E2E config. Without
+#                          this the extended job no-ops.
 # ---------------------------------------------------------------------------
 
 on:
@@ -40,33 +74,65 @@ on:
       - "apps/mobile/**"
       - "packages/**"
       - ".github/workflows/e2e-mobile.yml"
+      - ".github/scripts/maestro-*.py"
+      - ".github/scripts/quarantine-lint.py"
   pull_request:
     paths:
       - "apps/mobile/**"
       - "packages/**"
       - ".github/workflows/e2e-mobile.yml"
+      - ".github/scripts/maestro-*.py"
+      - ".github/scripts/quarantine-lint.py"
+  workflow_dispatch:
+  schedule:
+    # Daily 09:00 UTC flake-stats sweep over the last 20 runs.
+    # Cheap and lets us spot drift even on weeks with low PR volume.
+    - cron: "0 9 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Workflow-level env. Each job inherits and may extend.
+env:
+  # The single source of truth for which flow stems are HARD-GATED.
+  # Adding a stem here moves it from extended to required immediately.
+  # Use the bare file stem (no .yaml extension, no path).
+  REQUIRED_FLOWS: "01-launch"
+  # Pinned simulator. Pinning eliminates a class of "passes on Tuesday,
+  # fails on Wednesday" flakes caused by GitHub rolling new runner images.
+  SIM_DEVICE: "iPhone 17 Pro Max"
+  SIM_RUNTIME_PREFIX: "iOS 26"
+
 jobs:
-  e2e-ios:
-    name: iOS E2E (Maestro)
+  # -------------------------------------------------------------------------
+  # 0. Quarantine lint — runs on Ubuntu, gates the whole workflow.
+  #    Cheap, fast, prevents the quarantine list from rotting.
+  # -------------------------------------------------------------------------
+  quarantine-lint:
+    name: Quarantine lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint quarantine file
+        run: |
+          python3 .github/scripts/quarantine-lint.py \
+            apps/mobile/.maestro/quarantined.txt
+
+  # -------------------------------------------------------------------------
+  # 1. REQUIRED iOS suite — HARD GATE.
+  #    No continue-on-error anywhere. Retries the maestro invocation up
+  #    to 3 times to absorb single-run noise.
+  # -------------------------------------------------------------------------
+  e2e-ios-required:
+    name: iOS E2E (required, hard gate)
+    needs: quarantine-lint
     runs-on: macos-latest
     timeout-minutes: 60
-    # continue-on-error: Maestro can't read RN Fabric tree on iOS 26 in CI; flows verified locally via screenshot-hash diff (see /tmp/pegada-flows-v2 docs).
-    continue-on-error: true
-
     env:
-      # Magic credentials — fall back to safe defaults when secrets are not set.
-      # The API only bypasses auth when BOTH vars match what is configured
-      # on the server side, so these defaults only work against a server that
-      # has the same defaults configured (e.g. a local staging instance).
       APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
       APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
-      # Stub values for non-critical EXPO_PUBLIC_ vars so the Zod schema passes.
-      # Replace with real secrets for production-grade CI.
       EXPO_PUBLIC_ENV: development
       EXPO_PUBLIC_BUGSNAG_API_KEY: ci-stub
       EXPO_PUBLIC_AMPLITUDE_API_KEY: ci-stub
@@ -74,24 +140,13 @@ jobs:
       EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ci-stub
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
-      # Activates the Maestro-only mock-purchase path in apps/mobile/src/services/payments.
-      # Mirrors MAESTRO_E2E on the API side (see packages/api/src/shared/config.ts);
-      # both halves must be set for the dev-only payment.maestroGrantPremium endpoint
-      # to function. NEVER set this in production builds.
       EXPO_PUBLIC_MAESTRO_E2E: "1"
-      # EXPO_PUBLIC_API_URL: set via secret or leave empty to skip API-dependent flows.
-      EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL || 'http://localhost:3009' }}
+      # No EXPO_PUBLIC_API_URL — required flows must not depend on the API.
 
     steps:
-      # ------------------------------------------------------------------
-      # 0. Select newest installed Xcode (Expo SDK 55 / expo-modules-core
-      #    needs Swift 6 features like MainActor isolation — Xcode 16+).
-      # ------------------------------------------------------------------
       - name: Select Xcode
         run: |
           set -euo pipefail
-          # Pick the highest-version Xcode_*.app available on the runner.
-          # macos-latest typically has Xcode 16 and Xcode 26 side by side.
           XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null \
             | sed 's|.*/Xcode_||;s|\.app$||' \
             | sort -V \
@@ -105,15 +160,9 @@ jobs:
           sudo xcode-select -s "/Applications/Xcode_${XCODE}.app/Contents/Developer"
           xcodebuild -version
 
-      # ------------------------------------------------------------------
-      # 1. Checkout
-      # ------------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v6
 
-      # ------------------------------------------------------------------
-      # 2. Node + pnpm
-      # ------------------------------------------------------------------
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.2.0
 
@@ -122,9 +171,6 @@ jobs:
         with:
           node-version: 20.x
 
-      # ------------------------------------------------------------------
-      # 3. Caches
-      # ------------------------------------------------------------------
       - name: Get pnpm store path
         id: pnpm-store
         run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
@@ -143,54 +189,41 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
           restore-keys: ${{ runner.os }}-pods-
 
+      # Maestro release line moves; key on the install script's
+      # current pointer (we re-download if the binary is missing).
+      # Pinning to a tagged version would be safer once we standardize
+      # one — for now we cache the latest install across the workflow's
+      # macOS runs and rely on the install step to be idempotent.
       - name: Cache Maestro
         uses: actions/cache@v5
         with:
           path: ~/.maestro
-          key: maestro-${{ runner.os }}-latest
+          key: maestro-${{ runner.os }}-v1
 
-      # ------------------------------------------------------------------
-      # 4. Install JS dependencies
-      # ------------------------------------------------------------------
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # ------------------------------------------------------------------
-      # 5. Setup Java 17 (for future Android support)
-      # ------------------------------------------------------------------
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # ------------------------------------------------------------------
-      # 6. Install Maestro
-      # ------------------------------------------------------------------
       - name: Install Maestro
         run: |
-          if [ ! -f "$HOME/.maestro/bin/maestro" ]; then
+          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
             curl -fsSL "https://get.maestro.mobile.dev" | bash
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
-      # ------------------------------------------------------------------
-      # 7. Stub Google Services files (required by expo prebuild)
-      # ------------------------------------------------------------------
       - name: Stub Google Services files
         working-directory: apps/mobile
         run: |
-          # Create minimal stub files so prebuild doesn't error.
-          # These are not used for the auth flow under test.
-          # Use -s (non-empty) instead of -f: the apps/mobile preinstall
-          # script writes a single newline when GOOGLE_SERVICES_JSON env is
-          # unset, leaving a 1-byte file that passes -f but breaks parsers.
           if [ ! -s google-services.json ]; then
             echo '{"project_info":{"project_number":"000","project_id":"ci-stub","storage_bucket":""},"client":[]}' \
               > google-services.json
           fi
           if [ ! -s GoogleService-Info.plist ] || ! head -1 GoogleService-Info.plist | grep -q '<?xml'; then
-            # Use printf to avoid heredoc/YAML indentation interactions.
             printf '%s\n' \
               '<?xml version="1.0" encoding="UTF-8"?>' \
               '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
@@ -212,25 +245,14 @@ jobs:
               '</dict>' \
               '</plist>' \
               > GoogleService-Info.plist
-            echo "::group::Stub plist contents"
-            cat GoogleService-Info.plist
-            echo "::endgroup::"
           fi
 
-      # ------------------------------------------------------------------
-      # 8. Expo prebuild (generates ios/ directory, does not commit it)
-      # ------------------------------------------------------------------
       - name: Expo prebuild (iOS)
         working-directory: apps/mobile
         run: npx expo prebuild --platform ios --no-install
         env:
           EXPO_NO_TELEMETRY: 1
 
-      # ------------------------------------------------------------------
-      # 8b. Patch Podfile: @expo/config-plugins emits `react-native-google-maps`
-      # but react-native-maps@1.27.2 ships as `react-native-maps`. Rewrite
-      # the pod name in the generated Podfile so CocoaPods can resolve it.
-      # ------------------------------------------------------------------
       - name: Patch Podfile (react-native-maps pod name)
         working-directory: apps/mobile/ios
         run: |
@@ -238,41 +260,24 @@ jobs:
             sed -i.bak "s|pod 'react-native-google-maps'|pod 'react-native-maps'|g" Podfile
             sed -i.bak "s|:path => '../../../node_modules/react-native-maps/google'|:path => '../../../node_modules/react-native-maps'|g" Podfile
             rm -f Podfile.bak
-            echo "::group::Patched Podfile"
-            grep -n "react-native-maps" Podfile || true
-            echo "::endgroup::"
           fi
 
-      # ------------------------------------------------------------------
-      # 9. CocoaPods install
-      # ------------------------------------------------------------------
       - name: CocoaPods install
         working-directory: apps/mobile/ios
         run: pod install
 
-      # ------------------------------------------------------------------
-      # 9b. Neutralize Bugsnag source-map upload build phase.
-      # The phase fails when BUGSNAG_API_KEY is unset (CI never has it).
-      # Prepend `exit 0` so it short-circuits without blocking the build.
-      # ------------------------------------------------------------------
       - name: Disable Bugsnag source-map upload phase
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
-          # Brace-aware .pbxproj patcher — see .github/scripts/patch-bugsnag-phase.py
           PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
 
-      # ------------------------------------------------------------------
-      # 10. Build for iOS simulator
-      # ------------------------------------------------------------------
       - name: Build iOS (Debug simulator)
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
-          # The app scheme matches the .xcodeproj name (Pegada). Workspace
-          # also lists every Pod scheme — pick the one tied to the .xcodeproj.
           export APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
           SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
             | python3 -c "
@@ -296,7 +301,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build \
             | xcpretty
-          # Verify the .app actually exists before moving on.
           PROD_DIR=build/Build/Products/Debug-iphonesimulator
           if ! ls "$PROD_DIR"/*.app >/dev/null 2>&1; then
             echo "::error::xcodebuild reported success but produced no .app in $PROD_DIR"
@@ -305,34 +309,47 @@ jobs:
           fi
           echo "Produced: $(ls -d $PROD_DIR/*.app)"
 
-      # ------------------------------------------------------------------
-      # 11. Boot simulator and install app
-      # ------------------------------------------------------------------
-      - name: Boot iOS simulator
+      # Pin the device + runtime. We pick the highest patch version that
+      # starts with $SIM_RUNTIME_PREFIX so we still benefit from runner
+      # updates within the iOS 26 major. If no match is found we hard
+      # fail rather than silently falling back to whatever's available.
+      - name: Boot iOS simulator (pinned)
         run: |
           set -euo pipefail
-          # Parse the JSON device list so we never grab a section header
-          # like "-- iOS 18.0 --" or the word "Shutdown" by accident.
           DEVICE_ID=$(xcrun simctl list devices available --json \
-            | python3 -c "
-          import json,sys
-          d=json.load(sys.stdin)['devices']
-          # Prefer iPhone 17/16/15 Pro then any iPhone in the newest iOS runtime
-          best=None
-          for runtime in sorted(d.keys(), reverse=True):
-              for dev in d[runtime]:
-                  name=dev.get('name','')
-                  if not name.startswith('iPhone'): continue
-                  if best is None: best=dev['udid']
-                  if 'Pro' in name: best=dev['udid']; break
-              if best and any('Pro' in x.get('name','') for x in d[runtime]): break
-          print(best or '')")
+            | SIM_DEVICE="$SIM_DEVICE" SIM_RUNTIME_PREFIX="$SIM_RUNTIME_PREFIX" python3 -c "
+          import json,os,sys,re
+          want_name=os.environ['SIM_DEVICE']
+          want_runtime=os.environ['SIM_RUNTIME_PREFIX']
+          data=json.load(sys.stdin)['devices']
+          candidates=[]
+          for runtime,devices in data.items():
+              # runtime keys look like 'com.apple.CoreSimulator.SimRuntime.iOS-26-0'
+              friendly=runtime.split('SimRuntime.')[-1].replace('-', ' ').replace('iOS ', 'iOS ')
+              if 'iOS' not in runtime: continue
+              # Normalize for prefix match: 'iOS-26-0' -> 'iOS 26'
+              m=re.search(r'iOS-(\\d+)', runtime)
+              if not m: continue
+              major=m.group(1)
+              normalized=f'iOS {major}'
+              if not normalized.startswith(want_runtime): continue
+              for dev in devices:
+                  if dev.get('name')==want_name:
+                      candidates.append((runtime, dev['udid']))
+          if not candidates:
+              print('', end='')
+          else:
+              # Sort by runtime descending (newest patch first)
+              candidates.sort(reverse=True)
+              print(candidates[0][1])
+          ")
           if [ -z "$DEVICE_ID" ]; then
-            echo "::error::No iPhone simulator available"
+            echo "::error::No simulator matching device='$SIM_DEVICE' runtime prefix='$SIM_RUNTIME_PREFIX'"
+            echo "Available devices:"
             xcrun simctl list devices available
             exit 1
           fi
-          echo "Booting simulator: $DEVICE_ID"
+          echo "Booting pinned simulator: $DEVICE_ID ($SIM_DEVICE, $SIM_RUNTIME_PREFIX)"
           xcrun simctl boot "$DEVICE_ID" || true
           xcrun simctl bootstatus "$DEVICE_ID" -b
           echo "SIMULATOR_UDID=$DEVICE_ID" >> $GITHUB_ENV
@@ -340,16 +357,11 @@ jobs:
       - name: Install app on simulator
         run: |
           set -euo pipefail
-          echo "::group::derivedData tree"
-          find apps/mobile/ios/build -name "*.app" -type d 2>/dev/null || true
-          ls apps/mobile/ios/build/Build/Products/ 2>/dev/null || true
-          echo "::endgroup::"
           APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
           if [ -z "$APP_PATH" ]; then
-            echo "::error::No .app produced under apps/mobile/ios/build — xcodebuild likely failed silently. Check the build step log."
+            echo "::error::No .app produced under apps/mobile/ios/build"
             exit 1
           fi
-          echo "Installing: $APP_PATH"
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
       - name: Launch app (warm up)
@@ -357,41 +369,78 @@ jobs:
           xcrun simctl launch "$SIMULATOR_UDID" app.pegada || true
           sleep 3
 
-      # ------------------------------------------------------------------
-      # 12. Run Maestro flows
-      # ------------------------------------------------------------------
-      - name: Run Maestro launch flow (no API required)
+      # The required suite is small enough to enumerate. We loop through
+      # the comma-separated REQUIRED_FLOWS and execute each as its own
+      # maestro invocation so a single failing flow has a clean failure
+      # boundary in the log. Retry up to 3x per flow.
+      - name: Run required Maestro flows (hard gate, retry 3x)
+        id: maestro-required
         run: |
-          maestro test apps/mobile/.maestro/launch.yaml \
-            --format junit \
-            --output maestro-results-launch.xml
+          set -euo pipefail
+          IFS=',' read -ra FLOWS <<< "$REQUIRED_FLOWS"
+          FAILED=()
+          for stem in "${FLOWS[@]}"; do
+            stem="$(echo "$stem" | xargs)"  # trim
+            flow="apps/mobile/.maestro/${stem}.yaml"
+            if [ ! -f "$flow" ]; then
+              echo "::error::Required flow not found: $flow"
+              FAILED+=("$stem (missing file)")
+              continue
+            fi
+            ok=0
+            for attempt in 1 2 3; do
+              echo "::group::$stem attempt $attempt"
+              if maestro test "$flow" \
+                  --format junit \
+                  --output "maestro-results-required-${stem}-attempt-${attempt}.xml"; then
+                # Canonical result file the reporter expects.
+                cp "maestro-results-required-${stem}-attempt-${attempt}.xml" \
+                   "maestro-results-required.xml" 2>/dev/null || true
+                ok=1
+                echo "::endgroup::"
+                break
+              fi
+              echo "::endgroup::"
+              echo "::warning::$stem attempt $attempt failed"
+            done
+            if [ "$ok" -ne 1 ]; then
+              FAILED+=("$stem")
+              # Preserve the last attempt's JUnit so the reporter shows it.
+              cp "maestro-results-required-${stem}-attempt-3.xml" \
+                 "maestro-results-required.xml" 2>/dev/null || true
+            fi
+          done
+          if [ "${#FAILED[@]}" -gt 0 ]; then
+            echo "::error::Required flows failed after 3 retries: ${FAILED[*]}"
+            exit 1
+          fi
         env:
           APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
           APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
 
-      - name: Run Maestro full flows (requires EXPO_PUBLIC_API_URL secret)
-        if: env.EXPO_PUBLIC_API_URL != ''
+      # Report runs even when the maestro step failed so the summary
+      # is always populated. The reporter's own exit code is what
+      # actually gates the job.
+      - name: Report required flow results
+        if: always()
         run: |
-          maestro test apps/mobile/.maestro/ \
-            --format junit \
-            --output maestro-results-full.xml \
-            --exclude-tags no-api
-        env:
-          APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
-          APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
-          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
-        continue-on-error: true
+          # Aggregate per-attempt JUnit files into a single rollup so the
+          # reporter sees the last-attempt outcome per flow.
+          ls maestro-results-required-*-attempt-*.xml 2>/dev/null || true
+          python3 .github/scripts/maestro-report.py \
+            --junit maestro-results-required.xml \
+            --quarantine apps/mobile/.maestro/quarantined.txt \
+            --required "$REQUIRED_FLOWS" \
+            --summary "$GITHUB_STEP_SUMMARY" \
+            --mode required
 
-      # ------------------------------------------------------------------
-      # 13. Upload artifacts on failure
-      # ------------------------------------------------------------------
-      - name: Upload Maestro results
+      - name: Upload required Maestro artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: maestro-results
+          name: maestro-results-required
           path: |
-            maestro-results-*.xml
+            maestro-results-required*.xml
             ~/.maestro/tests/**/*.png
           if-no-files-found: ignore
 
@@ -399,13 +448,373 @@ jobs:
         if: failure()
         run: |
           xcrun simctl spawn "$SIMULATOR_UDID" log collect \
-            --output simulator.logarchive || true
+            --output simulator-required.logarchive || true
         continue-on-error: true
 
       - name: Upload simulator log on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: simulator-log
-          path: simulator.logarchive
+          name: simulator-log-required
+          path: simulator-required.logarchive
           if-no-files-found: ignore
+
+  # -------------------------------------------------------------------------
+  # 2. EXTENDED iOS suite — SOFT GATE (documented temporary).
+  #    Runs the full suite when a backend URL is configured. Reports
+  #    per-flow status. Honors the quarantine list. Never fails the
+  #    workflow.
+  #
+  #    The soft gate is intentional and explicitly time-bound: it will
+  #    be flipped to a hard gate once either (a) staging API is wired
+  #    via EXPO_PUBLIC_API_URL and proven stable for 20 consecutive
+  #    runs (see flake-stats job), or (b) the backend services move to
+  #    a Linux runner. Until then, treat the extended summary as the
+  #    source of truth for what's actually green.
+  # -------------------------------------------------------------------------
+  e2e-ios-extended:
+    name: iOS E2E (extended, soft gate)
+    needs: quarantine-lint
+    runs-on: macos-latest
+    timeout-minutes: 90
+    # Soft gate. The reporter step inside this job never exits non-zero
+    # in --mode=extended, so this flag is belt-and-suspenders against
+    # an infrastructure failure (e.g. xcodebuild OOM) bubbling up.
+    # When we promote the extended suite to required, REMOVE this line.
+    continue-on-error: true
+
+    env:
+      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
+      APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
+      EXPO_PUBLIC_ENV: development
+      EXPO_PUBLIC_BUGSNAG_API_KEY: ci-stub
+      EXPO_PUBLIC_AMPLITUDE_API_KEY: ci-stub
+      EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY: ci-stub
+      EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ci-stub
+      EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
+      EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
+      EXPO_PUBLIC_MAESTRO_E2E: "1"
+      EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+
+    steps:
+      - name: Preflight — check for backend URL
+        id: preflight
+        run: |
+          if [ -z "${EXPO_PUBLIC_API_URL:-}" ]; then
+            echo "::warning::EXPO_PUBLIC_API_URL secret is not set. The extended suite cannot run without a reachable backend (Postgres+PostGIS, Redis, serverless-redis-http, tRPC server). Skipping. To enable, set the secret to a staging URL with the same APPLE_MAGIC_* + MAESTRO_E2E config as the local stack."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write skip summary
+        if: steps.preflight.outputs.skip == 'true'
+        run: |
+          {
+            echo "## Maestro E2E — Extended suite"
+            echo ""
+            echo "Skipped: EXPO_PUBLIC_API_URL secret is not configured."
+            echo ""
+            echo "The extended suite (flows 02-27) needs a reachable backend."
+            echo "GitHub-hosted macOS runners can't run Docker services, so"
+            echo "options to unblock are:"
+            echo ""
+            echo "  1. Point EXPO_PUBLIC_API_URL at a persistent staging API."
+            echo "  2. Split the API onto a Linux runner with Docker services"
+            echo "     and proxy/tunnel it to the macOS runner."
+            echo "  3. Bake an MSW mock into an \\\`e2e\\\` build variant."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Select Xcode
+        if: steps.preflight.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null \
+            | sed 's|.*/Xcode_||;s|\.app$||' \
+            | sort -V \
+            | tail -1)
+          sudo xcode-select -s "/Applications/Xcode_${XCODE}.app/Contents/Developer"
+          xcodebuild -version
+
+      - name: Checkout
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        if: steps.preflight.outputs.skip != 'true'
+        uses: pnpm/action-setup@v4.2.0
+
+      - name: Setup Node
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+
+      - name: Get pnpm store path
+        if: steps.preflight.outputs.skip != 'true'
+        id: pnpm-store
+        run: echo "dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+
+      - name: Cache CocoaPods
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Cache Maestro
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: ~/.maestro
+          key: maestro-${{ runner.os }}-v1
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.skip != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Java 17
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Maestro
+        if: steps.preflight.outputs.skip != 'true'
+        run: |
+          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
+            curl -fsSL "https://get.maestro.mobile.dev" | bash
+          fi
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Stub Google Services files
+        if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile
+        run: |
+          if [ ! -s google-services.json ]; then
+            echo '{"project_info":{"project_number":"000","project_id":"ci-stub","storage_bucket":""},"client":[]}' \
+              > google-services.json
+          fi
+          if [ ! -s GoogleService-Info.plist ] || ! head -1 GoogleService-Info.plist | grep -q '<?xml'; then
+            printf '%s\n' \
+              '<?xml version="1.0" encoding="UTF-8"?>' \
+              '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+              '<plist version="1.0">' \
+              '<dict>' \
+              '  <key>API_KEY</key><string>ci-stub</string>' \
+              '  <key>BUNDLE_ID</key><string>app.pegada</string>' \
+              '  <key>CLIENT_ID</key><string>ci-stub.apps.googleusercontent.com</string>' \
+              '  <key>REVERSED_CLIENT_ID</key><string>com.googleusercontent.apps.ci-stub</string>' \
+              '  <key>GOOGLE_APP_ID</key><string>1:000:ios:000</string>' \
+              '  <key>GCM_SENDER_ID</key><string>000</string>' \
+              '  <key>PROJECT_ID</key><string>ci-stub</string>' \
+              '  <key>STORAGE_BUCKET</key><string></string>' \
+              '</dict>' \
+              '</plist>' \
+              > GoogleService-Info.plist
+          fi
+
+      - name: Expo prebuild (iOS)
+        if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform ios --no-install
+        env:
+          EXPO_NO_TELEMETRY: 1
+
+      - name: Patch Podfile (react-native-maps pod name)
+        if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile/ios
+        run: |
+          if grep -q "react-native-google-maps" Podfile; then
+            sed -i.bak "s|pod 'react-native-google-maps'|pod 'react-native-maps'|g" Podfile
+            sed -i.bak "s|:path => '../../../node_modules/react-native-maps/google'|:path => '../../../node_modules/react-native-maps'|g" Podfile
+            rm -f Podfile.bak
+          fi
+
+      - name: CocoaPods install
+        if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile/ios
+        run: pod install
+
+      - name: Disable Bugsnag source-map upload phase
+        if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile/ios
+        run: |
+          set -euo pipefail
+          PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
+          PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
+
+      - name: Build iOS (Debug simulator)
+        if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile/ios
+        run: |
+          set -euo pipefail
+          WORKSPACE=$(ls -d *.xcworkspace | head -1)
+          export APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
+          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
+            | python3 -c "
+          import json,sys,os
+          app=os.environ['APP_NAME']
+          schemes=json.load(sys.stdin)['workspace']['schemes']
+          if app in schemes: print(app)
+          else:
+              hit=[s for s in schemes if s.lower()==app.lower()]
+              print(hit[0] if hit else app)
+          ")
+          set -o pipefail
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build \
+            | xcpretty
+
+      - name: Boot iOS simulator (pinned)
+        if: steps.preflight.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          DEVICE_ID=$(xcrun simctl list devices available --json \
+            | SIM_DEVICE="$SIM_DEVICE" SIM_RUNTIME_PREFIX="$SIM_RUNTIME_PREFIX" python3 -c "
+          import json,os,sys,re
+          want_name=os.environ['SIM_DEVICE']
+          want_runtime=os.environ['SIM_RUNTIME_PREFIX']
+          data=json.load(sys.stdin)['devices']
+          candidates=[]
+          for runtime,devices in data.items():
+              if 'iOS' not in runtime: continue
+              m=re.search(r'iOS-(\\d+)', runtime)
+              if not m: continue
+              normalized=f'iOS {m.group(1)}'
+              if not normalized.startswith(want_runtime): continue
+              for dev in devices:
+                  if dev.get('name')==want_name:
+                      candidates.append((runtime, dev['udid']))
+          candidates.sort(reverse=True)
+          print(candidates[0][1] if candidates else '')
+          ")
+          if [ -z "$DEVICE_ID" ]; then
+            echo "::error::No simulator matching device='$SIM_DEVICE' runtime prefix='$SIM_RUNTIME_PREFIX'"
+            exit 1
+          fi
+          xcrun simctl boot "$DEVICE_ID" || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          echo "SIMULATOR_UDID=$DEVICE_ID" >> $GITHUB_ENV
+
+      - name: Install app on simulator
+        if: steps.preflight.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
+          xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
+
+      - name: Run full Maestro suite (excludes quarantined)
+        if: steps.preflight.outputs.skip != 'true'
+        id: maestro-extended
+        run: |
+          set -uo pipefail
+          # Build a Maestro `--exclude-tags` list isn't enough because
+          # quarantine entries are by stem, not tag. Instead we collect
+          # every non-quarantined .yaml under .maestro/ and feed them.
+          QUARANTINED=$(grep -v '^[[:space:]]*#' apps/mobile/.maestro/quarantined.txt \
+            | awk '{print $1}' | grep -v '^$' | sort -u || true)
+          FLOWS=()
+          for f in apps/mobile/.maestro/*.yaml; do
+            stem="$(basename "$f" .yaml)"
+            if echo "$QUARANTINED" | grep -qx "$stem"; then
+              echo "::notice::skipping quarantined flow: $stem"
+              continue
+            fi
+            FLOWS+=("$f")
+          done
+          if [ "${#FLOWS[@]}" -eq 0 ]; then
+            echo "::warning::No extended flows to run"
+            exit 0
+          fi
+          # Run as a single maestro invocation so suite-level ordering
+          # (config.yaml) is respected. Allow failures — the reporter
+          # decides what's blocking.
+          maestro test "${FLOWS[@]}" \
+            --format junit \
+            --output maestro-results-extended.xml \
+            --exclude-tags no-api,util || true
+        env:
+          APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
+          APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
+          EXPO_PUBLIC_API_URL: ${{ env.EXPO_PUBLIC_API_URL }}
+
+      - name: Report extended flow results
+        if: steps.preflight.outputs.skip != 'true' && always()
+        run: |
+          python3 .github/scripts/maestro-report.py \
+            --junit maestro-results-extended.xml \
+            --quarantine apps/mobile/.maestro/quarantined.txt \
+            --required "$REQUIRED_FLOWS" \
+            --summary "$GITHUB_STEP_SUMMARY" \
+            --mode extended
+
+      - name: Upload extended Maestro artifacts
+        if: steps.preflight.outputs.skip != 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-results-extended
+          path: |
+            maestro-results-extended*.xml
+            ~/.maestro/tests/**/*.png
+          if-no-files-found: ignore
+
+      - name: Capture simulator log on failure
+        if: steps.preflight.outputs.skip != 'true' && failure()
+        run: |
+          xcrun simctl spawn "$SIMULATOR_UDID" log collect \
+            --output simulator-extended.logarchive || true
+        continue-on-error: true
+
+      - name: Upload simulator log on failure
+        if: steps.preflight.outputs.skip != 'true' && failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulator-log-extended
+          path: simulator-extended.logarchive
+          if-no-files-found: ignore
+
+  # -------------------------------------------------------------------------
+  # 3. Flake stats — read-only observability.
+  #    Pulls JUnit artifacts from the last N runs and emits a per-flow
+  #    pass-rate table. Never blocks. Runs on PRs (so authors can see the
+  #    state of the world before deciding to promote/quarantine) and
+  #    daily via cron.
+  # -------------------------------------------------------------------------
+  flake-stats:
+    name: Flake stats (last 20 runs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Don't block, don't depend on the suites — this is observability.
+    if: github.event_name != 'schedule' || github.repository == github.event.repository.full_name
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Compute pass rate per flow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/maestro-flake-stats.py \
+            --workflow e2e-mobile.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --limit 20 \
+            --summary "$GITHUB_STEP_SUMMARY"
