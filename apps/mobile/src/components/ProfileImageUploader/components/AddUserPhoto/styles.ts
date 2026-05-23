@@ -77,3 +77,22 @@ export const AddRemoveContainer = styled(PressableArea)<{
 export const FadedDog = styled(Dog)`
   opacity: 0.5;
 `;
+
+/**
+ * MAESTRO_E2E placeholder skip button. Visible but unobtrusive — pinned to
+ * the bottom edge of the photo cell so a Maestro `point` tap can target it
+ * without occluding the centered FadedDog (which is the real human tap
+ * target on non-Maestro runs). Rendered only when both gates pass in
+ * `AddUserPhoto.showMaestroSkip` — production builds short-circuit on
+ * `config.ENV === "production"` so they never instantiate this style.
+ */
+export const MaestroSkipPressable = styled(PressableArea)`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+`;

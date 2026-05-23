@@ -48,6 +48,7 @@
     "date-fns": "^3.6.0",
     "expo": "^55.0.24",
     "expo-blur": "~55.0.14",
+    "expo-asset": "~55.0.17",
     "expo-build-properties": "~55.0.14",
     "expo-constants": "~55.0.16",
     "expo-crypto": "~55.0.15",
