@@ -31,17 +31,17 @@ This document tracks the rewrite of the journey flows (20-27) so they:
 
 ## Flow status
 
-| # | Flow                          | Status | Post-check                           |
-|---|-------------------------------|--------|--------------------------------------|
-| 20 | account-creation-journey     | TODO   | User+Dog+Image rows in DB            |
-| 21 | swipe-journey                | TODO   | Interest rows of correct types       |
-| 22 | new-match-journey            | TODO   | Match + Message rows                 |
-| 23 | preferences-journey          | TODO   | dog.preferred* columns               |
-| 23b | lang-theme-persistence (NEW) | TODO   | visual + AsyncStorage                |
-| 24 | profile-journey              | TODO   | dog.name = timestamped value         |
-| 25 | upgrade-journey              | TODO   | Subscription row PREMIUM             |
-| 26 | logout-journey               | TODO   | screenshot proof                     |
-| 27 | delete-account-journey       | TODO   | User row gone                        |
+| #   | Flow                         | Status | Post-check                     |
+| --- | ---------------------------- | ------ | ------------------------------ |
+| 20  | account-creation-journey     | TODO   | User+Dog+Image rows in DB      |
+| 21  | swipe-journey                | TODO   | Interest rows of correct types |
+| 22  | new-match-journey            | TODO   | Match + Message rows           |
+| 23  | preferences-journey          | TODO   | dog.preferred\* columns        |
+| 23b | lang-theme-persistence (NEW) | TODO   | visual + AsyncStorage          |
+| 24  | profile-journey              | TODO   | dog.name = timestamped value   |
+| 25  | upgrade-journey              | TODO   | Subscription row PREMIUM       |
+| 26  | logout-journey               | TODO   | screenshot proof               |
+| 27  | delete-account-journey       | TODO   | User row gone                  |
 
 ## Wrapper
 
