@@ -3,22 +3,22 @@ import * as React from "react";
 import { ActivityIndicator } from "react-native";
 import { magicToast } from "react-native-magic-toast";
 import Animated, { FadeOut, useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { FileSystemUploadType, uploadAsync } from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import AddRemove from "@/assets/images/AddRemove.svg";
 import { PressableArea } from "@/components/PressableArea";
 import {
-  compressImage,
+  getMaestroPlaceholderUri,
   ImagePickerError,
   Picture,
+  ProfileImageUploadStage,
+  shouldOfferMaestroPlaceholder,
   showImagePickerOptions,
+  uploadProfileImage,
 } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
 import { sendError } from "@/services/errorTracking";
-import { getMimeType } from "@/services/getMimeType";
 import * as S from "./styles";
 
 type AddUserPhotoProps = {
@@ -59,8 +59,34 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
     onDelete();
   };
 
+  /**
+   * Reports a failed upload to Bugsnag with the precise pipeline stage and
+   * surfaces a toast to the user. Shared by both the real picker flow and
+   * the Maestro placeholder skip flow so a regression in either path
+   * produces identical telemetry.
+   */
+  const reportUploadFailure = (
+    err: unknown,
+    stage: "pick" | ProfileImageUploadStage,
+    context: string,
+  ) => {
+    const reason = err instanceof Error ? err.message : String(err);
+
+    const trackedError =
+      err instanceof Error
+        ? Object.assign(err, { context, stage })
+        : new Error(`${context}[${stage}]: ${reason}`);
+    sendError(trackedError);
+
+    if (__DEV__) {
+      magicToast.alert(t("imagePicker.uploadFailedDev", { reason: `[${stage}] ${reason}` }));
+    } else {
+      magicToast.alert(t("imagePicker.uploadFailed"));
+    }
+  };
+
   const handleAdd = async () => {
-    let stage: "pick" | "presign" | "compress" | "upload" | "finalize" = "pick";
+    let stage: "pick" | ProfileImageUploadStage = "pick";
     try {
       const selectedImage = await showImagePickerOptions();
 
@@ -68,29 +94,9 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
       onAdd({ url: selectedImage.uri });
       setLocalPicture(selectedImage.uri);
 
-      stage = "presign";
-      const presignedUrl = await getTrcpContext().image.signedUrl.fetch();
-
-      /**
-       * Compress the image before uploading. Expensive operation,
-       * so we do it only after the visual feedback is shown.
-       */
-      stage = "compress";
-      const compressedImage = await compressImage(selectedImage.uri);
-
-      stage = "upload";
-      const response = await uploadAsync(presignedUrl, compressedImage.uri, {
-        mimeType: getMimeType(compressedImage.uri),
-        uploadType: FileSystemUploadType.BINARY_CONTENT,
-        httpMethod: "PUT",
+      const finalUrl = await uploadProfileImage(selectedImage.uri, (s) => {
+        stage = s;
       });
-
-      if (response.status !== 200) {
-        throw new Error(`S3 PUT returned ${response.status}`);
-      }
-
-      stage = "finalize";
-      const finalUrl = presignedUrl.split("?")[0] as string;
 
       onAdd({ url: finalUrl });
     } catch (err) {
@@ -106,26 +112,53 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
         return;
       }
 
-      const reason = err instanceof Error ? err.message : String(err);
+      reportUploadFailure(err, stage, "ProfileImageUploader.handleAdd");
+      handleDelete();
+    }
+  };
 
-      const trackedError =
-        err instanceof Error
-          ? Object.assign(err, { context: "ProfileImageUploader.handleAdd", stage })
-          : new Error(`ProfileImageUploader.handleAdd[${stage}]: ${reason}`);
-      sendError(trackedError);
+  /**
+   * MAESTRO E2E ONLY — bypass the iOS photo picker by uploading a
+   * bundled placeholder PNG through the *real* presign + compress + upload
+   * pipeline. This exists because iOS 26's PHPicker grid renders inside a
+   * separate `RemotePlaceholder` PHX process that XCUITest cannot synthesize
+   * taps into from a Maestro `point` (issue #44).
+   *
+   * GATED by `shouldOfferMaestroPlaceholder()` — both `config.ENV !==
+   * "production"` *and* `EXPO_PUBLIC_MAESTRO_E2E === "1"` must hold,
+   * mirroring the gating pattern of the BE-mocked purchase shipped in
+   * PR #35 (services/payments → `isMaestroMockMode`, paired with the API's
+   * `NODE_ENV !== "production"` AND `MAESTRO_E2E=1` check). The button
+   * itself is conditionally rendered on the same gate, so the
+   * placeholder asset's `require(...)` is never executed in production.
+   */
+  const handleMaestroPlaceholderUpload = async () => {
+    let stage: "pick" | ProfileImageUploadStage = "pick";
+    try {
+      const placeholderUri = await getMaestroPlaceholderUri();
 
-      // Surface a real error to the user (was a silent Portuguese-only Alert).
-      // In dev mode include the underlying reason so devs/QA can debug.
-      if (__DEV__) {
-        magicToast.alert(t("imagePicker.uploadFailedDev", { reason: `[${stage}] ${reason}` }));
-      } else {
-        magicToast.alert(t("imagePicker.uploadFailed"));
-      }
+      // Optimistic feedback identical to the real flow so screenshots/check
+      // observers see the same intermediate state.
+      onAdd({ url: placeholderUri });
+      setLocalPicture(placeholderUri);
+
+      const finalUrl = await uploadProfileImage(placeholderUri, (s) => {
+        stage = s;
+      });
+
+      onAdd({ url: finalUrl });
+    } catch (err) {
+      reportUploadFailure(err, stage, "ProfileImageUploader.handleMaestroPlaceholderUpload");
       handleDelete();
     }
   };
 
   const isLoading = Boolean(localPicture && !picture.url.includes("http"));
+
+  // `shouldOfferMaestroPlaceholder()` short-circuits on
+  // `config.ENV === "production"` so App Store builds always evaluate to
+  // `false` here regardless of EXPO_PUBLIC_MAESTRO_E2E misconfiguration.
+  const showMaestroSkip = !hasPicture && !isLoading && shouldOfferMaestroPlaceholder();
 
   return (
     <S.UserPictureContainer>
@@ -161,6 +194,26 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
             </S.DebugImageStatusContainer>
           ) : null
         }
+        {/*
+          MAESTRO_E2E placeholder skip affordance — see comment on
+          `handleMaestroPlaceholderUpload`. Rendered only when both gates pass
+          and the slot is empty + idle. Anchored to the bottom edge of the
+          cell so a Maestro `point` tap at e.g. (cell_x, cell_y + ~85%) lands
+          cleanly without overlapping the centered FadedDog hit area.
+          testID is per-slot so flow 20 can disambiguate which cell to fill.
+        */}
+        {showMaestroSkip ? (
+          <S.MaestroSkipPressable
+            testID={
+              typeof index === "number" ? `maestro-skip-photo-${index}` : "maestro-skip-photo"
+            }
+            onPress={handleMaestroPlaceholderUpload}
+          >
+            <Text color="white" fontSize="xxs" fontWeight="bold">
+              MAESTRO_E2E_SKIP_PHOTO
+            </Text>
+          </S.MaestroSkipPressable>
+        ) : null}
       </S.UserPictureContent>
       <S.AddRemoveContainer
         testID={
