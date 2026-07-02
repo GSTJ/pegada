@@ -309,8 +309,19 @@ jobs:
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
-            build \
-            | xcpretty
+            build 2>&1 \
+            | tee xcodebuild-raw.log \
+            | xcpretty \
+            || {
+              # xcpretty swallows run-script phase stderr — on failure dump
+              # the raw log around the failing phase so the error is visible
+              # in CI instead of a bare 'PhaseScriptExecution failed'.
+              echo "::group::raw xcodebuild output (failures)"
+              grep -nE "error:|Command PhaseScriptExecution failed" xcodebuild-raw.log | head -50 || true
+              awk '/Generate updates resources/,0' xcodebuild-raw.log | head -150 || true
+              echo "::endgroup::"
+              exit 65
+            }
           PROD_DIR=build/Build/Products/Release-iphonesimulator
           if ! ls "$PROD_DIR"/*.app >/dev/null 2>&1; then
             echo "::error::xcodebuild reported success but produced no .app in $PROD_DIR"
@@ -700,8 +711,19 @@ jobs:
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
-            build \
-            | xcpretty
+            build 2>&1 \
+            | tee xcodebuild-raw.log \
+            | xcpretty \
+            || {
+              # xcpretty swallows run-script phase stderr — on failure dump
+              # the raw log around the failing phase so the error is visible
+              # in CI instead of a bare 'PhaseScriptExecution failed'.
+              echo "::group::raw xcodebuild output (failures)"
+              grep -nE "error:|Command PhaseScriptExecution failed" xcodebuild-raw.log | head -50 || true
+              awk '/Generate updates resources/,0' xcodebuild-raw.log | head -150 || true
+              echo "::endgroup::"
+              exit 65
+            }
 
       - name: Boot iOS simulator (pinned)
         if: steps.preflight.outputs.skip != 'true'
