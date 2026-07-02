@@ -478,6 +478,32 @@ jobs:
             --output simulator-required.logarchive || true
         continue-on-error: true
 
+      # `log collect` proved unreliable (run 28593434192 produced no
+      # artifact) — also dump a plain-text app log + native crash reports
+      # so launch failures are diagnosable straight from the run page.
+      - name: Collect app crash diagnostics on failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p crash-diagnostics
+          xcrun simctl spawn "$SIMULATOR_UDID" log show --last 20m \
+            --predicate 'process == "Pegada"' --style compact \
+            > crash-diagnostics/pegada-oslog.txt 2>&1
+          cp ~/Library/Logs/DiagnosticReports/Pegada*.ips crash-diagnostics/ 2>/dev/null
+          echo "::group::pegada fatal lines"
+          grep -iE "fatal|exception|abort|Invalid environment|No script URL" \
+            crash-diagnostics/pegada-oslog.txt | tail -60 || true
+          echo "::endgroup::"
+
+      - name: Upload crash diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-diagnostics-required
+          path: crash-diagnostics/
+          if-no-files-found: ignore
+
       - name: Upload simulator log on failure
         if: failure()
         uses: actions/upload-artifact@v4
