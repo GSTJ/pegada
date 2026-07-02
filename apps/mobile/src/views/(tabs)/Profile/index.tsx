@@ -137,7 +137,6 @@ const Profile = () => {
         <SettingsList
           bounces={false}
           contentContainerStyle={{
-            paddingBottom: theme.spacing[4] + tabBarHeight,
             paddingTop: dogProfileHeight - marginTop,
             flexGrow: 1,
             zIndex: 10,
@@ -154,7 +153,12 @@ const Profile = () => {
           <View
             style={{
               backgroundColor: theme.colors.background,
-              paddingVertical: theme.spacing[1],
+              paddingTop: theme.spacing[1],
+              // The settings block owns the opaque background below the
+              // photo header: stretch to the viewport bottom and pad past
+              // the floating tab bar so no grey gap shows at scroll end.
+              paddingBottom: theme.spacing[4] + tabBarHeight,
+              flexGrow: 1,
             }}
           >
             <LocationConfig />
