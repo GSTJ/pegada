@@ -5,9 +5,11 @@ import { DefaultTheme as DefaultPegadaTheme } from "@pegada/shared/themes/themes
 type PegadaTheme = typeof DefaultPegadaTheme;
 
 declare module "styled-components" {
-  export type DefaultTheme = PegadaTheme;
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface DefaultTheme extends PegadaTheme {}
 }
 
 declare module "styled-components/native" {
-  export type DefaultTheme = PegadaTheme;
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface DefaultTheme extends PegadaTheme {}
 }

@@ -218,7 +218,7 @@ jobs:
       - name: Install Maestro
         run: |
           if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | bash
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
@@ -651,7 +651,7 @@ jobs:
         if: steps.preflight.outputs.skip != 'true'
         run: |
           if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | bash
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
