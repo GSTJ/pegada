@@ -141,7 +141,13 @@ jobs:
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_MAESTRO_E2E: "1"
-      # No EXPO_PUBLIC_API_URL — required flows must not depend on the API.
+      # Required flows must not DEPEND on the API, but the app's config
+      # schema hard-requires EXPO_PUBLIC_API_URL to boot: zod throws on the
+      # missing var, the JS bundle dies, and expo-updates' ErrorRecovery
+      # aborts the app before SignIn ever renders (verified from run
+      # 28589432792 artifacts — home screen on every attempt). Point it at
+      # a dead local port; nothing in the required flows makes a request.
+      EXPO_PUBLIC_API_URL: http://localhost:9999/api
 
     steps:
       - name: Select Xcode

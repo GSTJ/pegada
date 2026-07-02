@@ -10,9 +10,7 @@ export const client = new S3Client({
   },
   // Dev/e2e: MinIO endpoint override. forcePathStyle because MinIO does
   // not serve virtual-hosted-style buckets (bucket.localhost:9002).
-  ...(config.AWS_S3_ENDPOINT
-    ? { endpoint: config.AWS_S3_ENDPOINT, forcePathStyle: true }
-    : {}),
+  ...(config.AWS_S3_ENDPOINT ? { endpoint: config.AWS_S3_ENDPOINT, forcePathStyle: true } : {}),
 });
 
 /**
