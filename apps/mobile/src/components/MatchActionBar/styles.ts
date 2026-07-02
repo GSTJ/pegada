@@ -35,7 +35,6 @@ export const Container = styled(Animated.View).attrs({
 `;
 
 export const ActionItem = styled(PressableArea).attrs({
-  accessible: true,
   // Hit target expansion so taps that land just outside the visible
   // button still register on the action, never falling through to the
   // card's PersonalInfo pressable underneath (which would open the

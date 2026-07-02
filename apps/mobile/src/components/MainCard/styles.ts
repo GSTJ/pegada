@@ -11,7 +11,7 @@ export const absoluteFill = css`
   left: 0;
 `;
 
-export const Container = styled(Animated.View).attrs({ accessible: true })`
+export const Container = styled(Animated.View)`
   background-color: ${(props) => props.theme.colors.background};
   overflow: hidden;
   padding-top: ${(props) => props.theme.spacing[6]}px;
