@@ -491,6 +491,10 @@ jobs:
             --predicate 'process == "Pegada"' --style compact \
             > crash-diagnostics/pegada-oslog.txt 2>&1
           cp ~/Library/Logs/DiagnosticReports/Pegada*.ips crash-diagnostics/ 2>/dev/null
+          # What the maestro driver actually sees — the app can be healthy
+          # on-screen while ids are missing from the snapshot.
+          maestro hierarchy > crash-diagnostics/hierarchy.json 2>&1 || true
+          cp ~/.maestro/tests/*/maestro.log crash-diagnostics/ 2>/dev/null
           # The exact JS bundle the crashing app ran — swap-in locally to
           # reproduce (local rebuilds from the same commit/lockfile/env do
           # NOT crash, so only CI's own bytes can explain the difference).
