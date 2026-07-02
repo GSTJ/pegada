@@ -4,9 +4,27 @@ tags:
   - smoke
 ---
 # Cold launch smoke test: app starts and the SignIn screen renders.
-# Point-based (RN tree invisible to XCUITest); verification = no crash + screenshot.
+# Point-based (RN tree invisible to XCUITest); verification = keyboard
+# presence + screenshot.
 - launchApp:
     clearState: true
     clearKeychain: true
 - waitForAnimationToEnd
+# ATT prompt can appear on first launch with cleared state — dismiss so it
+# doesn't block the email field's autoFocus keyboard.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+# Liveness assertion. The RN view tree is invisible to XCUITest on this
+# build, so we can't assert on SignIn text/testIDs — but the email
+# TextInput autofocuses, which raises the SYSTEM keyboard, and keyboard
+# keys are native elements with locale-independent identifiers. Keyboard
+# visible == JS bundle evaluated + SignIn mounted. Without this, an app
+# that crashes right after launchApp (e.g. the missing-keychain-entitlement
+# SIGABRT from unsigned builds) sails through a screenshot-only flow and
+# the "hard gate" gates nothing.
+- extendedWaitUntil:
+    visible:
+      id: "shift"
+    timeout: 20000
 - takeScreenshot: 01-launch-signin

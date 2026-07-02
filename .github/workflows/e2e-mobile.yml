@@ -298,6 +298,10 @@ jobs:
           ")
           echo "Building workspace=$WORKSPACE scheme=$SCHEME"
           set -o pipefail
+          # No CODE_SIGNING_ALLOWED=NO: simulator builds ad-hoc sign for free,
+          # and the app NEEDS its entitlements — without them expo-secure-store
+          # throws KeyChainException at startup, the JS bundle dies, and
+          # expo-updates' ErrorRecovery aborts the whole app (SIGABRT).
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
@@ -305,7 +309,6 @@ jobs:
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
             build \
             | xcpretty
           PROD_DIR=build/Build/Products/Release-iphonesimulator
@@ -686,6 +689,10 @@ jobs:
               print(hit[0] if hit else app)
           ")
           set -o pipefail
+          # No CODE_SIGNING_ALLOWED=NO: simulator builds ad-hoc sign for free,
+          # and the app NEEDS its entitlements — without them expo-secure-store
+          # throws KeyChainException at startup, the JS bundle dies, and
+          # expo-updates' ErrorRecovery aborts the whole app (SIGABRT).
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
@@ -693,7 +700,6 @@ jobs:
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
             build \
             | xcpretty
 
