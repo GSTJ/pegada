@@ -18,8 +18,14 @@ tags:
 # that crashes right after launchApp (e.g. the missing-keychain-entitlement
 # SIGABRT from unsigned builds) sails through a screenshot-only flow and
 # the "hard gate" gates nothing.
+# Liveness assertion on the app's OWN testID (visible since the a11y
+# unlock). Catches every launch-crash class this gate has eaten so far —
+# missing entitlements, missing env, styled-components DOM branch, Ads
+# SDK abort — where a screenshot-only flow sails through. (The earlier
+# keyboard-key proxy `id: shift` broke across iOS 26.x runtimes: CI's
+# keyboard exposes different key identifiers than 26.5.)
 - extendedWaitUntil:
     visible:
-      id: "shift"
+      id: "signin-email"
     timeout: 20000
 - takeScreenshot: 01-launch-signin
