@@ -8,8 +8,6 @@ tags:
 #   1. Login as the returning magic user (test@pegada.app).
 #   2. Open Profile tab.
 #   3. Scroll to reveal the Logout row (below ToS / Privacy / Rate).
-#   4. Tap the Logout row by POINT (RN content is invisible to XCUITest on
-#      iOS 26 Fabric — see comment block at the bottom of this file).
 #   5. Confirm via the native iOS UIAlertController.
 #   6. Screenshot proves we're back on the email/sign-in screen (no native
 #      assertion is reliable here — RN tree is empty and the only system
@@ -19,18 +17,12 @@ tags:
 #      proves we are STILL on sign-in — would not be the case if logout
 #      left the JWT in Keychain.
 #
-# === iOS 26 + RN Fabric: WHY the verifications look the way they do ===
-#
-# In this build the RN view tree is completely INVISIBLE to the XCUITest
-# accessibility snapshot. `maestro hierarchy` returns only the status bar
 # and the system keyboard — no testIDs, no rendered text. Every previous
 # attempt at `tapOn: { id: profile-logout }` or
 # `assertVisible: { id: signin-submit }` FAILS with "no visible element"
 # even though the row / button is clearly on-screen in a screenshot.
 #
 # What DOES work:
-#   - point-based taps (`tapOn: { point: "X%, Y%" }`) — the OS routes them
-#     regardless of a11y tree contents
 #   - native UI assertions (`tapOn: { text: "Logout" }` on UIAlertController
 #     buttons, system "Next" accessory above number pad, ATT prompt)
 #   - screenshots for visual proof
@@ -38,9 +30,6 @@ tags:
 #     can observe; the Keychain cleanup is verified via the cold-relaunch
 #     screenshot)
 #
-# Coordinates calibrated empirically on iPhone 17 Pro Max iOS 26.4
-# (440x956 logical, 1320x2868 px). See screenshots 26-* checked in by
-# this PR for the reference frames they were measured from.
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -52,7 +41,7 @@ tags:
 
 # --- Open Profile tab (rightmost bottom-tab icon) ---
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 26-02-on-profile
@@ -60,7 +49,6 @@ tags:
 # --- Scroll the Settings list to reveal Logout / Delete account ---
 # The Profile screen has a fixed sticky "Settings" header and the rows
 # below scroll. A single tight upward swipe within the list area
-# (start 80% Y, end 30% Y) pulls Logout into view. The list does not
 # bounce so this is deterministic.
 - swipe:
     start: "50%, 80%"
@@ -70,11 +58,9 @@ tags:
 - takeScreenshot: 26-03-settings-scrolled
 
 # --- Tap Logout row by point ---
-# Empirically measured at Y ≈ 73% on this device after a single scroll
 # (Logout sits below the divider that separates the legal links from the
-# destructive actions). Delete account is at Y ≈ 79% — keep clear of it.
 - tapOn:
-    point: "20%, 73%"
+    id: "profile-logout"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 26-04-logout-alert
@@ -97,7 +83,6 @@ tags:
 
 # --- Proof we're back on sign-in: screenshot only ---
 # The sign-in screen renders RN content (email input + Continue button)
-# that is invisible to XCUITest on iOS 26. The keyboard is up (auto-focus)
 # but the QWERTY keyboard is present on every text-input screen so its
 # visibility is not a unique marker. Screenshot is the honest assertion.
 # Downstream evidence: the cold-relaunch below would NOT land here if the

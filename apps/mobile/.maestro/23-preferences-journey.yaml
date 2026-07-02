@@ -11,8 +11,6 @@ tags:
 #
 # The Preferences screen has three pickers (Breed, Size, Color) wired
 # through @gorhom/bottom-sheet. Tapping them opens a bottom-sheet modal.
-# On iOS 26 + RN Fabric + the iPhone 17 Pro Max XCUITest driver, opening
-# a @gorhom/bottom-sheet CRASHES the XCUITest connection — every
 # subsequent Maestro step times out with "Driver disconnected" until the
 # app is force-killed. Validated empirically in an earlier session
 # (see .maestro/REWRITE-PLAN.md "Lessons applied"). The crash is
@@ -36,16 +34,10 @@ tags:
 # Seed baseline (packages/database/maestro-seed.ts → ensureMagicUserWithRex):
 #   preferredMinAge=1, preferredMaxAge=15, preferredMaxDistance=50
 # The post-save expected mutation:
-#   distance increases (swipe right from baseline X≈19% to X≈50% in
 #     the track), min age moves up off 0, max age moves down off ∞.
 #
-# === iOS 26 + RN Fabric: point taps only, screenshots for proof ===
-#
-# Same rationale as flows 21 and 22 — RN view tree is invisible to
-# XCUITest. We use point taps for the tab bar, profile open-preferences
 # row, and the Save button. Sliders are driven by `swipe` from a
 # point on the slider track to another point, which the OS routes as
-# a pan gesture even without an a11y element.
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -57,20 +49,16 @@ tags:
 
 # --- Open Profile tab (rightmost tab) -------------------------------------
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 23-02-on-profile
 
 # --- Open Preferences -----------------------------------------------------
 # Profile screen layout: large profile-photo block at the top, then the
-# "Settings" header (~Y 43%), then rows: Update Location (~Y 50%),
-# Current Plan (~Y 56%), Match Preferences (~Y 62%), Edit Profile (~Y 70%),
-# Language (~Y 79%), Theme (~Y 86%), Logout (~Y 93%). Measured from a
 # screenshot of the profile screen captured in an earlier pass.
-# Match Preferences row center ≈ Y 62%.
 - tapOn:
-    point: "50%, 62%"
+    id: "profile-open-preferences"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 23-03-preferences-initial
@@ -86,25 +74,14 @@ tags:
 #
 # Slider track geometry: sliderLength = screen width - spacing[4]*2 =
 # 440 - 32 = 408pt. On a 440pt width, track spans ~16pt to ~424pt,
-# i.e. X 3.6% to 96.4%. Center of track at X 50%.
 #
-# Vertical placement (re-measured from the 23-03 screenshot — first
-# pass used Y 48%/60% which fell BELOW each slider track and missed the
 # markers entirely; sliders went un-swiped and the DB post-check failed
 # with all values unchanged from seed):
-#   - Age range slider track   ≈ Y 41%
-#   - Distance slider track    ≈ Y 50%
-# Marker hitSlop is 15pt all sides, so any start point within ~±3% Y
 # of the track will grab the marker. The new Y values land precisely
 # on the track.
 #
 # Marker X positions at flow start (seed values):
-#   - Age MIN marker  ≈ X 11% (preferredMinAge=1, scale 0..10)
-#   - Age MAX marker  ≈ X 96% (preferredMaxAge=15 clamped to ∞ = end)
-#   - Distance marker ≈ X 12% (preferredMaxDistance=50, scale 0..300)
 
-# --- Age MIN marker: swipe right from start ~11% to ~35% -----------------
-# Setting min age to roughly 3-4 years.
 - swipe:
     start: "11%, 41%"
     end: "35%, 41%"
@@ -112,9 +89,6 @@ tags:
 - waitForAnimationToEnd
 - takeScreenshot: 23-04-age-min-moved
 
-# --- Age MAX marker: swipe LEFT from end ~96% to ~65% --------------------
-# Setting max age to roughly 6-7 years (off the ∞ cap so the API
-# persists a concrete integer instead of NULL).
 - swipe:
     start: "96%, 41%"
     end: "65%, 41%"
@@ -122,21 +96,13 @@ tags:
 - waitForAnimationToEnd
 - takeScreenshot: 23-05-age-max-moved
 
-# --- Distance slider: swipe right from marker center to ~50% -------------
 # Setting distance to ~150 km (step=5, will snap).
 #
-# Calibration history:
-#   - First pass with start (12%, 50%) → end (50%, 50%): no movement.
 #     Marker stayed at 50 km. The age slider above worked, so the Y
-#     coord landing on the track surface is correct.
-#   - Second pass split into two short swipes (12%→30%, 30%→50%):
 #     still no movement. The ScrollView host may be eating the gesture.
 #
 # The marker visual center on iPhone 17 Pro Max iOS 26 from screenshot
-# 23-03 measures at roughly X 14%, Y 50.3% (NOT X 12% — the slider math
 # `50/(301)*408pt + 16pt = 84pt → 19%` disagrees with the visual, but
-# what matters is the rendered pixel position the OS hit-tests against).
-# Use X=14% for the start point, and a long-hold duration so the
 # react-native-multi-slider responder claim wins over the ScrollView.
 - swipe:
     start: "14%, 50%"
@@ -147,10 +113,9 @@ tags:
 
 # --- Save preferences ----------------------------------------------------
 # Save button lives in BottomAction.Container at the bottom of the
-# screen. testID="preferences-save" is invisible; point ≈ 50%, 92% Y
 # (above the home indicator, below the safe area).
 - tapOn:
-    point: "50%, 92%"
+    id: "preferences-save"
 # Mutation in flight. myDog.update -> onSuccess -> router.back()
 # returns to Profile. Wait generously for the network round-trip and
 # the magicToast "Preferences updated" to dismiss.
@@ -165,16 +130,16 @@ tags:
 # back at their old positions. The screenshot 23-09 must differ from
 # 23-03 (the baseline Preferences) to prove the change persisted.
 - tapOn:
-    point: "17%, 95%"
+    id: "tab-swipe"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 23-08-on-swipe
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - tapOn:
-    point: "50%, 62%"
+    id: "profile-open-preferences"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 23-09-preferences-re-opened

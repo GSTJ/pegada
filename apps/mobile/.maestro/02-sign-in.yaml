@@ -4,7 +4,6 @@ tags:
   - smoke
 ---
 # Sign-in via APPLE_MAGIC_EMAIL + APPLE_MAGIC_CODE.
-# Uses point-based util because RN tree is invisible to XCUITest snapshot.
 - launchApp:
     clearState: true
     clearKeychain: true

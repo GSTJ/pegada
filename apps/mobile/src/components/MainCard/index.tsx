@@ -113,7 +113,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
         </CarouselContainer>
       </UpperPart>
       {Boolean(shouldShowPersonalInfo) && (
-        <PressableArea onPress={openUserProfile}>
+        <PressableArea testID="swipe-card-open-profile" onPress={openUserProfile}>
           <PersonalInfo dog={dog} />
         </PressableArea>
       )}

@@ -25,17 +25,12 @@ tags:
 # We log in as delete-me@pegada.app on purpose. Deleting test@pegada.app
 # would break every other Maestro flow on the next run.
 #
-# === iOS 26 + RN Fabric calibrations ===
-# RN view tree is invisible to XCUITest on this build (see flow 26's
 # yaml for the full diagnosis). Every in-app row tap goes through
 # POINT coords; only native iOS Alert text / SignIn text inputs (which
 # back onto UIKit primitives) remain selectable by text.
 #
-# Coords measured on iPhone 17 Pro Max iOS 26.4 (440x956 / 1320x2868).
-# Coordinates DIFFER from test@pegada.app's profile (flow 24/26) because
 # delete-me@pegada.app does not have the same dynamic content above
 # (no Bella match, no large dog header chrome). Verified empirically
-# at run 2026-05-21_203752: Y=68% on delete-me's scrolled Profile
 # triggered the LOGOUT dialog, not Delete account.
 #
 #   - Profile tab              : 83%, 95%
@@ -53,7 +48,7 @@ tags:
 
 # --- Profile tab ---
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 27-02-on-profile
@@ -69,11 +64,10 @@ tags:
 - takeScreenshot: 27-03-scrolled
 
 # --- Tap Delete Account row by point ---
-# Y=75% after one scroll on delete-me's Profile (Logout sits at Y=68%
 # so we MUST keep clear of it - mis-tapping Logout would dismiss the
 # delete confirmation entirely and waste the run).
 - tapOn:
-    point: "50%, 75%"
+    id: "profile-delete-account"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 27-04-delete-confirm-dialog
@@ -94,8 +88,6 @@ tags:
 - takeScreenshot: 27-05-after-delete
 
 # --- Proof we're back on sign-in: screenshot only ---
-# Same as flow 26: the sign-in screen renders RN content invisible to
-# XCUITest. No native assertion is reliable here (the QWERTY keyboard
 # is present on every text-input screen so it's not a unique marker).
 # Screenshot is the honest assertion; the cold-relaunch below proves
 # the session was truly wiped from Keychain.

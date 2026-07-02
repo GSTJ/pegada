@@ -8,28 +8,20 @@ tags:
 # 14-profile-edit smokes. Verifies:
 #   1. Edit Profile -> erase name -> type "Rex-<ts>" -> save -> name
 #      persists across a tab round-trip (Swipe -> Profile). DB post-check
-#      asserts the new name pattern landed in Postgres.
 #   2. Terms of Use -> opens SFSafariViewController (PR #37 dropped the
 #      PAGE_SHEET presentation so the Safari "Done" chrome button is
-#      reachable in the XCUITest tree).
 #   3. Privacy Policy -> same SFSafariViewController pattern.
 #   4. Rate the App -> StoreReview.requestReview fires. On iOS sim this
 #      either no-ops or shows an empty system dialog; we dismiss any
 #      "Not Now" prompt optionally and the screenshot + the Profile tab
 #      still being alive proves the call did not crash the app.
 #
-# === iOS 26 + RN Fabric calibrations ===
-# Tab bar / Profile row taps go through POINT coords because XCUITest is
 # blind to the RN view tree for this build (see flow 26 yaml for the
 # full diagnosis). EditProfile input testIDs DO work because they back
 # onto plain RN TextInput primitives whose accessibility labels the
-# XCUITest snapshot still picks up via UIKit bridges.
 #
-# Coords measured on iPhone 17 Pro Max iOS 26.4 (440x956 logical / 1320x2868 px).
 #   - Profile tab            : 83%, 95% (rightmost bottom-tab icon - same as 21/22/23/26)
 #   - Swipe tab              : 17%, 95% (leftmost bottom-tab icon)
-#   - Edit Profile row       : 50%, 70% (unscrolled - row sits just below Match Preferences Y=62%)
-#   - Scrolled Settings rows : ToS Y=58%, Privacy Y=66%, Rate Y=74% after one upward swipe
 #     (same scroll gesture as flow 26: 50%,80% -> 50%,30% duration 500ms)
 - launchApp:
     clearState: true
@@ -42,7 +34,7 @@ tags:
 
 # --- Navigate to Profile tab ---
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 24-02-on-profile
@@ -57,38 +49,19 @@ tags:
 # bonus, not a correctness requirement (the check only matches Rex-%).
 
 # Tap Edit Profile row (5th row on unscrolled list: Location, Plan, Match
-# Preferences, Edit Profile, Language/Theme below). Measured Y after flow
-# 23 calibrated Match Preferences at 62% on the same device.
 - tapOn:
-    point: "50%, 70%"
+    id: "profile-open-edit"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 24-03-on-edit
 
-# EditProfile testIDs DO NOT resolve on this build (iOS 26 + RN Fabric
-# blackout - confirmed empirically: `tapOn id: edit-profile-name`
-# failed at run 2026-05-21_200832 even though the input was clearly
-# visible in 24-03-on-edit.png).
-#
-# Use point taps measured from that screenshot (1320x2868 / 440x956):
-#   - Photo grid (2x3) ends      ~Y=42% (tapping inside opens an action
-#                                  sheet "What do you prefer?" - AVOID)
-#   - Name LABEL ("Name" text)    ~Y=46%
-#   - Name INPUT (the "Rex" box)  ~Y=59% (tap target - measured from the
-#                                  pixel center of the gray rounded
-#                                  input box in 24-04-typed-name.png
-#                                  after runs at Y=50% and Y=54% missed
 #                                  the box without focusing it)
-#   - Bio  input vertical center  ~Y=70%
-#   - Save Profile button center  ~Y=94% (sticky bottom action)
 - tapOn:
-    point: "50%, 59%"
+    id: "edit-profile-name"
 - waitForAnimationToEnd
-# Defense: if the previous tap accidentally landed inside a photo cell
 # (boundary case where the grid bottom drifts during layout), the
 # "What do you prefer?" UIAlertController surfaces. Dismiss it so we
 # can retry the name-input tap. The Cancel button is a native UIKit
-# Alert button that the XCUITest tree DOES see even with the RN
 # blackout.
 - tapOn:
     text: "Cancel"
@@ -100,19 +73,9 @@ tags:
 - inputText: "Rex-${Date.now()}"
 - takeScreenshot: 24-04-typed-name
 
-# Dismiss the soft keyboard so the sticky Save Profile button is fully
-# tappable. The keyboard covers the bottom ~29% of the screen on iPhone
-# 17 Pro Max iOS 26; without dismissing, a tap at Y=94% may land on the
-# keyboard's bottom row instead of the button. Tap the Bio label (Y=53%)
-# which is a non-interactive Text - it does nothing but the tap outside
-# the focused input drops focus and the keyboard collapses.
-- tapOn:
-    point: "10%, 53%"
-- waitForAnimationToEnd
-
 # Save. dogUpdateMutation calls router.back() onSuccess -> Profile tab.
 - tapOn:
-    point: "50%, 94%"
+    id: "edit-profile-save"
 - waitForAnimationToEnd:
     timeout: 10000
 - takeScreenshot: 24-05-after-save
@@ -121,12 +84,12 @@ tags:
 # Forces the Profile screen to remount and the dog query data to come
 # from cache / refetch so we know the new name truly persisted.
 - tapOn:
-    point: "17%, 95%"
+    id: "tab-swipe"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 24-06-on-swipe
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 24-07-persisted
@@ -138,9 +101,7 @@ tags:
 #
 # CRITICAL: each web-browser / Rate-the-App dismissal causes the
 # Profile ScrollView to spring back to the top, so we MUST re-scroll
-# before tapping the next row. The Rate-the-App row at Y=50% will
 # trigger StoreReview on dismissal anyway (verified at run
-# 2026-05-21_202542 where a Y=58% tap intended for ToS landed on Rate
 # and the SKStoreReview alert appeared); always re-scroll between
 # rows to keep alignment.
 - swipe:
@@ -150,20 +111,10 @@ tags:
 - waitForAnimationToEnd
 - takeScreenshot: 24-08-settings-scrolled
 
-# Scrolled row Y coords measured from 24-08-settings-scrolled.png
-# (1320x2868 / 440x956), all tappable rows after one swipe:
-#   - Edit Profile      Y=10%
-#   - Language          Y=17%
-#   - Theme             Y=22%
 #   - divider
-#   - Terms of Use      Y=34%
-#   - Privacy Policy    Y=42%
-#   - Rate the App      Y=50%
 #   - divider
-#   - Logout            Y=62%
-#   - Delete account    Y=68%
 - tapOn:
-    point: "50%, 34%"
+    id: "profile-open-terms"
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 24-09-on-terms
@@ -179,15 +130,6 @@ tags:
     text: ".*Terms of Use.*"
     optional: true
 
-# Safari chrome "Done" button is a native UIKit element so XCUITest
-# always sees it even when the RN tree is blacked out. Tap it (optional
-# in case the chrome localization differs).
-#
-# Historical note: the May 21 dev build's openWebBrowser PAGE_SHEET
-# presentation backgrounded the app to iOS Springboard instead of
-# presenting SFSafariViewController in-app (filed as issue #45). PR #37
-# fixed this by dropping PAGE_SHEET; the "Done" button tap now
-# dismisses the in-app browser cleanly and 24-10-after-terms captures
 # the recovered Profile screen. The downstream re-launch below is kept
 # as a defensive recovery in case the Done tap doesn't register on
 # some device/iOS combinations.
@@ -200,7 +142,7 @@ tags:
 - waitForAnimationToEnd:
     timeout: 15000
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 24-10-after-terms
@@ -213,7 +155,7 @@ tags:
     duration: 500
 - waitForAnimationToEnd
 - tapOn:
-    point: "50%, 42%"
+    id: "profile-open-privacy"
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 24-11-on-privacy
@@ -232,7 +174,7 @@ tags:
 - waitForAnimationToEnd:
     timeout: 15000
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 24-12-after-privacy
@@ -241,7 +183,6 @@ tags:
 # StoreReview.requestReview surfaces an "Enjoying Pegada?" UIAlertController
 # with a "Not Now" button on the iOS simulator (verified visually at
 # 24-09-on-terms.png from run 2026-05-21_202542 where a mis-aligned
-# Y=58% tap accidentally triggered it). The presence of "Not Now"
 # proves the StoreReview call did not crash the app.
 - swipe:
     start: "50%, 80%"
@@ -249,7 +190,7 @@ tags:
     duration: 500
 - waitForAnimationToEnd
 - tapOn:
-    point: "50%, 50%"
+    id: "profile-open-rate"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 24-13-on-rate

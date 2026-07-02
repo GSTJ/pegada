@@ -11,7 +11,14 @@ export const Container = styled(SafeAreaView).attrs({
   flex: 1;
 `;
 
-export const PressableContainer = styled(Pressable)`
+/**
+ * Keyboard-dismiss wrapper for the whole screen. `accessible: false` is
+ * load-bearing: Pressables are implicitly accessibility ELEMENTS, and an
+ * accessible element COLLAPSES its entire subtree in the a11y tree — the
+ * whole SignIn screen (email input, submit button, all testIDs) becomes
+ * one opaque node to XCUITest/VoiceOver.
+ */
+export const PressableContainer = styled(Pressable).attrs({ accessible: false })`
   flex-grow: 1;
 `;
 

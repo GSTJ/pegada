@@ -14,35 +14,13 @@ tags:
 # "test@pegada.app,delete-me@pegada.app" in your environment. See
 # packages/api/src/shared/config.ts → isMagicEmail.
 #
-# Caller must already have launchApp'd. Coordinates calibrated on
-# iPhone 17 Pro Max (440x956 logical, 1320x2868 px) — identical to
 # utils/login-returning.yaml.
-- tapOn:
-    text: "Ask App Not to Track"
-    optional: true
-- tapOn:
-    text: "Allow Once"
-    optional: true
-- tapOn:
-    text: "Don.t Allow"
-    optional: true
+- runFlow: dismiss-system-dialogs.yaml
 # Email screen: tap the email field, type, then tap Continue (above keyboard).
-# pressKey:Enter does not advance to OTP on iOS 26 + RN Fabric.
 #
-# Calibration (issue #40): with the autoFocus keyboard open on iPhone 17
-# Pro Max iOS 26 the keyboard takes the bottom ~29% of the viewport
-# (Y ≥ 71%). The OLD coord `50%, 84%` landed on the `v` key inside the
-# keyboard, prepending a stray `v` to the typed email. Pixel-measured
-# coords from a 1320×2868 keyboard-up screenshot:
-#   - email TextInput vertical center ≈ 53% Y
-#   - Continue button vertical center ≈ 62% Y
-#   - keyboard top edge ≈ 71% Y
 - tapOn:
-    point: "50%, 53%"
+    id: "signin-email"
 - waitForAnimationToEnd
-# Defense-in-depth for issue #40: if a future calibration drift puts the
-# focus tap inside the keyboard region, that tap types a stray character
-# into the field. Erase 50 chars (well above any sane manual prefix) so
 # the field is empty before we input the real email — otherwise a stray
 # `v` would yield `vdelete-me@pegada.app` which is NOT in
 # APPLE_MAGIC_EMAIL and the downstream 424242 submit is rejected.
@@ -50,24 +28,16 @@ tags:
 - waitForAnimationToEnd
 - inputText: "delete-me@pegada.app"
 - tapOn:
-    point: "50%, 62%"
+    id: "signin-submit"
 - waitForAnimationToEnd:
     timeout: 8000
 # ATT dialog fires asynchronously after email submit — dismiss before OTP.
-- tapOn:
-    text: "Ask App Not to Track"
-    optional: true
-- tapOn:
-    text: "Don.t Allow"
-    optional: true
+- runFlow: dismiss-system-dialogs.yaml
 - waitForAnimationToEnd
 # Regression guard for issue #40: if the email tap lands in the keyboard
-# (as the OLD 84% coord did with the v-key), inputText prepends junk to
 # the email, the magic-email check rejects it, and the flow gets stuck on
 # the email screen with a QWERTY keyboard. The OTP screen swaps in iOS's
-# system number-pad which exposes a "Next" accessory button that XCUITest
 # CAN see even though app-rendered RN text cannot. Assert it here so a
-# coord regression fails LOUDLY at the utility level instead of cascading
 # into "OTP cells never filled" timeouts in every dependent flow.
 - assertVisible: "Next"
 # OTP: first cell does not auto-focus on iOS 26 — tap center of OTP row
@@ -94,9 +64,7 @@ tags:
 - waitForAnimationToEnd:
     timeout: 25000
 # ATT dialog may surface again after OTP submission.
-- tapOn:
-    text: "Ask App Not to Track"
-    optional: true
+- runFlow: dismiss-system-dialogs.yaml
 - tapOn:
     text: "Allow"
     optional: true

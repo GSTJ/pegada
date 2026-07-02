@@ -4,7 +4,6 @@ tags:
   - smoke
 ---
 # Sign in as returning user (lands on swipe tab) then tap each tab in turn.
-# Point-based: tab bar bottom row at ~95% Y, three tabs at ~17%, 50%, 83% X.
 - launchApp:
     clearState: true
     clearKeychain: true

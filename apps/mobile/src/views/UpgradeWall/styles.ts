@@ -8,7 +8,7 @@ import { BlurView } from "@/components/BlurView";
 import { PressableArea } from "@/components/PressableArea";
 import { Text } from "@/components/Text";
 
-export const Container = styled.View.attrs({ accessible: true })`
+export const Container = styled.View`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;

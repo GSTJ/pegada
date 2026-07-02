@@ -30,7 +30,7 @@ export const SettingsList = styled(Animated.ScrollView)`
   background-color: transparent;
 `;
 
-export const Container = styled.View.attrs({ accessible: true })`
+export const Container = styled.View`
   flex-grow: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;

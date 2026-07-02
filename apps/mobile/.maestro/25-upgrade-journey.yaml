@@ -51,14 +51,12 @@ tags:
 # User.plan back to FREE before each run so the upgrade CTA is visible
 # (the previous run would have left the user PREMIUM otherwise).
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: 25-02-on-profile-free
 
 # --- Step 2: open the upgrade wall via deep link ---
-# Deep link bypasses the Plan row coord lookup (which would otherwise
-# need separate calibration). The wall is a stack screen reachable via
 # router.push(SceneName.UpgradeWall) - the same destination CurrentPlanConfig
 # pushes to when a Free user taps the row.
 - openLink: ${APP_SCHEME}://upgrade-wall
@@ -80,9 +78,8 @@ tags:
 # environmental gate is what blocks completion, not the UI.
 #
 # CTA position: sticky bottom action, same as flow 24's Save Profile
-# button. Y=94% on iPhone 17 Pro Max iOS 26.4.
 - tapOn:
-    point: "50%, 94%"
+    id: "upgrade-wall-purchase-cta"
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 25-04-after-purchase-tap
@@ -95,7 +92,6 @@ tags:
 - waitForAnimationToEnd
 
 # --- Step 4: re-open Profile to capture the final plan state ---
-# In CI mock-mode: router.back() already landed us on Profile after the
 # successful mock purchase. In dev-build mode: we're still on the upgrade
 # wall; tap the close button (top-right, hitSlop set in PR #37) and
 # navigate to Profile manually.
@@ -104,11 +100,11 @@ tags:
     optional: true
 - waitForAnimationToEnd
 - tapOn:
-    point: "92%, 6%"
+    id: "upgrade-wall-close"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 25-05-on-profile-after-purchase

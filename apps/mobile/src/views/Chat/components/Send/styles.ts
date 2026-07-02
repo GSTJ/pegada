@@ -20,7 +20,7 @@ export const Input = styled.TextInput.attrs((props) => ({
   font-size: ${(props) => props.theme.typography.sizes.md.size}px;
 `;
 
-export const Container = styled(BlurView).attrs({ accessible: true })`
+export const Container = styled(BlurView)`
   padding: 0 ${(props) => props.theme.spacing[2]}px;
   border-top-color: ${(props) => props.theme.colors.border};
   border-top-width: ${(props) => props.theme.stroke.sm}px;

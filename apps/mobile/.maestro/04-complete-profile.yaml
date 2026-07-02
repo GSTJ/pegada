@@ -3,8 +3,6 @@ name: Complete profile (optional fields)
 tags:
   - smoke
 ---
-# Sign in. May land on CreateProfile, CompleteProfile, AskForLocation, or tabs
-# depending on fixture state. Point-based smoke that walks through likely steps.
 - launchApp:
     clearState: true
     clearKeychain: true

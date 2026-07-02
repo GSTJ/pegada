@@ -4,7 +4,6 @@ tags:
   - smoke
 ---
 # Cold launch smoke test: app starts and the SignIn screen renders.
-# Point-based (RN tree invisible to XCUITest); verification = keyboard
 # presence + screenshot.
 - launchApp:
     clearState: true
@@ -12,11 +11,7 @@ tags:
 - waitForAnimationToEnd
 # ATT prompt can appear on first launch with cleared state — dismiss so it
 # doesn't block the email field's autoFocus keyboard.
-- tapOn:
-    text: "Ask App Not to Track"
-    optional: true
-# Liveness assertion. The RN view tree is invisible to XCUITest on this
-# build, so we can't assert on SignIn text/testIDs — but the email
+- runFlow: utils/dismiss-system-dialogs.yaml
 # TextInput autofocuses, which raises the SYSTEM keyboard, and keyboard
 # keys are native elements with locale-independent identifiers. Keyboard
 # visible == JS bundle evaluated + SignIn mounted. Without this, an app

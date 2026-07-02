@@ -35,22 +35,14 @@ tags:
 #      prompt that still appears even with location:inuse pre-granted.
 #
 #   6. Swipe tab: assertVisible on `swipe-screen` testID — the SwipeScreen
-#      registers as a native a11y container (the SafeAreaView wrapper) that
-#      XCUITest CAN see, unlike the deeply-nested Input/Pressable RN nodes
 #      below.
 #
-# iOS 26 Fabric reality (verified empirically on this branch — see
 # utils/login-fresh.yaml comments and the run that produced
 # ~/.maestro/tests/2026-05-21_164009):
-#   - XCUITest's accessibility snapshot is BLIND to most RN-rendered
 #     content for this app build: `tapOn: id: profile-name` times out
-#     looping through an empty hierarchy. We use point-based taps for
 #     every in-app TextInput / Button on CreateProfile + CompleteProfile.
 #   - Native system UI (image picker alert, photos library, location
-#     prompt) IS visible via native a11y labels (text: "Choose from
 #     Library" etc.).
-#   - Coordinates calibrated on iPhone 17 Pro Max (440x956 logical,
-#     1320x2868 px). The same reference device used by login-fresh.yaml
 #     and the rest of the suite.
 #
 # Photo upload regression fix (PR #36): on iOS 26 Release builds the
@@ -82,17 +74,16 @@ tags:
 # ---------------------------------------------------------------------------
 # Photo via the MAESTRO_E2E skip affordance (PR #46, issue #44): iOS 26's
 # PHPicker grid renders inside a RemotePlaceholder PHX process that
-# XCUITest cannot tap into, so fighting the native picker is inherently
 # flaky. The affordance uploads a bundled placeholder PNG through the
 # REAL presign + compress + upload pipeline and only renders when
 # config.ENV !== "production" AND EXPO_PUBLIC_MAESTRO_E2E=1 (both set by
 # the CI build and the local Release e2e build).
 #
-# The `maestro-skip-photo-0` testID is on the pill but XCUITest cannot
-# see RN testIDs on this build — point tap calibrated from the
 # 20-02-on-create-profile screenshot on iPhone 17 Pro Max: the pill is
 # anchored to the bottom edge of the first photo cell, text region
-# centered at ~16% X, ~35% Y (left of the pink "+" badge at ~31% X).
+# Point tap (not id): react-native-draggable-grid wraps each cell in its
+# pan-responder view and hides descendants from the a11y tree, so the
+# pill's testID never surfaces. Calibrated on iPhone 17 Pro Max.
 - tapOn:
     point: "16%, 35%"
 
@@ -104,28 +95,19 @@ tags:
     timeout: 15000
 - takeScreenshot: 20-05-photo-uploaded
 
-# Dog-name TextInput. Calibrated from the 20-05-photo-uploaded screenshot
-# on iPhone 17 Pro Max: the 2-row photo grid is FIXED-SIZE (six slots
-# render whether filled or not), so the Name input center sits at
-# 50%, 66% — same as the legacy 03-create-profile.yaml coord. The old
-# 55% guess landed in the gap between the grid and the reorder hint and
-# focused nothing (and could graze a second skip pill).
 - tapOn:
-    point: "50%, 66%"
+    id: "profile-name"
 - waitForAnimationToEnd
 - inputText: "MaestroPup"
 - takeScreenshot: 20-03-after-name
 
 # Submit WITH the keyboard up. hideKeyboard is an unreliable no-op on
-# iOS 26, and a mis-timed keyboard-down tap at 92% lands in the QWERTY
 # area, typing junk into the focused field (observed: the birthdate got
 # appended to the name). BottomAction pins the Create Profile button
-# ABOVE the keyboard at a deterministic ~50%, 61% on iPhone 17 Pro Max
-# (calibrated from the 20-04 screenshot with keyboard open — careful:
 # 43% lands on the second-row skip pills and uploads ANOTHER photo), so
 # keep the keyboard up and tap the pinned button instead.
 - tapOn:
-    point: "50%, 61%"
+    id: "profile-submit"
 - waitForAnimationToEnd:
     timeout: 15000
 
@@ -134,21 +116,18 @@ tags:
 # ---------------------------------------------------------------------------
 # Birthdate TextInput on CompleteProfile is the only required field — the
 # screen has profile-photo preview + birthdate input + submit. Birthdate
-# input center is at ~50%, 55% Y (matches legacy 04-complete-profile.yaml).
 # CompleteProfile is the "Details" screen: avatar on top, then a 2x2 grid
 # of OPTIONAL fields (Breed | Birth date / Size | Color) and a Skip CTA.
-# The Birth date masked input sits top-RIGHT at ~70% X, 29% Y (calibrated
 # from the 20-06 screenshot on iPhone 17 Pro Max).
 - tapOn:
-    point: "70%, 29%"
+    id: "complete-profile-birth-date"
 - waitForAnimationToEnd
 - inputText: "01/01/2020"
 - takeScreenshot: 20-04-after-birthdate
 
 # Same keyboard-up submit as CreateProfile: BottomAction pins the CTA
-# above the keyboard at ~50%, 61%; hideKeyboard is unreliable on iOS 26.
 - tapOn:
-    point: "50%, 61%"
+    id: "profile-submit"
 - waitForAnimationToEnd:
     timeout: 12000
 
@@ -156,19 +135,17 @@ tags:
 # 4. AskForLocation — tap Enable Location and accept the system prompt
 # ---------------------------------------------------------------------------
 - takeScreenshot: 20-06-on-location
-# Enable Location button is the primary CTA at ~50%, 92% Y (BottomAction
-# container, same vertical position as the submit buttons above).
 # Tapped twice: the first synthetic tap after a screen transition is
 # often eaten on iOS 26 (observed repeatedly on this suite), and the
 # handler is idempotent — the second tap while location is resolving is
 # a no-op. The wrapper pins the sim GPS to SF so getCurrentPosition
 # resolves instead of hanging forever.
 - tapOn:
-    point: "50%, 92%"
+    id: "location-allow"
 - waitForAnimationToEnd:
     timeout: 3000
 - tapOn:
-    point: "50%, 92%"
+    id: "location-allow"
     optional: true
 - waitForAnimationToEnd:
     timeout: 5000
@@ -176,20 +153,12 @@ tags:
 # Defensive: if iOS still pops the location prompt (sim quirk with
 # pre-granted permissions on iOS 26), accept it. Both labels are
 # present in different iOS versions; either path is fine for the test.
-- tapOn:
-    text: "Allow While Using App"
-    optional: true
-- tapOn:
-    text: "Allow Once"
-    optional: true
+- runFlow: utils/dismiss-system-dialogs.yaml
 - waitForAnimationToEnd:
     timeout: 15000
 
 # ---------------------------------------------------------------------------
-# 5. Final verification — we landed on the Swipe tab
 # ---------------------------------------------------------------------------
-# No a11y assertion here: `swipe-screen` was documented as the one testID
-# XCUITest can see, but on the current Release build the RN tree is fully
 # blind (verified 2026-07-02: the deck renders, the assert still fails).
 # Suite convention applies instead — the screenshot proves rendering, and
 # checks/20-account-creation.sh proves persistence (fresh User + Dog +

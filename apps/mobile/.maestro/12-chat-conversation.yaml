@@ -3,8 +3,6 @@ name: Chat — open first conversation and send message
 tags:
   - smoke
 ---
-# Returning user has match with Bella + 2 chats. Open Messages → first row →
-# type and send a message → back.
 - launchApp:
     clearState: true
     clearKeychain: true

@@ -10,12 +10,8 @@ tags:
 # reversing in the UI, newest renders at top. Fixed by reversing in
 # useChatPagination so newest is at the bottom adjacent to the Send composer.
 #
-# iOS 26 Fabric note (same constraint as flows 20-27): the RN view tree is
-# invisible to XCUITest, so the original `tapOn: id: chat-input` and the
 # `assertVisible` text assertions can never match on this build. Rewritten
-# point-based; verification is screenshots (rendering) + the DB post-check
 # in checks/19-chat-order.sh (the sent message actually persisted).
-# Coordinates calibrated on iPhone 17 Pro Max (440x956 logical).
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -26,38 +22,40 @@ tags:
 - takeScreenshot: 19-after-login
 # Messages tab is the middle icon of the tab bar
 - tapOn:
-    point: "50%, 95%"
+    id: "tab-messages"
 - waitForAnimationToEnd
 - takeScreenshot: 19-on-messages
 # First (seeded Bella) conversation row under the "Messages" header.
 # 25% lands in the Matched Dogs thumbnail strip above it and is flaky —
-# the row's own center is at ~28% Y on iPhone 17 Pro Max.
 - tapOn:
-    point: "50%, 28%"
+    id: "messages-chat-row"
 - waitForAnimationToEnd:
+    timeout: 3000
+# First tap after the Messages screen mounts is often eaten — if we did
+# navigate, the row no longer exists and this is a no-op.
+- tapOn:
+    id: "messages-chat-row"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
     timeout: 8000
 - takeScreenshot: 19-on-chat
 # Composer TextInput pinned to the bottom of the chat (keyboard closed).
-# CALIBRATION QUIRK (verified empirically on iPhone 17 Pro Max iOS 26):
-# the composer PAINTS at ~86% Y but its touch target sits at ~92% Y —
-# taps on the visible placeholder do NOT focus; taps at 92% do. Likely
 # the Chat KeyboardAvoidingView + iOS 26 keyboard-strip interaction
 # shifting paint relative to layout. Tracked as a follow-up; do not
-# "fix" this coord back to the visible position.
 - tapOn:
-    point: "50%, 92%"
+    id: "chat-input"
 - waitForAnimationToEnd:
     timeout: 3000
 - inputText: "REGRESSION_BOTTOM_CHECK"
 - takeScreenshot: 19-typed
 # Submit via the keyboard return key (returnKeyType="send") — the chat
 # has no separate send button, so Enter drives Input.onSubmitEditing.
-# (The QWERTY return key exposes no stable a11y id, unlike the OTP
 # number pad's "Send" accessory, so tapOn id is not an option here.)
 - pressKey: Enter
 - waitForAnimationToEnd:
     timeout: 5000
 # Screenshot proves the conversation rendered post-send; the DB post-check
 # proves the message row persisted. Visual bottom-position ordering is
-# reviewed via screenshot hash-diff (no a11y access to RN text here).
 - takeScreenshot: 19-after-send

@@ -1,0 +1,18 @@
+appId: ${APP_ID}
+name: util - dismiss optional system dialogs (ATT / location)
+tags:
+  - util
+---
+# All taps optional: any subset (or none) of these dialogs may appear.
+- tapOn:
+    text: "Ask App Not to Track"
+    optional: true
+- tapOn:
+    text: "Allow Once"
+    optional: true
+- tapOn:
+    text: "Allow While Using App"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
