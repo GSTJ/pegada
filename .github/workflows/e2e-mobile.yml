@@ -491,6 +491,11 @@ jobs:
             --predicate 'process == "Pegada"' --style compact \
             > crash-diagnostics/pegada-oslog.txt 2>&1
           cp ~/Library/Logs/DiagnosticReports/Pegada*.ips crash-diagnostics/ 2>/dev/null
+          # The exact JS bundle the crashing app ran — swap-in locally to
+          # reproduce (local rebuilds from the same commit/lockfile/env do
+          # NOT crash, so only CI's own bytes can explain the difference).
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          cp "$APP_PATH/main.jsbundle" crash-diagnostics/ 2>/dev/null
           echo "::group::pegada fatal lines"
           grep -iE "fatal|exception|abort|Invalid environment|No script URL" \
             crash-diagnostics/pegada-oslog.txt | tail -60 || true
