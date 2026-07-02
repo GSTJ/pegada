@@ -1,6 +1,5 @@
 // https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 import "react-native-get-random-values";
-import "@/why-did-you-render";
 
 import * as React from "react";
 import { LogBox, Text, View } from "react-native";

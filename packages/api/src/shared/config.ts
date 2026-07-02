@@ -36,6 +36,12 @@ const configSchema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string(),
   AWS_REGION: z.string(),
   AWS_S3_BUCKET_NAME: z.string(),
+  /**
+   * Dev/e2e only: point the S3 client at a local S3-compatible endpoint
+   * (MinIO from packages/database/docker-compose.yml) so image uploads
+   * work without real AWS credentials. Never set in production.
+   */
+  AWS_S3_ENDPOINT: z.string().optional(),
 
   /** MAIL */
   MAIL_USER: z.string(),

@@ -91,6 +91,10 @@ export const MaestroSkipPressable = styled(PressableArea)`
   bottom: 0;
   left: 0;
   right: 0;
+  /* Must win hit-testing over the sibling FadedDog PressableArea and its
+     generous hitSlop — without this, taps on the pill open the regular
+     image-picker dialog instead (verified on iPhone 17 Pro Max sim). */
+  z-index: 10;
   padding: 4px;
   align-items: center;
   justify-content: center;
