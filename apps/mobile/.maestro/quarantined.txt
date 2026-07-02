@@ -1,0 +1,28 @@
+# Quarantined Maestro flows
+# ---------------------------------------------------------------------------
+# Flows listed here are KNOWN to fail or be flaky in CI and are temporarily
+# soft-gated. Each entry MUST include:
+#   - the flow stem (no path, no .yaml extension)
+#   - a # reason: ... comment on the same line
+#   - a # owner: <github-handle> comment so we know who is unblocking it
+#   - a # added: YYYY-MM-DD comment so we can spot stale entries
+#
+# Quarantine is a TEMPORARY measure. Entries older than 30 days are flagged
+# by the `quarantine-lint` step in .github/workflows/e2e-mobile.yml. The PR
+# author owns the entry until removed.
+#
+# To add a flow:
+#   1. Open the failure logs and confirm it's flake (not a real regression).
+#   2. Add a line below with reason/owner/added.
+#   3. Open a Linear ticket and link it in the reason.
+#
+# To remove a flow:
+#   1. Run the flow 10x in CI (push the branch repeatedly or use workflow_dispatch).
+#   2. If 10/10 pass, delete the line.
+#   3. The flow is now a hard gate again.
+#
+# Format (one flow per line, # comments allowed):
+#   <flow-stem>   # reason: <text>; owner: @handle; added: YYYY-MM-DD
+#
+# Example (commented out — uncomment and edit when needed):
+# 22-new-match-journey   # reason: race on socket reconnect; owner: @gstj; added: 2026-05-20
