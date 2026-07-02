@@ -419,7 +419,9 @@ jobs:
               echo "::group::$stem attempt $attempt"
               if maestro test "$flow" \
                   --format junit \
-                  --output "maestro-results-required-${stem}-attempt-${attempt}.xml"; then
+                  --output "maestro-results-required-${stem}-attempt-${attempt}.xml" \
+                  && { [ ! -x "apps/mobile/.maestro/checks/${stem}.sh" ] \
+                       || bash "apps/mobile/.maestro/checks/${stem}.sh"; }; then
                 # Canonical result file the reporter expects.
                 cp "maestro-results-required-${stem}-attempt-${attempt}.xml" \
                    "maestro-results-required.xml" 2>/dev/null || true

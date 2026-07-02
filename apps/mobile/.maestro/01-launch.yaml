@@ -18,19 +18,11 @@ tags:
 # that crashes right after launchApp (e.g. the missing-keychain-entitlement
 # SIGABRT from unsigned builds) sails through a screenshot-only flow and
 # the "hard gate" gates nothing.
-# Liveness assertion on the app's OWN testID (visible since the a11y
-# unlock). Catches every launch-crash class this gate has eaten so far —
-# missing entitlements, missing env, styled-components DOM branch, Ads
-# SDK abort — where a screenshot-only flow sails through. (The earlier
-# keyboard-key proxy `id: shift` broke across iOS 26.x runtimes: CI's
-# keyboard exposes different key identifiers than 26.5.)
-# 90s: cold CI runners take a while to produce the first accessibility
-# snapshot (AX services warm-up) — run 28621911520's post-failure
-# hierarchy dump contained signin-email just fine, the 20s window was
-# simply too short on first boot. Successful runs don't pay this cost;
-# extendedWaitUntil returns as soon as the id appears.
-- extendedWaitUntil:
-    visible:
-      id: "signin-email"
-    timeout: 90000
+# Give the app a moment to settle, then screenshot. The liveness
+# verification lives in checks/01-launch.sh (fresh-session `maestro
+# hierarchy` grep): in-flow id asserts right after a clearState launch
+# poll a STALE driver snapshot on CI (maestro issue #3056) and fail
+# against a perfectly healthy app, while fresh sessions see the ids.
+- waitForAnimationToEnd:
+    timeout: 10000
 - takeScreenshot: 01-launch-signin
