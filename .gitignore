@@ -43,6 +43,15 @@ build/**
 
 .env.dev
 .env.prod
+.env.production
+
+# Claude Code local state (worktrees, local settings)
+.claude/worktrees/
+.claude/settings.local.json
+
+# Maestro run artifacts (screenshots land in the CWD of the run)
+/*.png
+apps/mobile/.maestro/.verify/
 
 dist/
 build/
