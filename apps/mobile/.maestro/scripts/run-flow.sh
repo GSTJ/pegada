@@ -74,12 +74,23 @@ if [[ "$RAW_ARG" =~ ^[0-9]+[a-z]?$ ]]; then
 else
   FLOW_PATH="$RAW_ARG"
   shift || true
-  # Try to derive a check script from a filename like .../NN-foo.yaml.
+  # Derive pre/check scripts from a filename like .../NN-foo.yaml — the
+  # path form must behave exactly like the numeric-prefix form, or flows
+  # invoked by path (CI's extended job, local suite loops) silently skip
+  # their pre-test setup (23b's AsyncStorage seed, 25's plan reset, 27's
+  # delete-me reseed) and fail on stale state.
   if [[ "$FLOW_PATH" =~ ([0-9]+[a-z]?)-[^/]+\.yaml$ ]]; then
     DERIVED_PREFIX="${BASH_REMATCH[1]}"
     CHECK_MATCH=("$MAESTRO_DIR/checks/$DERIVED_PREFIX"-*.sh)
     if [[ -e "${CHECK_MATCH[0]}" ]]; then
       CHECK_SCRIPT="${CHECK_MATCH[0]}"
+    fi
+    PRE_MATCH=("$SCRIPT_DIR/pre/$DERIVED_PREFIX"-*.sh)
+    if [[ -e "${PRE_MATCH[0]}" ]]; then
+      echo ""
+      echo "==> running pre-test setup: ${PRE_MATCH[0]}"
+      bash "${PRE_MATCH[0]}"
+      echo "==> pre-test setup OK"
     fi
   fi
 fi

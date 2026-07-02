@@ -473,6 +473,16 @@ export const seedDeleteMeUser = async () => {
     throw new Error("maestro-seed: no breed available to attach to delete-me dog");
   }
 
+  // Upsert the breed row before connecting: on a fresh DB (db push
+  // --force-reset + maestro:seed only) the Breed catalog from the main
+  // `prisma db seed` doesn't exist yet, and the nested connect below
+  // fails with P2025. Same self-sufficiency pattern as ensureBreed().
+  await prisma.breed.upsert({
+    where: { id: breed.id },
+    update: {},
+    create: { id: breed.id, name: breed.name, slug: breed.slug ?? "shih-tzu" },
+  });
+
   const dogId = createId();
   await prisma.user.create({
     data: {

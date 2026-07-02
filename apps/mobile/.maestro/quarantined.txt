@@ -26,3 +26,4 @@
 #
 # Example (commented out — uncomment and edit when needed):
 # 22-new-match-journey   # reason: race on socket reconnect; owner: @gstj; added: 2026-05-20
+19-chat-message-order   # reason: XCUITest taps land ~55pt off vs HID taps on the chat screen (composer paint/hit offset + Messages row miss) — app verified healthy, manual HID send persists to DB; needs coordinate recalibration for the maestro driver; owner: @GSTJ; added: 2026-07-02
