@@ -178,8 +178,11 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
           <PressableArea
             testID={typeof index === "number" ? `add-photo-${index}` : undefined}
             onPress={handleAdd}
-            // Takes up the whole component,
-            hitSlop={hitSlop}
+            // Takes up the whole component. When the Maestro skip pill is
+            // shown, retract the bottom slop so it can't swallow taps meant
+            // for the pill (150pt of slop otherwise covers the entire cell
+            // including the pill's strip).
+            hitSlop={showMaestroSkip ? { ...hitSlop, bottom: 0 } : hitSlop}
           >
             <S.FadedDog fill={theme.colors.text} width={40} height={40} />
           </PressableArea>
