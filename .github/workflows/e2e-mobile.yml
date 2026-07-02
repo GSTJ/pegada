@@ -273,7 +273,14 @@ jobs:
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
           PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
 
-      - name: Build iOS (Debug simulator)
+      # Release, NOT Debug: a Debug simulator build skips the "Bundle React
+      # Native code and images" phase (no embedded main.jsbundle) and the
+      # expo-dev-client Debug app expects a Metro packager. On a CI runner
+      # with no packager the app cold-launches into the RedBox "No script
+      # URL provided" (verified from run 28571242749 artifacts), failing
+      # every flow. Release embeds the bundle and matches the configuration
+      # all flow coordinates were calibrated against.
+      - name: Build iOS (Release simulator, embedded JS bundle)
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
@@ -294,14 +301,14 @@ jobs:
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build \
             | xcpretty
-          PROD_DIR=build/Build/Products/Debug-iphonesimulator
+          PROD_DIR=build/Build/Products/Release-iphonesimulator
           if ! ls "$PROD_DIR"/*.app >/dev/null 2>&1; then
             echo "::error::xcodebuild reported success but produced no .app in $PROD_DIR"
             ls -la "$PROD_DIR" || true
@@ -357,7 +364,7 @@ jobs:
       - name: Install app on simulator
         run: |
           set -euo pipefail
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
           if [ -z "$APP_PATH" ]; then
             echo "::error::No .app produced under apps/mobile/ios/build"
             exit 1
@@ -654,7 +661,14 @@ jobs:
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
           PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
 
-      - name: Build iOS (Debug simulator)
+      # Release, NOT Debug: a Debug simulator build skips the "Bundle React
+      # Native code and images" phase (no embedded main.jsbundle) and the
+      # expo-dev-client Debug app expects a Metro packager. On a CI runner
+      # with no packager the app cold-launches into the RedBox "No script
+      # URL provided" (verified from run 28571242749 artifacts), failing
+      # every flow. Release embeds the bundle and matches the configuration
+      # all flow coordinates were calibrated against.
+      - name: Build iOS (Release simulator, embedded JS bundle)
         if: steps.preflight.outputs.skip != 'true'
         working-directory: apps/mobile/ios
         run: |
@@ -675,7 +689,7 @@ jobs:
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
@@ -718,7 +732,7 @@ jobs:
         if: steps.preflight.outputs.skip != 'true'
         run: |
           set -euo pipefail
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
       - name: Run full Maestro suite (excludes quarantined)
