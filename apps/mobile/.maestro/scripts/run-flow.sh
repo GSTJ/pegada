@@ -99,6 +99,14 @@ fi
 export APP_ID="${APP_ID:-app.pegada}"
 export APP_SCHEME="${APP_SCHEME:-pegada}"
 
+# 3b. Pin the simulator's GPS to San Francisco — the maestro seed places
+# all deck dogs near SF, and without a simulated location
+# `getCurrentPositionAsync` never resolves, so flow 20's AskForLocation
+# screen hangs forever even with the permission pre-granted.
+if command -v xcrun >/dev/null 2>&1; then
+  xcrun simctl location booted set 37.7749,-122.4194 2>/dev/null || true
+fi
+
 echo ""
 echo "==> maestro test $FLOW_PATH"
 set +e

@@ -33,3 +33,17 @@ services:
       SRH_MODE: env
       SRH_TOKEN: example_token
       SRH_CONNECTION_STRING: "redis://redis:6379"
+
+  # Dev/e2e-only S3 stand-in so image uploads work without AWS credentials.
+  # The API points at it via AWS_S3_ENDPOINT (see packages/api config).
+  # Port 9002 to avoid clashing with other local MinIO/S3 tooling on 9000.
+  minio:
+    container_name: pegada-minio
+    image: minio/minio:latest
+    command: server /data
+    restart: always
+    environment:
+      MINIO_ROOT_USER: pegada-dev
+      MINIO_ROOT_PASSWORD: pegada-dev-secret
+    ports:
+      - "9002:9000"
