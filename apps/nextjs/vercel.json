@@ -1,0 +1,42 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/queues/mail/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "mail",
+          "retryAfterSeconds": 30
+        }
+      ]
+    },
+    "src/app/api/queues/process-image/route.ts": {
+      "maxDuration": 120,
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "process-image",
+          "retryAfterSeconds": 60
+        }
+      ]
+    },
+    "src/app/api/queues/send-push/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "send-push",
+          "retryAfterSeconds": 30
+        }
+      ]
+    },
+    "src/app/api/queues/check-push-receipts/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "check-push-receipts",
+          "retryAfterSeconds": 300
+        }
+      ]
+    }
+  }
+}

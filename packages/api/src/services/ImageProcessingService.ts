@@ -1,10 +1,9 @@
-import * as tf from "@tensorflow/tfjs-node";
 import * as Blurhash from "blurhash";
-import * as nsfwjs from "nsfwjs";
 import sharp from "sharp";
 
-import { FEATURES, FlagService } from "@pegada/api/services/FlagService";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
+
+import { FEATURES, FlagService } from "./FlagService";
 
 export class ImageProcessingService {
   static checkForProfanity = async ({
@@ -24,22 +23,31 @@ export class ImageProcessingService {
       return IMAGE_STATUS.APPROVED;
     }
 
-    const imageBuffer = await sharp(arrayBuffer)
+    // Pure-JS tfjs instead of tfjs-node: the consumer runs in a Vercel
+    // function where native bindings can't load. Lazy imports keep the
+    // model out of every other route's cold start.
+    const [tf, nsfwjs] = await Promise.all([import("@tensorflow/tfjs"), import("nsfwjs")]);
+
+    const { data, info } = await sharp(arrayBuffer)
       .resize({ height: 300, withoutEnlargement: true })
-      .toBuffer();
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-    const imageTensor = tf.tidy(() => {
-      return tf.node.decodeImage(imageBuffer, 3);
-    }) as unknown as tf.Tensor3D;
+    const imageTensor = tf.tensor3d(new Int32Array(data), [info.height, info.width, 3], "int32");
 
-    const model = await nsfwjs.load("MobileNetV2");
-    const predictions = await model.classify(imageTensor);
+    try {
+      const model = await nsfwjs.load("MobileNetV2");
+      const predictions = await model.classify(imageTensor as never);
 
-    const isNotSafe = predictions.some(
-      (prediction) => prediction.className !== "Neutral" && prediction.probability > threshold,
-    );
+      const isNotSafe = predictions.some(
+        (prediction) => prediction.className !== "Neutral" && prediction.probability > threshold,
+      );
 
-    return isNotSafe ? IMAGE_STATUS.REJECTED : IMAGE_STATUS.APPROVED;
+      return isNotSafe ? IMAGE_STATUS.REJECTED : IMAGE_STATUS.APPROVED;
+    } finally {
+      imageTensor.dispose();
+    }
   };
 
   static async createBlurhash({ arrayBuffer }: { arrayBuffer: ArrayBuffer }) {
@@ -61,8 +69,6 @@ export class ImageProcessingService {
 
     const clamped = new Uint8ClampedArray(pixels);
 
-    const blurhash = Blurhash.encode(clamped, metadata.width, metadata.height, 4, 4);
-
-    return blurhash;
+    return Blurhash.encode(clamped, metadata.width, metadata.height, 4, 4);
   }
 }

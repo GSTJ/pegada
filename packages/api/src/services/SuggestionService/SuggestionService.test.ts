@@ -8,8 +8,6 @@ import { generateFakeUserWithDog } from "@pegada/database/__mocks__/generate-fak
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 
 import { dogSafeSchema } from "../../dtos/dogDto";
-import { CheckPushNotificationReceiptsQueue } from "../../queue/CheckPushNotificationReceiptsQueue";
-import { SendPushNotificationQueue } from "../../queue/SendPushNotificationQueue";
 import { SwipeService } from "../SwipeService";
 import { SuggestionService } from "./SuggestionService";
 
@@ -21,8 +19,6 @@ jest.mock("@bugsnag/js", () => ({
 
 afterAll(async () => {
   await prisma.$disconnect();
-  await SendPushNotificationQueue.close();
-  await CheckPushNotificationReceiptsQueue.close();
 });
 
 const LIMIT = 10;

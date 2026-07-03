@@ -19,12 +19,6 @@ const configSchema = z.object({
   POSTHOG_API_KEY: z.string(),
   POSTHOG_HOST: z.string(),
 
-  /** REDIS */
-  REDIS_HOST: z.string(),
-  REDIS_PORT: z.coerce.number(),
-  REDIS_PASSWORD: z.string(),
-  REDIS_USERNAME: z.string(),
-
   /** SERVER */
   PORT: z.coerce.number().default(3009),
 
@@ -46,7 +40,10 @@ const configSchema = z.object({
   /** MAIL */
   MAIL_USER: z.string(),
   MAIL_NAME: z.string(),
-  SENDGRID_API_KEY: z.string(),
+  RESEND_API_KEY: z.string(),
+
+  /** PUSH (Expo access token for send + receipt consumers) */
+  EXPO_ACCESS_TOKEN: z.string().optional(),
 
   /** APP */
   MIN_APP_VERSION: semverSchema,

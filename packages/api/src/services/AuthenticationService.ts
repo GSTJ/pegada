@@ -2,7 +2,8 @@ import prisma from "@pegada/database";
 import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/errors";
 import { Language } from "@pegada/shared/i18n/types/types";
 
-import { MAIL_QUEUE, MailQueue } from "../queue/MailQueue";
+import { enqueue } from "../queue/enqueue";
+import { TOPICS } from "../queue/topics";
 import { config, isMagicEmail } from "../shared/config";
 
 /**
@@ -142,7 +143,7 @@ export class AuthenticationService {
       create: { email, code, codeExpiresAt: expiresAt },
     });
 
-    await MailQueue.add(MAIL_QUEUE, { email, code, language: this.language });
+    await enqueue(TOPICS.MAIL, { email, code, language: this.language });
   }
 
   static async checkVerification({ email, code }: { email: string; code: string }) {

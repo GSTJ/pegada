@@ -1,22 +1,10 @@
-import fs from "fs/promises";
 import handlebars from "handlebars";
 import { ParseKeys } from "i18next";
-import nodemailer from "nodemailer";
 
 import { Language, Namespace } from "@pegada/shared/i18n/types/types";
 
 import { config } from "../shared/config";
 import { TranslationService } from "./TranslationService";
-
-// Create a Nodemailer transport using SendGrid
-const mailer = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
-  auth: {
-    user: "apikey",
-    pass: config.SENDGRID_API_KEY,
-  },
-});
 
 export class MailService {
   // Inspired from this snippet
@@ -40,20 +28,18 @@ export class MailService {
     );
   }
 
-  static async parseHandlebars({
-    path,
+  static async compileTemplate({
+    template,
     variables,
     language = Language.Default,
   }: {
-    path: string;
+    template: string;
     variables: Record<string, string | number>;
     language?: Language;
   }) {
     if ("language" in variables) {
       throw new Error('Cannot use "language" as a variable name');
     }
-
-    const template = await fs.readFile(path, "utf8");
 
     MailService.registerTranslationHelper(language);
 
@@ -73,15 +59,26 @@ export class MailService {
     html: string;
     text?: string;
   }) {
-    return mailer.sendMail({
-      from: {
-        name: config.MAIL_NAME,
-        address: config.MAIL_USER,
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
       },
-      to,
-      subject,
-      html,
-      text,
+      body: JSON.stringify({
+        from: `${config.MAIL_NAME} <${config.MAIL_USER}>`,
+        to: [to],
+        subject,
+        html,
+        text,
+      }),
     });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Resend refused the email (${response.status}): ${body}`);
+    }
+
+    return (await response.json()) as { id: string };
   }
 }
