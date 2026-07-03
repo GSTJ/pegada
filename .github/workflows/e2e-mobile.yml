@@ -431,6 +431,30 @@ jobs:
             ok=0
             for attempt in 1 2 3; do
               echo "::group::$stem attempt $attempt"
+              # 01-launch runs driverless: maestro's XCUITest driver is
+              # unstable on GitHub macOS runners (its port connection dies
+              # mid-flow — runs 28627657052/28630098292), while a
+              # fresh-session `maestro hierarchy` has seen the app's ids on
+              # every single run. simctl launches; the check script does the
+              # liveness assertion with the same strength as the flow's.
+              if [ "$stem" = "01-launch" ]; then
+                xcrun simctl terminate "$SIMULATOR_UDID" app.pegada 2>/dev/null || true
+                if xcrun simctl launch "$SIMULATOR_UDID" app.pegada \
+                    && sleep 20 \
+                    && bash "apps/mobile/.maestro/checks/01-launch.sh"; then
+                  # Synthesize a passing JUnit entry for the reporter.
+                  printf '%s\n' '<?xml version="1.0"?><testsuites><testsuite name="Required" tests="1" failures="0"><testcase name="01-launch (driverless liveness)" classname="01-launch"/></testsuite></testsuites>' \
+                    > "maestro-results-required-${stem}-attempt-${attempt}.xml"
+                  cp "maestro-results-required-${stem}-attempt-${attempt}.xml" \
+                     "maestro-results-required.xml"
+                  ok=1
+                  echo "::endgroup::"
+                  break
+                fi
+                echo "::endgroup::"
+                echo "::warning::$stem attempt $attempt failed"
+                continue
+              fi
               if maestro test "$flow" \
                   --format junit \
                   --output "maestro-results-required-${stem}-attempt-${attempt}.xml" \
