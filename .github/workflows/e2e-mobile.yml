@@ -396,12 +396,28 @@ jobs:
           xcrun simctl launch "$SIMULATOR_UDID" app.pegada || true
           sleep 3
 
+      # First maestro use compiles + installs its XCUITest runner on the
+      # simulator, which can blow the default driver-startup window on a
+      # cold runner — flows then fail with 'Failed to connect to
+      # 127.0.0.1:22087' while the app itself is perfectly healthy (the
+      # post-failure fresh-session hierarchy proved this twice). Warm the
+      # driver once before the gated flows so their runs start against a
+      # live driver.
+      - name: Warm up Maestro driver
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+        run: |
+          maestro hierarchy > /dev/null 2>&1 || true
+          maestro hierarchy > /dev/null 2>&1 || true
+
       # The required suite is small enough to enumerate. We loop through
       # the comma-separated REQUIRED_FLOWS and execute each as its own
       # maestro invocation so a single failing flow has a clean failure
       # boundary in the log. Retry up to 3x per flow.
       - name: Run required Maestro flows (hard gate, retry 3x)
         id: maestro-required
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
         run: |
           set -euo pipefail
           IFS=',' read -ra FLOWS <<< "$REQUIRED_FLOWS"
