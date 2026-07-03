@@ -504,7 +504,7 @@ jobs:
 
       - name: Upload required Maestro artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: maestro-results-required
           path: |
@@ -548,7 +548,7 @@ jobs:
 
       - name: Upload crash diagnostics
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: crash-diagnostics-required
           path: crash-diagnostics/
@@ -556,7 +556,7 @@ jobs:
 
       - name: Upload simulator log on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: simulator-log-required
           path: simulator-required.logarchive
@@ -892,7 +892,7 @@ jobs:
 
       - name: Upload extended Maestro artifacts
         if: steps.preflight.outputs.skip != 'true' && always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: maestro-results-extended
           path: |
@@ -909,7 +909,7 @@ jobs:
 
       - name: Upload simulator log on failure
         if: steps.preflight.outputs.skip != 'true' && failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: simulator-log-extended
           path: simulator-extended.logarchive
