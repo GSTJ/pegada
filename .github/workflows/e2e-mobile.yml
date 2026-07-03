@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Lint quarantine file
         run: |
           python3 .github/scripts/quarantine-lint.py \
@@ -167,7 +167,7 @@ jobs:
           xcodebuild -version
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6.0.9
@@ -641,7 +641,7 @@ jobs:
 
       - name: Checkout
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
         if: steps.preflight.outputs.skip != 'true'
@@ -932,7 +932,7 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Compute pass rate per flow
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
