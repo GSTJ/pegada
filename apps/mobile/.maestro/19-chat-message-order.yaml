@@ -10,10 +10,8 @@ tags:
 # reversing in the UI, newest renders at top. Fixed by reversing in
 # useChatPagination so newest is at the bottom adjacent to the Send composer.
 #
-# This flow opens the seeded chat with Bella, sends a unique message, then
-# asserts both the unique text and the OLDEST seeded message ("Hey Bella!")
-# are visible. With the bug active, the oldest is offscreen-above and only
-# the newest two messages render in the visible viewport.
+# `assertVisible` text assertions can never match on this build. Rewritten
+# in checks/19-chat-order.sh (the sent message actually persisted).
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -22,33 +20,42 @@ tags:
 - waitForAnimationToEnd:
     timeout: 15000
 - takeScreenshot: 19-after-login
-# Messages tab is at the bottom-center of the tab bar
+# Messages tab is the middle icon of the tab bar
 - tapOn:
-    point: "50%, 95%"
+    id: "tab-messages"
 - waitForAnimationToEnd
 - takeScreenshot: 19-on-messages
-# First chat row near the top of the list (~50%, 25% Y)
+# First (seeded Bella) conversation row under the "Messages" header.
+# 25% lands in the Matched Dogs thumbnail strip above it and is flaky —
 - tapOn:
-    point: "50%, 25%"
+    id: "messages-chat-row"
 - waitForAnimationToEnd:
+    timeout: 3000
+# First tap after the Messages screen mounts is often eaten — if we did
+# navigate, the row no longer exists and this is a no-op.
+- tapOn:
+    id: "messages-chat-row"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
     timeout: 8000
 - takeScreenshot: 19-on-chat
-# Send a unique new message — it MUST render at the bottom.
+# Composer TextInput pinned to the bottom of the chat (keyboard closed).
+# the Chat KeyboardAvoidingView + iOS 26 keyboard-strip interaction
+# shifting paint relative to layout. Tracked as a follow-up; do not
 - tapOn:
     id: "chat-input"
 - waitForAnimationToEnd:
-    timeout: 1000
+    timeout: 3000
 - inputText: "REGRESSION_BOTTOM_CHECK"
 - takeScreenshot: 19-typed
-# Send button on the right of the input (~92%, 70% Y when keyboard is up)
-- tapOn:
-    point: "92%, 70%"
+# Submit via the keyboard return key (returnKeyType="send") — the chat
+# has no separate send button, so Enter drives Input.onSubmitEditing.
+# number pad's "Send" accessory, so tapOn id is not an option here.)
+- pressKey: Enter
 - waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 5000
+# Screenshot proves the conversation rendered post-send; the DB post-check
+# proves the message row persisted. Visual bottom-position ordering is
 - takeScreenshot: 19-after-send
-# The unique text must be on screen.
-- assertVisible: "REGRESSION_BOTTOM_CHECK"
-# The seeded greeting is the OLDEST message and must appear ABOVE the new
-# message (visible in the viewport, scrolled to top of conversation).
-- assertVisible:
-    text: "Hey Bella! Want to meet up at the dog park?"

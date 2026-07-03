@@ -37,6 +37,23 @@ config.resolver.nodeModulesPaths = [
 // 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
 config.resolver.disableHierarchicalLookup = true;
 
+// 4. Never let native bundles resolve the WEB build of styled-components.
+// A transitive import of bare "styled-components" pulls the DOM StyleSheet
+// (document.head/createElement) into the iOS bundle; depending on install
+// layout it can end up EXECUTED and the app dies at route load with
+// "ReferenceError: Property 'document' doesn't exist" (seen on CI run
+// 28596688266 while local builds happened to resolve the native build).
+const defaultResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform !== "web" && moduleName === "styled-components") {
+    moduleName = "styled-components/native";
+  }
+  if (defaultResolveRequest) {
+    return defaultResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 const { FileStore } = require("metro-cache");
 config.cacheStores = [
   // Ensure the cache isn't shared between projects

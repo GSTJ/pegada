@@ -4,7 +4,6 @@ tags:
   - smoke
 ---
 # Sign in as fresh user (test@pegada.app) → CreateProfile screen → fill name → submit.
-# Point-based. Verification = no crash + screenshot trail.
 - launchApp:
     clearState: true
     clearKeychain: true

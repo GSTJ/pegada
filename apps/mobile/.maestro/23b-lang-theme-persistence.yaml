@@ -13,7 +13,6 @@ tags:
 #
 # The Profile screen exposes Language and Theme via dedicated rows that
 # open @gorhom/bottom-sheet pickers. Opening any @gorhom/bottom-sheet
-# CRASHES the XCUITest accessibility driver on iOS 26 — every
 # subsequent Maestro step times out with "Driver disconnected" until
 # the app is force-killed. Validated empirically in an earlier session
 # (see .maestro/REWRITE-PLAN.md "Lessons applied"). We CANNOT drive
@@ -38,10 +37,6 @@ tags:
 # PR thread) is not viable for this codebase. Approach B
 # (client-side AsyncStorage write) is the only path.
 #
-# === iOS 26 + RN Fabric: same constraints as 21/22/23 ===
-#
-# Point-based taps for in-app targets (Profile tab); RN view tree
-# invisible to XCUITest; screenshot + DB post-check as authoritative
 # proofs. Here the "DB post-check" is actually an AsyncStorage post-
 # check (checks/23b-lang-theme.sh reads the manifest.json after the
 # Maestro flow ends and asserts the values are still language=pt-BR /
@@ -74,9 +69,8 @@ tags:
 
 # --- Profile tab (rightmost on bottom tab bar) ----------------------------
 # Person icon at the rightmost slot. The tab bar has 3 icons evenly
-# spaced at X 17% / 50% / 83% with vertical center ≈ Y 95%.
 - tapOn:
-    point: "83%, 95%"
+    id: "tab-profile"
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: 23b-03-on-profile-pt-dark
@@ -88,7 +82,6 @@ tags:
 #     light theme used in flows 23 (preferences-journey). MD5-diffing
 #     the bytes of 23b-02 against the 23-02-on-profile capture from
 #     flow 23 should yield a DIFFERENT hash (different theme + different
-#     locale = different pixel content).
 #
 # The AsyncStorage post-check (checks/23b-lang-theme.sh) reads the
 # manifest.json AFTER this flow ends and verifies the values are still

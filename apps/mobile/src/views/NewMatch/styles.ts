@@ -5,7 +5,7 @@ import styled from "styled-components/native";
 
 import { Image } from "@/components/Image";
 
-export const Container = styled.View.attrs({ accessible: true })`
+export const Container = styled.View`
   background-color: ${(props) => props.theme.colors.background};
   flex: 1;
 `;

@@ -23,23 +23,11 @@ tags:
 # Seed (packages/database/maestro-seed.ts, asserted before this flow runs
 # via scripts/seed-before-test.sh):
 #   - test@pegada.app's Rex (id cmpd50hv40002tfxk11n9kqb4) anchors the deck.
-#   - MatchMe sits at the TOP of Rex's deck (premium pre-liker, priority=1).
 #     Liking her would fire the new-match modal and derail this flow, so
 #     step 4 DISLIKES her first to clear her without firing the modal.
 #   - SwipeDog1..SwipeDog6 are co-located SF dogs WITHOUT reciprocal
 #     interests — liking them never opens the new-match modal, so the
 #     like / dislike / maybe / report cycle runs against them safely.
-#
-# iOS 26 Fabric reality (verified via `maestro hierarchy` against a logged-
-# in build — see 20-account-creation-journey.yaml docs):
-# - XCUITest's a11y snapshot is BLIND to the RN view tree for this app
-#   build. testIDs like `swipe-card`, `swipe-like`, `dog-profile-name`
-#   are NOT reachable; only the system status bar surfaces.
-# - We use point-based taps for every in-app target. Coordinates calibrated
-#   on iPhone 17 Pro Max (440x956 logical, 1320x2868 px) from style
-#   inspection of MatchActionBar/styles.ts + MainCard + DogProfile.
-# - Native UIAlertController (the Report dialog) DOES surface via native
-#   a11y labels — text matchers work for "Report", "Yes", "Cancel".
 #
 # Report flow (apps/mobile/src/views/DogProfile/index.tsx → reportUser):
 # - Triggers a native Alert with title "Report" (i18n key dogProfile.report)
@@ -58,8 +46,6 @@ tags:
 - waitForAnimationToEnd:
     timeout: 15000
 
-# --- 1. Land on Swipe tab -------------------------------------------------
-# No testID assertion possible (RN tree invisible). The screenshot below is
 # the baseline for the "card changed" hash diff in the next step.
 - takeScreenshot: 21-on-swipe
 
@@ -67,10 +53,8 @@ tags:
 # Tapping the MainCard's PersonalInfo region (lower-middle of the card,
 # below the bio / above the MatchActionBar) navigates to
 # SceneName.Profile/[id]. The card occupies most of the screen below the
-# top safe-area; the personal-info pressable sits at roughly 50%, 75% Y
-# (above the action bar at 92% Y).
 - tapOn:
-    point: "50%, 75%"
+    id: "swipe-card-open-profile"
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 21-on-profile-matchme
@@ -85,62 +69,46 @@ tags:
 # --- 3. Close DogProfile and return to swipe deck -------------------------
 # DogProfile's close button (testID="dog-profile-close") renders the
 # `GoBack` component with align-self: flex-end in the top header. On
-# iPhone 17 Pro Max this lands at roughly (92%, 8%) — top-right corner
 # inside the safe area inset.
 - tapOn:
-    point: "92%, 8%"
+    id: "dog-profile-close"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-back-on-swipe-matchme
 
 # --- 4. DISLIKE MatchMe → clears the pre-liker without firing the modal --
-# MatchActionBar layout (MatchActionBar/styles.ts):
-#   - Container at `bottom: spacing[6]` (~24px), absolute, full width,
-#     justify-content: space-around → 3 items at ~16.6%, 50%, 83.3% X.
-#   - Each ActionItem min 44×44pt + spacing[2.5] padding → ~52pt tall.
-#   - On iPhone 17 Pro Max the visually-hittable button row sits at
-#     ~86% Y — verified empirically by 08-swipe-like.yaml /
-#     09-swipe-dislike.yaml which use exactly Y=86 (X=25 / 75) and
-#     pass reliably. The theoretical layout math from the styles
-#     suggested Y≈91% but iOS 26 lands the home-indicator inset higher
-#     than the raw style padding implies, so the visual centerline is
-#     actually 86%. First-attempt run with Y=91% missed the buttons and
-#     no Interest rows were created — fixed in this iteration.
-# Dislike is the LEFT button (~25%, 86%).
 - tapOn:
-    point: "25%, 86%"
+    id: "swipe-dislike"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-dislike-matchme
 
 # --- 5. LIKE the next card (SwipeDog1) → deck must advance ---------------
 # SwipeDogN pool has NO reciprocal interest, so liking never opens the
-# new-match modal — deck simply advances. Like is the RIGHT button (~83%).
 - tapOn:
-    point: "75%, 86%"
+    id: "swipe-like"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-like-swipedog2
 
 # --- 6. DISLIKE next card (SwipeDog3) → deck advances --------------------
 - tapOn:
-    point: "25%, 86%"
+    id: "swipe-dislike"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-dislike-swipedog3
 
 # --- 7. MAYBE next card (SwipeDog4) → deck advances ----------------------
-# MAYBE is the CENTER button (~50%, 86%). Wired through swipeHandlerRef +
 # MatchActionBar onMaybe → Swipe.Maybe direction.
 - tapOn:
-    point: "50%, 86%"
+    id: "swipe-maybe"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 21-after-maybe-swipedog4
 
 # --- 8. Open the (now different) top dog's profile to report -------------
 - tapOn:
-    point: "50%, 75%"
+    id: "swipe-card-open-profile"
 - waitForAnimationToEnd:
     timeout: 8000
 - takeScreenshot: 21-profile-for-report
@@ -151,14 +119,12 @@ tags:
 
 # --- 9. Trigger the report Alert and confirm -----------------------------
 # Report row sits at the BOTTOM of the BottomColumn ScrollView, below
-# Share. After scroll, it's at roughly 50%, 80% Y. Tap fires
 # reportUser(dog) → Alert.alert("Report", ...).
 - tapOn:
-    point: "50%, 80%"
+    id: "dog-profile-report"
 - waitForAnimationToEnd:
     timeout: 3000
 
-# Native iOS Alert IS visible to XCUITest via native a11y labels.
 # Title "Report" + body text (dogProfile.reportMessage from en.json).
 - assertVisible:
     text: "Report"
@@ -174,9 +140,6 @@ tags:
 - waitForAnimationToEnd:
     timeout: 8000
 
-# iOS may surface a system "Cannot open page" alert if Mail isn't set up
-# on the simulator (default state). Dismiss optionally so the post-report
-# screenshot lands on the swipe deck and not on the system alert.
 - tapOn:
     text: "OK"
     optional: true

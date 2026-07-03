@@ -14,9 +14,15 @@ export const PlanContainer = styled(PressableArea)`
   z-index: 10;
 `;
 
+/**
+ * Must stay transparent: the dog photo header (BackgroundProfileContainer)
+ * is absolutely positioned BEHIND this wrapper and shows through the
+ * transparent paddingTop area of the settings list. The bottom "grey gap"
+ * is handled by the settings block itself (flexGrow + tab-bar padding in
+ * index.tsx), not by painting this wrapper.
+ */
 export const ScrollContainer = styled.View`
   overflow: hidden;
-  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 export const SettingsList = styled(Animated.ScrollView)`
@@ -24,7 +30,7 @@ export const SettingsList = styled(Animated.ScrollView)`
   background-color: transparent;
 `;
 
-export const Container = styled.View.attrs({ accessible: true })`
+export const Container = styled.View`
   flex-grow: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `;

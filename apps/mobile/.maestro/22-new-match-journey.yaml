@@ -9,7 +9,6 @@ tags:
 #
 # Seed contract (packages/database/maestro-seed.ts):
 #   - test@pegada.app owns Rex (MALE, SF). Rex's deck is anchored to SF.
-#   - MatchMe owner is PREMIUM and co-located in SF (priority=1, distance=0)
 #     so SuggestionService.getPotentialMatches puts MatchMe at the TOP of
 #     Rex's deck ahead of the SwipeDog pool. MatchMe has a one-sided
 #     Interest(MatchMe → Rex, INTERESTED) so when Rex swipes INTERESTED
@@ -29,12 +28,7 @@ tags:
 #      JOINs back to the new match.
 #   5. Back navigation returns to the Messages list, where the new match
 #      and its last-message preview are renderable (DB check is the
-#      authoritative assertion; messages-screen content is invisible to
-#      XCUITest on iOS 26 Fabric — see comment block below).
 #
-# === iOS 26 + RN Fabric: WHY the taps look the way they do ===
-#
-# On this app build, XCUITest's accessibility snapshot is blind to the
 # RN view tree. `maestro hierarchy` returns only the system status bar
 # and the keyboard when one is up — testIDs and rendered RN text are
 # unreachable. The prior 22-yaml on this branch used a mix of
@@ -42,29 +36,16 @@ tags:
 # new-match-screen }` which would never resolve on this device/build.
 #
 # What DOES work:
-#   - point-based taps for in-app targets (calibrated empirically on
-#     iPhone 17 Pro Max iOS 26.4, 440×956 logical / 1320×2868 px)
 #   - text matchers on native UIAlert / system keyboard buttons
 #   - screenshots for visual proof + per-step diff
 #   - DB post-check (apps/mobile/.maestro/checks/22-new-match.sh) for
 #     the authoritative state-changed assertions
 #
-# Coordinate calibration sources:
-#   - MatchActionBar layout: dislike=25% / maybe=50% / like=75% X, Y=86%
-#     (proven by flow 21 — same MatchActionBar/styles.ts container).
-#   - NewMatch CTAs: Button stack at the bottom inside Content. With the
-#     ScrollView taking the upper area, the two Buttons (Send message,
-#     Keep swiping) sit at Y≈82% (Send) and Y≈90% (Skip) on a 956pt
-#     viewport, both at X≈50%. Sized by theme.spacing[4] padding + the
-#     standard Button height.
 #   - Chat input + send: there is NO send button — Send/index.tsx wires
 #     onSubmitEditing on the TextInput (returnKeyType="send"). The only
 #     way to dispatch the message is the keyboard's Send return key,
 #     i.e. `pressKey: Enter` after inputText. The input itself sits just
-#     above the keyboard at Y≈68% when focused (Send/styles.ts:
 #     absolute bottom:0, height SEND_HEIGHT+insets.bottom).
-#   - Chat back button: chat-back testID is invisible; the navigation
-#     header chevron is at top-left ≈ (10%, 8%).
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -74,40 +55,30 @@ tags:
     timeout: 15000
 - takeScreenshot: 22-01-after-login
 
-# --- 1. We land on the Swipe tab with MatchMe at the top --------------------
 # No RN-text assertion is possible. The DB seed guarantees MatchMe is the
 # top card; the per-step screenshot is the visual anchor and the DB
 # post-check is the authoritative proof.
 - takeScreenshot: 22-02-matchme-on-top
 
 # --- 2. LIKE MatchMe → triggers real match creation ------------------------
-# Like is the RIGHT button in MatchActionBar (~75%, 86%). When Rex
 # swipes INTERESTED on MatchMe, the SwipeService finds the seeded
 # reciprocal interest, MatchService.createMatch runs, the API responds
 # with { match }, and the redux saga pushes /new-match.
 - tapOn:
-    point: "75%, 86%"
+    id: "swipe-like"
 - waitForAnimationToEnd:
     timeout: 10000
 - takeScreenshot: 22-03-after-like-matchme
 
 # --- 3. NewMatch screen — tap "Send a message" CTA ------------------------
-# RN content is invisible to XCUITest so we cannot assertVisible the
 # new-match-screen testID. The screenshot above + the DB post-check
 # (Match row created + Message row inserted in next step) prove the
 # screen actually mounted.
 #
-# Button geometry (measured from screenshot 22-03 captured by an
-# earlier pass — a 1320x2868 frame on iPhone 17 Pro Max iOS 26):
-#   - Send a Message button center ≈ Y 83% (Y 2380 / 2868)
-#   - Keep Swiping button center   ≈ Y 91% (Y 2610 / 2868)
-# First-pass guesses (82% then 90%) both missed: 82% landed above the
-# Send button, 90% landed on Keep Swiping → router.back() → bounced
 # back to the swipe deck. Verified by inspecting 22-04 in that run —
 # it showed a SwipeDog2 profile (post-tap on the swipe card's personal
-# info area), NOT the chat. Y=83% targets the Send button center.
 - tapOn:
-    point: "50%, 83%"
+    id: "new-match-send"
 # === CRITICAL: AdMob interstitial blocks navigation ===
 # NewMatch.handleSendMessage calls `await safeLoadAndShow()` BEFORE
 # router.push(chat) — see views/NewMatch/index.tsx + services/advertise-
@@ -127,19 +98,16 @@ tags:
 # The chat input sits at the bottom of the screen (Send/styles.ts:
 # absolute bottom:0, height SEND_HEIGHT(65) + insets.bottom). When the
 # chat first mounts the keyboard is NOT auto-focused — the input is at
-# its resting position with vertical center at Y≈94% (measured from
 # screenshot 22-04 captured by an earlier pass: input top edge at Y
-# 2706/2868 = 94.3%, height ~125px, center at Y 2768/2868 ≈ 96.5%
 # accounting for the home-indicator inset). Tap there to focus, which
 # brings the keyboard up.
 #
-# First-pass guess of Y=68% landed on the empty chat body (the
 # "You two matched!" placeholder area sits at the top, with a huge
 # empty middle before the input bar). Verified in 22-05: the input
 # placeholder "Type a message" was still rendered (input never gained
 # focus, keyboard never came up).
 - tapOn:
-    point: "50%, 94%"
+    id: "chat-input"
 - waitForAnimationToEnd:
     timeout: 3000
 # Static literal — the post-check asserts a Message row exists whose
@@ -184,33 +152,24 @@ tags:
 - takeScreenshot: 22-06-chat-after-send
 
 # --- 5. Back to NewMatch, then over to Messages list ----------------------
-# Tap the chat header chevron at top-left (~10%, 8%). The nav stack is
 # /swipe → /new-match → /chat/[matchId], so chat.back() returns to
 # /new-match (NOT directly to the messages list — verified by the
 # screenshot below matching the 22-03 hash). testID="chat-back" is
-# invisible to XCUITest on iOS 26.
 - tapOn:
-    point: "10%, 8%"
+    id: "chat-back"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 22-07-back-on-new-match
-# Tap "Keep Swiping" (~Y 91%) on NewMatch to call router.back() and
-# return to the swipe tab. This is a Skip CTA but it's the standard
-# nav-out path from /new-match — there's no direct "go to messages"
-# affordance on this screen.
 - tapOn:
-    point: "50%, 91%"
+    id: "new-match-skip"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 22-08-back-on-swipe
-# Tap the Messages tab (center-bottom on the tab bar, ~50%, 95%).
 - tapOn:
-    point: "50%, 95%"
+    id: "tab-messages"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: 22-09-on-messages-list
-# Messages list RN content is invisible to XCUITest. The DB post-check
-# is the authoritative assertion that:
 #   (a) the new Match row exists between Rex and MatchMe, AND
 #   (b) the Message row with prefix "MATCH22_" exists and JOINs to that
 #       Match.

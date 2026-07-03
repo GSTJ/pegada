@@ -3,7 +3,7 @@ import styled from "styled-components/native";
 
 import { Text } from "@/components/Text";
 
-export const Container = styled.KeyboardAvoidingView.attrs({ accessible: true })`
+export const Container = styled.KeyboardAvoidingView`
   background-color: ${(props) => props.theme.colors.background};
   flex: 1;
 `;

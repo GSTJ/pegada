@@ -86,9 +86,24 @@ async function ensureMagicUserWithRex() {
     include: { dogs: true },
   });
 
+  // Find the magic user's dog by OWNERSHIP, not by name: flow 24 renames
+  // Rex to "Rex-<ts>", and a name-based lookup would create a SECOND dog
+  // for the account. The app then keeps swiping as the original (oldest)
+  // dog while the seed purges/pre-likes the new one — the deck gets eaten
+  // a little more every run and flow 22 eventually sees zero cards.
   let rex = await prisma.dog.findFirst({
-    where: { userId: magic.id, name: "Rex", deletedAt: null },
+    where: { userId: magic.id, deletedAt: null },
+    orderBy: { createdAt: "asc" },
   });
+
+  // Any extra dogs (created by the old name-based lookup) are soft-deleted
+  // so the account is back to exactly one dog.
+  if (rex) {
+    await prisma.dog.updateMany({
+      where: { userId: magic.id, deletedAt: null, id: { not: rex.id } },
+      data: { deletedAt: new Date() },
+    });
+  }
 
   if (!rex) {
     rex = await prisma.dog.create({
@@ -118,6 +133,7 @@ async function ensureMagicUserWithRex() {
     rex = await prisma.dog.update({
       where: { id: rex.id },
       data: {
+        name: "Rex",
         preferredMinAge: 1,
         preferredMaxAge: 15,
         preferredMaxDistance: 50,
@@ -362,13 +378,22 @@ async function ensureSwipePoolDogs(rexId: string) {
     const email = `test+swipedog${i}@pegada.app`;
     const name = `SwipeDog${i}`;
 
+    // Each SwipeDog sits STRICTLY farther from Rex than MatchMe (who is
+    // exactly co-located at SF). The deck orders by `priority DESC,
+    // distance ASC`, and priority=1 for pre-likers only applies to
+    // PREMIUM users — for a FREE user, identical coordinates make the
+    // order a Postgres tie-break (arbitrary, heap-dependent), and flow
+    // 22 flakes whenever MatchMe isn't first. ~1.1km per index keeps a
+    // stable SwipeDog1..6 order and everyone inside the 50km preference.
+    const swipeDogLat = SF.lat + 0.01 * i;
+
     const user = await prisma.user.upsert({
       where: { email },
       update: {
         city: "San Francisco",
         state: "CA",
         country: "USA",
-        latitude: SF.lat,
+        latitude: swipeDogLat,
         longitude: SF.lon,
       },
       create: {
@@ -376,7 +401,7 @@ async function ensureSwipePoolDogs(rexId: string) {
         city: "San Francisco",
         state: "CA",
         country: "USA",
-        latitude: SF.lat,
+        latitude: swipeDogLat,
         longitude: SF.lon,
       },
       include: { dogs: { where: { deletedAt: null } } },
@@ -472,6 +497,16 @@ export const seedDeleteMeUser = async () => {
   if (!breed?.id) {
     throw new Error("maestro-seed: no breed available to attach to delete-me dog");
   }
+
+  // Upsert the breed row before connecting: on a fresh DB (db push
+  // --force-reset + maestro:seed only) the Breed catalog from the main
+  // `prisma db seed` doesn't exist yet, and the nested connect below
+  // fails with P2025. Same self-sufficiency pattern as ensureBreed().
+  await prisma.breed.upsert({
+    where: { id: breed.id },
+    update: {},
+    create: { id: breed.id, name: breed.name, slug: breed.slug ?? "shih-tzu" },
+  });
 
   const dogId = createId();
   await prisma.user.create({

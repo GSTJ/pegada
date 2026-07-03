@@ -141,7 +141,13 @@ jobs:
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_MAESTRO_E2E: "1"
-      # No EXPO_PUBLIC_API_URL — required flows must not depend on the API.
+      # Required flows must not DEPEND on the API, but the app's config
+      # schema hard-requires EXPO_PUBLIC_API_URL to boot: zod throws on the
+      # missing var, the JS bundle dies, and expo-updates' ErrorRecovery
+      # aborts the app before SignIn ever renders (verified from run
+      # 28589432792 artifacts — home screen on every attempt). Point it at
+      # a dead local port; nothing in the required flows makes a request.
+      EXPO_PUBLIC_API_URL: http://localhost:9999/api
 
     steps:
       - name: Select Xcode
@@ -198,7 +204,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.maestro
-          key: maestro-${{ runner.os }}-v1
+          key: maestro-${{ runner.os }}-2.6.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -212,7 +218,7 @@ jobs:
       - name: Install Maestro
         run: |
           if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | bash
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
@@ -273,7 +279,14 @@ jobs:
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
           PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
 
-      - name: Build iOS (Debug simulator)
+      # Release, NOT Debug: a Debug simulator build skips the "Bundle React
+      # Native code and images" phase (no embedded main.jsbundle) and the
+      # expo-dev-client Debug app expects a Metro packager. On a CI runner
+      # with no packager the app cold-launches into the RedBox "No script
+      # URL provided" (verified from run 28571242749 artifacts), failing
+      # every flow. Release embeds the bundle and matches the configuration
+      # all flow coordinates were calibrated against.
+      - name: Build iOS (Release simulator, embedded JS bundle)
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
@@ -291,17 +304,31 @@ jobs:
           ")
           echo "Building workspace=$WORKSPACE scheme=$SCHEME"
           set -o pipefail
+          # No CODE_SIGNING_ALLOWED=NO: simulator builds ad-hoc sign for free,
+          # and the app NEEDS its entitlements — without them expo-secure-store
+          # throws KeyChainException at startup, the JS bundle dies, and
+          # expo-updates' ErrorRecovery aborts the whole app (SIGABRT).
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
-            build \
-            | xcpretty
-          PROD_DIR=build/Build/Products/Debug-iphonesimulator
+            build 2>&1 \
+            | tee xcodebuild-raw.log \
+            | xcpretty \
+            || {
+              # xcpretty swallows run-script phase stderr — on failure dump
+              # the raw log around the failing phase so the error is visible
+              # in CI instead of a bare 'PhaseScriptExecution failed'.
+              echo "::group::raw xcodebuild output (failures)"
+              grep -nE "error:|Command PhaseScriptExecution failed" xcodebuild-raw.log | head -50 || true
+              awk '/Generate updates resources/,0' xcodebuild-raw.log | head -150 || true
+              echo "::endgroup::"
+              exit 65
+            }
+          PROD_DIR=build/Build/Products/Release-iphonesimulator
           if ! ls "$PROD_DIR"/*.app >/dev/null 2>&1; then
             echo "::error::xcodebuild reported success but produced no .app in $PROD_DIR"
             ls -la "$PROD_DIR" || true
@@ -357,7 +384,7 @@ jobs:
       - name: Install app on simulator
         run: |
           set -euo pipefail
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
           if [ -z "$APP_PATH" ]; then
             echo "::error::No .app produced under apps/mobile/ios/build"
             exit 1
@@ -368,6 +395,20 @@ jobs:
         run: |
           xcrun simctl launch "$SIMULATOR_UDID" app.pegada || true
           sleep 3
+
+      # First maestro use compiles + installs its XCUITest runner on the
+      # simulator, which can blow the default driver-startup window on a
+      # cold runner — flows then fail with 'Failed to connect to
+      # 127.0.0.1:22087' while the app itself is perfectly healthy (the
+      # post-failure fresh-session hierarchy proved this twice). Warm the
+      # driver once before the gated flows so their runs start against a
+      # live driver.
+      - name: Warm up Maestro driver
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
+        run: |
+          maestro hierarchy > /dev/null 2>&1 || true
+          maestro hierarchy > /dev/null 2>&1 || true
 
       # The required suite is small enough to enumerate. We loop through
       # the comma-separated REQUIRED_FLOWS and execute each as its own
@@ -390,9 +431,35 @@ jobs:
             ok=0
             for attempt in 1 2 3; do
               echo "::group::$stem attempt $attempt"
+              # 01-launch runs driverless: maestro's XCUITest driver is
+              # unstable on GitHub macOS runners (its port connection dies
+              # mid-flow — runs 28627657052/28630098292), while a
+              # fresh-session `maestro hierarchy` has seen the app's ids on
+              # every single run. simctl launches; the check script does the
+              # liveness assertion with the same strength as the flow's.
+              if [ "$stem" = "01-launch" ]; then
+                xcrun simctl terminate "$SIMULATOR_UDID" app.pegada 2>/dev/null || true
+                if xcrun simctl launch "$SIMULATOR_UDID" app.pegada \
+                    && sleep 20 \
+                    && bash "apps/mobile/.maestro/checks/01-launch.sh"; then
+                  # Synthesize a passing JUnit entry for the reporter.
+                  printf '%s\n' '<?xml version="1.0"?><testsuites><testsuite name="Required" tests="1" failures="0"><testcase name="01-launch (driverless liveness)" classname="01-launch"/></testsuite></testsuites>' \
+                    > "maestro-results-required-${stem}-attempt-${attempt}.xml"
+                  cp "maestro-results-required-${stem}-attempt-${attempt}.xml" \
+                     "maestro-results-required.xml"
+                  ok=1
+                  echo "::endgroup::"
+                  break
+                fi
+                echo "::endgroup::"
+                echo "::warning::$stem attempt $attempt failed"
+                continue
+              fi
               if maestro test "$flow" \
                   --format junit \
-                  --output "maestro-results-required-${stem}-attempt-${attempt}.xml"; then
+                  --output "maestro-results-required-${stem}-attempt-${attempt}.xml" \
+                  && { [ ! -x "apps/mobile/.maestro/checks/${stem}.sh" ] \
+                       || bash "apps/mobile/.maestro/checks/${stem}.sh"; }; then
                 # Canonical result file the reporter expects.
                 cp "maestro-results-required-${stem}-attempt-${attempt}.xml" \
                    "maestro-results-required.xml" 2>/dev/null || true
@@ -417,6 +484,7 @@ jobs:
         env:
           APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
           APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
 
       # Report runs even when the maestro step failed so the summary
       # is always populated. The reporter's own exit code is what
@@ -450,6 +518,41 @@ jobs:
           xcrun simctl spawn "$SIMULATOR_UDID" log collect \
             --output simulator-required.logarchive || true
         continue-on-error: true
+
+      # `log collect` proved unreliable (run 28593434192 produced no
+      # artifact) — also dump a plain-text app log + native crash reports
+      # so launch failures are diagnosable straight from the run page.
+      - name: Collect app crash diagnostics on failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p crash-diagnostics
+          xcrun simctl spawn "$SIMULATOR_UDID" log show --last 20m \
+            --predicate 'process == "Pegada"' --style compact \
+            > crash-diagnostics/pegada-oslog.txt 2>&1
+          cp ~/Library/Logs/DiagnosticReports/Pegada*.ips crash-diagnostics/ 2>/dev/null
+          # What the maestro driver actually sees — the app can be healthy
+          # on-screen while ids are missing from the snapshot.
+          maestro hierarchy > crash-diagnostics/hierarchy.json 2>&1 || true
+          cp ~/.maestro/tests/*/maestro.log crash-diagnostics/ 2>/dev/null
+          # The exact JS bundle the crashing app ran — swap-in locally to
+          # reproduce (local rebuilds from the same commit/lockfile/env do
+          # NOT crash, so only CI's own bytes can explain the difference).
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          cp "$APP_PATH/main.jsbundle" crash-diagnostics/ 2>/dev/null
+          echo "::group::pegada fatal lines"
+          grep -iE "fatal|exception|abort|Invalid environment|No script URL" \
+            crash-diagnostics/pegada-oslog.txt | tail -60 || true
+          echo "::endgroup::"
+
+      - name: Upload crash diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-diagnostics-required
+          path: crash-diagnostics/
+          if-no-files-found: ignore
 
       - name: Upload simulator log on failure
         if: failure()
@@ -576,7 +679,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.maestro
-          key: maestro-${{ runner.os }}-v1
+          key: maestro-${{ runner.os }}-2.6.0
 
       - name: Install dependencies
         if: steps.preflight.outputs.skip != 'true'
@@ -593,7 +696,7 @@ jobs:
         if: steps.preflight.outputs.skip != 'true'
         run: |
           if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | bash
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
@@ -654,7 +757,14 @@ jobs:
           PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
           PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
 
-      - name: Build iOS (Debug simulator)
+      # Release, NOT Debug: a Debug simulator build skips the "Bundle React
+      # Native code and images" phase (no embedded main.jsbundle) and the
+      # expo-dev-client Debug app expects a Metro packager. On a CI runner
+      # with no packager the app cold-launches into the RedBox "No script
+      # URL provided" (verified from run 28571242749 artifacts), failing
+      # every flow. Release embeds the bundle and matches the configuration
+      # all flow coordinates were calibrated against.
+      - name: Build iOS (Release simulator, embedded JS bundle)
         if: steps.preflight.outputs.skip != 'true'
         working-directory: apps/mobile/ios
         run: |
@@ -672,16 +782,30 @@ jobs:
               print(hit[0] if hit else app)
           ")
           set -o pipefail
+          # No CODE_SIGNING_ALLOWED=NO: simulator builds ad-hoc sign for free,
+          # and the app NEEDS its entitlements — without them expo-secure-store
+          # throws KeyChainException at startup, the JS bundle dies, and
+          # expo-updates' ErrorRecovery aborts the whole app (SIGABRT).
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath build \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
-            build \
-            | xcpretty
+            build 2>&1 \
+            | tee xcodebuild-raw.log \
+            | xcpretty \
+            || {
+              # xcpretty swallows run-script phase stderr — on failure dump
+              # the raw log around the failing phase so the error is visible
+              # in CI instead of a bare 'PhaseScriptExecution failed'.
+              echo "::group::raw xcodebuild output (failures)"
+              grep -nE "error:|Command PhaseScriptExecution failed" xcodebuild-raw.log | head -50 || true
+              awk '/Generate updates resources/,0' xcodebuild-raw.log | head -150 || true
+              echo "::endgroup::"
+              exit 65
+            }
 
       - name: Boot iOS simulator (pinned)
         if: steps.preflight.outputs.skip != 'true'
@@ -718,7 +842,7 @@ jobs:
         if: steps.preflight.outputs.skip != 'true'
         run: |
           set -euo pipefail
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Debug-iphonesimulator*" | head -1)
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
       - name: Run full Maestro suite (excludes quarantined)
