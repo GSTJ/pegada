@@ -416,8 +416,6 @@ jobs:
       # boundary in the log. Retry up to 3x per flow.
       - name: Run required Maestro flows (hard gate, retry 3x)
         id: maestro-required
-        env:
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
         run: |
           set -euo pipefail
           IFS=',' read -ra FLOWS <<< "$REQUIRED_FLOWS"
@@ -462,6 +460,7 @@ jobs:
         env:
           APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
           APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
 
       # Report runs even when the maestro step failed so the summary
       # is always populated. The reporter's own exit code is what
