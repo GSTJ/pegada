@@ -128,7 +128,9 @@ const QueryAwareErrorBoundary = ({
     const ErrorComponent = errorFallback ?? DefaultErrorComponent;
 
     return (
-      <PostHogErrorBoundary fallback={<ErrorComponent {...props} />}>{children}</PostHogErrorBoundary>
+      <PostHogErrorBoundary fallback={<ErrorComponent {...props} />}>
+        {children}
+      </PostHogErrorBoundary>
     );
   };
 

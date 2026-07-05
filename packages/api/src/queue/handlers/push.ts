@@ -4,11 +4,7 @@ import { sendError } from "../../errors/errors";
 import { UserService } from "../../services/UserService";
 import { config } from "../../shared/config";
 import { enqueue } from "../enqueue";
-import {
-  ICheckPushNotificationReceiptsJobData,
-  ISendNotificationJobData,
-  TOPICS,
-} from "../topics";
+import { ICheckPushNotificationReceiptsJobData, ISendNotificationJobData, TOPICS } from "../topics";
 
 const RECEIPT_EXPIRATION_MIN = 24 * 60 * 60; /** 24 hours */
 export const RECEIPT_CHECK_DELAY_SECONDS = 35 * 60; /** 35 minutes */
@@ -66,9 +62,13 @@ export const handleSendPushNotification = async (data: ISendNotificationJobData)
   }
 
   if (receipts.length) {
-    await enqueue(TOPICS.CHECK_PUSH_RECEIPTS, { receipts }, {
-      delaySeconds: RECEIPT_CHECK_DELAY_SECONDS,
-    });
+    await enqueue(
+      TOPICS.CHECK_PUSH_RECEIPTS,
+      { receipts },
+      {
+        delaySeconds: RECEIPT_CHECK_DELAY_SECONDS,
+      },
+    );
   }
 };
 
@@ -102,7 +102,11 @@ export const handleCheckPushReceipts = async ({
     `Some push notifications weren't processed. Receipts: ${JSON.stringify(nonProcessedReceipts)}`,
   );
 
-  await enqueue(TOPICS.CHECK_PUSH_RECEIPTS, { receipts: nonProcessedReceipts }, {
-    delaySeconds: RECEIPT_CHECK_DELAY_SECONDS,
-  });
+  await enqueue(
+    TOPICS.CHECK_PUSH_RECEIPTS,
+    { receipts: nonProcessedReceipts },
+    {
+      delaySeconds: RECEIPT_CHECK_DELAY_SECONDS,
+    },
+  );
 };
