@@ -1,0 +1,14 @@
+.claude
+node_modules
+apps/mobile/ios
+apps/mobile/android
+apps/mobile/node_modules
+apps/mobile/.expo
+.expo
+.git
+.turbo
+.pnpm
+*.tsbuildinfo
+dist
+build
+web-build

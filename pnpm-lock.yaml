@@ -472,6 +472,9 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
+      expo-server-sdk:
+        specifier: ^3.10.0
+        version: 3.10.0
       geolib:
         specifier: ^3.3.14
         version: 3.3.14
@@ -527,9 +530,6 @@ importers:
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
-      expo-server-sdk:
-        specifier: ^3.10.0
-        version: 3.10.0
       next:
         specifier: '*'
         version: 14.2.5(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
