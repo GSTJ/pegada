@@ -17,9 +17,54 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checkup:
-    name: Typecheck, Lint and Format
+  # Dedupe runs alone first: it's a lockfile sanity check, not a per-task
+  # matrix concern, and gating the matrix on it avoids paying for 3 parallel
+  # setups when the lockfile itself is broken.
+  dedupe:
+    name: 🧹 Dedupe
     runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Setup Repo
+        uses: actions/checkout@v7
+
+      - name: 🏗 Setup PNPM
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: 📦 Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧹 Dedupe
+        run: pnpm dedupe --check
+
+  # Typecheck/lint/format used to run serially in one job (~sum of all
+  # three). Splitting into a matrix trades that for parallel wall-clock =
+  # setup + slowest task: each job pays its own ~40s setup (checkout, pnpm,
+  # node, turbo cache restore), but with turbo cache hits the tasks
+  # themselves are fast, so 3 parallel setups + max(task) beats 1 setup +
+  # sum(tasks) once the tasks aren't trivially fast.
+  checkup:
+    name: ${{ matrix.emoji }} ${{ matrix.label }}
+    needs: dedupe
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - task: typecheck
+            label: Typecheck
+            emoji: 🧪
+          - task: lint
+            label: Lint
+            emoji: 🧹
+          - task: format
+            label: Format
+            emoji: 💅
     steps:
       - name: 🏗 Setup Repo
         uses: actions/checkout@v7
@@ -39,14 +84,5 @@ jobs:
       - name: 🏗 Setup Turborepo Cache
         uses: rharkor/caching-for-turbo@v2.5.0
 
-      - name: 🧹 Dedupe
-        run: pnpm dedupe --check
-
-      - name: 🧪 Typecheck
-        run: pnpm run typecheck
-
-      - name: 🧹 Lint
-        run: pnpm run lint
-
-      - name: 💅 Format
-        run: pnpm run format
+      - name: ${{ matrix.emoji }} ${{ matrix.label }}
+        run: pnpm run ${{ matrix.task }}

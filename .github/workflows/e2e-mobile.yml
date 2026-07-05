@@ -53,6 +53,47 @@ name: E2E Mobile (Maestro)
 #   We pin to iPhone 17 Pro Max on the newest available iOS 26 runtime.
 #   The previous "best available" heuristic picked different devices on
 #   different runner images, which is itself a flake source.
+#
+# ---------------------------------------------------------------------------
+# WHY NOT BUILD-ONCE / TEST-MANY (and why we cache native compile instead)
+# ---------------------------------------------------------------------------
+# We investigated splitting into a `build` job (produces the .app once,
+# uploaded as an artifact) feeding N parallel `test` jobs. Two things about
+# THIS codebase make that unsafe or a no-op, verified against real run
+# 28738396560 before writing this:
+#
+#   1. EXPO_PUBLIC_* vars are inlined into the JS bundle by Expo/Babel at
+#      build time, and the "Bundle React Native code and images" Xcode
+#      build phase runs Metro AS PART OF `xcodebuild build`. required and
+#      extended intentionally set different EXPO_PUBLIC_API_URL (required:
+#      a dead localhost port, since its flows must not depend on the API;
+#      extended: the real staging secret). One shared .app artifact would
+#      silently serve the wrong config to whichever job didn't build it —
+#      a correctness bug, not a speed win.
+#
+#   2. The Maestro suite itself is NOT embarrassingly parallel:
+#      apps/mobile/.maestro/config.yaml enforces a strict, sequential
+#      executionOrder.flowsOrder because flows mutate SHARED state (one
+#      seeded test@pegada.app user/dog/deck — 24 renames the dog, 21/22
+#      consume the swipe deck, 25 changes the plan) against the ONE shared
+#      backend behind EXPO_PUBLIC_API_URL. 27-delete-account-journey must
+#      run dead last and against a second, disposable account. Running
+#      flow shards concurrently against that shared backend would race on
+#      the same rows — trading a slow-but-correct suite for a fast-but-
+#      flaky one.
+#
+# What we verified instead (job 85216660789, run 28738396560): of the
+# ~23min "Build iOS (Release simulator)" step, ~22min is native
+# CompileC/CompileSwift/Link work and only ~1min is the JS bundle/link
+# tail. That native-compile cost IS safely shareable across runs (it
+# doesn't depend on EXPO_PUBLIC_API_URL) via a DerivedData cache keyed on
+# the INPUTS that determine expo prebuild's native output — app.config.ts,
+# the plugins/ dir, and the lockfile (apps/mobile/ios/ itself is
+# gitignored and only exists after prebuild runs, so it can't be hashed at
+# restore time) — unchanged inputs turn a ~23min cold build into an
+# incremental ~1-2min rebuild, in BOTH the required and extended jobs,
+# without merging their bundles. That's the change made below (see
+# "Cache Xcode DerivedData").
 # ---------------------------------------------------------------------------
 # REQUIRED GITHUB SECRETS
 # ---------------------------------------------------------------------------
@@ -192,6 +233,33 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
           restore-keys: ${{ runner.os }}-pods-
 
+      # Xcode DerivedData holds the compiled object files for every Pod +
+      # the app target. CompileC/CompileSwift/Link is ~22 of the ~23min
+      # "Build iOS" step (verified via run 28738396560's raw xcodebuild
+      # log: build start 10:58:02 -> "Bundle React Native code and images"
+      # phase 11:20:07 -> finish 11:21:23 — the JS-bundle/link tail is only
+      # ~1min). None of that native compile depends on EXPO_PUBLIC_API_URL,
+      # so it's safe to share across runs (and across this job vs
+      # extended's, since they key off the same native inputs). Restoring
+      # a hit turns xcodebuild into an incremental rebuild instead of a
+      # cold compile.
+      #
+      # NOTE: apps/mobile/ios/ is gitignored and only exists AFTER `expo
+      # prebuild` runs later in this job — hashing it here (before it
+      # exists) would hash nothing. We key on the actual INPUTS that
+      # determine prebuild's output instead: app.config.ts + the plugins/
+      # dir (Expo config plugins that patch the generated native project,
+      # e.g. withStoreKitConfiguration.js) + the lockfile (autolinked
+      # native deps). Falls back to any same-OS cache so a partial hit
+      # still saves most of the work.
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build
+          key: ${{ runner.os }}-xcode-deriveddata-required-${{ hashFiles('apps/mobile/app.config.ts', 'apps/mobile/plugins/**', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-deriveddata-required-
+
       # Maestro release line moves; key on the install script's
       # current pointer (we re-download if the binary is missing).
       # Pinning to a tagged version would be safer once we standardize
@@ -283,6 +351,10 @@ jobs:
       # URL provided" (verified from run 28571242749 artifacts), failing
       # every flow. Release embeds the bundle and matches the configuration
       # all flow coordinates were calibrated against.
+      #
+      # -derivedDataPath build is also the "Cache Xcode DerivedData" path
+      # above: a cache hit means this is an incremental build (relink +
+      # rebundle only, ~1-2min) instead of a cold compile (~23min).
       - name: Build iOS (Release simulator, embedded JS bundle)
         working-directory: apps/mobile/ios
         run: |
@@ -662,6 +734,24 @@ jobs:
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
           restore-keys: ${{ runner.os }}-pods-
 
+      # See "Cache Xcode DerivedData" in e2e-ios-required for the full
+      # rationale (~22 of ~23min is native compile, shareable across runs
+      # since it doesn't depend on EXPO_PUBLIC_API_URL) and why the key is
+      # built from prebuild's INPUTS (app.config.ts, plugins/, lockfile)
+      # rather than the gitignored, not-yet-generated apps/mobile/ios/
+      # output. Separate key suffix (extended vs required) since this
+      # job's cache entry is only useful when the preflight check finds a
+      # backend and this job actually builds — no point contending for the
+      # same cache slot.
+      - name: Cache Xcode DerivedData
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build
+          key: ${{ runner.os }}-xcode-deriveddata-extended-${{ hashFiles('apps/mobile/app.config.ts', 'apps/mobile/plugins/**', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-deriveddata-extended-
+
       - name: Cache Maestro
         if: steps.preflight.outputs.skip != 'true'
         uses: actions/cache@v5
@@ -752,6 +842,10 @@ jobs:
       # URL provided" (verified from run 28571242749 artifacts), failing
       # every flow. Release embeds the bundle and matches the configuration
       # all flow coordinates were calibrated against.
+      #
+      # -derivedDataPath build is also the "Cache Xcode DerivedData" path
+      # above: a cache hit means this is an incremental build (relink +
+      # rebundle only) instead of a cold ~23min compile.
       - name: Build iOS (Release simulator, embedded JS bundle)
         if: steps.preflight.outputs.skip != 'true'
         working-directory: apps/mobile/ios
