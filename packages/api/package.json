@@ -48,6 +48,7 @@
     "@pegada/tsconfig": "workspace:*",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.1.0",
+    "@types/semver": "^7.7.1",
     "expo-server-sdk": "^3.10.0",
     "next": "*",
     "typescript": "*"
