@@ -136,6 +136,8 @@ jobs:
       EXPO_PUBLIC_ENV: development
       EXPO_PUBLIC_BUGSNAG_API_KEY: ci-stub
       EXPO_PUBLIC_AMPLITUDE_API_KEY: ci-stub
+      EXPO_PUBLIC_POSTHOG_API_KEY: ci-stub
+      EXPO_PUBLIC_POSTHOG_HOST: https://us.i.posthog.com
       EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY: ci-stub
       EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ci-stub
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
@@ -592,6 +594,8 @@ jobs:
       EXPO_PUBLIC_ENV: development
       EXPO_PUBLIC_BUGSNAG_API_KEY: ci-stub
       EXPO_PUBLIC_AMPLITUDE_API_KEY: ci-stub
+      EXPO_PUBLIC_POSTHOG_API_KEY: ci-stub
+      EXPO_PUBLIC_POSTHOG_HOST: https://us.i.posthog.com
       EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY: ci-stub
       EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ci-stub
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
