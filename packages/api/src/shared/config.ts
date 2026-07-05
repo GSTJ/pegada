@@ -22,7 +22,12 @@ const configSchema = z.object({
   /** AUTH */
   JWT_SECRET: z.string(),
 
-  /** AWS */
+  /**
+   * AWS (legacy image upload path). Shipped app binaries presign PUTs
+   * against S3 via `image.signedUrl` and derive the public URL from the
+   * presigned host, so this path must stay byte-identical until every
+   * binary in the wild is on the R2 path (see R2 block below).
+   */
   AWS_ACCESS_KEY_ID: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
   AWS_REGION: z.string(),
@@ -33,6 +38,24 @@ const configSchema = z.object({
    * work without real AWS credentials. Never set in production.
    */
   AWS_S3_ENDPOINT: z.string().optional(),
+
+  /**
+   * CLOUDFLARE R2 (new image upload path, used by `image.signedUpload`).
+   * All optional: when endpoint/keys/public base URL aren't all set
+   * (dev/e2e), signedUpload falls back to the legacy S3/MinIO path above,
+   * so local behavior is unchanged without extra setup.
+   */
+  /** R2 account S3 API endpoint (https://<account_id>.r2.cloudflarestorage.com). */
+  R2_ENDPOINT: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET_NAME: z.string().default("pegava"),
+  /**
+   * Public base URL R2 object keys are served from — the bucket's custom
+   * domain (https://images.pegada.app). Used to build the URL written to
+   * the DB after an upload (`${PUBLIC_IMAGES_BASE_URL}/${key}`).
+   */
+  PUBLIC_IMAGES_BASE_URL: z.string().optional(),
 
   /**
    * MAIL (Cloudflare Email Service — https://developers.cloudflare.com/email-service).
