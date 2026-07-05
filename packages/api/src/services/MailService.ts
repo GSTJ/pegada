@@ -1,3 +1,4 @@
+import Cloudflare from "cloudflare";
 import handlebars from "handlebars";
 import { ParseKeys } from "i18next";
 
@@ -5,6 +6,8 @@ import { Language, Namespace } from "@pegada/shared/i18n/types/types";
 
 import { config } from "../shared/config";
 import { TranslationService } from "./TranslationService";
+
+const cloudflare = new Cloudflare({ apiToken: config.CLOUDFLARE_EMAIL_API_TOKEN });
 
 export class MailService {
   // Inspired from this snippet
@@ -59,26 +62,19 @@ export class MailService {
     html: string;
     text?: string;
   }) {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: `${config.MAIL_NAME} <${config.MAIL_USER}>`,
-        to: [to],
-        subject,
-        html,
-        text,
-      }),
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`Resend refused the email (${response.status}): ${body}`);
+    if (!config.CLOUDFLARE_ACCOUNT_ID || !config.CLOUDFLARE_EMAIL_API_TOKEN) {
+      throw new Error(
+        "Cannot send email: CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_EMAIL_API_TOKEN are not set",
+      );
     }
 
-    return (await response.json()) as { id: string };
+    return cloudflare.emailSending.send({
+      account_id: config.CLOUDFLARE_ACCOUNT_ID,
+      from: { address: config.MAIL_USER, name: config.MAIL_NAME },
+      to,
+      subject,
+      html,
+      text,
+    });
   }
 }

@@ -16,6 +16,7 @@ const nextConfig = {
       "nsfwjs",
       "expo-server-sdk",
       "@vercel/queue",
+      "cloudflare",
     ],
   },
   /** Enables hot reloading for local packages without a build step */
