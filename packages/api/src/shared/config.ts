@@ -12,18 +12,9 @@ const configSchema = z.object({
   /** GENERAL */
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
-  /** LOGGING */
-  BUGSNAG_API_KEY: z.string(),
-
-  /** POSTHOG */
+  /** POSTHOG (analytics + error tracking + feature flags) */
   POSTHOG_API_KEY: z.string(),
   POSTHOG_HOST: z.string(),
-
-  /** REDIS */
-  REDIS_HOST: z.string(),
-  REDIS_PORT: z.coerce.number(),
-  REDIS_PASSWORD: z.string(),
-  REDIS_USERNAME: z.string(),
 
   /** SERVER */
   PORT: z.coerce.number().default(3009),
@@ -43,10 +34,18 @@ const configSchema = z.object({
    */
   AWS_S3_ENDPOINT: z.string().optional(),
 
-  /** MAIL */
+  /**
+   * MAIL (Cloudflare Email Service — https://developers.cloudflare.com/email-service).
+   * Optional so local/e2e boot doesn't need real creds: magic emails skip
+   * sending, and sendMail() throws loudly if it ever tries to send without them.
+   */
   MAIL_USER: z.string(),
   MAIL_NAME: z.string(),
-  SENDGRID_API_KEY: z.string(),
+  CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
+  CLOUDFLARE_EMAIL_API_TOKEN: z.string().optional(),
+
+  /** PUSH (Expo access token for send + receipt consumers) */
+  EXPO_ACCESS_TOKEN: z.string().optional(),
 
   /** APP */
   MIN_APP_VERSION: semverSchema,

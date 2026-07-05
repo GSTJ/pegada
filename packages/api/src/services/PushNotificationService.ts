@@ -2,11 +2,8 @@ import Expo from "expo-server-sdk";
 import { z } from "zod";
 
 import { sendError } from "../errors/errors";
-import {
-  ISendNotificationJobData,
-  SEND_PUSH_NOTIFICATION_QUEUE,
-  SendPushNotificationQueue,
-} from "../queue/SendPushNotificationQueue";
+import { enqueue } from "../queue/enqueue";
+import { ISendNotificationJobData, TOPICS } from "../queue/topics";
 import { UserService } from "./UserService";
 
 export class PushNotificationService {
@@ -26,13 +23,10 @@ export class PushNotificationService {
         throw error;
       }
 
-      const waitingJobCount = await SendPushNotificationQueue.getWaitingCount();
-
-      const DELAY_BETWEEN_NOTIFICATIONS_MS = 100;
-
-      return await SendPushNotificationQueue.add(SEND_PUSH_NOTIFICATION_QUEUE, notification, {
-        delay: waitingJobCount * DELAY_BETWEEN_NOTIFICATIONS_MS,
-      });
+      // The old BullMQ path spaced sends by queue depth to respect Expo
+      // rate limits; expo-server-sdk already throttles per client and
+      // Vercel Queues retries on 429s, so the send goes straight through.
+      return await enqueue(TOPICS.SEND_PUSH, notification);
     } catch (error) {
       sendError(error);
     }

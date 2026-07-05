@@ -1,18 +1,13 @@
 // https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 import "react-native-get-random-values";
 
-import * as React from "react";
-import { LogBox, Text, View } from "react-native";
+import { LogBox, Text } from "react-native";
 import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 import * as Updates from "expo-updates";
-import Bugsnag from "@bugsnag/expo";
-import BugsnagPluginReact, {
-  BugsnagErrorBoundary as IBugsnagErrorBoundary,
-} from "@bugsnag/plugin-react";
 
-import { ampli } from "@/ampli";
 import { config } from "@/services/config";
 import { sendError } from "@/services/errorTracking";
+import { posthog } from "@/services/posthog";
 
 mobileAds()
   .setRequestConfiguration({
@@ -36,35 +31,17 @@ Text.defaultProps.allowFontScaling = false;
 // Not helpful as there is nothing I can do about them
 LogBox.ignoreLogs([
   "Sending `onAnimatedValueUpdate` with no listeners registered.",
-  "WARNING: Ampli is already initialized.",
   "Warning: Overriding previous layout animation with new one before the first began:",
 ]);
 
-ampli.load({
-  environment: config.ENV,
-  client: {
-    configuration: {
-      logLevel: 0, // None
-    },
-    apiKey: config.AMPLITUDE_API_KEY,
-  },
-});
-
+// Attach env + release to every event (analytics and errors), the way
+// Bugsnag's releaseStage / metadata used to. codeBundleId ties errors to
+// the exact OTA update group.
 const manifest = Updates.manifest;
 const metadata = "metadata" in manifest ? manifest.metadata : undefined;
 const updateGroup = metadata && "updateGroup" in metadata ? metadata.updateGroup : undefined;
 
-Bugsnag.start({
-  apiKey: config.BUGSNAG_API_KEY,
-  codeBundleId: (updateGroup as string) || "",
-  metadata: { app: { env: config.ENV } },
-  plugins: [new BugsnagPluginReact()],
-  releaseStage: config.ENV,
-  enabledReleaseStages: ["production", "staging"],
-  logger: null,
+posthog.register({
+  environment: config.ENV,
+  code_bundle_id: (updateGroup as string) || "",
 });
-
-Bugsnag.setContext("app");
-
-export const BugsnagErrorBoundary: IBugsnagErrorBoundary =
-  Bugsnag.getPlugin("react")?.createErrorBoundary(React) || View;

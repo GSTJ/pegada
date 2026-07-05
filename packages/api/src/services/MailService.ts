@@ -1,22 +1,13 @@
-import fs from "fs/promises";
+import Cloudflare from "cloudflare";
 import handlebars from "handlebars";
 import { ParseKeys } from "i18next";
-import nodemailer from "nodemailer";
 
 import { Language, Namespace } from "@pegada/shared/i18n/types/types";
 
 import { config } from "../shared/config";
 import { TranslationService } from "./TranslationService";
 
-// Create a Nodemailer transport using SendGrid
-const mailer = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
-  auth: {
-    user: "apikey",
-    pass: config.SENDGRID_API_KEY,
-  },
-});
+const cloudflare = new Cloudflare({ apiToken: config.CLOUDFLARE_EMAIL_API_TOKEN });
 
 export class MailService {
   // Inspired from this snippet
@@ -40,20 +31,18 @@ export class MailService {
     );
   }
 
-  static async parseHandlebars({
-    path,
+  static async compileTemplate({
+    template,
     variables,
     language = Language.Default,
   }: {
-    path: string;
+    template: string;
     variables: Record<string, string | number>;
     language?: Language;
   }) {
     if ("language" in variables) {
       throw new Error('Cannot use "language" as a variable name');
     }
-
-    const template = await fs.readFile(path, "utf8");
 
     MailService.registerTranslationHelper(language);
 
@@ -73,11 +62,15 @@ export class MailService {
     html: string;
     text?: string;
   }) {
-    return mailer.sendMail({
-      from: {
-        name: config.MAIL_NAME,
-        address: config.MAIL_USER,
-      },
+    if (!config.CLOUDFLARE_ACCOUNT_ID || !config.CLOUDFLARE_EMAIL_API_TOKEN) {
+      throw new Error(
+        "Cannot send email: CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_EMAIL_API_TOKEN are not set",
+      );
+    }
+
+    return cloudflare.emailSending.send({
+      account_id: config.CLOUDFLARE_ACCOUNT_ID,
+      from: { address: config.MAIL_USER, name: config.MAIL_NAME },
       to,
       subject,
       html,

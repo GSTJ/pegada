@@ -212,7 +212,7 @@ export const takeImage = async () => {
 /**
  * Stage identifiers for the profile-image upload pipeline. Kept as a union so
  * the catch site in `AddUserPhoto` can attach the failing stage to the error
- * payload sent to Bugsnag without stringly-typed magic values.
+ * payload sent to PostHog without stringly-typed magic values.
  */
 export type ProfileImageUploadStage = "presign" | "compress" | "upload" | "finalize";
 

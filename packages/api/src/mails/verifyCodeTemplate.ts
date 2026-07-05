@@ -1,4 +1,7 @@
-<html lang="{{language}}">
+// Inlined as a TS module (not fs.readFile of a .hbs) because @pegada/api is
+// transpiled into the Next.js bundle — source-tree template files don't ship
+// to Vercel functions.
+export const VERIFY_CODE_TEMPLATE = `<html lang="{{language}}">
   <head>
     <style>
       body {
@@ -57,4 +60,4 @@
       </div>
     </div>
   </body>
-</html>
+</html>`;

@@ -2,7 +2,8 @@ import prisma from "@pegada/database";
 import { DogServerSchema, IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 
 import { dogSelect, selfDogSelect, serverOnlyFullDogSelect } from "../dtos/dogDto";
-import { PROCESS_IMAGE_QUEUE, ProcessImageQueue } from "../queue/ProcessImageQueue";
+import { enqueue } from "../queue/enqueue";
+import { TOPICS } from "../queue/topics";
 import { deleteImageFromS3 } from "../shared/fileUpload";
 import { ImageService } from "./ImageService";
 import { SwipeService } from "./SwipeService";
@@ -77,7 +78,7 @@ export class DogService {
     });
 
     // Classify images, create blurhashes and update image status
-    await Promise.all(dog.images.map((image) => ProcessImageQueue.add(PROCESS_IMAGE_QUEUE, image)));
+    await Promise.all(dog.images.map((image) => enqueue(TOPICS.PROCESS_IMAGE, image)));
 
     return dog;
   }
@@ -135,7 +136,7 @@ export class DogService {
         const isNew = imagesToCreatePermanent.find((newImage) => newImage.url === image.url);
         if (!isNew) return;
 
-        return ProcessImageQueue.add(PROCESS_IMAGE_QUEUE, image);
+        return enqueue(TOPICS.PROCESS_IMAGE, image);
       }),
     ]);
 

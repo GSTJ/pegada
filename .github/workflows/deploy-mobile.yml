@@ -58,7 +58,7 @@ jobs:
 
       # Only done as we are running Typecheck before publishing
       - name: 🏗 Setup Turborepo Cache
-        uses: dtinth/setup-github-actions-caching-for-turbo@v1
+        uses: rharkor/caching-for-turbo@v2.5.0
 
       # That shouldn't be necessary if we are running before merging PR's,
       # but as commits to main are not protected yet and sometimes happen,

@@ -9,12 +9,13 @@ import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 
 interface DogProfileProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-const DogProfile = async ({ params: { id } }: DogProfileProps) => {
+const DogProfile = async ({ params }: DogProfileProps) => {
+  const { id } = await params;
   const dog = await prisma.dog.findFirst({
     where: { id, deletedAt: null },
     include: { images: true, breed: true },

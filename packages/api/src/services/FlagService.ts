@@ -1,19 +1,13 @@
-import { PostHog } from "posthog-node";
-
 import { sendError } from "../errors/errors";
 import { cacheFunctionResultFor } from "../shared/cacheFunctionResultFor";
-import { config } from "../shared/config";
-
-const client = new PostHog(config.POSTHOG_API_KEY, {
-  host: config.POSTHOG_HOST,
-});
+import { posthog } from "../shared/posthog";
 
 const FIVE_SECONDS = 5000;
 
 // Cache the result of isFeatureEnabled for 5 seconds
 // This prevents our quota from being exceeded.
 const cachedIsFeatureEnabled = cacheFunctionResultFor(
-  (feature: string) => client.isFeatureEnabled(feature, ""),
+  (feature: string) => posthog.isFeatureEnabled(feature, ""),
   FIVE_SECONDS,
 );
 
