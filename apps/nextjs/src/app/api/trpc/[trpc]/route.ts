@@ -5,6 +5,7 @@ import { Redis } from "@upstash/redis";
 import { ipAddress } from "@vercel/functions";
 
 import { appRouter, createTRPCContext } from "@pegada/api";
+import { sendError } from "@pegada/api/errors/errors";
 import { config } from "@pegada/api/shared/config";
 import { getSession, Session } from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
@@ -27,8 +28,15 @@ export const OPTIONS = () => {
 const loggedOutRatelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(15, "30s"),
   redis: Redis.fromEnv(),
+  // Bound how long a hanging Redis call can stall a request. Combined with
+  // the fail-open handling below, a dead/unreachable Redis degrades to "no
+  // rate limiting" instead of a full outage.
+  timeout: 2000,
 });
 
+// Redis being unreachable (DNS failure, network error, timeout, auth error)
+// must never take the whole API down. Fail open: let the request through,
+// and report the outage once so it's visible instead of silently swallowed.
 const handleRatelimiter = async ({
   req,
   session,
@@ -45,9 +53,25 @@ const handleRatelimiter = async ({
 
   const ip = ipAddress(req) ?? "127.0.0.1";
 
-  const { limit, remaining, reset, success } = await loggedOutRatelimit.limit(ip);
+  let result: Awaited<ReturnType<typeof loggedOutRatelimit.limit>>;
+  try {
+    result = await loggedOutRatelimit.limit(ip);
+  } catch (error) {
+    sendError(error);
+    return;
+  }
+
+  const { limit, remaining, reset, success, reason } = result;
 
   if (success) return;
+
+  // `reason === "timeout"` means the limiter itself couldn't reach Redis in
+  // time (see `timeout` above) and is not a genuine rate-limit rejection.
+  // Fail open here too, rather than blocking real traffic on a dead Redis.
+  if (reason === "timeout") {
+    sendError(new Error("Rate limiter timed out reaching Redis"));
+    return;
+  }
 
   return new Response(JSON.stringify({ error: "Rate limited" }), {
     status: 429,
