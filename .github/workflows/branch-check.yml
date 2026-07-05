@@ -1,4 +1,12 @@
 name: Branch Checkup
+# NOTE: this workflow is push-triggered (branches-ignore: main), not
+# pull_request-triggered, so there's no github.event.pull_request.draft
+# to gate on here — GitHub still surfaces these runs on the PR because
+# it associates push-to-branch runs with any open PR for that branch.
+# Draft-gating (see e2e-mobile.yml) only applies to pull_request-triggered
+# workflows; converting this trigger to pull_request would change the
+# checkout ref (merge commit vs branch head) for no real benefit, since
+# this job is cheap relative to e2e.
 on:
   push:
     branches-ignore:
@@ -19,39 +27,17 @@ jobs:
       - name: 🏗 Setup PNPM
         uses: pnpm/action-setup@v6.0.9
 
-      - name: 🏗 Get PNPM store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: 🏗 Setup PNPM cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: 🏗 Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 20.x
-
-      - name: "📦 Cache Node Modules"
-        uses: actions/cache@v5
-        id: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          cache: pnpm
 
       - name: 📦 Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗 Setup Turborepo Cache
-        uses: dtinth/setup-github-actions-caching-for-turbo@v1
+        uses: rharkor/caching-for-turbo@v2
 
       - name: 🧹 Dedupe
         run: pnpm dedupe --check
