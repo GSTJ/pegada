@@ -6,8 +6,9 @@ import { QueryErrorResetBoundary, useQueryErrorResetBoundary } from "@tanstack/r
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
+import { PostHogErrorBoundary } from "posthog-react-native";
+
 import { Button } from "@/components/Button";
-import { BugsnagErrorBoundary } from "@/config";
 import {
   ContainedText,
   Container,
@@ -127,9 +128,7 @@ const QueryAwareErrorBoundary = ({
     const ErrorComponent = errorFallback ?? DefaultErrorComponent;
 
     return (
-      <BugsnagErrorBoundary FallbackComponent={() => <ErrorComponent {...props} />}>
-        {children}
-      </BugsnagErrorBoundary>
+      <PostHogErrorBoundary fallback={<ErrorComponent {...props} />}>{children}</PostHogErrorBoundary>
     );
   };
 

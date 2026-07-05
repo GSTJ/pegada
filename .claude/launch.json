@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Apple",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve-sim"],
+      "port": 3200
+    }
+  ]
+}

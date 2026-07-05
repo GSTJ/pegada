@@ -2,15 +2,8 @@
   "name": "@pegada/mobile",
   "version": "0.1.0",
   "private": true,
-  "workspaces": {
-    "nohoist": [
-      "@bugsnag/plugin-expo-eas-sourcemaps",
-      "@bugsnag/source-maps"
-    ]
-  },
   "main": "index.js",
   "scripts": {
-    "ampli:setup": "ampli pull",
     "start": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -18,14 +11,9 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
     "setup:secret:files": "[ ! -s ./google-services.json ] && echo $GOOGLE_SERVICES_JSON > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && echo $GOOGLE_SERVICE_INFO_PLIST > ./GoogleService-Info.plist || echo \"\"",
-    "preinstall": "pnpm setup:secret:files",
-    "eas-build-on-success": "npx bugsnag-eas-build-on-success"
+    "preinstall": "pnpm setup:secret:files"
   },
   "dependencies": {
-    "@amplitude/ampli": "^1.35.0",
-    "@amplitude/analytics-react-native": "^1.4.9",
-    "@bugsnag/expo": "^55.0.0",
-    "@bugsnag/plugin-react": "^7.25.0",
     "@expo/config-types": "^55.0.5",
     "@expo/metro-runtime": "~55.0.11",
     "@gorhom/bottom-sheet": "^5.2.14",
@@ -78,6 +66,7 @@
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "lottie-react-native": "7.3.8",
+    "posthog-react-native": "^4.54.4",
     "prop-types": "^15.8.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -113,8 +102,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "@bugsnag/plugin-expo-eas-sourcemaps": "^55.0.1",
-    "@bugsnag/source-maps": "^2.3.3",
     "@pegada/api": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
     "@types/color": "^3.0.6",

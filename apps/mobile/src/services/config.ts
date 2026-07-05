@@ -2,10 +2,10 @@ import { z } from "zod";
 
 const configSchema = z.object({
   ENV: z.enum(["development", "production"]),
-  BUGSNAG_API_KEY: z.string(),
+  POSTHOG_API_KEY: z.string(),
+  POSTHOG_HOST: z.string(),
   IOS_GOOGLE_MAPS_API_KEY: z.string(),
   ANDROID_GOOGLE_MAPS_API_KEY: z.string(),
-  AMPLITUDE_API_KEY: z.string(),
   REVENUE_CAT_IOS_API_KEY: z.string(),
   REVENUE_CAT_ANDROID_API_KEY: z.string(),
   API_URL: z.string(),
@@ -19,10 +19,10 @@ const configSchema = z.object({
 
 const _config = configSchema.safeParse({
   ENV: process.env.EXPO_PUBLIC_ENV,
-  BUGSNAG_API_KEY: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY,
+  POSTHOG_API_KEY: process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
+  POSTHOG_HOST: process.env.EXPO_PUBLIC_POSTHOG_HOST,
   IOS_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY,
   ANDROID_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
-  AMPLITUDE_API_KEY: process.env.EXPO_PUBLIC_AMPLITUDE_API_KEY,
   REVENUE_CAT_IOS_API_KEY: process.env.EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY,
   REVENUE_CAT_ANDROID_API_KEY: process.env.EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY,
   API_URL: process.env.EXPO_PUBLIC_API_URL,

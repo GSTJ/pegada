@@ -60,7 +60,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
   };
 
   /**
-   * Reports a failed upload to Bugsnag with the precise pipeline stage and
+   * Reports a failed upload to PostHog with the precise pipeline stage and
    * surfaces a toast to the user. Shared by both the real picker flow and
    * the Maestro placeholder skip flow so a regression in either path
    * produces identical telemetry.

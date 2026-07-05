@@ -143,7 +143,6 @@ const config: ExpoConfig = {
         cameraPermission: "The app allows you to take photos for your doggie's profile.",
       },
     ],
-    "@bugsnag/plugin-expo-eas-sourcemaps",
     // Wires the source-controlled `Pegada.storekit` fixture into the iOS
     // scheme so simulator runs (local + CI) can resolve real product pricing
     // without an App Store sandbox session. Plugin is a no-op when the file
@@ -230,9 +229,6 @@ const config: ExpoConfig = {
   },
   extra: {
     oneSignalAppId: "",
-    bugsnag: {
-      apiKey: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY,
-    },
     eas: {
       projectId: "cadfd124-f01c-4d16-910e-1455f62a3b03",
     },

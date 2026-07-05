@@ -1,9 +1,5 @@
-// Init Bugsnag
-import "./start";
-
-import Bugsnag from "@bugsnag/js";
-
 import { config } from "../shared/config";
+import { posthog } from "../shared/posthog";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sendError = (error: any) => {
@@ -12,7 +8,7 @@ export const sendError = (error: any) => {
     console.error(error);
   }
 
-  Bugsnag.notify(error);
+  posthog.captureException(error);
 };
 
 export const logDebug = (...props: unknown[]) => {

@@ -12,10 +12,7 @@ const configSchema = z.object({
   /** GENERAL */
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
-  /** LOGGING */
-  BUGSNAG_API_KEY: z.string(),
-
-  /** POSTHOG */
+  /** POSTHOG (analytics + error tracking + feature flags) */
   POSTHOG_API_KEY: z.string(),
   POSTHOG_HOST: z.string(),
 

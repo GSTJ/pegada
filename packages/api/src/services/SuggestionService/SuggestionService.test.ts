@@ -11,10 +11,14 @@ import { dogSafeSchema } from "../../dtos/dogDto";
 import { SwipeService } from "../SwipeService";
 import { SuggestionService } from "./SuggestionService";
 
-jest.mock("@bugsnag/js", () => ({
-  start: jest.fn(),
-  notify: jest.fn(),
-  setContext: jest.fn(),
+jest.mock("../../shared/posthog", () => ({
+  posthog: {
+    captureException: jest.fn(),
+    capture: jest.fn(),
+    identify: jest.fn(),
+    isFeatureEnabled: jest.fn(),
+    shutdown: jest.fn(),
+  },
 }));
 
 afterAll(async () => {
