@@ -37,7 +37,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🏗 Setup Turborepo Cache
-        uses: rharkor/caching-for-turbo@v2
+        uses: rharkor/caching-for-turbo@v2.5.0
 
       - name: 🧹 Dedupe
         run: pnpm dedupe --check
