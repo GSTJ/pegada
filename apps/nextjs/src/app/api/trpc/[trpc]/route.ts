@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { ipAddress } from "@vercel/functions";
 
 import { appRouter, createTRPCContext } from "@pegada/api";
 import { config } from "@pegada/api/shared/config";
@@ -42,7 +43,7 @@ const handleRatelimiter = async ({
     return;
   }
 
-  const ip = req.ip ?? "127.0.0.1";
+  const ip = ipAddress(req) ?? "127.0.0.1";
 
   const { limit, remaining, reset, success } = await loggedOutRatelimit.limit(ip);
 
