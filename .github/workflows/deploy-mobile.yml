@@ -37,7 +37,7 @@ jobs:
           path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-"
+            ${{ runner.os }}-pnpm-store-
 
       - name: 🏗 Setup Node
         uses: actions/setup-node@v6
@@ -76,9 +76,7 @@ jobs:
         run: eas update --auto --non-interactive
         working-directory: apps/mobile
         env:
-          EXPO_PUBLIC_AMPLITUDE_API_KEY: ${{ secrets.EXPO_PUBLIC_AMPLITUDE_API_KEY }}
           EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
-          EXPO_PUBLIC_BUGSNAG_API_KEY: ${{ secrets.EXPO_PUBLIC_BUGSNAG_API_KEY }}
           EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
           EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY }}
           EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY }}
@@ -87,8 +85,10 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
           GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
           EXPO_PUBLIC_ENV: production
+          EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
+          EXPO_PUBLIC_POSTHOG_HOST: ${{ secrets.EXPO_PUBLIC_POSTHOG_HOST }}
 
-      - name: 📩 Upload Source Maps
-        run: ./.github/scripts/upload-sourcemaps.sh
-        env:
-          EXPO_PUBLIC_BUGSNAG_API_KEY: ${{ secrets.EXPO_PUBLIC_BUGSNAG_API_KEY }}
+      # TODO: Bugsnag sourcemap upload removed (dead vendor, replaced by PostHog).
+      # PostHog RN doesn't ship an equivalent build-time sourcemap upload CLI today;
+      # its error tracking relies on SDK-side capture (PostHogErrorBoundary / autocapture),
+      # not symbolication of uploaded maps. Revisit if PostHog adds one.
