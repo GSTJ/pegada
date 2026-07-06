@@ -381,6 +381,23 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # Needed here (not just in the downstream test jobs) because the
+      # post-build liveness check below uses `maestro hierarchy` to
+      # verify whichever .app we produced (swapped or freshly built)
+      # actually boots before we upload it.
+      - name: Cache Maestro
+        uses: actions/cache@v5
+        with:
+          path: ~/.maestro
+          key: maestro-${{ runner.os }}-2.6.0
+
+      - name: Install Maestro
+        run: |
+          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          fi
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
       # @expo/fingerprint hashes exactly the native-affecting inputs
       # (config plugins' resolved output, native module versions, native
       # config fields) rather than the whole monorepo lockfile. Two runs
@@ -1170,6 +1187,65 @@ jobs:
               echo "::endgroup::"
               exit 65
             }
+
+      # Same safety net as the required build: verify whichever .app we
+      # ended up with (swapped or freshly built) actually boots before
+      # every extended shard downloads and depends on it.
+      - name: Cache Maestro
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: ~/.maestro
+          key: maestro-${{ runner.os }}-2.6.0
+
+      - name: Install Maestro
+        if: steps.preflight.outputs.skip != 'true'
+        run: |
+          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          fi
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Boot simulator + verify .app liveness
+        if: steps.preflight.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          DEVICE_ID=$(xcrun simctl list devices available --json \
+            | SIM_DEVICE="$SIM_DEVICE" SIM_RUNTIME_PREFIX="$SIM_RUNTIME_PREFIX" python3 -c "
+          import json,os,sys,re
+          want_name=os.environ['SIM_DEVICE']
+          want_runtime=os.environ['SIM_RUNTIME_PREFIX']
+          data=json.load(sys.stdin)['devices']
+          candidates=[]
+          for runtime,devices in data.items():
+              if 'iOS' not in runtime: continue
+              m=re.search(r'iOS-(\\d+)', runtime)
+              if not m: continue
+              normalized=f'iOS {m.group(1)}'
+              if not normalized.startswith(want_runtime): continue
+              for dev in devices:
+                  if dev.get('name')==want_name:
+                      candidates.append((runtime, dev['udid']))
+          candidates.sort(reverse=True)
+          print(candidates[0][1] if candidates else '')
+          ")
+          if [ -z "$DEVICE_ID" ]; then
+            echo "::error::No simulator matching device='$SIM_DEVICE' runtime prefix='$SIM_RUNTIME_PREFIX'"
+            exit 1
+          fi
+          xcrun simctl boot "$DEVICE_ID" || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+          xcrun simctl launch "$DEVICE_ID" app.pegada
+          sleep 20
+          if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then
+            echo "[verify] PASS - .app is alive (signin-email present)"
+          else
+            echo "::error::[verify] FAIL - built .app did not reach SignIn. Refusing to upload a broken artifact."
+            exit 1
+          fi
 
       - name: Upload .app artifact
         if: steps.preflight.outputs.skip != 'true'
