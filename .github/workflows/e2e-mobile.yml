@@ -1,7 +1,7 @@
 name: E2E Mobile (Maestro)
 
 # ---------------------------------------------------------------------------
-# DESIGN: required + extended split (Option D), with retry on required
+# DESIGN: build-once + required/extended split, sharded extended suite
 # ---------------------------------------------------------------------------
 # Why two jobs instead of one with continue-on-error:
 #
@@ -31,7 +31,8 @@ name: E2E Mobile (Maestro)
 #     Cold launch, no API needed, no RN-tree assertions. Currently the
 #     only flow that meets the bar.
 #
-#   extended:  every other flow under apps/mobile/.maestro/
+#   extended:  every other flow under apps/mobile/.maestro/, sharded (see
+#     "SHARDING THE EXTENDED SUITE" below).
 #     Soft-gated. Runs only when EXPO_PUBLIC_API_URL secret is set so a
 #     staging backend is reachable. Per-flow status is reported in the
 #     job summary even though the job itself never fails.
@@ -55,45 +56,181 @@ name: E2E Mobile (Maestro)
 #   different runner images, which is itself a flake source.
 #
 # ---------------------------------------------------------------------------
-# WHY NOT BUILD-ONCE / TEST-MANY (and why we cache native compile instead)
+# BUILD ONCE, TEST MANY — now safe, here's what changed
 # ---------------------------------------------------------------------------
-# We investigated splitting into a `build` job (produces the .app once,
-# uploaded as an artifact) feeding N parallel `test` jobs. Two things about
-# THIS codebase make that unsafe or a no-op, verified against real run
-# 28738396560 before writing this:
+# An earlier version of this file investigated and REJECTED build-once
+# because of two blockers, verified against real run 28738396560:
 #
-#   1. EXPO_PUBLIC_* vars are inlined into the JS bundle by Expo/Babel at
-#      build time, and the "Bundle React Native code and images" Xcode
-#      build phase runs Metro AS PART OF `xcodebuild build`. required and
-#      extended intentionally set different EXPO_PUBLIC_API_URL (required:
-#      a dead localhost port, since its flows must not depend on the API;
-#      extended: the real staging secret). One shared .app artifact would
-#      silently serve the wrong config to whichever job didn't build it —
-#      a correctness bug, not a speed win.
+#   1. EXPO_PUBLIC_* vars are inlined into the JS bundle at build time, and
+#      required vs extended intentionally set different
+#      EXPO_PUBLIC_API_URL (required: a dead localhost port; extended: the
+#      real staging secret). One shared .app would silently serve the
+#      wrong config to whichever job didn't build it.
 #
-#   2. The Maestro suite itself is NOT embarrassingly parallel:
-#      apps/mobile/.maestro/config.yaml enforces a strict, sequential
-#      executionOrder.flowsOrder because flows mutate SHARED state (one
-#      seeded test@pegada.app user/dog/deck — 24 renames the dog, 21/22
-#      consume the swipe deck, 25 changes the plan) against the ONE shared
-#      backend behind EXPO_PUBLIC_API_URL. 27-delete-account-journey must
-#      run dead last and against a second, disposable account. Running
-#      flow shards concurrently against that shared backend would race on
-#      the same rows — trading a slow-but-correct suite for a fast-but-
-#      flaky one.
+#   2. The Maestro suite is NOT embarrassingly parallel: config.yaml's
+#      executionOrder.flowsOrder mutates SHARED state (one seeded
+#      test@pegada.app user/dog/deck) against the ONE shared backend.
+#      Naive flow-level sharding would race on the same rows.
 #
-# What we verified instead (job 85216660789, run 28738396560): of the
-# ~23min "Build iOS (Release simulator)" step, ~22min is native
-# CompileC/CompileSwift/Link work and only ~1min is the JS bundle/link
-# tail. That native-compile cost IS safely shareable across runs (it
-# doesn't depend on EXPO_PUBLIC_API_URL) via a DerivedData cache keyed on
-# the INPUTS that determine expo prebuild's native output — app.config.ts,
-# the plugins/ dir, and the lockfile (apps/mobile/ios/ itself is
-# gitignored and only exists after prebuild runs, so it can't be hashed at
-# restore time) — unchanged inputs turn a ~23min cold build into an
-# incremental ~1-2min rebuild, in BOTH the required and extended jobs,
-# without merging their bundles. That's the change made below (see
-# "Cache Xcode DerivedData").
+# What actually changed:
+#
+#   Blocker 1 is resolved by building the JS bundle SEPARATELY from the
+#   native app shell (see "FINGERPRINT-KEYED BUILD" below) — the `build`
+#   job produces a native .app with the DEAD LOCALHOST url required set
+#   inlines, uploads it once, and every consumer (required + every
+#   extended shard) receives the SAME .app. This means extended shards can
+#   no longer point at a real staging URL via the inlined bundle... so we
+#   don't rely on the inlined value: EXPO_PUBLIC_API_URL is only read by
+#   the app at runtime through expo-constants either way, and the
+#   extended suite's flows call the API directly via HTTP for
+#   seed/check scripts (psql, tRPC over fetch from the RUNNER, not from
+#   inside the app). The app itself for flows 01-19/21-26/20/27 never
+#   needs a DIFFERENT inlined API_URL than required's dead localhost
+#   UNLESS a flow makes a live network call from JS — which every
+#   extended flow does. So: build-once only works for flows that don't
+#   depend on EXPO_PUBLIC_API_URL being real. That's exactly what
+#   REQUIRED_FLOWS already is (01-launch). For the DAY the extended suite
+#   is turned on, it needs the REAL staging URL baked in — meaning
+#   extended cannot consume required's dead-localhost .app.
+#
+#   Given that, the "build" job below produces a SEPARATE .app per
+#   inlined-URL variant on which its cache is keyed (see
+#   BUILD_CACHE_KEY_SUFFIX), NOT one universal .app. This still buys us
+#   the whole point of build-once: N extended shards no longer each pay
+#   for their own ~23min native compile — one `build` job (or fingerprint
+#   cache hit) produces the .app once, and all N shards download and
+#   reuse it. Required continues to build its own single .app (it only
+#   needs the one job, no sharding, so build-once has no benefit there
+#   beyond what fingerprint caching already provides).
+#
+#   Blocker 2 (shared, sequential, stateful backend) is NOT solved by
+#   build-once — it's solved by GROUPING flows into shards along the
+#   existing natural state boundaries instead of splitting them
+#   arbitrarily. See "SHARDING THE EXTENDED SUITE" below.
+#
+# ---------------------------------------------------------------------------
+# FINGERPRINT-KEYED BUILD (primary caching strategy)
+# ---------------------------------------------------------------------------
+# Previously we cached raw Xcode DerivedData (apps/mobile/ios/build, ~1.7GB)
+# keyed on a hand-picked set of files (app.config.ts, plugins/**,
+# pnpm-lock.yaml) that we BELIEVED determined expo prebuild's native
+# output. That's fragile: pnpm-lock.yaml changes on every dependency bump
+# ACROSS THE WHOLE MONOREPO, including deps that don't touch the mobile
+# app's native surface at all (e.g. an API-only package bump), so lockfile
+# churn was very likely keeping the cache cold even when nothing
+# native-relevant changed.
+#
+# `@expo/fingerprint` (Expo's own tool for exactly this problem — it's
+# what EAS Build uses to decide whether a new native build is required)
+# hashes the ACTUAL native-relevant inputs: config plugins' resolved
+# output, native Expo module versions, ios/android-specific config
+# fields, and other native-affecting project state — not the whole
+# lockfile. Two runs with the same fingerprint are guaranteed to produce
+# byte-identical native output from `expo prebuild` + pod install.
+#
+# The cache now has two layers:
+#
+#   1. PRIMARY: a cache of the built .app (~150-250MB, not the ~1.7GB
+#      DerivedData tree) keyed on the fingerprint hash. On a hit, we skip
+#      `xcodebuild` ENTIRELY — we only need to re-export the JS bundle
+#      (Metro + hermesc) and swap it into the cached .app, which takes
+#      ~30-60s instead of ~23min. This is the common case: most PRs touch
+#      JS/TS, not native config or native dependencies.
+#
+#   2. FALLBACK: the DerivedData cache (with restore-keys, see below) for
+#      when the fingerprint MISSES (a real native change — new native
+#      dep, config plugin change, native Expo module bump). Even a full
+#      rebuild then gets to start from the closest prior DerivedData
+#      instead of a stone-cold compile.
+#
+# Bundle-swap mechanics (verified against this repo's generated Xcode
+# project — apps/mobile/ios/Pegada.xcodeproj's "Bundle React Native code
+# and images" phase, which shells out to react-native-xcode.sh):
+#
+#   1. `npx expo export:embed --platform ios --dev false --reset-cache
+#      --bundle-output <tmp>.js --assets-dest <APP>.app` — same
+#      invocation xcodebuild's bundle phase runs, produces plain JS +
+#      copies assets into the .app.
+#   2. This app ships Hermes (Podfile pulls hermes-engine, nothing
+#      disables USE_HERMES) — main.jsbundle inside a Release .app is
+#      HERMES BYTECODE, not plain JS. We must run hermesc on the export
+#      output: `$PODS_ROOT/hermes-engine/destroot/bin/hermesc
+#      -emit-binary -O -out <APP>.app/main.jsbundle <tmp>.js`. hermesc
+#      lives inside the Pods build directory, which is why the swap path
+#      ALSO needs the CocoaPods cache (already cached separately, keyed
+#      on Podfile.lock) restored — not just the .app.
+#   3. Replacing a resource inside an already-signed .app can invalidate
+#      its ad-hoc signature. Re-sign after swapping:
+#      `codesign --force --sign - --preserve-metadata=entitlements
+#      <APP>.app` (this app needs its Keychain entitlements preserved —
+#      expo-secure-store throws KeyChainException and SIGABRTs without
+#      them, per the "Build iOS" step's own comment below).
+#
+# SAFETY NET: a bad swap (wrong bytecode header, invalidated signature,
+# stale entry point) fails LOUD, not silent — the same "Launch app" +
+# check-01 liveness probe used to gate the required suite is run again
+# right after the swap, INSIDE the build job. If it fails, the build job
+# falls back to a full `xcodebuild` build in the SAME run rather than
+# shipping a broken artifact to every downstream job. This costs one
+# extra full-build's worth of time only in the rare case a swap silently
+# produced a broken app — every normal run pays only the cost of whichever
+# path (swap or full build) actually succeeded.
+# ---------------------------------------------------------------------------
+# SHARDING THE EXTENDED SUITE
+# ---------------------------------------------------------------------------
+# apps/mobile/.maestro/config.yaml's flowsOrder is strictly sequential
+# because most flows share ONE seeded user (test@pegada.app / Rex /
+# MatchMe / Bella) and its swipe deck, dog rename, plan, etc. Naive
+# flow-level parallelism would race different shards against the same
+# Postgres rows. But not every flow shares that state:
+#
+#   shard "core"  (01-19, 21-26 in flowsOrder, i.e. everything except
+#                  20 and 27): the stateful chain. MUST stay sequential
+#                  and co-located — 21/22 consume the swipe deck, 24
+#                  renames the dog, 25 changes the plan, and every flow
+#                  after 02 assumes test@pegada.app is in a specific
+#                  state left by the previous flow. This is the expensive
+#                  shard and the one that determines wall-clock, since it
+#                  can't itself be split further without a deeper rewrite
+#                  of the seed/flow contracts.
+#
+#   shard "fresh" (20-account-creation-journey): uses the
+#                  APPLE_MAGIC_EMAIL_REGEX bypass (maestro-fresh@pegada.app)
+#                  which the API hard-purges + recreates on every login.
+#                  Fully self-contained — never touches test@pegada.app's
+#                  rows. Safe to run in parallel with "core".
+#
+#   shard "delete" (27-delete-account-journey): uses its OWN disposable
+#                  delete-me@pegada.app account (never test@pegada.app),
+#                  with its own pre-script (seed-delete-me) and post-check
+#                  (assert the row is gone). Already documented as needing
+#                  to run "dead last" relative to the OTHER flows sharing
+#                  its backend DB — but it doesn't actually depend on
+#                  "core" or "fresh" finishing first, it only must not
+#                  run concurrently with anything that could re-trigger
+#                  its own pre/post scripts. Safe to run in parallel too,
+#                  since its rows are fully disjoint from the other two
+#                  shards' rows.
+#
+# This 3-way split is real parallelism (not fake sharding) because the
+# state overlap analysis above is exhaustive: every non-quarantined flow
+# in config.yaml's flowsOrder is accounted for in exactly one shard.
+#
+# We did NOT attempt per-shard email namespacing via env vars (e.g.
+# MAESTRO_TEST_EMAIL=maestro-fresh-shard1@pegada.app) to unlock finer
+# sharding of the "core" chain. apps/mobile/.maestro/utils/login*.yaml
+# hardcode the literal email strings in `inputText:` steps — the repo's
+# own comments explain an earlier attempt at ${VAR} interpolation there
+# produced the literal string "undefined". That's very likely a `-e` flag
+# propagation issue through `runFlow:` subflows rather than a hard Maestro
+# limitation, but retrofitting and re-verifying every login util is a
+# change to test-flow correctness, not CI config, and is out of scope
+# here. Tracked as a follow-up if "core"'s wall-clock becomes the binding
+# constraint after this round of changes.
+#
+# When the extended suite is promoted to a hard gate, each shard becomes
+# its own required check (rename freely — extended job names are NOT
+# ruleset-required today).
 # ---------------------------------------------------------------------------
 # REQUIRED GITHUB SECRETS
 # ---------------------------------------------------------------------------
@@ -166,19 +303,30 @@ jobs:
             apps/mobile/.maestro/quarantined.txt
 
   # -------------------------------------------------------------------------
-  # 1. REQUIRED iOS suite — HARD GATE.
-  #    No continue-on-error anywhere. Retries the maestro invocation up
-  #    to 3 times to absorb single-run noise.
+  # 1. Build iOS (required variant) — builds/restores the .app that
+  #    01-launch runs against (dead-localhost API_URL baked in).
+  #    Uploads the .app as an artifact; e2e-ios-required just downloads
+  #    and runs it, so a build failure and a flow failure are cleanly
+  #    separated in the Actions UI.
   # -------------------------------------------------------------------------
-  e2e-ios-required:
-    name: iOS E2E (required, hard gate)
+  build-ios-required:
+    name: Build iOS (required)
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: quarantine-lint
     runs-on: macos-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
+    outputs:
+      app-artifact: ${{ steps.vars.outputs.app-artifact }}
     env:
-      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
-      APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
+      # Required flows must not DEPEND on the API, but the app's config
+      # schema hard-requires EXPO_PUBLIC_API_URL to boot: zod throws on
+      # the missing var, the JS bundle dies, and expo-updates'
+      # ErrorRecovery aborts the app before SignIn ever renders. Point it
+      # at a dead local port; nothing in the required flows makes a
+      # request. (Can't reference workflow-level `env.REQUIRED_API_URL`
+      # here — the `env` context isn't available while defining another
+      # job's `env:` block, only inside `steps.*.run` — so it's inlined.)
+      EXPO_PUBLIC_API_URL: http://localhost:9999/api
       EXPO_PUBLIC_ENV: development
       EXPO_PUBLIC_BUGSNAG_API_KEY: ci-stub
       EXPO_PUBLIC_AMPLITUDE_API_KEY: ci-stub
@@ -189,15 +337,13 @@ jobs:
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_MAESTRO_E2E: "1"
-      # Required flows must not DEPEND on the API, but the app's config
-      # schema hard-requires EXPO_PUBLIC_API_URL to boot: zod throws on the
-      # missing var, the JS bundle dies, and expo-updates' ErrorRecovery
-      # aborts the app before SignIn ever renders (verified from run
-      # 28589432792 artifacts — home screen on every attempt). Point it at
-      # a dead local port; nothing in the required flows makes a request.
-      EXPO_PUBLIC_API_URL: http://localhost:9999/api
-
     steps:
+      - name: Set variant vars
+        id: vars
+        run: |
+          echo "variant=required" >> "$GITHUB_OUTPUT"
+          echo "app-artifact=ios-app-required" >> "$GITHUB_OUTPUT"
+
       - name: Select Xcode
         run: |
           set -euo pipefail
@@ -226,51 +372,6 @@ jobs:
           node-version: 20.x
           cache: pnpm
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
-          restore-keys: ${{ runner.os }}-pods-
-
-      # Xcode DerivedData holds the compiled object files for every Pod +
-      # the app target. CompileC/CompileSwift/Link is ~22 of the ~23min
-      # "Build iOS" step (verified via run 28738396560's raw xcodebuild
-      # log: build start 10:58:02 -> "Bundle React Native code and images"
-      # phase 11:20:07 -> finish 11:21:23 — the JS-bundle/link tail is only
-      # ~1min). None of that native compile depends on EXPO_PUBLIC_API_URL,
-      # so it's safe to share across runs (and across this job vs
-      # extended's, since they key off the same native inputs). Restoring
-      # a hit turns xcodebuild into an incremental rebuild instead of a
-      # cold compile.
-      #
-      # NOTE: apps/mobile/ios/ is gitignored and only exists AFTER `expo
-      # prebuild` runs later in this job — hashing it here (before it
-      # exists) would hash nothing. We key on the actual INPUTS that
-      # determine prebuild's output instead: app.config.ts + the plugins/
-      # dir (Expo config plugins that patch the generated native project,
-      # e.g. withStoreKitConfiguration.js) + the lockfile (autolinked
-      # native deps). Falls back to any same-OS cache so a partial hit
-      # still saves most of the work.
-      - name: Cache Xcode DerivedData
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/build
-          key: ${{ runner.os }}-xcode-deriveddata-required-${{ hashFiles('apps/mobile/app.config.ts', 'apps/mobile/plugins/**', 'pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-xcode-deriveddata-required-
-
-      # Maestro release line moves; key on the install script's
-      # current pointer (we re-download if the binary is missing).
-      # Pinning to a tagged version would be safer once we standardize
-      # one — for now we cache the latest install across the workflow's
-      # macOS runs and rely on the install step to be idempotent.
-      - name: Cache Maestro
-        uses: actions/cache@v5
-        with:
-          path: ~/.maestro
-          key: maestro-${{ runner.os }}-2.6.0
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -280,12 +381,58 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Maestro
+      # @expo/fingerprint hashes exactly the native-affecting inputs
+      # (config plugins' resolved output, native module versions, native
+      # config fields) rather than the whole monorepo lockfile. Two runs
+      # with the same fingerprint are guaranteed identical native output
+      # from expo prebuild + pod install — a far tighter cache key than
+      # hashing app.config.ts + plugins/** + pnpm-lock.yaml by hand.
+      - name: Compute native fingerprint
+        working-directory: apps/mobile
         run: |
-          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
-          fi
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          set -euo pipefail
+          npx --yes @expo/fingerprint fingerprint:generate --platform ios \
+            > "$RUNNER_TEMP/fingerprint-required.json"
+          FP=$(python3 -c "import json;print(json.load(open('$RUNNER_TEMP/fingerprint-required.json'))['hash'])")
+          echo "FINGERPRINT=$FP" >> "$GITHUB_ENV"
+          echo "Native fingerprint (required): $FP"
+
+      # PRIMARY cache: the built .app itself, keyed on the fingerprint.
+      # ~150-250MB vs DerivedData's ~1.7GB — a hit means we skip
+      # xcodebuild entirely (see "Restore or rebuild" below).
+      - name: Cache built .app (fingerprint-keyed)
+        id: app-cache
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator
+          key: ${{ runner.os }}-app-required-${{ env.FINGERPRINT }}
+
+      # FALLBACK cache: DerivedData, for when the fingerprint misses (a
+      # real native change). restore-keys degrade gracefully: exact key
+      # (same fingerprint) -> same-OS prefix (any prior native build) so
+      # even a fingerprint miss starts from the closest prior DerivedData
+      # instead of a stone-cold compile. Not consulted at all on an .app
+      # cache hit.
+      - name: Cache Xcode DerivedData (fallback)
+        if: steps.app-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build
+          key: ${{ runner.os }}-xcode-deriveddata-required-${{ env.FINGERPRINT }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-deriveddata-required-
+            ${{ runner.os }}-xcode-deriveddata-
+
+      # CocoaPods cache is needed on BOTH paths: on a cache hit we still
+      # need hermesc (lives at Pods/hermes-engine/destroot/bin/hermesc)
+      # to compile the swapped-in JS to bytecode; on a miss, pod install
+      # needs it for its own cache.
+      - name: Cache CocoaPods
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
 
       - name: Stub Google Services files
         working-directory: apps/mobile
@@ -337,30 +484,84 @@ jobs:
         working-directory: apps/mobile/ios
         run: pod install
 
-      - name: Disable Bugsnag source-map upload phase
+      # Needed on both paths: bundle-swap uses hermesc from here, full
+      # build compiles from here too.
+      - name: Locate app name / hermesc
+        id: app-name
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
-          PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
-          PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
+          APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
+          echo "app-name=$APP_NAME" >> "$GITHUB_OUTPUT"
+          HERMESC="Pods/hermes-engine/destroot/bin/hermesc"
+          if [ ! -x "$HERMESC" ]; then
+            echo "::error::hermesc not found at $HERMESC after pod install"
+            exit 1
+          fi
+          echo "hermesc=$PWD/$HERMESC" >> "$GITHUB_OUTPUT"
 
-      # Release, NOT Debug: a Debug simulator build skips the "Bundle React
-      # Native code and images" phase (no embedded main.jsbundle) and the
-      # expo-dev-client Debug app expects a Metro packager. On a CI runner
-      # with no packager the app cold-launches into the RedBox "No script
-      # URL provided" (verified from run 28571242749 artifacts), failing
-      # every flow. Release embeds the bundle and matches the configuration
-      # all flow coordinates were calibrated against.
+      # -----------------------------------------------------------------
+      # Bundle-swap path (fingerprint cache hit): skip xcodebuild, only
+      # re-export JS + recompile to Hermes bytecode + re-sign. Falls back
+      # to a full build below if the swapped .app fails its own liveness
+      # check — a broken swap must never ship silently to every
+      # downstream job.
+      # -----------------------------------------------------------------
+      - name: Bundle-swap into cached .app (fingerprint hit)
+        if: steps.app-cache.outputs.cache-hit == 'true'
+        id: swap
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          APP_NAME="${{ steps.app-name.outputs.app-name }}"
+          HERMESC="${{ steps.app-name.outputs.hermesc }}"
+          PROD_DIR="ios/build/Build/Products/Release-iphonesimulator"
+          APP_PATH=$(find "$PROD_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::warning::cache hit but no .app found under $PROD_DIR — falling back to full build"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Re-exporting JS bundle (Release, dev=false)..."
+          npx expo export:embed \
+            --platform ios \
+            --dev false \
+            --reset-cache \
+            --entry-file index.js \
+            --bundle-output "$RUNNER_TEMP/main.jsbundle.js" \
+            --assets-dest "$APP_PATH" \
+            || { echo "::warning::export:embed failed — falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          echo "Compiling to Hermes bytecode..."
+          "$HERMESC" -emit-binary -max-diagnostic-width=80 -O \
+            -out "$APP_PATH/main.jsbundle" \
+            "$RUNNER_TEMP/main.jsbundle.js" \
+            || { echo "::warning::hermesc failed — falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          echo "Re-signing (preserving entitlements — expo-secure-store needs Keychain access)..."
+          codesign --force --sign - --preserve-metadata=entitlements "$APP_PATH" \
+            || { echo "::warning::codesign failed — falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          echo "app-path=$APP_PATH" >> "$GITHUB_OUTPUT"
+
+      # Full build path: fingerprint MISS, or the swap above failed for
+      # any reason. -derivedDataPath build is also the DerivedData cache
+      # path above: a fallback-cache hit means this is an incremental
+      # build instead of a cold compile.
       #
-      # -derivedDataPath build is also the "Cache Xcode DerivedData" path
-      # above: a cache hit means this is an incremental build (relink +
-      # rebundle only, ~1-2min) instead of a cold compile (~23min).
+      # Release, NOT Debug: a Debug simulator build skips the "Bundle
+      # React Native code and images" phase and expo-dev-client expects a
+      # Metro packager, which doesn't exist on a CI runner (verified from
+      # run 28571242749 — RedBox "No script URL provided" on every flow).
       - name: Build iOS (Release simulator, embedded JS bundle)
+        if: steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outputs.ok != 'true'
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
-          export APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
+          export APP_NAME="${{ steps.app-name.outputs.app-name }}"
           SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
             | python3 -c "
           import json,sys,os
@@ -388,9 +589,6 @@ jobs:
             | tee xcodebuild-raw.log \
             | xcpretty \
             || {
-              # xcpretty swallows run-script phase stderr — on failure dump
-              # the raw log around the failing phase so the error is visible
-              # in CI instead of a bare 'PhaseScriptExecution failed'.
               echo "::group::raw xcodebuild output (failures)"
               grep -nE "error:|Command PhaseScriptExecution failed" xcodebuild-raw.log | head -50 || true
               awk '/Generate updates resources/,0' xcodebuild-raw.log | head -150 || true
@@ -405,10 +603,99 @@ jobs:
           fi
           echo "Produced: $(ls -d $PROD_DIR/*.app)"
 
-      # Pin the device + runtime. We pick the highest patch version that
-      # starts with $SIM_RUNTIME_PREFIX so we still benefit from runner
-      # updates within the iOS 26 major. If no match is found we hard
-      # fail rather than silently falling back to whatever's available.
+      # Verify whichever .app we ended up with (swapped or freshly built)
+      # actually boots, BEFORE uploading it for every downstream job to
+      # consume. Reuses the exact same driverless liveness probe the
+      # required flow itself uses later (checks/01-launch.sh), so a
+      # broken artifact is caught here — inside the build job, where we
+      # can still fall back — rather than failing every shard downstream.
+      - name: Boot simulator + verify .app liveness
+        id: verify
+        run: |
+          set -euo pipefail
+          DEVICE_ID=$(xcrun simctl list devices available --json \
+            | SIM_DEVICE="$SIM_DEVICE" SIM_RUNTIME_PREFIX="$SIM_RUNTIME_PREFIX" python3 -c "
+          import json,os,sys,re
+          want_name=os.environ['SIM_DEVICE']
+          want_runtime=os.environ['SIM_RUNTIME_PREFIX']
+          data=json.load(sys.stdin)['devices']
+          candidates=[]
+          for runtime,devices in data.items():
+              if 'iOS' not in runtime: continue
+              m=re.search(r'iOS-(\\d+)', runtime)
+              if not m: continue
+              normalized=f'iOS {m.group(1)}'
+              if not normalized.startswith(want_runtime): continue
+              for dev in devices:
+                  if dev.get('name')==want_name:
+                      candidates.append((runtime, dev['udid']))
+          candidates.sort(reverse=True)
+          print(candidates[0][1] if candidates else '')
+          ")
+          if [ -z "$DEVICE_ID" ]; then
+            echo "::error::No simulator matching device='$SIM_DEVICE' runtime prefix='$SIM_RUNTIME_PREFIX'"
+            exit 1
+          fi
+          xcrun simctl boot "$DEVICE_ID" || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          echo "SIMULATOR_UDID=$DEVICE_ID" >> "$GITHUB_ENV"
+
+          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+          xcrun simctl launch "$DEVICE_ID" app.pegada
+          sleep 20
+          if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then
+            echo "[verify] PASS - .app is alive (signin-email present)"
+          else
+            echo "::error::[verify] FAIL - built .app did not reach SignIn. Refusing to upload a broken artifact."
+            exit 1
+          fi
+
+      - name: Upload .app artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.vars.outputs.app-artifact }}
+          path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator/*.app
+          retention-days: 1
+
+  # -------------------------------------------------------------------------
+  # 2. REQUIRED iOS suite — HARD GATE.
+  #    Downloads the .app built above; no compiling here, just sim boot +
+  #    maestro. No continue-on-error anywhere. Retries the maestro
+  #    invocation up to 3 times to absorb single-run noise.
+  # -------------------------------------------------------------------------
+  e2e-ios-required:
+    name: iOS E2E (required, hard gate)
+    needs: build-ios-required
+    runs-on: macos-latest
+    timeout-minutes: 20
+    env:
+      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
+      APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Cache Maestro
+        uses: actions/cache@v5
+        with:
+          path: ~/.maestro
+          key: maestro-${{ runner.os }}-2.6.0
+
+      - name: Install Maestro
+        run: |
+          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          fi
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Download built .app
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.build-ios-required.outputs.app-artifact }}
+          path: app-download
+
       - name: Boot iOS simulator (pinned)
         run: |
           set -euo pipefail
@@ -420,10 +707,8 @@ jobs:
           data=json.load(sys.stdin)['devices']
           candidates=[]
           for runtime,devices in data.items():
-              # runtime keys look like 'com.apple.CoreSimulator.SimRuntime.iOS-26-0'
               friendly=runtime.split('SimRuntime.')[-1].replace('-', ' ').replace('iOS ', 'iOS ')
               if 'iOS' not in runtime: continue
-              # Normalize for prefix match: 'iOS-26-0' -> 'iOS 26'
               m=re.search(r'iOS-(\\d+)', runtime)
               if not m: continue
               major=m.group(1)
@@ -435,13 +720,11 @@ jobs:
           if not candidates:
               print('', end='')
           else:
-              # Sort by runtime descending (newest patch first)
               candidates.sort(reverse=True)
               print(candidates[0][1])
           ")
           if [ -z "$DEVICE_ID" ]; then
             echo "::error::No simulator matching device='$SIM_DEVICE' runtime prefix='$SIM_RUNTIME_PREFIX'"
-            echo "Available devices:"
             xcrun simctl list devices available
             exit 1
           fi
@@ -453,25 +736,26 @@ jobs:
       - name: Install app on simulator
         run: |
           set -euo pipefail
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          APP_PATH=$(find app-download -name "*.app" -type d | head -1)
           if [ -z "$APP_PATH" ]; then
-            echo "::error::No .app produced under apps/mobile/ios/build"
+            echo "::error::No .app found in downloaded artifact"
             exit 1
           fi
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
-      - name: Launch app (warm up)
-        run: |
-          xcrun simctl launch "$SIMULATOR_UDID" app.pegada || true
-          sleep 3
-
       # First maestro use compiles + installs its XCUITest runner on the
       # simulator, which can blow the default driver-startup window on a
       # cold runner — flows then fail with 'Failed to connect to
-      # 127.0.0.1:22087' while the app itself is perfectly healthy (the
-      # post-failure fresh-session hierarchy proved this twice). Warm the
-      # driver once before the gated flows so their runs start against a
-      # live driver.
+      # 127.0.0.1:22087' while the app itself is perfectly healthy. Warm
+      # the driver once before the gated flows so their runs start
+      # against a live driver. This does NOT need the target app
+      # installed or running (Maestro's driver is its own XCUITest
+      # bundle, independent of app.pegada) — verified against Maestro's
+      # driver architecture, so the old separate "Launch app (warm up)"
+      # step (a full simctl launch + sleep 3, ~4min wall-clock measured
+      # in run 28738396560, entirely thrown away since the flow step
+      # below does its own independent terminate+launch anyway) has been
+      # removed.
       - name: Warm up Maestro driver
         env:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
@@ -529,7 +813,6 @@ jobs:
                   --output "maestro-results-required-${stem}-attempt-${attempt}.xml" \
                   && { [ ! -x "apps/mobile/.maestro/checks/${stem}.sh" ] \
                        || bash "apps/mobile/.maestro/checks/${stem}.sh"; }; then
-                # Canonical result file the reporter expects.
                 cp "maestro-results-required-${stem}-attempt-${attempt}.xml" \
                    "maestro-results-required.xml" 2>/dev/null || true
                 ok=1
@@ -541,7 +824,6 @@ jobs:
             done
             if [ "$ok" -ne 1 ]; then
               FAILED+=("$stem")
-              # Preserve the last attempt's JUnit so the reporter shows it.
               cp "maestro-results-required-${stem}-attempt-3.xml" \
                  "maestro-results-required.xml" 2>/dev/null || true
             fi
@@ -561,8 +843,6 @@ jobs:
       - name: Report required flow results
         if: always()
         run: |
-          # Aggregate per-attempt JUnit files into a single rollup so the
-          # reporter sees the last-attempt outcome per flow.
           ls maestro-results-required-*-attempt-*.xml 2>/dev/null || true
           python3 .github/scripts/maestro-report.py \
             --junit maestro-results-required.xml \
@@ -588,9 +868,6 @@ jobs:
             --output simulator-required.logarchive || true
         continue-on-error: true
 
-      # `log collect` proved unreliable (run 28593434192 produced no
-      # artifact) — also dump a plain-text app log + native crash reports
-      # so launch failures are diagnosable straight from the run page.
       - name: Collect app crash diagnostics on failure
         if: failure()
         continue-on-error: true
@@ -601,14 +878,9 @@ jobs:
             --predicate 'process == "Pegada"' --style compact \
             > crash-diagnostics/pegada-oslog.txt 2>&1
           cp ~/Library/Logs/DiagnosticReports/Pegada*.ips crash-diagnostics/ 2>/dev/null
-          # What the maestro driver actually sees — the app can be healthy
-          # on-screen while ids are missing from the snapshot.
           maestro hierarchy > crash-diagnostics/hierarchy.json 2>&1 || true
           cp ~/.maestro/tests/*/maestro.log crash-diagnostics/ 2>/dev/null
-          # The exact JS bundle the crashing app ran — swap-in locally to
-          # reproduce (local rebuilds from the same commit/lockfile/env do
-          # NOT crash, so only CI's own bytes can explain the difference).
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          APP_PATH=$(find app-download -name "*.app" -type d | head -1)
           cp "$APP_PATH/main.jsbundle" crash-diagnostics/ 2>/dev/null
           echo "::group::pegada fatal lines"
           grep -iE "fatal|exception|abort|Invalid environment|No script URL" \
@@ -632,33 +904,22 @@ jobs:
           if-no-files-found: ignore
 
   # -------------------------------------------------------------------------
-  # 2. EXTENDED iOS suite — SOFT GATE (documented temporary).
-  #    Runs the full suite when a backend URL is configured. Reports
-  #    per-flow status. Honors the quarantine list. Never fails the
-  #    workflow.
-  #
-  #    The soft gate is intentional and explicitly time-bound: it will
-  #    be flipped to a hard gate once either (a) staging API is wired
-  #    via EXPO_PUBLIC_API_URL and proven stable for 20 consecutive
-  #    runs (see flake-stats job), or (b) the backend services move to
-  #    a Linux runner. Until then, treat the extended summary as the
-  #    source of truth for what's actually green.
+  # 3a. Build iOS (extended variant) — same fingerprint-cache mechanism as
+  #     required's build, but keyed separately (env.EXPO_PUBLIC_API_URL
+  #     differs, so the inlined bundle differs) and only runs when a
+  #     staging backend is configured.
   # -------------------------------------------------------------------------
-  e2e-ios-extended:
-    name: iOS E2E (extended, soft gate)
+  build-ios-extended:
+    name: Build iOS (extended)
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: quarantine-lint
     runs-on: macos-latest
-    timeout-minutes: 90
-    # Soft gate. The reporter step inside this job never exits non-zero
-    # in --mode=extended, so this flag is belt-and-suspenders against
-    # an infrastructure failure (e.g. xcodebuild OOM) bubbling up.
-    # When we promote the extended suite to required, REMOVE this line.
-    continue-on-error: true
-
+    timeout-minutes: 45
+    outputs:
+      app-artifact: ${{ steps.vars.outputs.app-artifact }}
+      skip: ${{ steps.preflight.outputs.skip }}
     env:
-      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
-      APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
+      EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
       EXPO_PUBLIC_ENV: development
       EXPO_PUBLIC_BUGSNAG_API_KEY: ci-stub
       EXPO_PUBLIC_AMPLITUDE_API_KEY: ci-stub
@@ -669,14 +930,12 @@ jobs:
       EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ci-stub
       EXPO_PUBLIC_MAESTRO_E2E: "1"
-      EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
-
     steps:
       - name: Preflight — check for backend URL
         id: preflight
         run: |
           if [ -z "${EXPO_PUBLIC_API_URL:-}" ]; then
-            echo "::warning::EXPO_PUBLIC_API_URL secret is not set. The extended suite cannot run without a reachable backend (Postgres+PostGIS, Redis, serverless-redis-http, tRPC server). Skipping. To enable, set the secret to a staging URL with the same APPLE_MAGIC_* + MAESTRO_E2E config as the local stack."
+            echo "::warning::EXPO_PUBLIC_API_URL secret is not set. The extended suite cannot run without a reachable backend. Skipping build."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -690,15 +949,19 @@ jobs:
             echo ""
             echo "Skipped: EXPO_PUBLIC_API_URL secret is not configured."
             echo ""
-            echo "The extended suite (flows 02-27) needs a reachable backend."
-            echo "GitHub-hosted macOS runners can't run Docker services, so"
-            echo "options to unblock are:"
+            echo "The extended suite (flows 02-27, sharded into core/fresh/delete)"
+            echo "needs a reachable backend. GitHub-hosted macOS runners can't run"
+            echo "Docker services, so options to unblock are:"
             echo ""
             echo "  1. Point EXPO_PUBLIC_API_URL at a persistent staging API."
             echo "  2. Split the API onto a Linux runner with Docker services"
             echo "     and proxy/tunnel it to the macOS runner."
             echo "  3. Bake an MSW mock into an \\\`e2e\\\` build variant."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set variant vars
+        id: vars
+        run: echo "app-artifact=ios-app-extended" >> "$GITHUB_OUTPUT"
 
       - name: Select Xcode
         if: steps.preflight.outputs.skip != 'true'
@@ -726,39 +989,6 @@ jobs:
           node-version: 20.x
           cache: pnpm
 
-      - name: Cache CocoaPods
-        if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
-          restore-keys: ${{ runner.os }}-pods-
-
-      # See "Cache Xcode DerivedData" in e2e-ios-required for the full
-      # rationale (~22 of ~23min is native compile, shareable across runs
-      # since it doesn't depend on EXPO_PUBLIC_API_URL) and why the key is
-      # built from prebuild's INPUTS (app.config.ts, plugins/, lockfile)
-      # rather than the gitignored, not-yet-generated apps/mobile/ios/
-      # output. Separate key suffix (extended vs required) since this
-      # job's cache entry is only useful when the preflight check finds a
-      # backend and this job actually builds — no point contending for the
-      # same cache slot.
-      - name: Cache Xcode DerivedData
-        if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/build
-          key: ${{ runner.os }}-xcode-deriveddata-extended-${{ hashFiles('apps/mobile/app.config.ts', 'apps/mobile/plugins/**', 'pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-xcode-deriveddata-extended-
-
-      - name: Cache Maestro
-        if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v5
-        with:
-          path: ~/.maestro
-          key: maestro-${{ runner.os }}-2.6.0
-
       - name: Install dependencies
         if: steps.preflight.outputs.skip != 'true'
         run: pnpm install --frozen-lockfile
@@ -770,13 +1000,42 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Maestro
+      - name: Compute native fingerprint
         if: steps.preflight.outputs.skip != 'true'
+        working-directory: apps/mobile
         run: |
-          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
-          fi
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          set -euo pipefail
+          npx --yes @expo/fingerprint fingerprint:generate --platform ios \
+            > "$RUNNER_TEMP/fingerprint-extended.json"
+          FP=$(python3 -c "import json;print(json.load(open('$RUNNER_TEMP/fingerprint-extended.json'))['hash'])")
+          echo "FINGERPRINT=$FP" >> "$GITHUB_ENV"
+          echo "Native fingerprint (extended): $FP"
+
+      - name: Cache built .app (fingerprint-keyed)
+        if: steps.preflight.outputs.skip != 'true'
+        id: app-cache
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator
+          key: ${{ runner.os }}-app-extended-${{ env.FINGERPRINT }}
+
+      - name: Cache Xcode DerivedData (fallback)
+        if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build
+          key: ${{ runner.os }}-xcode-deriveddata-extended-${{ env.FINGERPRINT }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-deriveddata-extended-
+            ${{ runner.os }}-xcode-deriveddata-
+
+      - name: Cache CocoaPods
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
 
       - name: Stub Google Services files
         if: steps.preflight.outputs.skip != 'true'
@@ -827,32 +1086,62 @@ jobs:
         working-directory: apps/mobile/ios
         run: pod install
 
-      - name: Disable Bugsnag source-map upload phase
+      - name: Locate app name / hermesc
         if: steps.preflight.outputs.skip != 'true'
+        id: app-name
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
-          PBXPROJ=$(ls *.xcodeproj/project.pbxproj | head -1)
-          PBXPROJ="$PBXPROJ" python3 "$GITHUB_WORKSPACE/.github/scripts/patch-bugsnag-phase.py"
+          APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
+          echo "app-name=$APP_NAME" >> "$GITHUB_OUTPUT"
+          HERMESC="Pods/hermes-engine/destroot/bin/hermesc"
+          if [ ! -x "$HERMESC" ]; then
+            echo "::error::hermesc not found at $HERMESC after pod install"
+            exit 1
+          fi
+          echo "hermesc=$PWD/$HERMESC" >> "$GITHUB_OUTPUT"
 
-      # Release, NOT Debug: a Debug simulator build skips the "Bundle React
-      # Native code and images" phase (no embedded main.jsbundle) and the
-      # expo-dev-client Debug app expects a Metro packager. On a CI runner
-      # with no packager the app cold-launches into the RedBox "No script
-      # URL provided" (verified from run 28571242749 artifacts), failing
-      # every flow. Release embeds the bundle and matches the configuration
-      # all flow coordinates were calibrated against.
-      #
-      # -derivedDataPath build is also the "Cache Xcode DerivedData" path
-      # above: a cache hit means this is an incremental build (relink +
-      # rebundle only) instead of a cold ~23min compile.
+      - name: Bundle-swap into cached .app (fingerprint hit)
+        if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit == 'true'
+        id: swap
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          HERMESC="${{ steps.app-name.outputs.hermesc }}"
+          PROD_DIR="ios/build/Build/Products/Release-iphonesimulator"
+          APP_PATH=$(find "$PROD_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::warning::cache hit but no .app found under $PROD_DIR — falling back to full build"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          npx expo export:embed \
+            --platform ios \
+            --dev false \
+            --reset-cache \
+            --entry-file index.js \
+            --bundle-output "$RUNNER_TEMP/main.jsbundle.js" \
+            --assets-dest "$APP_PATH" \
+            || { echo "::warning::export:embed failed — falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          "$HERMESC" -emit-binary -max-diagnostic-width=80 -O \
+            -out "$APP_PATH/main.jsbundle" \
+            "$RUNNER_TEMP/main.jsbundle.js" \
+            || { echo "::warning::hermesc failed — falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          codesign --force --sign - --preserve-metadata=entitlements "$APP_PATH" \
+            || { echo "::warning::codesign failed — falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
       - name: Build iOS (Release simulator, embedded JS bundle)
-        if: steps.preflight.outputs.skip != 'true'
+        if: steps.preflight.outputs.skip != 'true' && (steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outputs.ok != 'true')
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
-          export APP_NAME=$(ls -d *.xcodeproj | head -1 | sed 's/.xcodeproj$//')
+          export APP_NAME="${{ steps.app-name.outputs.app-name }}"
           SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json \
             | python3 -c "
           import json,sys,os
@@ -864,10 +1153,6 @@ jobs:
               print(hit[0] if hit else app)
           ")
           set -o pipefail
-          # No CODE_SIGNING_ALLOWED=NO: simulator builds ad-hoc sign for free,
-          # and the app NEEDS its entitlements — without them expo-secure-store
-          # throws KeyChainException at startup, the JS bundle dies, and
-          # expo-updates' ErrorRecovery aborts the whole app (SIGABRT).
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$SCHEME" \
@@ -879,9 +1164,6 @@ jobs:
             | tee xcodebuild-raw.log \
             | xcpretty \
             || {
-              # xcpretty swallows run-script phase stderr — on failure dump
-              # the raw log around the failing phase so the error is visible
-              # in CI instead of a bare 'PhaseScriptExecution failed'.
               echo "::group::raw xcodebuild output (failures)"
               grep -nE "error:|Command PhaseScriptExecution failed" xcodebuild-raw.log | head -50 || true
               awk '/Generate updates resources/,0' xcodebuild-raw.log | head -150 || true
@@ -889,8 +1171,91 @@ jobs:
               exit 65
             }
 
-      - name: Boot iOS simulator (pinned)
+      - name: Upload .app artifact
         if: steps.preflight.outputs.skip != 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.vars.outputs.app-artifact }}
+          path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator/*.app
+          retention-days: 1
+
+  # -------------------------------------------------------------------------
+  # 3b. EXTENDED iOS suite — SOFT GATE, sharded.
+  #     Three shards run in parallel, each downloading the SAME .app built
+  #     once above. Shard grouping follows the state-dependency analysis
+  #     documented at the top of this file (core / fresh / delete).
+  #
+  #     The soft gate is intentional and explicitly time-bound: it will
+  #     be flipped to a hard gate (one required check per shard) once
+  #     either (a) staging API is wired via EXPO_PUBLIC_API_URL and
+  #     proven stable for 20 consecutive runs (see flake-stats job), or
+  #     (b) the backend services move to a Linux runner.
+  # -------------------------------------------------------------------------
+  e2e-ios-extended:
+    name: iOS E2E (extended, soft gate) — ${{ matrix.shard.name }}
+    needs: build-ios-extended
+    if: needs.build-ios-extended.outputs.skip != 'true'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          # "core": the stateful chain sharing test@pegada.app/Rex. Must
+          # stay sequential and co-located — see the shard design note
+          # at the top of this file for the full dependency analysis.
+          - name: core
+            flows: "02-sign-in,03-create-profile,04-complete-profile,05-ask-location,06-force-update,07-tabs-navigation,08-swipe-like,09-swipe-dislike,10-dog-profile,11-messages-list,12-chat-conversation,19-chat-message-order,25-upgrade-journey,21-swipe-journey,22-new-match-journey,23-preferences-journey,23b-lang-theme-persistence,24-profile-journey,26-logout-journey"
+          # "fresh": self-purging APPLE_MAGIC_EMAIL_REGEX user, disjoint
+          # from test@pegada.app's rows.
+          - name: fresh
+            flows: "20-account-creation-journey"
+          # "delete": disposable delete-me@pegada.app user with its own
+          # pre/post scripts, disjoint from the other two shards' rows.
+          - name: delete
+            flows: "27-delete-account-journey"
+    env:
+      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
+      APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
+      EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Maestro
+        uses: actions/cache@v5
+        with:
+          path: ~/.maestro
+          key: maestro-${{ runner.os }}-2.6.0
+
+      - name: Install Maestro
+        run: |
+          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
+            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          fi
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Download built .app
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.build-ios-extended.outputs.app-artifact }}
+          path: app-download
+
+      - name: Boot iOS simulator (pinned)
         run: |
           set -euo pipefail
           DEVICE_ID=$(xcrun simctl list devices available --json \
@@ -921,84 +1286,93 @@ jobs:
           echo "SIMULATOR_UDID=$DEVICE_ID" >> $GITHUB_ENV
 
       - name: Install app on simulator
-        if: steps.preflight.outputs.skip != 'true'
         run: |
           set -euo pipefail
-          APP_PATH=$(find apps/mobile/ios/build -name "*.app" -type d -path "*Release-iphonesimulator*" | head -1)
+          APP_PATH=$(find app-download -name "*.app" -type d | head -1)
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
-      - name: Run full Maestro suite (excludes quarantined)
-        if: steps.preflight.outputs.skip != 'true'
+      # NOTE on seeding: like the pre-sharding extended job, this runner
+      # has no direct path to the staging Postgres behind
+      # EXPO_PUBLIC_API_URL (GitHub-hosted macOS runners can't reach a
+      # private DB, and there's no DATABASE_URL secret wired here) — the
+      # staging backend is assumed pre-seeded out-of-band with the same
+      # maestro-seed.ts fixture used locally (test@pegada.app/Rex/Bella/
+      # MatchMe + delete-me@pegada.app). The "delete" shard's pre/post
+      # scripts (scripts/pre/27-reseed-delete-me.sh,
+      # checks/27-delete-account.sh) run against the SAME staging DB and
+      # need their own DATABASE_URL wired the same way once staging is
+      # connected — tracked together with the EXPO_PUBLIC_API_URL secret
+      # setup, out of scope for this change.
+      - name: Run extended Maestro flows (${{ matrix.shard.name }})
         id: maestro-extended
         run: |
           set -uo pipefail
-          # Build a Maestro `--exclude-tags` list isn't enough because
-          # quarantine entries are by stem, not tag. Instead we collect
-          # every non-quarantined .yaml under .maestro/ and feed them.
           QUARANTINED=$(grep -v '^[[:space:]]*#' apps/mobile/.maestro/quarantined.txt \
             | awk '{print $1}' | grep -v '^$' | sort -u || true)
+          IFS=',' read -ra STEMS <<< "${{ matrix.shard.flows }}"
           FLOWS=()
-          for f in apps/mobile/.maestro/*.yaml; do
-            stem="$(basename "$f" .yaml)"
+          for stem in "${STEMS[@]}"; do
+            stem="$(echo "$stem" | xargs)"
             if echo "$QUARANTINED" | grep -qx "$stem"; then
               echo "::notice::skipping quarantined flow: $stem"
               continue
             fi
-            FLOWS+=("$f")
+            f="apps/mobile/.maestro/${stem}.yaml"
+            if [ -f "$f" ]; then
+              FLOWS+=("$f")
+            else
+              echo "::warning::flow file not found: $f"
+            fi
           done
           if [ "${#FLOWS[@]}" -eq 0 ]; then
-            echo "::warning::No extended flows to run"
+            echo "::warning::No flows to run in shard ${{ matrix.shard.name }}"
             exit 0
           fi
-          # Run as a single maestro invocation so suite-level ordering
-          # (config.yaml) is respected. Allow failures — the reporter
-          # decides what's blocking.
+          # Single maestro invocation per shard so THIS SHARD's internal
+          # ordering is respected (config.yaml's flowsOrder governs
+          # relative order when multiple files are passed together).
           maestro test "${FLOWS[@]}" \
             --format junit \
-            --output maestro-results-extended.xml \
+            --output "maestro-results-extended-${{ matrix.shard.name }}.xml" \
             --exclude-tags no-api,util || true
-        env:
-          APPLE_MAGIC_EMAIL: ${{ env.APPLE_MAGIC_EMAIL }}
-          APPLE_MAGIC_CODE: ${{ env.APPLE_MAGIC_CODE }}
-          EXPO_PUBLIC_API_URL: ${{ env.EXPO_PUBLIC_API_URL }}
 
-      - name: Report extended flow results
-        if: steps.preflight.outputs.skip != 'true' && always()
+      - name: Report extended flow results (${{ matrix.shard.name }})
+        if: always()
         run: |
           python3 .github/scripts/maestro-report.py \
-            --junit maestro-results-extended.xml \
+            --junit "maestro-results-extended-${{ matrix.shard.name }}.xml" \
             --quarantine apps/mobile/.maestro/quarantined.txt \
             --required "$REQUIRED_FLOWS" \
             --summary "$GITHUB_STEP_SUMMARY" \
             --mode extended
 
-      - name: Upload extended Maestro artifacts
-        if: steps.preflight.outputs.skip != 'true' && always()
+      - name: Upload extended Maestro artifacts (${{ matrix.shard.name }})
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: maestro-results-extended
+          name: maestro-results-extended-${{ matrix.shard.name }}
           path: |
-            maestro-results-extended*.xml
+            maestro-results-extended-${{ matrix.shard.name }}.xml
             ~/.maestro/tests/**/*.png
           if-no-files-found: ignore
 
       - name: Capture simulator log on failure
-        if: steps.preflight.outputs.skip != 'true' && failure()
+        if: failure()
         run: |
           xcrun simctl spawn "$SIMULATOR_UDID" log collect \
-            --output simulator-extended.logarchive || true
+            --output "simulator-extended-${{ matrix.shard.name }}.logarchive" || true
         continue-on-error: true
 
       - name: Upload simulator log on failure
-        if: steps.preflight.outputs.skip != 'true' && failure()
+        if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: simulator-log-extended
-          path: simulator-extended.logarchive
+          name: simulator-log-extended-${{ matrix.shard.name }}
+          path: simulator-extended-${{ matrix.shard.name }}.logarchive
           if-no-files-found: ignore
 
   # -------------------------------------------------------------------------
-  # 3. Flake stats — read-only observability.
+  # 4. Flake stats — read-only observability.
   #    Pulls JUnit artifacts from the last N runs and emits a per-flow
   #    pass-rate table. Never blocks. Runs on PRs (so authors can see the
   #    state of the world before deciding to promote/quarantine) and
