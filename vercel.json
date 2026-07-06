@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "apps/nextjs/src/app/api/queues/mail/route.ts": {
+    "src/app/api/queues/mail/route.ts": {
       "experimentalTriggers": [
         {
           "type": "queue/v2beta",
@@ -10,7 +10,7 @@
         }
       ]
     },
-    "apps/nextjs/src/app/api/queues/process-image/route.ts": {
+    "src/app/api/queues/process-image/route.ts": {
       "maxDuration": 120,
       "experimentalTriggers": [
         {
@@ -20,7 +20,7 @@
         }
       ]
     },
-    "apps/nextjs/src/app/api/queues/send-push/route.ts": {
+    "src/app/api/queues/send-push/route.ts": {
       "experimentalTriggers": [
         {
           "type": "queue/v2beta",
@@ -29,7 +29,7 @@
         }
       ]
     },
-    "apps/nextjs/src/app/api/queues/check-push-receipts/route.ts": {
+    "src/app/api/queues/check-push-receipts/route.ts": {
       "experimentalTriggers": [
         {
           "type": "queue/v2beta",
