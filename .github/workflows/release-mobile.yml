@@ -205,7 +205,11 @@ jobs:
     name: Build Android (production, local)
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # A cold-cache first run on a 4-core hosted runner (no ~/.gradle to
+    # restore, eas build --local doing its own prebuild on top of
+    # gradlew bundleRelease) plausibly exceeds 60 minutes; this isn't
+    # pathological; 90 gives headroom without masking a real hang.
+    timeout-minutes: 90
     outputs:
       aab-artifact: ${{ steps.vars.outputs.aab-artifact }}
     steps:
@@ -271,8 +275,16 @@ jobs:
       # Gradle's own dependency/build cache. `eas build --local` runs
       # prebuild + `gradlew bundleRelease` internally; this just warms
       # ~/.gradle so that invocation doesn't start stone cold.
-      - name: Cache Gradle
-        uses: actions/cache@v5
+      #
+      # Split into restore/save (rather than the combined actions/cache
+      # action) so the save step can run with `if: always()`. The
+      # combined action's save only fires from its own post-job hook,
+      # which is NOT guaranteed to run if the job is killed by
+      # timeout-minutes -- we want a slow/cold first run to still leave a
+      # warm cache behind for the next attempt, timeout or not.
+      - name: Restore Gradle cache
+        id: gradle-cache-restore
+        uses: actions/cache/restore@v5
         with:
           path: |
             ~/.gradle/caches
@@ -286,8 +298,17 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # Step-level timeout shorter than the job's, on purpose: a job-level
+      # timeout-minutes kill terminates the whole runner process tree
+      # immediately, it does NOT let subsequent if: always() steps run
+      # (that's different from a step merely failing, which DOES leave
+      # the rest of the job to execute). To guarantee the Gradle cache
+      # save below actually runs on a slow/hung build, this step must
+      # fail on its own before the job-level ceiling hits, leaving
+      # headroom in the job for the always() save step afterward.
       - name: EAS build (Android, production, local)
         working-directory: apps/mobile
+        timeout-minutes: 80
         run: |
           eas build \
             --platform android \
@@ -295,6 +316,19 @@ jobs:
             --local \
             --non-interactive \
             --output "$RUNNER_TEMP/pegada.aab"
+
+      # Runs even if the build step above failed (including its own
+      # step-level timeout above), so a slow cold run still leaves a warm
+      # cache for the next attempt. Skips saving if we got an exact-key
+      # cache hit (nothing changed, re-saving would be wasted work).
+      - name: Save Gradle cache
+        if: always() && steps.gradle-cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ steps.gradle-cache-restore.outputs.cache-primary-key }}
 
       - name: Upload .aab artifact
         uses: actions/upload-artifact@v7
