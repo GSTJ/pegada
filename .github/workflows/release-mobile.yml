@@ -1,0 +1,285 @@
+name: Release Mobile (build + submit)
+
+# ---------------------------------------------------------------------------
+# WHY GITHUB ACTIONS INSTEAD OF EAS CLOUD BUILDS
+# ---------------------------------------------------------------------------
+# EAS's free-tier build queue got too slow to be usable for release builds
+# (an overnight Android production build sat in RUN_GRADLEW for ~4.5h before
+# erroring out). GitHub Actions runners (macOS + Ubuntu) are free for this
+# repo, so native binaries are built here with `eas build --local`, which
+# runs the exact same build pipeline EAS's own workers run, just on our
+# runner instead of theirs. EAS is now used ONLY for:
+#   - fetching the project's remote credentials (signing identity,
+#     provisioning profile, keystore) and EAS-server env vars/secrets
+#     (GOOGLE_SERVICES_JSON, RevenueCat/PostHog keys, etc.) via EXPO_TOKEN
+#   - store submission (`eas submit`), as a separate, manual-gated job
+#
+# `eas build --local` requires authentication (EXPO_TOKEN) to fetch both of
+# those from EAS's servers, same as a cloud build would; the difference is
+# only WHERE the compile/link/archive steps run.
+# ---------------------------------------------------------------------------
+# CREDENTIALS
+# ---------------------------------------------------------------------------
+# iOS signing uses EAS's remote credentials (managed via `eas credentials`),
+# fetched non-interactively over the same EXPO_TOKEN auth. In non-interactive
+# mode, EAS CLI only allows REUSING an existing valid provisioning
+# profile/certificate; it refuses to GENERATE a new one without an App Store
+# Connect API key (EXPO_ASC_API_KEY_PATH / EXPO_ASC_KEY_ID /
+# EXPO_ASC_ISSUER_ID), see:
+# https://docs.expo.dev/build/building-on-ci/#optional-provide-an-asc-api-token-for-your-apple-team
+# If the stored credentials are valid this is a non-issue. If EAS decides it
+# needs to mint a new profile mid-build, the iOS job will fail with an
+# InsufficientAuthenticationNonInteractiveError, which needs an ASC API key
+# from Gabriel to fix (only he can create one in App Store Connect).
+# ---------------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to build"
+        required: true
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+        default: all
+      submit:
+        description: "Submit the built artifact(s) to the store after a successful build"
+        required: true
+        type: boolean
+        default: false
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  EXPO_NO_TELEMETRY: 1
+
+jobs:
+  # -------------------------------------------------------------------------
+  # iOS: local EAS build on a macOS runner, production profile.
+  # -------------------------------------------------------------------------
+  build-ios:
+    name: Build iOS (production, local)
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios' }}
+    runs-on: macos-latest
+    timeout-minutes: 60
+    outputs:
+      ipa-artifact: ${{ steps.vars.outputs.ipa-artifact }}
+    steps:
+      - name: Set vars
+        id: vars
+        run: echo "ipa-artifact=ios-production-ipa" >> "$GITHUB_OUTPUT"
+
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null \
+            | sed 's|.*/Xcode_||;s|\.app$||' \
+            | sort -V \
+            | tail -1)
+          if [ -z "$XCODE" ]; then
+            echo "::error::No Xcode_*.app installed on runner"
+            ls /Applications/ | grep -i xcode || true
+            exit 1
+          fi
+          echo "Selecting Xcode $XCODE"
+          sudo xcode-select -s "/Applications/Xcode_${XCODE}.app/Contents/Developer"
+          xcodebuild -version
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Keyed on Podfile.lock like e2e-mobile.yml. `eas build --local` runs
+      # its own `pod install` internally during prebuild, this cache just
+      # gives that step a warm CocoaPods cache to pull from.
+      - name: Cache CocoaPods
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pods-
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS build (iOS, production, local)
+        working-directory: apps/mobile
+        run: |
+          eas build \
+            --platform ios \
+            --profile production \
+            --local \
+            --non-interactive \
+            --output "$RUNNER_TEMP/Pegada.ipa"
+
+      - name: Upload .ipa artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.vars.outputs.ipa-artifact }}
+          path: ${{ runner.temp }}/Pegada.ipa
+          retention-days: 14
+
+  # -------------------------------------------------------------------------
+  # Android: local EAS build on an Ubuntu runner, production profile.
+  # -------------------------------------------------------------------------
+  build-android:
+    name: Build Android (production, local)
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      aab-artifact: ${{ steps.vars.outputs.aab-artifact }}
+    steps:
+      - name: Set vars
+        id: vars
+        run: echo "aab-artifact=android-production-aab" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Gradle's own dependency/build cache. `eas build --local` runs
+      # prebuild + `gradlew bundleRelease` internally; this just warms
+      # ~/.gradle so that invocation doesn't start stone cold.
+      - name: Cache Gradle
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('apps/mobile/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS build (Android, production, local)
+        working-directory: apps/mobile
+        run: |
+          eas build \
+            --platform android \
+            --profile production \
+            --local \
+            --non-interactive \
+            --output "$RUNNER_TEMP/pegada.aab"
+
+      - name: Upload .aab artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.vars.outputs.aab-artifact }}
+          path: ${{ runner.temp }}/pegada.aab
+          retention-days: 14
+
+  # -------------------------------------------------------------------------
+  # Submission: manual-gated. Only runs when `submit` input is explicitly
+  # true (workflow_dispatch only; tag pushes never auto-submit). Downloads
+  # whichever artifact(s) the build jobs produced and calls `eas submit`,
+  # which pushes straight to app review, so this must stay opt-in.
+  # -------------------------------------------------------------------------
+  submit-ios:
+    name: Submit iOS to App Store
+    needs: build-ios
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.submit == true && (inputs.platform == 'all' || inputs.platform == 'ios') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download .ipa artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.build-ios.outputs.ipa-artifact }}
+          path: artifact
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS submit (iOS)
+        working-directory: apps/mobile
+        run: |
+          eas submit \
+            --platform ios \
+            --path "$GITHUB_WORKSPACE/artifact/Pegada.ipa" \
+            --non-interactive
+
+  submit-android:
+    name: Submit Android to Play Store
+    needs: build-android
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.submit == true && (inputs.platform == 'all' || inputs.platform == 'android') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download .aab artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.build-android.outputs.aab-artifact }}
+          path: artifact
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS submit (Android)
+        working-directory: apps/mobile
+        run: |
+          eas submit \
+            --platform android \
+            --path "$GITHUB_WORKSPACE/artifact/pegada.aab" \
+            --non-interactive
