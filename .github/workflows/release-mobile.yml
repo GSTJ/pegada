@@ -130,6 +130,29 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # `eas build --local` does NOT materialize EAS's file-type "secret"
+      # env vars (GOOGLE_SERVICES_JSON / GOOGLE_SERVICE_INFO_PLIST) onto
+      # disk, that only happens on EAS's own cloud build workers. Without
+      # the real file here, the config-plugin mod that reads
+      # ios.googleServicesFile crashes (`Cannot read properties of null
+      # (reading 'nodeName')`) trying to parse an empty placeholder.
+      # Write the real file from our own GHA secret instead, same
+      # variable names deploy-mobile.yml already uses for the OTA-update
+      # workflow. Never echo the decoded contents (contains API keys).
+      - name: Write GoogleService-Info.plist
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          if [ -z "${GOOGLE_SERVICE_INFO_PLIST:-}" ]; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST secret is not set"
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > GoogleService-Info.plist
+          # Sanity check without printing contents: must be well-formed XML plist.
+          plutil -lint GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+
       - name: EAS build (iOS, production, local)
         working-directory: apps/mobile
         run: |
@@ -200,6 +223,23 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
+      # See the matching step in the iOS job: `eas build --local` doesn't
+      # materialize EAS's file-type "secret" env vars to disk, so we write
+      # the real google-services.json ourselves from our own GHA secret.
+      - name: Write google-services.json
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          if [ -z "${GOOGLE_SERVICES_JSON:-}" ]; then
+            echo "::error::GOOGLE_SERVICES_JSON secret is not set"
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > google-services.json
+          # Sanity check without printing contents: must be well-formed JSON.
+          python3 -c "import json; json.load(open('google-services.json'))"
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       - name: EAS build (Android, production, local)
         working-directory: apps/mobile
