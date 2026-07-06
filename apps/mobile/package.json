@@ -10,7 +10,7 @@
     "eject": "expo eject",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
-    "setup:secret:files": "[ ! -s ./google-services.json ] && echo $GOOGLE_SERVICES_JSON > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && echo $GOOGLE_SERVICE_INFO_PLIST > ./GoogleService-Info.plist || echo \"\"",
+    "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
     "preinstall": "pnpm setup:secret:files"
   },
   "dependencies": {

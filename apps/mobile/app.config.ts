@@ -1,12 +1,19 @@
 import { ExpoConfig } from "expo/config";
 
+// The primary/fallback locale's native strings (permission descriptions,
+// etc.), also used verbatim by the `locales` map below. Reused here to
+// seed Android's base values/strings.xml via withDefaultLocaleStrings,
+// see that plugin's file for why this is needed.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+
 const config: ExpoConfig = {
   /**
    * Always update the version when making a native change
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.3.1",
+  version: "1.4.0",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -148,6 +155,14 @@ const config: ExpoConfig = {
     // without an App Store sandbox session. Plugin is a no-op when the file
     // is missing or when the platform isn't iOS.
     "./plugins/withStoreKitConfiguration",
+    // Seeds Android's base (unqualified) values/strings.xml with the
+    // primary locale's native strings. Without this, Android Lint's
+    // ExtraTranslation check treats every string in locales.en /
+    // locales["pt-BR"] as an orphaned translation (present in a
+    // locale-tagged resource file, absent from the default one) and
+    // FAILS gradlew bundleRelease -- this is what killed the 2026-07-05
+    // overnight EAS cloud build. See withDefaultLocaleStrings.js.
+    ["./plugins/withDefaultLocaleStrings", { stringsByKey: defaultLocaleNativeStrings }],
   ],
   androidStatusBar: {
     barStyle: "dark-content",
