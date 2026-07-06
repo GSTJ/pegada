@@ -22,6 +22,7 @@ executionOrder:
     - 21-swipe-journey
     - 22-new-match-journey
     - 23-preferences-journey
+    - 23b-lang-theme-persistence
     - 24-profile-journey
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The

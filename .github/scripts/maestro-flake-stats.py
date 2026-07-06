@@ -50,8 +50,13 @@ def list_recent_runs(workflow: str, repo: str, limit: int) -> list[dict]:
     )
 
 
-def download_artifact(repo: str, run_id: int, name: str, dest: Path) -> bool:
-    """Download a single artifact by name. Returns False if not present."""
+def download_artifacts(repo: str, run_id: int, pattern: str, dest: Path) -> bool:
+    """Download every artifact matching a glob pattern. Returns False if none present.
+
+    The extended suite is sharded (maestro-results-extended-<shard-name>), so we
+    can no longer download a single fixed artifact name — `gh run download`'s
+    `--pattern` flag matches all shards' artifacts in one call.
+    """
     try:
         subprocess.check_output(
             [
@@ -61,8 +66,8 @@ def download_artifact(repo: str, run_id: int, name: str, dest: Path) -> bool:
                 str(run_id),
                 "--repo",
                 repo,
-                "--name",
-                name,
+                "--pattern",
+                pattern,
                 "--dir",
                 str(dest),
             ],
@@ -122,9 +127,10 @@ def main() -> int:
             run_id = run["databaseId"]
             run_dir = tmp_path / str(run_id)
             run_dir.mkdir()
-            # Artifact names produced by this workflow.
-            for artifact_name in ("maestro-results-required", "maestro-results-extended"):
-                ok = download_artifact(args.repo, run_id, artifact_name, run_dir)
+            # Artifact names produced by this workflow. Extended is sharded
+            # (maestro-results-extended-<shard>), so match with a glob.
+            for artifact_pattern in ("maestro-results-required", "maestro-results-extended*"):
+                ok = download_artifacts(args.repo, run_id, artifact_pattern, run_dir)
                 if not ok:
                     continue
                 results = parse_run_junits(run_dir)
