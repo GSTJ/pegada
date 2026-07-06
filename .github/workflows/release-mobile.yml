@@ -399,6 +399,21 @@ jobs:
           name: ${{ needs.build-ios.outputs.ipa-artifact }}
           path: artifact
 
+      # `eas submit` evaluates apps/mobile/app.config.ts, which imports the
+      # `expo` package -- without an install it dies with "Cannot find
+      # package 'expo'" before ever talking to the store.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Setup EAS CLI
         uses: expo/expo-github-action@v9
         with:
@@ -428,6 +443,20 @@ jobs:
         with:
           name: ${{ needs.build-android.outputs.aab-artifact }}
           path: artifact
+
+      # Same as submit-ios: `eas submit` needs node_modules to evaluate the
+      # Expo config before it can talk to the store.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Setup EAS CLI
         uses: expo/expo-github-action@v9
