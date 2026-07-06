@@ -386,7 +386,7 @@ jobs:
       # verify whichever .app we produced (swapped or freshly built)
       # actually boots before we upload it.
       - name: Cache Maestro
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.maestro
           key: maestro-${{ runner.os }}-2.6.0
@@ -428,7 +428,7 @@ jobs:
       # stage the .app between app-cache/ and the products dir as needed.
       - name: Cache built .app (fingerprint-keyed)
         id: app-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/app-cache
           key: ${{ runner.os }}-app-required-${{ env.FINGERPRINT }}
@@ -483,7 +483,7 @@ jobs:
       # hit.
       - name: Cache Xcode DerivedData (fallback)
         if: steps.app-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/ios/build
           key: ${{ runner.os }}-xcode-deriveddata-required-${{ env.FINGERPRINT }}
@@ -496,7 +496,7 @@ jobs:
       # to compile the swapped-in JS to bytecode; on a miss, pod install
       # needs it for its own cache.
       - name: Cache CocoaPods
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
@@ -755,7 +755,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Cache Maestro
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.maestro
           key: maestro-${{ runner.os }}-2.6.0
@@ -1093,7 +1093,7 @@ jobs:
       - name: Cache built .app (fingerprint-keyed)
         if: steps.preflight.outputs.skip != 'true'
         id: app-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/app-cache
           key: ${{ runner.os }}-app-extended-${{ env.FINGERPRINT }}
@@ -1136,7 +1136,7 @@ jobs:
       # happens post-job. See the required build's cache comments.
       - name: Cache Xcode DerivedData (fallback)
         if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/ios/build
           key: ${{ runner.os }}-xcode-deriveddata-extended-${{ env.FINGERPRINT }}
@@ -1146,7 +1146,7 @@ jobs:
 
       - name: Cache CocoaPods
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
@@ -1276,7 +1276,7 @@ jobs:
       # every extended shard downloads and depends on it.
       - name: Cache Maestro
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.maestro
           key: maestro-${{ runner.os }}-2.6.0
@@ -1412,7 +1412,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Maestro
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.maestro
           key: maestro-${{ runner.os }}-2.6.0

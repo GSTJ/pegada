@@ -169,7 +169,7 @@ jobs:
       # its own `pod install` internally during prebuild, this cache just
       # gives that step a warm CocoaPods cache to pull from.
       - name: Cache CocoaPods
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/mobile/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/pnpm-lock.yaml') }}
@@ -284,7 +284,7 @@ jobs:
       # warm cache behind for the next attempt, timeout or not.
       - name: Restore Gradle cache
         id: gradle-cache-restore
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.gradle/caches
@@ -363,7 +363,7 @@ jobs:
       # cache hit (nothing changed, re-saving would be wasted work).
       - name: Save Gradle cache
         if: always() && steps.gradle-cache-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.gradle/caches
