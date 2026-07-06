@@ -65,3 +65,8 @@ google-services.json
 
 # Turbo cache
 *.tsbuildinfo
+
+# Vercel
+.vercel
+
+.env*
