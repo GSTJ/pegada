@@ -36,10 +36,7 @@ const withDefaultLocaleStrings = (config, { stringsByKey }) => {
   return withStringsXml(config, (modConfig) => {
     let strings = modConfig.modResults;
     for (const [name, value] of Object.entries(stringsByKey)) {
-      strings = AndroidConfig.Strings.setStringItem(
-        [{ $: { name }, _: value }],
-        strings,
-      );
+      strings = AndroidConfig.Strings.setStringItem([{ $: { name }, _: value }], strings);
     }
     modConfig.modResults = strings;
     return modConfig;
