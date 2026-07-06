@@ -26,9 +26,9 @@ export const client = new S3Client({
  */
 export const r2UploadsEnabled = Boolean(
   config.R2_ENDPOINT &&
-    config.R2_ACCESS_KEY_ID &&
-    config.R2_SECRET_ACCESS_KEY &&
-    config.PUBLIC_IMAGES_BASE_URL,
+  config.R2_ACCESS_KEY_ID &&
+  config.R2_SECRET_ACCESS_KEY &&
+  config.PUBLIC_IMAGES_BASE_URL,
 );
 
 export const r2Client = r2UploadsEnabled
