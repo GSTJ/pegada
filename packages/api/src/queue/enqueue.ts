@@ -33,8 +33,35 @@ export const enqueue = async <T extends Topic>(
   options: EnqueueOptions = {},
 ) => {
   if (isVercelQueueAvailable()) {
+    // eslint-disable-next-line no-console
+    console.log("[queue-debug] enqueue: pre-send", {
+      topic,
+      QUEUE_DRIVER: process.env.QUEUE_DRIVER ?? null,
+      VERCEL: process.env.VERCEL ?? null,
+      VERCEL_ENV: process.env.VERCEL_ENV ?? null,
+      VERCEL_REGION: process.env.VERCEL_REGION ?? null,
+      VERCEL_DEPLOYMENT_ID: process.env.VERCEL_DEPLOYMENT_ID ?? null,
+      NODE_ENV: process.env.NODE_ENV ?? null,
+      isVercelQueueAvailable: isVercelQueueAvailable(),
+    });
     const { send } = await import("@vercel/queue");
-    return send(topic, payload, options);
+    try {
+      const result = await send(topic, payload, options);
+      // eslint-disable-next-line no-console
+      console.log(
+        "[queue-debug] enqueue: send() result",
+        JSON.stringify({ topic, result }),
+      );
+      return result;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[queue-debug] enqueue: send() threw", {
+        topic,
+        errorName: error instanceof Error ? error.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   if (options.delaySeconds) {
