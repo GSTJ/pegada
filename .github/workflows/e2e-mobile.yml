@@ -416,40 +416,22 @@ jobs:
 
       # PRIMARY cache: the built .app itself, keyed on the fingerprint.
       # ~150-250MB vs DerivedData's ~1.7GB, a hit means we skip
-      # xcodebuild entirely (see "Restore or rebuild" below).
+      # xcodebuild entirely (see the bundle-swap step below).
+      #
+      # CRITICAL: the cache path lives OUTSIDE apps/mobile/ios. `expo
+      # prebuild` DELETES the entire ios/ dir ("Clearing ios" in its log,
+      # verified in runs 28763018898 + 28764258631) before regenerating,
+      # so anything cached under ios/ and restored before prebuild is
+      # destroyed before it can be used. (This also means the ORIGINAL
+      # DerivedData cache on main never actually worked: it restored to
+      # ios/build before prebuild wiped it.) The swap/full-build steps
+      # stage the .app between app-cache/ and the products dir as needed.
       - name: Cache built .app (fingerprint-keyed)
         id: app-cache
         uses: actions/cache@v5
         with:
-          path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator
+          path: apps/mobile/app-cache
           key: ${{ runner.os }}-app-required-${{ env.FINGERPRINT }}
-
-      # FALLBACK cache: DerivedData, for when the fingerprint misses (a
-      # real native change). restore-keys degrade gracefully: exact key
-      # (same fingerprint) -> same-OS prefix (any prior native build) so
-      # even a fingerprint miss starts from the closest prior DerivedData
-      # instead of a stone-cold compile. Not consulted at all on an .app
-      # cache hit.
-      - name: Cache Xcode DerivedData (fallback)
-        if: steps.app-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/build
-          key: ${{ runner.os }}-xcode-deriveddata-required-${{ env.FINGERPRINT }}
-          restore-keys: |
-            ${{ runner.os }}-xcode-deriveddata-required-
-            ${{ runner.os }}-xcode-deriveddata-
-
-      # CocoaPods cache is needed on BOTH paths: on a cache hit we still
-      # need hermesc (lives at Pods/hermes-engine/destroot/bin/hermesc)
-      # to compile the swapped-in JS to bytecode; on a miss, pod install
-      # needs it for its own cache.
-      - name: Cache CocoaPods
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
-          restore-keys: ${{ runner.os }}-pods-
 
       - name: Stub Google Services files
         working-directory: apps/mobile
@@ -488,6 +470,38 @@ jobs:
         env:
           EXPO_NO_TELEMETRY: 1
 
+      # These two caches restore INTO apps/mobile/ios, so their steps must
+      # come AFTER prebuild (which deletes ios/ wholesale, see the .app
+      # cache comment above). actions/cache restores at step position but
+      # saves post-job, so late placement only affects restore timing.
+      #
+      # FALLBACK cache: DerivedData, for when the fingerprint misses (a
+      # real native change). restore-keys degrade gracefully: exact key
+      # (same fingerprint) -> same-OS prefix (any prior native build) so
+      # even a fingerprint miss starts from the closest prior DerivedData
+      # instead of a stone-cold compile. Not consulted on an .app cache
+      # hit.
+      - name: Cache Xcode DerivedData (fallback)
+        if: steps.app-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build
+          key: ${{ runner.os }}-xcode-deriveddata-required-${{ env.FINGERPRINT }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-deriveddata-required-
+            ${{ runner.os }}-xcode-deriveddata-
+
+      # CocoaPods cache is needed on BOTH paths: on a cache hit we still
+      # need hermesc (lives at Pods/hermes-engine/destroot/bin/hermesc)
+      # to compile the swapped-in JS to bytecode; on a miss, pod install
+      # needs it for its own cache.
+      - name: Cache CocoaPods
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
       - name: Patch Podfile (react-native-maps pod name)
         working-directory: apps/mobile/ios
         run: |
@@ -524,18 +538,21 @@ jobs:
       # check, a broken swap must never ship silently to every
       # downstream job.
       # -----------------------------------------------------------------
+      # continue-on-error so an UNGUARDED crash in here (e.g. run
+      # 28764258631's find exiting non-zero under set -e) still lets the
+      # full-build fallback below run instead of failing the whole job
+      # with no artifact.
       - name: Bundle-swap into cached .app (fingerprint hit)
         if: steps.app-cache.outputs.cache-hit == 'true'
         id: swap
+        continue-on-error: true
         working-directory: apps/mobile
         run: |
           set -euo pipefail
-          APP_NAME="${{ steps.app-name.outputs.app-name }}"
           HERMESC="${{ steps.app-name.outputs.hermesc }}"
-          PROD_DIR="ios/build/Build/Products/Release-iphonesimulator"
-          APP_PATH=$(find "$PROD_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+          APP_PATH=$(find app-cache -maxdepth 1 -name "*.app" -type d 2>/dev/null | head -1 || true)
           if [ -z "$APP_PATH" ]; then
-            echo "::warning::cache hit but no .app found under $PROD_DIR, falling back to full build"
+            echo "::warning::cache hit but no .app found under app-cache/, falling back to full build"
             echo "ok=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -560,20 +577,27 @@ jobs:
           codesign --force --sign - --preserve-metadata=entitlements "$APP_PATH" \
             || { echo "::warning::codesign failed, falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
+          # Place the swapped .app where the verify/upload steps (and the
+          # e2e jobs' find) expect build products to live.
+          PROD_DIR="ios/build/Build/Products/Release-iphonesimulator"
+          mkdir -p "$PROD_DIR"
+          rm -rf "$PROD_DIR"/*.app
+          cp -R "$APP_PATH" "$PROD_DIR/"
+
           echo "ok=true" >> "$GITHUB_OUTPUT"
-          echo "app-path=$APP_PATH" >> "$GITHUB_OUTPUT"
 
       # Full build path: fingerprint MISS, or the swap above failed for
-      # any reason. -derivedDataPath build is also the DerivedData cache
-      # path above: a fallback-cache hit means this is an incremental
-      # build instead of a cold compile.
+      # any reason (graceful ok=false OR a hard step failure, hence the
+      # outcome check). -derivedDataPath build is also the DerivedData
+      # cache path above: a fallback-cache hit means this is an
+      # incremental build instead of a cold compile.
       #
       # Release, NOT Debug: a Debug simulator build skips the "Bundle
       # React Native code and images" phase and expo-dev-client expects a
       # Metro packager, which doesn't exist on a CI runner (verified from
       # run 28571242749, RedBox "No script URL provided" on every flow).
       - name: Build iOS (Release simulator, embedded JS bundle)
-        if: steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outputs.ok != 'true'
+        if: steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outcome != 'success' || steps.swap.outputs.ok != 'true'
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
@@ -620,6 +644,20 @@ jobs:
           fi
           echo "Produced: $(ls -d $PROD_DIR/*.app)"
 
+      # After a full build, stage the fresh .app into app-cache/ so the
+      # post-job cache save (which snapshots that path) captures it for
+      # the next run's fingerprint hit. No-op cost on the swap path
+      # (exact-key hits never re-save).
+      - name: Stage .app for cache save
+        if: steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outcome != 'success' || steps.swap.outputs.ok != 'true'
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find ios/build/Build/Products/Release-iphonesimulator -maxdepth 1 -name "*.app" -type d | head -1)
+          mkdir -p app-cache
+          rm -rf app-cache/*.app
+          cp -R "$APP_PATH" app-cache/
+
       # Verify whichever .app we ended up with (swapped or freshly built)
       # actually boots, BEFORE uploading it for every downstream job to
       # consume. Reuses the exact same driverless liveness probe the
@@ -630,7 +668,7 @@ jobs:
       # The first maestro invocation on a fresh runner compiles + installs
       # Maestro's XCUITest driver on the simulator, which blows the
       # default driver-startup window (the 'Failed to connect to
-      # 127.0.0.1:22087' class of failure) — hence the raised
+      # 127.0.0.1:22087' class of failure), hence the raised
       # MAESTRO_DRIVER_STARTUP_TIMEOUT and the two throwaway warm-up
       # invocations before the real probe, same pattern the e2e jobs use.
       - name: Boot simulator + verify .app liveness
@@ -1050,31 +1088,15 @@ jobs:
           echo "FINGERPRINT=$FP" >> "$GITHUB_ENV"
           echo "Native fingerprint (extended): $FP"
 
+      # Cache path is OUTSIDE apps/mobile/ios: expo prebuild deletes the
+      # whole ios/ dir, see the required build's cache comments.
       - name: Cache built .app (fingerprint-keyed)
         if: steps.preflight.outputs.skip != 'true'
         id: app-cache
         uses: actions/cache@v5
         with:
-          path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator
+          path: apps/mobile/app-cache
           key: ${{ runner.os }}-app-extended-${{ env.FINGERPRINT }}
-
-      - name: Cache Xcode DerivedData (fallback)
-        if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/build
-          key: ${{ runner.os }}-xcode-deriveddata-extended-${{ env.FINGERPRINT }}
-          restore-keys: |
-            ${{ runner.os }}-xcode-deriveddata-extended-
-            ${{ runner.os }}-xcode-deriveddata-
-
-      - name: Cache CocoaPods
-        if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v5
-        with:
-          path: apps/mobile/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
-          restore-keys: ${{ runner.os }}-pods-
 
       - name: Stub Google Services files
         if: steps.preflight.outputs.skip != 'true'
@@ -1110,6 +1132,26 @@ jobs:
         env:
           EXPO_NO_TELEMETRY: 1
 
+      # Restored AFTER prebuild (which deletes ios/ wholesale); save still
+      # happens post-job. See the required build's cache comments.
+      - name: Cache Xcode DerivedData (fallback)
+        if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/build
+          key: ${{ runner.os }}-xcode-deriveddata-extended-${{ env.FINGERPRINT }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-deriveddata-extended-
+            ${{ runner.os }}-xcode-deriveddata-
+
+      - name: Cache CocoaPods
+        if: steps.preflight.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
       - name: Patch Podfile (react-native-maps pod name)
         if: steps.preflight.outputs.skip != 'true'
         working-directory: apps/mobile/ios
@@ -1140,17 +1182,19 @@ jobs:
           fi
           echo "hermesc=$PWD/$HERMESC" >> "$GITHUB_OUTPUT"
 
+      # continue-on-error so an unguarded crash still lets the full-build
+      # fallback run; see the required build's swap step.
       - name: Bundle-swap into cached .app (fingerprint hit)
         if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit == 'true'
         id: swap
+        continue-on-error: true
         working-directory: apps/mobile
         run: |
           set -euo pipefail
           HERMESC="${{ steps.app-name.outputs.hermesc }}"
-          PROD_DIR="ios/build/Build/Products/Release-iphonesimulator"
-          APP_PATH=$(find "$PROD_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+          APP_PATH=$(find app-cache -maxdepth 1 -name "*.app" -type d 2>/dev/null | head -1 || true)
           if [ -z "$APP_PATH" ]; then
-            echo "::warning::cache hit but no .app found under $PROD_DIR, falling back to full build"
+            echo "::warning::cache hit but no .app found under app-cache/, falling back to full build"
             echo "ok=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -1172,10 +1216,15 @@ jobs:
           codesign --force --sign - --preserve-metadata=entitlements "$APP_PATH" \
             || { echo "::warning::codesign failed, falling back to full build"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
+          PROD_DIR="ios/build/Build/Products/Release-iphonesimulator"
+          mkdir -p "$PROD_DIR"
+          rm -rf "$PROD_DIR"/*.app
+          cp -R "$APP_PATH" "$PROD_DIR/"
+
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
       - name: Build iOS (Release simulator, embedded JS bundle)
-        if: steps.preflight.outputs.skip != 'true' && (steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outputs.ok != 'true')
+        if: steps.preflight.outputs.skip != 'true' && (steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outcome != 'success' || steps.swap.outputs.ok != 'true')
         working-directory: apps/mobile/ios
         run: |
           set -euo pipefail
@@ -1209,6 +1258,18 @@ jobs:
               echo "::endgroup::"
               exit 65
             }
+
+      # Stage the fresh .app into app-cache/ for the post-job cache save,
+      # same as the required build.
+      - name: Stage .app for cache save
+        if: steps.preflight.outputs.skip != 'true' && (steps.app-cache.outputs.cache-hit != 'true' || steps.swap.outcome != 'success' || steps.swap.outputs.ok != 'true')
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find ios/build/Build/Products/Release-iphonesimulator -maxdepth 1 -name "*.app" -type d | head -1)
+          mkdir -p app-cache
+          rm -rf app-cache/*.app
+          cp -R "$APP_PATH" app-cache/
 
       # Same safety net as the required build: verify whichever .app we
       # ended up with (swapped or freshly built) actually boots before
