@@ -626,8 +626,17 @@ jobs:
       # required flow itself uses later (checks/01-launch.sh), so a
       # broken artifact is caught here, inside the build job, where we
       # can still fall back, rather than failing every shard downstream.
+      #
+      # The first maestro invocation on a fresh runner compiles + installs
+      # Maestro's XCUITest driver on the simulator, which blows the
+      # default driver-startup window (the 'Failed to connect to
+      # 127.0.0.1:22087' class of failure) — hence the raised
+      # MAESTRO_DRIVER_STARTUP_TIMEOUT and the two throwaway warm-up
+      # invocations before the real probe, same pattern the e2e jobs use.
       - name: Boot simulator + verify .app liveness
         id: verify
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
         run: |
           set -euo pipefail
           DEVICE_ID=$(xcrun simctl list devices available --json \
@@ -661,7 +670,20 @@ jobs:
           xcrun simctl install "$DEVICE_ID" "$APP_PATH"
           xcrun simctl launch "$DEVICE_ID" app.pegada
           sleep 20
-          if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then
+          # Warm the driver (first invocation installs the XCUITest
+          # runner and often exceeds even generous timeouts).
+          maestro hierarchy > /dev/null 2>&1 || true
+          maestro hierarchy > /dev/null 2>&1 || true
+          ok=0
+          for attempt in 1 2 3; do
+            if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then
+              ok=1
+              break
+            fi
+            echo "[verify] attempt $attempt: signin-email not found yet, retrying..."
+            sleep 10
+          done
+          if [ "$ok" -eq 1 ]; then
             echo "[verify] PASS - .app is alive (signin-email present)"
           else
             echo "::error::[verify] FAIL - built .app did not reach SignIn. Refusing to upload a broken artifact."
@@ -1206,8 +1228,13 @@ jobs:
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
+      # Raised driver-startup timeout + warm-up invocations for the same
+      # reason as the required build's verify step: the first maestro use
+      # installs the XCUITest driver and blows the default window.
       - name: Boot simulator + verify .app liveness
         if: steps.preflight.outputs.skip != 'true'
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
         run: |
           set -euo pipefail
           DEVICE_ID=$(xcrun simctl list devices available --json \
@@ -1240,7 +1267,18 @@ jobs:
           xcrun simctl install "$DEVICE_ID" "$APP_PATH"
           xcrun simctl launch "$DEVICE_ID" app.pegada
           sleep 20
-          if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then
+          maestro hierarchy > /dev/null 2>&1 || true
+          maestro hierarchy > /dev/null 2>&1 || true
+          ok=0
+          for attempt in 1 2 3; do
+            if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then
+              ok=1
+              break
+            fi
+            echo "[verify] attempt $attempt: signin-email not found yet, retrying..."
+            sleep 10
+          done
+          if [ "$ok" -eq 1 ]; then
             echo "[verify] PASS - .app is alive (signin-email present)"
           else
             echo "::error::[verify] FAIL - built .app did not reach SignIn. Refusing to upload a broken artifact."
