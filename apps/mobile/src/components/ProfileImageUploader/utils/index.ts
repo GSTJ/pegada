@@ -230,12 +230,18 @@ export class ProfileImageUploadError extends Error {
  * the Maestro placeholder skip affordance (`shouldOfferMaestroPlaceholder`).
  *
  * Steps:
- *   1. presign — request a one-shot S3 PUT URL from the API
+ *   1. presign — request an upload descriptor from the API: method, url,
+ *      headers to send, and the object's canonical public URL
  *   2. compress — re-encode to WEBP @ 0.8 quality (expensive, kept after the
  *      caller has already shown optimistic visual feedback)
- *   3. upload — PUT the bytes to S3 via expo-file-system's BINARY_CONTENT mode
- *   4. finalize — strip the query string off the presigned URL to get the
- *      canonical public URL of the uploaded object
+ *   3. upload — send the bytes exactly as the descriptor says, via
+ *      expo-file-system's BINARY_CONTENT mode
+ *   4. finalize — return the descriptor's `publicUrl`
+ *
+ * The app is storage-agnostic on purpose: it performs the upload as
+ * described and stores ONLY `publicUrl`. No deriving URLs from the upload
+ * target, no assumptions about hosts, buckets, or query strings — the
+ * backend can switch storage vendors without an app release.
  *
  * `onProgress` is called as each stage *starts* so the caller can keep a stage
  * label for telemetry; the final `finalize` notification fires immediately
@@ -246,10 +252,10 @@ export const uploadProfileImage = async (
   onProgress?: (stage: ProfileImageUploadStage) => void,
 ): Promise<string> => {
   onProgress?.("presign");
-  const presignedUrl = await getTrcpContext()
-    .image.signedUrl.fetch()
+  const upload = await getTrcpContext()
+    .image.signedUpload.fetch()
     .catch((cause) => {
-      throw new ProfileImageUploadError("presign", "Failed to fetch presigned S3 URL", { cause });
+      throw new ProfileImageUploadError("presign", "Failed to fetch upload descriptor", { cause });
     });
 
   onProgress?.("compress");
@@ -258,20 +264,21 @@ export const uploadProfileImage = async (
   });
 
   onProgress?.("upload");
-  const response = await uploadAsync(presignedUrl, compressedImage.uri, {
+  const response = await uploadAsync(upload.url, compressedImage.uri, {
     mimeType: getMimeType(compressedImage.uri),
     uploadType: FileSystemUploadType.BINARY_CONTENT,
-    httpMethod: "PUT",
+    httpMethod: upload.method,
+    headers: upload.headers,
   }).catch((cause) => {
     throw new ProfileImageUploadError("upload", "uploadAsync threw", { cause });
   });
 
   if (response.status !== 200) {
-    throw new ProfileImageUploadError("upload", `S3 PUT returned ${response.status}`);
+    throw new ProfileImageUploadError("upload", `upload PUT returned ${response.status}`);
   }
 
   onProgress?.("finalize");
-  return presignedUrl.split("?")[0] as string;
+  return upload.publicUrl;
 };
 
 /**
