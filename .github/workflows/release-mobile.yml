@@ -130,28 +130,48 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      # `eas build --local` does NOT materialize EAS's file-type "secret"
-      # env vars (GOOGLE_SERVICES_JSON / GOOGLE_SERVICE_INFO_PLIST) onto
-      # disk, that only happens on EAS's own cloud build workers. Without
-      # the real file here, the config-plugin mod that reads
-      # ios.googleServicesFile crashes (`Cannot read properties of null
-      # (reading 'nodeName')`) trying to parse an empty placeholder.
-      # Write the real file from our own GHA secret instead, same
-      # variable names deploy-mobile.yml already uses for the OTA-update
-      # workflow. Never echo the decoded contents (contains API keys).
-      - name: Write GoogleService-Info.plist
-        working-directory: apps/mobile
+      # `eas build --local` stages the project into an isolated working
+      # copy (packages/eas-cli/src/vcs/local.ts's makeShallowCopyAsync)
+      # that explicitly EXCLUDES anything matching .gitignore, which is
+      # where GoogleService-Info.plist/google-services.json live. Writing
+      # the real file into the GHA checkout before calling `eas build` is
+      # a no-op: it never survives into that copy (confirmed: Gradle read
+      # a malformed/empty file from the copy's path even though our
+      # written file validated fine in the checkout).
+      #
+      # apps/mobile's own `preinstall` script (setup:secret:files) already
+      # exists to solve exactly this: it materializes these two files from
+      # the GOOGLE_SERVICES_JSON / GOOGLE_SERVICE_INFO_PLIST env vars, and
+      # since it's a package.json lifecycle hook it re-runs on every `pnpm
+      # install`, including the one `eas build --local` triggers INSIDE
+      # its own isolated copy. So instead of writing files ourselves, we
+      # decode our base64 GHA secrets into real env vars here and let that
+      # existing script do the writing, in whichever directory pnpm
+      # actually runs in. (Fixed a latent bug in that script in the same
+      # PR: it used unquoted `echo $VAR`, which word-splits on
+      # whitespace/newlines via $IFS and mangles multi-line content like
+      # this plist/JSON; now `printf '%s' "$VAR"` with proper quoting.)
+      #
+      # Never echo the decoded contents anywhere (contains API keys).
+      - name: Decode GoogleService secrets to env
         run: |
           set -euo pipefail
-          if [ -z "${GOOGLE_SERVICE_INFO_PLIST:-}" ]; then
+          if [ -z "${GOOGLE_SERVICE_INFO_PLIST_B64:-}" ]; then
             echo "::error::GOOGLE_SERVICE_INFO_PLIST secret is not set"
             exit 1
           fi
-          echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > GoogleService-Info.plist
+          DECODED=$(printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_B64" | base64 --decode)
           # Sanity check without printing contents: must be well-formed XML plist.
-          plutil -lint GoogleService-Info.plist
+          printf '%s' "$DECODED" | plutil -lint -
+          DELIM="EOF_${GITHUB_RUN_ID}_${RANDOM}${RANDOM}"
+          {
+            echo "GOOGLE_SERVICE_INFO_PLIST<<$DELIM"
+            printf '%s' "$DECODED"
+            echo ""
+            echo "$DELIM"
+          } >> "$GITHUB_ENV"
         env:
-          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+          GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
 
       - name: EAS build (iOS, production, local)
         working-directory: apps/mobile
@@ -224,22 +244,33 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      # See the matching step in the iOS job: `eas build --local` doesn't
-      # materialize EAS's file-type "secret" env vars to disk, so we write
-      # the real google-services.json ourselves from our own GHA secret.
-      - name: Write google-services.json
-        working-directory: apps/mobile
+      # See the long comment on the matching iOS step: `eas build --local`
+      # stages an isolated copy of the project that excludes anything
+      # .gitignore'd (which includes google-services.json), so a file we
+      # write into the GHA checkout never survives into that copy.
+      # Decode into an env var instead and let apps/mobile's own
+      # `preinstall` script (setup:secret:files) write the file, since
+      # that hook re-runs on every `pnpm install`, including the one
+      # `eas build --local` triggers inside its own copy.
+      - name: Decode GoogleService secrets to env
         run: |
           set -euo pipefail
-          if [ -z "${GOOGLE_SERVICES_JSON:-}" ]; then
+          if [ -z "${GOOGLE_SERVICES_JSON_B64:-}" ]; then
             echo "::error::GOOGLE_SERVICES_JSON secret is not set"
             exit 1
           fi
-          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > google-services.json
+          DECODED=$(printf '%s' "$GOOGLE_SERVICES_JSON_B64" | base64 --decode)
           # Sanity check without printing contents: must be well-formed JSON.
-          python3 -c "import json; json.load(open('google-services.json'))"
+          printf '%s' "$DECODED" | python3 -m json.tool > /dev/null
+          DELIM="EOF_${GITHUB_RUN_ID}_${RANDOM}${RANDOM}"
+          {
+            echo "GOOGLE_SERVICES_JSON<<$DELIM"
+            printf '%s' "$DECODED"
+            echo ""
+            echo "$DELIM"
+          } >> "$GITHUB_ENV"
         env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       - name: EAS build (Android, production, local)
         working-directory: apps/mobile
