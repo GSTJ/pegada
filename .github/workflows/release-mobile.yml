@@ -298,6 +298,44 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # Root cause of the rc6 hang: the Gradle DAEMON hit its default
+      # metaspace ceiling (~512 MiB, per Gradle's own
+      # org.gradle.jvmargs default of -Xmx512m -XX:MaxMetaspaceSize=384m)
+      # about 12 minutes into `gradlew :app:bundleRelease`, threw repeated
+      # `OutOfMemoryError: Metaspace` from its idle RMI thread, and then
+      # wedged (not crashed) rather than dying cleanly, leaving the whole
+      # process tree alive but stuck for the remaining ~64 minutes with
+      # zero log output until our step timeout finally killed it.
+      #
+      # EAS's own cloud build workers never hit this: their job config
+      # explicitly sets GRADLE_OPTS="-Dorg.gradle.jvmargs=\"-XX:MaxMetaspaceSize=1g
+      # -Xmx4g ...\" -Dorg.gradle.daemon=false" (confirmed against the
+      # overnight cloud build's own logs). We match that here.
+      #
+      # Per Gradle's docs (config_gradle.html / build_environment.html):
+      # GRADLE_OPTS configures the CLIENT jvm and "typically doesn't
+      # affect the daemon" on its own; org.gradle.jvmargs is what actually
+      # controls the JVM that runs the build (daemon or not). We set both:
+      #   - org.gradle.jvmargs via ~/.gradle/gradle.properties: this path
+      #     is the user's global Gradle config, it lives OUTSIDE
+      #     apps/mobile entirely so `eas build --local`'s gitignore-
+      #     filtered shallow copy (see the GoogleService comments above)
+      #     can't drop it, and Gradle reads it regardless of which
+      #     directory invokes gradlew.
+      #   - GRADLE_OPTS with -Dorg.gradle.daemon=false on the build step's
+      #     own env, since this IS explicitly forwarded via GRADLE_OPTS
+      #     per Gradle's docs. A persistent daemon buys nothing on an
+      #     ephemeral single-build CI runner anyway, and removes an entire
+      #     class of "wedged background process" failure like this one.
+      - name: Configure Gradle JVM memory (avoid daemon Metaspace OOM)
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.gradle
+          cat >> ~/.gradle/gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          EOF
+          cat ~/.gradle/gradle.properties
+
       # Step-level timeout shorter than the job's, on purpose: a job-level
       # timeout-minutes kill terminates the whole runner process tree
       # immediately, it does NOT let subsequent if: always() steps run
@@ -309,6 +347,8 @@ jobs:
       - name: EAS build (Android, production, local)
         working-directory: apps/mobile
         timeout-minutes: 80
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
         run: |
           eas build \
             --platform android \
