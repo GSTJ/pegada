@@ -45,7 +45,10 @@ const withAppIntents = (config) => {
     // 1. Swift source -> main target Sources build phase. Copied to the
     // project root and referenced by basename, exactly like the (proven)
     // withStoreKitConfiguration resource wiring.
-    fs.copyFileSync(path.join(SOURCE_DIR, SWIFT_FILE_NAME), path.join(platformRoot, SWIFT_FILE_NAME));
+    fs.copyFileSync(
+      path.join(SOURCE_DIR, SWIFT_FILE_NAME),
+      path.join(platformRoot, SWIFT_FILE_NAME),
+    );
 
     try {
       IOSConfig.XcodeUtils.addBuildSourceFileToGroup({
