@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as React from "react";
-import { ListRenderItemInfo, Pressable } from "react-native";
+import { ListRenderItemInfo, Pressable, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
@@ -102,11 +102,19 @@ const UnForwardedPickerSheet = <T extends Item>(
     onChange,
     optional: _optional,
     searchable,
-    snapPoints = ["70%", "93%"],
+    snapPoints,
     itemTestIDPrefix,
     testID: _testID,
     ...flatlistProps
   } = props;
+
+  // When no snapPoints are given, let the sheet size to its content (v5
+  // dynamic sizing) so short lists like language/theme aren't clipped by a
+  // fixed fraction of the screen. Searchable/long lists still pass explicit
+  // snapPoints for a tall scrollable sheet. Cap dynamic height so a big list
+  // can't grow past the screen.
+  const enableDynamicSizing = !snapPoints;
+  const { height: screenHeight } = useWindowDimensions();
 
   const data = filter
     ? props.data.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()))
@@ -145,6 +153,8 @@ const UnForwardedPickerSheet = <T extends Item>(
       android_keyboardInputMode="adjustResize" // Fixes the keyboard extra padding on Android
       ref={pickerSheetRef}
       snapPoints={snapPoints}
+      enableDynamicSizing={enableDynamicSizing}
+      maxDynamicContentSize={screenHeight * 0.9}
       enableDismissOnClose
       keyboardBehavior="interactive"
       backgroundStyle={backgroundStyle}
@@ -208,7 +218,9 @@ export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
           optional={props.optional}
         />
       </Pressable>
-      <PickerSheet {...props} ref={pickerSheetRef} />
+      {/* Long/searchable lists (breeds, sizes, colors) keep a tall fixed sheet;
+          direct PickerSheet users without snapPoints get content-fit sizing. */}
+      <PickerSheet snapPoints={["70%", "93%"]} {...props} ref={pickerSheetRef} />
     </Container>
   );
 };
