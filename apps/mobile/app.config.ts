@@ -312,6 +312,9 @@ const config: ExpoConfig = {
       // the capability enabled on their App IDs in the Apple Developer
       // portal for device builds).
       "com.apple.developer.usernotifications.communication": true,
+      // Shared storage between the app and the widget extension: the matches
+      // snapshot (UserDefaults) + downloaded avatars (container files).
+      "com.apple.security.application-groups": ["group.app.pegada"],
     },
     // associatedDomains: [
     //   'applinks:pegada.app',

@@ -12,6 +12,7 @@ import { getTrcpContext } from "@/contexts/trcpContext";
 import { api, RouterOutputs } from "@/contexts/TRPCProvider";
 import { handleRequestAppReview } from "@/services/appReview";
 import { sendError } from "@/services/errorTracking";
+import { syncMatchesWidget } from "@/services/matchesWidget";
 import { SceneName } from "@/types/SceneName";
 import { Header } from "@/views/(tabs)/Messages/components/Header";
 import { Message } from "@/views/(tabs)/Messages/components/Message";
@@ -50,6 +51,9 @@ const Messages = () => {
       const dog = match.dog;
       getTrcpContext().dog.get.setData({ id: dog.id }, dog);
     });
+
+    // Refresh the home-screen widget whenever the matches query updates.
+    void syncMatchesWidget(matches);
   }, [matches]);
 
   const [search, setSearch] = useState("");

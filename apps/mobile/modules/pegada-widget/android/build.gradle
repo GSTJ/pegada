@@ -1,0 +1,39 @@
+// Glance widgets are written with @Composable functions, so this module needs
+// the Compose compiler plugin. Since Kotlin 2.0 the compiler plugin ships
+// versioned alongside Kotlin itself; `kotlinVersion` comes from the root
+// project (same pattern expo-modules-core uses for its optional compose
+// feature).
+buildscript {
+  repositories {
+    mavenCentral()
+    google()
+  }
+
+  dependencies {
+    classpath("org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${kotlinVersion}")
+  }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+group = 'app.pegada'
+version = '1.0.0'
+
+android {
+  namespace 'app.pegada.widget'
+
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+
+  buildFeatures {
+    compose true
+  }
+}
+
+dependencies {
+  implementation 'androidx.glance:glance-appwidget:1.1.1'
+}

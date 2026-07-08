@@ -335,14 +335,20 @@
     "emptyTitle": "Parece que os doguinhos acabaram!",
     "preferencesButton": "Ver Preferências"
   },
+  "tabs": {
+    "swipe": "Descobrir",
+    "messages": "Mensagens",
+    "profile": "Perfil"
+  },
   "themes": {
     "automatic": "Automático",
     "dark": "Escuro",
     "light": "Claro"
   },
-  "tabs": {
-    "swipe": "Descobrir",
-    "messages": "Mensagens",
-    "profile": "Perfil"
+  "widget": {
+    "waitingForReply": "{{count}} match esperando sua resposta",
+    "waitingForReply_plural": "{{count}} matches esperando sua resposta",
+    "allCaughtUp": "Tudo respondido! Bora fazer novos amigos",
+    "signedOut": "Entre para ver seus matches aqui"
   }
 }

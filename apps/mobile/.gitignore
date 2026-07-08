@@ -26,6 +26,10 @@ web-build/
 
 **/*/ios
 **/*/android
+# The prebuild-generated ios/android dirs above must stay ignored (CNG), but
+# local Expo modules ship their own source-controlled native folders.
+!modules/*/ios
+!modules/*/android
 
 .turbo
 build/**

@@ -335,14 +335,20 @@
     "emptyTitle": "We couldn't find any more dogs!",
     "preferencesButton": "View Preferences"
   },
+  "tabs": {
+    "swipe": "Swipe",
+    "messages": "Messages",
+    "profile": "Profile"
+  },
   "themes": {
     "automatic": "Automatic",
     "dark": "Dark",
     "light": "Light"
   },
-  "tabs": {
-    "swipe": "Swipe",
-    "messages": "Messages",
-    "profile": "Profile"
+  "widget": {
+    "waitingForReply": "{{count}} match waiting for your reply",
+    "waitingForReply_plural": "{{count}} matches waiting for your reply",
+    "allCaughtUp": "All caught up! Go make new friends",
+    "signedOut": "Sign in to see your matches here"
   }
 }
