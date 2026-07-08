@@ -43,12 +43,17 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
-    // Generates the shared `targets/pegada-widgets` WidgetKit extension
-    // target (home-screen widgets, Live Activities, Control Center controls)
-    // at prebuild time. iOS allows one widget extension per app, so every
-    // widget-family feature registers in PegadaWidgetsBundle.swift instead
-    // of adding a target. Team ID comes from EAS credentials at build time;
-    // local sim builds don't sign.
+    // Wires every directory under `targets/` into the Xcode project at
+    // prebuild time: notification-service (communication-style chat
+    // pushes, see targets/notification-service/) and pegada-widgets (the
+    // shared WidgetKit extension -- home-screen widgets, Live Activities,
+    // Control Center controls). iOS allows one widget extension per app,
+    // so every widget-family feature registers in PegadaWidgetsBundle.swift
+    // instead of adding a separate target. The plugin globs
+    // `targets/*/expo-target.config.{js,json}` itself, so ONE entry here
+    // picks up both -- do not add this more than once, it re-runs its
+    // Xcode-project mutation pass per extra entry with no benefit. Team ID
+    // comes from EAS credentials at build time; local sim builds don't sign.
     "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
@@ -177,11 +182,6 @@ const config: ExpoConfig = {
         cameraPermission: "The app allows you to take photos for your doggie's profile.",
       },
     ],
-    // Wires every directory under `targets/` into the Xcode project at
-    // prebuild time. Currently just the notification-service extension that
-    // renders chat pushes as iOS communication notifications (sender dog
-    // avatar + name); see targets/notification-service/.
-    "@bacons/apple-targets",
     // Wires the source-controlled `Pegada.storekit` fixture into the iOS
     // scheme so simulator runs (local + CI) can resolve real product pricing
     // without an App Store sandbox session. Plugin is a no-op when the file
