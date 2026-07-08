@@ -95,9 +95,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   return (
     <Container testID="swipe-card" {...props} style={[props.style, transform]}>
       <PhotoAnchor
-        sharedTransitionTag={
-          SHARED_ELEMENT_TRANSITIONS_ENABLED ? `dog-photo-${dog.id}` : undefined
-        }
+        sharedTransitionTag={SHARED_ELEMENT_TRANSITIONS_ENABLED ? `dog-photo-${dog.id}` : undefined}
         sharedTransitionStyle={SHARED_ELEMENT_TRANSITIONS_ENABLED ? dogPhotoTransition : undefined}
       >
         <Picture
