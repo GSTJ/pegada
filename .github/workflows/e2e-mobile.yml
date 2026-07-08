@@ -820,26 +820,16 @@ jobs:
           fi
           xcrun simctl install "$SIMULATOR_UDID" "$APP_PATH"
 
-      # First maestro use compiles + installs its XCUITest runner on the
-      # simulator, which can blow the default driver-startup window on a
-      # cold runner, flows then fail with 'Failed to connect to
-      # 127.0.0.1:22087' while the app itself is perfectly healthy. Warm
-      # the driver once before the gated flows so their runs start
-      # against a live driver. This does NOT need the target app
-      # installed or running (Maestro's driver is its own XCUITest
-      # bundle, independent of app.pegada), verified against Maestro's
-      # driver architecture, so the old separate "Launch app (warm up)"
-      # step (a full simctl launch + sleep 3, ~4min wall-clock measured
-      # in run 28738396560, entirely thrown away since the flow step
-      # below does its own independent terminate+launch anyway) has been
-      # removed.
-      - name: Warm up Maestro driver
-        env:
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
-        run: |
-          maestro hierarchy > /dev/null 2>&1 || true
-          maestro hierarchy > /dev/null 2>&1 || true
-
+      # A "Warm up Maestro driver" step (two throwaway `maestro hierarchy`
+      # calls) used to live here. Deleted: REQUIRED_FLOWS is only
+      # "01-launch", and that flow runs the driverless-of-`maestro-test`
+      # branch below (checks/01-launch.sh), which never calls `maestro
+      # test` and so never consumes a warmed driver session — its own
+      # first `maestro hierarchy` call pays the cold-driver-compile cost
+      # regardless of whether this step ran first. Pure waste for the
+      # required job today (~4-6.5 min/PR). Reinstate this step ONLY if a
+      # future REQUIRED_FLOW actually exercises `maestro test`.
+      #
       # The required suite is small enough to enumerate. We loop through
       # the comma-separated REQUIRED_FLOWS and execute each as its own
       # maestro invocation so a single failing flow has a clean failure
