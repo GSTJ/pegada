@@ -243,9 +243,24 @@ const config: ExpoConfig = {
     },
     googleServicesFile: "./GoogleService-Info.plist",
     // iOS 18+ dark/tinted home screen icon variants. `light` falls back to
-    // the top-level `icon` when omitted. Both variants must be the glyph
-    // on a transparent background -- iOS supplies the dark backdrop and
-    // applies the user's tint color itself.
+    // the top-level `icon` when omitted. Both source PNGs are the glyph on
+    // a transparent background, per Apple's spec -- iOS supplies the dark
+    // backdrop and applies the user's tint color itself.
+    //
+    // KNOWN LIMITATION (Expo SDK 55): the prebuild plugin
+    // (@expo/prebuild-config/build/plugins/icons/withIosIcons.js,
+    // generateUniversalIconAsync) hardcodes `removeTransparency: appearance
+    // !== 'dark'` and forces a solid white `backgroundColor` for every
+    // variant except 'dark'. That includes 'tinted', so this transparent
+    // source PNG gets flattened onto opaque white during `expo prebuild`
+    // before Xcode ever sees it -- the tinted home screen icon renders as a
+    // gray glyph in a white square instead of blending into iOS's tinted
+    // gradient. There is no source-asset fix for this; it's a toolchain
+    // bug/limitation in this SDK version (see the `// TODO: Maybe use a
+    // more adaptive option based on the icon color?` comment in that file).
+    // Only `dark` is unaffected and renders correctly today. Revisit this
+    // once Expo fixes `generateUniversalIconAsync`, or patch it via
+    // patch-package if we decide that's worth it.
     icon: {
       dark: "./src/assets/images/icon-dark.png",
       tinted: "./src/assets/images/icon-tinted.png",
