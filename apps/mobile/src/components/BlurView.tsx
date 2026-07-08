@@ -40,9 +40,26 @@ export const TransparentAndroidDarkBlurView = styled(ContainerComponent).attrs({
   }};
 `;
 
-// `isLiquidGlassAvailable()` reflects a fixed OS capability, so it's safe to
-// read once at module scope -- same pattern as the `Platform.OS` check above.
-const glassAvailable = isLiquidGlassAvailable();
+let cachedGlassAvailable: boolean | undefined;
+
+/**
+ * `isLiquidGlassAvailable()` calls `requireNativeModule('ExpoGlassEffect')`
+ * under the hood, which throws synchronously if the native module isn't
+ * linked. It must never run at module scope -- a throw during module
+ * evaluation crashes app boot with no redbox recovery. Evaluate lazily on
+ * first use instead, and treat a missing/broken native module as "not
+ * available" so we degrade to the non-glass fallback.
+ */
+export const isLiquidGlassAvailableSafe = (): boolean => {
+  if (cachedGlassAvailable === undefined) {
+    try {
+      cachedGlassAvailable = isLiquidGlassAvailable();
+    } catch {
+      cachedGlassAvailable = false;
+    }
+  }
+  return cachedGlassAvailable;
+};
 
 /**
  * Same intent as `TransparentAndroidDarkBlurView` (a dark, translucent
@@ -50,9 +67,14 @@ const glassAvailable = isLiquidGlassAvailable();
  * Falls back to the existing blur-on-iOS/flat-on-Android behavior everywhere
  * else, so older iOS and Android are pixel-for-pixel unchanged.
  */
-export const TransparentGlassOrDarkBlurView = glassAvailable
-  ? styled(GlassView).attrs({
-      glassEffectStyle: "clear",
-      colorScheme: "dark",
-    })``
-  : TransparentAndroidDarkBlurView;
+const StyledGlassView = styled(GlassView).attrs({
+  glassEffectStyle: "clear",
+  colorScheme: "dark",
+})``;
+
+export const TransparentGlassOrDarkBlurView: React.FC<BlurViewProps> = (props) =>
+  isLiquidGlassAvailableSafe() ? (
+    <StyledGlassView {...props} />
+  ) : (
+    <TransparentAndroidDarkBlurView {...props} />
+  );

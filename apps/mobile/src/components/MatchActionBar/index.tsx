@@ -1,7 +1,8 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
-import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { useTheme } from "styled-components/native";
+
+import { isLiquidGlassAvailableSafe } from "@/components/BlurView";
 
 import { GlassPillBackground } from "./GlassPillBackground";
 import {
@@ -22,13 +23,14 @@ interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
 
 /**
  * The pill background behind each action button. Uses a real Liquid Glass
- * effect on iOS 26+ (`isLiquidGlassAvailable()`), and falls back to the
- * original tinted-transparent fill everywhere else (older iOS, Android).
+ * effect on iOS 26+ (`isLiquidGlassAvailableSafe()`), and falls back to the
+ * original tinted-transparent fill everywhere else (older iOS, Android, or
+ * if the native module is missing).
  */
 const ActionItemBackground = () => {
   const theme = useTheme();
 
-  if (isLiquidGlassAvailable()) {
+  if (isLiquidGlassAvailableSafe()) {
     return (
       <GlassPillBackground
         tintColor={theme.colors.primary}

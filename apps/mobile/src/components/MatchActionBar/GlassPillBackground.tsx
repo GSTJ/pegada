@@ -16,7 +16,7 @@ interface GlassPillBackgroundProps {
 }
 
 /**
- * Only ever rendered after the caller has checked `isLiquidGlassAvailable()`.
+ * Only ever rendered after the caller has checked `isLiquidGlassAvailableSafe()`.
  */
 export const GlassPillBackground: React.FC<GlassPillBackgroundProps> = ({
   tintColor,
