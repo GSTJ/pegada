@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!--
+      Library manifests are merged into the app manifest by gradle, so the
+      widget receiver ships with this module and survives a clean prebuild
+      without any extra config plugin.
+    -->
+    <receiver
+      android:name="app.pegada.widget.MatchesWidgetReceiver"
+      android:exported="false"
+      android:label="@string/pegada_widget_label">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/pegada_matches_widget_info" />
+    </receiver>
+  </application>
+</manifest>

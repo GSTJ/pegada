@@ -13,7 +13,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.4.0",
+  version: "1.5.0",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -166,6 +166,10 @@ const config: ExpoConfig = {
     // without an App Store sandbox session. Plugin is a no-op when the file
     // is missing or when the platform isn't iOS.
     "./plugins/withStoreKitConfiguration",
+    // Generates the WidgetKit extension target from targets/matches-widget
+    // (Swift source + expo-target.config.js) at prebuild time, so the
+    // home-screen widget survives CNG without a committed ios/ directory.
+    "@bacons/apple-targets",
     // Seeds Android's base (unqualified) values/strings.xml with the
     // primary locale's native strings. Without this, Android Lint's
     // ExtraTranslation check treats every string in locales.en /
@@ -242,6 +246,13 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    // Used by @bacons/apple-targets to sign the widget extension.
+    appleTeamId: "23DRM684H8",
+    // Shared storage between the app and the widget extension: the matches
+    // snapshot (UserDefaults) + downloaded avatars (container files).
+    entitlements: {
+      "com.apple.security.application-groups": ["group.app.pegada"],
+    },
     // associatedDomains: [
     //   'applinks:pegada.app',
     //   'applinks:www.pegada.app',
