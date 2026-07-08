@@ -43,6 +43,13 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
+    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
@@ -186,10 +193,6 @@ const config: ExpoConfig = {
     // Shortcuts, Spotlight) into the main iOS app target. See the plugin
     // file for the full story.
     "./plugins/withAppIntents",
-    // Generates the extension targets under targets/ (currently only
-    // targets/controls, the iOS 18+ Control Center button). Team ID comes
-    // from EAS credentials at build time; local sim builds don't sign.
-    "@bacons/apple-targets",
   ],
   androidStatusBar: {
     barStyle: "dark-content",
