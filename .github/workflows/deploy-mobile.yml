@@ -72,21 +72,14 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # `--environment production` pulls EXPO_PUBLIC_* from the EAS env store
+      # (the same source `eas build` uses), so OTA updates and binaries stay in
+      # lockstep. The old approach fed these from GitHub Actions secrets that
+      # don't exist (only EXPO_TOKEN is set), so every OTA baked empty values —
+      # empty EXPO_PUBLIC_API_URL is what broke the first request on 1.4.0.
       - name: 🚀 Create Update
-        run: eas update --auto --non-interactive
+        run: eas update --auto --non-interactive --environment production
         working-directory: apps/mobile
-        env:
-          EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
-          EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
-          EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY }}
-          EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY }}
-          EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY }}
-          EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY }}
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
-          EXPO_PUBLIC_ENV: production
-          EXPO_PUBLIC_POSTHOG_API_KEY: ${{ secrets.EXPO_PUBLIC_POSTHOG_API_KEY }}
-          EXPO_PUBLIC_POSTHOG_HOST: ${{ secrets.EXPO_PUBLIC_POSTHOG_HOST }}
 
       # TODO: Bugsnag sourcemap upload removed (dead vendor, replaced by PostHog).
       # PostHog RN doesn't ship an equivalent build-time sourcemap upload CLI today;

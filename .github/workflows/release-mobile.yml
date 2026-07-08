@@ -33,6 +33,21 @@ name: Release Mobile (build + submit)
 # from Gabriel to fix (only he can create one in App Store Connect).
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# WHEN THIS RUNS vs. WHEN OTA RUNS
+# ---------------------------------------------------------------------------
+# Most releases ship over-the-air: deploy-mobile.yml runs `eas update` on every
+# push to main, which is the frequent path and needs no native build or store
+# submission. This workflow is only for the rarer case where NATIVE actually
+# changed (new/updated native dep, config plugin, permissions, version bump)
+# and a fresh binary is required.
+#
+# A new native binary must NOT be auto-submitted to the stores: it needs
+# TestFlight/internal-track testing and a deliberate staged rollout first. So:
+#   - tag push (v*)        -> builds artifacts only, NEVER submits
+#   - manual dispatch      -> submit is an explicit opt-in (defaults to false)
+# `eas submit` is only ever reached when a human sets submit=true on a dispatch.
+# ---------------------------------------------------------------------------
 on:
   workflow_dispatch:
     inputs:
@@ -46,7 +61,7 @@ on:
           - android
         default: all
       submit:
-        description: "Submit the built artifact(s) to the store after a successful build"
+        description: "Submit built artifact(s) to the store (opt-in; a brand-new native version normally ships to TestFlight/internal first, not straight to submit)"
         required: true
         type: boolean
         default: false

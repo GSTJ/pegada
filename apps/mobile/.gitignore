@@ -56,3 +56,6 @@ google-services.json
 
 # Turbo cache
 *.tsbuildinfo
+# EAS-generated local credentials (contains cert passwords) — never commit
+credentials.json
+credentials/
