@@ -327,5 +327,9 @@
     "automatic": "Automatic",
     "dark": "Dark",
     "light": "Light"
+  },
+  "quickActions": {
+    "matches": "Matches",
+    "editProfile": "Edit profile"
   }
 }

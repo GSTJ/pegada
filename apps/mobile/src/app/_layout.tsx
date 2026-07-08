@@ -18,6 +18,7 @@ import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useTrackScreens } from "@/hooks/useTrackScreens";
 import { sendError } from "@/services/errorTracking";
 import { useGetInitialNotifications } from "@/services/linking";
+import { useQuickActions } from "@/services/quickActions";
 import { store } from "@/store";
 
 // Wait for the assets to load before hiding the SplashScreen
@@ -39,6 +40,7 @@ const App = () => {
 
   useTrackScreens();
   useGetInitialNotifications();
+  useQuickActions();
 
   // MAESTRO_E2E only: render magic modals inside the main window instead
   // of RNScreens' FullWindowOverlay. The overlay is a separate native

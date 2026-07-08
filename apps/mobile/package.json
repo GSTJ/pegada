@@ -53,6 +53,7 @@
     "expo-localization": "~55.0.16",
     "expo-location": "~55.1.10",
     "expo-notifications": "^55.0.23",
+    "expo-quick-actions": "^6.0.2",
     "expo-router": "^55.0.14",
     "expo-secure-store": "^55.0.14",
     "expo-splash-screen": "~55.0.21",
