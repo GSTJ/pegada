@@ -13,7 +13,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.4.0",
+  version: "1.5.0",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -35,6 +35,10 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
+    // Wires the `targets/like-limit-activity` widget-extension target
+    // (ActivityKit Live Activity for the daily like limit) into the iOS
+    // project at prebuild time. iOS-only, no-op on Android.
+    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
@@ -228,6 +232,8 @@ const config: ExpoConfig = {
     appStoreUrl: "https://apps.apple.com/app/id6450865592",
     infoPlist: {
       CFBundleAllowMixedLocalizations: true,
+      // Required for the like-limit countdown Live Activity (iOS 16.2+).
+      NSSupportsLiveActivities: true,
     },
     splash: {
       backgroundColor: "#FFFFFF",

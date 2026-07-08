@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["PegadaLiveStatusModule"]
+  },
+  "android": {
+    "modules": ["app.pegada.livestatus.PegadaLiveStatusModule"]
+  }
+}

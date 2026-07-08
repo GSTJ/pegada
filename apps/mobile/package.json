@@ -104,6 +104,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
+    "@bacons/apple-targets": "^4.0.7",
     "@pegada/api": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
     "@types/color": "^3.0.6",
