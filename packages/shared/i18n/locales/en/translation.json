@@ -327,5 +327,10 @@
     "automatic": "Automatic",
     "dark": "Dark",
     "light": "Light"
+  },
+  "tabs": {
+    "swipe": "Swipe",
+    "messages": "Messages",
+    "profile": "Profile"
   }
 }

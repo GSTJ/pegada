@@ -1,5 +1,6 @@
 import { Platform, View } from "react-native";
 import { BlurViewProps, BlurView as ExpoBlurView } from "expo-blur";
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import Color from "color";
 import styled, { DefaultTheme } from "styled-components/native";
 
@@ -38,3 +39,20 @@ export const TransparentAndroidDarkBlurView = styled(ContainerComponent).attrs({
     return Color(props.theme.colors.black).alpha(0.5).string();
   }};
 `;
+
+// `isLiquidGlassAvailable()` reflects a fixed OS capability, so it's safe to
+// read once at module scope -- same pattern as the `Platform.OS` check above.
+const glassAvailable = isLiquidGlassAvailable();
+
+/**
+ * Same intent as `TransparentAndroidDarkBlurView` (a dark, translucent
+ * pill floating over a photo), but rendered as real Liquid Glass on iOS 26+.
+ * Falls back to the existing blur-on-iOS/flat-on-Android behavior everywhere
+ * else, so older iOS and Android are pixel-for-pixel unchanged.
+ */
+export const TransparentGlassOrDarkBlurView = glassAvailable
+  ? styled(GlassView).attrs({
+      glassEffectStyle: "clear",
+      colorScheme: "dark",
+    })``
+  : TransparentAndroidDarkBlurView;

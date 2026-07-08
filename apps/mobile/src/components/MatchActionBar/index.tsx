@@ -1,7 +1,17 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
+import { useTheme } from "styled-components/native";
 
-import { ActionItem, ConfusedEmoji, Container, HeartEyesEmoji, ThinkingEmoji } from "./styles";
+import { GlassPillBackground } from "./GlassPillBackground";
+import {
+  ActionItem,
+  ActionItemFallbackBackground,
+  ConfusedEmoji,
+  Container,
+  HeartEyesEmoji,
+  ThinkingEmoji,
+} from "./styles";
 
 interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   onNope: () => void;
@@ -9,6 +19,26 @@ interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   onMaybe: () => void;
   animated?: boolean;
 }
+
+/**
+ * The pill background behind each action button. Uses a real Liquid Glass
+ * effect on iOS 26+ (`isLiquidGlassAvailable()`), and falls back to the
+ * original tinted-transparent fill everywhere else (older iOS, Android).
+ */
+const ActionItemBackground = () => {
+  const theme = useTheme();
+
+  if (isLiquidGlassAvailable()) {
+    return (
+      <GlassPillBackground
+        tintColor={theme.colors.primary}
+        colorScheme={theme.dark ? "dark" : "light"}
+      />
+    );
+  }
+
+  return <ActionItemFallbackBackground />;
+};
 
 export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   onNope,
@@ -25,16 +55,19 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
     <Container exiting={ZoomOutDown} {...props}>
       <Animated.View entering={dislikeAnimation}>
         <ActionItem testID="swipe-dislike" onPress={onNope}>
+          <ActionItemBackground />
           <ConfusedEmoji />
         </ActionItem>
       </Animated.View>
       <Animated.View entering={maybeAnimation}>
         <ActionItem testID="swipe-maybe" onPress={onMaybe}>
+          <ActionItemBackground />
           <ThinkingEmoji />
         </ActionItem>
       </Animated.View>
       <Animated.View entering={likeAnimation}>
         <ActionItem testID="swipe-like" onPress={onYep}>
+          <ActionItemBackground />
           <HeartEyesEmoji />
         </ActionItem>
       </Animated.View>
