@@ -39,6 +39,17 @@ const config: ExpoConfig = {
     "expo-notifications",
     "expo-localization",
     "expo-router",
+    // react-native-maps 1.20+ enables Google Maps via its own config plugin.
+    // The deprecated `ios.config.googleMapsApiKey` / `android.config.googleMaps`
+    // fields make Expo prebuild reference a `react-native-google-maps` podspec
+    // that no longer exists in 1.27, which breaks `pod install` on iOS.
+    [
+      "react-native-maps",
+      {
+        iosGoogleMapsApiKey: process.env.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY,
+        androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
+      },
+    ],
     [
       "expo-build-properties",
       {
@@ -193,11 +204,6 @@ const config: ExpoConfig = {
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
-    config: {
-      googleMaps: {
-        apiKey: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
-      },
-    },
     // intentFilters: [
     //   {
     //     action: 'VIEW',
@@ -233,7 +239,6 @@ const config: ExpoConfig = {
     },
     googleServicesFile: "./GoogleService-Info.plist",
     config: {
-      googleMapsApiKey: process.env.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY,
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",

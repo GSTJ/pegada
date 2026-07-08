@@ -43,9 +43,7 @@ if (!_config.success) {
  * URL always hits the handler directly, regardless of the built env value.
  */
 const normalizeApiUrl = (raw: string): string =>
-  raw
-    .replace(/\/+$/, "")
-    .replace(/^(https?:\/\/)pegada\.app(\/|$)/, "$1www.pegada.app$2");
+  raw.replace(/\/+$/, "").replace(/^(https?:\/\/)pegada\.app(\/|$)/, "$1www.pegada.app$2");
 
 export const config = {
   ..._config.data,
