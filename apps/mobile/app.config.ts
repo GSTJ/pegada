@@ -35,6 +35,13 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
+    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
@@ -166,10 +173,6 @@ const config: ExpoConfig = {
     // without an App Store sandbox session. Plugin is a no-op when the file
     // is missing or when the platform isn't iOS.
     "./plugins/withStoreKitConfiguration",
-    // Generates the WidgetKit extension target from targets/matches-widget
-    // (Swift source + expo-target.config.js) at prebuild time, so the
-    // home-screen widget survives CNG without a committed ios/ directory.
-    "@bacons/apple-targets",
     // Seeds Android's base (unqualified) values/strings.xml with the
     // primary locale's native strings. Without this, Android Lint's
     // ExtraTranslation check treats every string in locales.en /
@@ -246,8 +249,6 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
-    // Used by @bacons/apple-targets to sign the widget extension.
-    appleTeamId: "23DRM684H8",
     // Shared storage between the app and the widget extension: the matches
     // snapshot (UserDefaults) + downloaded avatars (container files).
     entitlements: {

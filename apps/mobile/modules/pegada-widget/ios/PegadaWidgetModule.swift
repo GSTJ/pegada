@@ -2,7 +2,7 @@ import ExpoModulesCore
 import WidgetKit
 
 /// Keep in sync with `modules/pegada-widget/index.ts` and
-/// `targets/matches-widget/MatchesWidget.swift`.
+/// `targets/pegada-widgets/MatchesWidget.swift`.
 private let appGroupId = "group.app.pegada"
 private let snapshotKey = "matchesWidgetSnapshot"
 private let widgetKind = "PegadaMatchesWidget"

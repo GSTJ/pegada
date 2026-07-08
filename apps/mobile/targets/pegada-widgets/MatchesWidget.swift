@@ -269,6 +269,11 @@ struct MediumMatchesView: View {
   }
 }
 
+// `containerBackground(for: .widget)` requires iOS 17. The shared extension
+// target deploys to iOS 16.2, so the widget is gated here and in
+// PegadaWidgetsBundle.swift; users below 17 simply won't see it in the
+// gallery.
+@available(iOS 17.0, *)
 struct MatchesWidgetEntryView: View {
   @Environment(\.widgetFamily) private var family
 
@@ -300,6 +305,7 @@ struct MatchesWidgetEntryView: View {
   }
 }
 
+@available(iOS 17.0, *)
 struct MatchesWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: widgetKind, provider: MatchesProvider()) { entry in

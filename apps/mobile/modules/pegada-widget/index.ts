@@ -5,7 +5,7 @@ import { requireOptionalNativeModule } from "expo-modules-core";
  * these, update the matching constants in:
  * - ios/PegadaWidgetModule.swift
  * - android/src/main/java/app/pegada/widget/PegadaWidgetModule.kt
- * - targets/matches-widget/MatchesWidget.swift
+ * - targets/pegada-widgets/MatchesWidget.swift
  */
 export const WIDGET_APP_GROUP = "group.app.pegada";
 
