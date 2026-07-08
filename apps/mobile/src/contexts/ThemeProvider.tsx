@@ -43,7 +43,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
   useEffect(() => {
     const fetchThemeFromStorage = async () => {
       const storedTheme = await getData(StorageKeys.Theme);
-      Appearance.setColorScheme(storedTheme as ColorSchemeName);
+      if (storedTheme) Appearance.setColorScheme(storedTheme as ColorSchemeName);
       setActiveTheme(storedTheme);
     };
 
@@ -53,7 +53,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
   const theme = themes[(colorScheme as Theme) ?? Theme.Default] ?? themes[Theme.Default];
 
   const handleActiveThemeChange = async (theme: ActiveTheme) => {
-    Appearance.setColorScheme(theme as ColorSchemeName);
+    if (theme) Appearance.setColorScheme(theme as ColorSchemeName);
     setActiveTheme(theme);
 
     if (!theme) return deleteData(StorageKeys.Theme);
