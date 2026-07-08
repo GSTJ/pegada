@@ -13,7 +13,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.4.0",
+  version: "1.5.0",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -201,6 +201,10 @@ const config: ExpoConfig = {
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./src/assets/images/adaptive-icon.png",
+      // Android 13+ "Themed icons" setting recolors this to the user's
+      // wallpaper-derived palette, so it must be a single-color (white)
+      // silhouette on transparency, not the full-color glyph.
+      monochromeImage: "./src/assets/images/adaptive-icon-monochrome.png",
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
@@ -238,6 +242,14 @@ const config: ExpoConfig = {
       },
     },
     googleServicesFile: "./GoogleService-Info.plist",
+    // iOS 18+ dark/tinted home screen icon variants. `light` falls back to
+    // the top-level `icon` when omitted. Both variants must be the glyph
+    // on a transparent background -- iOS supplies the dark backdrop and
+    // applies the user's tint color itself.
+    icon: {
+      dark: "./src/assets/images/icon-dark.png",
+      tinted: "./src/assets/images/icon-tinted.png",
+    },
     config: {
       usesNonExemptEncryption: false,
     },
