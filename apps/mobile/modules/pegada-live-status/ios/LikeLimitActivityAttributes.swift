@@ -6,7 +6,7 @@ import Foundation
   /// Shared ActivityAttributes for the like-limit countdown Live Activity.
   ///
   /// IMPORTANT: this struct is duplicated verbatim in
-  /// `targets/like-limit-activity/LikeLimitActivityAttributes.swift`.
+  /// `targets/pegada-widgets/LikeLimitActivityAttributes.swift`.
   /// ActivityKit matches app <-> widget-extension activities by the
   /// attribute type's name and its Codable encoding, so both copies must
   /// stay identical. If you change one, change the other.

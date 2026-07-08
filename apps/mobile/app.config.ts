@@ -35,9 +35,12 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
-    // Wires the `targets/like-limit-activity` widget-extension target
-    // (ActivityKit Live Activity for the daily like limit) into the iOS
-    // project at prebuild time. iOS-only, no-op on Android.
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
     "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
