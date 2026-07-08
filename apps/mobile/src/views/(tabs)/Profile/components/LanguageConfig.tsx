@@ -52,7 +52,6 @@ export const LanguageConfig = () => {
         placeholder={t("profile.language")}
         value={value}
         data={languagesPickerData}
-        snapPoints={["40%"]}
         itemTestIDPrefix="language-item-"
         onChange={(item) => {
           i18n.changeLanguage(item.id as keyof typeof LANGUAGES).catch(sendError);

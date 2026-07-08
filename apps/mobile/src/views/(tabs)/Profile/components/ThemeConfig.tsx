@@ -50,7 +50,6 @@ export const ThemeConfig = () => {
         placeholder={t("profile.theme")}
         value={value}
         data={data}
-        snapPoints={["40%"]}
         itemTestIDPrefix="theme-item-"
         onChange={(item) => {
           setActiveTheme(item.id as ActiveTheme).catch(sendError);
