@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import * as React from "react";
 import { BackHandler, ScrollView, View } from "react-native";
 import { Image } from "expo-image";
@@ -12,6 +13,7 @@ import { Text } from "@/components/Text";
 import { api } from "@/contexts/TRPCProvider";
 import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
 import { analytics } from "@/services/analytics";
+import { haptics } from "@/services/haptics";
 import { SceneName } from "@/types/SceneName";
 import AnimatedCards from "./AnimatedCards";
 import { ConfettiAnimation } from "./ConfettiAnimation";
@@ -78,6 +80,11 @@ const NewMatch: React.FC = () => {
 
     return () => subscription.remove();
   });
+
+  // Pairs with the confetti Lottie — celebrates the match as the screen appears.
+  useEffect(() => {
+    haptics.success();
+  }, []);
 
   return (
     <Container testID="new-match-screen">
