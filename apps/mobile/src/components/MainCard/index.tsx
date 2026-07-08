@@ -2,6 +2,7 @@ import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { useState } from "react";
 import * as React from "react";
 import {
+  SharedTransition,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -11,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
 import { PressableArea } from "@/components/PressableArea";
+import { SHARED_ELEMENT_TRANSITIONS_ENABLED } from "@/constants";
 import { SceneName } from "@/types/SceneName";
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
@@ -19,6 +21,7 @@ import {
   CarouselContainer,
   Container,
   NextImage,
+  PhotoAnchor,
   Picture,
   PreviousImage,
   UpperPart,
@@ -27,6 +30,10 @@ import {
 const springConfig = { mass: 0.2 };
 
 const START_IMAGE_INDEX = 0;
+
+// Custom easing for the swipe-card -> DogProfile shared-element photo
+// transition. Gated by SHARED_ELEMENT_TRANSITIONS_ENABLED (see @/constants).
+const dogPhotoTransition = SharedTransition.duration(350).springify();
 
 export interface VisitingCardProps extends React.ComponentProps<typeof Container> {
   dog: SwipeDog;
@@ -87,13 +94,20 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
 
   return (
     <Container testID="swipe-card" {...props} style={[props.style, transform]}>
-      <Picture
-        source={{
-          uri: images[currentImage]?.url,
-          blurhash: images[currentImage]?.blurhash,
-        }}
-        key={images[currentImage]?.id}
-      />
+      <PhotoAnchor
+        sharedTransitionTag={
+          SHARED_ELEMENT_TRANSITIONS_ENABLED ? `dog-photo-${dog.id}` : undefined
+        }
+        sharedTransitionStyle={SHARED_ELEMENT_TRANSITIONS_ENABLED ? dogPhotoTransition : undefined}
+      >
+        <Picture
+          source={{
+            uri: images[currentImage]?.url,
+            blurhash: images[currentImage]?.blurhash,
+          }}
+          key={images[currentImage]?.id}
+        />
+      </PhotoAnchor>
       <LinearGradient
         style={{
           position: "absolute",

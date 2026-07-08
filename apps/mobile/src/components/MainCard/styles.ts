@@ -22,6 +22,19 @@ export const Picture = styled(Image)`
   ${absoluteFill}
 `;
 
+/**
+ * Stable (never remounted) wrapper carrying the shared-element
+ * `sharedTransitionTag`. `Picture` itself remounts (via its `key`) every time
+ * the visible photo index changes on a card, which would otherwise make
+ * Reanimated treat an in-card photo swipe as a shared-element transition.
+ * Keeping the tag on this outer, always-mounted view means the transition
+ * only fires on the real navigation-driven mount/unmount.
+ */
+export const PhotoAnchor = styled(Animated.View)`
+  flex: 1;
+  ${absoluteFill}
+`;
+
 export const UpperPart = styled.View`
   flex: 1;
 `;
