@@ -64,7 +64,9 @@ export default () => {
           tabBarItemAccessibilityLabel: t("tabs.profile"),
         }}
       >
-        <NativeTabs.Trigger.Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} />
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "person.circle", selected: "person.circle.fill" }}
+        />
         <NativeTabs.Trigger.Label hidden>{t("tabs.profile")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
