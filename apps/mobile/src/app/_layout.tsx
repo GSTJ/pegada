@@ -19,6 +19,7 @@ import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
 import { getExpoPostHog } from "@/services/observability";
+import { useQuickActions } from "@/services/quickActions";
 import { store } from "@/store";
 
 // Wait for the assets to load before hiding the SplashScreen
@@ -49,6 +50,7 @@ const App = () => {
 
   useTrackScreens();
   useGetInitialNotifications();
+  useQuickActions();
 
   // MAESTRO_E2E only: render magic modals inside the main window instead
   // of RNScreens' FullWindowOverlay. The overlay is a separate native
