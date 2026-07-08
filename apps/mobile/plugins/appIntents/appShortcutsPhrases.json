@@ -1,0 +1,15 @@
+{
+  "//": "Siri phrase localizations for the App Shortcuts declared in PegadaAppIntents.swift. Keys MUST match the Swift phrases exactly, with \\(.applicationName) written as ${applicationName}. withAppIntents.js turns each locale into <lang>.lproj/AppShortcuts.strings (the table name Siri requires).",
+  "en": {
+    "Start swiping in ${applicationName}": "Start swiping in ${applicationName}",
+    "Find dogs in ${applicationName}": "Find dogs in ${applicationName}",
+    "Open my matches in ${applicationName}": "Open my matches in ${applicationName}",
+    "Show my ${applicationName} matches": "Show my ${applicationName} matches"
+  },
+  "pt-BR": {
+    "Start swiping in ${applicationName}": "Procurar doguinhos no ${applicationName}",
+    "Find dogs in ${applicationName}": "Encontrar doguinhos no ${applicationName}",
+    "Open my matches in ${applicationName}": "Abrir meus matches no ${applicationName}",
+    "Show my ${applicationName} matches": "Mostrar meus matches do ${applicationName}"
+  }
+}
