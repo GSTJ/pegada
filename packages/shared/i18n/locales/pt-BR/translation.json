@@ -216,6 +216,10 @@
     "updateError": "Ocorreu um erro ao atualizar suas preferências.",
     "years": "0-{{maxYears}}+ anos"
   },
+  "quickActions": {
+    "matches": "Matches",
+    "editProfile": "Editar perfil"
+  },
   "links": {
     "termsOfUse": "https://www.pegada.app/pt-br/terms-of-use",
     "privacyPolicy": "https://www.pegada.app/pt-br/privacy-policy"
@@ -327,9 +331,5 @@
     "automatic": "Automático",
     "dark": "Escuro",
     "light": "Claro"
-  },
-  "quickActions": {
-    "matches": "Matches",
-    "editProfile": "Editar perfil"
   }
 }
