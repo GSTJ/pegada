@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 import MultiSlider, { LabelProps, MultiSliderProps } from "@ptomasroos/react-native-multi-slider";
 import { useTheme } from "styled-components/native";
 
@@ -58,11 +58,11 @@ const CustomMarker = () => <Marker hitSlop={markerHitSlop} />;
 export const Root = (props: MultiSliderProps) => {
   const theme = useTheme();
 
-  // On android, if the slider is close to the edge of the screen,
-  // the swipe gesture will be triggered instead of the slider
-  // making the user go back to the previous screen. This is a
-  // workaround to prevent that.
-  const safePadding = Platform.OS === "android" ? theme.spacing[7] : 0;
+  // When the slider reaches the edge of the screen, a horizontal drag there
+  // gets claimed by the OS navigation gesture (iOS interactive pop / Android
+  // system back) instead of the slider, sending the user back a screen. Inset
+  // the track on both platforms so no marker sits in that edge gesture zone.
+  const safePadding = theme.spacing[7];
 
   const sliderLength = (props?.sliderLength ?? 0) - safePadding * 2;
 
