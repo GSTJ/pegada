@@ -3,25 +3,54 @@ import * as QuickActions from "expo-quick-actions";
 import { useTranslation } from "react-i18next";
 
 import { sendError } from "@/services/errorTracking";
-import { customQuickActionHandler, QuickActionId } from "./handlers/action";
+import {
+  customQuickActionHandler,
+  flushPendingQuickAction,
+  QuickActionId,
+  setPendingQuickAction,
+} from "./handlers/action";
 import { editProfileIcon, matchesIcon } from "./handlers/icons";
 
-export const useQuickActions = () => {
+/**
+ * `enabled` must only be `true` once the app has resolved to the fully
+ * authenticated, onboarded route (`initialRouteName === SceneName.Swipe`
+ * in `app/_layout.tsx`). Quick actions are reachable from the
+ * unauthenticated root mount, so -- like `services/linking`'s
+ * `processLinks`, which only runs inside the authenticated Swipe screen --
+ * we must not navigate before that resolves. A tap that arrives earlier
+ * (cold start, or a warm tap while still signed out/onboarding) is held
+ * and replayed once `enabled` flips to `true`, instead of being dropped
+ * or racing the auth redirect.
+ */
+export const useQuickActions = (enabled: boolean) => {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
     // When the app is not already running, and the user taps a quick action
-    customQuickActionHandler(QuickActions.initial);
+    setPendingQuickAction(QuickActions.initial);
   }, []);
 
   useEffect(() => {
     // When the app is already running, and the user taps a quick action
-    const subscription = QuickActions.addListener(customQuickActionHandler);
+    const subscription = QuickActions.addListener((action) => {
+      if (enabled) {
+        customQuickActionHandler(action);
+        return;
+      }
+
+      setPendingQuickAction(action);
+    });
 
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    flushPendingQuickAction();
+  }, [enabled]);
 
   useEffect(() => {
     // Titles come from the runtime API (not the static config plugin) so
