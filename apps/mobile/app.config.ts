@@ -202,6 +202,10 @@ const config: ExpoConfig = {
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./src/assets/images/adaptive-icon.png",
+      // Android 13+ "Themed icons" setting recolors this to the user's
+      // wallpaper-derived palette, so it must be a single-color (white)
+      // silhouette on transparency, not the full-color glyph.
+      monochromeImage: "./src/assets/images/adaptive-icon-monochrome.png",
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
@@ -239,6 +243,30 @@ const config: ExpoConfig = {
       },
     },
     googleServicesFile: "./GoogleService-Info.plist",
+    // iOS 18+ dark home screen icon variant. `light` falls back to the
+    // top-level `icon` when omitted. The source PNG is the glyph on a
+    // transparent background, per Apple's spec -- iOS supplies the dark
+    // backdrop itself.
+    //
+    // `tinted` is deliberately NOT configured here even though
+    // src/assets/images/icon-tinted.png exists (transparent glyph, ready to
+    // go): Expo SDK 55's prebuild plugin
+    // (@expo/prebuild-config/build/plugins/icons/withIosIcons.js,
+    // generateUniversalIconAsync) hardcodes `removeTransparency: appearance
+    // !== 'dark'` and forces a solid white `backgroundColor` for every
+    // variant except 'dark'. That flattens the transparent source onto
+    // opaque white during `expo prebuild`, before Xcode ever sees it, so
+    // real users who enable iOS's "Tinted" home screen icons would see a
+    // white square with a faint gray glyph -- worse than not shipping the
+    // variant at all, since omitting `tinted` makes iOS fall back to the
+    // normal full-color icon in tinted mode (see `getIcons()` in the same
+    // plugin). Flagged as a blocker to Gabriel in the PR description rather
+    // than shipped silently. Revisit once Expo fixes
+    // `generateUniversalIconAsync`, or patch it via patch-package if that's
+    // worth it later -- icon-tinted.png is already generated and correct.
+    icon: {
+      dark: "./src/assets/images/icon-dark.png",
+    },
     config: {
       usesNonExemptEncryption: false,
     },
