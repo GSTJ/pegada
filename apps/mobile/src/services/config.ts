@@ -35,4 +35,19 @@ if (!_config.success) {
   throw new Error("Invalid environment variables.");
 }
 
-export const config = _config.data;
+/**
+ * The prod API lives on `www.pegada.app`; the bare apex `pegada.app`
+ * 308-redirects there, and RN's fetch can't follow that redirect cleanly
+ * (it hands back the "Redirecting..." body), which crashes the first tRPC
+ * call. Normalize the apex to `www` and drop any trailing slash so the base
+ * URL always hits the handler directly, regardless of the built env value.
+ */
+const normalizeApiUrl = (raw: string): string =>
+  raw
+    .replace(/\/+$/, "")
+    .replace(/^(https?:\/\/)pegada\.app(\/|$)/, "$1www.pegada.app$2");
+
+export const config = {
+  ..._config.data,
+  API_URL: normalizeApiUrl(_config.data.API_URL),
+};

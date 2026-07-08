@@ -55,7 +55,20 @@ export const trpcQueryClient = api.createClient({
       },
       fetch: async (url, options): Promise<Response> => {
         const res = await fetch(url as string, options as RequestInit);
-        const responsesJSON = (await res.json()) as ResponseJSON[];
+
+        // The API base URL must resolve directly to the tRPC handler with NO
+        // redirect. `pegada.app` 308-redirects to `www.pegada.app`, and RN's
+        // fetch surfaces the redirect body ("Redirecting...") instead of
+        // following it transparently — so `res.json()` below would throw on
+        // the very first request and take startup down with it. If the body
+        // isn't JSON (redirect page, HTML 5xx, gateway timeout), degrade to an
+        // empty tRPC batch instead of throwing so the app can recover.
+        let responsesJSON: ResponseJSON[];
+        try {
+          responsesJSON = (await res.json()) as ResponseJSON[];
+        } catch {
+          responsesJSON = [];
+        }
 
         if (res.status === 401) {
           const unauthorized = responsesJSON.some((responseJSON) => {

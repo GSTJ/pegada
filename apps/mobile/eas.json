@@ -11,6 +11,7 @@
     "development": {
       "extends": "fast",
       "node": "20.10.0",
+      "environment": "development",
       "developmentClient": true,
       "distribution": "internal",
       "autoIncrement": true,
@@ -21,6 +22,7 @@
     "production": {
       "extends": "fast",
       "node": "20.10.0",
+      "environment": "production",
       "channel": "main",
       "autoIncrement": true
     }
@@ -29,6 +31,10 @@
     "production": {
       "ios": {
         "ascAppId": "6450865592"
+      },
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
       }
     }
   }
