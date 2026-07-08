@@ -242,8 +242,16 @@ const config: ExpoConfig = {
       },
     },
     googleServicesFile: "./GoogleService-Info.plist",
-    // iOS 18+ dark home screen icon variant. `light` falls back to the
-    // top-level `icon` when omitted. The source PNG is the glyph on a
+    // iOS 18+ dark home screen icon variant. Expo SDK 55's withIosIcons only
+    // falls back to the top-level `icon` when the `ios.icon` object has NONE
+    // of light/dark/tinted set (see getIcons() in withIosIcons.js) -- with
+    // `dark` present, it does NOT backfill `light`. setIconsAsync then picks
+    // the base/no-appearance asset catalog entry via `icon.light || icon.dark
+    // || icon.tinted`, so omitting `light` here made BOTH the default and the
+    // dark-appearance icon render from icon-dark.png (confirmed via
+    // `expo prebuild` + pixel diff of the generated Contents.json images: the
+    // no-appearance entry was byte-identical to icon-dark.png, not icon.png).
+    // `light` must be set explicitly. The source PNG is the glyph on a
     // transparent background, per Apple's spec -- iOS supplies the dark
     // backdrop itself.
     //
@@ -264,6 +272,7 @@ const config: ExpoConfig = {
     // `generateUniversalIconAsync`, or patch it via patch-package if that's
     // worth it later -- icon-tinted.png is already generated and correct.
     icon: {
+      light: "./src/assets/images/icon.png",
       dark: "./src/assets/images/icon-dark.png",
     },
     config: {
