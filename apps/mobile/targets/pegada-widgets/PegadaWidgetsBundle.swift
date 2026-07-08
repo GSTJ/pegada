@@ -7,6 +7,10 @@ import WidgetKit
 @main
 struct PegadaWidgetsBundle: WidgetBundle {
   var body: some Widget {
+    LikeLimitLiveActivity()
+    if #available(iOS 17.0, *) {
+      MatchesWidget()
+    }
     if #available(iOS 18.0, *) {
       StartSwipingControl()
     }

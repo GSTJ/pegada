@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Required to post the countdown notification at all (Android 13+). -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!-- Required for the promoted "Live Updates" surface on Android 16+. -->
+  <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+</manifest>
