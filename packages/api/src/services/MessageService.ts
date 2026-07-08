@@ -91,6 +91,8 @@ class MessageService {
           lng: this.language,
           replace: { name: newMessage.sender.name },
         }),
+        channelId: "messages",
+        categoryId: "chat-message",
         data: {
           url: `chat/${matchId}/${newMessage.senderId}`,
         },
