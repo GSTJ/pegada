@@ -1,8 +1,8 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import * as React from "react";
+import { View } from "react-native";
 import {
-  SharedTransition,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -11,8 +11,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
+import { setHeroTarget, startHero, useIsHeroActive } from "@/components/HeroTransition/store";
 import { PressableArea } from "@/components/PressableArea";
-import { SHARED_ELEMENT_TRANSITIONS_ENABLED } from "@/constants";
 import { SceneName } from "@/types/SceneName";
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
@@ -30,10 +30,6 @@ import {
 const springConfig = { mass: 0.2 };
 
 const START_IMAGE_INDEX = 0;
-
-// Custom easing for the swipe-card -> DogProfile shared-element photo
-// transition. Gated by SHARED_ELEMENT_TRANSITIONS_ENABLED (see @/constants).
-const dogPhotoTransition = SharedTransition.duration(350).springify();
 
 export interface VisitingCardProps extends React.ComponentProps<typeof Container> {
   dog: SwipeDog;
@@ -53,15 +49,48 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
 
   const rotation = useSharedValue(0);
 
+  // When rendered inside DogProfile (no personal info), this card is the hero
+  // *destination*; on the swipe deck it's the *source*.
+  const isHeroDestination = !shouldShowPersonalInfo;
+  const photoAnchorRef = useRef<View>(null);
+  const heroActive = useIsHeroActive(dog.id);
+
+  const currentPhoto = images[currentImage];
+
   const openUserProfile = () => {
-    router.push({
-      pathname: `${SceneName.Profile}/[id]`,
-      params: {
-        id: dog.id,
-        currentImageIndex: currentImage,
-      },
+    // Kick off the manual hero morph: freeze the tapped photo into a flying
+    // overlay measured at its on-screen frame, then navigate. The destination
+    // card reports its frame on mount (see onDestinationLayout) and the
+    // overlay springs between the two. See @/components/HeroTransition/store.
+    photoAnchorRef.current?.measureInWindow((x, y, width, height) => {
+      if (width > 0 && height > 0 && currentPhoto?.url) {
+        startHero({
+          id: dog.id,
+          source: { uri: currentPhoto.url, blurhash: currentPhoto.blurhash },
+          from: { x, y, width, height },
+        });
+      }
+      router.push({
+        pathname: `${SceneName.Profile}/[id]`,
+        params: {
+          id: dog.id,
+          currentImageIndex: currentImage,
+        },
+      });
     });
   };
+
+  const onDestinationLayout = useCallback(() => {
+    if (!isHeroDestination) return;
+    // Defer to the next frame so native layout has settled before we measure.
+    requestAnimationFrame(() => {
+      photoAnchorRef.current?.measureInWindow((x, y, width, height) => {
+        if (width > 0 && height > 0) {
+          setHeroTarget({ id: dog.id, to: { x, y, width, height } });
+        }
+      });
+    });
+  }, [dog.id, isHeroDestination]);
 
   const gotoPreviousImage = () => {
     // If there is only one image, open the user profile for now.
@@ -95,15 +124,19 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   return (
     <Container testID="swipe-card" {...props} style={[props.style, transform]}>
       <PhotoAnchor
-        sharedTransitionTag={SHARED_ELEMENT_TRANSITIONS_ENABLED ? `dog-photo-${dog.id}` : undefined}
-        sharedTransitionStyle={SHARED_ELEMENT_TRANSITIONS_ENABLED ? dogPhotoTransition : undefined}
+        ref={photoAnchorRef}
+        onLayout={onDestinationLayout}
+        // While the hero overlay is flying, hide the real photo so only the
+        // overlay copy is visible (no double image). The overlay clears itself
+        // once the morph lands, revealing this again.
+        style={heroActive ? { opacity: 0 } : undefined}
       >
         <Picture
           source={{
-            uri: images[currentImage]?.url,
-            blurhash: images[currentImage]?.blurhash,
+            uri: currentPhoto?.url,
+            blurhash: currentPhoto?.blurhash,
           }}
-          key={images[currentImage]?.id}
+          key={currentPhoto?.id}
         />
       </PhotoAnchor>
       <LinearGradient
