@@ -152,7 +152,10 @@ private fun MatchesWidgetContent(
     Spacer(modifier = GlanceModifier.height(8.dp))
 
     Text(
-      text = snapshot.message,
+      // The big numeral above already carries the count when there are no
+      // avatars to show, so that layout uses the countless copy to avoid
+      // showing the count twice.
+      text = (if (dogs.isEmpty()) snapshot.messageCountless else null) ?: snapshot.message,
       style = TextStyle(color = primaryText, fontSize = 13.sp, fontWeight = FontWeight.Medium),
       maxLines = 2,
     )

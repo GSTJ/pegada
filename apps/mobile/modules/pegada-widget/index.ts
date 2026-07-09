@@ -23,11 +23,19 @@ export type WidgetSnapshotDog = {
  * All user-facing strings arrive pre-localized from JS (i18next), so the
  * native side stays data-driven and never hardcodes copy. `message` always
  * matches the current state (waiting count, all caught up, or logged out).
+ *
+ * `messageCountless` is the same "waiting for reply" copy without the
+ * leading count (e.g. "matches waiting for your reply"). Layouts that
+ * already show the count as a standalone numeral (MEDIUM) use this instead
+ * of `message` so the count isn't printed twice; it's `null` whenever
+ * `message` isn't the "waiting for reply" variant (all caught up, logged
+ * out).
  */
 export type WidgetSnapshot = {
   loggedIn: boolean;
   count: number;
   message: string;
+  messageCountless: string | null;
   dogs: WidgetSnapshotDog[];
 };
 

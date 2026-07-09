@@ -19,10 +19,17 @@ struct SnapshotDog: Decodable {
 /// User-facing copy inside the snapshot is pre-localized by the app (i18next),
 /// so this extension stays data-driven. Only the "app never wrote anything"
 /// fallback lives natively, in `L10n`.
+///
+/// `messageCountless` mirrors `message` without the leading count (e.g.
+/// "matches waiting for your reply"); MEDIUM already renders the count as
+/// its own numeral, so it uses this instead to avoid showing the count
+/// twice. It's `nil` whenever `message` isn't the "waiting for reply"
+/// variant.
 struct MatchesSnapshot: Decodable {
   let loggedIn: Bool
   let count: Int
   let message: String
+  let messageCountless: String?
   let dogs: [SnapshotDog]
 }
 
@@ -49,6 +56,12 @@ enum L10n {
     isPortuguese
       ? "3 matches esperando sua resposta"
       : "3 matches waiting for your reply"
+  }
+
+  static var previewMessageCountless: String {
+    isPortuguese
+      ? "matches esperando sua resposta"
+      : "matches waiting for your reply"
   }
 }
 
@@ -120,6 +133,7 @@ struct MatchesEntry: TimelineEntry {
         loggedIn: true,
         count: 3,
         message: L10n.previewMessage,
+        messageCountless: L10n.previewMessageCountless,
         dogs: [
           SnapshotDog(name: "Luna", avatar: nil),
           SnapshotDog(name: "Thor", avatar: nil),
@@ -311,7 +325,9 @@ struct MediumMatchesView: View {
           .foregroundColor(Brand.pink)
           .lineLimit(1)
           .minimumScaleFactor(0.7)
-        Text(snapshot.message)
+        // The numeral above already carries the count, so MEDIUM uses the
+        // countless copy here to avoid showing it twice.
+        Text(snapshot.messageCountless ?? snapshot.message)
           .font(Brand.medium(13))
           .foregroundColor(Brand.text)
           .lineLimit(2)
