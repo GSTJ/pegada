@@ -22,6 +22,17 @@ export const Picture = styled(Image)`
   ${absoluteFill}
 `;
 
+/**
+ * Stable (never remounted) wrapper around the photo. `Picture` itself remounts
+ * (via its `key`) whenever the visible photo index changes, so keeping the
+ * measure anchor on this always-mounted outer view gives the manual hero
+ * transition a stable frame to measure (see @/components/HeroTransition).
+ */
+export const PhotoAnchor = styled(Animated.View)`
+  flex: 1;
+  ${absoluteFill}
+`;
+
 export const UpperPart = styled.View`
   flex: 1;
 `;
