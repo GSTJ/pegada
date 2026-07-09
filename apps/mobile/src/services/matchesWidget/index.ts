@@ -57,6 +57,10 @@ export const syncMatchesWidget = async (matches: Matches): Promise<void> => {
         waiting.length > 0
           ? i18n.t("widget.waitingForReply", { count: waiting.length })
           : i18n.t("widget.allCaughtUp"),
+      // Only meaningful alongside the "waiting for reply" state: layouts
+      // that render the count as its own numeral (MEDIUM) use this instead
+      // of `message` so the count isn't shown twice.
+      messageCountless: waiting.length > 0 ? i18n.t("widget.waitingForReplyCountless") : null,
       dogs: dogsOnWidget.map((dog) => ({
         name: dog.name,
         avatar: avatarPathByDogId.get(dog.id) ?? null,
@@ -82,6 +86,7 @@ export const syncMatchesWidgetLoggedOut = async (): Promise<void> => {
       loggedIn: false,
       count: 0,
       message: i18n.t("widget.signedOut"),
+      messageCountless: null,
       dogs: [],
     });
   } catch (error) {

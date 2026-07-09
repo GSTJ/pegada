@@ -11,11 +11,17 @@ data class WidgetDog(
 /**
  * The JSON contract written by JS. Keep in sync with
  * `modules/pegada-widget/index.ts`.
+ *
+ * [messageCountless] mirrors [message] without the leading count (e.g.
+ * "matches waiting for your reply"); layouts that already render the count
+ * as its own numeral use this instead so the count isn't shown twice. Null
+ * whenever [message] isn't the "waiting for reply" variant.
  */
 data class WidgetSnapshot(
   val loggedIn: Boolean,
   val count: Int,
   val message: String,
+  val messageCountless: String?,
   val dogs: List<WidgetDog>,
 ) {
   companion object {
@@ -55,6 +61,7 @@ data class WidgetSnapshot(
         loggedIn = obj.optBoolean("loggedIn", false),
         count = obj.optInt("count", 0),
         message = obj.optString("message"),
+        messageCountless = obj.optString("messageCountless").takeIf { it.isNotEmpty() },
         dogs = dogs,
       )
     }

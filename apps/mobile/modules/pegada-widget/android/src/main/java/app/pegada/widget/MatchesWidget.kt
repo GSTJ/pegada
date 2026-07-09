@@ -164,7 +164,10 @@ private fun MatchesWidgetContent(snapshot: WidgetSnapshot?, avatars: List<Bitmap
     Spacer(modifier = GlanceModifier.height(10.dp))
 
     Text(
-      text = snapshot.message,
+      // The big numeral above already carries the count when there are no
+      // avatars to show, so that layout uses the countless copy to avoid
+      // showing the count twice.
+      text = (if (avatars.isEmpty()) snapshot.messageCountless else null) ?: snapshot.message,
       style = TextStyle(color = primaryText, fontSize = 13.sp),
       maxLines = 2,
     )
