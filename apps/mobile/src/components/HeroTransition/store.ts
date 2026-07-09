@@ -38,6 +38,13 @@ export interface HeroState {
   from: HeroFrame | null;
   /** measured DogProfile photo frame (end of the morph). set once it mounts. */
   to: HeroFrame | null;
+  /**
+   * True once the flying overlay image has actually painted (expo-image
+   * `onDisplay`). The real photos underneath only hide from this point on --
+   * hiding them on `startHero` left a 1-2 frame blank flash while the overlay
+   * image decoded.
+   */
+  overlayReady: boolean;
   /** bumped every mutation so subscribers re-read. */
   version: number;
 }
@@ -47,6 +54,7 @@ const initialState: HeroState = {
   source: null,
   from: null,
   to: null,
+  overlayReady: false,
   version: 0,
 };
 
@@ -69,7 +77,13 @@ const setState = (next: Partial<HeroState>) => {
  * destination frame arrives later via {@link setHeroTarget}.
  */
 export const startHero = (args: { id: string; source: HeroSource; from: HeroFrame }) => {
-  setState({ id: args.id, source: args.source, from: args.from, to: null });
+  setState({ id: args.id, source: args.source, from: args.from, to: null, overlayReady: false });
+};
+
+/** Called by the overlay image's `onDisplay` -- it has pixels on screen. */
+export const markHeroOverlayReady = () => {
+  if (state.id === null || state.overlayReady) return;
+  setState({ overlayReady: true });
 };
 
 /**
@@ -100,8 +114,13 @@ const getSnapshot = () => state;
 
 export const useHeroState = (): HeroState => useSyncExternalStore(subscribe, getSnapshot);
 
-/** True while a hero for `id` is active (used to hide the real photos). */
+/**
+ * True while a hero for `id` is active AND its overlay has painted (used to
+ * hide the real photos). Gating on `overlayReady` keeps the originals visible
+ * for the couple of frames the overlay image needs to decode, so the morph
+ * starts without a blank flash.
+ */
 export const useIsHeroActive = (id: string | undefined): boolean => {
   const current = useHeroState();
-  return Boolean(id) && current.id === id;
+  return Boolean(id) && current.id === id && current.overlayReady;
 };
