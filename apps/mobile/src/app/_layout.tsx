@@ -1,6 +1,6 @@
 import "@/config";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
 import { PostHogProvider } from "posthog-react-native";
@@ -12,7 +12,7 @@ import styled from "styled-components/native";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { config } from "@/services/config";
 import { posthog } from "@/services/posthog";
-import { ThemeProvider } from "@/contexts/ThemeProvider";
+import { storedThemePromise, ThemeProvider } from "@/contexts/ThemeProvider";
 import { TRPCProvider } from "@/contexts/TRPCProvider";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useTrackScreens } from "@/hooks/useTrackScreens";
@@ -29,13 +29,22 @@ const AppContainer = styled(GestureHandlerRootView)`
 
 const App = () => {
   const { initialRouteName } = useProtectedRoute();
+  const [themeReady, setThemeReady] = useState(false);
+
+  // Keep the native splash up until the stored theme override has been
+  // applied (ThemeProvider awaits the same promise and its effect runs
+  // first). Hiding earlier paints the system theme for a frame and then
+  // flips to the stored one — the white/dark blink at boot in dark mode.
+  useEffect(() => {
+    void storedThemePromise.finally(() => setThemeReady(true));
+  }, []);
 
   useEffect(() => {
-    if (initialRouteName) {
+    if (initialRouteName && themeReady) {
       SplashScreen.hideAsync()?.catch(sendError);
       router.replace(initialRouteName);
     }
-  }, [initialRouteName]);
+  }, [initialRouteName, themeReady]);
 
   useTrackScreens();
   useGetInitialNotifications();

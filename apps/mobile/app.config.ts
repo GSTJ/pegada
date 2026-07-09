@@ -13,7 +13,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.4.0",
+  version: "1.4.1",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -174,6 +174,11 @@ const config: ExpoConfig = {
     // FAILS gradlew bundleRelease -- this is what killed the 2026-07-05
     // overnight EAS cloud build. See withDefaultLocaleStrings.js.
     ["./plugins/withDefaultLocaleStrings", { stringsByKey: defaultLocaleNativeStrings }],
+    // Applies the user's in-app theme choice (mirrored to NSUserDefaults by
+    // ThemeProvider) to the iOS window before the splash screen renders, so
+    // a forced dark theme boots with a dark splash instead of blinking
+    // white->dark on light-mode devices. See withInitialThemeOverride.js.
+    "./plugins/withInitialThemeOverride",
   ],
   androidStatusBar: {
     barStyle: "dark-content",
