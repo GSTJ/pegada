@@ -118,10 +118,5 @@
   },
   "installConfig": {
     "hoistingLimits": "workspaces"
-  },
-  "reanimated": {
-    "staticFeatureFlags": {
-      "ENABLE_SHARED_ELEMENT_TRANSITIONS": true
-    }
   }
 }

@@ -9,6 +9,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Provider } from "react-redux";
 import styled from "styled-components/native";
 
+import { HeroTransitionOverlay } from "@/components/HeroTransition";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { config } from "@/services/config";
 import { posthog } from "@/services/posthog";
@@ -80,6 +81,9 @@ const App = () => {
           </ThemeProvider>
         </TRPCProvider>
       </PostHogProvider>
+      {/* Above the navigator so the flying photo paints over both screens
+          while they cross-fade during a swipe-card -> profile transition. */}
+      <HeroTransitionOverlay />
     </AppContainer>
   );
 };
