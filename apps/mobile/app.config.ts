@@ -257,6 +257,8 @@ const config: ExpoConfig = {
     appStoreUrl: "https://apps.apple.com/app/id6450865592",
     infoPlist: {
       CFBundleAllowMixedLocalizations: true,
+      // Required for the like-limit countdown Live Activity (iOS 16.2+).
+      NSSupportsLiveActivities: true,
     },
     splash: {
       backgroundColor: "#FFFFFF",
