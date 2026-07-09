@@ -1,6 +1,7 @@
 // https://github.com/expo/router/blob/main/apps/demo/metro.config.js
 // Learn more https://docs.expo.io/guides/customizing-metro
 const { getDefaultConfig } = require("expo/metro-config");
+const { getPostHogExpoConfig } = require("posthog-react-native/metro");
 const path = require("path");
 
 // Find the project and workspace directories
@@ -8,7 +9,14 @@ const projectRoot = __dirname;
 
 const workspaceRoot = path.resolve(projectRoot, "../..");
 
-const config = getDefaultConfig(__dirname);
+// Wraps the default config so every JS bundle (Release native builds AND
+// `expo export`/`eas update` OTA bundles) gets a chunk/debug id injected at
+// build time. That id is what lets PostHog match an uploaded sourcemap back
+// to the exact bundle a crash came from. Safe to always apply: it only
+// annotates the bundle, it never uploads anything itself (upload happens
+// separately, see app.config.ts's posthog-react-native/expo plugin and
+// scripts/upload-posthog-sourcemaps-ota.sh for the OTA path).
+const config = getPostHogExpoConfig(__dirname, { getDefaultConfig });
 
 config.watcher = {
   // +73.3
