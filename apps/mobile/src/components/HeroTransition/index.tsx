@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Image as ExpoImage } from "expo-image";
 
-import { endHero, HeroFrame, useHeroState } from "./store";
+import { endHero, HeroFrame, markHeroOverlayReady, useHeroState } from "./store";
 
 const AnimatedExpoImage = Animated.createAnimatedComponent(ExpoImage);
 
@@ -102,6 +102,10 @@ export const HeroTransitionOverlay = () => {
         placeholder={hero.source.blurhash ? { blurhash: hero.source.blurhash } : undefined}
         contentFit="cover"
         cachePolicy="memory-disk"
+        // The real photos underneath stay visible until the overlay has
+        // painted (see store.ts), otherwise the card blanks for the frames
+        // the image spends decoding.
+        onDisplay={markHeroOverlayReady}
         style={[styles.image, animatedStyle]}
       />
     </Animated.View>
