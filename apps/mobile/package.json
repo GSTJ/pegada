@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
-    "preinstall": "pnpm setup:secret:files"
+    "preinstall": "pnpm setup:secret:files",
+    "sourcemaps:upload:ota": "../../scripts/upload-posthog-sourcemaps-ota.sh"
   },
   "dependencies": {
     "@expo/config-types": "^55.0.5",
@@ -106,6 +107,7 @@
     "@babel/core": "^7.29.0",
     "@pegada/api": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
+    "@posthog/cli": "^0.8.1",
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.17.7",
     "@types/react": "^19.2.14",
