@@ -162,6 +162,11 @@ const config: ExpoConfig = {
         cameraPermission: "The app allows you to take photos for your doggie's profile.",
       },
     ],
+    // Wires every directory under `targets/` into the Xcode project at
+    // prebuild time. Currently just the notification-service extension that
+    // renders chat pushes as iOS communication notifications (sender dog
+    // avatar + name); see targets/notification-service/.
+    "@bacons/apple-targets",
     // Wires the source-controlled `Pegada.storekit` fixture into the iOS
     // scheme so simulator runs (local + CI) can resolve real product pricing
     // without an App Store sandbox session. Plugin is a no-op when the file
@@ -280,6 +285,13 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    entitlements: {
+      // Communication-notification styling for chat pushes (the
+      // notification-service target carries the same entitlement; both need
+      // the capability enabled on their App IDs in the Apple Developer
+      // portal for device builds).
+      "com.apple.developer.usernotifications.communication": true,
+    },
     // associatedDomains: [
     //   'applinks:pegada.app',
     //   'applinks:www.pegada.app',

@@ -14,6 +14,7 @@
     "preinstall": "pnpm setup:secret:files"
   },
   "dependencies": {
+    "@bacons/apple-targets": "4.0.7",
     "@expo/config-types": "^55.0.5",
     "@expo/metro-runtime": "~55.0.11",
     "@gorhom/bottom-sheet": "^5.2.14",
