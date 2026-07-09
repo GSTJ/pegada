@@ -35,6 +35,8 @@
     "breed": "Breed"
   },
   "chat": {
+    "notificationChannelName": "Messages",
+    "replyAction": "Reply",
     "sendAMessageToStart": "Send a message to start the conversation",
     "today": "Today",
     "yesterday": "Yesterday",
