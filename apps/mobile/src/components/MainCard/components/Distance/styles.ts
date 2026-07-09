@@ -1,9 +1,9 @@
 import styled from "styled-components/native";
 
-import { TransparentAndroidDarkBlurView } from "@/components/BlurView";
+import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
 import { Text } from "@/components/Text";
 
-export const Container = styled(TransparentAndroidDarkBlurView)`
+export const Container = styled(TransparentGlassOrDarkBlurView)`
   margin: ${(props) => props.theme.spacing[6]}px;
   margin-top: 0px;
   border-radius: ${(props) => props.theme.radii.md}px;

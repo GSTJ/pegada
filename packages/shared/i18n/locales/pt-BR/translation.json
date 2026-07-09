@@ -333,5 +333,10 @@
     "automatic": "Automático",
     "dark": "Escuro",
     "light": "Claro"
+  },
+  "tabs": {
+    "swipe": "Descobrir",
+    "messages": "Mensagens",
+    "profile": "Perfil"
   }
 }
