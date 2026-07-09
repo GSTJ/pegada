@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["PegadaWidgetModule"]
+  },
+  "android": {
+    "modules": ["app.pegada.widget.PegadaWidgetModule"]
+  }
+}

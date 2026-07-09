@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="pegada_widget_label">Matches</string>
+  <string name="pegada_widget_description">Veja os matches esperando sua resposta.</string>
+  <string name="pegada_widget_placeholder">Abra o Pegada para ver seus matches aqui</string>
+</resources>

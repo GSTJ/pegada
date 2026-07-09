@@ -306,12 +306,15 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    // Communication-notification styling for chat pushes (the
+    // notification-service target carries the same entitlement; both need
+    // the capability enabled on their App IDs in the Apple Developer
+    // portal for device builds), plus shared storage between the app and
+    // the widget extension: the matches snapshot (UserDefaults) + downloaded
+    // avatars (container files).
     entitlements: {
-      // Communication-notification styling for chat pushes (the
-      // notification-service target carries the same entitlement; both need
-      // the capability enabled on their App IDs in the Apple Developer
-      // portal for device builds).
       "com.apple.developer.usernotifications.communication": true,
+      "com.apple.security.application-groups": ["group.app.pegada"],
     },
     // associatedDomains: [
     //   'applinks:pegada.app',
