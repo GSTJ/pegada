@@ -31,6 +31,15 @@ export default () => {
   const theme = useTheme();
   const { t } = useTranslation();
 
+  // The app has a manual theme system (light/dark/system) that overrides the
+  // OS scheme via `Appearance.setColorScheme`, but that only affects the JS
+  // side -- UIKit traits don't change, so the Liquid Glass tab bar would
+  // follow the OS and render light glass in in-app dark mode (and vice
+  // versa). `experimental_userInterfaceStyle` sets
+  // `overrideUserInterfaceStyle` on the native bar so the glass follows the
+  // APP theme, same as GlassView's `colorScheme` elsewhere in the branch.
+  const userInterfaceStyle = theme.dark ? ("dark" as const) : ("light" as const);
+
   return (
     <NativeTabs
       tintColor={theme.colors.primary}
@@ -42,6 +51,7 @@ export default () => {
         unstable_nativeProps={{
           tabBarItemTestID: "tab-swipe",
           tabBarItemAccessibilityLabel: t("tabs.swipe"),
+          experimental_userInterfaceStyle: userInterfaceStyle,
         }}
       >
         <NativeTabs.Trigger.Icon sf={{ default: "pawprint", selected: "pawprint.fill" }} />
@@ -52,6 +62,7 @@ export default () => {
         unstable_nativeProps={{
           tabBarItemTestID: "tab-messages",
           tabBarItemAccessibilityLabel: t("tabs.messages"),
+          experimental_userInterfaceStyle: userInterfaceStyle,
         }}
       >
         <NativeTabs.Trigger.Icon sf={{ default: "message", selected: "message.fill" }} />
@@ -62,6 +73,7 @@ export default () => {
         unstable_nativeProps={{
           tabBarItemTestID: "tab-profile",
           tabBarItemAccessibilityLabel: t("tabs.profile"),
+          experimental_userInterfaceStyle: userInterfaceStyle,
         }}
       >
         <NativeTabs.Trigger.Icon
