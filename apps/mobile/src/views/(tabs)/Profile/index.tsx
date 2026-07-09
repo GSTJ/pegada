@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { View } from "react-native";
 import Animated, {
   Extrapolation,
@@ -10,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as StoreReview from "expo-store-review";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { BottomTabBarHeightContext } from "@react-navigation/bottom-tabs";
 import { useIsFocused, useScrollToTop } from "@react-navigation/native";
 import { t } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -116,7 +117,13 @@ const Profile = () => {
 
   const dogProfileHeight = useDogProfileHeight();
 
-  const tabBarHeight = useBottomTabBarHeight();
+  // Android renders the JS Bottom Tab Navigator, so the height context is
+  // there. iOS uses expo-router Native Tabs (UIKit owns the bar), so the
+  // context is missing and useBottomTabBarHeight() would throw -- read the
+  // context directly and fall back to the standard UITabBar height (49pt)
+  // plus the bottom safe-area inset.
+  const jsTabBarHeight = useContext(BottomTabBarHeightContext);
+  const tabBarHeight = jsTabBarHeight ?? 49 + insets.bottom;
 
   return (
     <Container testID="profile-screen">
