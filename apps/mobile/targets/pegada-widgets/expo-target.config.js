@@ -19,11 +19,19 @@ module.exports = {
   bundleIdentifier: ".widgets",
   deploymentTarget: "16.2",
   frameworks: ["SwiftUI", "WidgetKit", "ActivityKit", "AppIntents"],
+  // Design tokens mirrored 1:1 from packages/shared/themes/themes.ts (light /
+  // dark). Values are the exact HSL strings from the theme so the widget and
+  // the app read as one family; prebuild converts them to colorsets. NOTE:
+  // the plugin expects `{ light, dark }` (not `{ color, darkColor }`) -
+  // anything else silently writes an EMPTY colorset.
   colors: {
-    $accent: "#EE61A1",
-    $widgetBackground: { color: "#FFFFFF", darkColor: "#16151A" },
-    BrandPink: "#EE61A1",
-    PrimaryText: { color: "#1C1B1F", darkColor: "#F3F1F6" },
+    $accent: "hsl(333, 81%, 66%)", // colors.primary (light)
+    $widgetBackground: { light: "hsl(0, 0%, 100%)", dark: "hsl(0, 0%, 0%)" }, // colors.background
+    BrandPink: { light: "hsl(333, 81%, 66%)", dark: "hsl(333, 58%, 59%)" }, // colors.primary
+    PrimaryText: { light: "hsl(222.2, 84%, 4.9%)", dark: "hsl(0, 0%, 95%)" }, // colors.text
+    SubtitleText: { light: "hsl(222.2, 10%, 39%)", dark: "hsl(0, 0%, 60%)" }, // colors.subtitle
+    CardSurface: { light: "hsl(0, 0%, 97.5%)", dark: "hsl(0, 0%, 15%)" }, // colors.card
+    BorderSubtle: { light: "hsl(214.3, 31.8%, 91.4%)", dark: "hsl(0, 0%, 12%)" }, // colors.border
   },
   // App Groups shared with the main app; harmless for entries that don't
   // read the shared container.

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -49,10 +50,20 @@ private const val MESSAGES_DEEP_LINK = "pegada://messages"
 private const val MAX_AVATARS = 3
 private const val AVATAR_TARGET_PX = 144
 
-private val brandPink = Color(0xFFEE61A1)
-private val background = ColorProvider(day = Color.White, night = Color(0xFF16151A))
-private val primaryText = ColorProvider(day = Color(0xFF1C1B1F), night = Color(0xFFF3F1F6))
-private val brandText = ColorProvider(day = brandPink, night = brandPink)
+// Design tokens mirrored from packages/shared/themes/themes.ts (light/dark):
+// primary hsl(333,81%,66%)/hsl(333,58%,59%), background white/black, text
+// hsl(222.2,84%,4.9%)/95%-white. Fixed brand colors on purpose, Material
+// You dynamic color would wash out the pink.
+private val brandPink = ColorProvider(day = Color(0xFFEF62A1), night = Color(0xFFD35A90))
+private val brandPinkFaint = ColorProvider(day = Color(0x2EEF62A1), night = Color(0x2ED35A90))
+private val widgetBackground = ColorProvider(day = Color(0xFFFFFFFF), night = Color(0xFF000000))
+private val primaryText = ColorProvider(day = Color(0xFF020817), night = Color(0xFFF2F2F2))
+private val onPink = ColorProvider(day = Color.White, night = Color.White)
+
+// Glance 1.1.1 ceiling, accepted deliberately: no custom typeface in
+// TextStyle (system font, Bold at most, sizes compensate for the missing
+// ExtraBold), no gradient brushes, no true negative spacing so avatars sit
+// side by side instead of overlapping like iOS.
 
 class MatchesWidget : GlanceAppWidget() {
   override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -60,22 +71,24 @@ class MatchesWidget : GlanceAppWidget() {
 
     // Decode outside the composition; Glance renders RemoteViews, so bitmaps
     // must be ready when the tree is emitted. Downsampled + circle-cropped to
-    // stay well under the RemoteViews bitmap memory budget.
-    val avatars =
-      snapshot
-        ?.dogs
-        .orEmpty()
-        .take(MAX_AVATARS)
-        .mapNotNull { dog -> dog.avatarPath?.let { path -> loadCircularAvatar(path) } }
+    // stay well under the RemoteViews bitmap memory budget. Slots stay
+    // aligned with `dogs`: a failed decode falls back to an initial badge
+    // instead of silently collapsing the row.
+    val dogs = snapshot?.dogs.orEmpty().take(MAX_AVATARS)
+    val avatars = dogs.map { dog -> dog.avatarPath?.let { path -> loadCircularAvatar(path) } }
 
     provideContent {
-      MatchesWidgetContent(snapshot = snapshot, avatars = avatars)
+      MatchesWidgetContent(snapshot = snapshot, dogs = dogs, avatars = avatars)
     }
   }
 }
 
 @Composable
-private fun MatchesWidgetContent(snapshot: WidgetSnapshot?, avatars: List<Bitmap>) {
+private fun MatchesWidgetContent(
+  snapshot: WidgetSnapshot?,
+  dogs: List<WidgetDog>,
+  avatars: List<Bitmap?>,
+) {
   val context = LocalContext.current
 
   val openMessages =
@@ -88,17 +101,14 @@ private fun MatchesWidgetContent(snapshot: WidgetSnapshot?, avatars: List<Bitmap
     modifier =
       GlanceModifier
         .fillMaxSize()
-        .background(background)
+        .background(widgetBackground)
         .cornerRadius(24.dp)
         .padding(16.dp)
         .clickable(actionStartActivity(openMessages)),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalAlignment = Alignment.CenterHorizontally,
+    horizontalAlignment = Alignment.Start,
   ) {
-    Text(
-      text = "Pegada",
-      style = TextStyle(color = brandText, fontSize = 14.sp, fontWeight = FontWeight.Bold),
-    )
+    BrandHeader()
 
     Spacer(modifier = GlanceModifier.height(10.dp))
 
@@ -106,67 +116,110 @@ private fun MatchesWidgetContent(snapshot: WidgetSnapshot?, avatars: List<Bitmap
       // Placeholder: never written to (fresh install), logged out, or all
       // caught up. The message is pre-localized by JS when a snapshot exists;
       // otherwise fall back to the localized resource string.
-      Text(text = "🐾", style = TextStyle(fontSize = 28.sp))
-      Spacer(modifier = GlanceModifier.height(8.dp))
       Text(
         text = snapshot?.message?.takeIf { it.isNotEmpty() }
           ?: context.getString(R.string.pegada_widget_placeholder),
-        style = TextStyle(color = primaryText, fontSize = 13.sp),
-        maxLines = 2,
+        style = TextStyle(color = primaryText, fontSize = 13.sp, fontWeight = FontWeight.Medium),
+        maxLines = 3,
       )
       return@Column
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-      avatars.forEachIndexed { index, avatar ->
+      dogs.forEachIndexed { index, dog ->
         if (index > 0) {
           Spacer(modifier = GlanceModifier.width(6.dp))
         }
-        Image(
-          provider = ImageProvider(avatar),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier = GlanceModifier.size(44.dp).cornerRadius(22.dp),
-        )
+        AvatarBadge(name = dog.name, avatar = avatars.getOrNull(index))
       }
 
-      val overflow = snapshot.count - avatars.size
-      if (overflow > 0 && avatars.isNotEmpty()) {
+      val overflow = snapshot.count - dogs.size
+      if (overflow > 0 && dogs.isNotEmpty()) {
         Spacer(modifier = GlanceModifier.width(6.dp))
-        Box(
-          modifier =
-            GlanceModifier
-              .size(44.dp)
-              .cornerRadius(22.dp)
-              .background(ColorProvider(day = brandPink, night = brandPink)),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = "+$overflow",
-            style =
-              TextStyle(
-                color = ColorProvider(day = Color.White, night = Color.White),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-              ),
-          )
-        }
+        OverflowChip(overflow)
       }
 
-      if (avatars.isEmpty()) {
+      if (dogs.isEmpty()) {
+        // No avatars at all: fall back to the big friendly number. 34sp
+        // compensates for Bold being the heaviest weight Glance offers.
         Text(
           text = "${snapshot.count}",
-          style = TextStyle(color = brandText, fontSize = 32.sp, fontWeight = FontWeight.Bold),
+          style = TextStyle(color = brandPink, fontSize = 34.sp, fontWeight = FontWeight.Bold),
         )
       }
     }
 
-    Spacer(modifier = GlanceModifier.height(10.dp))
+    Spacer(modifier = GlanceModifier.height(8.dp))
 
     Text(
       text = snapshot.message,
-      style = TextStyle(color = primaryText, fontSize = 13.sp),
+      style = TextStyle(color = primaryText, fontSize = 13.sp, fontWeight = FontWeight.Medium),
       maxLines = 2,
+    )
+  }
+}
+
+// Paw glyph + wordmark, tinted with the brand pink of the current theme.
+// The paw lives only here, one paw reference per surface.
+@Composable
+private fun BrandHeader() {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    Image(
+      provider = ImageProvider(R.drawable.pegada_widget_paw),
+      contentDescription = null,
+      colorFilter = ColorFilter.tint(brandPink),
+      modifier = GlanceModifier.size(14.dp),
+    )
+    Spacer(modifier = GlanceModifier.width(5.dp))
+    // Lowercase on purpose: the app's logo wordmark is "pegada".
+    Text(
+      text = "pegada",
+      style = TextStyle(color = brandPink, fontSize = 14.sp, fontWeight = FontWeight.Bold),
+    )
+  }
+}
+
+// Circular avatar on a background-colored ring (Glance has no stroke-border
+// primitive, so the ring is an outer box 4dp larger than the image). Dogs
+// without a usable photo get a brand-tinted initial instead of vanishing.
+@Composable
+private fun AvatarBadge(name: String, avatar: Bitmap?) {
+  Box(
+    modifier = GlanceModifier.size(44.dp).cornerRadius(22.dp).background(widgetBackground),
+    contentAlignment = Alignment.Center,
+  ) {
+    if (avatar != null) {
+      Image(
+        provider = ImageProvider(avatar),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = GlanceModifier.size(40.dp).cornerRadius(20.dp),
+      )
+    } else {
+      Box(
+        modifier = GlanceModifier.size(40.dp).cornerRadius(20.dp).background(brandPinkFaint),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = name.take(1).uppercase(),
+          style = TextStyle(color = brandPink, fontSize = 17.sp, fontWeight = FontWeight.Bold),
+        )
+      }
+    }
+  }
+}
+
+// "+N" coin, same size as the avatars so the overflow reads as one more
+// member of the pack.
+@Composable
+private fun OverflowChip(count: Int) {
+  Box(
+    modifier = GlanceModifier.size(44.dp).cornerRadius(22.dp).background(brandPink),
+    contentAlignment = Alignment.Center,
+  ) {
+    Text(
+      text = "+$count",
+      style = TextStyle(color = onPink, fontSize = 14.sp, fontWeight = FontWeight.Bold),
     )
   }
 }

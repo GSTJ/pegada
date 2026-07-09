@@ -1,3 +1,4 @@
+import CoreText
 import SwiftUI
 import WidgetKit
 
@@ -50,6 +51,35 @@ enum L10n {
       : "3 matches waiting for your reply"
   }
 }
+
+// MARK: - Design tokens
+
+/// Colors come from the target's colorsets (declared in
+/// expo-target.config.js, mirrored from packages/shared/themes/themes.ts).
+/// Gilroy is the app's brand typeface; the weights map to the same roles the
+/// app uses (ExtraBold = display, Bold = emphasis, SemiBold = captions,
+/// Medium = body).
+private enum Brand {
+  static let pink = Color("BrandPink")
+  static let text = Color("PrimaryText")
+  static let background = Color("$widgetBackground")
+
+  static func extraBold(_ size: CGFloat) -> Font { .custom("Gilroy-ExtraBold", size: size) }
+  static func bold(_ size: CGFloat) -> Font { .custom("Gilroy-Bold", size: size) }
+  static func semiBold(_ size: CGFloat) -> Font { .custom("Gilroy-SemiBold", size: size) }
+  static func medium(_ size: CGFloat) -> Font { .custom("Gilroy-Medium", size: size) }
+}
+
+/// App extensions are supposed to pick fonts up from their own `UIAppFonts`
+/// (see Info.plist), but widget processes have a history of skipping that
+/// registration. Registering explicitly is idempotent and cheap.
+private let brandFontsRegistered: Bool = {
+  let fonts = Bundle.main.urls(forResourcesWithExtension: "ttf", subdirectory: nil) ?? []
+  for url in fonts {
+    CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+  }
+  return !fonts.isEmpty
+}()
 
 // MARK: - Timeline
 
@@ -133,16 +163,37 @@ struct AvatarView: View {
           .scaledToFill()
       } else {
         ZStack {
-          Color("BrandPink").opacity(0.18)
+          Brand.pink.opacity(0.18)
           Text(name.prefix(1).uppercased())
-            .font(.system(size: size * 0.42, weight: .bold, design: .rounded))
-            .foregroundColor(Color("BrandPink"))
+            .font(Brand.bold(size * 0.42))
+            .foregroundColor(Brand.pink)
         }
       }
     }
     .frame(width: size, height: size)
     .clipShape(Circle())
-    .overlay(Circle().strokeBorder(Color("$widgetBackground"), lineWidth: 2))
+    .overlay(Circle().strokeBorder(Brand.background, lineWidth: 2))
+  }
+}
+
+/// The "+N" coin at the end of an overlapping avatar stack; same shape and
+/// ring as the avatars so the overflow reads as one more member of the pack,
+/// not an afterthought.
+struct OverflowChip: View {
+  let count: Int
+  let size: CGFloat
+
+  var body: some View {
+    ZStack {
+      Circle().fill(Brand.pink)
+      Text("+\(count)")
+        .font(Brand.bold(size * 0.36))
+        .foregroundColor(.white)
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+    }
+    .frame(width: size, height: size)
+    .overlay(Circle().strokeBorder(Brand.background, lineWidth: 2))
   }
 }
 
@@ -154,6 +205,10 @@ struct AvatarStack: View {
     Array(entry.snapshot?.dogs.prefix(3) ?? [])
   }
 
+  private var overflow: Int {
+    max(0, (entry.snapshot?.count ?? 0) - dogs.count)
+  }
+
   var body: some View {
     HStack(spacing: -size * 0.28) {
       ForEach(Array(dogs.enumerated()), id: \.offset) { index, dog in
@@ -163,18 +218,36 @@ struct AvatarStack: View {
           size: size
         )
       }
+      if overflow > 0 {
+        OverflowChip(count: overflow, size: size)
+      }
     }
   }
 }
 
 struct BrandHeader: View {
   var body: some View {
-    HStack(spacing: 4) {
-      Text("🐾")
-        .font(.system(size: 12))
-      Text("Pegada")
-        .font(.system(size: 13, weight: .heavy, design: .rounded))
-        .foregroundColor(Color("BrandPink"))
+    // Lowercase on purpose: the app's logo wordmark is "pegada".
+    Text("pegada")
+      .font(Brand.extraBold(13))
+      .foregroundColor(Brand.pink)
+  }
+}
+
+/// Full-bleed widget background: flat theme surface with a single paw
+/// watermark peeking from the bottom-trailing corner (the one paw reference
+/// per surface, the header stays wordmark-only).
+struct WidgetBackground: View {
+  var body: some View {
+    ZStack(alignment: .bottomTrailing) {
+      Brand.background
+      Image(systemName: "pawprint.fill")
+        .resizable()
+        .scaledToFit()
+        .frame(width: 64, height: 64)
+        .rotationEffect(.degrees(-24))
+        .foregroundColor(Brand.pink.opacity(0.10))
+        .offset(x: 14, y: 16)
     }
   }
 }
@@ -183,16 +256,14 @@ struct EmptyStateView: View {
   let message: String
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 6) {
+    VStack(alignment: .leading, spacing: 8) {
       BrandHeader()
       Spacer(minLength: 0)
-      Text("🐶")
-        .font(.system(size: 28))
       Text(message)
-        .font(.system(size: 13, weight: .medium, design: .rounded))
-        .foregroundColor(Color("PrimaryText"))
+        .font(Brand.medium(13))
+        .foregroundColor(Brand.text)
         .lineLimit(3)
-        .minimumScaleFactor(0.8)
+        .minimumScaleFactor(0.85)
       Spacer(minLength: 0)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -204,23 +275,16 @@ struct SmallMatchesView: View {
   let snapshot: MatchesSnapshot
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
+    VStack(alignment: .leading, spacing: 0) {
       BrandHeader()
-      Spacer(minLength: 0)
-      HStack(alignment: .center, spacing: 8) {
-        AvatarStack(entry: entry, size: 40)
-        if snapshot.count > min(snapshot.dogs.count, 3) {
-          Text("+\(snapshot.count - min(snapshot.dogs.count, 3))")
-            .font(.system(size: 16, weight: .bold, design: .rounded))
-            .foregroundColor(Color("BrandPink"))
-        }
-      }
+      Spacer(minLength: 8)
+      AvatarStack(entry: entry, size: 36)
+      Spacer(minLength: 8)
       Text(snapshot.message)
-        .font(.system(size: 12, weight: .medium, design: .rounded))
-        .foregroundColor(Color("PrimaryText"))
+        .font(Brand.medium(12))
+        .foregroundColor(Brand.text)
         .lineLimit(2)
-        .minimumScaleFactor(0.8)
-      Spacer(minLength: 0)
+        .minimumScaleFactor(0.85)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
   }
@@ -234,22 +298,28 @@ struct MediumMatchesView: View {
     Array(snapshot.dogs.prefix(3))
   }
 
+  private var overflow: Int {
+    max(0, snapshot.count - dogs.count)
+  }
+
   var body: some View {
     HStack(alignment: .center, spacing: 16) {
-      VStack(alignment: .leading, spacing: 6) {
+      VStack(alignment: .leading, spacing: 4) {
         BrandHeader()
         Text("\(snapshot.count)")
-          .font(.system(size: 40, weight: .heavy, design: .rounded))
-          .foregroundColor(Color("BrandPink"))
+          .font(Brand.extraBold(40))
+          .foregroundColor(Brand.pink)
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
         Text(snapshot.message)
-          .font(.system(size: 13, weight: .medium, design: .rounded))
-          .foregroundColor(Color("PrimaryText"))
+          .font(Brand.medium(13))
+          .foregroundColor(Brand.text)
           .lineLimit(2)
-          .minimumScaleFactor(0.8)
+          .minimumScaleFactor(0.85)
       }
       .frame(maxWidth: .infinity, alignment: .leading)
 
-      HStack(spacing: 12) {
+      HStack(alignment: .top, spacing: 12) {
         ForEach(Array(dogs.enumerated()), id: \.offset) { index, dog in
           VStack(spacing: 4) {
             AvatarView(
@@ -257,11 +327,21 @@ struct MediumMatchesView: View {
               name: dog.name,
               size: 48
             )
-            Text(dog.name)
-              .font(.system(size: 11, weight: .semibold, design: .rounded))
-              .foregroundColor(Color("PrimaryText"))
-              .lineLimit(1)
+            // The last caption carries the overflow so "+N" never gets
+            // silently dropped on medium.
+            if overflow > 0, index == dogs.count - 1 {
+              Text("+\(overflow)")
+                .font(Brand.bold(11))
+                .foregroundColor(Brand.pink)
+                .lineLimit(1)
+            } else {
+              Text(dog.name)
+                .font(Brand.semiBold(11))
+                .foregroundColor(Brand.text)
+                .lineLimit(1)
+            }
           }
+          .frame(width: 52)
         }
       }
     }
@@ -280,10 +360,11 @@ struct MatchesWidgetEntryView: View {
   let entry: MatchesEntry
 
   var body: some View {
+    let _ = brandFontsRegistered
     content
       .widgetURL(messagesDeepLink)
       .containerBackground(for: .widget) {
-        Color("$widgetBackground")
+        WidgetBackground()
       }
   }
 

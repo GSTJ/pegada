@@ -7,5 +7,19 @@
       <key>NSExtensionPointIdentifier</key>
       <string>com.apple.widgetkit-extension</string>
     </dict>
+    <!--
+      Extensions load their own UIAppFonts; the main app's registration does
+      NOT propagate to the widget process. The .ttf files live in ./fonts and
+      are bundled automatically (the whole target folder is a synchronized
+      Xcode group). MatchesWidget.swift also registers them at runtime via
+      CTFontManager as a belt-and-suspenders fallback.
+    -->
+    <key>UIAppFonts</key>
+    <array>
+      <string>Gilroy-Bold.ttf</string>
+      <string>Gilroy-SemiBold.ttf</string>
+      <string>Gilroy-Medium.ttf</string>
+      <string>Gilroy-ExtraBold.ttf</string>
+    </array>
   </dict>
 </plist>
