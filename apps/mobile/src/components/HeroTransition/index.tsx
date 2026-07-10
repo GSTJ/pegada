@@ -9,12 +9,23 @@ import Animated, {
 } from "react-native-reanimated";
 import { Image as ExpoImage } from "expo-image";
 
-import { endHero, HeroFrame, markHeroOverlayReady, useHeroState } from "./store";
+import { MatchActionBar } from "@/components/MatchActionBar";
+import Distance from "@/components/MainCard/components/Distance";
+import Pagination from "@/components/MainCard/components/Pagination";
+import { UpperPart } from "@/components/MainCard/styles";
+import {
+  abandonHero,
+  areHeroSharedElementsReady,
+  endHero,
+  HeroFrame,
+  markHeroOverlayReady,
+  useHeroState,
+} from "./store";
 
 const AnimatedExpoImage = Animated.createAnimatedComponent(ExpoImage);
 
-// Matches the stack "fade" duration closely so the overlay lands as the new
-// screen finishes fading in. Slightly springy for a livelier morph.
+// Short enough to preserve the direct-manipulation feel while giving the
+// photo and shared controls time to read as one continuous object.
 const MORPH_DURATION = 320;
 
 const frameStyle = (frame: HeroFrame) => ({
@@ -22,12 +33,13 @@ const frameStyle = (frame: HeroFrame) => ({
   y: frame.y,
   width: frame.width,
   height: frame.height,
+  borderRadius: frame.borderRadius,
 });
 
 /**
  * Renders the flying photo during a manual hero transition. Mounted once, high
  * in the tree (above the navigator), so it stays visible while the source and
- * destination screens cross-fade underneath it. Does nothing until a hero is
+ * destination routes swap underneath it. Does nothing until a hero is
  * active. See {@link file://./store.ts} for the why.
  */
 export const HeroTransitionOverlay = () => {
@@ -37,11 +49,18 @@ export const HeroTransitionOverlay = () => {
   const y = useSharedValue(0);
   const width = useSharedValue(0);
   const height = useSharedValue(0);
-  const opacity = useSharedValue(0);
+  const borderRadius = useSharedValue(0);
+  const actionX = useSharedValue(0);
+  const actionY = useSharedValue(0);
+  const actionWidth = useSharedValue(0);
+  const actionHeight = useSharedValue(0);
 
   const from = hero.from;
   const to = hero.to;
   const heroId = hero.id;
+  const actionFrom = hero.actionFrom;
+  const actionTo = hero.actionTo;
+  const sharedElementsReady = areHeroSharedElementsReady(hero);
 
   // Snap to the source frame the instant a hero starts.
   useEffect(() => {
@@ -50,47 +69,65 @@ export const HeroTransitionOverlay = () => {
     cancelAnimation(y);
     cancelAnimation(width);
     cancelAnimation(height);
+    cancelAnimation(borderRadius);
     const f = frameStyle(from);
     x.value = f.x;
     y.value = f.y;
     width.value = f.width;
     height.value = f.height;
-    opacity.value = 1;
+    borderRadius.value = f.borderRadius ?? 0;
+    if (actionFrom) {
+      actionX.value = actionFrom.x;
+      actionY.value = actionFrom.y;
+      actionWidth.value = actionFrom.width;
+      actionHeight.value = actionFrom.height;
+    }
     // Only re-run when a brand new hero begins.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [heroId, from]);
+  }, [heroId, from, actionFrom]);
 
   // Morph to the destination frame once it's measured, then clear.
   useEffect(() => {
-    if (!from || !to) return;
+    if (!from || !to || !sharedElementsReady) return;
     const t = frameStyle(to);
     const config = { duration: MORPH_DURATION };
     x.value = withTiming(t.x, config);
     y.value = withTiming(t.y, config);
     width.value = withTiming(t.width, config);
+    borderRadius.value = withTiming(t.borderRadius ?? 0, config);
+    if (actionFrom && actionTo) {
+      actionX.value = withTiming(actionTo.x, config);
+      actionY.value = withTiming(actionTo.y, config);
+      actionWidth.value = withTiming(actionTo.width, config);
+      actionHeight.value = withTiming(actionTo.height, config);
+    }
     height.value = withTiming(t.height, config, (finished) => {
       "worklet";
       if (finished) {
-        opacity.value = 0;
         runOnJS(endHero)();
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [heroId, to]);
+  }, [heroId, to, actionFrom, actionTo, sharedElementsReady]);
 
   // Safety net: if the destination never reports a frame (e.g. profile failed
   // to mount), don't leave a frozen photo on screen forever.
   useEffect(() => {
-    if (!from || to) return;
-    const timeout = setTimeout(() => endHero(), 700);
+    if (!heroId || !from || sharedElementsReady) return;
+    const timeout = setTimeout(() => abandonHero(heroId), 700);
     return () => clearTimeout(timeout);
-  }, [heroId, from, to]);
+  }, [heroId, from, sharedElementsReady]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
     transform: [{ translateX: x.value }, { translateY: y.value }],
     width: width.value,
     height: height.value,
+    borderRadius: borderRadius.value,
+  }));
+  const actionStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: actionX.value }, { translateY: actionY.value }],
+    width: actionWidth.value,
+    height: actionHeight.value,
   }));
 
   if (!heroId || !from || !hero.source?.uri) return null;
@@ -108,12 +145,37 @@ export const HeroTransitionOverlay = () => {
         onDisplay={markHeroOverlayReady}
         style={[styles.image, animatedStyle]}
       />
+      {hero.chrome ? (
+        <Animated.View style={[styles.chrome, animatedStyle]}>
+          <UpperPart>
+            <Distance dog={hero.chrome.dog} />
+            <Pagination pages={hero.chrome.pages} currentPage={hero.chrome.currentPage} />
+          </UpperPart>
+        </Animated.View>
+      ) : null}
+      {hero.chrome && actionFrom && actionTo ? (
+        <Animated.View style={[styles.actionBar, actionStyle]}>
+          <MatchActionBar visualOnly onNope={() => {}} onMaybe={() => {}} onYep={() => {}} />
+        </Animated.View>
+      ) : null}
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   image: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+  },
+  chrome: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    overflow: "hidden",
+    paddingTop: 24,
+  },
+  actionBar: {
     position: "absolute",
     left: 0,
     top: 0,

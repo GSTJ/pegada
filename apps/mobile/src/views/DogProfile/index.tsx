@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, Alert, Linking, Share, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Header, HeaderBackButton } from "@react-navigation/elements";
 import i18n from "i18next";
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "styled-components/native";
 
 import MainCard from "@/components/MainCard";
+import { startReverseHero } from "@/components/HeroTransition/store";
 import { MatchActionBar } from "@/components/MatchActionBar";
 import { NetworkBoundary, UnknownErrorComponent } from "@/components/NetworkBoundary";
 import { Text } from "@/components/Text";
@@ -107,13 +108,17 @@ const useSwipeHandler = (id: string) => {
   const dispatch = useDispatch();
 
   return (swipeType: Swipe) => {
+    const commitSwipe = () => {
+      if (id === currentCardId && swipeHandlerRef.current) {
+        return swipeHandlerRef.current.gotoDirection(swipeType);
+      }
+
+      dispatch(Actions.dogs.swipe.request({ id: id, swipeType }));
+    };
+
+    const reversing = startReverseHero(id, commitSwipe);
     router.back();
-
-    if (id === currentCardId && swipeHandlerRef.current) {
-      return swipeHandlerRef.current.gotoDirection(swipeType);
-    }
-
-    dispatch(Actions.dogs.swipe.request({ id: id, swipeType }));
+    if (!reversing) commitSwipe();
   };
 };
 
@@ -121,10 +126,12 @@ const DogProfile = () => {
   const {
     id,
     currentImageIndex = 0,
+    heroTransition,
     matchId,
   } = useLocalSearchParams<{
     id: string;
     currentImageIndex?: string;
+    heroTransition?: string;
     matchId?: string;
   }>();
 
@@ -134,6 +141,21 @@ const DogProfile = () => {
   const insets = useSafeAreaInsets();
   const topInset = useCustomTopInset();
   const router = useRouter();
+  const navigation = useNavigation();
+  const completingHeroRemoval = React.useRef(false);
+
+  useEffect(() => {
+    if (heroTransition !== "1") return;
+    return navigation.addListener("beforeRemove", (event) => {
+      if (completingHeroRemoval.current) return;
+
+      const reversing = startReverseHero(id, () => {
+        completingHeroRemoval.current = true;
+        navigation.dispatch(event.data.action);
+      });
+      if (reversing) event.preventDefault();
+    });
+  }, [heroTransition, id, navigation]);
 
   const theme = useTheme();
 
@@ -255,6 +277,8 @@ const DogProfile = () => {
         <>
           <S.MatchActionBarGradient style={{ height: matchActionBarHeight + theme.spacing[8] }} />
           <MatchActionBar
+            sharedDogId={id}
+            sharedRole="target"
             style={{ bottom: topInset }}
             onNope={() => swipeHandler(Swipe.Dislike)}
             onYep={() => swipeHandler(Swipe.Like)}

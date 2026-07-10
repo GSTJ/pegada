@@ -66,24 +66,25 @@ const App = () => {
       <PostHogProvider client={posthog} autocapture={false}>
         <TRPCProvider>
           <ThemeProvider>
-            <BottomSheetModalProvider>
-              <NetworkBoundary>
-                <Provider store={store}>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(app)" />
-                    <Stack.Screen name="(auth)" />
-                  </Stack>
-                </Provider>
-                <MagicModalPortal />
-              </NetworkBoundary>
-            </BottomSheetModalProvider>
+            <>
+              <BottomSheetModalProvider>
+                <NetworkBoundary>
+                  <Provider store={store}>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="(app)" />
+                      <Stack.Screen name="(auth)" />
+                    </Stack>
+                  </Provider>
+                  <MagicModalPortal />
+                </NetworkBoundary>
+              </BottomSheetModalProvider>
+              {/* Above the navigator so shared profile elements paint over both screens. */}
+              <HeroTransitionOverlay />
+            </>
           </ThemeProvider>
         </TRPCProvider>
       </PostHogProvider>
-      {/* Above the navigator so the flying photo paints over both screens
-          while they cross-fade during a swipe-card -> profile transition. */}
-      <HeroTransitionOverlay />
     </AppContainer>
   );
 };
