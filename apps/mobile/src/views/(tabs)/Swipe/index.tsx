@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 import * as React from "react";
-import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 
 import { MatchActionBar } from "@/components/MatchActionBar";
-import { useTabBarOverlap } from "@/hooks/useTabBarHeight";
 import { sendError } from "@/services/errorTracking";
 import { trackUser } from "@/services/getInitialRouteName";
 import {
@@ -51,15 +49,6 @@ const Matches = () => {
   const dispatch = useDispatch();
   const cards = useSelector(getCards);
 
-  // Under iOS Native Tabs the screen extends beneath the translucent
-  // (Liquid Glass) tab bar. The card deck and its floating action bar are
-  // interactive, so the whole region ends above the bar: the card shrinks
-  // and the action bar keeps its original spacing[6] offset relative to
-  // the card's bottom edge, preserving the JS-tabs design proportions.
-  // 0 on Android, whose JS tab bar doesn't overlay the screen. The outer
-  // Container still runs full-bleed so the glass blurs the app background.
-  const tabBarOverlap = useTabBarOverlap();
-
   useEffect(() => {
     trackUser();
     const processLinksSubscription = processLinks();
@@ -84,17 +73,15 @@ const Matches = () => {
   return (
     <Container testID="swipe-screen" style={{ paddingTop: topInset }}>
       <ChangeLocation />
-      <View style={{ flex: 1, marginBottom: tabBarOverlap }}>
-        <Container>
-          <SwipeBackButton />
-          <SwipeRequestFeedback />
-          {cards
-            .map((card) => <SwipeHandler key={card.id} card={card} />)
-            .slice(0, MAX_TO_RENDER)
-            .reverse()}
-        </Container>
-        <MatchActionBarWrapper />
-      </View>
+      <Container>
+        <SwipeBackButton />
+        <SwipeRequestFeedback />
+        {cards
+          .map((card) => <SwipeHandler key={card.id} card={card} />)
+          .slice(0, MAX_TO_RENDER)
+          .reverse()}
+      </Container>
+      <MatchActionBarWrapper />
     </Container>
   );
 };

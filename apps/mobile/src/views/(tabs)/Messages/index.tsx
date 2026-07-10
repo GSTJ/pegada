@@ -9,7 +9,6 @@ import Divider from "@/components/Divider";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { Text } from "@/components/Text";
 import { getTrcpContext } from "@/contexts/trcpContext";
-import { useTabBarOverlap } from "@/hooks/useTabBarHeight";
 import { api, RouterOutputs } from "@/contexts/TRPCProvider";
 import { handleRequestAppReview } from "@/services/appReview";
 import { sendError } from "@/services/errorTracking";
@@ -84,11 +83,6 @@ const Messages = () => {
 
   const theme = useTheme();
 
-  // iOS Native Tabs: the list scrolls under the translucent tab bar (the
-  // intended Liquid Glass look), but the final row must settle above it.
-  // 0 on Android's JS tabs, whose bar doesn't overlay the screen.
-  const tabBarOverlap = useTabBarOverlap();
-
   // useCallback makes the header images re-render and flicker
   // useMemo is the right hook for this case, solving the issue
   const MemoizedHeader = (
@@ -141,7 +135,7 @@ const Messages = () => {
           borderColor: theme.colors.border,
         }}
         contentContainerStyle={{
-          paddingBottom: theme.spacing[4] + tabBarOverlap,
+          paddingBottom: theme.spacing[4],
           paddingTop: theme.spacing[1],
           // Increase size only if data is empty
           // Otherwise it bugs stuff

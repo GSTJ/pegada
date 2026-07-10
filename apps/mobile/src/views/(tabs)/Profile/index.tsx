@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as StoreReview from "expo-store-review";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused, useScrollToTop } from "@react-navigation/native";
 import { t } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -22,7 +23,6 @@ import Paperwork from "@/assets/images/Paperwork.svg";
 import SignOut from "@/assets/images/SignOut.svg";
 import Divider from "@/components/Divider";
 import { Text } from "@/components/Text";
-import { useTabBarHeight } from "@/hooks/useTabBarHeight";
 import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/errorTracking";
@@ -116,7 +116,7 @@ const Profile = () => {
 
   const dogProfileHeight = useDogProfileHeight();
 
-  const tabBarHeight = useTabBarHeight();
+  const tabBarHeight = useBottomTabBarHeight();
 
   return (
     <Container testID="profile-screen">

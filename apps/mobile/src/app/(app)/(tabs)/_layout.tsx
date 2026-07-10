@@ -1,21 +1,68 @@
-import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Tabs } from "expo-router";
+import { useTheme } from "styled-components/native";
 
-import AndroidTabsLayout from "./AndroidTabsLayout";
-import IOSNativeTabsLayout from "./IOSNativeTabsLayout";
+import Logo from "@/assets/images/Logo";
+import Messages from "@/assets/images/Messages";
+import Profile from "@/assets/images/Profile";
 
-/**
- * Tab bar rendering is platform-split on purpose:
- *
- * - iOS uses expo-router's Native Tabs (`expo-router/unstable-native-tabs`),
- *   which hands the tab bar to UIKit. On iOS 26 that means Liquid Glass for
- *   free, with zero extra work.
- * - Android keeps the existing JS `Tabs`. Native Tabs on Android render as a
- *   plain Material 3 bottom nav and would cost us the fine-grained
- *   `theme.spacing`/safe-area-driven bar insets and the gradient brand icons
- *   we render today (Native Tabs icons only accept SF Symbols / xcasset /
- *   drawable / material glyphs / static image sources, not arbitrary SVG
- *   element trees) -- a straight downgrade with nothing gained, since Liquid
- *   Glass itself is iOS 26-only. See the PR description for the full
- *   comparison.
- */
-export default Platform.OS === "ios" ? IOSNativeTabsLayout : AndroidTabsLayout;
+interface TabBarIconProps {
+  focused: boolean;
+  color: string;
+}
+
+export default () => {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Tabs
+      screenOptions={{
+        sceneStyle: { backgroundColor: theme.colors.background },
+        tabBarInactiveTintColor: theme.colors.text,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: theme.colors.background,
+          borderTopWidth: 0,
+          elevation: 0,
+          marginVertical: theme.spacing[3],
+          marginBottom: insets.bottom ? theme.spacing[0.5] : theme.spacing[3],
+        },
+        tabBarBadgeStyle: {
+          backgroundColor: theme.colors.primary,
+          color: theme.colors.background,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="swipe"
+        options={{
+          tabBarButtonTestID: "tab-swipe",
+          tabBarIcon: ({ color }: TabBarIconProps) => (
+            <Logo colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          tabBarButtonTestID: "tab-messages",
+          tabBarIcon: ({ color }: TabBarIconProps) => (
+            <Messages colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarButtonTestID: "tab-profile",
+          tabBarIcon: ({ color }: TabBarIconProps) => (
+            <Profile colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+          ),
+        }}
+      />
+    </Tabs>
+  );
+};
