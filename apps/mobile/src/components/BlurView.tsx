@@ -2,6 +2,7 @@ import * as React from "react";
 import { Platform, View } from "react-native";
 import { BlurViewProps, BlurView as ExpoBlurView } from "expo-blur";
 import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from "expo-glass-effect";
+import { useIsFocused } from "@react-navigation/native";
 import Color from "color";
 import styled, { DefaultTheme, useTheme } from "styled-components/native";
 
@@ -80,11 +81,13 @@ const getGlassCompatibleProps = (props: BlurViewProps) => {
  */
 export const BlurView = React.forwardRef<View, BlurViewProps>((props, ref) => {
   const theme = useTheme();
+  const isFocused = useIsFocused();
 
-  if (isLiquidGlassAvailableSafe()) {
+  if (isFocused && isLiquidGlassAvailableSafe()) {
     return (
       <GlassView
         {...getGlassCompatibleProps(props)}
+        key={theme.dark ? "glass-dark" : "glass-light"}
         ref={ref}
         glassEffectStyle="regular"
         colorScheme={theme.dark ? "dark" : "light"}
@@ -105,17 +108,23 @@ BlurView.displayName = "BlurView";
  */
 const StyledGlassView = styled(GlassView)``;
 
-export const TransparentGlassOrDarkBlurView = React.forwardRef<View, BlurViewProps>((props, ref) =>
-  isLiquidGlassAvailableSafe() ? (
-    <StyledGlassView
-      {...getGlassCompatibleProps(props)}
-      ref={ref}
-      glassEffectStyle="clear"
-      colorScheme="dark"
-    />
-  ) : (
-    <TransparentAndroidDarkBlurView {...props} ref={ref} />
-  ),
+export const TransparentGlassOrDarkBlurView = React.forwardRef<View, BlurViewProps>(
+  (props, ref) => {
+    const theme = useTheme();
+    const isFocused = useIsFocused();
+
+    return isFocused && isLiquidGlassAvailableSafe() ? (
+      <StyledGlassView
+        {...getGlassCompatibleProps(props)}
+        key={theme.dark ? "photo-glass-dark" : "photo-glass-light"}
+        ref={ref}
+        glassEffectStyle="clear"
+        colorScheme="dark"
+      />
+    ) : (
+      <TransparentAndroidDarkBlurView {...props} ref={ref} />
+    );
+  },
 );
 
 TransparentGlassOrDarkBlurView.displayName = "TransparentGlassOrDarkBlurView";

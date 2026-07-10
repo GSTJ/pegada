@@ -23,6 +23,7 @@ export const GlassPillBackground: React.FC<GlassPillBackgroundProps> = ({
   colorScheme,
 }) => (
   <StyledGlassView
+    key={colorScheme}
     glassEffectStyle="regular"
     isInteractive
     tintColor={tintColor}

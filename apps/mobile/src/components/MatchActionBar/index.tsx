@@ -1,5 +1,6 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
+import { useIsFocused } from "@react-navigation/native";
 import { useTheme } from "styled-components/native";
 
 import { isLiquidGlassAvailableSafe } from "@/components/BlurView";
@@ -29,14 +30,10 @@ interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
  */
 const ActionItemBackground = () => {
   const theme = useTheme();
+  const isFocused = useIsFocused();
 
-  if (isLiquidGlassAvailableSafe()) {
-    return (
-      <GlassPillBackground
-        tintColor={theme.colors.primary}
-        colorScheme={theme.dark ? "dark" : "light"}
-      />
-    );
+  if (isFocused && isLiquidGlassAvailableSafe()) {
+    return <GlassPillBackground tintColor={theme.colors.primary} colorScheme="dark" />;
   }
 
   return <ActionItemFallbackBackground />;
