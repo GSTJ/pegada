@@ -1,8 +1,9 @@
+import * as React from "react";
 import { Platform, View } from "react-native";
 import { BlurViewProps, BlurView as ExpoBlurView } from "expo-blur";
-import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
+import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from "expo-glass-effect";
 import Color from "color";
-import styled, { DefaultTheme } from "styled-components/native";
+import styled, { DefaultTheme, useTheme } from "styled-components/native";
 
 type MixinProps = { theme: DefaultTheme } & BlurViewProps;
 
@@ -20,7 +21,7 @@ const ContainerComponent = Platform.OS === "ios" ? ExpoBlurView : View;
  * content inside the container blurry as well sometimes and bugging
  * navigation
  */
-export const BlurView = styled(ContainerComponent).attrs(getProps)<BlurViewProps>`
+const FallbackBlurView = styled(ContainerComponent).attrs(getProps)<BlurViewProps>`
   background-color: ${(props) => {
     if (Platform.OS === "android") return props.theme.colors.background;
     return Color(props.theme.colors.background).alpha(0.5).string();
@@ -53,7 +54,7 @@ let cachedGlassAvailable: boolean | undefined;
 export const isLiquidGlassAvailableSafe = (): boolean => {
   if (cachedGlassAvailable === undefined) {
     try {
-      cachedGlassAvailable = isLiquidGlassAvailable();
+      cachedGlassAvailable = isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
     } catch {
       cachedGlassAvailable = false;
     }
@@ -61,20 +62,60 @@ export const isLiquidGlassAvailableSafe = (): boolean => {
   return cachedGlassAvailable;
 };
 
+const getGlassCompatibleProps = (props: BlurViewProps) => {
+  const viewProps = { ...props };
+  delete viewProps.blurTarget;
+  delete viewProps.tint;
+  delete viewProps.intensity;
+  delete viewProps.blurReductionFactor;
+  delete viewProps.experimentalBlurMethod;
+  delete viewProps.blurMethod;
+  return viewProps;
+};
+
+/**
+ * Uses native Liquid Glass for every existing blur-backed surface on iOS 26.
+ * The public props stay compatible with expo-blur so current callers and
+ * styled-components wrappers keep their layout and refs unchanged.
+ */
+export const BlurView = React.forwardRef<View, BlurViewProps>((props, ref) => {
+  const theme = useTheme();
+
+  if (isLiquidGlassAvailableSafe()) {
+    return (
+      <GlassView
+        {...getGlassCompatibleProps(props)}
+        ref={ref}
+        glassEffectStyle="regular"
+        colorScheme={theme.dark ? "dark" : "light"}
+      />
+    );
+  }
+
+  return <FallbackBlurView {...props} ref={ref} />;
+});
+
+BlurView.displayName = "BlurView";
+
 /**
  * Same intent as `TransparentAndroidDarkBlurView` (a dark, translucent
  * pill floating over a photo), but rendered as real Liquid Glass on iOS 26+.
  * Falls back to the existing blur-on-iOS/flat-on-Android behavior everywhere
  * else, so older iOS and Android are pixel-for-pixel unchanged.
  */
-const StyledGlassView = styled(GlassView).attrs({
-  glassEffectStyle: "clear",
-  colorScheme: "dark",
-})``;
+const StyledGlassView = styled(GlassView)``;
 
-export const TransparentGlassOrDarkBlurView: React.FC<BlurViewProps> = (props) =>
+export const TransparentGlassOrDarkBlurView = React.forwardRef<View, BlurViewProps>((props, ref) =>
   isLiquidGlassAvailableSafe() ? (
-    <StyledGlassView {...props} />
+    <StyledGlassView
+      {...getGlassCompatibleProps(props)}
+      ref={ref}
+      glassEffectStyle="clear"
+      colorScheme="dark"
+    />
   ) : (
-    <TransparentAndroidDarkBlurView {...props} />
-  );
+    <TransparentAndroidDarkBlurView {...props} ref={ref} />
+  ),
+);
+
+TransparentGlassOrDarkBlurView.displayName = "TransparentGlassOrDarkBlurView";
