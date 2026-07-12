@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { sendError } from "@/services/errorTracking";
 import { SceneName } from "@/types/SceneName";
 
-enum NotificationUrl {
+export enum NotificationUrl {
   Match = "match/",
   Chat = "chat/",
 }
