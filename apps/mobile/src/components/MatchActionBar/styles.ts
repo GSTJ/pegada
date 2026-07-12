@@ -32,6 +32,11 @@ export const Container = styled(Animated.View).attrs({
 
   z-index: 10;
   elevation: 10;
+
+  shadow-color: #000;
+  shadow-offset: 0px 1px;
+  shadow-opacity: 0.1;
+  shadow-radius: 1px;
 `;
 
 export const ActionItem = styled(TransparentGlassOrDarkBlurView).attrs(() => ({
@@ -40,6 +45,7 @@ export const ActionItem = styled(TransparentGlassOrDarkBlurView).attrs(() => ({
   padding: ${(props) => props.theme.spacing[2.5]}px;
 
   border-radius: ${(props) => props.theme.radii.round}px;
+
   /* The visible pill background is rendered by ActionItemBackground
      (plain fill or GlassView, see index.tsx) as an absolute-fill sibling
      behind the emoji, so it can be swapped without touching hit-testing. */
