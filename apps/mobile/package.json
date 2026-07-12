@@ -92,6 +92,7 @@
     "react-native-svg": "^15.15.3",
     "react-native-svg-transformer": "^1.5.0",
     "react-native-web": "~0.21.2",
+    "react-native-worklets": "0.8.3",
     "react-redux": "^9.1.2",
     "reduce-reducers": "^1.0.4",
     "redux": "^5.0.1",

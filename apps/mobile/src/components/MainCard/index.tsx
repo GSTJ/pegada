@@ -1,6 +1,7 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import * as React from "react";
+import { View } from "react-native";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -9,8 +10,17 @@ import {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useTheme } from "styled-components/native";
 
+import {
+  createHeroNavigationWatchdog,
+  setHeroTarget,
+  startHero,
+  useHeroState,
+  useIsHeroActive,
+} from "@/components/HeroTransition/store";
 import { PressableArea } from "@/components/PressableArea";
+import { getTrcpContext } from "@/contexts/trcpContext";
 import { SceneName } from "@/types/SceneName";
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
@@ -19,6 +29,7 @@ import {
   CarouselContainer,
   Container,
   NextImage,
+  PhotoAnchor,
   Picture,
   PreviousImage,
   UpperPart,
@@ -43,18 +54,74 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   const { images = [] } = dog;
   const [currentImage, setCurrentImage] = useState(startImageIndex);
   const router = useRouter();
+  const theme = useTheme();
 
   const rotation = useSharedValue(0);
 
+  // When rendered inside DogProfile (no personal info), this card is the hero
+  // *destination*; on the swipe deck it's the *source*.
+  const isHeroDestination = !shouldShowPersonalInfo;
+  const photoAnchorRef = useRef<View>(null);
+  const heroActive = useIsHeroActive(dog.id);
+  const activeHero = useHeroState();
+  const hideSharedChrome = heroActive && Boolean(activeHero.chrome);
+
+  const currentPhoto = images[currentImage];
+
   const openUserProfile = () => {
-    router.push({
-      pathname: `${SceneName.Profile}/[id]`,
-      params: {
-        id: dog.id,
-        currentImageIndex: currentImage,
-      },
+    // The swipe response already contains the complete DogProfile payload.
+    // Refresh the exact query key at the interaction boundary so an entry
+    // that has aged out of React Query never suspends between the card and
+    // the hero destination.
+    getTrcpContext().dog.get.setData({ id: dog.id }, dog);
+
+    const navigate = (heroTransition?: string) => {
+      router.push({
+        pathname: `${SceneName.Profile}/[id]`,
+        params: {
+          id: dog.id,
+          currentImageIndex: currentImage,
+          heroTransition,
+        },
+      });
+    };
+    const finishNavigation = createHeroNavigationWatchdog(navigate);
+
+    // Kick off the manual hero morph: freeze the tapped photo into a flying
+    // overlay measured at its on-screen frame, then navigate. The destination
+    // card reports its frame on mount (see onDestinationLayout) and the
+    // overlay animates between the two. See @/components/HeroTransition/store.
+    photoAnchorRef.current?.measureInWindow((x, y, width, height) => {
+      if (width > 0 && height > 0 && currentPhoto?.url) {
+        finishNavigation(() => {
+          startHero({
+            id: dog.id,
+            source: { uri: currentPhoto.url, blurhash: currentPhoto.blurhash },
+            from: { x, y, width, height, borderRadius: theme.radii.lg },
+            chrome: {
+              dog,
+              pages: images.length,
+              currentPage: currentImage,
+            },
+          });
+        });
+        return;
+      }
+      finishNavigation();
     });
   };
+
+  const onDestinationLayout = useCallback(() => {
+    if (!isHeroDestination) return;
+    // Defer to the next frame so native layout has settled before we measure.
+    requestAnimationFrame(() => {
+      photoAnchorRef.current?.measureInWindow((x, y, width, height) => {
+        if (width > 0 && height > 0) {
+          setHeroTarget({ id: dog.id, to: { x, y, width, height, borderRadius: 0 } });
+        }
+      });
+    });
+  }, [dog.id, isHeroDestination]);
 
   const gotoPreviousImage = () => {
     // If there is only one image, open the user profile for now.
@@ -87,13 +154,22 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
 
   return (
     <Container testID="swipe-card" {...props} style={[props.style, transform]}>
-      <Picture
-        source={{
-          uri: images[currentImage]?.url,
-          blurhash: images[currentImage]?.blurhash,
-        }}
-        key={images[currentImage]?.id}
-      />
+      <PhotoAnchor
+        ref={photoAnchorRef}
+        onLayout={onDestinationLayout}
+        // While the hero overlay is flying, hide the real photo so only the
+        // overlay copy is visible (no double image). The overlay clears itself
+        // once the morph lands, revealing this again.
+        style={heroActive ? { opacity: 0 } : undefined}
+      >
+        <Picture
+          source={{
+            uri: currentPhoto?.url,
+            blurhash: currentPhoto?.blurhash,
+          }}
+          key={currentPhoto?.id}
+        />
+      </PhotoAnchor>
       <LinearGradient
         style={{
           position: "absolute",
@@ -104,7 +180,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
         }}
         colors={["rgba(0, 0, 0, .5)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
       />
-      <UpperPart>
+      <UpperPart style={hideSharedChrome ? { opacity: 0 } : undefined}>
         <Distance dog={dog} />
         <Pagination pages={images.length} currentPage={currentImage} />
         <CarouselContainer>

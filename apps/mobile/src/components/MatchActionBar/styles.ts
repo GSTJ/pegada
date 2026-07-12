@@ -12,26 +12,32 @@ import { PressableArea } from "@/components/PressableArea";
 // Apple HIG recommends a minimum 44x44pt hit area for tappable targets.
 const MIN_TOUCH_TARGET = 44;
 
-export const Container = styled(Animated.View).attrs({
+interface ContainerProps {
+  $hidden?: boolean;
+  $inline?: boolean;
+}
+
+export const Container = styled(Animated.View).attrs<ContainerProps>((props) => ({
   // box-none keeps the bar itself non-blocking so the card below stays
   // pannable in the gaps, but lifts the bar above the card visually so
   // each ActionItem reliably wins taps over the card's PersonalInfo
   // pressable that sits underneath.
-  pointerEvents: "box-none",
-})`
+  pointerEvents: props.$hidden ? "none" : "box-none",
+}))<ContainerProps>`
   width: 100%;
 
   justify-content: space-around;
   align-items: center;
   flex-direction: row;
 
-  position: absolute;
+  position: ${(props) => (props.$inline ? "relative" : "absolute")};
   align-self: center;
-  bottom: ${(props) => props.theme.spacing[6]}px;
+  bottom: ${(props) => (props.$inline ? 0 : props.theme.spacing[6])}px;
   padding: 0 ${(props) => props.theme.spacing[2]}px;
 
   z-index: 10;
   elevation: 10;
+  opacity: ${(props) => (props.$hidden ? 0 : 1)};
 `;
 
 export const ActionItem = styled(PressableArea).attrs({

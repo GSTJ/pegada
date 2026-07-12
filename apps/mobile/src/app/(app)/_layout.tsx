@@ -54,7 +54,19 @@ export default () => {
           animation: "default",
         }}
       />
-      <Stack.Screen name="profile/[id]" />
+      <Stack.Screen
+        name="profile/[id]"
+        options={({ route }) => ({
+          // The photo overlay is the forward transition from Swipe. Running
+          // the stack fade at the same time duplicates the whole card behind
+          // it. The same route-level opt-out lets the shared elements reverse
+          // cleanly on Back without a competing stack animation.
+          animation:
+            (route.params as { heroTransition?: string } | undefined)?.heroTransition === "1"
+              ? "none"
+              : "fade",
+        })}
+      />
       <Stack.Screen
         name="preferences"
         options={{
