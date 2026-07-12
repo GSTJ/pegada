@@ -5,7 +5,15 @@ import { ExpoConfig } from "expo/config";
 // seed Android's base values/strings.xml via withDefaultLocaleStrings,
 // see that plugin's file for why this is needed.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+const enNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+// The platform-specific sections (`ios` carries Localizable.strings entries
+// for the App Intents, handled natively by Expo's locales support) must NOT
+// leak into Android's strings.xml -- "ios" isn't a valid string resource.
+const {
+  ios: _iosNativeStrings,
+  android: _androidNativeStrings,
+  ...defaultLocaleNativeStrings
+} = enNativeStrings;
 
 const config: ExpoConfig = {
   /**
@@ -35,6 +43,13 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
+    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
@@ -174,6 +189,10 @@ const config: ExpoConfig = {
     // FAILS gradlew bundleRelease -- this is what killed the 2026-07-05
     // overnight EAS cloud build. See withDefaultLocaleStrings.js.
     ["./plugins/withDefaultLocaleStrings", { stringsByKey: defaultLocaleNativeStrings }],
+    // Compiles the "Open Matches" / "Start Swiping" App Intents (Siri,
+    // Shortcuts, Spotlight) into the main iOS app target. See the plugin
+    // file for the full story.
+    "./plugins/withAppIntents",
   ],
   androidStatusBar: {
     barStyle: "dark-content",
