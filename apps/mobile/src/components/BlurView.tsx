@@ -1,7 +1,11 @@
 import * as React from "react";
 import { Platform, View } from "react-native";
 import { BlurViewProps, BlurView as ExpoBlurView } from "expo-blur";
-import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from "expo-glass-effect";
+import {
+  GlassView,
+  isGlassEffectAPIAvailable,
+  isLiquidGlassAvailable,
+} from "expo-glass-effect";
 import { useIsFocused } from "@react-navigation/native";
 import Color from "color";
 import styled, { DefaultTheme, useTheme } from "styled-components/native";
@@ -22,7 +26,9 @@ const ContainerComponent = Platform.OS === "ios" ? ExpoBlurView : View;
  * content inside the container blurry as well sometimes and bugging
  * navigation
  */
-const FallbackBlurView = styled(ContainerComponent).attrs(getProps)<BlurViewProps>`
+const FallbackBlurView = styled(ContainerComponent).attrs(
+  getProps,
+)<BlurViewProps>`
   background-color: ${(props) => {
     if (Platform.OS === "android") return props.theme.colors.background;
     return Color(props.theme.colors.background).alpha(0.5).string();
@@ -55,7 +61,8 @@ let cachedGlassAvailable: boolean | undefined;
 export const isLiquidGlassAvailableSafe = (): boolean => {
   if (cachedGlassAvailable === undefined) {
     try {
-      cachedGlassAvailable = isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
+      cachedGlassAvailable =
+        isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
     } catch {
       cachedGlassAvailable = false;
     }
@@ -108,23 +115,24 @@ BlurView.displayName = "BlurView";
  */
 const StyledGlassView = styled(GlassView)``;
 
-export const TransparentGlassOrDarkBlurView = React.forwardRef<View, BlurViewProps>(
-  (props, ref) => {
-    const theme = useTheme();
-    const isFocused = useIsFocused();
+export const TransparentGlassOrDarkBlurView = React.forwardRef<
+  View,
+  BlurViewProps
+>((props, ref) => {
+  const theme = useTheme();
+  const isFocused = useIsFocused();
 
-    return isFocused && isLiquidGlassAvailableSafe() ? (
-      <StyledGlassView
-        {...getGlassCompatibleProps(props)}
-        key={theme.dark ? "photo-glass-dark" : "photo-glass-light"}
-        ref={ref}
-        glassEffectStyle="clear"
-        colorScheme="dark"
-      />
-    ) : (
-      <TransparentAndroidDarkBlurView {...props} ref={ref} />
-    );
-  },
-);
+  return isFocused && isLiquidGlassAvailableSafe() ? (
+    <StyledGlassView
+      key={theme.dark ? "photo-glass-dark" : "photo-glass-light"}
+      ref={ref}
+      glassEffectStyle="clear"
+      colorScheme="dark"
+      {...getGlassCompatibleProps(props)}
+    />
+  ) : (
+    <TransparentAndroidDarkBlurView {...props} ref={ref} />
+  );
+});
 
 TransparentGlassOrDarkBlurView.displayName = "TransparentGlassOrDarkBlurView";
