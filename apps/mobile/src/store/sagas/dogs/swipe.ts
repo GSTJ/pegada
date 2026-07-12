@@ -10,6 +10,7 @@ import { getTrcpContext } from "@/contexts/trcpContext";
 import { getUnsafeIsPremium } from "@/hooks/usePayments";
 import { sendError } from "@/services/errorTracking";
 import { getError } from "@/services/getError";
+import { endLikeLimitLiveStatus, startLikeLimitLiveStatus } from "@/services/liveStatus";
 import { Actions, RootReducer } from "@/store/reducers";
 import { SwipeAction } from "@/store/reducers/dogs/swipe";
 import { SceneName } from "@/types/SceneName";
@@ -46,12 +47,19 @@ function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.req
       yield call(getTrcpContext().match.getAll.invalidate);
     }
 
+    // A successful swipe means the like limit is no longer active, take
+    // down the countdown Live Activity/notification if one is up.
+    yield call(endLikeLimitLiveStatus);
+
     yield put(Actions.dogs.swipe.success());
   } catch (err: any) {
     const likeLimitReachedError = getError(err, LikeLimitReached);
     if (likeLimitReachedError) {
       const { likeLimitResetAt } = likeLimitReachedError;
       showLikeLimitReached({ likeLimitResetAt });
+      // Glanceable countdown outside the app: Dynamic Island/lock screen on
+      // iOS, (promoted) countdown notification on Android.
+      yield call(startLikeLimitLiveStatus, likeLimitResetAt);
       yield put(Actions.dogs.swipe.failure({ likeLimitResetAt }));
       return;
     }

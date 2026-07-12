@@ -7,6 +7,12 @@
     "winFreeTrial": "Ganhe um Teste Gratuito",
     "getPremium": "Descubra o Premium"
   },
+  "liveStatus": {
+    "title": "Curtidas recarregando",
+    "body": "Suas curtidas grátis voltam quando o tempo acabar",
+    "ready": "Curtidas de volta!",
+    "channelName": "Contagem do limite de curtidas"
+  },
   "appReview": {
     "areYouLikingTheAppModal": {
       "description": "Queremos saber sua opinião, você é um dos melhores doguinhos!",
