@@ -1,19 +1,14 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
-import { useIsFocused } from "@react-navigation/native";
-import { useTheme } from "styled-components/native";
 
-import { isLiquidGlassAvailableSafe } from "@/components/BlurView";
-
-import { GlassPillBackground } from "./GlassPillBackground";
 import {
   ActionItem,
-  ActionItemFallbackBackground,
   ConfusedEmoji,
   Container,
   HeartEyesEmoji,
   ThinkingEmoji,
 } from "./styles";
+import { PressableArea } from "@/components/PressableArea";
 
 interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   onNope: () => void;
@@ -22,22 +17,7 @@ interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   animated?: boolean;
 }
 
-/**
- * The pill background behind each action button. Uses a real Liquid Glass
- * effect on iOS 26+ (`isLiquidGlassAvailableSafe()`), and falls back to the
- * original tinted-transparent fill everywhere else (older iOS, Android, or
- * if the native module is missing).
- */
-const ActionItemBackground = () => {
-  const theme = useTheme();
-  const isFocused = useIsFocused();
-
-  if (isFocused && isLiquidGlassAvailableSafe()) {
-    return <GlassPillBackground tintColor={theme.colors.primary} colorScheme="dark" />;
-  }
-
-  return <ActionItemFallbackBackground />;
-};
+const hitSlop = { top: 12, bottom: 12, left: 12, right: 12 };
 
 export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   onNope,
@@ -49,26 +29,32 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   const dislikeAnimation = animated ? FadeInDown.delay(300) : undefined;
   const maybeAnimation = animated ? FadeInDown.delay(350) : undefined;
   const likeAnimation = animated ? FadeInDown.delay(400) : undefined;
-
   return (
     <Container exiting={ZoomOutDown} {...props}>
       <Animated.View entering={dislikeAnimation}>
-        <ActionItem testID="swipe-dislike" onPress={onNope}>
-          <ActionItemBackground />
-          <ConfusedEmoji />
-        </ActionItem>
+        <PressableArea
+          hitSlop={hitSlop}
+          testID="swipe-dislike"
+          onPress={onNope}
+        >
+          <ActionItem>
+            <ConfusedEmoji />
+          </ActionItem>
+        </PressableArea>
       </Animated.View>
       <Animated.View entering={maybeAnimation}>
-        <ActionItem testID="swipe-maybe" onPress={onMaybe}>
-          <ActionItemBackground />
-          <ThinkingEmoji />
-        </ActionItem>
+        <PressableArea hitSlop={hitSlop} testID="swipe-maybe" onPress={onMaybe}>
+          <ActionItem>
+            <ThinkingEmoji />
+          </ActionItem>
+        </PressableArea>
       </Animated.View>
       <Animated.View entering={likeAnimation}>
-        <ActionItem testID="swipe-like" onPress={onYep}>
-          <ActionItemBackground />
-          <HeartEyesEmoji />
-        </ActionItem>
+        <PressableArea hitSlop={hitSlop} testID="swipe-like" onPress={onYep}>
+          <ActionItem>
+            <HeartEyesEmoji />
+          </ActionItem>
+        </PressableArea>
       </Animated.View>
     </Container>
   );
