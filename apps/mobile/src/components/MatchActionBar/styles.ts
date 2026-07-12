@@ -34,7 +34,9 @@ export const Container = styled(Animated.View).attrs({
   elevation: 10;
 `;
 
-export const ActionItem = styled(TransparentGlassOrDarkBlurView)`
+export const ActionItem = styled(TransparentGlassOrDarkBlurView).attrs((props) => ({
+  isInteractive: true,
+}))`
   padding: ${(props) => props.theme.spacing[2.5]}px;
 
   border-radius: ${(props) => props.theme.radii.round}px;
