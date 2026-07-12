@@ -13,7 +13,6 @@ const HIT_SLOP = {
 
 export const Container = styled(PressableArea).attrs({
   hitSlop: HIT_SLOP,
-  pointerEvents: "box-only",
 })`
   margin-top: ${-BACK_CONTAINER_SIZE / 2}px;
   right: ${(props) => props.theme.spacing[4]}px;
