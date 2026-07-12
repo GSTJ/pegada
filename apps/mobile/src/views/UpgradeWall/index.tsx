@@ -14,6 +14,7 @@ import { Button } from "@/components/Button";
 import { useEligibleForTrial } from "@/hooks/usePayments";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/errorTracking";
+import { haptics } from "@/services/haptics";
 import { payments } from "@/services/payments";
 import Benefits from "@/views/UpgradeWall/components/Benefits";
 import PlanPackages from "@/views/UpgradeWall/components/PlanPackages";
@@ -75,6 +76,8 @@ const UpgradeWall: React.FC = () => {
       });
     },
     onSuccess: () => {
+      haptics.success();
+
       analytics.track({
         event_type: "Upgrade",
         event_properties: {
@@ -101,6 +104,8 @@ const UpgradeWall: React.FC = () => {
 
       // If it's a simulator, an error is expected
       if (!isDevice) return;
+
+      haptics.error();
 
       analytics.track({
         event_type: "Upgrade",

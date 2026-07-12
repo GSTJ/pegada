@@ -13,6 +13,7 @@ import {
 } from "react-native-reanimated";
 
 import { ACTION_OFFSET, ACTION_VELOCITY, CARD } from "@/constants";
+import { haptics } from "@/services/haptics";
 
 export interface Translation {
   x: SharedValue<number>;
@@ -99,6 +100,10 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
     y: useSharedValue(0),
   };
 
+  // Tracks whether we've already fired the threshold-crossing haptic for the
+  // current gesture, so it ticks once per crossing instead of every frame.
+  const hasCrossedThreshold = useSharedValue(false);
+
   // We want to guarantee the animation has finished before enabling
   // the card to be swiped again. Otherwise the dog will be able
   // to 'catch' the card on the middle of the animation.
@@ -112,6 +117,10 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
     // Avoid concurrency, should gotoDirection only once
     if (!enabled) return;
     runOnJS(setEnabled)(false);
+
+    // Confirms the action itself (button tap or a released swipe past the
+    // threshold) — distinct from the lighter "crossing" tick in `onUpdate`.
+    runOnJS(haptics.light)();
 
     const swipeCoordinates = getDirectionCoordinates(swipeDirection);
     return gotoCoordinate(
@@ -129,10 +138,19 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
     .onBegin((ctx) => {
       translation.x.value = ctx.translationX;
       translation.y.value = ctx.translationY;
+      hasCrossedThreshold.value = false;
     })
     .onUpdate((event) => {
       translation.x.value = event.translationX;
       translation.y.value = event.translationY;
+
+      // Fire a tick exactly once per crossing of the decision threshold,
+      // reusing the same rule `onEnd` uses to commit to a direction.
+      const crossedNow = !!getSwipeType(event);
+      if (crossedNow && !hasCrossedThreshold.value) {
+        runOnJS(haptics.selection)();
+      }
+      hasCrossedThreshold.value = crossedNow;
     })
     .onEnd((event) => {
       const swipeType = getSwipeType(event);
