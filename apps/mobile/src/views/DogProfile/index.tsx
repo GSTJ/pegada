@@ -12,10 +12,7 @@ import { useTheme } from "styled-components/native";
 
 import MainCard from "@/components/MainCard";
 import { MatchActionBar } from "@/components/MatchActionBar";
-import {
-  NetworkBoundary,
-  UnknownErrorComponent,
-} from "@/components/NetworkBoundary";
+import { NetworkBoundary, UnknownErrorComponent } from "@/components/NetworkBoundary";
 import { Text } from "@/components/Text";
 import { APP_SHARE_LINK_BASE } from "@/constants";
 import { getTrcpContext } from "@/contexts/trcpContext";
@@ -57,12 +54,7 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
 
   return (
     <S.ShareButton>
-      <Text
-        onPress={handleShare}
-        fontWeight="bold"
-        color="primary"
-        style={{ textAlign: "center" }}
-      >
+      <Text onPress={handleShare} fontWeight="bold" color="primary" style={{ textAlign: "center" }}>
         {t("dogProfile.shareProfile", { name: firstName })}
       </Text>
     </S.ShareButton>
@@ -165,19 +157,13 @@ const DogProfile = () => {
     } catch (err) {
       sendError(err);
 
-      Alert.alert(
-        t("dogProfile.somethingWrong"),
-        t("dogProfile.tryAgainLater"),
-      );
+      Alert.alert(t("dogProfile.somethingWrong"), t("dogProfile.tryAgainLater"));
     } finally {
       setUnmatchLoading(false);
     }
   };
 
-  const [dog] = api.dog.get.useSuspenseQuery(
-    { id: id as string },
-    { refetchOnMount: false },
-  );
+  const [dog] = api.dog.get.useSuspenseQuery({ id: id as string }, { refetchOnMount: false });
 
   const firstName = dog.name.split(" ")[0];
 
@@ -214,9 +200,7 @@ const DogProfile = () => {
             <BreedTag breed={dog.breed} />
             <S.Name testID="dog-profile-name" numberOfLines={1}>
               {dog.name}
-              {dog.birthDate ? (
-                <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age>
-              ) : undefined}
+              {dog.birthDate ? <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age> : undefined}
             </S.Name>
             <View style={{ gap: theme.spacing[7] }}>
               <S.Description>{dog.bio}</S.Description>
@@ -230,11 +214,7 @@ const DogProfile = () => {
                   {unmatchLoading ? (
                     <ActivityIndicator color={theme.colors.primary} />
                   ) : (
-                    <Text
-                      fontWeight="bold"
-                      color="primary"
-                      style={{ textAlign: "center" }}
-                    >
+                    <Text fontWeight="bold" color="primary" style={{ textAlign: "center" }}>
                       {t("dogProfile.unmatch")}
                     </Text>
                   )}
@@ -273,9 +253,7 @@ const DogProfile = () => {
 
       {!matchId && (
         <>
-          <S.MatchActionBarGradient
-            style={{ height: matchActionBarHeight + theme.spacing[8] }}
-          />
+          <S.MatchActionBarGradient style={{ height: matchActionBarHeight + theme.spacing[8] }} />
           <MatchActionBar
             style={{ bottom: topInset }}
             onNope={() => swipeHandler(Swipe.Dislike)}

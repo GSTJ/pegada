@@ -20,8 +20,7 @@ const GlassmorphismStyled = styled(TransparentGlassOrDarkBlurView).attrs({
 `;
 
 const ViewStyled = styled(View)`
-  padding: ${(props) => props.theme.spacing[2]}px
-    ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[2]}px ${(props) => props.theme.spacing[4]}px;
   padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
 `;
 

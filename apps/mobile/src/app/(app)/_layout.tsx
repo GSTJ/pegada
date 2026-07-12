@@ -23,6 +23,12 @@ export default () => {
         },
 
         headerBlurEffect: "regular",
+        scrollEdgeEffects: {
+          bottom: "hidden",
+          left: "hidden",
+          right: "hidden",
+          top: "hidden",
+        },
 
         headerStyle: {
           // BlurEffect doesn't work on Android, so opacity is not necessary

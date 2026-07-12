@@ -1,13 +1,7 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
 
-import {
-  ActionItem,
-  ConfusedEmoji,
-  Container,
-  HeartEyesEmoji,
-  ThinkingEmoji,
-} from "./styles";
+import { ActionItem, ConfusedEmoji, Container, HeartEyesEmoji, ThinkingEmoji } from "./styles";
 import { PressableArea } from "@/components/PressableArea";
 
 interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
@@ -32,11 +26,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   return (
     <Container exiting={ZoomOutDown} {...props}>
       <Animated.View entering={dislikeAnimation}>
-        <PressableArea
-          hitSlop={hitSlop}
-          testID="swipe-dislike"
-          onPress={onNope}
-        >
+        <PressableArea hitSlop={hitSlop} testID="swipe-dislike" onPress={onNope}>
           <ActionItem>
             <ConfusedEmoji />
           </ActionItem>
