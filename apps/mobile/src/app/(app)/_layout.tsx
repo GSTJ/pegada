@@ -22,7 +22,7 @@ export default () => {
           backgroundColor: theme.colors.background,
         },
 
-        headerBlurEffect: "prominent",
+        headerBlurEffect: "regular",
 
         headerStyle: {
           // BlurEffect doesn't work on Android, so opacity is not necessary

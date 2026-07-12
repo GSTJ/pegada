@@ -6,7 +6,6 @@ import {
   isGlassEffectAPIAvailable,
   isLiquidGlassAvailable,
 } from "expo-glass-effect";
-import { useIsFocused } from "@react-navigation/native";
 import Color from "color";
 import styled, { DefaultTheme, useTheme } from "styled-components/native";
 
@@ -88,9 +87,8 @@ const getGlassCompatibleProps = (props: BlurViewProps) => {
  */
 export const BlurView = React.forwardRef<View, BlurViewProps>((props, ref) => {
   const theme = useTheme();
-  const isFocused = useIsFocused();
 
-  if (isFocused && isLiquidGlassAvailableSafe()) {
+  if (isLiquidGlassAvailableSafe()) {
     return (
       <GlassView
         {...getGlassCompatibleProps(props)}
@@ -120,14 +118,13 @@ export const TransparentGlassOrDarkBlurView = React.forwardRef<
   BlurViewProps
 >((props, ref) => {
   const theme = useTheme();
-  const isFocused = useIsFocused();
 
-  return isFocused && isLiquidGlassAvailableSafe() ? (
+  return isLiquidGlassAvailableSafe() ? (
     <StyledGlassView
       key={theme.dark ? "photo-glass-dark" : "photo-glass-light"}
       ref={ref}
       glassEffectStyle="clear"
-      colorScheme="dark"
+      colorScheme={theme.dark ? "dark" : "light"}
       {...getGlassCompatibleProps(props)}
     />
   ) : (
