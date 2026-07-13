@@ -7,6 +7,7 @@ import confusedEmoji from "@/assets/images/ConfusedEmoji.webp";
 import heartEyesEmoji from "@/assets/images/HeartEyesEmoji.webp";
 import thinkingEmoji from "@/assets/images/ThinkingEmoji.webp";
 import { Image } from "@/components/Image";
+import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
 
 // Apple HIG recommends a minimum 44x44pt hit area for tappable targets.
 const MIN_TOUCH_TARGET = 44;
@@ -38,7 +39,9 @@ export const Container = styled(Animated.View).attrs({
   shadow-radius: 1px;
 `;
 
-export const ActionItem = styled.View`
+export const ActionItem = styled(TransparentGlassOrDarkBlurView).attrs(() => ({
+  isInteractive: true,
+}))`
   padding: ${(props) => props.theme.spacing[2.5]}px;
 
   border-radius: ${(props) => props.theme.radii.round}px;

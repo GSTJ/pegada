@@ -1,5 +1,6 @@
 import styled from "styled-components/native";
 
+import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
 import { PressableArea } from "@/components/PressableArea";
 
 const BACK_CONTAINER_SIZE = 60;
@@ -11,26 +12,22 @@ const HIT_SLOP = {
 };
 
 export const Container = styled(PressableArea).attrs({
-  pointerEvents: "box-only",
   hitSlop: HIT_SLOP,
 })`
   margin-top: ${-BACK_CONTAINER_SIZE / 2}px;
   right: ${(props) => props.theme.spacing[4]}px;
-  border-radius: ${BACK_CONTAINER_SIZE}px;
-  overflow: hidden;
-
   align-self: flex-end;
-
   z-index: 2;
-
-  border-width: ${(props) => props.theme.stroke.sm}px;
-  border-color: ${(props) => props.theme.colors.border};
 `;
 
-export const Content = styled.View`
+export const Content = styled(TransparentGlassOrDarkBlurView).attrs({
+  isInteractive: true,
+  glassEffectStyle: "regular",
+})`
   width: ${BACK_CONTAINER_SIZE}px;
   height: ${BACK_CONTAINER_SIZE}px;
   border-radius: ${BACK_CONTAINER_SIZE}px;
+  overflow: hidden;
 
   justify-content: center;
   align-items: center;
