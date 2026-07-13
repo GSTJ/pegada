@@ -5,13 +5,11 @@ import styled from "styled-components/native";
 import { BreedSlug } from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
+import Glassmorphism from "@/components/Glassmorphism";
 import { Text } from "@/components/Text";
 import { SwipeDog } from "@/store/reducers/dogs/swipe";
-import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
 
-const GlassmorphismStyled = styled(TransparentGlassOrDarkBlurView).attrs({
-  glassEffectStyle: "regular",
-})`
+const GlassmorphismStyled = styled(Glassmorphism)`
   border-radius: ${(props) => props.theme.radii.md}px;
   margin-right: auto;
   margin-bottom: ${(props) => props.theme.spacing[3]}px;

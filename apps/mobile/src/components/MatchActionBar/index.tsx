@@ -1,8 +1,20 @@
 import * as React from "react";
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
+import { useIsFocused } from "@react-navigation/native";
+import { useTheme } from "styled-components/native";
 
-import { ActionItem, ConfusedEmoji, Container, HeartEyesEmoji, ThinkingEmoji } from "./styles";
+import { isLiquidGlassAvailableSafe } from "@/components/BlurView";
 import { PressableArea } from "@/components/PressableArea";
+
+import { GlassPillBackground } from "./GlassPillBackground";
+import {
+  ActionItem,
+  ActionItemFallbackBackground,
+  ConfusedEmoji,
+  Container,
+  HeartEyesEmoji,
+  ThinkingEmoji,
+} from "./styles";
 
 interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   onNope: () => void;
@@ -12,6 +24,17 @@ interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
 }
 
 const hitSlop = { top: 12, bottom: 12, left: 12, right: 12 };
+
+const ActionItemBackground = () => {
+  const theme = useTheme();
+  const isFocused = useIsFocused();
+
+  if (isFocused && isLiquidGlassAvailableSafe()) {
+    return <GlassPillBackground tintColor={theme.colors.primary} colorScheme="dark" />;
+  }
+
+  return <ActionItemFallbackBackground />;
+};
 
 export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   onNope,
@@ -28,6 +51,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
       <Animated.View entering={dislikeAnimation}>
         <PressableArea hitSlop={hitSlop} testID="swipe-dislike" onPress={onNope}>
           <ActionItem>
+            <ActionItemBackground />
             <ConfusedEmoji />
           </ActionItem>
         </PressableArea>
@@ -35,6 +59,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
       <Animated.View entering={maybeAnimation}>
         <PressableArea hitSlop={hitSlop} testID="swipe-maybe" onPress={onMaybe}>
           <ActionItem>
+            <ActionItemBackground />
             <ThinkingEmoji />
           </ActionItem>
         </PressableArea>
@@ -42,6 +67,7 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
       <Animated.View entering={likeAnimation}>
         <PressableArea hitSlop={hitSlop} testID="swipe-like" onPress={onYep}>
           <ActionItem>
+            <ActionItemBackground />
             <HeartEyesEmoji />
           </ActionItem>
         </PressableArea>
