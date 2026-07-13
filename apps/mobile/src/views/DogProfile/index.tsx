@@ -83,16 +83,16 @@ export const reportUser = (dog: SwipeDog) => {
             )}`,
           );
 
-          await getTrcpContext()
-            .client.swipe.swipe.mutate({ id: dog.id, swipeType: Swipe.Dislike })
-            .then(() => {
-              getTrcpContext().match.getAll.setData(undefined, (request) => {
-                if (!request) return [];
-                return request.filter((match) => match.dog.id !== dog.id);
-              });
+          await getTrcpContext().client.swipe.swipe.mutate({
+            id: dog.id,
+            swipeType: Swipe.Dislike,
+          });
+          getTrcpContext().match.getAll.setData(undefined, (request) => {
+            if (!request) return [];
+            return request.filter((match) => match.dog.id !== dog.id);
+          });
 
-              router.back();
-            });
+          router.back();
         } catch (err) {
           // Silently fail
           sendError(err);
