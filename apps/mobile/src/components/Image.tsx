@@ -1,35 +1,29 @@
-import { forwardRef } from "react";
-import { View } from "react-native";
-import { Image as ExpoImage, ImageProps } from "expo-image";
-import styled from "styled-components/native";
+import { forwardRef, type ComponentRef } from "react";
+import { Image as ExpoImage, type ImageProps } from "expo-image";
 
-interface LocalImageProps extends Omit<ImageProps, "source"> {
-  source?: {
-    blurhash?: string | null | undefined;
-    uri?: string;
-  };
-}
+import { resolveImagePresentationProps } from "./imageProps";
 
-const AbsoluteImage = styled(ExpoImage)`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-`;
+export type LocalImageProps = ImageProps;
 
-const ImageWrapper = styled.View`
-  overflow: hidden;
-`;
+/**
+ * Pegada's cached image with automatic blurhash placeholder support.
+ *
+ * This intentionally renders a single Expo Image. Keeping an outer View here
+ * would require manually separating every current and future Image prop from
+ * View props, which is how options such as contentFit and onDisplay were lost.
+ */
+export const Image = forwardRef<ComponentRef<typeof ExpoImage>, LocalImageProps>(
+  ({ source, placeholder, contentFit, placeholderContentFit, cachePolicy, ...props }, ref) => {
+    const presentationProps = resolveImagePresentationProps({
+      source,
+      placeholder,
+      contentFit,
+      placeholderContentFit,
+      cachePolicy,
+    });
 
-export const Image = forwardRef<View, LocalImageProps>(({ source, ...props }, ref) => {
-  const blurhash = source?.blurhash;
+    return <ExpoImage ref={ref} {...props} {...presentationProps} />;
+  },
+);
 
-  return (
-    <ImageWrapper {...props} ref={ref}>
-      {blurhash ? <AbsoluteImage source={{ blurhash }} /> : null}
-      <AbsoluteImage
-        source={blurhash ? { ...source, blurhash: undefined } : source}
-        cachePolicy="memory-disk"
-      />
-    </ImageWrapper>
-  );
-});
+Image.displayName = "Image";

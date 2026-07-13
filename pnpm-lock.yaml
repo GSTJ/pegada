@@ -342,6 +342,9 @@ importers:
       babel-plugin-styled-components:
         specifier: ^2.1.4
         version: 2.1.4(@babel/core@7.29.0)(styled-components@6.1.11(patch_hash=7pi476ptgmafuuvkxpwgjc6kq4)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
+      tsx:
+        specifier: ^4.21.0
+        version: 4.22.2
 
   apps/nextjs:
     dependencies:
