@@ -339,9 +339,15 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      babel-jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@babel/core@7.29.0)
       babel-plugin-styled-components:
         specifier: ^2.1.4
         version: 2.1.4(@babel/core@7.29.0)(styled-components@6.1.11(patch_hash=7pi476ptgmafuuvkxpwgjc6kq4)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.1.0)(ts-node@10.9.2(@swc/core@1.15.43)(@types/node@22.1.0)(typescript@5.4.5))
 
   apps/nextjs:
     dependencies:

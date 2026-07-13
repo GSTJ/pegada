@@ -35,9 +35,9 @@ const HeroText: React.FC = () => {
       <Trans
         i18nKey="insertEmail.findDogsNearYou"
         components={{
-          view: <FlexRowView />,
-          title: <Title />,
-          highlight: <RectangleHighLight />,
+          view: <FlexRowView key="view" />,
+          title: <Title key="title" />,
+          highlight: <RectangleHighLight key="highlight" />,
         }}
       />
     </Container>

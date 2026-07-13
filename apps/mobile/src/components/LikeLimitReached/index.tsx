@@ -43,7 +43,7 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt })
           <Trans
             i18nKey="likeLimit.description"
             components={{
-              b: <Text fontWeight="semibold" />,
+              b: <Text key="b" fontWeight="semibold" />,
             }}
             values={{ count: FREE_DAILY_SWIPE_LIMIT }}
           />
