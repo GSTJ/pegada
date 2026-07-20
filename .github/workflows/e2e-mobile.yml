@@ -367,7 +367,7 @@ jobs:
         uses: pnpm/action-setup@v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 20.x
           cache: pnpm
@@ -1051,7 +1051,7 @@ jobs:
 
       - name: Setup Node
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 20.x
           cache: pnpm
@@ -1393,7 +1393,7 @@ jobs:
         uses: pnpm/action-setup@v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 20.x
           cache: pnpm
