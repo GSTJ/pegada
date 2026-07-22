@@ -11,6 +11,7 @@
     "test": "jest --runInBand",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
+    "verify:image-props": "tsx ./scripts/verify-image-props.ts",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
     "preinstall": "pnpm setup:secret:files",
     "sourcemaps:upload:ota": "../../scripts/upload-posthog-sourcemaps-ota.sh"
@@ -120,9 +121,10 @@
     "@types/react-redux": "^7.1.33",
     "@types/react-test-renderer": "^18.3.0",
     "@types/uuid": "^10.0.0",
-    "babel-jest": "^29.7.0",
     "babel-plugin-styled-components": "^2.1.4",
-    "jest": "^29.7.0"
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "tsx": "^4.21.0"
   },
   "installConfig": {
     "hoistingLimits": "workspaces"

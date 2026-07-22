@@ -357,6 +357,9 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.1.0)(ts-node@10.9.2(@swc/core@1.15.43)(@types/node@22.1.0)(typescript@5.4.5))
+      tsx:
+        specifier: ^4.21.0
+        version: 4.22.2
 
   apps/nextjs:
     dependencies:
