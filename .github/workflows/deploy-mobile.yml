@@ -81,7 +81,13 @@ jobs:
         run: eas update --auto --non-interactive --environment production
         working-directory: apps/mobile
 
-      # TODO: Bugsnag sourcemap upload removed (dead vendor, replaced by PostHog).
-      # PostHog RN doesn't ship an equivalent build-time sourcemap upload CLI today;
-      # its error tracking relies on SDK-side capture (PostHogErrorBoundary / autocapture),
-      # not symbolication of uploaded maps. Revisit if PostHog adds one.
+      # `eas update` publishes the OTA bundle but never uploads sourcemaps
+      # anywhere (that's a separate step per PostHog's docs). `eas env:exec`
+      # pulls POSTHOG_CLI_API_KEY/HOST/PROJECT_ID from the EAS "production"
+      # environment (POSTHOG_CLI_API_KEY is stored there as "sensitive", not
+      # "secret", so it IS readable by the CLI here) and injects them into
+      # the script's shell env; the script itself no-ops if the key is
+      # somehow still missing.
+      - name: 🗺️ Upload PostHog sourcemaps (OTA)
+        run: eas env:exec production 'pnpm run sourcemaps:upload:ota' --non-interactive
+        working-directory: apps/mobile

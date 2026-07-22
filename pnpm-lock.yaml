@@ -318,6 +318,9 @@ importers:
       '@pegada/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
+      '@posthog/cli':
+        specifier: ^0.8.1
+        version: 0.8.1
       '@types/color':
         specifier: ^3.0.6
         version: 3.0.6
@@ -2281,6 +2284,11 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@posthog/cli@0.8.1':
+    resolution: {integrity: sha512-7gCx2rslQtXSN0RfdxHRXumc5E1CY8ldVDxncUGeQ7qTFHprRbryH17W//fcuNMeNhvr6vc8DStj9gGWSS/Zfw==}
+    engines: {node: '>=14.14', npm: '>=6'}
+    hasBin: true
 
   '@posthog/core@1.39.6':
     resolution: {integrity: sha512-o6ajIwN5zXoNP0D4H/QPmOyibNTUkSyOR6ya7AG5U2ywXx4awo72L2KnCoiZPQM5x/bXv6jPBdimH8M18Ax0aw==}
@@ -9557,6 +9565,10 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@posthog/cli@0.8.1':
+    dependencies:
+      detect-libc: 2.1.2
 
   '@posthog/core@1.39.6':
     dependencies:

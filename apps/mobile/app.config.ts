@@ -7,6 +7,23 @@ import { ExpoConfig } from "expo/config";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
 
+// The posthog-react-native/expo config plugin wires a sourcemap-upload step
+// into the generated Xcode "Bundle React Native code and images" build phase
+// and the Android Gradle release bundle task (see posthog-react-native's
+// tooling/posthog-xcode.sh and tooling/posthog.gradle). The Gradle side
+// already skips debug variants on its own; the Xcode side does not -- it
+// would run (and hard-fail the build) on ANY config, including a Debug
+// build on a real device, if posthog-cli can't authenticate.
+//
+// Only apply the plugin when POSTHOG_CLI_API_KEY is present so a bare local
+// `expo prebuild`/`expo run:ios`/`expo run:android` (no EAS env, no
+// POSTHOG_CLI_* exported) never gets the upload step injected at all -- the
+// generated native project simply doesn't contain it, so there's nothing to
+// fail. CI (release-mobile.yml's `eas build --local`) and EAS-managed builds
+// pull POSTHOG_CLI_API_KEY from the EAS "production" environment, so the
+// plugin activates there automatically.
+const posthogSourcemapsEnabled = Boolean(process.env.POSTHOG_CLI_API_KEY);
+
 const config: ExpoConfig = {
   /**
    * Always update the version when making a native change
@@ -174,6 +191,11 @@ const config: ExpoConfig = {
     // FAILS gradlew bundleRelease -- this is what killed the 2026-07-05
     // overnight EAS cloud build. See withDefaultLocaleStrings.js.
     ["./plugins/withDefaultLocaleStrings", { stringsByKey: defaultLocaleNativeStrings }],
+    // Sourcemap upload for Release native builds only (see
+    // posthogSourcemapsEnabled above) -- omitted entirely from the plugins
+    // list otherwise, so a plain local build never has the upload step in
+    // its generated Xcode/Gradle project.
+    ...(posthogSourcemapsEnabled ? (["posthog-react-native/expo"] as const) : []),
   ],
   androidStatusBar: {
     barStyle: "dark-content",
