@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Hand-maintained (apple-targets only generates this file when absent).
+    IntentsSupported/INSendMessageIntent is what marks the extension as
+    capable of upgrading pushes into communication notifications.
+  -->
+  <key>NSExtension</key>
+  <dict>
+    <key>NSExtensionAttributes</key>
+    <dict>
+      <key>IntentsSupported</key>
+      <array>
+        <string>INSendMessageIntent</string>
+      </array>
+    </dict>
+    <key>NSExtensionPointIdentifier</key>
+    <string>com.apple.usernotifications.service</string>
+    <key>NSExtensionPrincipalClass</key>
+    <string>$(PRODUCT_MODULE_NAME).NotificationService</string>
+  </dict>
+</dict>
+</plist>
