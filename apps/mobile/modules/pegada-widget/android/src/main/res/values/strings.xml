@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!--
+    Only the strings the widget needs BEFORE the app has ever written a
+    snapshot (widget picker + first render). Everything else arrives
+    pre-localized from JS inside the snapshot JSON.
+  -->
+  <string name="pegada_widget_label">Matches</string>
+  <string name="pegada_widget_description">See the matches waiting for your reply.</string>
+  <string name="pegada_widget_placeholder">Open Pegada to see your matches here</string>
+</resources>
