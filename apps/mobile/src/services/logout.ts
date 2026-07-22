@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
+import { syncMatchesWidgetLoggedOut } from "@/services/matchesWidget";
 import { payments } from "@/services/payments";
 import { queryClient } from "@/services/queryClient";
 import { store } from "@/store";
@@ -21,6 +22,10 @@ export const logout = async () => {
     router.replace(SceneName.SignIn);
 
     await payments.logOut();
+
+    // Leave a localized sign-in prompt on the home-screen widget and wipe
+    // the cached avatars.
+    await syncMatchesWidgetLoggedOut();
 
     // Clear request caches
     queryClient.clear();

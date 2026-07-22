@@ -8,11 +8,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "eject": "expo eject",
+    "test": "jest --runInBand",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
     "verify:image-props": "tsx ./scripts/verify-image-props.ts",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
-    "preinstall": "pnpm setup:secret:files"
+    "preinstall": "pnpm setup:secret:files",
+    "sourcemaps:upload:ota": "../../scripts/upload-posthog-sourcemaps-ota.sh"
   },
   "dependencies": {
     "@expo/config-types": "^55.0.5",
@@ -56,6 +58,7 @@
     "expo-localization": "~55.0.16",
     "expo-location": "~55.1.10",
     "expo-notifications": "^55.0.23",
+    "expo-quick-actions": "^6.0.2",
     "expo-router": "^55.0.14",
     "expo-secure-store": "^55.0.14",
     "expo-splash-screen": "~55.0.21",
@@ -107,8 +110,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
+    "@bacons/apple-targets": "^4.0.7",
     "@pegada/api": "workspace:*",
     "@pegada/tsconfig": "workspace:*",
+    "@posthog/cli": "^0.8.1",
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.17.7",
     "@types/react": "^19.2.14",
@@ -117,6 +122,8 @@
     "@types/react-test-renderer": "^18.3.0",
     "@types/uuid": "^10.0.0",
     "babel-plugin-styled-components": "^2.1.4",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
     "tsx": "^4.21.0"
   },
   "installConfig": {
