@@ -7,13 +7,30 @@ import { ExpoConfig } from "expo/config";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
 
+// The posthog-react-native/expo config plugin wires a sourcemap-upload step
+// into the generated Xcode "Bundle React Native code and images" build phase
+// and the Android Gradle release bundle task (see posthog-react-native's
+// tooling/posthog-xcode.sh and tooling/posthog.gradle). The Gradle side
+// already skips debug variants on its own; the Xcode side does not -- it
+// would run (and hard-fail the build) on ANY config, including a Debug
+// build on a real device, if posthog-cli can't authenticate.
+//
+// Only apply the plugin when POSTHOG_CLI_API_KEY is present so a bare local
+// `expo prebuild`/`expo run:ios`/`expo run:android` (no EAS env, no
+// POSTHOG_CLI_* exported) never gets the upload step injected at all -- the
+// generated native project simply doesn't contain it, so there's nothing to
+// fail. CI (release-mobile.yml's `eas build --local`) and EAS-managed builds
+// pull POSTHOG_CLI_API_KEY from the EAS "production" environment, so the
+// plugin activates there automatically.
+const posthogSourcemapsEnabled = Boolean(process.env.POSTHOG_CLI_API_KEY);
+
 const config: ExpoConfig = {
   /**
    * Always update the version when making a native change
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.4.1",
+  version: "1.5.0",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -35,10 +52,18 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
+    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
     "expo-router",
+    "expo-quick-actions",
     // react-native-maps 1.20+ enables Google Maps via its own config plugin.
     // The deprecated `ios.config.googleMapsApiKey` / `android.config.googleMaps`
     // fields make Expo prebuild reference a `react-native-google-maps` podspec
@@ -179,6 +204,11 @@ const config: ExpoConfig = {
     // a forced dark theme boots with a dark splash instead of blinking
     // white->dark on light-mode devices. See withInitialThemeOverride.js.
     "./plugins/withInitialThemeOverride",
+    // Sourcemap upload for Release native builds only (see
+    // posthogSourcemapsEnabled above) -- omitted entirely from the plugins
+    // list otherwise, so a plain local build never has the upload step in
+    // its generated Xcode/Gradle project.
+    ...(posthogSourcemapsEnabled ? (["posthog-react-native/expo"] as const) : []),
   ],
   androidStatusBar: {
     barStyle: "dark-content",
@@ -206,6 +236,10 @@ const config: ExpoConfig = {
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./src/assets/images/adaptive-icon.png",
+      // Android 13+ "Themed icons" setting recolors this to the user's
+      // wallpaper-derived palette, so it must be a single-color (white)
+      // silhouette on transparency, not the full-color glyph.
+      monochromeImage: "./src/assets/images/adaptive-icon-monochrome.png",
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
@@ -243,10 +277,48 @@ const config: ExpoConfig = {
       },
     },
     googleServicesFile: "./GoogleService-Info.plist",
+    // iOS 18+ dark home screen icon variant. Expo SDK 55's withIosIcons only
+    // falls back to the top-level `icon` when the `ios.icon` object has NONE
+    // of light/dark/tinted set (see getIcons() in withIosIcons.js) -- with
+    // `dark` present, it does NOT backfill `light`. setIconsAsync then picks
+    // the base/no-appearance asset catalog entry via `icon.light || icon.dark
+    // || icon.tinted`, so omitting `light` here made BOTH the default and the
+    // dark-appearance icon render from icon-dark.png (confirmed via
+    // `expo prebuild` + pixel diff of the generated Contents.json images: the
+    // no-appearance entry was byte-identical to icon-dark.png, not icon.png).
+    // `light` must be set explicitly. The source PNG is the glyph on a
+    // transparent background, per Apple's spec -- iOS supplies the dark
+    // backdrop itself.
+    //
+    // `tinted` is deliberately NOT configured here even though
+    // src/assets/images/icon-tinted.png exists (transparent glyph, ready to
+    // go): Expo SDK 55's prebuild plugin
+    // (@expo/prebuild-config/build/plugins/icons/withIosIcons.js,
+    // generateUniversalIconAsync) hardcodes `removeTransparency: appearance
+    // !== 'dark'` and forces a solid white `backgroundColor` for every
+    // variant except 'dark'. That flattens the transparent source onto
+    // opaque white during `expo prebuild`, before Xcode ever sees it, so
+    // real users who enable iOS's "Tinted" home screen icons would see a
+    // white square with a faint gray glyph -- worse than not shipping the
+    // variant at all, since omitting `tinted` makes iOS fall back to the
+    // normal full-color icon in tinted mode (see `getIcons()` in the same
+    // plugin). Flagged as a blocker to Gabriel in the PR description rather
+    // than shipped silently. Revisit once Expo fixes
+    // `generateUniversalIconAsync`, or patch it via patch-package if that's
+    // worth it later -- icon-tinted.png is already generated and correct.
+    icon: {
+      light: "./src/assets/images/icon.png",
+      dark: "./src/assets/images/icon-dark.png",
+    },
     config: {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    // Shared storage between the app and the widget extension: the matches
+    // snapshot (UserDefaults) + downloaded avatars (container files).
+    entitlements: {
+      "com.apple.security.application-groups": ["group.app.pegada"],
+    },
     // associatedDomains: [
     //   'applinks:pegada.app',
     //   'applinks:www.pegada.app',
