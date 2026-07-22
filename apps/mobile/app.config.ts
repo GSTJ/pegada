@@ -63,6 +63,7 @@ const config: ExpoConfig = {
     "expo-notifications",
     "expo-localization",
     "expo-router",
+    "expo-quick-actions",
     // react-native-maps 1.20+ enables Google Maps via its own config plugin.
     // The deprecated `ios.config.googleMapsApiKey` / `android.config.googleMaps`
     // fields make Expo prebuild reference a `react-native-google-maps` podspec
