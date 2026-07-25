@@ -1,0 +1,19 @@
+diff --git a/minimatch.js b/minimatch.js
+index 2e4a058a130dceebf83a7bd435f5d22b765ac836..d78c32b3a5254fcdeda07713e2481bf7e7804c2b 100644
+--- a/minimatch.js
++++ b/minimatch.js
+@@ -7,7 +7,13 @@ var path = (function () { try { return require('path') } catch (e) {}}()) || {
+ minimatch.sep = path.sep
+ 
+ var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
+-var expand = require('brace-expansion')
++// brace-expansion 1.x/2.x are affected by CVE-2026-14257 (unbounded expansion
++// length -> uncatchable OOM) and upstream shipped the fix on 5.x only. The root
++// package.json pins brace-expansion to ^5.0.8 everywhere; 5.x moved from
++// `module.exports = expand` to a named `expand` export, so unwrap it here. The
++// fallback keeps this working if the resolved copy is ever a 1.x/2.x again.
++var braceExpansion = require('brace-expansion')
++var expand = braceExpansion.expand || braceExpansion
+ 
+ var plTypes = {
+   '!': { open: '(?:(?!(?:', close: '))[^/]*?)'},

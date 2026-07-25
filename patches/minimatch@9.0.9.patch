@@ -1,0 +1,34 @@
+diff --git a/dist/commonjs/index.js b/dist/commonjs/index.js
+index c12dc5e6476874f9dbba429a19e445a4a688e1df..1dd661b7ce2e87e5c495bd0eab2960ce58819348 100644
+--- a/dist/commonjs/index.js
++++ b/dist/commonjs/index.js
+@@ -4,7 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.unescape = exports.escape = exports.AST = exports.Minimatch = exports.match = exports.makeRe = exports.braceExpand = exports.defaults = exports.filter = exports.GLOBSTAR = exports.sep = exports.minimatch = void 0;
+-const brace_expansion_1 = __importDefault(require("brace-expansion"));
++// brace-expansion 1.x/2.x are affected by CVE-2026-14257 (unbounded expansion
++// length -> uncatchable OOM) and upstream shipped the fix on 5.x only. The root
++// package.json pins brace-expansion to ^5.0.8 everywhere; 5.x dropped the
++// default export in favour of a named `expand`, so normalise both shapes here.
++const brace_expansion_mod_1 = require("brace-expansion");
++const brace_expansion_1 = {
++    default: brace_expansion_mod_1.expand || __importDefault(brace_expansion_mod_1).default,
++};
+ const assert_valid_pattern_js_1 = require("./assert-valid-pattern.js");
+ const ast_js_1 = require("./ast.js");
+ const escape_js_1 = require("./escape.js");
+diff --git a/dist/esm/index.js b/dist/esm/index.js
+index 737c8095415235e69e4717b505d0ee4ea3c0b6fa..de36008709e804b4e8cc2c3f23e70bc2fea009b1 100644
+--- a/dist/esm/index.js
++++ b/dist/esm/index.js
+@@ -1,4 +1,8 @@
+-import expand from 'brace-expansion';
++// brace-expansion 1.x/2.x are affected by CVE-2026-14257 (unbounded expansion
++// length -> uncatchable OOM) and upstream shipped the fix on 5.x only. The root
++// package.json pins brace-expansion to ^5.0.8 everywhere; 5.x dropped the
++// default export in favour of a named `expand`, so import the named one.
++import { expand } from 'brace-expansion';
+ import { assertValidPattern } from './assert-valid-pattern.js';
+ import { AST } from './ast.js';
+ import { escape } from './escape.js';
