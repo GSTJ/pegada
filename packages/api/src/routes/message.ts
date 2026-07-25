@@ -51,7 +51,10 @@ export const messageRouter = createTRPCRouter({
 
     const dog = await DogService.getDogByUserId(ctx.session.user.id);
 
-    const deletedMessage = await MessageService.deleteMessage(dog.id, messageId);
+    const deletedMessage = await MessageService.deleteMessage({
+      messageId,
+      senderId: dog.id,
+    });
 
     return deletedMessage;
   }),

@@ -100,7 +100,15 @@ class MessageService {
     return newMessage;
   }
 
-  static async deleteMessage(messageId: string, senderId: string) {
+  /**
+   * Soft-deletes a message the sender owns.
+   *
+   * `senderId` is a Dog id, not a User id — Message.senderId is a relation to
+   * Dog (see schema.prisma), and `sendMessage` stores the sender's dog id.
+   * Both ids are strings, so the arguments used to be trivially swappable at
+   * the call site; taking a named object makes that a compile error.
+   */
+  static async deleteMessage({ messageId, senderId }: { messageId: string; senderId: string }) {
     const message = await prisma.message.findUnique({
       where: { id: messageId, deletedAt: null },
     });
