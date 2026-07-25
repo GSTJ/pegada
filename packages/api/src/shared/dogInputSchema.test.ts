@@ -61,6 +61,19 @@ describe("dogInputSchema images", () => {
     expect(result.error?.issues.map((issue) => issue.path)).toEqual([["images", 1, "url"]]);
   });
 
+  it("keeps the check through .partial(), which is what myDog.update accepts", () => {
+    const partial = dogInputSchema.partial();
+
+    expect(
+      partial.safeParse({ images: [{ url: `${BUCKET_URL}/dogs/1`, position: 0 }] }).success,
+    ).toBe(true);
+    expect(
+      partial.safeParse({ images: [{ url: "https://example.com/payload.png", position: 0 }] })
+        .success,
+    ).toBe(false);
+    expect(partial.safeParse({ name: "Rex" }).success).toBe(true);
+  });
+
   it("still applies the schema it extends", () => {
     const result = dogInputSchema.safeParse({
       ...dogWithImage(`${BUCKET_URL}/dogs/1`),
