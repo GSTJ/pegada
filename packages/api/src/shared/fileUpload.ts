@@ -1,6 +1,7 @@
 import { CopyObjectCommand, DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { config } from "../shared/config";
+import { assertAllowedImageUrl } from "./imageUrl";
 
 /**
  * Legacy S3 client (shipped app binaries upload here via `image.signedUrl`).
@@ -46,9 +47,24 @@ export const r2Client = r2UploadsEnabled
     })
   : undefined;
 
+const encodeKey = (key: string) => key.split("/").map(encodeURIComponent).join("/");
+
 /** Build the public URL an R2 object key is served from. */
-export const getPublicUrl = (key: string) =>
-  `${config.PUBLIC_IMAGES_BASE_URL}/${key.split("/").map(encodeURIComponent).join("/")}`;
+export const getPublicUrl = (key: string) => `${config.PUBLIC_IMAGES_BASE_URL}/${encodeKey(key)}`;
+
+/**
+ * Build the URL a legacy S3/MinIO object key is served from. Mirrors what
+ * `getSignedUpload` hands the client on that path: the endpoint override is
+ * path-style (`<endpoint>/<bucket>/<key>`, MinIO in dev/e2e), plain AWS is
+ * virtual-hosted (`<bucket>.s3.<region>.amazonaws.com/<key>`).
+ */
+export const getLegacyUrl = (key: string) => {
+  const base = config.AWS_S3_ENDPOINT
+    ? `${config.AWS_S3_ENDPOINT.replace(/\/+$/, "")}/${config.AWS_S3_BUCKET_NAME}`
+    : `https://${config.AWS_S3_BUCKET_NAME}.s3.${config.AWS_REGION}.amazonaws.com`;
+
+  return `${base}/${encodeKey(key)}`;
+};
 
 const hostOf = (url: string) => new URL(url).host;
 
@@ -66,12 +82,41 @@ const isR2Url = (url: string) => {
   );
 };
 
-/** Pick the storage (client + bucket) an image URL lives in, by host. */
-const storageForUrl = (url: string) =>
-  isR2Url(url)
-    ? // Non-null: isR2Url only returns true when r2UploadsEnabled.
-      { client: r2Client as S3Client, bucket: config.R2_BUCKET_NAME, isR2: true }
-    : { client, bucket: config.AWS_S3_BUCKET_NAME, isR2: false };
+type Storage = {
+  client: S3Client;
+  bucket: string;
+  isR2: boolean;
+  /** Canonical public URL for a key in this storage. */
+  urlForKey: (key: string) => string;
+};
+
+/**
+ * Pick the storage (client + bucket) an image URL lives in, by host.
+ *
+ * Fails closed: the legacy S3 client used to be the fallback for every host
+ * that wasn't R2, which meant a URL pointing anywhere at all still got
+ * operated on. Only the configured storage origins get past this now.
+ */
+const storageForUrl = (url: string): Storage => {
+  assertAllowedImageUrl(url);
+
+  if (isR2Url(url)) {
+    // Non-null: isR2Url only returns true when r2UploadsEnabled.
+    return {
+      client: r2Client as S3Client,
+      bucket: config.R2_BUCKET_NAME,
+      isR2: true,
+      urlForKey: getPublicUrl,
+    };
+  }
+
+  return {
+    client,
+    bucket: config.AWS_S3_BUCKET_NAME,
+    isR2: false,
+    urlForKey: getLegacyUrl,
+  };
+};
 
 /**
  * Extract the object key from an object URL, host-agnostically.
@@ -103,7 +148,7 @@ export const moveImageToFolder = async (url: string, folder: string) => {
   // Routed by URL host: images uploaded through the legacy path live on
   // S3/MinIO, images from the new path live on R2. Copies never cross
   // providers — temp and permanent folders are in the same bucket.
-  const { client: storageClient, bucket, isR2 } = storageForUrl(url);
+  const { client: storageClient, bucket, isR2, urlForKey } = storageForUrl(url);
 
   const oldKey = keyFromUrl(url, bucket);
   const fileName = oldKey.split("/").slice(-1)[0];
@@ -123,5 +168,8 @@ export const moveImageToFolder = async (url: string, folder: string) => {
 
   await deleteImageFromS3(url);
 
-  return url.replace(oldKey, newKey);
+  // Rebuilt from the storage's own base URL rather than patched out of the
+  // caller's string, so nothing about the incoming URL other than the file
+  // name reaches the database.
+  return urlForKey(newKey);
 };

@@ -1,6 +1,5 @@
-import { dogServerSchema } from "@pegada/shared/schemas/dogSchema";
-
 import { DogService } from "../services/DogService";
+import { dogInputSchema } from "../shared/dogInputSchema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const myDogRouter = createTRPCRouter({
@@ -14,7 +13,7 @@ export const myDogRouter = createTRPCRouter({
     return { ok: true };
   }),
 
-  update: protectedProcedure.input(dogServerSchema.partial()).mutation(async ({ ctx, input }) => {
+  update: protectedProcedure.input(dogInputSchema.partial()).mutation(async ({ ctx, input }) => {
     const dog = await DogService.getDogByUserId(ctx.session.user.id);
     const updatedDog = await DogService.updateDog(dog.id, input);
     return updatedDog;
