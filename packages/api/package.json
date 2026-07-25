@@ -50,7 +50,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.1.0",
     "@types/semver": "^7.7.1",
-    "next": "15.5.20",
+    "next": "15.5.22",
     "typescript": "*"
   }
 }
