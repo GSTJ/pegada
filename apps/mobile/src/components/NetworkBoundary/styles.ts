@@ -5,7 +5,14 @@ import { Text } from "@/components/Text";
 
 export const Container = styled.ScrollView.attrs({
   contentContainerStyle: { flex: 1 },
-})``;
+})`
+  /* This boundary can replace the whole navigation tree, so nothing themed
+     renders behind it — without its own background the text sits directly on
+     the native window, which can be a mismatched backdrop (e.g. black while
+     the JS theme is light). Painting the theme background keeps text and
+     backdrop always coming from the same theme. */
+  background-color: ${(props) => props.theme.colors.background};
+`;
 
 export const Content = styled.View`
   justify-content: center;
