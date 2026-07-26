@@ -1,0 +1,56 @@
+Pegada
+Copyright (C) 2025-2026 Gabriel Taveira
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+ADDITIONAL TERM UNDER SECTION 7(b) OF THE GNU AGPL VERSION 3
+------------------------------------------------------------
+
+As permitted by Section 7(b) of the GNU Affero General Public License version
+3, the following author attribution must be preserved.
+
+If you convey a covered work, or make a modified version available to users
+over a network, you must preserve the attribution below and display it in the
+Appropriate Legal Notices of the work. Where the work has a user-facing
+"About", "Credits", "Settings", "Legal", or equivalent screen, the attribution
+must appear there and must be readable without requiring the user to view
+source code.
+
+    Based on Pegada, Copyright (C) 2025-2026 Gabriel Taveira
+    https://github.com/GSTJ/pegada
+
+This attribution may not be removed, obscured, relocated to a place users
+cannot reasonably find, or altered in a way that misrepresents the origin of
+the work. Removing it terminates your rights under this License, as provided
+in Section 8.
+
+You may add your own copyright notice and attribution for your own
+contributions alongside this one. Nothing here prevents you from taking credit
+for your own work, only from taking credit for this one.
+
+
+COMMERCIAL LICENSING
+--------------------
+
+The AGPL requires that anyone who conveys this work, or runs a modified
+version of it on a network server, releases their complete corresponding
+source under the AGPL as well.
+
+If you want to build something on top of Pegada without releasing your own
+source, a separate commercial license is available. That is a conversation
+rather than a refusal.
+
+    Gabriel Taveira
+    gabrielstaveira@gmail.com

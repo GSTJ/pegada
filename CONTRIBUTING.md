@@ -36,6 +36,24 @@ When you're sending a pull request:
 - Prefer small pull requests focused on one change.
 - Follow the pull request template when opening a pull request.
 
+## Licensing of contributions
+
+Pegada is [AGPL-3.0-or-later](./LICENSE), with an attribution requirement added under Section 7(b) (see [NOTICE](./NOTICE)). It's real open source: fork it, modify it, run it, ship it. The catch is copyleft, if you distribute it or run a modified version as a network service, you have to release your source too, and you have to keep the attribution.
+
+A separate commercial license is available for people who don't want to release their source. For that to be possible, contributions need to be licensable on the same terms. So by opening a pull request you're confirming two things:
+
+1. **You wrote it, or you have the right to submit it.** It's your own work, or you have permission from whoever owns it, and it doesn't pull in code under a license that conflicts with the AGPL.
+
+2. **You grant a license to use it.** A perpetual, worldwide, irrevocable, royalty-free, non-exclusive license to Gabriel Taveira to use, reproduce, modify, publish, distribute, sublicense, and relicense your contribution as part of Pegada, both under the AGPL and under separate commercial terms.
+
+You keep the copyright on what you wrote. This is a license, not an assignment, so your code stays yours and you can use it anywhere else you want. You're also welcome to add your own copyright line for your contribution.
+
+If point 2 doesn't work for you, no hard feelings. Open an issue describing the fix instead and you'll get credited for it.
+
+### Commercial use
+
+Want to build on this without open-sourcing your own stack? That's a conversation, not a no. Email gabrielstaveira@gmail.com.
+
 ## Code of Conduct
 
 ### Our Pledge
@@ -77,7 +95,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ### Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at [INSERT CONTACT METHOD]. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at gabrielstaveira@gmail.com. All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
