@@ -72,8 +72,10 @@ const Messages = () => {
 
     if (!filteredMatches.length) return [];
 
-    // Most recent messages come first
-    const sortedMatches = filteredMatches.sort((a, b) => {
+    // Most recent messages come first. Sort a copy: with no search term
+    // getFiltered hands back the query's own array, and sorting in place
+    // reorders the cached data under everything else reading it.
+    const sortedMatches = [...filteredMatches].sort((a, b) => {
       if (!a.lastMessage) return 1;
       if (!b.lastMessage) return -1;
 

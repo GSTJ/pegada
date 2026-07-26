@@ -60,6 +60,10 @@
     ],
     "typescript/no-explicit-any": "warn",
     "typescript/no-require-imports": "off",
+    "import/no-unassigned-import": "off",
+    "import/no-named-as-default-member": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-array-reverse": "off",
     "no-restricted-imports": [
       "error",
       {
@@ -88,6 +92,21 @@
       ],
       "rules": {
         "no-console": "off"
+      }
+    },
+    {
+      "files": ["apps/mobile/**"],
+      "rules": {
+        "react-perf/jsx-no-new-object-as-prop": "off",
+        "react-perf/jsx-no-new-array-as-prop": "off",
+        "react-perf/jsx-no-new-function-as-prop": "off",
+        "react-perf/jsx-no-jsx-as-prop": "off"
+      }
+    },
+    {
+      "files": ["packages/api/src/services/**"],
+      "rules": {
+        "typescript/no-extraneous-class": "off"
       }
     }
   ]
