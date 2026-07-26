@@ -114,6 +114,7 @@
     "@pegada/tsconfig": "workspace:*",
     "@posthog/cli": "^0.8.1",
     "@types/color": "^3.0.6",
+    "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.7",
     "@types/react": "^19.2.14",
     "@types/react-dom": "~19.2.3",
