@@ -27,6 +27,41 @@ We follow the [conventional commits specification](https://www.conventionalcommi
 - `test`: adding or updating tests, e.g. add integration tests using detox.
 - `chore`: tooling changes, e.g. change CI config.
 
+The type and scope are not decoration: [CHANGELOG.md](./CHANGELOG.md), the
+GitHub release and the annotated tag are all generated from them by
+`.github/scripts/changelog.py`. A commit that doesn't parse still shows up,
+just under "Other".
+
+Breaking changes get a `!` before the colon and a `BREAKING CHANGE:` footer
+explaining what callers have to do:
+
+```
+feat(api)!: return message ids as strings
+
+BREAKING CHANGE: `message.send` used to return a numeric `id`. Clients
+that compared it to a number need to compare strings now.
+```
+
+Both markers land the commit under "Breaking changes" at the top of the
+release, and the footer text travels with it into all three places.
+
+### Cutting a release
+
+```sh
+./scripts/tag-release.sh              # v<version from apps/mobile/app.config.ts>
+./scripts/tag-release.sh v1.5.0-rc1   # explicit, e.g. a release candidate
+DRY_RUN=1 ./scripts/tag-release.sh    # print the notes and stop
+```
+
+The script creates an annotated tag whose message is the generated notes and
+pushes it. That push is what starts `release-mobile.yml`: it publishes the
+GitHub release, refreshes `CHANGELOG.md` on `main`, and builds the native
+artifacts. Anything with a suffix (`-rc1`, `-beta.2`) is marked a prerelease.
+Store submission stays a separate, opt-in manual dispatch.
+
+Most changes never need any of this. `deploy-mobile.yml` ships an OTA update
+on every push to `main`; a tag is only for when native actually changed.
+
 ### Sending a pull request
 
 > **Working on your first pull request?** You can learn how from this _free_ series: [How to Contribute to an Open Source Project on GitHub](https://app.egghead.io/playlists/how-to-contribute-to-an-open-source-project-on-github).
