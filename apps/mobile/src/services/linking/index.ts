@@ -39,6 +39,19 @@ export const useGetInitialNotifications = () => {
     Notifications.getLastNotificationResponseAsync()
       .then((response) => {
         if (!response) return;
+
+        // A reply typed on a killed app only ever surfaces here. Native buffers
+        // the launch response and replays it into the module the moment it is
+        // created, which is before any JS listener exists, so the emitted event
+        // goes nowhere and only `lastResponse` survives (see
+        // NotificationCenterManager.pendingResponses on iOS and
+        // NotificationManager's listener replay on Android). Sending from the
+        // listener alone silently dropped the message.
+        if (isReplyAction(response)) {
+          handleReplyAction(response).catch(sendError);
+          return;
+        }
+
         const url = getNotificationUrl(response);
         setInitialNotification(url);
       })
