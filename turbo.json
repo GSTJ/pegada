@@ -2,8 +2,18 @@
   "$schema": "https://turborepo.org/schema.json",
   "globalDependencies": ["**/.env", ".env"],
   "tasks": {
+    // The suite runs against a live database, so a cached pass says nothing
+    // about the current state of it. The old `outputs` entry pointed at a
+    // jest cache directory jest never writes, which made turbo warn "no
+    // output files found" on every run.
+    // `passThroughEnv` is what makes `dotenv -e .env.test -- turbo test`
+    // work at all: under strict env mode turbo drops the vars dotenv set
+    // before the task sees them, so `pretest`'s `prisma migrate deploy`
+    // died on a missing DIRECT_URL. Scoped to `test` on purpose — putting
+    // it in `globalPassThroughEnv` would change build/typecheck cache keys.
     "test": {
-      "outputs": ["node_modules/.cache/.testcache"]
+      "cache": false,
+      "passThroughEnv": ["*"]
     },
     "typecheck": {
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]

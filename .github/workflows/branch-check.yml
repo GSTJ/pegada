@@ -86,3 +86,52 @@ jobs:
 
       - name: ${{ matrix.emoji }} ${{ matrix.label }}
         run: pnpm run ${{ matrix.task }}
+
+  # Kept out of the checkup matrix: only this job needs a database, and
+  # sharing the matrix would spin up Postgres for typecheck/lint/format too.
+  # No turbo cache step either — `test` is `cache: false` in turbo.json, so
+  # there would be nothing to restore.
+  test:
+    name: 🔬 Test
+    needs: dedupe
+    runs-on: ubuntu-latest
+    services:
+      # PostGIS, not plain Postgres: schema.prisma declares the postgis
+      # extension and the baseline migration creates it. Same image as
+      # packages/database/docker-compose.test.yml, and the credentials,
+      # port and database name have to match the DATABASE_URL committed in
+      # .env.test, which is what `pnpm test` feeds to Prisma.
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: tony
+          POSTGRES_PASSWORD: hawk
+          POSTGRES_DB: pegava
+        ports:
+          - 3355:5432
+        options: >-
+          --health-cmd "pg_isready -U tony -d pegava"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: 🏗 Setup Repo
+        uses: actions/checkout@v7
+
+      - name: 🏗 Setup PNPM
+        uses: pnpm/action-setup@v6.0.9
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: 📦 Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `pnpm test` is `dotenv -e .env.test -- turbo test`, and the api
+      # package's `pretest` runs `prisma migrate deploy` against the service
+      # container above before jest starts.
+      - name: 🔬 Test
+        run: pnpm test
