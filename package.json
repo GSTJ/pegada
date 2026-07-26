@@ -1,6 +1,7 @@
 {
   "name": "pegada",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "workspaces": [
     "packages/*",
     "tools/*",

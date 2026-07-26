@@ -64,3 +64,16 @@ Pegada is the ultimate social app for dogs. It's not just Tinder for dogs - it's
    pnpm mobile start  # Mobile app
    pnpm queue dev     # Backend services
    ```
+
+## License
+
+[AGPL-3.0-or-later](./LICENSE), plus an attribution requirement under Section 7(b) (details in [NOTICE](./NOTICE)).
+
+Open source, properly. Fork it, modify it, run it, learn from it, ship it. Two conditions:
+
+- **Copyleft.** Distribute it, or run a modified version as a network service, and you release your source under the AGPL too.
+- **Credit stays.** Keep the "Based on Pegada" attribution visible in the app's About/Credits/Legal screen. Add your own copyright next to it, that's fine. Just don't pass this off as yours.
+
+Don't want to open-source your own stack? A commercial license is available. Email gabrielstaveira@gmail.com, that's a conversation rather than a no.
+
+Contributing? Skim [CONTRIBUTING.md](./CONTRIBUTING.md) first, there's a short bit on how contributions get licensed.

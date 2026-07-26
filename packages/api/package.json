@@ -4,7 +4,7 @@
   "private": true,
   "description": "",
   "keywords": [],
-  "license": "ISC",
+  "license": "AGPL-3.0-or-later",
   "author": "",
   "type": "module",
   "exports": {
