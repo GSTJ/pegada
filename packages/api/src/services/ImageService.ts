@@ -7,7 +7,7 @@ import { DogServerSchema } from "@pegada/shared/schemas/dogSchema";
 
 import { config } from "../shared/config";
 import * as FileUpload from "../shared/fileUpload";
-import { getPublicUrl, moveImageToFolder } from "../shared/fileUpload";
+import { TEMPORARY_UPLOAD_PREFIX, getPublicUrl, moveImageToFolder } from "../shared/fileUpload";
 
 const PERMANENT_STORAGE_FOLDER = "dogs";
 
@@ -36,7 +36,7 @@ export class ImageService {
    * MIN_APP_VERSION is past the release that switched to `signedUpload`.
    */
   static async getSignedUrl() {
-    const key = "dogs-temporary/" + Date.now().toString();
+    const key = `${TEMPORARY_UPLOAD_PREFIX}/${Date.now().toString()}`;
 
     const command = new PutObjectCommand({
       Bucket: config.AWS_S3_BUCKET_NAME,
@@ -58,7 +58,7 @@ export class ImageService {
    * just builds its own descriptor here.
    */
   static async getSignedUpload(): Promise<SignedUpload> {
-    const key = "dogs-temporary/" + Date.now().toString();
+    const key = `${TEMPORARY_UPLOAD_PREFIX}/${Date.now().toString()}`;
 
     if (FileUpload.r2UploadsEnabled) {
       const command = new PutObjectCommand({

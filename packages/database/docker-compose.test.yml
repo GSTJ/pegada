@@ -6,6 +6,10 @@ services:
   postgres:
     container_name: pegada-postgres-test
     image: postgis/postgis
+    # postgis/postgis publishes no arm64 manifest, so an Apple Silicon Mac
+    # cannot pull it at all without being told to take the amd64 image and
+    # run it emulated. No-op on amd64 hosts.
+    platform: linux/amd64
     shm_size: 128mb
     restart: always
     environment:

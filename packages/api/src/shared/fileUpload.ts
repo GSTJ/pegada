@@ -130,6 +130,28 @@ const keyFromUrl = (url: string, bucket: string) => {
   return decodeURIComponent(withoutBucket.join("/"));
 };
 
+/**
+ * Where every fresh upload lands. Both upload routes (`image.signedUpload` and
+ * the legacy `image.signedUrl`) presign exactly one key shape,
+ * `dogs-temporary/<timestamp>`, so a freshly uploaded object is always here
+ * and never anywhere else.
+ */
+export const TEMPORARY_UPLOAD_PREFIX = "dogs-temporary";
+
+/**
+ * The move acts on a key the caller names: the URL comes straight off the dog
+ * create/update payload. An allowed origin only tells us the key is somewhere
+ * in our storage, and the move is meant for one thing, a pending upload. So it
+ * accepts a key directly under the temporary prefix, one segment, nothing else.
+ */
+const assertTemporaryUploadKey = (key: string) => {
+  const [prefix, name, ...rest] = key.split("/");
+
+  if (prefix !== TEMPORARY_UPLOAD_PREFIX || !name || rest.length > 0) {
+    throw new Error("Image URL does not point at a temporary upload");
+  }
+};
+
 export const deleteImageFromS3 = async (url: string) => {
   const { client: storageClient, bucket } = storageForUrl(url);
 
@@ -151,6 +173,10 @@ export const moveImageToFolder = async (url: string, folder: string) => {
   const { client: storageClient, bucket, isR2, urlForKey } = storageForUrl(url);
 
   const oldKey = keyFromUrl(url, bucket);
+
+  // Ahead of the copy and the delete below, both of which act on this key.
+  assertTemporaryUploadKey(oldKey);
+
   const fileName = oldKey.split("/").slice(-1)[0];
   const newKey = `${folder}/${fileName}`;
 
@@ -164,6 +190,9 @@ export const moveImageToFolder = async (url: string, folder: string) => {
     ...(isR2 ? {} : { ACL: "public-read" as const }),
   });
 
+  // Sequential on purpose: a failed copy rejects here and the original stays
+  // put. Losing the object because only half the move ran is worse than the
+  // move failing.
   await storageClient.send(command);
 
   await deleteImageFromS3(url);

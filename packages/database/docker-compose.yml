@@ -6,6 +6,8 @@ services:
   postgres:
     container_name: pegada-postgres
     image: postgis/postgis
+    # Same as the test compose: no arm64 manifest for postgis/postgis.
+    platform: linux/amd64
     shm_size: 128mb
     restart: always
     environment:
