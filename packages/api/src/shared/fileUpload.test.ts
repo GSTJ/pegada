@@ -83,6 +83,54 @@ describe("moveImageToFolder", () => {
 
     expect(send).not.toHaveBeenCalled();
   });
+
+  /**
+   * The URL comes off the dog payload, so the caller picks the key. Only a
+   * pending upload is a valid thing to move.
+   */
+  it("refuses a key already under the permanent folder", async () => {
+    await expect(moveImageToFolder(`${BUCKET_URL}/dogs/1712345678`, "dogs")).rejects.toThrow(
+      "temporary upload",
+    );
+
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("refuses a key under any other prefix", async () => {
+    await expect(moveImageToFolder(`${BUCKET_URL}/backups/1712345678`, "dogs")).rejects.toThrow(
+      "temporary upload",
+    );
+
+    await expect(moveImageToFolder(`${BUCKET_URL}/1712345678`, "dogs")).rejects.toThrow(
+      "temporary upload",
+    );
+
+    await expect(
+      moveImageToFolder(`${BUCKET_URL}/dogs-temporary-other/1712345678`, "dogs"),
+    ).rejects.toThrow("temporary upload");
+
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("refuses a key nested deeper than one segment under the temporary folder", async () => {
+    await expect(
+      moveImageToFolder(`${BUCKET_URL}/dogs-temporary/nested/1712345678`, "dogs"),
+    ).rejects.toThrow("temporary upload");
+
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("does not delete the original when the copy fails", async () => {
+    send.mockRejectedValueOnce(new Error("copy blew up"));
+
+    await expect(
+      moveImageToFolder(`${BUCKET_URL}/dogs-temporary/1712345678`, "dogs"),
+    ).rejects.toThrow("copy blew up");
+
+    expect(CopyObjectCommand).toHaveBeenCalled();
+    expect(DeleteObjectCommand).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("deleteImageFromS3", () => {
