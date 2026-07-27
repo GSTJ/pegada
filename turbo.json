@@ -15,12 +15,14 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    // No `outputs`: `tsc --noEmit` writes nothing. It used to declare the
-    // `.tsbuildinfo` the packages pointed `tsBuildInfoFile` at, but
-    // magic-tsconfig 1.1.0 dropped `incremental` from its bases (a stale
-    // build-info file made `rm -rf dist && tsc` emit nothing at all), and
-    // `tsBuildInfoFile` without `incremental` is a hard tsc error. Turbo still
-    // caches the task on its inputs; there is just no artifact to restore.
+    // No `outputs`. It used to declare the `.tsbuildinfo` the packages pointed
+    // `tsBuildInfoFile` at, but magic-tsconfig 1.1.0 dropped `incremental` from
+    // base.json and internal-package.json (a stale build-info file made
+    // `rm -rf dist && tsc` emit nothing at all), and `tsBuildInfoFile` without
+    // `incremental` is a hard tsc error. apps/nextjs is the one package that
+    // still writes one — 1.2.0 put `incremental` back in nextjs.json, where it
+    // is safe because the base is `noEmit` — and it is gitignored rather than
+    // declared here, because a cached `tsc --noEmit` has nothing to restore.
     "typecheck": {},
     "build": {
       "outputs": ["node_modules/.cache/build.json"]
