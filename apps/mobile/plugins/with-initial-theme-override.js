@@ -14,7 +14,7 @@
  *
  *   The JS side mirrors the choice into NSUserDefaults via React Native's
  *   `Settings` API (key: `pegadaThemeOverride`, see
- *   src/contexts/ThemeProvider.tsx). This plugin injects a snippet into
+ *   src/contexts/theme-provider.tsx). This plugin injects a snippet into
  *   AppDelegate.swift, right after the UIWindow is created and before
  *   startReactNative shows the splash, that reads the key and sets
  *   `overrideUserInterfaceStyle` accordingly. The splash storyboard's

@@ -7,7 +7,7 @@ import UserNotifications
 ///
 /// The server marks chat pushes with `mutable-content: 1` and ships
 /// `senderName` / `senderAvatarUrl` / `url` in the Expo push `data` payload
-/// (see packages/api/src/services/MessageService.ts).
+/// (see packages/api/src/services/message-service.ts).
 ///
 /// NSE contract: no matter what fails (missing fields, avatar download,
 /// intent donation), the original notification content is still delivered.

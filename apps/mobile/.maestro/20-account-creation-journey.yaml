@@ -17,7 +17,7 @@ tags:
 #
 #   2. Sign in via utils/login-fresh.yaml — the API's APPLE_MAGIC_EMAIL_REGEX
 #      bypass (^maestro-fresh.*@pegada\.app$ — see
-#      packages/api/src/services/AuthenticationService.ts → isFreshMagicEmail)
+#      packages/api/src/services/authentication-service.ts → isFreshMagicEmail)
 #      hard-purges the matching user + cascading Dog/Image/Match/Interest/
 #      Message rows BEFORE upserting, so the auth router always lands on
 #      CreateProfile regardless of any prior run's state. Two back-to-back

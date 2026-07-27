@@ -161,7 +161,7 @@ export const IMAGE_STATUS = {
  * Shape only. Image URLs are unconstrained here because this package is
  * bundled into the mobile app and has no access to server config; the API
  * layers the storage-origin allowlist on top in
- * packages/api/src/shared/dogInputSchema.ts, which is what the tRPC routes
+ * packages/api/src/shared/dog-input-schema.ts, which is what the tRPC routes
  * accept. Don't wire this schema straight to a mutation.
  */
 /** One stored image, as the server accepts it. */
