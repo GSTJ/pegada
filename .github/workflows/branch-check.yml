@@ -50,7 +50,7 @@ jobs:
   checkup:
     name: 👮 Checkup
     needs: dedupe
-    uses: GSTJ/magic/.github/workflows/ci.yml@main
+    uses: GSTJ/magic/.github/workflows/ci.yml@v1
 
   # Kept out of the shared checkup job: only this one needs a database, and
   # folding it in would spin up Postgres for typecheck/lint/format too. No

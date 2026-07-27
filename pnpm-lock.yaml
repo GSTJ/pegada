@@ -55,6 +55,9 @@ importers:
       magic-oxlint-config:
         specifier: ^1.2.0
         version: 1.2.0(eslint@9.39.5(jiti@1.21.0)(supports-color@8.1.1))(oxlint@1.75.0)
+      magic-oxlint-plugin:
+        specifier: ^1.1.0
+        version: 1.1.0(oxlint@1.75.0)
       magic-tsconfig:
         specifier: ^1.2.0
         version: 1.2.0
@@ -5733,6 +5736,15 @@ packages:
   magic-oxlint-config@1.2.0:
     resolution: {integrity: sha512-QBqa4xdsLwi3a9yo8hGW5ZZwXdHzGBmz6GCK86nHza2r+8s9tztwP6mxIzP/8HGd6xbzP2zOfcwHsUIso3ROvQ==}
     engines: {node: '>=22.18.0'}
+    peerDependencies:
+      oxlint: '>=1.75.0'
+    peerDependenciesMeta:
+      oxlint:
+        optional: true
+
+  magic-oxlint-plugin@1.1.0:
+    resolution: {integrity: sha512-SdxWuNO9B0g5vMivlk9gP0B+PIKmBoImn8QWn9HQy0tIiyELzSmdrBkGtB2OB7IY23KK6b3gx1WDy8gxy763EA==}
+    engines: {node: '>=22'}
     peerDependencies:
       oxlint: '>=1.75.0'
     peerDependenciesMeta:
@@ -13731,6 +13743,10 @@ snapshots:
       oxlint: 1.75.0
     transitivePeerDependencies:
       - eslint
+
+  magic-oxlint-plugin@1.1.0(oxlint@1.75.0):
+    optionalDependencies:
+      oxlint: 1.75.0
 
   magic-tsconfig@1.2.0: {}
 
