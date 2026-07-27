@@ -1,5 +1,10 @@
 import prisma from "@pegada/database";
+import {
+  NOTIFICATION_CATEGORY,
+  NOTIFICATION_CHANNEL,
+} from "@pegada/shared/constants/notifications";
 import { Language } from "@pegada/shared/i18n/types/types";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
 
 import { PushNotificationService } from "./PushNotificationService";
 import { TranslationService } from "./TranslationService";
@@ -64,7 +69,15 @@ class MessageService {
         sender: {
           select: {
             name: true,
-            images: true,
+            // First approved photo only: it rides along in the push payload so
+            // the iOS Notification Service Extension can render the sender's
+            // avatar on communication notifications.
+            images: {
+              orderBy: { position: "asc" },
+              where: { status: IMAGE_STATUS.APPROVED },
+              take: 1,
+              select: { url: true },
+            },
           },
         },
         receiver: {
@@ -91,8 +104,15 @@ class MessageService {
           lng: this.language,
           replace: { name: newMessage.sender.name },
         }),
+        channelId: NOTIFICATION_CHANNEL.ChatMessage,
+        categoryId: NOTIFICATION_CATEGORY.ChatMessage,
+        // Lets the iOS Notification Service Extension intercept the push and
+        // restyle it as a communication notification (sender avatar + name).
+        mutableContent: true,
         data: {
           url: `chat/${matchId}/${newMessage.senderId}`,
+          senderName: newMessage.sender.name,
+          senderAvatarUrl: newMessage.sender.images[0]?.url,
         },
       });
     }
