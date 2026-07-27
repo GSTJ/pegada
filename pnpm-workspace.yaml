@@ -64,6 +64,7 @@ minimumReleaseAgeExclude:
   - magic-oxfmt-config@1.2.0
   - magic-oxlint-config@1.2.0
   - magic-tsconfig@1.2.0
+  - magic-oxlint-plugin@1.1.0
 
 # pnpm 10+ does not run dependency install scripts unless they are listed here,
 # and pnpm 11 makes an unanswered list a hard install failure. Every entry ran
