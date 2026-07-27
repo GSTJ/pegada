@@ -1,6 +1,10 @@
+import type { Language } from "@pegada/shared/i18n/types/types";
+
 import prisma from "@pegada/database";
-import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/errors";
-import { Language } from "@pegada/shared/i18n/types/types";
+import {
+  InvalidOTPCodeError,
+  OTPRequiredError,
+} from "@pegada/shared/errors/errors";
 
 import { enqueue } from "../queue/enqueue";
 import { TOPICS } from "../queue/topics";
@@ -16,10 +20,10 @@ const FRESH_MAGIC_EMAIL_REGEX = (() => {
   if (!config.APPLE_MAGIC_EMAIL_REGEX) return null;
   try {
     return new RegExp(config.APPLE_MAGIC_EMAIL_REGEX);
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error("❌ Invalid APPLE_MAGIC_EMAIL_REGEX", e);
-    throw e;
+  } catch (error) {
+    // oxlint-disable-next-line no-console -- The regex comes from the environment; the operator needs to see which one failed to parse.
+    console.error("❌ Invalid APPLE_MAGIC_EMAIL_REGEX", error);
+    throw error;
   }
 })();
 
@@ -55,13 +59,19 @@ const purgeUserByEmail = async (email: string): Promise<void> => {
 
   await prisma.$transaction([
     prisma.message.deleteMany({
-      where: { OR: [{ senderId: { in: dogIds } }, { receiverId: { in: dogIds } }] },
+      where: {
+        OR: [{ senderId: { in: dogIds } }, { receiverId: { in: dogIds } }],
+      },
     }),
     prisma.interest.deleteMany({
-      where: { OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }] },
+      where: {
+        OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+      },
     }),
     prisma.match.deleteMany({
-      where: { OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }] },
+      where: {
+        OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+      },
     }),
     prisma.image.deleteMany({ where: { dogId: { in: dogIds } } }),
     prisma.dog.deleteMany({ where: { userId: user.id } }),
@@ -146,16 +156,30 @@ export class AuthenticationService {
     await enqueue(TOPICS.MAIL, { email, code, language: this.language });
   }
 
-  static async checkVerification({ email, code }: { email: string; code: string }) {
+  static async checkVerification({
+    email,
+    code,
+  }: {
+    email: string;
+    code: string;
+  }) {
     // Used for apple to review the app — any email in APPLE_MAGIC_EMAIL
     // (single value or comma-separated list) accepts APPLE_MAGIC_CODE.
-    if (config.APPLE_MAGIC_CODE && code === config.APPLE_MAGIC_CODE && isMagicEmail(email)) {
+    if (
+      config.APPLE_MAGIC_CODE &&
+      code === config.APPLE_MAGIC_CODE &&
+      isMagicEmail(email)
+    ) {
       return true;
     }
 
     // Test-only fresh-user bypass — same code, no DB lookup, so login is
     // idempotent regardless of whether the user existed before.
-    if (config.APPLE_MAGIC_CODE && code === config.APPLE_MAGIC_CODE && isFreshMagicEmail(email)) {
+    if (
+      config.APPLE_MAGIC_CODE &&
+      code === config.APPLE_MAGIC_CODE &&
+      isFreshMagicEmail(email)
+    ) {
       return true;
     }
 

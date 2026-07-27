@@ -1,32 +1,33 @@
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
-
 import { config } from "../shared/config";
+
+const breedSchema = z
+  .object({
+    id: z.string(),
+    slug: z.string(),
+  })
+  .nullable();
+
+const dogImageSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  position: z.number(),
+  blurhash: z.string().nullable(),
+});
 
 export const dogSafeSchema = z
   .object({
     id: z.string(),
     bio: z.string().nullable(),
-    breed: z
-      .object({
-        id: z.string(),
-        slug: z.string(),
-      })
-      .nullable(),
+    breed: breedSchema,
     birthDate: z.date().nullable(),
     color: z.string().nullable(),
     gender: z.string(),
     distance: z.number().nullable(),
-    images: z.array(
-      z.object({
-        id: z.string(),
-        url: z.string(),
-        position: z.number(),
-        blurhash: z.string().nullable(),
-      }),
-    ),
+    images: z.array(dogImageSchema),
     name: z.string(),
     pedigreeProof: z.string().nullable(),
     size: z.string().nullable(),
@@ -79,7 +80,7 @@ export const selfDogSelect = Prisma.validator<Prisma.DogSelect>()({
       position: true,
       blurhash: true,
       // We don't want to expose softbans to the client, but it's useful while developing
-      status: config.NODE_ENV === "development" ? true : false,
+      status: config.NODE_ENV === "development",
     },
   },
   user: {

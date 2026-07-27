@@ -1,14 +1,15 @@
 import { Platform } from "react-native";
+
 import { Directory, File, Paths } from "expo-file-system";
 
 import { WIDGET_APP_GROUP } from "../../../modules/pegada-widget";
 
 const AVATARS_DIRECTORY_NAME = "widget-avatars";
 
-export type WidgetAvatarSource = {
+export interface WidgetAvatarSource {
   dogId: string;
   url: string | undefined;
-};
+}
 
 /**
  * Platform-split storage backend for the widget avatars.
@@ -37,17 +38,25 @@ const getAvatarsDirectory = (): Directory | null => {
 };
 
 // Native file APIs (UIImage/BitmapFactory) expect plain paths, not file:// URIs.
-const toNativePath = (file: File) => decodeURI(file.uri).replace(/^file:\/\//, "");
+const toNativePath = (file: File) =>
+  decodeURI(file.uri).replace(/^file:\/\//, "");
 
-// Tiny stable hash (djb2) so a dog changing its main photo produces a new
-// cache filename, and the stale one gets swept below.
+/**
+ * Tiny stable hash (djb2) so a dog changing its main photo produces a new
+ * cache filename, and the stale one gets swept below.
+ *
+ * The bitwise operators are the algorithm, not a micro-optimisation: `^` is
+ * what mixes each character in and `>>> 0` is what makes the result unsigned.
+ */
+/* oxlint-disable no-bitwise -- djb2 is defined in terms of xor and an unsigned shift */
 const hash = (value: string) => {
   let result = 5381;
   for (let index = 0; index < value.length; index++) {
-    result = (result * 33) ^ value.charCodeAt(index);
+    result = (result * 33) ^ (value.codePointAt(index) ?? 0);
   }
   return (result >>> 0).toString(36);
 };
+/* oxlint-enable no-bitwise */
 
 /**
  * Downloads (at most 3, enforced by the caller) avatars into the widget

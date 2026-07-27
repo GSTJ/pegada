@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { useTranslation } from "react-i18next";
 
 import SwipeBackArrow from "@/assets/images/SwipeBackArrow.svg";

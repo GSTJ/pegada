@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+
 import Color from "color";
 import styled from "styled-components/native";
 
@@ -21,7 +22,8 @@ export const Header = styled(BlurView)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing[2]}px ${({ theme }) => theme.spacing[4]}px;
+  padding: ${({ theme }) => theme.spacing[2]}px
+    ${({ theme }) => theme.spacing[4]}px;
   border-bottom-width: ${({ theme }) => theme.stroke.sm}px;
   border-bottom-color: ${({ theme }) => theme.colors.border};
   position: absolute;
@@ -33,7 +35,8 @@ export const CloseButton = styled(PressableArea).attrs({ accessible: true })`
   width: ${({ theme }) => theme.spacing[8]}px;
   align-items: center;
   justify-content: center;
-  background-color: ${({ theme }) => Color(theme.colors.text).alpha(0.05).toString()};
+  background-color: ${({ theme }) =>
+    new Color(theme.colors.text).alpha(0.05).toString()};
   border-radius: ${({ theme }) => theme.radii.round}px;
 `;
 
@@ -49,7 +52,8 @@ export const Title = styled(Text)`
 `;
 
 export const Subtitle = styled(Text)`
-  color: ${({ theme }) => Color(theme.colors.primary).lighten(0.1).toString()};
+  color: ${({ theme }) =>
+    new Color(theme.colors.primary).lighten(0.1).toString()};
   text-align: center;
   max-width: 300px;
   align-self: center;

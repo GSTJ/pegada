@@ -111,8 +111,6 @@
     "@babel/core": "^7.29.0",
     "@bacons/apple-targets": "^4.0.7",
     "@pegada/api": "workspace:*",
-    "magic-oxlint-config": "^1.0.0",
-    "magic-tsconfig": "^1.0.0",
     "@posthog/cli": "^0.8.1",
     "@types/color": "^3.0.6",
     "@types/jest": "^29.5.12",
@@ -123,9 +121,12 @@
     "@types/react-test-renderer": "^18.3.0",
     "babel-jest": "^29.7.0",
     "babel-plugin-styled-components": "^2.1.4",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "magic-oxlint-config": "^1.0.0",
+    "magic-tsconfig": "^1.0.0"
   },
   "jest": {
+    "clearMocks": true,
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     }

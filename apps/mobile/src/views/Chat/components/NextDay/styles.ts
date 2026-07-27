@@ -4,10 +4,13 @@ import styled from "styled-components/native";
 import { Text } from "@/components/text";
 
 export const Container = styled.View`
-  margin: ${(props) => props.theme.spacing[4]}px auto ${(props) => props.theme.spacing[5]}px auto;
+  margin: ${(props) => props.theme.spacing[4]}px auto
+    ${(props) => props.theme.spacing[5]}px auto;
 
-  padding: ${(props) => props.theme.spacing[0.5]}px ${(props) => props.theme.spacing[2.5]}px
-    ${(props) => props.theme.spacing[1.5]}px ${(props) => props.theme.spacing[2.5]}px;
+  padding: ${(props) => props.theme.spacing[0.5]}px
+    ${(props) => props.theme.spacing[2.5]}px
+    ${(props) => props.theme.spacing[1.5]}px
+    ${(props) => props.theme.spacing[2.5]}px;
 
   border-radius: ${(props) => props.theme.radii.round}px;
   background-color: ${(props) => props.theme.colors.card};
@@ -22,5 +25,5 @@ export const Container = styled.View`
 `;
 
 export const DateText = styled(Text)`
-  color: ${(props) => Color(props.theme.colors.text).alpha(0.5).string()};
+  color: ${(props) => new Color(props.theme.colors.text).alpha(0.5).string()};
 `;

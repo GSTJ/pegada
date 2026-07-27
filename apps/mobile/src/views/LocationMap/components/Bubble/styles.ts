@@ -1,5 +1,5 @@
-import Animated from "react-native-reanimated";
 import LottieView from "lottie-react-native";
+import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
 import { Text } from "@/components/text";
@@ -16,7 +16,8 @@ export const Swipe = styled(LottieView).attrs({
 
 export const Container = styled(Animated.View)`
   position: absolute;
-  padding: ${(props) => props.theme.spacing[2.5]}px ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[2.5]}px
+    ${(props) => props.theme.spacing[4]}px;
   background: ${(props) => props.theme.colors.background};
   border: 1px ${(props) => props.theme.colors.border};
   align-items: center;

@@ -22,15 +22,17 @@ const _config = configSchema.safeParse({
   POSTHOG_API_KEY: process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
   POSTHOG_HOST: process.env.EXPO_PUBLIC_POSTHOG_HOST,
   IOS_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY,
-  ANDROID_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
+  ANDROID_GOOGLE_MAPS_API_KEY:
+    process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
   REVENUE_CAT_IOS_API_KEY: process.env.EXPO_PUBLIC_REVENUE_CAT_IOS_API_KEY,
-  REVENUE_CAT_ANDROID_API_KEY: process.env.EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY,
+  REVENUE_CAT_ANDROID_API_KEY:
+    process.env.EXPO_PUBLIC_REVENUE_CAT_ANDROID_API_KEY,
   API_URL: process.env.EXPO_PUBLIC_API_URL,
   MAESTRO_E2E: process.env.EXPO_PUBLIC_MAESTRO_E2E,
 });
 
 if (!_config.success) {
-  // eslint-disable-next-line no-console
+  // oxlint-disable-next-line no-console -- The process is about to throw on invalid env; this is the only way to say why.
   console.error("❌ Invalid environment variables", _config.error.format());
   throw new Error("Invalid environment variables.");
 }
@@ -43,7 +45,9 @@ if (!_config.success) {
  * URL always hits the handler directly, regardless of the built env value.
  */
 const normalizeApiUrl = (raw: string): string =>
-  raw.replace(/\/+$/, "").replace(/^(https?:\/\/)pegada\.app(\/|$)/, "$1www.pegada.app$2");
+  raw
+    .replace(/\/+$/, "")
+    .replace(/^(https?:\/\/)pegada\.app(\/|$)/, "$1www.pegada.app$2");
 
 export const config = {
   ..._config.data,

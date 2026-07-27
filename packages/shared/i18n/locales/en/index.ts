@@ -7,7 +7,7 @@ import server from "./server.json";
 import translation from "./translation.json";
 import web from "./web.json";
 
-export default {
+const en = {
   [Namespace.Translation]: translation,
   [Namespace.Breed]: breed,
   [Namespace.Server]: server,
@@ -15,3 +15,5 @@ export default {
   [Namespace.Zod]: zod,
   [Namespace.Web]: web,
 };
+
+export default en;

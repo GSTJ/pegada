@@ -1,7 +1,9 @@
 import { useState } from "react";
+
 import { useTranslation } from "react-i18next";
 
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
+
 import { useSendMessage } from "../../hooks/use-send-message";
 import { Container, Input } from "./styles";
 

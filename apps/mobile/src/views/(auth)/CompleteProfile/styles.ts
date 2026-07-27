@@ -1,9 +1,24 @@
 import styled from "styled-components/native";
 
 import { Image } from "@/components/image";
+import { Text } from "@/components/text";
 
 export const Container = styled.ScrollView`
-  flex-grow: 1;
+  flex: 1;
+`;
+
+/** The wider half of the breed / birth-date row. */
+export const WideColumn = styled.View`
+  flex: 1.5;
+`;
+
+/** The fixed gutter between two fields sharing a row. */
+export const Gap = styled.View`
+  width: ${({ theme }) => theme.spacing[3]}px;
+`;
+
+export const Note = styled(Text)`
+  margin-top: ${({ theme }) => theme.spacing[6]}px;
 `;
 
 export const ImageContainer = styled.View`

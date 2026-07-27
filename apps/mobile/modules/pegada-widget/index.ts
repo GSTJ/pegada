@@ -14,10 +14,10 @@ export const WIDGET_APP_GROUP = "group.app.pegada";
  * scheme) readable by the widget process: inside the App Group container on
  * iOS, inside the app's document directory on Android.
  */
-export type WidgetSnapshotDog = {
+export interface WidgetSnapshotDog {
   name: string;
   avatar: string | null;
-};
+}
 
 /**
  * All user-facing strings arrive pre-localized from JS (i18next), so the
@@ -31,29 +31,33 @@ export type WidgetSnapshotDog = {
  * `message` isn't the "waiting for reply" variant (all caught up, logged
  * out).
  */
-export type WidgetSnapshot = {
+export interface WidgetSnapshot {
   loggedIn: boolean;
   count: number;
   message: string;
   messageCountless: string | null;
   dogs: WidgetSnapshotDog[];
-};
+}
 
-type PegadaWidgetNativeModule = {
-  setSnapshot(json: string): Promise<void>;
-};
+interface PegadaWidgetNativeModule {
+  setSnapshot: (json: string) => Promise<void>;
+}
 
 // Optional so web (and any environment without the native module, e.g.
 // tests) degrades to a no-op instead of throwing at import time.
-const nativeModule = requireOptionalNativeModule<PegadaWidgetNativeModule>("PegadaWidget");
+const nativeModule =
+  requireOptionalNativeModule<PegadaWidgetNativeModule>("PegadaWidget");
 
 /**
  * Persists the snapshot where the home-screen widgets can read it
  * (App Group UserDefaults on iOS, SharedPreferences on Android) and asks
  * the OS to re-render the widget timelines.
  */
-export const setWidgetSnapshot = async (snapshot: WidgetSnapshot): Promise<void> => {
+export const setWidgetSnapshot = async (
+  snapshot: WidgetSnapshot,
+): Promise<void> => {
   await nativeModule?.setSnapshot(JSON.stringify(snapshot));
 };
 
-export const isWidgetModuleAvailable = () => nativeModule != null;
+export const isWidgetModuleAvailable = () =>
+  nativeModule !== undefined && nativeModule !== null;

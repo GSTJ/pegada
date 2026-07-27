@@ -1,13 +1,31 @@
+import type { RouterOutputs } from "@/contexts/trpc-provider";
+
 import { useEffect } from "react";
 import * as React from "react";
 import { useWindowDimensions, View } from "react-native";
-import { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
-import { useTheme } from "styled-components";
 
-import { Image } from "@/components/image";
-import { DefaultLoadingComponent, NetworkBoundary } from "@/components/NetworkBoundary";
-import { api, RouterOutputs } from "@/contexts/trpc-provider";
-import { HeartEyesContainer, RotatedImageLeft, RotatedImageRight } from "./styles";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
+
+import {
+  DefaultLoadingComponent,
+  NetworkBoundary,
+} from "@/components/NetworkBoundary";
+import { api } from "@/contexts/trpc-provider";
+
+import {
+  CardsColumn,
+  HeartEyesContainer,
+  HeartEyesEmoji,
+  HeartEyesEmojiStandalone,
+  LoadingBox,
+  RotatedImageLeft,
+  RotatedImageRight,
+} from "./styles";
 
 interface AnimatedCardsProps {
   matchDog?: RouterOutputs["dog"]["get"];
@@ -26,7 +44,6 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
   const CARD_HEIGHT = windowDimensions.height < 800 ? 200 : 325;
 
   useEffect(() => {
-    // eslint-disable-next-line react-compiler/react-compiler -- false positive
     rotateZ.value = withDelay(500, withTiming(ROTATE_Z, { duration: 500 }));
   }, [rotateZ]);
 
@@ -53,59 +70,51 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
   });
 
   return (
-    <View style={{ alignItems: "center" }}>
+    <CardsColumn>
       <View>
         <RotatedImageRight
           source={{
             uri: myDog?.images[0]?.url,
             blurhash: myDog?.images[0]?.blurhash ?? undefined,
           }}
-          style={[rotatedImageLeftStyle, { height: CARD_HEIGHT, width: CARD_HEIGHT / 1.5 }]}
+          style={[
+            rotatedImageLeftStyle,
+            { height: CARD_HEIGHT, width: CARD_HEIGHT / 1.5 },
+          ]}
         />
         <RotatedImageLeft
           source={{
             uri: matchDog?.images[0]?.url,
             blurhash: matchDog?.images[0]?.blurhash ?? undefined,
           }}
-          style={[rotatedImageRightStyle, { height: CARD_HEIGHT, width: CARD_HEIGHT / 1.5 }]}
+          style={[
+            rotatedImageRightStyle,
+            { height: CARD_HEIGHT, width: CARD_HEIGHT / 1.5 },
+          ]}
         />
       </View>
       <HeartEyesContainer>
-        <Image
+        <HeartEyesEmoji
           source={require("@/assets/images/HeartEyesEmoji.webp")}
-          style={{
-            width: 70,
-            height: 70,
-          }}
         />
       </HeartEyesContainer>
-    </View>
+    </CardsColumn>
   );
 };
 
-const AnimatedCardsErrorFallback = () => {
-  const theme = useTheme();
-  return (
-    <Image
-      source={require("@/assets/images/HeartEyesEmoji.webp")}
-      style={{
-        width: 70,
-        height: 70,
-        marginBottom: theme.spacing[5],
-      }}
-    />
-  );
-};
+const AnimatedCardsErrorFallback = () => (
+  <HeartEyesEmojiStandalone
+    source={require("@/assets/images/HeartEyesEmoji.webp")}
+  />
+);
 
-const AnimatedCardsLoading = () => {
-  return (
-    <View style={{ height: 200 }}>
-      <DefaultLoadingComponent />
-    </View>
-  );
-};
+const AnimatedCardsLoading = () => (
+  <LoadingBox>
+    <DefaultLoadingComponent />
+  </LoadingBox>
+);
 
-export default ({ matchDog }: AnimatedCardsProps) => (
+const AnimatedCardsBoundary = ({ matchDog }: AnimatedCardsProps) => (
   <NetworkBoundary
     suspenseFallback={<AnimatedCardsLoading />}
     errorFallback={AnimatedCardsErrorFallback}
@@ -113,3 +122,5 @@ export default ({ matchDog }: AnimatedCardsProps) => (
     <AnimatedCards matchDog={matchDog} />
   </NetworkBoundary>
 );
+
+export default AnimatedCardsBoundary;

@@ -1,7 +1,9 @@
 import * as React from "react";
+
 import { useTheme } from "styled-components/native";
 
 import ArrowDown from "@/assets/images/ArrowDown.svg";
+
 import { Container, Content } from "./styles";
 
 const GoBack = (props: React.ComponentProps<typeof Container>) => {

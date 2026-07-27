@@ -1,19 +1,22 @@
-import { KeyboardAvoidingView, Platform, View } from "react-native";
-import { magicToast } from "react-native-magic-toast";
+import type { DogCompleteClientSchema } from "@pegada/shared/schemas/dog-schema";
+
+import { Platform } from "react-native";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { dogCompleteClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
 import { useTheme } from "styled-components/native";
-
-import { DogCompleteClientSchema, dogCompleteClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import { Fill, KeyboardScreen, Row } from "@/components/layout";
 import { InputPicker } from "@/components/Picker";
-import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
 import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
@@ -22,7 +25,15 @@ import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/error-tracking";
 import { maskDate } from "@/services/mask-date";
 import { SceneName } from "@/types/scene-name";
-import { Container, ImageContainer, ProfileImage } from "./styles";
+
+import {
+  Container,
+  Gap,
+  ImageContainer,
+  Note,
+  ProfileImage,
+  WideColumn,
+} from "./styles";
 
 const CompleteProfile = () => {
   const router = useRouter();
@@ -30,19 +41,20 @@ const CompleteProfile = () => {
 
   const { profileImageUrl } = useLocalSearchParams();
 
-  const { control, handleSubmit, getValues, watch } = useForm<DogCompleteClientSchema>({
-    defaultValues: {
-      birthDate: "",
-      breedId: "",
-    },
-    resolver: zodResolver(dogCompleteClientSchema),
-  });
+  const { control, handleSubmit, getValues, watch } =
+    useForm<DogCompleteClientSchema>({
+      defaultValues: {
+        birthDate: "",
+        breedId: "",
+      },
+      resolver: zodResolver(dogCompleteClientSchema),
+    });
 
   const form = watch();
 
   const headerHeight = useDelayedHeaderHeight();
 
-  const hasChanged = Object.values(form).some((value) => Boolean(value));
+  const hasChanged = Object.values(form).some(Boolean);
 
   const myDogUpdateMutation = api.myDog.update.useMutation({
     onSuccess: (data) => {
@@ -61,11 +73,12 @@ const CompleteProfile = () => {
 
   const saveUser = handleSubmit(async (data) => {
     if (hasChanged) {
+      const { birthDate, breedId, color, size } = data;
       const dogData = {
-        ...(data.birthDate && { birthDate: data.birthDate }),
-        ...(data.breedId && { breedId: data.breedId }),
-        ...(data.color && { color: data.color }),
-        ...(data.size && { size: data.size }),
+        ...(birthDate && { birthDate }),
+        ...(breedId && { breedId }),
+        ...(color && { color }),
+        ...(size && { size }),
       };
 
       await myDogUpdateMutation.mutateAsync(dogData);
@@ -80,21 +93,23 @@ const CompleteProfile = () => {
   const theme = useTheme();
 
   const { scrollViewProps } = useBottomActionStyle();
-  const continueText = hasChanged ? t("completeProfile.save") : t("common.skip");
+  const continueText = hasChanged
+    ? t("completeProfile.save")
+    : t("common.skip");
 
   return (
-    <KeyboardAvoidingView
-      style={{ flexGrow: 1 }}
+    <KeyboardScreen
       keyboardVerticalOffset={headerHeight}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={{ flex: 1 }}>
+      <Fill>
         <Container
-          style={{ flex: 1 }}
           {...scrollViewProps}
           contentContainerStyle={{
             paddingHorizontal: theme.spacing[4],
-            paddingBottom: theme.spacing[8] + scrollViewProps.contentContainerStyle.paddingBottom,
+            paddingBottom:
+              theme.spacing[8] +
+              scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           keyboardDismissMode="interactive"
         >
@@ -102,8 +117,8 @@ const CompleteProfile = () => {
             <ProfileImage source={{ uri: profileImageUrl as string }} />
           </ImageContainer>
 
-          <View style={{ flexDirection: "row" }}>
-            <View style={{ flex: 1 }}>
+          <Row>
+            <Fill>
               <Controller
                 name="breedId"
                 control={control}
@@ -119,16 +134,19 @@ const CompleteProfile = () => {
                   />
                 )}
               />
-            </View>
+            </Fill>
 
-            <View style={{ width: theme.spacing[3] }} />
+            <Gap />
 
-            <View style={{ flex: 1.5 }}>
+            <WideColumn>
               <Controller
                 name="birthDate"
                 control={control}
                 rules={{ required: true }}
-                render={({ field: { onChange, onBlur, value, name }, fieldState }) => (
+                render={({
+                  field: { onChange, onBlur, value, name },
+                  fieldState,
+                }) => (
                   <Input
                     testID="complete-profile-birth-date"
                     title={t("completeProfile.birthDate")}
@@ -151,10 +169,10 @@ const CompleteProfile = () => {
                   />
                 )}
               />
-            </View>
-          </View>
+            </WideColumn>
+          </Row>
 
-          <View style={{ flexDirection: "row" }}>
+          <Row>
             <Controller
               name="size"
               control={control}
@@ -173,7 +191,7 @@ const CompleteProfile = () => {
               )}
             />
 
-            <View style={{ width: theme.spacing[3] }} />
+            <Gap />
             <Controller
               name="color"
               control={control}
@@ -191,11 +209,9 @@ const CompleteProfile = () => {
                 />
               )}
             />
-          </View>
+          </Row>
 
-          <Text fontSize="xs" style={{ marginTop: theme.spacing[6] }}>
-            {t("completeProfile.additionalInfo")}
-          </Text>
+          <Note fontSize="xs">{t("completeProfile.additionalInfo")}</Note>
         </Container>
         <BottomAction.Container>
           <Button
@@ -206,8 +222,8 @@ const CompleteProfile = () => {
             {continueText}
           </Button>
         </BottomAction.Container>
-      </View>
-    </KeyboardAvoidingView>
+      </Fill>
+    </KeyboardScreen>
   );
 };
 

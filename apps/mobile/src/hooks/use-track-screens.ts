@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+
 import { usePathname } from "expo-router";
 
 import { analytics } from "@/services/analytics";

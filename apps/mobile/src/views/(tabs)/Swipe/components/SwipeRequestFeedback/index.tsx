@@ -1,7 +1,11 @@
+import type { RootReducer } from "@/store/reducers";
+
 import { View } from "react-native";
-import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+
 import { router } from "expo-router";
+
 import { useTranslation } from "react-i18next";
+import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Button } from "@/components/Button";
@@ -11,8 +15,9 @@ import {
   useIsOffline,
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
-import { Actions, RootReducer } from "@/store/reducers";
+import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
+
 import { Description, EmptyAnimation, LogoLoading, Title } from "./styles";
 
 export const EmptyComponent = () => {
@@ -33,13 +38,16 @@ const EmptyState = () => {
       <View>
         <LogoLoading />
         <Animated.View entering={FadeInDown} exiting={FadeOutDown}>
-          <Title fontWeight="bold" style={{ paddingBottom: 2 }}>
+          <Title fontWeight="bold">
             {t("swipeRequestFeedback.emptyTitle")}
           </Title>
-          <Description fontSize="xs" style={{ paddingBottom: 4 }}>
+          <Description fontSize="xs">
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
-          <Button onPress={() => router.push(SceneName.Preferences)} variant="outline">
+          <Button
+            onPress={() => router.push(SceneName.Preferences)}
+            variant="outline"
+          >
             {t("swipeRequestFeedback.preferencesButton")}
           </Button>
         </Animated.View>

@@ -13,6 +13,11 @@ export default createMiddleware({
 });
 
 export const config = {
-  // Skip all paths that should not be internationalized
+  // Skip all paths that should not be internationalized.
+  //
+  // Has to stay a plain string literal: Next statically analyses this export at
+  // build time and a template literal (what `unicorn/prefer-string-raw` rewrites
+  // it to) fails that analysis with "Invalid segment configuration export".
+  // oxlint-disable-next-line unicorn/prefer-string-raw -- see above
   matcher: ["/((?!api|store|_next|.*\\..*).*)"],
 };

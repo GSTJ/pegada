@@ -1,6 +1,7 @@
+import type { Image } from "./image";
+
 import type { ComponentProps } from "react";
 
-import type { Image } from "./image";
 import { resolveImagePresentationProps } from "./image-props";
 
 const blurhash = "LEHV6nWB2yk8pyo0adR*.7kCMdnj";
@@ -19,7 +20,7 @@ const forwardedProps = {
 } satisfies ComponentProps<typeof Image>;
 
 test("moves an API blurhash onto the placeholder and keeps the source clean", () => {
-  expect(resolveImagePresentationProps(forwardedProps)).toEqual({
+  expect(resolveImagePresentationProps(forwardedProps)).toStrictEqual({
     source: { uri },
     placeholder: { blurhash },
     contentFit: "contain",
@@ -29,7 +30,9 @@ test("moves an API blurhash onto the placeholder and keeps the source clean", ()
 });
 
 test("defaults the blurhash fit to cover when the caller sets no contentFit", () => {
-  expect(resolveImagePresentationProps({ source: { uri, blurhash } })).toEqual({
+  expect(
+    resolveImagePresentationProps({ source: { uri, blurhash } }),
+  ).toStrictEqual({
     source: { uri },
     placeholder: { blurhash },
     contentFit: undefined,
@@ -48,7 +51,7 @@ test("leaves a caller-provided placeholder and cache policy alone", () => {
       placeholderContentFit: "scale-down",
       cachePolicy: "disk",
     }),
-  ).toEqual({
+  ).toStrictEqual({
     source: { uri },
     placeholder,
     contentFit: undefined,
@@ -64,7 +67,7 @@ test("treats an explicit null placeholder and cache policy as opting out", () =>
       placeholder: null,
       cachePolicy: null,
     }),
-  ).toEqual({
+  ).toStrictEqual({
     source: { uri },
     placeholder: null,
     contentFit: undefined,
@@ -76,7 +79,7 @@ test("treats an explicit null placeholder and cache policy as opting out", () =>
 test.each([42, "https://images.pegada.app/static.webp", null] as const)(
   "passes a %p source straight through",
   (source) => {
-    expect(resolveImagePresentationProps({ source })).toEqual({
+    expect(resolveImagePresentationProps({ source })).toStrictEqual({
       source,
       placeholder: undefined,
       contentFit: undefined,
@@ -92,7 +95,7 @@ test("passes a responsive source array straight through", () => {
     { uri: "https://images.pegada.app/luna-large.webp", width: 1280 },
   ];
 
-  expect(resolveImagePresentationProps({ source })).toEqual({
+  expect(resolveImagePresentationProps({ source })).toStrictEqual({
     source,
     placeholder: undefined,
     contentFit: undefined,

@@ -1,5 +1,7 @@
+import type { PurchasesPackage } from "react-native-purchases";
+
 import * as React from "react";
-import { PurchasesPackage } from "react-native-purchases";
+
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/text";
@@ -11,6 +13,28 @@ import {
   PlanContainer,
   Price,
 } from "@/views/UpgradeWall/components/PlanPackages/styles";
+
+const formatPrice = (value: number, currency: string) =>
+  new Intl.NumberFormat("default", {
+    style: "currency",
+    currency,
+  }).format(value);
+
+const getPeriodDetails = (
+  period: string,
+): {
+  periodUnit: "D" | "W" | "M" | "Y";
+  periodValue: number;
+} => {
+  const [, num, unit] = period.match(/P(\d+)(D|W|M|Y)/) ?? [];
+
+  if (!num || !unit) throw new Error("Invalid period format");
+
+  return {
+    periodUnit: unit as "D" | "W" | "M" | "Y",
+    periodValue: Math.trunc(Number(num)),
+  };
+};
 
 interface PlanCardProps {
   selected: boolean;
@@ -28,30 +52,12 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   const { t } = useTranslation();
   const { product } = pkg;
 
-  const { price: currentPrice, currencyCode, subscriptionPeriod: period, identifier } = product;
-
-  const formatPrice = (value: number, currency: string) =>
-    Intl.NumberFormat("default", {
-      style: "currency",
-      currency,
-    }).format(value);
-
-  const getPeriodDetails = (
-    period: string,
-  ): {
-    periodUnit: "D" | "W" | "M" | "Y";
-    periodValue: number;
-  } => {
-    const periodMatch = period.match(/P(\d+)(D|W|M|Y)/);
-    const [, num, unit] = periodMatch!;
-
-    if (!num || !unit) throw new Error("Invalid period format");
-
-    return {
-      periodUnit: unit as "D" | "W" | "M" | "Y",
-      periodValue: parseInt(num, 10),
-    };
-  };
+  const {
+    price: currentPrice,
+    currencyCode,
+    subscriptionPeriod: period,
+    identifier,
+  } = product;
 
   const formattedCurrentPrice = formatPrice(currentPrice, currencyCode);
 
@@ -89,7 +95,11 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   })();
 
   return (
-    <PlanContainer testID={`upgrade-wall-plan-${identifier}`} selected={selected} onPress={onPress}>
+    <PlanContainer
+      testID={`upgrade-wall-plan-${identifier}`}
+      selected={selected}
+      onPress={onPress}
+    >
       <Checkbox selected={selected} />
       <Flex>
         <Text fontSize="sm" fontWeight="semibold">

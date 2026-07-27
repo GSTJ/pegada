@@ -1,11 +1,13 @@
 import { useRef, useState } from "react";
 import { Alert, Platform } from "react-native";
-import { magicToast } from "react-native-magic-toast";
-import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
+
 import { useRouter } from "expo-router";
+
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
+import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
 import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components/native";
 
@@ -14,6 +16,7 @@ import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { api } from "@/contexts/trpc-provider";
 import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
+
 import { updateUserLocation } from "../(auth)/AskForLocation";
 import { Marker } from "./components/Marker";
 import { Submit } from "./components/Submit";
@@ -93,7 +96,9 @@ const LocationMap = () => {
         mapPadding={mapPadding}
         // Android doesn't switch maps to dark mode like IOS does,
         // so we need to set the custom style manually
-        customMapStyle={theme.dark ? require("./assets/map-dark.json") : undefined}
+        customMapStyle={
+          theme.dark ? require("./assets/map-dark.json") : undefined
+        }
         key={theme.dark ? "dark" : "light"}
         initialRegion={{
           latitude: location?.latitude,
@@ -104,13 +109,15 @@ const LocationMap = () => {
         onTouchStart={() => setTouchStarted(true)}
         onRegionChange={() => {
           if (!touchStarted) return;
-          // eslint-disable-next-line react-compiler/react-compiler -- false positive
           dragging.value = withTiming(1, {
             easing: Easing.in(Easing.ease),
             duration: 200,
           });
         }}
-        onRegionChangeComplete={(newLocation: { latitude: number; longitude: number }) => {
+        onRegionChangeComplete={(newLocation: {
+          latitude: number;
+          longitude: number;
+        }) => {
           setLocation({
             latitude: newLocation.latitude,
             longitude: newLocation.longitude,
@@ -132,8 +139,10 @@ const LocationMap = () => {
   );
 };
 
-export default () => (
+const LocationMapScreen = () => (
   <NetworkBoundary>
     <LocationMap />
   </NetworkBoundary>
 );
+
+export default LocationMapScreen;

@@ -1,8 +1,14 @@
 import * as React from "react";
-import { SlideInLeft, SlideInRight, SlideOutRight } from "react-native-reanimated";
+
 import { format } from "date-fns";
+import {
+  SlideInLeft,
+  SlideInRight,
+  SlideOutRight,
+} from "react-native-reanimated";
 
 import { Text } from "@/components/text";
+
 import Feedback, { FeedbackStatus } from "../feedback";
 import { Info, Message, Time } from "./styles";
 
@@ -20,7 +26,8 @@ export const MessageComponent: React.FC<MessageComponentProps> = (props) => {
 
   const incomingAnimation = newMessage ? SlideInLeft : undefined;
 
-  const outgoingAnimation = status === FeedbackStatus.Loading ? SlideInRight : undefined;
+  const outgoingAnimation =
+    status === FeedbackStatus.Loading ? SlideInRight : undefined;
 
   const enteringAnimation = self ? outgoingAnimation : incomingAnimation;
 

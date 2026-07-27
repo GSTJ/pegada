@@ -38,5 +38,6 @@ export const Container = styled(PressableArea)<ContainerProps>`
 `;
 
 export const ButtonText = styled(Text)<VariantProps>`
-  color: ${(props) => (props.variant === "outline" ? props.theme.colors.primary : "white")};
+  color: ${(props) =>
+    props.variant === "outline" ? props.theme.colors.primary : "white"};
 `;

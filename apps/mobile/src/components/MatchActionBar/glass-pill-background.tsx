@@ -1,5 +1,7 @@
 import * as React from "react";
+
 import { GlassView } from "expo-glass-effect";
+
 import styled from "styled-components/native";
 
 const StyledGlassView = styled(GlassView)`

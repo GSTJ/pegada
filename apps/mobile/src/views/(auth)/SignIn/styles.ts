@@ -1,4 +1,5 @@
 import { KeyboardAvoidingView, Pressable } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
@@ -18,7 +19,9 @@ export const Container = styled(SafeAreaView).attrs({
  * whole SignIn screen (email input, submit button, all testIDs) becomes
  * one opaque node to XCUITest/VoiceOver.
  */
-export const PressableContainer = styled(Pressable).attrs({ accessible: false })`
+export const PressableContainer = styled(Pressable).attrs({
+  accessible: false,
+})`
   flex-grow: 1;
 `;
 
@@ -41,7 +44,8 @@ export const TopCard = styled.ImageBackground.attrs((props) => ({
   background-color: ${(props) => props.theme.colors.background};
   justify-content: center;
   align-items: center;
-  padding: ${(props) => props.theme.spacing[10]}px ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[10]}px
+    ${(props) => props.theme.spacing[4]}px;
 `;
 
 export const BottomCard = styled.View`

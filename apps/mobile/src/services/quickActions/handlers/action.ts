@@ -1,4 +1,5 @@
-import * as QuickActions from "expo-quick-actions";
+import type * as QuickActions from "expo-quick-actions";
+
 import { router } from "expo-router";
 
 import { sendError } from "@/services/error-tracking";
@@ -11,7 +12,7 @@ export enum QuickActionId {
 
 // Holds a quick action tapped before we know whether the user is
 // authenticated and fully onboarded (mirrors `initialNotification` in
-// `services/linking/handlers/initialNotification.ts`). Cleared once
+// `services/linking/handlers/initial-notification.ts`). Cleared once
 // consumed so it doesn't replay on a later, unrelated auth resolution.
 let pendingQuickAction: QuickActions.Action | undefined;
 
@@ -23,7 +24,9 @@ const handleUnknownQuickAction = (id: string) => {
   sendError(new Error(`Unknown quick action: ${id}`));
 };
 
-export const customQuickActionHandler = (action?: QuickActions.Action | null) => {
+export const customQuickActionHandler = (
+  action?: QuickActions.Action | null,
+) => {
   if (!action) return;
 
   if (action.id === QuickActionId.Matches) {

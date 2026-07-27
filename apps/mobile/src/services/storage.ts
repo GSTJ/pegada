@@ -23,7 +23,10 @@ export interface StorageDataTypes {
   [StorageKeys.AppReviewStatus]: "completed";
 }
 
-export const storeData = async <T extends StorageKeys>(key: T, value: StorageDataTypes[T]) => {
+export const storeData = async <T extends StorageKeys>(
+  key: T,
+  value: StorageDataTypes[T],
+) => {
   await AsyncStorage.setItem(key, value);
   return value;
 };

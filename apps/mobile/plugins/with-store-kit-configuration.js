@@ -35,8 +35,8 @@ const fs = require("fs");
 const STOREKIT_FILE_NAME = "Pegada.storekit";
 
 const withStoreKitConfiguration = (config) => {
-  return withXcodeProject(config, async (modConfig) => {
-    const projectRoot = modConfig.modRequest.projectRoot;
+  return withXcodeProject(config, (modConfig) => {
+    const { projectRoot } = modConfig.modRequest;
     const platformRoot = modConfig.modRequest.platformProjectRoot;
     const sourcePath = path.join(projectRoot, STOREKIT_FILE_NAME);
 
@@ -44,7 +44,6 @@ const withStoreKitConfiguration = (config) => {
       // No .storekit file in the mobile app root — silently skip. This
       // keeps the plugin safe for environments that don't have the file
       // (e.g. fresh clones before the file has been pulled).
-      // eslint-disable-next-line no-console
       console.warn(
         `[withStoreKitConfiguration] ${STOREKIT_FILE_NAME} not found at ${sourcePath} — skipping StoreKit wiring.`,
       );
@@ -108,7 +107,6 @@ const withStoreKitConfiguration = (config) => {
         fs.writeFileSync(schemePath, schemeContent, "utf8");
       }
     } else {
-      // eslint-disable-next-line no-console
       console.warn(
         `[withStoreKitConfiguration] scheme file not found at ${schemePath} — StoreKit file copied but not activated.`,
       );

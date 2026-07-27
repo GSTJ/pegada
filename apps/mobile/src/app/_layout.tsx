@@ -1,26 +1,27 @@
 import "@/config";
-
 import { useEffect, useState } from "react";
+
+import { router, SplashScreen, Stack } from "expo-router";
+
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
-import { PostHogProvider } from "posthog-react-native";
-import { router, SplashScreen, Stack } from "expo-router";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Provider } from "react-redux";
 import styled from "styled-components/native";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { config } from "@/services/config";
-import { posthog } from "@/services/posthog";
 import { storedThemePromise, ThemeProvider } from "@/contexts/theme-provider";
 import { TRPCProvider } from "@/contexts/trpc-provider";
 import { useProtectedRoute } from "@/hooks/use-protected-route";
 import { useTrackScreens } from "@/hooks/use-track-screens";
+import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
+import { posthog } from "@/services/posthog";
 import { useQuickActions } from "@/services/quickActions";
-import { SceneName } from "@/types/scene-name";
 import { store } from "@/store";
+import { SceneName } from "@/types/scene-name";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);

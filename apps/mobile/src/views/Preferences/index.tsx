@@ -1,12 +1,17 @@
+import type { RouterInputs } from "@/contexts/trpc-provider";
+import type { Resolver } from "react-hook-form";
+
 import { useEffect } from "react";
 import * as React from "react";
 import { Dimensions } from "react-native";
-import { magicToast } from "react-native-magic-toast";
+
 import { useRouter } from "expo-router";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { t } from "i18next";
 import { Controller, useForm } from "react-hook-form";
+import { magicToast } from "react-native-magic-toast";
 import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components/native";
 import { z } from "zod";
@@ -18,13 +23,20 @@ import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import { Slider } from "@/components/Slider";
 import { getTrcpContext } from "@/contexts/trcp-context";
-import { api, RouterInputs } from "@/contexts/trpc-provider";
+import { api } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
-import { Container, DistanceContainer, InputRow, InputSpace, SliderContainer } from "./styles";
+
+import {
+  Container,
+  DistanceContainer,
+  InputRow,
+  InputSpace,
+  SliderContainer,
+} from "./styles";
 
 const { width } = Dimensions.get("window");
 
@@ -45,7 +57,10 @@ const schema = z
     preferredSize: z.string().nullable().optional(),
     preferredMaxDistance: z.array(z.number().nullable()).nullable().optional(),
     preferredBreedId: z.string().nullable().optional(),
-    preferredAgeRange: z.array(z.number().nullable().optional()).nullable().optional(),
+    preferredAgeRange: z
+      .array(z.number().nullable().optional())
+      .nullable()
+      .optional(),
   })
   .optional();
 
@@ -68,8 +83,9 @@ const Preferences: React.FC = () => {
       preferredBreedId: undefined,
       preferredAgeRange: [0, MAX_FILTER_AGE],
     },
-    // Zod is breaking here, seems to be an issue with the library
-    resolver: zodResolver(schema as any),
+    // The zod/@hookform resolver types disagree about the refined schema's
+    // output; the form's own generic is what actually types the values.
+    resolver: zodResolver(schema) as Resolver<Preference>,
   });
 
   const dispatch = useDispatch();
@@ -101,7 +117,10 @@ const Preferences: React.FC = () => {
     };
 
     // Unlimited
-    if (body.preferredMaxDistance && body.preferredMaxDistance >= MAX_FILTER_DISTANCE) {
+    if (
+      body.preferredMaxDistance &&
+      body.preferredMaxDistance >= MAX_FILTER_DISTANCE
+    ) {
       body.preferredMaxDistance = undefined;
     }
 
@@ -131,7 +150,9 @@ const Preferences: React.FC = () => {
     setValue("preferredBreedId", dog.preferredBreedId);
     setValue("preferredColor", dog.preferredColor);
     setValue("preferredSize", dog.preferredSize);
-    setValue("preferredMaxDistance", [dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE]);
+    setValue("preferredMaxDistance", [
+      dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE,
+    ]);
     setValue("preferredAgeRange", [
       dog.preferredMinAge ?? 0,
       dog.preferredMaxAge ?? MAX_FILTER_AGE + 1,
@@ -151,7 +172,9 @@ const Preferences: React.FC = () => {
         contentContainerStyle={{
           paddingHorizontal: theme.spacing[4],
           paddingTop: headerHeight,
-          paddingBottom: scrollViewProps.contentContainerStyle.paddingBottom + theme.spacing[4],
+          paddingBottom:
+            scrollViewProps.contentContainerStyle.paddingBottom +
+            theme.spacing[4],
         }}
       >
         <Controller
@@ -208,7 +231,10 @@ const Preferences: React.FC = () => {
                 itemTestIDPrefix="preferences-color-item-"
                 title={t("preferences.color")}
                 placeholder={t("preferences.anyColor")}
-                data={[{ id: null, name: t("preferences.anyColor") }, ...colors]}
+                data={[
+                  { id: null, name: t("preferences.anyColor") },
+                  ...colors,
+                ]}
                 value={
                   colors.find((color) => color.id === value) ?? {
                     id: null,
@@ -276,8 +302,10 @@ const Preferences: React.FC = () => {
   );
 };
 
-export default () => (
+const PreferencesScreen = () => (
   <NetworkBoundary>
     <Preferences />
   </NetworkBoundary>
 );
+
+export default PreferencesScreen;

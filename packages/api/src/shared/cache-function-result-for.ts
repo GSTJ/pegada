@@ -1,5 +1,5 @@
 export const cacheFunctionResultFor = <
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any -- A generic cache wrapper has to accept any function signature.
   T extends (...props: any[]) => any,
 >(
   fn: T,

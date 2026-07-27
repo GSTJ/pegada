@@ -11,7 +11,9 @@ export const useCurrentCityText = () => {
 
   const hasLatLng = myDog?.user?.latitude && myDog.user?.longitude;
 
-  const currentCityFallback = hasLatLng ? t("common.nearYou") : t("common.unknown");
+  const currentCityFallback = hasLatLng
+    ? t("common.nearYou")
+    : t("common.unknown");
 
   const currentCityText = myDog?.user?.city ?? currentCityFallback;
 

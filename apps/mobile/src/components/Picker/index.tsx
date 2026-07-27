@@ -1,15 +1,20 @@
+import type { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
+
+import type { ListRenderItemInfo } from "react-native";
+
 import { useState } from "react";
 import * as React from "react";
-import { ListRenderItemInfo, Pressable, useWindowDimensions } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Pressable, useWindowDimensions } from "react-native";
+
 import { BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
-import { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "styled-components/native";
 
 import { renderCustomBackdrop } from "@/components/custom-backdrop";
 import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
+
 import {
   CloseIcon,
   Container,
@@ -19,10 +24,10 @@ import {
   TitleContainer,
 } from "./styles";
 
-export type Item = {
+export interface Item {
   id: string | null;
   name: string;
-};
+}
 
 export interface InputPickerProps<T extends Item> extends Partial<
   Omit<BottomSheetFlatListProps<T>, "ref">
@@ -117,7 +122,9 @@ const UnForwardedPickerSheet = <T extends Item>(
   const { height: screenHeight } = useWindowDimensions();
 
   const data = filter
-    ? props.data.filter((item) => item.name.toLowerCase().includes(filter.toLowerCase()))
+    ? props.data.filter((item) =>
+        item.name.toLowerCase().includes(filter.toLowerCase()),
+      )
     : props.data;
 
   const backgroundStyle = {
@@ -144,7 +151,9 @@ const UnForwardedPickerSheet = <T extends Item>(
       value={value}
       onChange={onChange}
       onClose={onClose}
-      testID={itemTestIDPrefix ? `${itemTestIDPrefix}${item.id ?? "any"}` : undefined}
+      testID={
+        itemTestIDPrefix ? `${itemTestIDPrefix}${item.id ?? "any"}` : undefined
+      }
     />
   );
 
@@ -191,7 +200,9 @@ const UnForwardedPickerSheet = <T extends Item>(
   );
 };
 
-export const PickerSheet = React.forwardRef(UnForwardedPickerSheet) as <T extends Item>(
+export const PickerSheet = React.forwardRef(UnForwardedPickerSheet) as <
+  T extends Item,
+>(
   props: InputPickerProps<T> & { ref?: React.Ref<BottomSheetModal> },
 ) => React.ReactElement;
 
@@ -220,7 +231,11 @@ export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
       </Pressable>
       {/* Long/searchable lists (breeds, sizes, colors) keep a tall fixed sheet;
           direct PickerSheet users without snapPoints get content-fit sizing. */}
-      <PickerSheet snapPoints={["70%", "93%"]} {...props} ref={pickerSheetRef} />
+      <PickerSheet
+        snapPoints={["70%", "93%"]}
+        {...props}
+        ref={pickerSheetRef}
+      />
     </Container>
   );
 };

@@ -1,10 +1,11 @@
+import type { IProcessImageJobData } from "../topics";
+
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import { sendError } from "../../errors/errors";
 import { ImageProcessingService } from "../../services/image-processing-service";
 import { ImageService } from "../../services/image-service";
 import { assertAllowedImageUrl } from "../../shared/image-url";
-import { IProcessImageJobData } from "../topics";
 
 export const handleProcessImage = async (image: IProcessImageJobData) => {
   // The URL is validated on the way in and rebuilt from our own storage base

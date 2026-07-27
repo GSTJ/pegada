@@ -11,7 +11,7 @@ import { config } from "./config";
  * `https://images.pegada.app.example.com/x`, and a host-only match would
  * accept an arbitrary port on our own domain.
  */
-export type ImageStorageConfig = {
+export interface ImageStorageConfig {
   /** R2 bucket custom domain, e.g. https://images.pegada.app */
   publicImagesBaseUrl?: string;
   /** R2 S3 API endpoint, e.g. https://<account>.r2.cloudflarestorage.com */
@@ -20,7 +20,7 @@ export type ImageStorageConfig = {
   awsS3Endpoint?: string;
   awsBucketName: string;
   awsRegion: string;
-};
+}
 
 const originOf = (url: string | undefined) => {
   if (!url) return undefined;
@@ -70,12 +70,18 @@ export const allowedImageOrigins = () =>
     awsRegion: config.AWS_REGION,
   });
 
-export const isAllowedImageUrl = (url: string, origins = allowedImageOrigins()) => {
+export const isAllowedImageUrl = (
+  url: string,
+  origins = allowedImageOrigins(),
+) => {
   const origin = originOf(url);
   return Boolean(origin && origins.has(origin));
 };
 
-export const assertAllowedImageUrl = (url: string, origins = allowedImageOrigins()) => {
+export const assertAllowedImageUrl = (
+  url: string,
+  origins = allowedImageOrigins(),
+) => {
   if (isAllowedImageUrl(url, origins)) return;
 
   throw new Error("Image URL does not point at a configured storage origin");

@@ -1,8 +1,9 @@
 import { Stack } from "expo-router";
+
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-export default () => {
+const AuthLayout = () => {
   const theme = useTheme();
 
   const { t } = useTranslation();
@@ -49,3 +50,5 @@ export default () => {
     </Stack>
   );
 };
+
+export default AuthLayout;

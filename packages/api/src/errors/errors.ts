@@ -1,10 +1,10 @@
 import { config } from "../shared/config";
 import { posthog } from "../shared/posthog";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any -- Anything can be thrown, and this is the boundary that has to accept it.
 export const sendError = (error: any) => {
   if (config.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console -- Development-only mirror of what gets reported to PostHog.
     console.error(error);
   }
 
@@ -13,14 +13,14 @@ export const sendError = (error: any) => {
 
 export const logDebug = (...props: unknown[]) => {
   if (config.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console -- Development-only mirror of what gets reported to PostHog.
     console.log(...props);
   }
 };
 
 export const errorDebug = (...props: unknown[]) => {
   if (config.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console -- Development-only mirror of what gets reported to PostHog.
     console.error(...props);
   }
 };

@@ -22,7 +22,7 @@ export const DefaultConfigs = {
   // https://tailwindcss.com/docs/space
   spacing: {
     0.5: BASE_SPACING * 0.5,
-    1: BASE_SPACING * 1,
+    1: Number(BASE_SPACING),
     1.5: BASE_SPACING * 1.5,
     2: BASE_SPACING * 2,
     2.5: BASE_SPACING * 2.5,

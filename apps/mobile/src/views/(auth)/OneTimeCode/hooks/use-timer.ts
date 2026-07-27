@@ -1,6 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
-const useTimer = (seconds: number): [number, Dispatch<SetStateAction<number>>] => {
+import { useEffect, useState } from "react";
+
+const useTimer = (
+  seconds: number,
+): [number, Dispatch<SetStateAction<number>>] => {
   const [timer, setTimer] = useState(seconds);
 
   useEffect(() => {

@@ -1,12 +1,13 @@
+import type { BreedSlug } from "@pegada/shared/i18n/i18n";
+
+import { Namespace } from "@pegada/shared/i18n/types/types";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components/native";
-
-import { BreedSlug } from "@pegada/shared/i18n/i18n";
-import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { Input } from "@/components/Input";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { api } from "@/contexts/trpc-provider";
+
 import { InputPicker } from "../Picker";
 
 interface BreedPickerProps {
@@ -19,7 +20,12 @@ interface BreedPickerProps {
   testID?: string;
 }
 
-const BreedPicker = ({ breed, setBreed, hasAnyOption = false, ...props }: BreedPickerProps) => {
+const BreedPicker = ({
+  breed,
+  setBreed,
+  hasAnyOption = false,
+  ...props
+}: BreedPickerProps) => {
   const { t } = useTranslation();
   const [breedsData] = api.breed.all.useSuspenseQuery(undefined, {
     refetchOnMount: false,
@@ -55,7 +61,13 @@ const DisabledInput = styled(Input)`
 const BreedPickerLoading = () => {
   const { t } = useTranslation();
 
-  return <DisabledInput title={t("breedPicker.breed")} loading pointerEvents="none" />;
+  return (
+    <DisabledInput
+      title={t("breedPicker.breed")}
+      loading
+      pointerEvents="none"
+    />
+  );
 };
 
 const BreedPickerError = () => {
@@ -71,8 +83,13 @@ const BreedPickerError = () => {
   );
 };
 
-export default (props: BreedPickerProps) => (
-  <NetworkBoundary suspenseFallback={<BreedPickerLoading />} errorFallback={BreedPickerError}>
+const BreedPickerBoundary = (props: BreedPickerProps) => (
+  <NetworkBoundary
+    suspenseFallback={<BreedPickerLoading />}
+    errorFallback={BreedPickerError}
+  >
     <BreedPicker {...props} />
   </NetworkBoundary>
 );
+
+export default BreedPickerBoundary;

@@ -9,5 +9,7 @@ export const getSafeLocale = () => {
   const requestHeaders = headers() as unknown as UnsafeUnwrappedHeaders;
 
   // We can grab the locale info from there.
-  return requestHeaders.get("x-next-intl-locale") ?? Language.Default.toLowerCase();
+  return (
+    requestHeaders.get("x-next-intl-locale") ?? Language.Default.toLowerCase()
+  );
 };

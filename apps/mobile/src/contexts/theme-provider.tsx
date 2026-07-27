@@ -1,21 +1,25 @@
+import type { StorageDataTypes } from "@/services/storage";
+
+import type { ColorSchemeName } from "react-native";
+
 import { useContext, useEffect, useMemo, useState } from "react";
 import * as React from "react";
-import { Appearance, ColorSchemeName, Platform, Settings, useColorScheme } from "react-native";
+import { Appearance, Platform, Settings, useColorScheme } from "react-native";
+
+import * as SystemUI from "expo-system-ui";
+
+import { DarkTheme, LightTheme } from "@pegada/shared/themes/themes";
 import {
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationLightTheme,
   ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
-import * as SystemUI from "expo-system-ui";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
-
-import { DarkTheme, LightTheme } from "@pegada/shared/themes/themes";
 
 import { sendError } from "@/services/error-tracking";
 import {
   deleteData,
   getData,
-  StorageDataTypes,
   StorageKeys,
   storeData,
   Theme,
@@ -33,12 +37,12 @@ export type ActiveTheme = StorageDataTypes[StorageKeys.Theme] | null;
 // (see app/_layout.tsx), so the first visible frame already uses the right
 // theme instead of painting the system one and then flipping — the
 // white/dark "blink" at boot.
-export const storedThemePromise: Promise<ActiveTheme> = getData(StorageKeys.Theme).catch(
-  (error) => {
-    sendError(error);
-    return null;
-  },
-);
+export const storedThemePromise: Promise<ActiveTheme> = getData(
+  StorageKeys.Theme,
+).catch((error) => {
+  sendError(error);
+  return null;
+});
 
 // Mirrors the forced theme into iOS UserDefaults so the native layer can
 // apply it to the window BEFORE the splash screen renders on the next cold
@@ -63,7 +67,9 @@ export const useActiveTheme = () => {
   return context;
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
+  children,
+}) => {
   const colorScheme = useColorScheme();
   const [activeTheme, setActiveTheme] = useState<ActiveTheme>(null);
 
@@ -71,7 +77,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
   useEffect(() => {
     const applyStoredTheme = async () => {
       const storedTheme = await storedThemePromise;
-      if (storedTheme) Appearance.setColorScheme(storedTheme as ColorSchemeName);
+      if (storedTheme)
+        Appearance.setColorScheme(storedTheme as ColorSchemeName);
       persistNativeThemeOverride(storedTheme);
       setActiveTheme(storedTheme);
     };
@@ -114,7 +121,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
     };
   }, [theme]);
 
-  const handleActiveThemeChange = async (theme: ActiveTheme) => {
+  const handleActiveThemeChange = (theme: ActiveTheme) => {
     if (theme) Appearance.setColorScheme(theme as ColorSchemeName);
     persistNativeThemeOverride(theme);
     setActiveTheme(theme);
@@ -123,13 +130,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
     return storeData(StorageKeys.Theme, theme);
   };
 
+  const themeContextValue = useMemo(
+    () => ({ activeTheme, setActiveTheme: handleActiveThemeChange }),
+    [activeTheme],
+  );
+
   return (
-    <ThemeContext.Provider
-      value={{
-        activeTheme,
-        setActiveTheme: handleActiveThemeChange,
-      }}
-    >
+    <ThemeContext.Provider value={themeContextValue}>
       <NavigationThemeProvider value={navigationTheme}>
         <StyledThemeProvider theme={theme}>{children}</StyledThemeProvider>
       </NavigationThemeProvider>

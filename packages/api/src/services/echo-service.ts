@@ -15,7 +15,7 @@ export class EchoService {
     let authenticated = false;
     if (userId) {
       const user = await UserService.getUserById(userId);
-      authenticated = !!user;
+      authenticated = Boolean(user);
     }
 
     return { authenticated, forceUpdate };

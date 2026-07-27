@@ -1,7 +1,7 @@
-import { handleCallback } from "@vercel/queue";
+import type { IProcessImageJobData } from "@pegada/api/queue/topics";
 
 import { handleProcessImage } from "@pegada/api/queue/handlers/process-image";
-import { IProcessImageJobData } from "@pegada/api/queue/topics";
+import { handleCallback } from "@vercel/queue";
 
 export const maxDuration = 120;
 

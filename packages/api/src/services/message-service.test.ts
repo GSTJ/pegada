@@ -1,6 +1,6 @@
 import prisma from "@pegada/database";
-import { breedData } from "@pegada/database/__mocks__/breed-data";
-import { generateFakeUserWithDog } from "@pegada/database/__mocks__/generate-fake-user-with-dog";
+import { breedData } from "@pegada/database/fixtures/breed-data";
+import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
 
 import MessageService from "./message-service";
 
@@ -64,7 +64,9 @@ describe("MessageService.deleteMessage", () => {
       senderId: sender.id,
     });
 
-    const deleted = await prisma.message.findUnique({ where: { id: message.id } });
+    const deleted = await prisma.message.findUnique({
+      where: { id: message.id },
+    });
 
     expect(deleted?.deletedAt).toBeInstanceOf(Date);
   });
@@ -79,7 +81,9 @@ describe("MessageService.deleteMessage", () => {
       }),
     ).rejects.toThrow("the sender is not the owner of the message");
 
-    const untouched = await prisma.message.findUnique({ where: { id: message.id } });
+    const untouched = await prisma.message.findUnique({
+      where: { id: message.id },
+    });
 
     expect(untouched?.deletedAt).toBeNull();
   });
@@ -98,10 +102,16 @@ describe("MessageService.deleteMessage", () => {
   it("does not delete twice", async () => {
     const { sender, message } = await seedConversation();
 
-    await MessageService.deleteMessage({ messageId: message.id, senderId: sender.id });
+    await MessageService.deleteMessage({
+      messageId: message.id,
+      senderId: sender.id,
+    });
 
     await expect(
-      MessageService.deleteMessage({ messageId: message.id, senderId: sender.id }),
+      MessageService.deleteMessage({
+        messageId: message.id,
+        senderId: sender.id,
+      }),
     ).rejects.toThrow("Invalid messageId");
   });
 });

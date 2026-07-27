@@ -1,9 +1,12 @@
 import * as React from "react";
 
 import { Text } from "@/components/text";
+
 import { Container, SearchFieldContainer, TextField } from "./styles";
 
-export const SearchBar: React.FC<React.ComponentProps<typeof TextField>> = (props) => {
+export const SearchBar: React.FC<React.ComponentProps<typeof TextField>> = (
+  props,
+) => {
   return (
     <Container edges={["top"]}>
       <SearchFieldContainer>

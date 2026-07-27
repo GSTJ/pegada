@@ -1,5 +1,7 @@
+import type { CustomerInfo, PurchasesPackage } from "react-native-purchases";
+
 import { useEffect } from "react";
-import { CustomerInfo, PurchasesPackage } from "react-native-purchases";
+
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { identifyUser } from "@/services/get-initial-route-name";
@@ -107,7 +109,7 @@ payments.init();
 // Guarded so that a misbehaving / unconfigured RevenueCat (e.g. stub API key)
 // can't take down the rest of the app at module-import time.
 try {
-  payments.addCustomerInfoUpdateListener(async (customerInfo: CustomerInfo) => {
+  payments.addCustomerInfoUpdateListener((customerInfo: CustomerInfo) => {
     queryClient.setQueryData([PaymentCacheKey.CustomerInfo], customerInfo);
   });
 } catch {

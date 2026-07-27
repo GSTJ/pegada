@@ -1,8 +1,11 @@
+import type { AppStateStatus } from "react-native";
+
 import { useEffect } from "react";
-import { AppState, AppStateStatus } from "react-native";
+import { AppState } from "react-native";
 
 import { api } from "@/contexts/trpc-provider";
 import { sendError } from "@/services/error-tracking";
+
 import { syncMatchesWidget } from "./index";
 
 /**
@@ -42,10 +45,13 @@ export const useMatchesWidgetSync = () => {
 
     syncFromServer();
 
-    const subscription = AppState.addEventListener("change", (status: AppStateStatus) => {
-      if (status === "active") syncFromServer();
-      if (status === "background") syncFromCache();
-    });
+    const subscription = AppState.addEventListener(
+      "change",
+      (status: AppStateStatus) => {
+        if (status === "active") syncFromServer();
+        if (status === "background") syncFromCache();
+      },
+    );
 
     return () => {
       disposed = true;

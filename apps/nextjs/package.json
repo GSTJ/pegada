@@ -41,10 +41,10 @@
     "typescript": "*"
   },
   "devDependencies": {
-    "magic-oxlint-config": "^1.0.0",
-    "magic-tsconfig": "^1.0.0",
     "@types/node": "22.1.0",
     "@types/react": "^19.2.14",
-    "@types/react-dom": "~19.2.3"
+    "@types/react-dom": "~19.2.3",
+    "magic-oxlint-config": "^1.0.0",
+    "magic-tsconfig": "^1.0.0"
   }
 }

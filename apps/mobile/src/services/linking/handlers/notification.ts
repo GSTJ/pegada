@@ -1,4 +1,5 @@
-import * as Notifications from "expo-notifications";
+import type * as Notifications from "expo-notifications";
+
 import { router } from "expo-router";
 
 import { sendError } from "@/services/error-tracking";
@@ -19,21 +20,21 @@ const handleUnknownNotification = (url: string) => {
   sendError(new Error(`Unknown notification: ${url}`));
 };
 
-const handleMatchNotification = async (matchId: string, dogId: string) => {
+const handleMatchNotification = (matchId: string, dogId: string) => {
   return router.push({
     pathname: SceneName.NewMatch,
-    params: { matchDogId: dogId, matchId: matchId },
+    params: { matchDogId: dogId, matchId },
   });
 };
 
-const handleChatNotification = async (matchId: string, dogId: string) => {
+const handleChatNotification = (matchId: string, dogId: string) => {
   return router.push({
     pathname: `${SceneName.Chat}/[matchId]`,
     params: { dogId, matchId },
   });
 };
 
-export const customNotificationHandler = async (url?: string) => {
+export const customNotificationHandler = (url?: string) => {
   if (!url) return;
 
   if (url.startsWith(NotificationUrl.Match)) {

@@ -1,8 +1,9 @@
+import type { ImagePickerAsset } from "expo-image-picker";
+
 import mime from "react-native-mime-types";
-import { ImagePickerAsset } from "expo-image-picker";
 
 const getMimeTypeFromUri = (uri: string) => {
-  const fileName = uri?.substring(uri.lastIndexOf("/") + 1, uri.length);
+  const fileName = uri?.slice(uri.lastIndexOf("/") + 1);
   const mimeByFileName = mime.lookup(fileName);
   if (mimeByFileName) {
     return mimeByFileName;

@@ -12,7 +12,12 @@ export type EventType =
   | "TRANSFER"
   | "SUBSCRIBER_ALIAS";
 
-export type PeriodType = "TRIAL" | "INTRO" | "NORMAL" | "PROMOTIONAL" | "PREPAID";
+export type PeriodType =
+  | "TRIAL"
+  | "INTRO"
+  | "NORMAL"
+  | "PROMOTIONAL"
+  | "PREPAID";
 
 export type StoreKind =
   | "AMAZON"
@@ -40,7 +45,7 @@ export interface BaseEvent {
   event_timestamp_ms: number;
   store: StoreKind;
   environment: Environment;
-  subscriber_attributes?: any;
+  subscriber_attributes?: Record<string, unknown>;
   app_user_id?: string;
 }
 
@@ -61,7 +66,7 @@ export interface SubscriptionLifecycleEvent extends BaseEvent {
   tax_percentage: number | null;
   commission_percentage: number | null;
   takehome_percentage?: number | null;
-  subscriber_attributes: any;
+  subscriber_attributes: Record<string, unknown>;
   transaction_id: string;
   original_transaction_id: string;
   is_family_share: boolean;
@@ -147,7 +152,12 @@ export type ObjectType =
   | "product"
   | "package"
   | "offering";
-export type AppType = "amazon" | "app_store" | "mac_app_store" | "play_store" | "stripe";
+export type AppType =
+  | "amazon"
+  | "app_store"
+  | "mac_app_store"
+  | "play_store"
+  | "stripe";
 export type ProductType = "subscription" | "one_time";
 
 export interface BaseObject {
@@ -235,5 +245,5 @@ export interface Offering extends BaseObject {
   project_id: string;
   is_current: boolean;
   packages: ObjectList<Package>;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }

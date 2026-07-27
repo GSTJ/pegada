@@ -1,14 +1,16 @@
+import type { AppRouter } from "@pegada/api";
+
 import { useEffect } from "react";
 import * as React from "react";
 import { Alert } from "react-native";
+
 import Constants from "expo-constants";
+
+import { RequestHeaders } from "@pegada/shared/types/types";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
-
-import type { AppRouter } from "@pegada/api";
-import { RequestHeaders } from "@pegada/shared/types/types";
 
 import { setTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
@@ -24,18 +26,18 @@ export { type RouterInputs, type RouterOutputs } from "@pegada/api";
  */
 export const api = createTRPCReact<AppRouter>();
 
-type ResponseJSON = {
+interface ResponseJSON {
   error?: {
     json?: {
       message?: string;
     };
   };
-};
+}
 
 export const trpcQueryClient = api.createClient({
   links: [
     httpBatchLink({
-      url: config.API_URL + "/trpc",
+      url: `${config.API_URL}/trpc`,
       transformer: superjson,
       headers: async () => {
         const headers = new Map<RequestHeaders, string>();
@@ -77,7 +79,10 @@ export const trpcQueryClient = api.createClient({
           });
 
           if (unauthorized) {
-            Alert.alert(i18n.t("session.expired"), i18n.t("session.expiredMessage"));
+            Alert.alert(
+              i18n.t("session.expired"),
+              i18n.t("session.expiredMessage"),
+            );
             throw logout();
           }
         }
@@ -85,7 +90,7 @@ export const trpcQueryClient = api.createClient({
         return {
           ...res,
           // Already decoded here
-          json: async () => responsesJSON,
+          json: () => Promise.resolve(responsesJSON),
         };
       },
     }),

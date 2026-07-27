@@ -1,12 +1,14 @@
-import { useState } from "react";
-import {
-  Gesture,
+import type {
   GestureEventPayload,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
+import type { SharedValue } from "react-native-reanimated";
+
+import { useState } from "react";
+
+import { Gesture } from "react-native-gesture-handler";
 import {
   runOnJS,
-  SharedValue,
   useSharedValue,
   withSpring,
   withTiming,
@@ -54,13 +56,15 @@ const getSwipeType = (
   "worklet";
 
   const horizontalTrigger =
-    Math.abs(event.translationX) > ACTION_OFFSET || Math.abs(event.velocityX) > ACTION_VELOCITY;
+    Math.abs(event.translationX) > ACTION_OFFSET ||
+    Math.abs(event.velocityX) > ACTION_VELOCITY;
 
   if (horizontalTrigger && event.translationX < 0) return Swipe.Dislike;
   if (horizontalTrigger && event.translationX > 0) return Swipe.Like;
 
   const verticalTrigger =
-    Math.abs(event.translationY) > ACTION_OFFSET || Math.abs(event.velocityY) > ACTION_VELOCITY;
+    Math.abs(event.translationY) > ACTION_OFFSET ||
+    Math.abs(event.velocityY) > ACTION_VELOCITY;
 
   if (verticalTrigger && event.translationY < 0) return Swipe.Maybe;
 };
@@ -80,11 +84,19 @@ const gotoCoordinate = (
   const callbackY = willMoveX ? undefined : callback;
 
   if (willMoveX) {
-    translation.x.value = withTiming(coordinates.x ?? 0, animationConfig, callback);
+    translation.x.value = withTiming(
+      coordinates.x ?? 0,
+      animationConfig,
+      callback,
+    );
   }
 
   if (willMoveY) {
-    translation.y.value = withTiming(coordinates.y ?? 0, animationConfig, callbackY);
+    translation.y.value = withTiming(
+      coordinates.y ?? 0,
+      animationConfig,
+      callbackY,
+    );
   }
 };
 
@@ -111,7 +123,10 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
     setTimeout(() => setEnabled(true), duration);
   };
 
-  const gotoDirection = (swipeDirection: Swipe, animationConfig = { duration: 250 }) => {
+  const gotoDirection = (
+    swipeDirection: Swipe,
+    animationConfig = { duration: 250 },
+  ) => {
     "worklet";
 
     // Avoid concurrency, should gotoDirection only once
@@ -146,7 +161,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
 
       // Fire a tick exactly once per crossing of the decision threshold,
       // reusing the same rule `onEnd` uses to commit to a direction.
-      const crossedNow = !!getSwipeType(event);
+      const crossedNow = Boolean(getSwipeType(event));
       if (crossedNow && !hasCrossedThreshold.value) {
         runOnJS(haptics.selection)();
       }

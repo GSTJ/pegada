@@ -1,14 +1,18 @@
+import type { RootReducer } from "@/store/reducers";
+
 import { all, call, put, select, takeLatest } from "redux-saga/effects";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
 import { sendError } from "@/services/error-tracking";
-import { Actions, RootReducer } from "@/store/reducers";
+import { Actions } from "@/store/reducers";
 import { ListAction } from "@/store/reducers/dogs/list";
 
 // Without marking as unknown, saga complains about the swipe all type inference
 export function* fetchUsersRequest(): unknown {
-  const dogs: RootReducer["dogs"] = yield select((state: RootReducer) => state.dogs);
+  const dogs: RootReducer["dogs"] = yield select(
+    (state: RootReducer) => state.dogs,
+  );
 
   try {
     const response = yield call(getTrcpContext().client.swipe.all.query, {
@@ -29,11 +33,11 @@ export function* fetchUsersRequest(): unknown {
         hasMore: response.length === dogs.config.limit,
       }),
     );
-  } catch (err) {
-    sendError(err);
+  } catch (error) {
+    sendError(error);
 
-    const error = { message: i18n.t("common.somethingWrong") };
-    yield put(Actions.dogs.list.failure(error));
+    const failure = { message: i18n.t("common.somethingWrong") };
+    yield put(Actions.dogs.list.failure(failure));
   }
 }
 

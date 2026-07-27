@@ -53,18 +53,26 @@ describe("isAllowedImageUrl", () => {
   });
 
   it("allows the R2 API endpoint", () => {
-    expect(allows("https://account-id.r2.cloudflarestorage.com/pegava/dogs/1712345678")).toBe(true);
+    expect(
+      allows(
+        "https://account-id.r2.cloudflarestorage.com/pegava/dogs/1712345678",
+      ),
+    ).toBe(true);
   });
 
   it("allows the legacy virtual-hosted S3 bucket", () => {
-    expect(allows("https://pegada-dev.s3.sa-east-1.amazonaws.com/dogs/1712345678")).toBe(true);
+    expect(
+      allows("https://pegada-dev.s3.sa-east-1.amazonaws.com/dogs/1712345678"),
+    ).toBe(true);
   });
 
   it("allows the MinIO endpoint only when it is configured", () => {
     const minioUrl = "http://localhost:9002/pegada-dev/dogs/1712345678";
 
     expect(allows(minioUrl)).toBe(false);
-    expect(isAllowedImageUrl(minioUrl, buildAllowedImageOrigins(MINIO_CONFIG))).toBe(true);
+    expect(
+      isAllowedImageUrl(minioUrl, buildAllowedImageOrigins(MINIO_CONFIG)),
+    ).toBe(true);
   });
 
   it("rejects an arbitrary external host", () => {
@@ -84,7 +92,9 @@ describe("isAllowedImageUrl", () => {
     expect(allows("https://images.pegada.app.example.com/x")).toBe(false);
     expect(allows("https://evil-images.pegada.app/x")).toBe(false);
     expect(allows("https://example.com/images.pegada.app/x")).toBe(false);
-    expect(allows("https://images.pegada.app.example.com/images.pegada.app")).toBe(false);
+    expect(
+      allows("https://images.pegada.app.example.com/images.pegada.app"),
+    ).toBe(false);
   });
 
   it("rejects credentials, ports and schemes that differ from the allowed origin", () => {

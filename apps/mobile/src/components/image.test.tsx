@@ -1,11 +1,15 @@
 import { renderToStaticMarkup } from "react-dom/server";
+
 import { Image as ExpoImage } from "expo-image";
 
 import { Image } from "./image";
 
-jest.mock("expo-image", () => ({ Image: jest.fn(() => null) }));
+// `Partial<...>`: the factory replaces the one export this suite renders.
+jest.mock<Partial<typeof import("expo-image")>>("expo-image", () => ({
+  Image: jest.fn(() => null) as unknown as typeof import("expo-image").Image,
+}));
 
-const expoImage = ExpoImage as unknown as jest.Mock;
+const expoImage = jest.mocked(ExpoImage);
 
 const blurhash = "LEHV6nWB2yk8pyo0adR*.7kCMdnj";
 const uri = "https://images.pegada.app/luna.webp";

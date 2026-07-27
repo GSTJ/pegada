@@ -1,5 +1,8 @@
 module.exports = {
   preset: "ts-jest",
+  // Owned by the runner rather than repeated as `jest.clearAllMocks()` in every
+  // suite's beforeEach, where it is easy to forget one.
+  clearMocks: true,
   testEnvironment: "node",
   testPathIgnorePatterns: ["<rootDir>/dist/"],
   // Every suite that touches the database truncates the tables it uses in

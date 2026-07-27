@@ -1,9 +1,10 @@
+import type { Language } from "@pegada/shared/i18n/types/types";
+
 import prisma from "@pegada/database";
 import {
   NOTIFICATION_CATEGORY,
   NOTIFICATION_CHANNEL,
 } from "@pegada/shared/constants/notifications";
-import { Language } from "@pegada/shared/i18n/types/types";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import { PushNotificationService } from "./push-notification-service";
@@ -52,11 +53,15 @@ class MessageService {
       where: { id: matchId, deletedAt: null },
     });
 
-    if (!match || (match.requesterId !== senderId && match.responderId !== senderId)) {
+    if (
+      !match ||
+      (match.requesterId !== senderId && match.responderId !== senderId)
+    ) {
       throw new Error("Invalid matchId or senderId");
     }
 
-    const otherDogId = match.requesterId === senderId ? match.responderId : match.requesterId;
+    const otherDogId =
+      match.requesterId === senderId ? match.responderId : match.requesterId;
 
     const newMessage = await prisma.message.create({
       data: {
@@ -100,10 +105,13 @@ class MessageService {
       await PushNotificationService.enqueuePushNotification({
         to: otherDog.user.pushToken,
         body: content,
-        title: TranslationService.translate("server:notification.message.title", {
-          lng: this.language,
-          replace: { name: newMessage.sender.name },
-        }),
+        title: TranslationService.translate(
+          "server:notification.message.title",
+          {
+            lng: this.language,
+            replace: { name: newMessage.sender.name },
+          },
+        ),
         channelId: NOTIFICATION_CHANNEL.ChatMessage,
         categoryId: NOTIFICATION_CATEGORY.ChatMessage,
         // Lets the iOS Notification Service Extension intercept the push and
@@ -128,13 +136,21 @@ class MessageService {
    * Both ids are strings, so the arguments used to be trivially swappable at
    * the call site; taking a named object makes that a compile error.
    */
-  static async deleteMessage({ messageId, senderId }: { messageId: string; senderId: string }) {
+  static async deleteMessage({
+    messageId,
+    senderId,
+  }: {
+    messageId: string;
+    senderId: string;
+  }) {
     const message = await prisma.message.findUnique({
       where: { id: messageId, deletedAt: null },
     });
 
     if (!message || message.senderId !== senderId) {
-      throw new Error("Invalid messageId or the sender is not the owner of the message");
+      throw new Error(
+        "Invalid messageId or the sender is not the owner of the message",
+      );
     }
 
     await prisma.message.update({

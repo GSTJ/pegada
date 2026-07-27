@@ -1,8 +1,8 @@
-import { faker } from "@faker-js/faker";
-import { PlanType, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
-// import { ImageService } from '../../../packages/api/src/services/ImageService'
-// import { IMAGE_STATUS } from '../../../packages/shared/schemas/dogSchema'
+import { faker } from "@faker-js/faker";
+import { PlanType } from "@prisma/client";
+
 import prisma from "..";
 import { breedData } from "./breed-data";
 
@@ -10,7 +10,7 @@ type CreateUser = Parameters<typeof prisma.user.create>[0];
 export const generateFakeUserWithDog = async (
   dogData?: Partial<Prisma.DogCreateNestedManyWithoutUserInput["create"]>,
   userData?: Partial<CreateUser["data"]>,
-  _withBlurHash: boolean = false,
+  _withBlurHash = false,
 ) => {
   // oxlint-disable-next-line no-unassigned-vars -- assigned in commented-out code below (kept as stub for future blurhash work)
   let blurhash: string | undefined;
@@ -63,9 +63,9 @@ export const generateFakeUserWithDog = async (
             },
           },
           breed: {
-            connect: { id: faker.helpers.arrayElement(breedData).id! },
+            connect: { id: faker.helpers.arrayElement(breedData).id ?? "" },
           },
-          ...(dogData as any),
+          ...(dogData as Partial<Prisma.DogCreateWithoutUserInput>),
         },
       },
     },
@@ -78,8 +78,8 @@ export const generateFakeUserWithDog = async (
     },
   });
 
-  return {
-    user,
-    dog: user.dogs[0]!,
-  };
+  const [dog] = user.dogs;
+  if (!dog) throw new Error("Fake user was created without a dog");
+
+  return { user, dog };
 };

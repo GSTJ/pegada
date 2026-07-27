@@ -1,6 +1,6 @@
 import { all } from "redux-saga/effects";
 
-import fetchUsersRequest from "./list";
-import handleSwipeUserRequest from "./swipe";
+import listSaga from "./list";
+import swipeSaga from "./swipe";
 
-export default all([fetchUsersRequest, handleSwipeUserRequest]);
+export default all([listSaga, swipeSaga]);

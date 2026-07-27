@@ -1,37 +1,43 @@
+import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
+import type { Picture } from "@/components/ProfileImageUploader/utils";
+import type { RouterInputs } from "@/contexts/trpc-provider";
+
+import type { ScrollView } from "react-native";
+
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-import { magicToast } from "react-native-magic-toast";
+import { Platform } from "react-native";
+
 import { useRouter } from "expo-router";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { dogClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { format } from "date-fns";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
 import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components/native";
-
-import { dogClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import { Fill, KeyboardScreen, Row } from "@/components/layout";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
-import {
-  ProfileImagesUploader,
-  ProfileImagesUploaderProps,
-} from "@/components/ProfileImageUploader";
-import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
+import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
+import { pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { getTrcpContext } from "@/contexts/trcp-context";
-import { api, RouterInputs } from "@/contexts/trpc-provider";
+import { api } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/error-tracking";
 import { maskDate } from "@/services/mask-date";
 import { Actions } from "@/store/reducers";
-import { Container } from "./styles";
+
+import { Container, Gap, MultilineInput, WideColumn } from "./styles";
 
 type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
 type EditProfileForm = Partial<MyDogUpdateMutation>;
@@ -40,20 +46,21 @@ const EditProfile = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const { control, handleSubmit, setValue, getValues } = useForm<EditProfileForm>({
-    defaultValues: {
-      name: "",
-      bio: "",
-      gender: "MALE",
-      weight: undefined,
-      birthDate: "",
-      breedId: "",
-      color: undefined,
-      size: undefined,
-      images: pictures,
-    },
-    resolver: zodResolver(dogClientSchema),
-  });
+  const { control, handleSubmit, setValue, getValues } =
+    useForm<EditProfileForm>({
+      defaultValues: {
+        name: "",
+        bio: "",
+        gender: "MALE",
+        weight: undefined,
+        birthDate: "",
+        breedId: "",
+        color: undefined,
+        size: undefined,
+        images: pictures,
+      },
+      resolver: zodResolver(dogClientSchema),
+    });
 
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
     refetchOnMount: false,
@@ -140,7 +147,7 @@ const EditProfile = () => {
       birthDate: data.birthDate ? data.birthDate : null,
       breedId: data.breedId ? data.breedId : null,
       color: data.color ? data.color : null,
-      size: data.size ? data.size : null,
+      size: data.size ?? null,
       images: data.images?.map((image, index) => ({
         id: image.id,
         url: image.url,
@@ -152,18 +159,16 @@ const EditProfile = () => {
   });
 
   return (
-    <KeyboardAvoidingView
-      style={{ flexGrow: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View style={{ flex: 1 }}>
+    <KeyboardScreen behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <Fill>
         <Container
           ref={scrollViewRef}
-          style={{ flex: 1 }}
           {...scrollViewProps}
           contentContainerStyle={{
             padding: theme.spacing[4],
-            paddingBottom: theme.spacing[4] + scrollViewProps.contentContainerStyle.paddingBottom,
+            paddingBottom:
+              theme.spacing[4] +
+              scrollViewProps.contentContainerStyle.paddingBottom,
             paddingTop: nonDelayedHeaderHeight + theme.spacing[4],
           }}
           scrollEnabled={gesturesEnabled}
@@ -177,7 +182,9 @@ const EditProfile = () => {
               return (
                 <ProfileImagesUploader
                   value={value as Picture[]}
-                  onChange={(cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0]) => {
+                  onChange={(
+                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                  ) => {
                     // This getValues is needed to ensure the update happens
                     // correctly even when adding images fast.
                     onChange(cb(getValues("images") as Picture[]));
@@ -213,7 +220,7 @@ const EditProfile = () => {
             control={control}
             rules={{ required: true }}
             render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
+              <MultilineInput
                 testID="edit-profile-bio"
                 title={t("editProfile.bio")}
                 placeholder={t("editProfile.bioPlaceholder")}
@@ -223,17 +230,19 @@ const EditProfile = () => {
                 maxLength={500}
                 multiline
                 error={fieldState.error?.message}
-                style={{ minHeight: 75 }}
               />
             )}
           />
-          <View style={{ flexDirection: "row" }}>
-            <View style={{ flex: 1 }}>
+          <Row>
+            <Fill>
               <Controller
                 name="weight"
                 control={control}
                 rules={{ required: true }}
-                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                render={({
+                  field: { onChange, onBlur, value },
+                  fieldState,
+                }) => (
                   <Input
                     title={t("editProfile.weight")}
                     placeholder="1"
@@ -241,7 +250,7 @@ const EditProfile = () => {
                     onBlur={onBlur}
                     onChangeText={(value: string) =>
                       // Only allow numbers
-                      onChange(value.replace(/[^0-9]/g, ""))
+                      onChange(value.replaceAll(/[^0-9]/g, ""))
                     }
                     maxLength={3}
                     numberOfLines={1}
@@ -250,14 +259,17 @@ const EditProfile = () => {
                   />
                 )}
               />
-            </View>
-            <View style={{ width: theme.spacing[3] }} />
-            <View style={{ flex: 1.5 }}>
+            </Fill>
+            <Gap />
+            <WideColumn>
               <Controller
                 name="birthDate"
                 control={control}
                 rules={{ required: true }}
-                render={({ field: { onChange, onBlur, value, name }, fieldState }) => (
+                render={({
+                  field: { onChange, onBlur, value, name },
+                  fieldState,
+                }) => (
                   <Input
                     title={t("editProfile.birthDate")}
                     placeholder="DD/MM/YYYY"
@@ -265,7 +277,8 @@ const EditProfile = () => {
                     onBlur={onBlur}
                     onChangeText={(value: string) => {
                       const oldValue = getValues()[name];
-                      const isErasing = value.length < (oldValue ? oldValue.length : 0);
+                      const isErasing =
+                        value.length < (oldValue ? oldValue.length : 0);
 
                       if (isErasing) return onChange(value);
 
@@ -278,8 +291,8 @@ const EditProfile = () => {
                   />
                 )}
               />
-            </View>
-          </View>
+            </WideColumn>
+          </Row>
 
           <Controller
             name="breedId"
@@ -294,7 +307,7 @@ const EditProfile = () => {
             )}
           />
 
-          <View style={{ flexDirection: "row" }}>
+          <Row>
             <Controller
               name="size"
               control={control}
@@ -311,7 +324,7 @@ const EditProfile = () => {
               )}
             />
 
-            <View style={{ width: theme.spacing[3] }} />
+            <Gap />
             <Controller
               name="color"
               control={control}
@@ -327,7 +340,7 @@ const EditProfile = () => {
                 />
               )}
             />
-          </View>
+          </Row>
           <Controller
             name="gender"
             control={control}
@@ -336,7 +349,11 @@ const EditProfile = () => {
               <RadioButtons
                 title={t("editProfile.gender")}
                 data={[t("editProfile.male"), t("editProfile.female")]}
-                value={value === "MALE" ? t("editProfile.male") : t("editProfile.female")}
+                value={
+                  value === "MALE"
+                    ? t("editProfile.male")
+                    : t("editProfile.female")
+                }
                 onChange={(value) => {
                   onChange(value === t("editProfile.male") ? "MALE" : "FEMALE");
                 }}
@@ -353,13 +370,15 @@ const EditProfile = () => {
             {t("editProfile.saveProfile")}
           </Button>
         </BottomAction.Container>
-      </View>
-    </KeyboardAvoidingView>
+      </Fill>
+    </KeyboardScreen>
   );
 };
 
-export default () => (
+const EditProfileScreen = () => (
   <NetworkBoundary>
     <EditProfile />
   </NetworkBoundary>
 );
+
+export default EditProfileScreen;

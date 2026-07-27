@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { differenceInSeconds } from "date-fns";
 
 export interface LikeLimitReachedProps {
@@ -16,9 +17,8 @@ const formatTimeLeft = (totalSeconds: number) => {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 };
 export const useCountdown = (likeLimitResetAt: Date) => {
-  const [timeLeft, setTimeLeft] = useState(
-    formatTimeLeft(differenceInSeconds(likeLimitResetAt, new Date())),
-  );
+  const secondsLeft = differenceInSeconds(likeLimitResetAt, new Date());
+  const [timeLeft, setTimeLeft] = useState(formatTimeLeft(secondsLeft));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,10 +27,7 @@ export const useCountdown = (likeLimitResetAt: Date) => {
 
       setTimeLeft(formatTimeLeft(distanceInSeconds));
 
-      if (distanceInSeconds <= 0) {
-        clearInterval(interval);
-        return;
-      }
+      if (distanceInSeconds <= 0) clearInterval(interval);
     }, 1000); // Update every second
 
     return () => clearInterval(interval);

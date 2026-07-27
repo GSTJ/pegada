@@ -3,10 +3,10 @@ export const maskDate = (input: string): string => {
   const dateRegex = new RegExp(/^\d{0,2}\/?\d{0,2}\/?\d{0,4}$/);
 
   let maskedInput = input
-    .replace(/[^\d]/g, "") // Remove any non-digit characters
+    .replaceAll(/[^\d]/g, "") // Remove any non-digit characters
     .slice(0, 8); // Limit to a maximum of 8 digits
 
-  if (!dateRegex.exec(maskedInput)) {
+  if (!dateRegex.test(maskedInput)) {
     return ""; // If the input doesn't match the regex, return an empty string
   }
 

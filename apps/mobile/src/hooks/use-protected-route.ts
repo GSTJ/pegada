@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { useSegments } from "expo-router";
 
 import { getInitialRouteName } from "@/services/get-initial-route-name";

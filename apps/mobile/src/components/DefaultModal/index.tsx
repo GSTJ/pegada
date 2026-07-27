@@ -1,6 +1,7 @@
 import * as React from "react";
-import { useMagicModal } from "react-native-magic-modal";
+
 import { useTranslation } from "react-i18next";
+import { useMagicModal } from "react-native-magic-modal";
 
 import { Container, Description, OkButton, Title } from "./styles";
 
@@ -9,7 +10,10 @@ interface DefaultModalProps {
   description: string;
 }
 
-export const DefaultModal: React.FC<DefaultModalProps> = ({ title, description }) => {
+export const DefaultModal: React.FC<DefaultModalProps> = ({
+  title,
+  description,
+}) => {
   const { t } = useTranslation();
   const { hide } = useMagicModal();
 

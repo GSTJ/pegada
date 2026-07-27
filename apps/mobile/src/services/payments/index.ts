@@ -1,12 +1,15 @@
-import { Alert, Platform } from "react-native";
-import Purchases, {
+import type {
   CustomerInfo,
-  LOG_LEVEL,
   PurchasesOffering,
   PurchasesPackage,
 } from "react-native-purchases";
+
+import { Alert, Platform } from "react-native";
+
 import * as Device from "expo-device";
+
 import { get } from "lodash";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { config } from "@/services/config";
@@ -41,7 +44,8 @@ const isStubRevenueCatKey =
   revenueCatApiKey === "ci-stub" ||
   revenueCatApiKey.startsWith("ci-stub") ||
   revenueCatApiKey.startsWith("placeholder") ||
-  (!revenueCatApiKey.startsWith("appl_") && !revenueCatApiKey.startsWith("goog_"));
+  (!revenueCatApiKey.startsWith("appl_") &&
+    !revenueCatApiKey.startsWith("goog_"));
 
 const init = () => {
   if (__DEV__) {
@@ -65,7 +69,9 @@ const logIn = async () => {
   const userID = await getLoggedUserID();
 
   if (!userID) {
-    throw new Error("Make sure the login is only called when the user is authenticated");
+    throw new Error(
+      "Make sure the login is only called when the user is authenticated",
+    );
   }
 
   if (isStubRevenueCatKey) {
@@ -75,7 +81,10 @@ const logIn = async () => {
   try {
     const userData = await Purchases.logIn(userID);
 
-    queryClient.setQueryData([PaymentCacheKey.CustomerInfo], () => userData.customerInfo);
+    queryClient.setQueryData(
+      [PaymentCacheKey.CustomerInfo],
+      () => userData.customerInfo,
+    );
 
     // Asynchronously set the email and display name
     getTrcpContext()
@@ -354,10 +363,14 @@ const maestroMockPurchase = async (pkg: PurchasesPackage) => {
   };
 };
 
-const purchasePackage = async (...props: Parameters<typeof Purchases.purchasePackage>) => {
+const purchasePackage = async (
+  ...props: Parameters<typeof Purchases.purchasePackage>
+) => {
   if (isMaestroMockMode) {
     const [pkg] = props;
-    return maestroMockPurchase(pkg) as unknown as ReturnType<typeof Purchases.purchasePackage>;
+    return maestroMockPurchase(pkg) as unknown as ReturnType<
+      typeof Purchases.purchasePackage
+    >;
   }
 
   if (isIosSimulator) {
@@ -373,13 +386,15 @@ const purchasePackage = async (...props: Parameters<typeof Purchases.purchasePac
   try {
     const result = await Purchases.purchasePackage(...props);
     return result;
-  } catch (e) {
+  } catch (error) {
     // On Android, this happens when a transfer is needed (the user already purchased on another account)
-    if (get(e, "message") === "This product is already active for the user.") {
+    if (
+      get(error, "message") === "This product is already active for the user."
+    ) {
       return restorePurchases();
     }
 
-    throw e;
+    throw error;
   }
 };
 
@@ -398,7 +413,7 @@ const getPlan = (customerInfo?: CustomerInfo | null) => {
   }
 
   for (const entitlement of Object.values(Entitlement)) {
-    if (typeof customerInfo.entitlements.active[entitlement] !== "undefined") {
+    if (customerInfo.entitlements.active[entitlement] !== undefined) {
       return {
         ...customerInfo.entitlements.active[entitlement],
         userPlan: getPlanByEntitlement(entitlement),
@@ -418,7 +433,9 @@ const restorePurchases = async () => {
       "Simulator Detected",
       "Restore is not available in the IOS simulator. Please try on a real device.",
     );
-    throw new Error("Restore is not available in the IOS simulator. Please try on a real device.");
+    throw new Error(
+      "Restore is not available in the IOS simulator. Please try on a real device.",
+    );
   }
 
   await Purchases.restorePurchases();
@@ -430,7 +447,7 @@ export const payments = {
   purchasePackage,
   getPlan,
   logIn,
-  restorePurchases: restorePurchases,
+  restorePurchases,
   logOut: Purchases.logOut,
   getCustomerInfo,
   addCustomerInfoUpdateListener: Purchases.addCustomerInfoUpdateListener,

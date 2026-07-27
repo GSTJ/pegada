@@ -1,63 +1,23 @@
-import { PlanType } from "@prisma/client";
-import { addDays, setHours } from "date-fns";
-import { getDistance } from "geolib";
-import { z } from "zod";
+import type { DogService } from "./dog-service";
+import type { Language } from "@pegada/shared/i18n/types/types";
 
 import prisma from "@pegada/database";
 import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
-import { LikeLimitReached } from "@pegada/shared/errors/errors";
-import { Language } from "@pegada/shared/i18n/types/types";
+import { LikeLimitReachedError } from "@pegada/shared/errors/errors";
+import { PlanType } from "@prisma/client";
+import { addDays, setHours } from "date-fns";
 
-import { dogSafeSchema } from "../dtos/dog-dto";
 import { sendError } from "../errors/errors";
-import { DogService } from "./dog-service";
 import MatchService from "./match-service";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
 import { UserService } from "./user-service";
 
-type DogSafeSchema = z.infer<typeof dogSafeSchema>;
-
-type IWithUser = Omit<DogSafeSchema, "distance" | "user"> & {
-  user: { latitude?: number | null; longitude?: number | null; plan: PlanType };
-};
 export class SwipeService {
   language?: Language;
 
   constructor(props: { language?: Language }) {
     this.language = props.language;
-  }
-
-  static transformDistanceBetweenUserAndDog<T extends IWithUser, V extends IWithUser["user"]>(
-    dog: T,
-    user: V,
-  ): DogSafeSchema {
-    const { user: owner, ...dogWithoutOwner } = dog;
-
-    if (!owner?.latitude || !owner?.longitude || !user?.latitude || !user?.longitude) {
-      return {
-        ...dogWithoutOwner,
-        distance: null,
-        user: { plan: user.plan },
-      };
-    }
-
-    const distanceInMeters = getDistance(
-      { latitude: owner.latitude, longitude: owner.longitude },
-      {
-        latitude: user.latitude,
-        longitude: user.longitude,
-      },
-      1000,
-    );
-
-    const distance = distanceInMeters / 1000;
-
-    return {
-      ...dogWithoutOwner,
-      user: { plan: user.plan },
-      distance,
-    };
   }
 
   async sendLikeNotification(dogId: string) {
@@ -84,7 +44,13 @@ export class SwipeService {
     }
   }
 
-  async getRemainingDailyLikes({ userId, dogId }: { userId: string; dogId: string }) {
+  async getRemainingDailyLikes({
+    userId,
+    dogId,
+  }: {
+    userId: string;
+    dogId: string;
+  }) {
     const userPlan = await UserService.getSubscriptionType(userId);
 
     // Only apply daily swipe limit to free users
@@ -106,7 +72,9 @@ export class SwipeService {
     if (remainingSwipes > 0) return { remainingSwipes };
 
     // If the user has reached their daily swipe limit, return the time at which the limit will reset
-    const oldestLike = dailyLikeCount[dailyLikeCount.length - 1]!;
+    const oldestLike = dailyLikeCount.at(-1);
+    if (!oldestLike) return { remainingSwipes };
+
     return {
       remainingSwipes,
       likeLimitResetAt: addDays(oldestLike.updatedAt, 1),
@@ -119,7 +87,9 @@ export class SwipeService {
     swipeType,
     userId,
   }: {
-    requester: NonNullable<Awaited<ReturnType<(typeof DogService)["getFullDogByUserId"]>>>;
+    requester: NonNullable<
+      Awaited<ReturnType<(typeof DogService)["getFullDogByUserId"]>>
+    >;
     responderId: string;
     swipeType: "NOT_INTERESTED" | "MAYBE" | "INTERESTED";
     userId: string;
@@ -133,17 +103,18 @@ export class SwipeService {
       });
 
       if (remainingDailyLikes.likeLimitResetAt) {
-        throw new LikeLimitReached({
+        throw new LikeLimitReachedError({
           likeLimitResetAt: remainingDailyLikes.likeLimitResetAt,
         });
       }
     }
 
-    const { interest, previousStatus } = await SwipeService.createOrUpdateInterest(
-      requester.id,
-      responderId,
-      swipeType,
-    );
+    const { interest, previousStatus } =
+      await SwipeService.createOrUpdateInterest(
+        requester.id,
+        responderId,
+        swipeType,
+      );
 
     if (swipeType === "NOT_INTERESTED") {
       if (previousStatus) {
@@ -173,12 +144,19 @@ export class SwipeService {
       return { interest, remainingDailyLikes };
     }
 
-    const hasMutualInterest = await SwipeService.checkForMutualInterest(responderId, requester.id);
+    const hasMutualInterest = await SwipeService.checkForMutualInterest(
+      responderId,
+      requester.id,
+    );
 
     // Needs to have at least one approved image and no rejected images to be able to send notifications
-    const isRequesterShadowbanned = requester.images.some((image) => image.status === "REJECTED");
+    const isRequesterShadowbanned = requester.images.some(
+      (image) => image.status === "REJECTED",
+    );
 
-    const requesterHasImages = requester.images.some((image) => image.status === "APPROVED");
+    const requesterHasImages = requester.images.some(
+      (image) => image.status === "APPROVED",
+    );
 
     const canSendNotifications = !isRequesterShadowbanned && requesterHasImages;
 
@@ -218,7 +196,10 @@ export class SwipeService {
     return { interest, previousStatus };
   }
 
-  static async checkForMutualInterest(requesterId: string, responderId: string) {
+  static async checkForMutualInterest(
+    requesterId: string,
+    responderId: string,
+  ) {
     const mutualInterest = await prisma.interest.findFirst({
       where: {
         requesterId,

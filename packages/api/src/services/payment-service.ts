@@ -1,15 +1,17 @@
-import { PlanType } from "@prisma/client";
+import type { Event } from "../types/revenuecat";
 
 import prisma from "@pegada/database";
+import { PlanType } from "@prisma/client";
 
-import { Event } from "../types/revenuecat";
 import { UserService } from "./user-service";
 
 enum RevenueCatEntitlement {
   PREMIUM = "premium",
 }
 
-type RevenueCatEvent = { event: Event };
+interface RevenueCatEvent {
+  event: Event;
+}
 
 const isAnonymous = (alias: string) => alias.startsWith("$RCAnonymousID:");
 const findNonAnonymousUserIds = (aliases: string[]): string[] => {
@@ -26,7 +28,7 @@ const getPlanByEntitlements = (entitlements: string[] | null) => {
   return PlanType.FREE;
 };
 class PaymentService {
-  async handleRevenueCatEvent({ event }: RevenueCatEvent) {
+  handleRevenueCatEvent({ event }: RevenueCatEvent) {
     const { app_user_id: userID, type } = event;
 
     switch (type) {
@@ -37,11 +39,12 @@ class PaymentService {
         });
       }
       case "RENEWAL":
-      case "INITIAL_PURCHASE":
+      case "INITIAL_PURCHASE": {
         if (isAnonymous(userID)) return;
 
         const plan = getPlanByEntitlements(event.entitlement_ids);
         return this.createSubscription({ userID, plan });
+      }
 
       case "EXPIRATION":
         if (isAnonymous(userID)) return;
@@ -54,7 +57,13 @@ class PaymentService {
     }
   }
 
-  async createSubscription({ userID, plan }: { userID: string; plan: PlanType }) {
+  async createSubscription({
+    userID,
+    plan,
+  }: {
+    userID: string;
+    plan: PlanType;
+  }) {
     await UserService.updateUserById(userID, { plan });
   }
 

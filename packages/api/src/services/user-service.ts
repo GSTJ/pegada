@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 
 import prisma from "@pegada/database";
 
@@ -33,12 +33,18 @@ export class UserService {
         });
         await tx.interest.deleteMany({
           where: {
-            OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+            OR: [
+              { requesterId: { in: dogIds } },
+              { responderId: { in: dogIds } },
+            ],
           },
         });
         await tx.match.deleteMany({
           where: {
-            OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+            OR: [
+              { requesterId: { in: dogIds } },
+              { responderId: { in: dogIds } },
+            ],
           },
         });
         await tx.image.deleteMany({ where: { dogId: { in: dogIds } } });
@@ -62,7 +68,10 @@ export class UserService {
     });
   }
 
-  static updateUserById(id: string, data: Partial<Omit<User, "email" | "id" | "createdAt">>) {
+  static updateUserById(
+    id: string,
+    data: Partial<Omit<User, "email" | "id" | "createdAt">>,
+  ) {
     return prisma.user.update({
       where: { id },
       data,
@@ -78,7 +87,7 @@ export class UserService {
     return user?.plan;
   }
 
-  static async createUser(data: User) {
+  static createUser(data: User) {
     return prisma.user.create({
       data,
     });

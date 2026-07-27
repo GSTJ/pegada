@@ -1,13 +1,15 @@
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+
 import { useRef } from "react";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
 
 import { Language } from "@pegada/shared/i18n/types/types";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "styled-components/native";
 
 import Translate from "@/assets/images/Translate.svg";
 import { PickerSheet } from "@/components/Picker";
 import { sendError } from "@/services/error-tracking";
+
 import { Config } from "./Config";
 
 // Not translating languages for now, as it's useful to
@@ -29,7 +31,9 @@ export const LanguageConfig = () => {
 
   const theme = useTheme();
 
-  const value = languagesPickerData.find(({ id }) => id === currentLanguage) ?? {
+  const value = languagesPickerData.find(
+    ({ id }) => id === currentLanguage,
+  ) ?? {
     id: currentLanguage,
     name: LANGUAGES[Language.Default],
   };
@@ -37,7 +41,10 @@ export const LanguageConfig = () => {
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
   return (
-    <Config.Root testID="profile-open-language" onPress={() => pickerSheetRef?.current?.present()}>
+    <Config.Root
+      testID="profile-open-language"
+      onPress={() => pickerSheetRef?.current?.present()}
+    >
       <Translate width={22} height={22} fill={theme.colors.text} />
 
       <Config.Container>
@@ -54,7 +61,9 @@ export const LanguageConfig = () => {
         data={languagesPickerData}
         itemTestIDPrefix="language-item-"
         onChange={(item) => {
-          i18n.changeLanguage(item.id as keyof typeof LANGUAGES).catch(sendError);
+          i18n
+            .changeLanguage(item.id as keyof typeof LANGUAGES)
+            .catch(sendError);
         }}
         ref={pickerSheetRef}
       />

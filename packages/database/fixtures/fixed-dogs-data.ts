@@ -2,7 +2,8 @@ import { createId } from "@paralleldrive/cuid2";
 
 import { breedData } from "./breed-data";
 
-const shihtzuId = breedData.find((breed) => breed.name === "Shih-tzu")?.id as string;
+const shihtzuId = breedData.find((breed) => breed.name === "Shih-tzu")
+  ?.id as string;
 
 export const userId = createId();
 export const userTwoId = createId();

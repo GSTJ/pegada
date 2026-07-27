@@ -1,15 +1,21 @@
+import type { LikeLimitReachedProps } from "@/components/LikeLimitReached/use-countdown";
+
 import { useEffect } from "react";
 import * as React from "react";
-import { magicModal, useMagicModal } from "react-native-magic-modal";
+
 import { useRouter } from "expo-router";
-import { Trans, useTranslation } from "react-i18next";
 
 import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
+import { Trans, useTranslation } from "react-i18next";
+import { magicModal, useMagicModal } from "react-native-magic-modal";
 
 import { Description, OkButton, Title } from "@/components/DefaultModal/styles";
-import { Container, CountdownContainer, Header } from "@/components/LikeLimitReached/styles";
 import {
-  LikeLimitReachedProps,
+  Container,
+  CountdownContainer,
+  Header,
+} from "@/components/LikeLimitReached/styles";
+import {
   useCountdown,
   ZERO_TIME_LEFT,
 } from "@/components/LikeLimitReached/use-countdown";
@@ -18,9 +24,12 @@ import { Text } from "@/components/text";
 import { useEligibleForTrial } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
 import { SceneName } from "@/types/scene-name";
-import { CloseButton } from "@/views/UpgradeWall/styles";
 
-const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt }) => {
+import { PinnedCloseButton } from "./styles";
+
+const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
+  likeLimitResetAt,
+}) => {
   const timeLeft = useCountdown(likeLimitResetAt);
   const { t } = useTranslation();
   const router = useRouter();
@@ -56,7 +65,7 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt })
         <Text>{t("likeLimit.remaining")}</Text>
       </CountdownContainer>
       <OkButton
-        onPress={async () => {
+        onPress={() => {
           hide();
 
           // Need to wait a bit to avoid the modal transition
@@ -65,11 +74,13 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt })
           }, 150);
         }}
       >
-        {isEligibleForTrial ? t("likeLimit.winFreeTrial") : t("likeLimit.getPremium")}
+        {isEligibleForTrial
+          ? t("likeLimit.winFreeTrial")
+          : t("likeLimit.getPremium")}
       </OkButton>
-      <CloseButton style={{ position: "absolute", top: 10, right: 10 }} onPress={() => hide()}>
+      <PinnedCloseButton onPress={() => hide()}>
         <CloseIcon width={10} height={10} />
-      </CloseButton>
+      </PinnedCloseButton>
     </Container>
   );
 };

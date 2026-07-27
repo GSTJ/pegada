@@ -1,10 +1,9 @@
-import { ExpoConfig } from "expo/config";
+import type { ExpoConfig } from "expo/config";
 
 // The primary/fallback locale's native strings (permission descriptions,
 // etc.), also used verbatim by the `locales` map below. Reused here to
 // seed Android's base values/strings.xml via withDefaultLocaleStrings,
 // see that plugin's file for why this is needed.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
 
 // The posthog-react-native/expo config plugin wires a sourcemap-upload step
@@ -74,7 +73,8 @@ const config: ExpoConfig = {
       "react-native-maps",
       {
         iosGoogleMapsApiKey: process.env.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY,
-        androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
+        androidGoogleMapsApiKey:
+          process.env.EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY,
       },
     ],
     [
@@ -86,7 +86,8 @@ const config: ExpoConfig = {
         },
         android: {
           // https://docs.page/invertase/react-native-google-mobile-ads/european-user-consent#handling-consent
-          extraProguardRules: "-keep class com.google.android.gms.internal.consent_sdk.** { *; }",
+          extraProguardRules:
+            "-keep class com.google.android.gms.internal.consent_sdk.** { *; }",
         },
       },
     ],
@@ -178,14 +179,17 @@ const config: ExpoConfig = {
     [
       "expo-location",
       {
-        locationWhenInUsePermission: "The app uses your location to find doggies near you.",
+        locationWhenInUsePermission:
+          "The app uses your location to find doggies near you.",
       },
     ],
     [
       "expo-image-picker",
       {
-        photosPermission: "The app allows you to choose photos for your doggie's profile.",
-        cameraPermission: "The app allows you to take photos for your doggie's profile.",
+        photosPermission:
+          "The app allows you to choose photos for your doggie's profile.",
+        cameraPermission:
+          "The app allows you to take photos for your doggie's profile.",
       },
     ],
     // Wires the source-controlled `Pegada.storekit` fixture into the iOS
@@ -200,7 +204,10 @@ const config: ExpoConfig = {
     // locale-tagged resource file, absent from the default one) and
     // FAILS gradlew bundleRelease -- this is what killed the 2026-07-05
     // overnight EAS cloud build. See withDefaultLocaleStrings.js.
-    ["./plugins/with-default-locale-strings", { stringsByKey: defaultLocaleNativeStrings }],
+    [
+      "./plugins/with-default-locale-strings",
+      { stringsByKey: defaultLocaleNativeStrings },
+    ],
     // Applies the user's in-app theme choice (mirrored to NSUserDefaults by
     // ThemeProvider) to the iOS window before the splash screen renders, so
     // a forced dark theme boots with a dark splash instead of blinking
@@ -210,7 +217,9 @@ const config: ExpoConfig = {
     // posthogSourcemapsEnabled above) -- omitted entirely from the plugins
     // list otherwise, so a plain local build never has the upload step in
     // its generated Xcode/Gradle project.
-    ...(posthogSourcemapsEnabled ? (["posthog-react-native/expo"] as const) : []),
+    ...(posthogSourcemapsEnabled
+      ? (["posthog-react-native/expo"] as const)
+      : []),
   ],
   androidStatusBar: {
     barStyle: "dark-content",

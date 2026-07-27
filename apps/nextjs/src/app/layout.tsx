@@ -1,13 +1,15 @@
 import "./globals.css";
+import type { Metadata } from "next";
 
-import { Metadata } from "next";
 import { Epilogue } from "next/font/google";
+
 import { Analytics } from "@vercel/analytics/react";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
+// oxlint-disable-next-line new-cap -- next/font loaders are capitalised functions, not constructors
 const epilogue = Epilogue({
   variable: "--font-epilogue",
   subsets: ["latin"],
@@ -21,7 +23,7 @@ export const generateMetadata = () => {
   } satisfies Metadata;
 };
 
-export default async ({ children }: { children: React.ReactNode }) => {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const locale = getSafeLocale();
 
   return (
@@ -31,3 +33,5 @@ export default async ({ children }: { children: React.ReactNode }) => {
     </html>
   );
 };
+
+export default RootLayout;

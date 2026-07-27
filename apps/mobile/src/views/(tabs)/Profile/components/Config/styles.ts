@@ -1,4 +1,5 @@
 import { Pressable } from "react-native";
+
 import styled from "styled-components/native";
 
 import { Text } from "@/components/text";
@@ -12,6 +13,12 @@ export const Root = styled(Pressable)`
 
 export const Container = styled.View`
   flex: 1;
+`;
+
+/** Fixed-width slot so every row's icon lines up, whatever its own size. */
+export const IconSlot = styled.View`
+  width: 22px;
+  align-items: center;
 `;
 
 export const ArrowContainer = styled.View`

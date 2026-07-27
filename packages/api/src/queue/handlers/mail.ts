@@ -1,7 +1,8 @@
+import type { IMailJobData } from "../topics";
+
 import { VERIFY_CODE_TEMPLATE } from "../../mails/verify-code-template";
 import { MailService } from "../../services/mail-service";
 import { TranslationService } from "../../services/translation-service";
-import { IMailJobData } from "../topics";
 
 export const handleMail = async ({ code, language, email }: IMailJobData) => {
   const emailHtml = await MailService.compileTemplate({

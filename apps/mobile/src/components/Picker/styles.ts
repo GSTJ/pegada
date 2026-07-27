@@ -13,9 +13,9 @@ export const TitleContainer = styled.View`
   border-color: ${(props) => props.theme.colors.border};
 `;
 
-type SelectedItemProps = {
+interface SelectedItemProps {
   selected?: boolean;
-};
+}
 
 export const SelectItem = styled(PressableArea)<SelectedItemProps>`
   padding: ${(props) => props.theme.spacing[4]}px;
@@ -26,7 +26,8 @@ export const SelectItem = styled(PressableArea)<SelectedItemProps>`
 `;
 
 export const SearchContainer = styled.View`
-  padding: ${(props) => props.theme.spacing[2]}px ${(props) => props.theme.spacing[1.5]}px;
+  padding: ${(props) => props.theme.spacing[2]}px
+    ${(props) => props.theme.spacing[1.5]}px;
   border-bottom-width: ${(props) => props.theme.stroke.md}px;
   border-color: ${(props) => props.theme.colors.border};
   background-color: ${(props) => props.theme.colors.background};
@@ -40,7 +41,8 @@ export const SearchInput = styled(BottomSheetTextInput).attrs((props) => ({
   font-family: ${(props) => props.theme.typography.fontFamily.medium};
   font-weight: medium;
   font-size: ${(props) => props.theme.typography.sizes.xs.size}px;
-  padding: ${(props) => props.theme.spacing[1.5]}px ${(props) => props.theme.spacing[2]}px;
+  padding: ${(props) => props.theme.spacing[1.5]}px
+    ${(props) => props.theme.spacing[2]}px;
   border-radius: ${(props) => props.theme.radii.sm}px;
   border-width: ${(props) => props.theme.stroke.md}px;
   border-color: ${(props) => props.theme.colors.border};

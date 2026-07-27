@@ -29,21 +29,30 @@ describe("dogInputSchema images", () => {
   });
 
   it("rejects loopback and private addresses", () => {
-    expect(parse("http://localhost:9002/pegada-dev/dogs/1").success).toBe(false);
-    expect(parse("http://127.0.0.1:9002/pegada-dev/dogs/1").success).toBe(false);
+    expect(parse("http://localhost:9002/pegada-dev/dogs/1").success).toBe(
+      false,
+    );
+    expect(parse("http://127.0.0.1:9002/pegada-dev/dogs/1").success).toBe(
+      false,
+    );
     expect(parse("http://10.0.0.5/dogs/1").success).toBe(false);
-    expect(parse("http://169.254.169.254/latest/meta-data/").success).toBe(false);
-  });
-
-  it("rejects a host that only contains the bucket host as a substring", () => {
-    expect(parse(`${BUCKET_URL}.example.com/dogs/1`).success).toBe(false);
-    expect(parse(`https://example.com${BUCKET_URL.replace("https://", "/")}/dogs/1`).success).toBe(
+    expect(parse("http://169.254.169.254/latest/meta-data/").success).toBe(
       false,
     );
   });
 
+  it("rejects a host that only contains the bucket host as a substring", () => {
+    expect(parse(`${BUCKET_URL}.example.com/dogs/1`).success).toBe(false);
+    expect(
+      parse(`https://example.com${BUCKET_URL.replace("https://", "/")}/dogs/1`)
+        .success,
+    ).toBe(false);
+  });
+
   it("rejects a different port on the bucket host", () => {
-    expect(parse(`${BUCKET_URL.replace(".com", ".com:8080")}/dogs/1`).success).toBe(false);
+    expect(
+      parse(`${BUCKET_URL.replace(".com", ".com:8080")}/dogs/1`).success,
+    ).toBe(false);
   });
 
   it("rejects every bad URL in a list that also contains a good one", () => {
@@ -58,18 +67,23 @@ describe("dogInputSchema images", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues.map((issue) => issue.path)).toEqual([["images", 1, "url"]]);
+    expect(result.error?.issues.map((issue) => issue.path)).toEqual([
+      ["images", 1, "url"],
+    ]);
   });
 
   it("keeps the check through .partial(), which is what myDog.update accepts", () => {
     const partial = dogInputSchema.partial();
 
     expect(
-      partial.safeParse({ images: [{ url: `${BUCKET_URL}/dogs/1`, position: 0 }] }).success,
+      partial.safeParse({
+        images: [{ url: `${BUCKET_URL}/dogs/1`, position: 0 }],
+      }).success,
     ).toBe(true);
     expect(
-      partial.safeParse({ images: [{ url: "https://example.com/payload.png", position: 0 }] })
-        .success,
+      partial.safeParse({
+        images: [{ url: "https://example.com/payload.png", position: 0 }],
+      }).success,
     ).toBe(false);
     expect(partial.safeParse({ name: "Rex" }).success).toBe(true);
   });

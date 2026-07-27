@@ -4,9 +4,22 @@ import { z } from "zod";
 
 const BIRTHDAY_FORMAT = "dd/MM/yyyy";
 
-export const DOG_COLORS = ["BLACK", "WHITE", "BROWN", "TRICOLOR", "ALBINO", "GOLDEN"] as const;
+export const DOG_COLORS = [
+  "BLACK",
+  "WHITE",
+  "BROWN",
+  "TRICOLOR",
+  "ALBINO",
+  "GOLDEN",
+] as const;
 
-export const DOG_SIZES = ["EXTRASMALL", "SMALL", "MEDIUM", "LARGE", "GIANT"] as const;
+export const DOG_SIZES = [
+  "EXTRASMALL",
+  "SMALL",
+  "MEDIUM",
+  "LARGE",
+  "GIANT",
+] as const;
 
 export const DOG_GENDERS = ["MALE", "FEMALE"] as const;
 
@@ -67,7 +80,7 @@ const dogSharedSchema = {
     })
     .refine(
       (date) => {
-        return !isNaN(date.getTime());
+        return !Number.isNaN(date.getTime());
       },
       // t('formErrors.dateFormatWrong')
       { params: { i18n: "formErrors.dateFormatWrong" } },
@@ -151,16 +164,17 @@ export const IMAGE_STATUS = {
  * packages/api/src/shared/dogInputSchema.ts, which is what the tRPC routes
  * accept. Don't wire this schema straight to a mutation.
  */
+/** One stored image, as the server accepts it. */
+const serverImageSchema = z.object({
+  id: z.string().optional(),
+  url: z.string(),
+  position: z.number(),
+});
+
 export const dogServerSchema = z.object({
   ...dogSharedSchema,
   images: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        url: z.string(),
-        position: z.number(),
-      }),
-    )
+    .array(serverImageSchema)
     .refine(
       (value) => {
         const hasImage = value.some((image) => image.url);
@@ -171,7 +185,9 @@ export const dogServerSchema = z.object({
     )
     .refine(
       (value) => {
-        const imagesLoading = value.some((image) => image.url && !image.url.startsWith("http"));
+        const imagesLoading = value.some(
+          (image) => image.url && !image.url.startsWith("http"),
+        );
         return !imagesLoading;
       },
       // t('formErrors.waitImageUpload')
@@ -179,13 +195,14 @@ export const dogServerSchema = z.object({
     ),
 });
 
+/** One image as the client holds it — the URL is absent while it uploads. */
+const clientImageSchema = z.object({
+  id: z.string().optional(),
+  url: z.string().optional(),
+});
+
 const clientImages = z
-  .array(
-    z.object({
-      id: z.string().optional(),
-      url: z.string().optional(),
-    }),
-  )
+  .array(clientImageSchema)
   .refine(
     (value) => {
       const hasImage = value.some((image) => image.url);
@@ -196,7 +213,9 @@ const clientImages = z
   )
   .refine(
     (value) => {
-      const imagesLoading = value.some((image) => image.url && !image.url.startsWith("http"));
+      const imagesLoading = value.some(
+        (image) => image.url && !image.url.startsWith("http"),
+      );
       return !imagesLoading;
     },
     // t('formErrors.waitImageUpload')

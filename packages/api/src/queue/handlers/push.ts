@@ -1,10 +1,17 @@
-import { Expo, ExpoPushMessage } from "expo-server-sdk";
+import type {
+  ICheckPushNotificationReceiptsJobData,
+  ISendNotificationJobData,
+} from "../topics";
+
+import type { ExpoPushMessage } from "expo-server-sdk";
+
+import { Expo } from "expo-server-sdk";
 
 import { sendError } from "../../errors/errors";
 import { UserService } from "../../services/user-service";
 import { config } from "../../shared/config";
 import { enqueue } from "../enqueue";
-import { ICheckPushNotificationReceiptsJobData, ISendNotificationJobData, TOPICS } from "../topics";
+import { TOPICS } from "../topics";
 
 const RECEIPT_EXPIRATION_MIN = 24 * 60 * 60; /** 24 hours */
 export const RECEIPT_CHECK_DELAY_SECONDS = 35 * 60; /** 35 minutes */
@@ -22,15 +29,17 @@ const handlePushError = async (errorMessage: string, pushToken: string) => {
   if (errorMessage === "DeviceNotRegistered") {
     try {
       await UserService.blacklistPushToken(pushToken);
-    } catch (err) {
-      sendError(err);
+    } catch (error) {
+      sendError(error);
     }
   }
 
   sendError(newError);
 };
 
-export const handleSendPushNotification = async (data: ISendNotificationJobData) => {
+export const handleSendPushNotification = async (
+  data: ISendNotificationJobData,
+) => {
   const message: ExpoPushMessage = {
     sound: "default",
     priority: "high",
@@ -44,24 +53,23 @@ export const handleSendPushNotification = async (data: ISendNotificationJobData)
 
   const tickets = await expo.sendPushNotificationsAsync([message]);
 
-  const receipts: { id: string; pushToken: string }[] = [];
+  // Error codes: https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
+  await Promise.all(
+    tickets.flatMap((ticket) =>
+      ticket.status === "error" && ticket.details?.error
+        ? [handlePushError(ticket.details.error, pushToken)]
+        : [],
+    ),
+  );
 
-  for (const ticket of tickets) {
-    // Error codes: https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
-    if (ticket.status === "error") {
-      if (ticket.details && ticket.details.error) {
-        await handlePushError(ticket.details.error, pushToken);
-      }
-      continue;
-    }
+  // Tickets for notifications that could not be enqueued have no id.
+  const receipts = tickets.flatMap((ticket) =>
+    ticket.status === "error" || !ticket.id
+      ? []
+      : [{ id: ticket.id, pushToken }],
+  );
 
-    // Tickets for notifications that could not be enqueued have no id.
-    if (ticket.id) {
-      receipts.push({ id: ticket.id, pushToken });
-    }
-  }
-
-  if (receipts.length) {
+  if (receipts.length > 0) {
     await enqueue(
       TOPICS.CHECK_PUSH_RECEIPTS,
       { receipts },
@@ -81,22 +89,26 @@ export const handleCheckPushReceipts = async ({
     incomingReceiptsData.map(({ id }) => id),
   );
 
-  const nonProcessedReceipts: typeof incomingReceiptsData = [];
+  const tokenFor = (id: string) =>
+    incomingReceiptsData.find((receipt) => receipt.id === id)
+      ?.pushToken as string;
 
-  for (const [id, receipt] of Object.entries(receipts)) {
-    const pushToken = incomingReceiptsData.find((r) => r.id === id)?.pushToken as string;
+  const entries = Object.entries(receipts);
 
-    if (receipt.status === "error" && receipt.details?.error) {
-      await handlePushError(receipt.details.error, pushToken);
-      continue;
-    }
+  await Promise.all(
+    entries.flatMap(([id, receipt]) =>
+      receipt.status === "error" && receipt.details?.error
+        ? [handlePushError(receipt.details.error, tokenFor(id))]
+        : [],
+    ),
+  );
 
-    if (receipt.status === "ok") continue;
+  // Anything neither errored nor confirmed is still in flight: ask again later.
+  const nonProcessedReceipts: typeof incomingReceiptsData = entries
+    .filter(([, receipt]) => receipt.status !== "ok" && !receipt.details?.error)
+    .map(([id]) => ({ id, pushToken: tokenFor(id) }));
 
-    nonProcessedReceipts.push({ id, pushToken });
-  }
-
-  if (!nonProcessedReceipts.length) return;
+  if (nonProcessedReceipts.length === 0) return;
 
   sendError(
     `Some push notifications weren't processed. Receipts: ${JSON.stringify(nonProcessedReceipts)}`,

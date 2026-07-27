@@ -33,21 +33,23 @@ export const swipeRouter = createTRPCRouter({
 
     return potentialMatches;
   }),
-  swipe: protectedProcedure.input(swipeSchema).mutation(async ({ ctx, input }) => {
-    const dog = await DogService.getFullDogByUserId(ctx.session.user.id);
+  swipe: protectedProcedure
+    .input(swipeSchema)
+    .mutation(async ({ ctx, input }) => {
+      const dog = await DogService.getFullDogByUserId(ctx.session.user.id);
 
-    if (!dog) {
-      throw new Error("Dog not found");
-    }
+      if (!dog) {
+        throw new Error("Dog not found");
+      }
 
-    const swipeService = new SwipeService({ language: ctx.language });
-    const swipe = await swipeService.swipeDog({
-      requester: dog,
-      responderId: input.id,
-      swipeType: input.swipeType,
-      userId: ctx.session.user.id,
-    });
+      const swipeService = new SwipeService({ language: ctx.language });
+      const swipe = await swipeService.swipeDog({
+        requester: dog,
+        responderId: input.id,
+        swipeType: input.swipeType,
+        userId: ctx.session.user.id,
+      });
 
-    return swipe;
-  }),
+      return swipe;
+    }),
 });

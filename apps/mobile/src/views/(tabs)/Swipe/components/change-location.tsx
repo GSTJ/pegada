@@ -1,15 +1,18 @@
 import { ActivityIndicator } from "react-native";
+
 import { useRouter } from "expo-router";
+
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import ArrowDown from "@/assets/images/ArrowDown.svg";
 import Location from "@/assets/images/Location.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 import { SceneName } from "@/types/scene-name";
+
 import { useCurrentCityText } from "../../../../hooks/use-current-city-text";
+import { LocationButton } from "../styles";
 
 const CurrentLocation = () => {
   const currentCityText = useCurrentCityText();
@@ -49,16 +52,9 @@ export const ChangeLocation = () => {
   const router = useRouter();
 
   return (
-    <PressableArea
+    <LocationButton
       onPress={() => {
         router.push(SceneName.LocationMap);
-      }}
-      style={{
-        padding: theme.spacing[2],
-        flexDirection: "row",
-        alignItems: "center",
-        alignSelf: "center",
-        marginBottom: theme.spacing[2],
       }}
     >
       <Location
@@ -85,6 +81,6 @@ export const ChangeLocation = () => {
         }}
         fill={theme.colors.primary}
       />
-    </PressableArea>
+    </LocationButton>
   );
 };

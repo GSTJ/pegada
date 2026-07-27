@@ -1,12 +1,16 @@
+import type { ActiveTheme } from "@/contexts/theme-provider";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+
 import { useRef } from "react";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import LightMode from "@/assets/images/LightMode.svg";
 import { PickerSheet } from "@/components/Picker";
-import { ActiveTheme, useActiveTheme } from "@/contexts/theme-provider";
+import { useActiveTheme } from "@/contexts/theme-provider";
 import { sendError } from "@/services/error-tracking";
+
 import { Config } from "./Config";
 
 export const ThemeConfig = () => {
@@ -35,7 +39,10 @@ export const ThemeConfig = () => {
   const pickerSheetRef = useRef<BottomSheetModal>(null);
 
   return (
-    <Config.Root testID="profile-open-theme" onPress={() => pickerSheetRef?.current?.present()}>
+    <Config.Root
+      testID="profile-open-theme"
+      onPress={() => pickerSheetRef?.current?.present()}
+    >
       <LightMode width={22} height={22} fill={theme.colors.text} />
 
       <Config.Container>

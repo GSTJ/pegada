@@ -14,12 +14,14 @@ export const dogRouter = createTRPCRouter({
     return dog;
   }),
 
-  create: protectedProcedure.input(dogInputSchema).mutation(async ({ ctx, input }) => {
-    const dog = await DogService.createDog({
-      ...input,
-      userId: ctx.session.user.id,
-    });
+  create: protectedProcedure
+    .input(dogInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const dog = await DogService.createDog({
+        ...input,
+        userId: ctx.session.user.id,
+      });
 
-    return dog;
-  }),
+      return dog;
+    }),
 });

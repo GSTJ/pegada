@@ -1,9 +1,12 @@
+import type { ISendNotificationJobData } from "../queue/topics";
+
 import Expo from "expo-server-sdk";
+
 import { z } from "zod";
 
 import { sendError } from "../errors/errors";
 import { enqueue } from "../queue/enqueue";
-import { ISendNotificationJobData, TOPICS } from "../queue/topics";
+import { TOPICS } from "../queue/topics";
 import { UserService } from "./user-service";
 
 export class PushNotificationService {
@@ -16,7 +19,9 @@ export class PushNotificationService {
       }
 
       if (!Expo.isExpoPushToken(pushToken)) {
-        const error = new Error(`Push token ${pushToken} is not a valid Expo push token`);
+        const error = new Error(
+          `Push token ${pushToken} is not a valid Expo push token`,
+        );
 
         await UserService.blacklistPushToken(pushToken);
 

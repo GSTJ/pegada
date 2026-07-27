@@ -1,22 +1,25 @@
+import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
+import type { Picture } from "@/components/ProfileImageUploader/utils";
+import type { DogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
+
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, View } from "react-native";
-import { magicToast } from "react-native-magic-toast";
+import { Platform } from "react-native";
+
 import { useRouter } from "expo-router";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { dogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
 import { useTheme } from "styled-components/native";
-
-import { DogQuickClientSchema, dogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import {
-  ProfileImagesUploader,
-  ProfileImagesUploaderProps,
-} from "@/components/ProfileImageUploader";
-import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
+import { Fill, KeyboardScreen } from "@/components/layout";
+import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
+import { pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
@@ -25,7 +28,8 @@ import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
-import { Container } from "./styles";
+
+import { Container, DragHint, MultilineInput, PhotoHint } from "./styles";
 
 const DEFAULT_VALUES: DogQuickClientSchema = {
   name: "",
@@ -100,18 +104,18 @@ const CreateProfile = () => {
   const { scrollViewProps } = useBottomActionStyle();
 
   return (
-    <KeyboardAvoidingView
-      style={{ flexGrow: 1 }}
+    <KeyboardScreen
       keyboardVerticalOffset={headerHeight}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={{ flex: 1 }}>
+      <Fill>
         <Container
-          style={{ flex: 1 }}
           {...scrollViewProps}
           contentContainerStyle={{
             padding: theme.spacing[4],
-            paddingBottom: theme.spacing[4] + scrollViewProps.contentContainerStyle.paddingBottom,
+            paddingBottom:
+              theme.spacing[4] +
+              scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           scrollEnabled={gesturesEnabled}
           keyboardShouldPersistTaps="handled"
@@ -125,22 +129,24 @@ const CreateProfile = () => {
                 <Text fontWeight="bold" fontSize="lg">
                   {t("createProfile.profilePictures")}
                 </Text>
-                <Text fontSize="xs" style={{ marginBottom: 10 }}>
+                <PhotoHint fontSize="xs">
                   {t("createProfile.minimumOnePhoto")}
-                </Text>
+                </PhotoHint>
                 <ProfileImagesUploader
                   setGesturesEnabled={setGesturesEnabled}
                   value={value as Picture[]}
-                  onChange={(cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0]) => {
+                  onChange={(
+                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                  ) => {
                     // This getValues is needed to ensure the update happens
                     // correctly even when adding images fast.
                     onChange(cb(getValues("images") as Picture[]));
                   }}
                   error={fieldState.error?.message}
                 />
-                <Text fontSize="xs" fontWeight="medium" style={{ marginTop: 5 }}>
+                <DragHint fontSize="xs" fontWeight="medium">
                   {t("createProfile.clickAndHold")}
-                </Text>
+                </DragHint>
               </>
             )}
           />
@@ -167,7 +173,7 @@ const CreateProfile = () => {
             control={control}
             rules={{ required: true }}
             render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
+              <MultilineInput
                 title={t("createProfile.bio")}
                 placeholder={t("createProfile.tellSomethingCool")}
                 value={value}
@@ -177,7 +183,6 @@ const CreateProfile = () => {
                 multiline
                 optional
                 error={fieldState.error?.message}
-                style={{ minHeight: 75 }}
               />
             )}
           />
@@ -189,9 +194,15 @@ const CreateProfile = () => {
               <RadioButtons
                 title={t("completeProfile.gender")}
                 data={[t("completeProfile.male"), t("completeProfile.female")]}
-                value={value === "MALE" ? t("completeProfile.male") : t("completeProfile.female")}
+                value={
+                  value === "MALE"
+                    ? t("completeProfile.male")
+                    : t("completeProfile.female")
+                }
                 onChange={(value) => {
-                  onChange(value === t("completeProfile.male") ? "MALE" : "FEMALE");
+                  onChange(
+                    value === t("completeProfile.male") ? "MALE" : "FEMALE",
+                  );
                 }}
               />
             )}
@@ -206,8 +217,8 @@ const CreateProfile = () => {
             {t("createProfile.createProfile")}
           </Button>
         </BottomAction.Container>
-      </View>
-    </KeyboardAvoidingView>
+      </Fill>
+    </KeyboardScreen>
   );
 };
 

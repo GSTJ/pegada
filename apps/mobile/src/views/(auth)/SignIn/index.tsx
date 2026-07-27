@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Alert, Keyboard, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useRouter } from "expo-router";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
-import { Trans, useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
 
 import { OTPRequiredError } from "@pegada/shared/errors/errors";
+import { Trans, useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "styled-components/native";
 
 import { Button } from "@/components/Button";
 import { api } from "@/contexts/trpc-provider";
@@ -14,6 +15,7 @@ import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
 import { SceneName } from "@/types/scene-name";
+
 import EmailInput from "./components/EmailInput";
 import HeroText from "./components/HeroText";
 import {
@@ -34,6 +36,14 @@ export const useCustomBottomInset = () => {
   return Math.max(theme.spacing[4], insets.bottom + theme.spacing[1]);
 };
 
+const requestTrackingPermissions = async () => {
+  try {
+    await requestTrackingPermissionsAsync();
+  } catch (error) {
+    sendError(error);
+  }
+};
+
 const InsertEmail = () => {
   const insets = useSafeAreaInsets();
   const bottomInset = useCustomBottomInset();
@@ -49,7 +59,10 @@ const InsertEmail = () => {
     onError: (error) => {
       // Resend code
       if (getError(error, OTPRequiredError)) {
-        requestTrackingPermissionsAsync().catch(sendError);
+        // Fire-and-forget: the OTP screen must not wait on the ATT prompt.
+        // `void` rather than a chained catch, which `promise/no-promise-in-callback`
+        // (rightly) reads as a second error path inside a callback.
+        void requestTrackingPermissions();
 
         return router.push({
           pathname: SceneName.OneTimeCode,
@@ -62,7 +75,7 @@ const InsertEmail = () => {
     },
   });
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     if (!isValidEmail) {
@@ -74,7 +87,9 @@ const InsertEmail = () => {
 
   return (
     <PressableContainer onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingViewStyled behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingViewStyled
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <Container>
           <TopCard
             source={require("@/assets/images/background.webp")}
@@ -100,7 +115,11 @@ const InsertEmail = () => {
               onChangeText={setEmail}
               error={error}
             />
-            <Button loading={loginMutation.isPending} onPress={handleLogin} testID="signin-submit">
+            <Button
+              loading={loginMutation.isPending}
+              onPress={handleLogin}
+              testID="signin-submit"
+            >
               {t("insertEmail.continue")}
             </Button>
           </BottomCard>

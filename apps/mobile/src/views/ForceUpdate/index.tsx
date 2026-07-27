@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Linking } from "react-native";
+
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";
 
@@ -8,6 +9,7 @@ import { BottomAction } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
 import { APP_SHARE_LINK_BASE } from "@/constants";
 import { sendError } from "@/services/error-tracking";
+
 import { CenterText, Container } from "./styles";
 
 const ForceUpdate: React.FC = () => {

@@ -7,6 +7,7 @@ import { queryClient } from "@/services/query-client";
 import { store } from "@/store";
 import { Actions } from "@/store/reducers/dogs";
 import { SceneName } from "@/types/scene-name";
+
 import { setInitialNotification } from "./linking/handlers/initial-notification";
 import { deleteData, StorageKeys } from "./storage";
 

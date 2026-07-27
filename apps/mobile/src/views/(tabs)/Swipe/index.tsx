@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import * as React from "react";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -14,6 +15,7 @@ import {
 import { processLinks } from "@/services/linking";
 import { Actions } from "@/store/reducers/dogs";
 import { getCards, getCurrentCardId } from "@/store/selectors";
+
 import { ChangeLocation } from "./components/change-location";
 import SwipeBackButton from "./components/SwipeBackButton";
 import SwipeHandler, { swipeHandlerRef } from "./components/SwipeHandler";

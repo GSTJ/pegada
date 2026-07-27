@@ -1,13 +1,14 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type { BreedSlug } from "@pegada/shared/i18n/i18n";
+
 import { View } from "react-native";
+
+import { Namespace } from "@pegada/shared/i18n/types/types";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components/native";
 
-import { BreedSlug } from "@pegada/shared/i18n/i18n";
-import { Namespace } from "@pegada/shared/i18n/types/types";
-
-import { Text } from "@/components/text";
-import { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import { Text } from "@/components/text";
 
 const GlassmorphismStyled = styled(TransparentGlassOrDarkBlurView).attrs({
   glassEffectStyle: "regular",
@@ -20,7 +21,8 @@ const GlassmorphismStyled = styled(TransparentGlassOrDarkBlurView).attrs({
 `;
 
 const ViewStyled = styled(View)`
-  padding: ${(props) => props.theme.spacing[2]}px ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[2]}px
+    ${(props) => props.theme.spacing[4]}px;
   padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
 `;
 

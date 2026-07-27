@@ -13,11 +13,13 @@ export const userSchema = z.object({
 });
 
 export const userRouter = createTRPCRouter({
-  update: protectedProcedure.input(userSchema).mutation(async ({ ctx, input }) => {
-    const userId = ctx.session.user.id;
-    const updatedDog = await UserService.updateUserById(userId, input);
-    return updatedDog;
-  }),
+  update: protectedProcedure
+    .input(userSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const updatedDog = await UserService.updateUserById(userId, input);
+      return updatedDog;
+    }),
 
   /**
    * Hard-delete the current user's account and every dependent record.

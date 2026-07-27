@@ -4,7 +4,11 @@ const DEFAULT_CACHE_POLICY = "memory-disk" as const;
 
 type ImagePresentationProps = Pick<
   ImageProps,
-  "cachePolicy" | "contentFit" | "placeholder" | "placeholderContentFit" | "source"
+  | "cachePolicy"
+  | "contentFit"
+  | "placeholder"
+  | "placeholderContentFit"
+  | "source"
 >;
 
 const isBlurhashSource = (
@@ -34,7 +38,8 @@ export const resolveImagePresentationProps = ({
       placeholder,
       contentFit,
       placeholderContentFit,
-      cachePolicy: cachePolicy === undefined ? DEFAULT_CACHE_POLICY : cachePolicy,
+      cachePolicy:
+        cachePolicy === undefined ? DEFAULT_CACHE_POLICY : cachePolicy,
     };
   }
 
@@ -46,7 +51,8 @@ export const resolveImagePresentationProps = ({
     placeholder: usesSourceBlurhash ? { blurhash } : placeholder,
     contentFit,
     placeholderContentFit:
-      placeholderContentFit ?? (usesSourceBlurhash ? (contentFit ?? "cover") : undefined),
+      placeholderContentFit ??
+      (usesSourceBlurhash ? (contentFit ?? "cover") : undefined),
     cachePolicy: cachePolicy === undefined ? DEFAULT_CACHE_POLICY : cachePolicy,
   };
 };

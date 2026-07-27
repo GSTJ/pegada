@@ -1,4 +1,5 @@
 import { KeyboardAvoidingView } from "react-native";
+
 import styled from "styled-components/native";
 
 import { PressableArea } from "@/components/pressable-area";

@@ -1,6 +1,11 @@
 "use client";
 
-const GlobalError = ({ reset }: { error: Error & { digest?: string }; reset: () => void }) => {
+const GlobalError = ({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) => {
   return (
     <html lang="en">
       <body>
@@ -17,7 +22,8 @@ const GlobalError = ({ reset }: { error: Error & { digest?: string }; reset: () 
                 We encountered an error. Please try again later.
               </p>
               <button
-                onClick={() => reset()}
+                type="button"
+                onClick={reset}
                 className="inline-flex text-white bg-primary hover:scale-105 transition-all focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900 my-4"
               >
                 Try again

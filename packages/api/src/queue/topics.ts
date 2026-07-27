@@ -1,7 +1,7 @@
-import { Image } from "@prisma/client";
-import { ExpoPushMessage } from "expo-server-sdk";
+import type { Language } from "@pegada/shared/i18n/types/types";
+import type { Image } from "@prisma/client";
 
-import { Language } from "@pegada/shared/i18n/types/types";
+import type { ExpoPushMessage } from "expo-server-sdk";
 
 export const TOPICS = {
   MAIL: "mail",
@@ -12,23 +12,23 @@ export const TOPICS = {
 
 export type Topic = (typeof TOPICS)[keyof typeof TOPICS];
 
-export type IMailJobData = {
+export interface IMailJobData {
   email: string;
   code: string;
   language?: Language;
-};
+}
 
 export type IProcessImageJobData = Partial<Image> & { id: string; url: string };
 
 export type ISendNotificationJobData = ExpoPushMessage;
 
-export type ICheckPushNotificationReceiptsJobData = {
+export interface ICheckPushNotificationReceiptsJobData {
   receipts?: { id: string; pushToken: string }[];
-};
+}
 
-export type TopicPayloads = {
+export interface TopicPayloads {
   [TOPICS.MAIL]: IMailJobData;
   [TOPICS.PROCESS_IMAGE]: IProcessImageJobData;
   [TOPICS.SEND_PUSH]: ISendNotificationJobData;
   [TOPICS.CHECK_PUSH_RECEIPTS]: ICheckPushNotificationReceiptsJobData;
-};
+}

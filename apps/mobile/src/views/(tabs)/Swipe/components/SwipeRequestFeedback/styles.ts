@@ -28,10 +28,12 @@ export const LogoLoading = styled(LottieView).attrs({
 
 export const Title = styled(Text)`
   margin-bottom: ${(props) => props.theme.spacing[1]}px;
+  padding-bottom: 2px;
   text-align: center;
 `;
 
 export const Description = styled(Text)`
+  padding-bottom: 4px;
   text-align: center;
   margin-bottom: ${(props) => props.theme.spacing[4]}px;
   max-width: 274px;

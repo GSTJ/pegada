@@ -1,4 +1,8 @@
-import { CopyObjectCommand, DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  CopyObjectCommand,
+  DeleteObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 import { config } from "../shared/config";
 import { assertAllowedImageUrl } from "./image-url";
@@ -16,7 +20,9 @@ export const client = new S3Client({
   },
   // Dev/e2e: MinIO endpoint override. forcePathStyle because MinIO does
   // not serve virtual-hosted-style buckets (bucket.localhost:9002).
-  ...(config.AWS_S3_ENDPOINT ? { endpoint: config.AWS_S3_ENDPOINT, forcePathStyle: true } : {}),
+  ...(config.AWS_S3_ENDPOINT
+    ? { endpoint: config.AWS_S3_ENDPOINT, forcePathStyle: true }
+    : {}),
 });
 
 /**
@@ -40,17 +46,20 @@ export const r2Client = r2UploadsEnabled
       // R2 does not serve virtual-hosted-style buckets either.
       forcePathStyle: true,
       credentials: {
-        // Non-null: guaranteed by the r2UploadsEnabled gate above.
-        accessKeyId: config.R2_ACCESS_KEY_ID!,
-        secretAccessKey: config.R2_SECRET_ACCESS_KEY!,
+        // Both are guaranteed by the r2UploadsEnabled gate above; the empty
+        // fallbacks are only there to satisfy the optional types.
+        accessKeyId: config.R2_ACCESS_KEY_ID ?? "",
+        secretAccessKey: config.R2_SECRET_ACCESS_KEY ?? "",
       },
     })
   : undefined;
 
-const encodeKey = (key: string) => key.split("/").map(encodeURIComponent).join("/");
+const encodeKey = (key: string) =>
+  key.split("/").map(encodeURIComponent).join("/");
 
 /** Build the public URL an R2 object key is served from. */
-export const getPublicUrl = (key: string) => `${config.PUBLIC_IMAGES_BASE_URL}/${encodeKey(key)}`;
+export const getPublicUrl = (key: string) =>
+  `${config.PUBLIC_IMAGES_BASE_URL}/${encodeKey(key)}`;
 
 /**
  * Build the URL a legacy S3/MinIO object key is served from. Mirrors what
@@ -82,13 +91,13 @@ const isR2Url = (url: string) => {
   );
 };
 
-type Storage = {
+interface Storage {
   client: S3Client;
   bucket: string;
   isR2: boolean;
   /** Canonical public URL for a key in this storage. */
   urlForKey: (key: string) => string;
-};
+}
 
 /**
  * Pick the storage (client + bucket) an image URL lives in, by host.
@@ -177,7 +186,7 @@ export const moveImageToFolder = async (url: string, folder: string) => {
   // Ahead of the copy and the delete below, both of which act on this key.
   assertTemporaryUploadKey(oldKey);
 
-  const fileName = oldKey.split("/").slice(-1)[0];
+  const fileName = oldKey.split("/").at(-1);
   const newKey = `${folder}/${fileName}`;
 
   const command = new CopyObjectCommand({

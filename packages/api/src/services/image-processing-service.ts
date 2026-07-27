@@ -1,7 +1,6 @@
-import * as Blurhash from "blurhash";
-import sharp from "sharp";
-
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
+import { encode as encodeBlurhash } from "blurhash";
+import sharp from "sharp";
 
 import { FEATURES, FlagService } from "./flag-service";
 
@@ -26,7 +25,10 @@ export class ImageProcessingService {
     // Pure-JS tfjs instead of tfjs-node: the consumer runs in a Vercel
     // function where native bindings can't load. Lazy imports keep the
     // model out of every other route's cold start.
-    const [tf, nsfwjs] = await Promise.all([import("@tensorflow/tfjs"), import("nsfwjs")]);
+    const [tf, nsfwjs] = await Promise.all([
+      import("@tensorflow/tfjs"),
+      import("nsfwjs"),
+    ]);
 
     const { data, info } = await sharp(arrayBuffer)
       .resize({ height: 300, withoutEnlargement: true })
@@ -34,14 +36,20 @@ export class ImageProcessingService {
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    const imageTensor = tf.tensor3d(new Int32Array(data), [info.height, info.width, 3], "int32");
+    const imageTensor = tf.tensor3d(
+      new Int32Array(data),
+      [info.height, info.width, 3],
+      "int32",
+    );
 
     try {
       const model = await nsfwjs.load("MobileNetV2");
       const predictions = await model.classify(imageTensor as never);
 
       const isNotSafe = predictions.some(
-        (prediction) => prediction.className !== "Neutral" && prediction.probability > threshold,
+        (prediction) =>
+          prediction.className !== "Neutral" &&
+          prediction.probability > threshold,
       );
 
       return isNotSafe ? IMAGE_STATUS.REJECTED : IMAGE_STATUS.APPROVED;
@@ -69,6 +77,6 @@ export class ImageProcessingService {
 
     const clamped = new Uint8ClampedArray(pixels);
 
-    return Blurhash.encode(clamped, metadata.width, metadata.height, 4, 4);
+    return encodeBlurhash(clamped, metadata.width, metadata.height, 4, 4);
   }
 }

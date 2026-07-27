@@ -1,11 +1,14 @@
+import type { MessageProps } from "./use-chat-pagination";
+
 import { useLocalSearchParams } from "expo-router";
-import * as uuid from "uuid";
+
+import { v4 as uuidV4 } from "uuid";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { sendError } from "@/services/error-tracking";
 import { queryClient } from "@/services/query-client";
+
 import { FeedbackStatus } from "../components/feedback";
-import { MessageProps } from "./use-chat-pagination";
 
 export const useSendMessage = () => {
   const { matchId } = useLocalSearchParams();
@@ -61,7 +64,8 @@ export const useSendMessage = () => {
       ["messages", matchId],
       (oldData: { pages: MessageProps[][] } | undefined) => {
         const updatedPages = [...(oldData?.pages ?? [[]])];
-        updatedPages[0] = updatedPages[0]?.filter((message) => message.id !== id) ?? [];
+        updatedPages[0] =
+          updatedPages[0]?.filter((message) => message.id !== id) ?? [];
         return { ...oldData, pages: updatedPages };
       },
     );
@@ -99,7 +103,7 @@ export const useSendMessage = () => {
   };
 
   const sendMessage = async (content: string) => {
-    const tempId = uuid.v4();
+    const tempId = uuidV4();
 
     try {
       // Add a fake 'sending' message to give an optimistic UI
@@ -114,8 +118,8 @@ export const useSendMessage = () => {
         ...newMessage,
         newMessage: true,
       });
-    } catch (err) {
-      sendError(err);
+    } catch (error) {
+      sendError(error);
 
       errorTemp(tempId);
       setTimeout(() => removeTemp(tempId), 1500);

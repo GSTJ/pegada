@@ -30,7 +30,9 @@
  *   following the system appearance — exactly today's behavior.
  */
 const { withAppDelegate } = require("expo/config-plugins");
-const { mergeContents } = require("@expo/config-plugins/build/utils/generateCode");
+const {
+  mergeContents,
+} = require("@expo/config-plugins/build/utils/generateCode");
 
 const OVERRIDE_SNIPPET = `    if let themeOverride = UserDefaults.standard.string(forKey: "pegadaThemeOverride"),
       themeOverride == "dark" || themeOverride == "light" {
@@ -41,8 +43,9 @@ const withInitialThemeOverride = (config) => {
   return withAppDelegate(config, (modConfig) => {
     if (modConfig.modResults.language !== "swift") {
       throw new Error(
-        "withInitialThemeOverride: expected a Swift AppDelegate, found " +
-          modConfig.modResults.language,
+        `withInitialThemeOverride: expected a Swift AppDelegate, found ${
+          modConfig.modResults.language
+        }`,
       );
     }
 

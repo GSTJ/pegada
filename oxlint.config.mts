@@ -24,19 +24,53 @@ export default defineConfig({
     "apps/mobile/GoogleService-Info.plist",
   ],
 
+  rules: {
+    // `pedantic` turns this on, which means "no TODO comments anywhere". This
+    // repo uses them as durable notes pinned to the code they describe — the
+    // 1000-day JWT in packages/api/src/trpc.ts is the clearest example. The
+    // only ways to satisfy the rule are deleting the note or rewording it to
+    // dodge the keyword, and both are worse than leaving the marker greppable.
+    "no-warning-comments": "off",
+  },
+
   overrides: [
     {
       // Seeds are operator-facing scripts that report progress on stdout, they
       // just don't live under `scripts/`.
       files: ["packages/database/seed.ts", "packages/database/maestro-seed.ts"],
-      rules: { "no-console": "off" },
+      rules: {
+        "no-console": "off",
+        // Seeding is deliberately sequential: every row depends on the one
+        // before it (a dog needs its user, an interest needs both dogs), and
+        // one connection writing in order is what keeps a re-run idempotent.
+        "no-await-in-loop": "off",
+      },
+    },
+    {
+      // The API's env boundary: the one module that reads process.env and
+      // hands back a zod-parsed object. The preset exempts `env.ts`; here the
+      // file is called `config.ts`.
+      files: ["packages/api/src/shared/config.ts"],
+      rules: { "no-restricted-properties": "off" },
     },
     {
       // The service layer is a set of static-method namespaces
       // (`SuggestionService.suggestFor(...)`). That is this repo's convention
       // for the API's domain services, not a general one.
       files: ["packages/api/src/services/**"],
-      rules: { "typescript/no-extraneous-class": "off" },
+      rules: {
+        "typescript/no-extraneous-class": "off",
+        // Same convention, reported by the other plugin.
+        "unicorn/no-static-only-class": "off",
+      },
+    },
+    {
+      // The error taxonomy is one module on purpose: `IntentionalError` and
+      // its four subclasses are read together and the client branches on their
+      // shared `error_code`. One class per file would be five files that only
+      // make sense opened at once.
+      files: ["**/errors/errors.ts"],
+      rules: { "max-classes-per-file": "off" },
     },
     {
       // Repeated from the preset because an `overrides[]` entry that omits

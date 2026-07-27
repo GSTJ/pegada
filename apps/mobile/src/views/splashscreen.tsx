@@ -1,8 +1,16 @@
+import type { ImageStyle } from "react-native";
+
 import { Animated, StyleSheet } from "react-native";
+
 import Constants from "expo-constants";
+
 import { useTheme } from "styled-components/native";
 
 import SplashscreenImage from "@/assets/images/splash-android.png";
+
+const styles = StyleSheet.create<{ splashImage: ImageStyle }>({
+  splashImage: { width: "100%", height: "100%" },
+});
 
 const AnimatedSplashScreen = () => {
   const theme = useTheme();
@@ -12,13 +20,18 @@ const AnimatedSplashScreen = () => {
     : Constants.expoConfig?.ios?.splash?.backgroundColor;
 
   return (
-    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor }]}>
+    <Animated.View
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, { backgroundColor }]}
+    >
       <Animated.Image
-        style={{
-          width: "100%",
-          height: "100%",
-          resizeMode: Constants.expoConfig?.ios?.splash?.resizeMode || "contain",
-        }}
+        style={[
+          styles.splashImage,
+          {
+            resizeMode:
+              Constants.expoConfig?.ios?.splash?.resizeMode ?? "contain",
+          },
+        ]}
         source={SplashscreenImage}
       />
     </Animated.View>

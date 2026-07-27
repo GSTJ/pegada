@@ -1,30 +1,50 @@
 import { useEffect } from "react";
+
 import * as Notifications from "expo-notifications";
 
 import { sendError } from "@/services/error-tracking";
-import { initialNotification, setInitialNotification } from "./handlers/initial-notification";
-import { customNotificationHandler, getNotificationUrl } from "./handlers/notification";
+
+import {
+  getInitialNotification,
+  setInitialNotification,
+} from "./handlers/initial-notification";
+import {
+  customNotificationHandler,
+  getNotificationUrl,
+} from "./handlers/notification";
 import { handleReplyAction, isReplyAction } from "./handlers/reply";
 
 export const processLinks = () => {
+  const initialNotification = getInitialNotification();
+
   if (initialNotification) {
-    customNotificationHandler(initialNotification).catch(sendError);
+    // The handler is synchronous — expo-router's push is — so a rejected
+    // promise was never the failure mode here; a thrown "Invalid notification
+    // url" was, and `.catch` never saw it.
+    try {
+      customNotificationHandler(initialNotification);
+    } catch (error) {
+      sendError(error);
+    }
   }
 
   setInitialNotification(undefined);
 
   // When the app is already running, and the user clicks on a notification
-  const notificationSubscription = Notifications.addNotificationResponseReceivedListener(
-    (response) => {
+  const notificationSubscription =
+    Notifications.addNotificationResponseReceivedListener((response) => {
       // The "Reply" action is already handled by the root listener in
       // `useGetInitialNotifications` - skip it here so we don't send the
       // message twice or navigate into the chat the user didn't tap into.
       if (isReplyAction(response)) return;
 
       const url = getNotificationUrl(response);
-      customNotificationHandler(url).catch(sendError);
-    },
-  );
+      try {
+        customNotificationHandler(url);
+      } catch (error) {
+        sendError(error);
+      }
+    });
 
   return {
     remove: () => {
@@ -47,21 +67,21 @@ export const useGetInitialNotifications = () => {
         // NotificationCenterManager.pendingResponses on iOS and
         // NotificationManager's listener replay on Android). Sending from the
         // listener alone silently dropped the message.
-        if (isReplyAction(response)) {
-          handleReplyAction(response).catch(sendError);
-          return;
-        }
+        // Returned rather than chained: the outer `.catch` below is the one
+        // error path, and a nested `.catch` here is a second one nobody reads.
+        if (isReplyAction(response)) return handleReplyAction(response);
 
         const url = getNotificationUrl(response);
         setInitialNotification(url);
+        return undefined;
       })
       .catch(sendError);
 
     // Registered here (root, mounted for the whole app lifetime) rather
     // than in `processLinks`, so the "Reply" action on a chat-message push
     // is handled even if the user never navigates to the Swipe screen.
-    const notificationSubscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+    const notificationSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
         if (isReplyAction(response)) {
           handleReplyAction(response).catch(sendError);
           return;
@@ -69,8 +89,7 @@ export const useGetInitialNotifications = () => {
 
         const url = getNotificationUrl(response);
         setInitialNotification(url);
-      },
-    );
+      });
 
     return () => {
       notificationSubscription.remove();

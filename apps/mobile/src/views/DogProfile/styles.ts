@@ -1,4 +1,7 @@
+import { StyleSheet } from "react-native";
+
 import { LinearGradient } from "expo-linear-gradient";
+
 import Color from "color";
 import { clamp } from "lodash";
 import styled from "styled-components/native";
@@ -41,7 +44,7 @@ export const ReportButton = styled(PressableArea).attrs({
 `;
 
 export const MatchActionBarGradient = styled(LinearGradient).attrs((props) => {
-  const gradientColor = Color(props.theme.colors.background);
+  const gradientColor = new Color(props.theme.colors.background);
 
   return {
     colors: [
@@ -82,3 +85,23 @@ export const Description = styled(Text)`
   margin-top: ${(props) => props.theme.spacing[2]}px;
   margin-bottom: ${(props) => props.theme.spacing[12]}px;
 `;
+
+/** Centred label shared by the share / unmatch / report actions. */
+export const ActionLabel = styled(Text)`
+  text-align: center;
+`;
+
+export const ErrorScreen = styled.View`
+  flex-grow: 1;
+  background-color: ${({ theme }) => theme.colors.background};
+`;
+
+/**
+ * `@react-navigation` header slots take style props rather than components, so
+ * the static half of each one lives in a sheet and the themed half stays inline.
+ */
+export const { headerLeft, headerRight, headerTitle } = StyleSheet.create({
+  headerLeft: { paddingLeft: 16 },
+  headerRight: { paddingRight: 16 },
+  headerTitle: { fontWeight: "bold" },
+});

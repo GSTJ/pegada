@@ -1,20 +1,25 @@
 import { ActivityIndicator, useWindowDimensions, View } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "styled-components/native";
 
 import Premium from "@/assets/images/Premium.svg";
 import { BIO_NUMBER_OF_LINES } from "@/components/MainCard/components/PersonalInfo";
 import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
-import { Container, Picture } from "@/components/MainCard/styles";
+import { Picture } from "@/components/MainCard/styles";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { api } from "@/contexts/trpc-provider";
 import { useCustomerPlan } from "@/hooks/use-payments";
 import { UserPlan } from "@/services/payments";
 import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 import {
+  HeaderCard,
+  InfoBlock,
+  NameRow,
   ProfileContainer,
   ProfileUnknownError,
+  Scrim,
+  Shade,
 } from "@/views/(tabs)/Profile/components/UserDogProfileHeader/styles";
 
 export const useDogProfileHeight = () => {
@@ -39,32 +44,32 @@ const UserDogProfileHeader = () => {
   }
 
   return (
-    <Container style={{ height: dogProfileHeight, borderRadius: 0 }}>
+    <HeaderCard style={{ height: dogProfileHeight }}>
       <Picture
         source={{
           uri: dog.images[0]?.url,
           blurhash: dog.images[0]?.blurhash ?? undefined,
         }}
       />
-      <LinearGradient
-        style={{ marginTop: "auto" }}
-        colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, .5)", "rgba(0, 0, 0, .5)", "rgba(0, 0, 0, .7)"]}
+      <Shade
+        colors={[
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 0, 0, .5)",
+          "rgba(0, 0, 0, .5)",
+          "rgba(0, 0, 0, .7)",
+        ]}
       >
-        <PersonalInfo.Container style={{ paddingBottom: 35 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: theme.spacing[1.5],
-            }}
-          >
+        <InfoBlock>
+          <NameRow style={{ gap: theme.spacing[1.5] }}>
             <PersonalInfo.Name
               testID="profile-dog-name"
               style={{ fontSize: theme.typography.sizes.xl.size }}
             >
               {dog.name}
               {dog.birthDate ? (
-                <PersonalInfo.Age style={{ fontSize: theme.typography.sizes.lg.size }}>
+                <PersonalInfo.Age
+                  style={{ fontSize: theme.typography.sizes.lg.size }}
+                >
                   , {getFormattedYears(dog.birthDate)}
                 </PersonalInfo.Age>
               ) : null}
@@ -77,7 +82,7 @@ const UserDogProfileHeader = () => {
                 height={22}
               />
             ) : null}
-          </View>
+          </NameRow>
           {dog.bio ? (
             <PersonalInfo.Description
               numberOfLines={BIO_NUMBER_OF_LINES}
@@ -86,9 +91,9 @@ const UserDogProfileHeader = () => {
               {dog.bio}
             </PersonalInfo.Description>
           ) : null}
-        </PersonalInfo.Container>
-      </LinearGradient>
-    </Container>
+        </InfoBlock>
+      </Shade>
+    </HeaderCard>
   );
 };
 
@@ -114,17 +119,13 @@ const WrappedUserDogProfileHeader = () => {
 
   return (
     <View style={{ height: dogProfileHeight }}>
-      <NetworkBoundary errorFallback={ProfileUnknownError} suspenseFallback={<LoadingFallback />}>
+      <NetworkBoundary
+        errorFallback={ProfileUnknownError}
+        suspenseFallback={<LoadingFallback />}
+      >
         <UserDogProfileHeader />
       </NetworkBoundary>
-      <LinearGradient
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
+      <Scrim
         colors={["rgba(0, 0, 0, .5)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
       />
     </View>

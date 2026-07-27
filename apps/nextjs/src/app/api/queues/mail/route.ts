@@ -1,7 +1,7 @@
-import { handleCallback } from "@vercel/queue";
+import type { IMailJobData } from "@pegada/api/queue/topics";
 
 import { handleMail } from "@pegada/api/queue/handlers/mail";
-import { IMailJobData } from "@pegada/api/queue/topics";
+import { handleCallback } from "@vercel/queue";
 
 // Consumer for the "mail" topic (see vercel.json experimentalTriggers).
 // Throwing lets Vercel Queues retry the delivery.

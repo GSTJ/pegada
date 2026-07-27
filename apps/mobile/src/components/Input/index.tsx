@@ -1,8 +1,11 @@
+import type { TextInput, TextInputProps, ViewProps } from "react-native";
+
 import * as React from "react";
-import { TextInput, TextInputProps, ViewProps } from "react-native";
+
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/text";
+
 import * as S from "./styles";
 
 interface TextFieldContainerProps {
@@ -30,7 +33,17 @@ interface InputProps extends TextInputProps {
 }
 
 export const Input = React.forwardRef<TextInput, InputProps>(
-  ({ title, canCancel = true, error, loading = false, optional = false, ...props }, ref) => {
+  (
+    {
+      title,
+      canCancel = true,
+      error,
+      loading = false,
+      optional = false,
+      ...props
+    },
+    ref,
+  ) => {
     const { t } = useTranslation();
 
     return (
@@ -40,11 +53,18 @@ export const Input = React.forwardRef<TextInput, InputProps>(
             <Text fontWeight="bold" fontSize="lg">
               {title}
             </Text>
-            {optional ? <Text fontSize="xs">{t("common.optional")}</Text> : null}
+            {optional ? (
+              <Text fontSize="xs">{t("common.optional")}</Text>
+            ) : null}
           </S.TitleContainer>
         )}
         <TextFieldContainer loading={loading}>
-          <S.TextInput value={props.value} onChangeText={props.onChangeText} ref={ref} {...props} />
+          <S.TextInput
+            value={props.value}
+            onChangeText={props.onChangeText}
+            ref={ref}
+            {...props}
+          />
           {Boolean(props.value) && canCancel ? (
             <S.CancelTouchArea onPress={() => props.onChangeText?.("")}>
               <S.CancelIcon />

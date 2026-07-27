@@ -1,9 +1,10 @@
 // https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 import "react-native-get-random-values";
-
 import { LogBox, Text } from "react-native";
-import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
+
 import * as Updates from "expo-updates";
+
+import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 
 import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
@@ -21,11 +22,11 @@ mobileAds()
 
 mobileAds().initialize().catch(sendError);
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-Text.defaultProps = Text.defaultProps || {};
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// oxlint-disable-next-line typescript/ban-ts-comment -- React Native's Text.defaultProps is untyped but is the only way to set app-wide font scaling.
+// @ts-expect-error
+Text.defaultProps ||= {};
+// oxlint-disable-next-line typescript/ban-ts-comment -- React Native's Text.defaultProps is untyped but is the only way to set app-wide font scaling.
+// @ts-expect-error
 Text.defaultProps.allowFontScaling = false;
 
 // Not helpful as there is nothing I can do about them
@@ -37,9 +38,10 @@ LogBox.ignoreLogs([
 // Attach env + release to every event (analytics and errors), the way
 // Bugsnag's releaseStage / metadata used to. codeBundleId ties errors to
 // the exact OTA update group.
-const manifest = Updates.manifest;
+const { manifest } = Updates;
 const metadata = "metadata" in manifest ? manifest.metadata : undefined;
-const updateGroup = metadata && "updateGroup" in metadata ? metadata.updateGroup : undefined;
+const updateGroup =
+  metadata && "updateGroup" in metadata ? metadata.updateGroup : undefined;
 
 posthog.register({
   environment: config.ENV,

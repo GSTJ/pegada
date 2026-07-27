@@ -12,15 +12,15 @@ type LooseProperties = Record<string, unknown>;
 const toEventProperties = (properties?: LooseProperties) =>
   properties as EventProperties | undefined;
 
-type TrackEvent = {
+interface TrackEvent {
   event_type: string;
   event_properties?: LooseProperties;
-};
+}
 
-type ScreenViewed = {
+interface ScreenViewed {
   screen: string;
   referringScreen?: string;
-};
+}
 
 // Keeps the Amplitude-era call shape (`{ event_type, event_properties }`)
 // so the existing call sites don't change, mapping it onto PostHog's

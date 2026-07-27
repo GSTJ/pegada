@@ -1,11 +1,10 @@
 import { faker } from "@faker-js/faker";
+import prisma from "@pegada/database";
+import { breedData } from "@pegada/database/fixtures/breed-data";
+import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { Color, Dog, Gender, PlanType, Size, SwipeType } from "@prisma/client";
 import { z } from "zod";
-
-import prisma from "@pegada/database";
-import { breedData } from "@pegada/database/__mocks__/breed-data";
-import { generateFakeUserWithDog } from "@pegada/database/__mocks__/generate-fake-user-with-dog";
-import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import { dogSafeSchema } from "../../dtos/dog-dto";
 import { SwipeService } from "../swipe-service";
@@ -24,6 +23,12 @@ jest.mock("../../shared/posthog", () => ({
 afterAll(async () => {
   await prisma.$disconnect();
 });
+
+// Pulled out of the fixture literals below: nesting a faker call inside an
+// options object inside a fixture inside `Promise.all` reads worse than a name.
+const randomColor = () => faker.helpers.arrayElement(Object.values(Color));
+const randomSize = () => faker.helpers.arrayElement(Object.values(Size));
+const smallInt = () => faker.number.int({ min: 1, max: 10 });
 
 const LIMIT = 10;
 
@@ -69,17 +74,17 @@ describe("SuggestionService", () => {
         generateFakeUserWithDog(
           {
             gender: Gender.FEMALE,
-            color: faker.helpers.arrayElement(Object.values(Color)),
-            size: faker.helpers.arrayElement(Object.values(Size)),
-            preferredColor: faker.helpers.arrayElement(Object.values(Color)),
-            preferredMaxAge: faker.number.int({ min: 1, max: 10 }),
-            preferredMaxDistance: faker.number.int({ min: 1, max: 10 }),
-            preferredMinAge: faker.number.int({ min: 1, max: 10 }),
-            preferredSize: faker.helpers.arrayElement(Object.values(Size)),
+            color: randomColor(),
+            size: randomSize(),
+            preferredColor: randomColor(),
+            preferredMaxAge: smallInt(),
+            preferredMaxDistance: smallInt(),
+            preferredMinAge: smallInt(),
+            preferredSize: randomSize(),
             bio: faker.lorem.paragraph(),
             birthDate: new Date().toISOString(),
             name: faker.person.firstName(),
-            weight: faker.number.int({ min: 1, max: 10 }),
+            weight: smallInt(),
           },
           {
             latitude: 0.05,
@@ -88,18 +93,28 @@ describe("SuggestionService", () => {
         ),
       ]);
 
-      const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+      const potentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [],
+      );
 
       z.array(dogSafeSchema).parse(potentialMatches);
 
       // Check if the breed is included correctly
-      expect(potentialMatches.some((potentialMatch) => potentialMatch.breed?.id)).toBeTruthy();
+      expect(
+        potentialMatches.some((potentialMatch) => potentialMatch.breed?.id),
+      ).toBeTruthy();
 
       // Check if the distance is included correctly
-      expect(potentialMatches.some((potentialMatch) => potentialMatch.distance)).toBeTruthy();
+      expect(
+        potentialMatches.some((potentialMatch) => potentialMatch.distance),
+      ).toBeTruthy();
 
       // Check if distance is omitted when latitude or longitude is not provided
-      expect(potentialMatches.some((potentialMatch) => !potentialMatch.distance)).toBeTruthy();
+      expect(
+        potentialMatches.some((potentialMatch) => !potentialMatch.distance),
+      ).toBeTruthy();
     });
 
     it("returns the right amount of potential matches", async () => {
@@ -107,7 +122,11 @@ describe("SuggestionService", () => {
         gender: Gender.MALE,
       });
 
-      const emptyPotentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+      const emptyPotentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [],
+      );
 
       expect(emptyPotentialMatches).toHaveLength(0);
 
@@ -121,7 +140,11 @@ describe("SuggestionService", () => {
         ),
       );
 
-      const fullPotentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+      const fullPotentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [],
+      );
 
       expect(fullPotentialMatches).toHaveLength(10);
     });
@@ -129,24 +152,41 @@ describe("SuggestionService", () => {
     it("throws an error if dog user ID is not provided", async () => {
       const dog = {} as Dog;
 
-      await expect(SuggestionService.getPotentialMatches(dog, LIMIT, [])).rejects.toThrow(
-        "User ID is required",
-      );
+      await expect(
+        SuggestionService.getPotentialMatches(dog, LIMIT, []),
+      ).rejects.toThrow("User ID is required");
     });
 
     it("returns dogs ordered by distance", async () => {
-      const [{ dog }, { dog: farDog }, { dog: withoutLocation }, { dog: nearDog }] =
-        await Promise.all([
-          generateFakeUserWithDog({ gender: Gender.MALE }, { latitude: 0, longitude: 0 }),
-          generateFakeUserWithDog({ gender: Gender.FEMALE }, { latitude: 10, longitude: 10 }),
-          generateFakeUserWithDog(
-            { gender: Gender.FEMALE },
-            { latitude: undefined, longitude: undefined },
-          ),
-          generateFakeUserWithDog({ gender: Gender.FEMALE }, { latitude: 1, longitude: 1 }),
-        ]);
+      const [
+        { dog },
+        { dog: farDog },
+        { dog: withoutLocation },
+        { dog: nearDog },
+      ] = await Promise.all([
+        generateFakeUserWithDog(
+          { gender: Gender.MALE },
+          { latitude: 0, longitude: 0 },
+        ),
+        generateFakeUserWithDog(
+          { gender: Gender.FEMALE },
+          { latitude: 10, longitude: 10 },
+        ),
+        generateFakeUserWithDog(
+          { gender: Gender.FEMALE },
+          { latitude: undefined, longitude: undefined },
+        ),
+        generateFakeUserWithDog(
+          { gender: Gender.FEMALE },
+          { latitude: 1, longitude: 1 },
+        ),
+      ]);
 
-      const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+      const potentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [],
+      );
 
       expect(potentialMatches).toHaveLength(3);
       expect(potentialMatches[0]!.id).toEqual(nearDog.id);
@@ -162,51 +202,66 @@ describe("SuggestionService", () => {
         gender: Gender.FEMALE,
       });
 
-      const firstPotentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+      const firstPotentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [],
+      );
 
       expect(firstPotentialMatches[0]?.id).toEqual(swipedDog.id);
 
       // Simulate a swipe
-      await SwipeService.createOrUpdateInterest(dog.id, swipedDog.id, SwipeType.INTERESTED);
+      await SwipeService.createOrUpdateInterest(
+        dog.id,
+        swipedDog.id,
+        SwipeType.INTERESTED,
+      );
 
-      const secondPotentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+      const secondPotentialMatches =
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
 
       expect(secondPotentialMatches[0]?.id).not.toEqual(swipedDog.id);
     });
 
     test("premium users have priority on the queue if they liked you", async () => {
-      const [{ dog }, { dog: nonPremiumDog }, { dog: premiumDog }] = await Promise.all([
-        generateFakeUserWithDog({ gender: Gender.MALE }, { longitude: 0, latitude: 0 }),
-        generateFakeUserWithDog(
-          { gender: Gender.FEMALE },
-          { plan: PlanType.FREE, longitude: 0, latitude: 0 }, // Free is closer
-        ),
-        generateFakeUserWithDog(
-          { gender: Gender.FEMALE },
-          { plan: PlanType.PREMIUM, longitude: 1, latitude: 1 }, // But premium should have priority
-        ),
-      ]);
+      const [{ dog }, { dog: nonPremiumDog }, { dog: premiumDog }] =
+        await Promise.all([
+          generateFakeUserWithDog(
+            { gender: Gender.MALE },
+            { longitude: 0, latitude: 0 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { plan: PlanType.FREE, longitude: 0, latitude: 0 }, // Free is closer
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { plan: PlanType.PREMIUM, longitude: 1, latitude: 1 }, // But premium should have priority
+          ),
+        ]);
 
-      const beforeLikesPotentialMatches = await SuggestionService.getPotentialMatches(
-        dog,
-        LIMIT,
-        [],
-      );
+      const beforeLikesPotentialMatches =
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
 
       // Check that the first potential match is the free user
       expect(beforeLikesPotentialMatches[0]!.id).toEqual(nonPremiumDog.id);
 
       // Simulate them both liking you
       await Promise.all([
-        SwipeService.createOrUpdateInterest(premiumDog.id, dog.id, SwipeType.INTERESTED),
-        SwipeService.createOrUpdateInterest(nonPremiumDog.id, dog.id, SwipeType.INTERESTED),
+        SwipeService.createOrUpdateInterest(
+          premiumDog.id,
+          dog.id,
+          SwipeType.INTERESTED,
+        ),
+        SwipeService.createOrUpdateInterest(
+          nonPremiumDog.id,
+          dog.id,
+          SwipeType.INTERESTED,
+        ),
       ]);
 
-      const afterLikesPotentialMatches = await SuggestionService.getPotentialMatches(
-        dog,
-        LIMIT,
-        [],
-      );
+      const afterLikesPotentialMatches =
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
 
       // Check that the first potential match is the premium user
       expect(afterLikesPotentialMatches[0]!.id).toEqual(premiumDog.id);
@@ -220,7 +275,11 @@ describe("SuggestionService", () => {
           generateFakeUserWithDog({ gender: Gender.MALE }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
 
@@ -247,7 +306,11 @@ describe("SuggestionService", () => {
           generateFakeUserWithDog({ gender: Gender.FEMALE, size: Size.LARGE }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(numberOfMediumDogs);
       });
@@ -281,10 +344,16 @@ describe("SuggestionService", () => {
           }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(numberOfGoldenDogs);
-        expect(potentialMatches.every((match) => match?.color === Color.GOLDEN));
+        expect(
+          potentialMatches.every((match) => match?.color === Color.GOLDEN),
+        ).toBe(true);
       });
 
       test("age", async () => {
@@ -292,7 +361,9 @@ describe("SuggestionService", () => {
         const preferredMaxAge = 4;
 
         const getBirthDateByAge = (age: number) =>
-          new Date(new Date().setFullYear(new Date().getFullYear() - age)).toISOString();
+          new Date(
+            new Date().setFullYear(new Date().getFullYear() - age),
+          ).toISOString();
 
         const [{ dog }, { dog: preferredAgeDog }] = await Promise.all([
           generateFakeUserWithDog({
@@ -314,7 +385,11 @@ describe("SuggestionService", () => {
           }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
         expect(potentialMatches[0]!.id).toEqual(preferredAgeDog.id);
@@ -338,7 +413,11 @@ describe("SuggestionService", () => {
           ),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
         expect(potentialMatches[0]!.id).toEqual(nearDog.id);
@@ -362,7 +441,8 @@ describe("SuggestionService", () => {
         ]);
 
         // Get potential matches
-        const firstPotentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const firstPotentialMatches =
+          await SuggestionService.getPotentialMatches(dog, LIMIT, []);
 
         expect(firstPotentialMatches).toHaveLength(2);
 
@@ -373,11 +453,8 @@ describe("SuggestionService", () => {
         });
 
         // Get potential matches
-        const secondPotentialMatches = await SuggestionService.getPotentialMatches(
-          updatedDog,
-          LIMIT,
-          [],
-        );
+        const secondPotentialMatches =
+          await SuggestionService.getPotentialMatches(updatedDog, LIMIT, []);
 
         expect(secondPotentialMatches).toHaveLength(1);
         expect(secondPotentialMatches[0]!.id).toEqual(sameBreedDog.id);
@@ -405,7 +482,11 @@ describe("SuggestionService", () => {
           }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
       });
@@ -430,7 +511,11 @@ describe("SuggestionService", () => {
           }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
       });
@@ -451,7 +536,11 @@ describe("SuggestionService", () => {
           }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
       });
@@ -483,7 +572,11 @@ describe("SuggestionService", () => {
           }),
         ]);
 
-        const potentialMatches = await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
 
         expect(potentialMatches).toHaveLength(1);
         expect(potentialMatches[0]!.images).toHaveLength(1);

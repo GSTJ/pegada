@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import * as React from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
+
+import * as StoreReview from "expo-store-review";
+
+import { useTranslation } from "react-i18next";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
 import { magicToast } from "react-native-magic-toast";
-import * as StoreReview from "expo-store-review";
-import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";
 import styled from "styled-components/native";
 
@@ -80,7 +82,9 @@ const NotLikingTheAppModal: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Container>
         <Title>{t("appReview.notLikingTheAppModal.title")}</Title>
         <CenterText style={{ marginBottom: theme.spacing[1] }}>
@@ -96,7 +100,9 @@ const NotLikingTheAppModal: React.FC = () => {
           placeholder={t("appReview.notLikingTheAppModal.placeholder")}
         />
         <ButtonRow>
-          <SmallButton onPress={handleSend}>{t("appReview.notLikingTheAppModal.send")}</SmallButton>
+          <SmallButton onPress={handleSend}>
+            {t("appReview.notLikingTheAppModal.send")}
+          </SmallButton>
         </ButtonRow>
       </Container>
     </KeyboardAvoidingView>
@@ -140,7 +146,9 @@ const AreYouLikingTheAppModal: React.FC = () => {
   return (
     <Container>
       <Title>{t("appReview.areYouLikingTheAppModal.title")}</Title>
-      <CenterText>{t("appReview.areYouLikingTheAppModal.description")}</CenterText>
+      <CenterText>
+        {t("appReview.areYouLikingTheAppModal.description")}
+      </CenterText>
       <ButtonRow>
         <SmallButton onPress={openNotLikingTheAppModal} variant="outline">
           {t("appReview.areYouLikingTheAppModal.no")}

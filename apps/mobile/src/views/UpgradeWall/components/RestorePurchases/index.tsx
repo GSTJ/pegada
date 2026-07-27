@@ -1,7 +1,9 @@
 import * as React from "react";
 import { ActivityIndicator, Alert } from "react-native";
+
 import { isDevice } from "expo-device";
 import { router } from "expo-router";
+
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";

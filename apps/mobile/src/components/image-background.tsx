@@ -1,7 +1,6 @@
-import {
-  ImageBackground as ExpoImageBackground,
-  ImageBackgroundProps as ExpoImageBackgroundProps,
-} from "expo-image";
+import type { ImageBackgroundProps as ExpoImageBackgroundProps } from "expo-image";
+
+import { ImageBackground as ExpoImageBackground } from "expo-image";
 
 export type ImageBackgroundProps = ExpoImageBackgroundProps;
 

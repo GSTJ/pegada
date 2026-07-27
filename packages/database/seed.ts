@@ -1,11 +1,17 @@
+import type { Prisma } from "@prisma/client";
+
 import { createId } from "@paralleldrive/cuid2";
-import { Prisma } from "@prisma/client";
 
 import { prisma } from ".";
-import { breedData } from "./__mocks__/breed-data";
-import { PITOCA_DOG, PITOCA_USER, PITOCO_DOG, PITOCO_USER } from "./__mocks__/fixed-dogs-data";
-import { generateFakeUserWithDog } from "./__mocks__/generate-fake-user-with-dog";
 import { dropDatabase } from "./drop-database";
+import { breedData } from "./fixtures/breed-data";
+import {
+  PITOCA_DOG,
+  PITOCA_USER,
+  PITOCO_DOG,
+  PITOCO_USER,
+} from "./fixtures/fixed-dogs-data";
+import { generateFakeUserWithDog } from "./fixtures/generate-fake-user-with-dog";
 
 const interestData: Prisma.InterestCreateManyInput[] = [
   {
@@ -33,9 +39,11 @@ const seedDatabase = async () => {
   await Promise.all([
     generateFakeUserWithDog(PITOCA_DOG, PITOCA_USER, true),
     generateFakeUserWithDog(PITOCO_DOG, PITOCO_USER, true),
-    Array.from({ length: 100 }).forEach(() => {
-      return generateFakeUserWithDog(undefined, undefined, true);
-    }),
+    // `forEach` here meant the 100 filler users were fired off and never
+    // awaited: the seed could finish while they were still being written.
+    ...Array.from({ length: 100 }, () =>
+      generateFakeUserWithDog(undefined, undefined, true),
+    ),
   ]);
 
   await prisma.interest.createMany({ data: interestData });
@@ -46,9 +54,8 @@ const main = async () => {
   try {
     await dropDatabase();
     await seedDatabase();
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

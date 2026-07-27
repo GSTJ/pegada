@@ -1,6 +1,8 @@
 import { Linking, Platform } from "react-native";
+
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import styled, { useTheme } from "styled-components/native";
@@ -10,6 +12,7 @@ import Loading from "@/components/loading";
 import { useCustomerPlan } from "@/hooks/use-payments";
 import { UserPlan } from "@/services/payments";
 import { SceneName } from "@/types/scene-name";
+
 import { Config } from "./Config";
 
 const PlanLoading = styled.View`
@@ -56,10 +59,16 @@ export const CurrentPlanConfig = () => {
   // testID disambiguates the upgrade CTA vs the manage-subscription CTA
   // so Maestro can assert on the pre/post-purchase state of this row.
   const testID =
-    userPlan === UserPlan.Premium ? "profile-current-plan-premium" : "profile-current-plan-upgrade";
+    userPlan === UserPlan.Premium
+      ? "profile-current-plan-premium"
+      : "profile-current-plan-upgrade";
 
   return (
-    <Config.Root testID={testID} disabled={plan.isLoading} onPress={handlePress}>
+    <Config.Root
+      testID={testID}
+      disabled={plan.isLoading}
+      onPress={handlePress}
+    >
       <Premium width={22} height={22} fill={theme.colors.text} />
       <Config.Container>
         <Config.Title>{t("profile.plan.currentPlan")}</Config.Title>
@@ -68,20 +77,23 @@ export const CurrentPlanConfig = () => {
             <StyledLoading inverse />
           </PlanLoading>
         ) : null}
-        {userPlan ? <Config.Description>{t(`plans.${userPlan}`)}</Config.Description> : null}
+        {userPlan ? (
+          <Config.Description>{t(`plans.${userPlan}`)}</Config.Description>
+        ) : null}
         {plan.isError ? (
           <Config.Description color="destructive">
             {t("profile.plan.errorLoading")}
           </Config.Description>
         ) : null}
       </Config.Container>
-      {!plan.isLoading ? (
+      {plan.isLoading ? null : (
         <Config.Description style={{ transform: [{ translateY: -2 }] }}>
           {userPlan === UserPlan.Free && t("profile.plan.upgradeToPremium")}
-          {userPlan === UserPlan.Premium && t("profile.plan.until", { date: expirationDate })}
+          {userPlan === UserPlan.Premium &&
+            t("profile.plan.until", { date: expirationDate })}
           {plan.isError ? t("profile.plan.clickToRetry") : null}
         </Config.Description>
-      ) : null}
+      )}
       <Config.Arrow />
     </Config.Root>
   );

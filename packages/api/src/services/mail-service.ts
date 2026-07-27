@@ -1,13 +1,15 @@
-import Cloudflare from "cloudflare";
-import handlebars from "handlebars";
-import { ParseKeys } from "i18next";
+import type { ParseKeys } from "i18next";
 
 import { Language, Namespace } from "@pegada/shared/i18n/types/types";
+import Cloudflare from "cloudflare";
+import handlebars from "handlebars";
 
 import { config } from "../shared/config";
 import { TranslationService } from "./translation-service";
 
-const cloudflare = new Cloudflare({ apiToken: config.CLOUDFLARE_EMAIL_API_TOKEN });
+const cloudflare = new Cloudflare({
+  apiToken: config.CLOUDFLARE_EMAIL_API_TOKEN,
+});
 
 export class MailService {
   // Inspired from this snippet
@@ -15,11 +17,10 @@ export class MailService {
   static registerTranslationHelper(language = Language.Default) {
     handlebars.registerHelper(
       "translate",
-      function (
-        this: never,
+      (
         key: ParseKeys<Namespace.Mail>,
         options: { hash: Record<string, string | number> },
-      ): handlebars.SafeString {
+      ): handlebars.SafeString => {
         const result = TranslationService.translate(key, {
           lng: language,
           ns: Namespace.Mail,
@@ -31,7 +32,7 @@ export class MailService {
     );
   }
 
-  static async compileTemplate({
+  static compileTemplate({
     template,
     variables,
     language = Language.Default,
@@ -51,7 +52,7 @@ export class MailService {
     return handlebarsTemplate({ ...variables, language });
   }
 
-  static async sendMail({
+  static sendMail({
     to,
     subject,
     html,

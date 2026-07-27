@@ -1,58 +1,41 @@
 import * as React from "react";
 import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { router } from "expo-router";
+
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "styled-components/native";
 
 import { Button } from "@/components/Button";
-import { Text } from "@/components/text";
 import { SceneName } from "@/types/scene-name";
 import { EmptyAnimation } from "@/views/(tabs)/Swipe/components/SwipeRequestFeedback/styles";
+
+import { EmptyDescription, EmptyRoot, EmptyTitle } from "../styles";
 
 interface EmptyMessagesProps {
   search: string;
   setSearch: (value: string) => void;
 }
 
-export const EmptyMessages: React.FC<EmptyMessagesProps> = ({ search, setSearch }) => {
+export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
+  search,
+  setSearch,
+}) => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const theme = useTheme();
 
   return (
-    <View
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        flexGrow: 1,
-        paddingHorizontal: theme.spacing[12],
-        paddingBottom: theme.spacing[12],
-        paddingTop: insets.top + theme.spacing[12],
-      }}
-    >
+    <EmptyRoot style={{ paddingTop: insets.top + theme.spacing[12] }}>
       <EmptyAnimation />
       <View>
-        <Text
-          fontWeight="semibold"
-          style={{
-            marginTop: 12,
-            marginBottom: 10,
-            textAlign: "center",
-          }}
-        >
+        <EmptyTitle fontWeight="semibold">
           {t("messages.empty.title")}
-        </Text>
-        <Text
-          fontSize="xs"
-          style={{
-            letterSpacing: 0.5,
-            textAlign: "center",
-            marginBottom: 30,
-          }}
-        >
+        </EmptyTitle>
+        <EmptyDescription fontSize="xs">
           {t("messages.empty.description")}
-        </Text>
+        </EmptyDescription>
       </View>
       {search ? (
         <Button variant="outline" onPress={() => setSearch("")}>
@@ -63,6 +46,6 @@ export const EmptyMessages: React.FC<EmptyMessagesProps> = ({ search, setSearch 
           {t("messages.empty.searchForDogs")}
         </Button>
       )}
-    </View>
+    </EmptyRoot>
   );
 };

@@ -5,7 +5,10 @@ jest.mock("@aws-sdk/client-s3", () => {
     send,
     S3Client: jest.fn(() => ({ send })),
     CopyObjectCommand: jest.fn((input: unknown) => ({ type: "copy", input })),
-    DeleteObjectCommand: jest.fn((input: unknown) => ({ type: "delete", input })),
+    DeleteObjectCommand: jest.fn((input: unknown) => ({
+      type: "delete",
+      input,
+    })),
   };
 });
 
@@ -23,7 +26,6 @@ const { send } = jest.requireMock("@aws-sdk/client-s3") as { send: jest.Mock };
 const BUCKET_URL = `https://${config.AWS_S3_BUCKET_NAME}.s3.${config.AWS_REGION}.amazonaws.com`;
 
 beforeEach(() => {
-  jest.clearAllMocks();
   send.mockResolvedValue({});
 });
 
@@ -48,14 +50,20 @@ describe("moveImageToFolder", () => {
   });
 
   it("returns a URL rebuilt from the storage base", async () => {
-    const url = await moveImageToFolder(`${BUCKET_URL}/dogs-temporary/1712345678`, "dogs");
+    const url = await moveImageToFolder(
+      `${BUCKET_URL}/dogs-temporary/1712345678`,
+      "dogs",
+    );
 
     expect(url).toBe(`${BUCKET_URL}/dogs/1712345678`);
   });
 
   it("refuses a URL on a host we do not serve images from", async () => {
     await expect(
-      moveImageToFolder("https://example.com/dogs-temporary/1712345678", "dogs"),
+      moveImageToFolder(
+        "https://example.com/dogs-temporary/1712345678",
+        "dogs",
+      ),
     ).rejects.toThrow("configured storage origin");
 
     expect(send).not.toHaveBeenCalled();
@@ -73,9 +81,9 @@ describe("moveImageToFolder", () => {
   });
 
   it("refuses loopback and link-local addresses", async () => {
-    await expect(moveImageToFolder("http://127.0.0.1:9002/x/y", "dogs")).rejects.toThrow(
-      "configured storage origin",
-    );
+    await expect(
+      moveImageToFolder("http://127.0.0.1:9002/x/y", "dogs"),
+    ).rejects.toThrow("configured storage origin");
 
     await expect(
       moveImageToFolder("http://169.254.169.254/latest/meta-data/", "dogs"),
@@ -89,24 +97,27 @@ describe("moveImageToFolder", () => {
    * pending upload is a valid thing to move.
    */
   it("refuses a key already under the permanent folder", async () => {
-    await expect(moveImageToFolder(`${BUCKET_URL}/dogs/1712345678`, "dogs")).rejects.toThrow(
-      "temporary upload",
-    );
+    await expect(
+      moveImageToFolder(`${BUCKET_URL}/dogs/1712345678`, "dogs"),
+    ).rejects.toThrow("temporary upload");
 
     expect(send).not.toHaveBeenCalled();
   });
 
   it("refuses a key under any other prefix", async () => {
-    await expect(moveImageToFolder(`${BUCKET_URL}/backups/1712345678`, "dogs")).rejects.toThrow(
-      "temporary upload",
-    );
-
-    await expect(moveImageToFolder(`${BUCKET_URL}/1712345678`, "dogs")).rejects.toThrow(
-      "temporary upload",
-    );
+    await expect(
+      moveImageToFolder(`${BUCKET_URL}/backups/1712345678`, "dogs"),
+    ).rejects.toThrow("temporary upload");
 
     await expect(
-      moveImageToFolder(`${BUCKET_URL}/dogs-temporary-other/1712345678`, "dogs"),
+      moveImageToFolder(`${BUCKET_URL}/1712345678`, "dogs"),
+    ).rejects.toThrow("temporary upload");
+
+    await expect(
+      moveImageToFolder(
+        `${BUCKET_URL}/dogs-temporary-other/1712345678`,
+        "dogs",
+      ),
     ).rejects.toThrow("temporary upload");
 
     expect(send).not.toHaveBeenCalled();
@@ -114,7 +125,10 @@ describe("moveImageToFolder", () => {
 
   it("refuses a key nested deeper than one segment under the temporary folder", async () => {
     await expect(
-      moveImageToFolder(`${BUCKET_URL}/dogs-temporary/nested/1712345678`, "dogs"),
+      moveImageToFolder(
+        `${BUCKET_URL}/dogs-temporary/nested/1712345678`,
+        "dogs",
+      ),
     ).rejects.toThrow("temporary upload");
 
     expect(send).not.toHaveBeenCalled();
@@ -143,9 +157,9 @@ describe("deleteImageFromS3", () => {
   });
 
   it("refuses a URL on a host we do not serve images from", async () => {
-    await expect(deleteImageFromS3("https://example.com/dogs/1712345678")).rejects.toThrow(
-      "configured storage origin",
-    );
+    await expect(
+      deleteImageFromS3("https://example.com/dogs/1712345678"),
+    ).rejects.toThrow("configured storage origin");
 
     expect(send).not.toHaveBeenCalled();
   });

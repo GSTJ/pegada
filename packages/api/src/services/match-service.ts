@@ -1,11 +1,12 @@
+import type { Language } from "@pegada/shared/i18n/types/types";
+
 import prisma from "@pegada/database";
-import { Language } from "@pegada/shared/i18n/types/types";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import { dogSelect } from "../dtos/dog-dto";
 import { sendError } from "../errors/errors";
+import { transformDistanceBetweenUserAndDog } from "../shared/dog-distance";
 import { PushNotificationService } from "./push-notification-service";
-import { SwipeService } from "./swipe-service";
 import { TranslationService } from "./translation-service";
 
 class MatchService {
@@ -20,7 +21,7 @@ class MatchService {
       where: {
         deletedAt: null,
         OR: [
-          { requesterId: requesterId, responderId: responderId },
+          { requesterId, responderId },
           { requesterId: responderId, responderId: requesterId },
         ],
       },
@@ -111,12 +112,14 @@ class MatchService {
     });
 
     // Prepare a list of matched dogs
-    const matchedDogs = matches.map(async (match) => {
-      const currentDog = match.requester.id === dogId ? match.requester : match.responder;
+    const matchedDogs = matches.map((match) => {
+      const currentDog =
+        match.requester.id === dogId ? match.requester : match.responder;
 
-      const otherDog = match.requester.id === dogId ? match.responder : match.requester; // Get the dog that is not the current dog
+      const otherDog =
+        match.requester.id === dogId ? match.responder : match.requester; // Get the dog that is not the current dog
 
-      const dog = SwipeService.transformDistanceBetweenUserAndDog(otherDog, currentDog.user);
+      const dog = transformDistanceBetweenUserAndDog(otherDog, currentDog.user);
 
       return {
         id: match.id,

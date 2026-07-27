@@ -1,13 +1,19 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import * as RequestPresigner from "@aws-sdk/s3-request-presigner";
-import { Image } from "@prisma/client";
+import type { DogServerSchema } from "@pegada/shared/schemas/dog-schema";
+import type { Image } from "@prisma/client";
 
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import prisma from "@pegada/database";
-import { DogServerSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { config } from "../shared/config";
-import * as FileUpload from "../shared/file-upload";
-import { TEMPORARY_UPLOAD_PREFIX, getPublicUrl, moveImageToFolder } from "../shared/file-upload";
+import {
+  client,
+  getPublicUrl,
+  moveImageToFolder,
+  r2Client,
+  r2UploadsEnabled,
+  TEMPORARY_UPLOAD_PREFIX,
+} from "../shared/file-upload";
 
 const PERMANENT_STORAGE_FOLDER = "dogs";
 
@@ -21,12 +27,12 @@ const PERMANENT_STORAGE_FOLDER = "dogs";
  * config decision: swapping R2 for GCS, Azure, or anything else just
  * returns a different descriptor, shipped clients never change.
  */
-export type SignedUpload = {
+export interface SignedUpload {
   method: "PUT";
   url: string;
   headers: Record<string, string>;
   publicUrl: string;
-};
+}
 
 export class ImageService {
   /**
@@ -44,7 +50,7 @@ export class ImageService {
       ACL: "public-read",
     });
 
-    const url = await RequestPresigner.getSignedUrl(FileUpload.client, command, {
+    const url = await getSignedUrl(client, command, {
       expiresIn: 60 * 60,
     });
 
@@ -60,7 +66,7 @@ export class ImageService {
   static async getSignedUpload(): Promise<SignedUpload> {
     const key = `${TEMPORARY_UPLOAD_PREFIX}/${Date.now().toString()}`;
 
-    if (FileUpload.r2UploadsEnabled) {
+    if (r2UploadsEnabled) {
       const command = new PutObjectCommand({
         Bucket: config.R2_BUCKET_NAME,
         Key: key,
@@ -68,9 +74,9 @@ export class ImageService {
         // bucket's custom domain (PUBLIC_IMAGES_BASE_URL).
       });
 
-      const url = await RequestPresigner.getSignedUrl(
+      const url = await getSignedUrl(
         // Non-null: guaranteed by the r2UploadsEnabled gate.
-        FileUpload.r2Client as NonNullable<typeof FileUpload.r2Client>,
+        r2Client as NonNullable<typeof r2Client>,
         command,
         { expiresIn: 60 * 60 },
       );
@@ -87,22 +93,27 @@ export class ImageService {
       ACL: "public-read",
     });
 
-    const url = await RequestPresigner.getSignedUrl(FileUpload.client, command, {
+    const url = await getSignedUrl(client, command, {
       expiresIn: 60 * 60,
     });
 
-    return { method: "PUT", url, headers: {}, publicUrl: url.split("?")[0] as string };
+    return {
+      method: "PUT",
+      url,
+      headers: {},
+      publicUrl: url.split("?")[0] as string,
+    };
   }
 
-  static async getImageById(id: string) {
+  static getImageById(id: string) {
     return prisma.image.findUnique({
-      where: { id: id },
+      where: { id },
     });
   }
 
-  static async updateImage({ id, ...data }: Partial<Image> & { id: string }) {
+  static updateImage({ id, ...data }: Partial<Image> & { id: string }) {
     return prisma.image.update({
-      where: { id: id },
+      where: { id },
       data,
     });
   }

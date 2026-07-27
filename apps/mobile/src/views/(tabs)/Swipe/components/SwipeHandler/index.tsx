@@ -1,6 +1,10 @@
+import type { Swipe } from "./hooks/use-swipe-gesture";
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+
 import { useEffect } from "react";
 import * as React from "react";
 import { StyleSheet } from "react-native";
+
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
@@ -14,9 +18,9 @@ import FeedbackCard from "@/components/FeedbackCard";
 import { ACTION_OFFSET } from "@/constants";
 import { useDidMountEffect } from "@/services/utils";
 import { Actions } from "@/store/reducers";
-import { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
-import { Swipe, useSwipeGesture } from "./hooks/use-swipe-gesture";
+
+import { useSwipeGesture } from "./hooks/use-swipe-gesture";
 
 const ROTATION_DEG = 8;
 
@@ -40,15 +44,22 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     dispatch(Actions.dogs.swipe.request({ id: card.id, swipeType }));
   };
 
-  const [translation, gestureHandler, gotoDirection, enabled] = useSwipeGesture({
-    onSwipeComplete,
-  });
+  const [translation, gestureHandler, gotoDirection, enabled] = useSwipeGesture(
+    {
+      onSwipeComplete,
+    },
+  );
 
-  const automaticSwipe = (swipeType: Swipe) => {
-    "worklet";
+  // Memoised so the effect below doesn't reinstall the imperative handle on
+  // every render — a worklet is a new function object each time otherwise.
+  const automaticSwipe = React.useCallback(
+    (swipeType: Swipe) => {
+      "worklet";
 
-    gotoDirection(swipeType, { duration: 500 });
-  };
+      gotoDirection(swipeType, { duration: 500 });
+    },
+    [gotoDirection],
+  );
 
   // useImperativeHandle unloads the ref depending on component rendering order
   // This is a new behavior that caused bugs, and had to be replaced with useEffect
@@ -62,7 +73,6 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
 
   useDidMountEffect(() => {
     if (isFirstCard) {
-      // eslint-disable-next-line react-compiler/react-compiler -- false positive
       translation.x.value = withSpring(0, { stiffness: 50 });
       translation.y.value = withSpring(0, { stiffness: 50 });
     }
@@ -89,7 +99,11 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
   return (
     <GestureDetector gesture={gestureHandler.enabled(isFirstCard && enabled)}>
       <Animated.View style={[StyleSheet.absoluteFill, transform]}>
-        <FeedbackCard isFirst={isFirstCard} dog={card} translation={translation} />
+        <FeedbackCard
+          isFirst={isFirstCard}
+          dog={card}
+          translation={translation}
+        />
       </Animated.View>
     </GestureDetector>
   );

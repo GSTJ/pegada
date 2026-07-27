@@ -1,12 +1,18 @@
-import prisma from "@pegada/database";
-import { DogServerSchema, IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
+import type { DogServerSchema } from "@pegada/shared/schemas/dog-schema";
 
-import { dogSelect, selfDogSelect, serverOnlyFullDogSelect } from "../dtos/dog-dto";
+import prisma from "@pegada/database";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
+
+import {
+  dogSelect,
+  selfDogSelect,
+  serverOnlyFullDogSelect,
+} from "../dtos/dog-dto";
 import { enqueue } from "../queue/enqueue";
 import { TOPICS } from "../queue/topics";
+import { transformDistanceBetweenUserAndDog } from "../shared/dog-distance";
 import { deleteImageFromS3 } from "../shared/file-upload";
 import { ImageService } from "./image-service";
-import { SwipeService } from "./swipe-service";
 
 type DogImagesWithId = (DogServerSchema["images"][number] & { id: string })[];
 
@@ -16,7 +22,8 @@ export class DogService {
     newImages: DogServerSchema["images"] = [],
   ) =>
     existingImages.filter(
-      (existingImage) => !newImages.find((newImage) => newImage.url === existingImage.url),
+      (existingImage) =>
+        !newImages.some((newImage) => newImage.url === existingImage.url),
     ) as DogImagesWithId;
 
   static #imagesToCreate = (
@@ -26,7 +33,9 @@ export class DogService {
     newImages.filter(
       (newImage) =>
         newImage.url && // Remove empty images
-        !existingImages.find((existingImage) => existingImage.url === newImage.url),
+        !existingImages.some(
+          (existingImage) => existingImage.url === newImage.url,
+        ),
     );
 
   static #imagesToUpdate = (
@@ -36,7 +45,8 @@ export class DogService {
     newImages?.filter((newImage) =>
       existingImages?.find(
         (existingImage) =>
-          newImage.url === existingImage.url && newImage.position !== existingImage.position,
+          newImage.url === existingImage.url &&
+          newImage.position !== existingImage.position,
       ),
     ) ?? ([] as DogImagesWithId);
 
@@ -62,7 +72,8 @@ export class DogService {
     }
 
     const nonEmptyImages = dogInput.images.filter((image) => image.url);
-    const images = await ImageService.makeTemporaryImagesPermanent(nonEmptyImages);
+    const images =
+      await ImageService.makeTemporaryImagesPermanent(nonEmptyImages);
 
     const dog = await prisma.dog.create({
       data: {
@@ -78,7 +89,9 @@ export class DogService {
     });
 
     // Classify images, create blurhashes and update image status
-    await Promise.all(dog.images.map((image) => enqueue(TOPICS.PROCESS_IMAGE, image)));
+    await Promise.all(
+      dog.images.map((image) => enqueue(TOPICS.PROCESS_IMAGE, image)),
+    );
 
     return dog;
   }
@@ -88,12 +101,11 @@ export class DogService {
       ? await prisma.image.findMany({ where: { dogId: id } })
       : [];
 
-    const { imagesToDelete, imagesToCreate, imagesToUpdate } = this.#classifyImages(
-      existingImages,
-      dogInput.images ?? [],
-    );
+    const { imagesToDelete, imagesToCreate, imagesToUpdate } =
+      this.#classifyImages(existingImages, dogInput.images ?? []);
 
-    const imagesToCreatePermanent = await ImageService.makeTemporaryImagesPermanent(imagesToCreate);
+    const imagesToCreatePermanent =
+      await ImageService.makeTemporaryImagesPermanent(imagesToCreate);
 
     const dogTransaction = await prisma.$transaction([
       ...imagesToUpdate.map((image) =>
@@ -132,12 +144,11 @@ export class DogService {
       ...imagesToDelete.map((image) => deleteImageFromS3(image.url)),
 
       // Classify images, create blurhashes and update image status
-      ...(updatedDog?.images ?? []).map(async (image) => {
-        const isNew = imagesToCreatePermanent.find((newImage) => newImage.url === image.url);
-        if (!isNew) return;
-
-        return enqueue(TOPICS.PROCESS_IMAGE, image);
-      }),
+      ...(updatedDog?.images ?? []).flatMap((image) =>
+        imagesToCreatePermanent.some((newImage) => newImage.url === image.url)
+          ? [enqueue(TOPICS.PROCESS_IMAGE, image)]
+          : [],
+      ),
     ]);
 
     return updatedDog;
@@ -175,7 +186,7 @@ export class DogService {
       throw new Error("Dog not found");
     }
 
-    return SwipeService.transformDistanceBetweenUserAndDog(dog, user);
+    return transformDistanceBetweenUserAndDog(dog, user);
   }
 
   static async getYourOwnDogByUserId(userId: string) {

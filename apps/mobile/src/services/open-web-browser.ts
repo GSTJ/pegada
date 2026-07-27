@@ -16,6 +16,6 @@ import * as WebBrowser from "expo-web-browser";
  *   Apple recommends for Terms / Privacy hand-offs. Users dismiss with
  *   the standard "Done" chrome on iOS or system back on Android.
  */
-export const openWebBrowser = async (url: string) => {
+export const openWebBrowser = (url: string) => {
   return WebBrowser.openBrowserAsync(url);
 };

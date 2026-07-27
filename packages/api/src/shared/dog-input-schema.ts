@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { dogServerSchema } from "@pegada/shared/schemas/dog-schema";
+import { z } from "zod";
 
 import { allowedImageOrigins, isAllowedImageUrl } from "./image-url";
 
@@ -17,14 +16,14 @@ export const dogInputSchema = dogServerSchema.extend({
   images: dogServerSchema.shape.images.superRefine((images, ctx) => {
     const origins = allowedImageOrigins();
 
-    images.forEach((image, index) => {
-      if (!image.url || isAllowedImageUrl(image.url, origins)) return;
-
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [index, "url"],
-        message: "Image URL does not point at a configured storage origin",
-      });
-    });
+    for (const [index, image] of images.entries()) {
+      if (image.url && !isAllowedImageUrl(image.url, origins)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [index, "url"],
+          message: "Image URL does not point at a configured storage origin",
+        });
+      }
+    }
   }),
 });

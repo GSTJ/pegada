@@ -1,11 +1,11 @@
-import { Dog, Gender, PlanType, Prisma, SwipeType } from "@prisma/client";
-import { Sql } from "@prisma/client/runtime/library";
-import { z } from "zod";
+import type { dogSafeSchema } from "../../dtos/dog-dto";
+import type { Dog } from "@prisma/client";
+import type { Sql } from "@prisma/client/runtime/library";
+import type { z } from "zod";
 
 import prisma from "@pegada/database";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
-
-import { dogSafeSchema } from "../../dtos/dog-dto";
+import { Gender, PlanType, Prisma, SwipeType } from "@prisma/client";
 
 type DogSafeSchema = z.infer<typeof dogSafeSchema>;
 export class SuggestionService {
@@ -18,9 +18,11 @@ export class SuggestionService {
     );
 
     // Handle the rest of the ranges
-    bucketRanges.forEach((range, index) => {
-      caseExpression.push(Prisma.sql`WHEN "subquery"."distance" < ${range} THEN ${index} `);
-    });
+    for (const [index, range] of bucketRanges.entries()) {
+      caseExpression.push(
+        Prisma.sql`WHEN "subquery"."distance" < ${range} THEN ${index} `,
+      );
+    }
 
     // Handle values greater than the last range
     caseExpression.push(Prisma.sql`ELSE ${bucketRanges.length} END`);
@@ -92,7 +94,7 @@ export class SuggestionService {
   }
 
   // Make distances less accurate for security reasons. Up to 1 decimal place is enough.
-  static async #anonimizeDistances(dogs: DogSafeSchema[]) {
+  static #anonimizeDistances(dogs: DogSafeSchema[]) {
     return dogs.map((dog) => ({
       ...dog,
       distance: dog.distance ? Math.round(dog.distance * 10) / 10 : null,

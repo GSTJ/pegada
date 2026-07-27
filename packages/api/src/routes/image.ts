@@ -14,7 +14,7 @@ export const imageRouter = createTRPCRouter({
   }),
 
   /** Storage-agnostic upload descriptor — see `SignedUpload` in ImageService. */
-  signedUpload: protectedProcedure.query(async () => {
+  signedUpload: protectedProcedure.query(() => {
     return ImageService.getSignedUpload();
   }),
 });

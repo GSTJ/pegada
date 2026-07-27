@@ -1,10 +1,12 @@
+import type { SharedValue } from "react-native-reanimated";
+
 import * as React from "react";
+
 import Animated, {
   Extrapolation,
   FadeInDown,
   FadeOutUp,
   interpolate,
-  SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
@@ -33,7 +35,12 @@ export const Marker: React.FC<{
 
   const markerViewStyle = useAnimatedStyle(() => {
     "worklet";
-    const markerTop = interpolate(dragging.value, [1, 0], [-15, 0], Extrapolation.CLAMP);
+    const markerTop = interpolate(
+      dragging.value,
+      [1, 0],
+      [-15, 0],
+      Extrapolation.CLAMP,
+    );
 
     return {
       top: markerTop,

@@ -1,6 +1,7 @@
 import { useTheme } from "styled-components";
 
 import Check from "@/assets/images/Check.svg";
+
 import { Container } from "./styles";
 
 export const Checkbox = ({ selected }: { selected?: boolean }) => {

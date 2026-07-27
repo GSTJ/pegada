@@ -1,7 +1,8 @@
+import type { BreedSlug } from "@pegada/shared/i18n/i18n";
+
 import { notFound } from "next/navigation";
 
 import prisma from "@pegada/database";
-import { BreedSlug } from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 import { getFormattedYears } from "@pegada/shared/utils/get-formatted-years";
 
@@ -27,18 +28,23 @@ const DogProfile = async ({ params }: DogProfileProps) => {
     return notFound();
   }
 
-  const dogImage = dog.images[0]?.url;
+  const [firstImage] = dog.images;
+  const dogImage = firstImage?.url;
+  // oxlint-disable-next-line react-perf/jsx-no-new-object-as-prop -- server component: this renders once per request, there is no re-render to memoise against
+  const dogImageStyle = { backgroundImage: `url(${dogImage})` };
 
   return (
     <div className="pt-8 space-y-8 flex flex-1 flex-col px-4 items-center pb-4 h-[100vh]">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.svg" draggable="false" alt="" className="h-12 select-none" />
+      {/* oxlint-disable-next-line nextjs/no-img-element -- A static SVG needs no next/image pipeline. */}
+      <img
+        src="/logo.svg"
+        draggable="false"
+        alt=""
+        className="h-12 select-none"
+      />
 
       <div className="relative rounded-lg border border-border flex flex-col overflow-hidden flex-1 w-full max-w-xl">
-        <div
-          style={{ backgroundImage: `url(${dogImage})` }}
-          className="flex flex-1 bg-cover bg-center"
-        >
+        <div style={dogImageStyle} className="flex flex-1 bg-cover bg-center">
           {Boolean(dog.breed?.name) && (
             <div className="border border-border/70 rounded-md p-2 py-1 m-4 bg-background/50 backdrop-blur ml-auto mb-auto font-semibold">
               {t(`${dog.breed?.slug as BreedSlug}`, { ns: Namespace.Breed })}
@@ -48,7 +54,9 @@ const DogProfile = async ({ params }: DogProfileProps) => {
         <div className="absolute bottom-0 right-0 left-0 bg-background/50 backdrop-blur flex flex-col items-center justify-center p-8 border-t border-t-border/70 text-center">
           <p className="text-xl text-text">
             <b>{dog.name}</b>
-            {dog?.birthDate ? `, ${getFormattedYears({ birthDate: dog?.birthDate, lng })}` : null}
+            {dog?.birthDate
+              ? `, ${getFormattedYears({ birthDate: dog?.birthDate, lng })}`
+              : null}
           </p>
           <p>{dog.bio}</p>
         </div>

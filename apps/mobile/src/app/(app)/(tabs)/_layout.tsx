@@ -1,5 +1,6 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Tabs } from "expo-router";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "styled-components/native";
 
 import Logo from "@/assets/images/logo";
@@ -11,7 +12,21 @@ interface TabBarIconProps {
   color: string;
 }
 
-export default () => {
+// Hoisted out of the layout: an inline `tabBarIcon` is a fresh component type
+// on every render, which remounts the icon whenever the tab bar updates.
+const SwipeTabIcon = ({ color }: TabBarIconProps) => (
+  <Logo colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+);
+
+const MessagesTabIcon = ({ color }: TabBarIconProps) => (
+  <Messages colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+);
+
+const ProfileTabIcon = ({ color }: TabBarIconProps) => (
+  <Profile colorStopOne={color} colorStopTwo={color} width={34} height={34} />
+);
+
+const TabsLayout = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -40,29 +55,25 @@ export default () => {
         name="swipe"
         options={{
           tabBarButtonTestID: "tab-swipe",
-          tabBarIcon: ({ color }: TabBarIconProps) => (
-            <Logo colorStopOne={color} colorStopTwo={color} width={34} height={34} />
-          ),
+          tabBarIcon: SwipeTabIcon,
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           tabBarButtonTestID: "tab-messages",
-          tabBarIcon: ({ color }: TabBarIconProps) => (
-            <Messages colorStopOne={color} colorStopTwo={color} width={34} height={34} />
-          ),
+          tabBarIcon: MessagesTabIcon,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           tabBarButtonTestID: "tab-profile",
-          tabBarIcon: ({ color }: TabBarIconProps) => (
-            <Profile colorStopOne={color} colorStopTwo={color} width={34} height={34} />
-          ),
+          tabBarIcon: ProfileTabIcon,
         }}
       />
     </Tabs>
   );
 };
+
+export default TabsLayout;

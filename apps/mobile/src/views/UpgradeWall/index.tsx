@@ -1,12 +1,15 @@
+import type { PurchasesPackage } from "react-native-purchases";
+
 import { useState } from "react";
 import * as React from "react";
 import { Alert, Platform, View } from "react-native";
-import { PurchasesPackage } from "react-native-purchases";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { isDevice } from "expo-device";
 import { useRouter } from "expo-router";
+
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "styled-components";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
@@ -19,6 +22,7 @@ import { payments } from "@/services/payments";
 import Benefits from "@/views/UpgradeWall/components/Benefits";
 import PlanPackages from "@/views/UpgradeWall/components/PlanPackages";
 import RestorePurchases from "@/views/UpgradeWall/components/RestorePurchases";
+
 import {
   CloseButton,
   CloseIcon,
@@ -31,7 +35,9 @@ import {
   Title,
 } from "./styles";
 
-const useTranslatedTrialDuration = (offering: PurchasesPackage | null | undefined) => {
+const useTranslatedTrialDuration = (
+  offering: PurchasesPackage | null | undefined,
+) => {
   const { t } = useTranslation();
 
   const introPrice = offering?.product.introPrice;
@@ -43,13 +49,21 @@ const useTranslatedTrialDuration = (offering: PurchasesPackage | null | undefine
 
   switch (introPrice.periodUnit) {
     case "DAY":
-      return quantity === 1 ? t("dateFormatting.day", props) : t("dateFormatting.days", props);
+      return quantity === 1
+        ? t("dateFormatting.day", props)
+        : t("dateFormatting.days", props);
     case "WEEK":
-      return quantity === 1 ? t("dateFormatting.week", props) : t("dateFormatting.weeks", props);
+      return quantity === 1
+        ? t("dateFormatting.week", props)
+        : t("dateFormatting.weeks", props);
     case "MONTH":
-      return quantity === 1 ? t("dateFormatting.month", props) : t("dateFormatting.months", props);
+      return quantity === 1
+        ? t("dateFormatting.month", props)
+        : t("dateFormatting.months", props);
     case "YEAR":
-      return quantity === 1 ? t("dateFormatting.year", props) : t("dateFormatting.years", props);
+      return quantity === 1
+        ? t("dateFormatting.year", props)
+        : t("dateFormatting.years", props);
   }
 };
 
@@ -59,7 +73,9 @@ const UpgradeWall: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [selectedOffering, setSelectedOffering] = useState<PurchasesPackage | null | undefined>();
+  const [selectedOffering, setSelectedOffering] = useState<
+    PurchasesPackage | null | undefined
+  >();
 
   const freeTrialDuration = useTranslatedTrialDuration(selectedOffering);
 
@@ -127,7 +143,9 @@ const UpgradeWall: React.FC = () => {
   });
 
   const title = t(
-    isEligibleForTrial ? "plans.upgradeWall.earnedFreeTrial" : "plans.upgradeWall.getPremium",
+    isEligibleForTrial
+      ? "plans.upgradeWall.earnedFreeTrial"
+      : "plans.upgradeWall.getPremium",
   );
 
   const trialSubtitle = isEligibleForTrial
@@ -135,10 +153,13 @@ const UpgradeWall: React.FC = () => {
     : t("plans.upgradeWall.enjoyFullAccess");
 
   const buttonText = t(
-    isEligibleForTrial ? "plans.upgradeWall.startFreeTrial" : "plans.upgradeWall.getPremium",
+    isEligibleForTrial
+      ? "plans.upgradeWall.startFreeTrial"
+      : "plans.upgradeWall.getPremium",
   );
 
-  const paddingTop = Platform.OS === "ios" ? theme.spacing[2] : insets.top + theme.spacing[2];
+  const paddingTop =
+    Platform.OS === "ios" ? theme.spacing[2] : insets.top + theme.spacing[2];
   const headerHeight = 40 + paddingTop;
 
   return (
@@ -149,8 +170,8 @@ const UpgradeWall: React.FC = () => {
           ...bottomActionStyle.scrollViewProps.contentContainerStyle,
           gap: theme.spacing[5],
           paddingBottom:
-            bottomActionStyle.scrollViewProps.contentContainerStyle.paddingBottom +
-            theme.spacing[8],
+            bottomActionStyle.scrollViewProps.contentContainerStyle
+              .paddingBottom + theme.spacing[8],
           paddingTop: theme.spacing[3] + headerHeight,
         }}
       >
@@ -209,7 +230,7 @@ const UpgradeWall: React.FC = () => {
         <Button
           testID="upgrade-wall-purchase-cta"
           onPress={() => {
-            purchasePackage.mutate(selectedOffering!);
+            if (selectedOffering) purchasePackage.mutate(selectedOffering);
           }}
           disabled={!selectedOffering}
           loading={purchasePackage.isPending || !selectedOffering}

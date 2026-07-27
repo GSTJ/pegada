@@ -1,17 +1,20 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+
 import { useState } from "react";
 import * as React from "react";
+
+import { useRouter } from "expo-router";
+
 import {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 
 import { PressableArea } from "@/components/pressable-area";
 import { SceneName } from "@/types/scene-name";
+
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
 import PersonalInfo from "./components/PersonalInfo";
@@ -21,6 +24,7 @@ import {
   NextImage,
   Picture,
   PreviousImage,
+  Scrim,
   UpperPart,
 } from "./styles";
 
@@ -28,7 +32,9 @@ const springConfig = { mass: 0.2 };
 
 const START_IMAGE_INDEX = 0;
 
-export interface VisitingCardProps extends React.ComponentProps<typeof Container> {
+export interface VisitingCardProps extends React.ComponentProps<
+  typeof Container
+> {
   dog: SwipeDog;
   shouldShowPersonalInfo?: boolean;
   startImageIndex?: number;
@@ -63,8 +69,10 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
 
     if (currentImage !== 0) return setCurrentImage((index) => index - 1);
 
-    // eslint-disable-next-line react-compiler/react-compiler -- false positive
-    rotation.value = withSequence(withSpring(-0.5, springConfig), withSpring(0, springConfig));
+    rotation.value = withSequence(
+      withSpring(-0.5, springConfig),
+      withSpring(0, springConfig),
+    );
   };
 
   const gotoNextImage = () => {
@@ -75,7 +83,10 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
     if (currentImage + 1 < images.length) {
       return setCurrentImage((index) => index + 1);
     }
-    rotation.value = withSequence(withSpring(0.5, springConfig), withSpring(0, springConfig));
+    rotation.value = withSequence(
+      withSpring(0.5, springConfig),
+      withSpring(0, springConfig),
+    );
   };
 
   const transform = useAnimatedStyle(() => {
@@ -94,15 +105,13 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
         }}
         key={images[currentImage]?.id}
       />
-      <LinearGradient
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-        colors={["rgba(0, 0, 0, .5)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
+      <Scrim
+        colors={[
+          "rgba(0, 0, 0, .5)",
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 0, 0, 0)",
+        ]}
       />
       <UpperPart>
         <Distance dog={dog} />
@@ -113,7 +122,10 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
         </CarouselContainer>
       </UpperPart>
       {Boolean(shouldShowPersonalInfo) && (
-        <PressableArea testID="swipe-card-open-profile" onPress={openUserProfile}>
+        <PressableArea
+          testID="swipe-card-open-profile"
+          onPress={openUserProfile}
+        >
           <PersonalInfo dog={dog} />
         </PressableArea>
       )}

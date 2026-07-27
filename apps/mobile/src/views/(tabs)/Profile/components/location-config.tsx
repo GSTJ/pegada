@@ -1,5 +1,7 @@
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator } from "react-native";
+
 import { useRouter } from "expo-router";
+
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
@@ -7,6 +9,7 @@ import Location from "@/assets/images/Location.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { useCurrentCityText } from "@/hooks/use-current-city-text";
 import { SceneName } from "@/types/scene-name";
+
 import { Config } from "./Config";
 
 const CurrentLocation = () => {
@@ -31,7 +34,10 @@ const CurrentLocationLoading = () => {
   const theme = useTheme();
 
   return (
-    <ActivityIndicator style={{ paddingHorizontal: theme.spacing[8] }} color={theme.colors.text} />
+    <ActivityIndicator
+      style={{ paddingHorizontal: theme.spacing[8] }}
+      color={theme.colors.text}
+    />
   );
 };
 export const LocationConfig = () => {
@@ -41,10 +47,13 @@ export const LocationConfig = () => {
   const theme = useTheme();
 
   return (
-    <Config.Root testID="profile-open-location" onPress={() => router.push(SceneName.LocationMap)}>
-      <View style={{ width: 22, alignItems: "center" }}>
+    <Config.Root
+      testID="profile-open-location"
+      onPress={() => router.push(SceneName.LocationMap)}
+    >
+      <Config.IconSlot>
         <Location width={19} height={19} fill={theme.colors.text} />
-      </View>
+      </Config.IconSlot>
 
       <Config.Container>
         <Config.Title>{t("profile.updateLocation")}</Config.Title>

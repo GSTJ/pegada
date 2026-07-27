@@ -1,6 +1,5 @@
 // Necessary for jwt-decode to work with react-native
 import "@react-native-anywhere/polyfill-base64";
-
 import { jwtDecode } from "jwt-decode";
 
 import { getData, StorageKeys } from "./storage";

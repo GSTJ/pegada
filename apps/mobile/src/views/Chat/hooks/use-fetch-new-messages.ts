@@ -1,10 +1,12 @@
+import type { MessageProps } from "./use-chat-pagination";
+
 import { useEffect, useRef } from "react";
+
 import { useLocalSearchParams } from "expo-router";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { sendError } from "@/services/error-tracking";
 import { queryClient } from "@/services/query-client";
-import { MessageProps } from "./use-chat-pagination";
 
 const REFRESH_INTERVAL = 5000;
 export const useFetchNewMessages = () => {
@@ -19,7 +21,7 @@ export const useFetchNewMessages = () => {
           gt: latestPollTimestampRef.current,
         });
 
-        if (!newMessages || !newMessages.length) return;
+        if (!newMessages || newMessages.length === 0) return;
 
         latestPollTimestampRef.current = new Date();
 
@@ -47,7 +49,7 @@ export const useFetchNewMessages = () => {
                 return 0;
               });
 
-            const lastMessage = updatedPages[0][0];
+            const [[lastMessage]] = updatedPages;
 
             // Update last message for this match
             getTrcpContext().match.getAll.setData(undefined, (matches) => {
@@ -58,7 +60,7 @@ export const useFetchNewMessages = () => {
                 ...matches.filter((match) => match.id !== matchId),
                 {
                   ...match,
-                  lastMessage: lastMessage,
+                  lastMessage,
                 },
               ];
             });
@@ -66,9 +68,9 @@ export const useFetchNewMessages = () => {
             return { ...oldData, pages: updatedPages };
           },
         );
-      } catch (err) {
+      } catch (error) {
         // Deals with pooling errors silently
-        sendError(err);
+        sendError(error);
       }
     };
 

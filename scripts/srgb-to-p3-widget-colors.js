@@ -30,7 +30,7 @@ const M_SRGB_TO_XYZ = [
 const M_P3_TO_XYZ = [
   [0.48657095, 0.26566769, 0.19821729],
   [0.22897456, 0.69173852, 0.07928691],
-  [0.0, 0.04511338, 1.04394437],
+  [0, 0.04511338, 1.04394437],
 ];
 
 const invert3x3 = (m) => {
@@ -46,12 +46,16 @@ const invert3x3 = (m) => {
 
 const M_XYZ_TO_P3 = invert3x3(M_P3_TO_XYZ);
 
-const matMul = (m, v) => m.map((row) => row[0] * v[0] + row[1] * v[1] + row[2] * v[2]);
+const matMul = (m, v) =>
+  m.map((row) => row[0] * v[0] + row[1] * v[1] + row[2] * v[2]);
 
-const srgbToLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const srgbToLinear = (c) =>
+  c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 const linearToSrgb = (c) => {
   const clamped = Math.max(c, 0);
-  return clamped <= 0.0031308 ? clamped * 12.92 : 1.055 * clamped ** (1 / 2.4) - 0.055;
+  return clamped <= 0.0031308
+    ? clamped * 12.92
+    : 1.055 * clamped ** (1 / 2.4) - 0.055;
 };
 
 /** @param {[number, number, number]} rgb 0-1 sRGB components */
@@ -80,7 +84,7 @@ const hslToSrgb = (h, s, l) => {
 /** Theme colors mirrored from packages/shared/themes/themes.ts. */
 const THEME_COLORS = {
   $accent: { light: [333, 0.81, 0.66] },
-  $widgetBackground: { light: [0, 0, 1.0], dark: [0, 0, 0.0] },
+  $widgetBackground: { light: [0, 0, 1], dark: [0, 0, 0] },
   BrandPink: { light: [333, 0.81, 0.66], dark: [333, 0.58, 0.59] },
   PrimaryText: { light: [222.2, 0.84, 0.049], dark: [0, 0, 0.95] },
   SubtitleText: { light: [222.2, 0.1, 0.39], dark: [0, 0, 0.6] },

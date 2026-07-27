@@ -1,18 +1,22 @@
 import { Platform } from "react-native";
+
 import Constants from "expo-constants";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
 import { getLoggedUserID } from "@/services/get-logged-user-id";
 import { SceneName } from "@/types/scene-name";
+
 import { sendError } from "./error-tracking";
 
-export const identifyUser = async (props: Parameters<typeof analytics.identify>[1]) => {
+export const identifyUser = async (
+  props: Parameters<typeof analytics.identify>[1],
+) => {
   try {
     const userId = await getLoggedUserID();
     return analytics.identify(userId, props);
-  } catch (e) {
-    sendError(e);
+  } catch (error) {
+    sendError(error);
   }
 };
 
@@ -26,7 +30,8 @@ export const trackUser = () => {
 
 export const getInitialRouteName = async () => {
   try {
-    const { authenticated, forceUpdate } = await getTrcpContext().client.echo.get.query();
+    const { authenticated, forceUpdate } =
+      await getTrcpContext().client.echo.get.query();
 
     if (forceUpdate) {
       return SceneName.ForceUpdate;
@@ -47,8 +52,8 @@ export const getInitialRouteName = async () => {
     }
 
     return SceneName.Swipe;
-  } catch (e) {
-    sendError(e);
+  } catch (error) {
+    sendError(error);
     return SceneName.SignIn;
   }
 };
