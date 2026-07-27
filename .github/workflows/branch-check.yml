@@ -33,7 +33,7 @@ jobs:
       - name: 🏗 Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: pnpm
 
       - name: 📦 Install Dependencies
@@ -42,55 +42,20 @@ jobs:
       - name: 🧹 Dedupe
         run: pnpm dedupe --check
 
-  # Typecheck/lint/format used to run serially in one job (~sum of all
-  # three). Splitting into a matrix trades that for parallel wall-clock =
-  # setup + slowest task: each job pays its own ~40s setup (checkout, pnpm,
-  # node, turbo cache restore), but with turbo cache hits the tasks
-  # themselves are fast, so 3 parallel setups + max(task) beats 1 setup +
-  # sum(tasks) once the tasks aren't trivially fast.
+  # Lint, format and typecheck come from GSTJ/magic — the same job every repo
+  # on the shared tooling runs, so a change to the stack is made in one place.
+  # It replaces a three-way matrix that paid its own ~40s setup per task; the
+  # reusable job installs once and runs all three, which is the better trade
+  # now that oxlint and oxfmt finish in under a second.
   checkup:
-    name: ${{ matrix.emoji }} ${{ matrix.label }}
+    name: 👮 Checkup
     needs: dedupe
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - task: typecheck
-            label: Typecheck
-            emoji: 🧪
-          - task: lint
-            label: Lint
-            emoji: 🧹
-          - task: format
-            label: Format
-            emoji: 💅
-    steps:
-      - name: 🏗 Setup Repo
-        uses: actions/checkout@v7
+    uses: GSTJ/magic/.github/workflows/ci.yml@main
 
-      - name: 🏗 Setup PNPM
-        uses: pnpm/action-setup@v6.0.9
-
-      - name: 🏗 Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 20.x
-          cache: pnpm
-
-      - name: 📦 Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🏗 Setup Turborepo Cache
-        uses: rharkor/caching-for-turbo@v2.5.0
-
-      - name: ${{ matrix.emoji }} ${{ matrix.label }}
-        run: pnpm run ${{ matrix.task }}
-
-  # Kept out of the checkup matrix: only this job needs a database, and
-  # sharing the matrix would spin up Postgres for typecheck/lint/format too.
-  # No turbo cache step either — `test` is `cache: false` in turbo.json, so
-  # there would be nothing to restore.
+  # Kept out of the shared checkup job: only this one needs a database, and
+  # folding it in would spin up Postgres for typecheck/lint/format too. No
+  # turbo cache step either — `test` is `cache: false` in turbo.json, so there
+  # would be nothing to restore.
   test:
     name: 🔬 Test
     needs: dedupe
@@ -124,7 +89,7 @@ jobs:
       - name: 🏗 Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: pnpm
 
       - name: 📦 Install Dependencies
