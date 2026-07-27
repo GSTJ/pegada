@@ -1,19 +1,15 @@
+import { extendConfig } from "magic-oxlint-config";
 import expo from "magic-oxlint-config/expo";
-import { defineConfig } from "oxlint";
 
 /**
  * A nested config replaces the root one for everything under `apps/mobile`, so
- * this file has to be complete on its own — including `ignorePatterns`, which
- * `extends` does not carry over.
+ * this file has to be complete on its own. `extendConfig` flattens the preset
+ * and the additions below into one config, which is what makes it complete:
+ * oxlint's own `extends` still drops the extended config's `ignorePatterns` on
+ * 1.75.0 and needs them re-listed by hand.
  */
-export default defineConfig({
-  extends: [expo],
-
-  ignorePatterns: [
-    ...(expo.ignorePatterns ?? []),
-    "google-services.json",
-    "GoogleService-Info.plist",
-  ],
+export default extendConfig(expo, {
+  ignorePatterns: ["google-services.json", "GoogleService-Info.plist"],
 
   rules: {
     // See the root config: a nested config replaces the root one outright, so
@@ -42,13 +38,6 @@ export default defineConfig({
     // incompatible library`). The compiler itself already skips these
     // components at build time; the lint rule only restates that as an error.
     "react/react-compiler": "off",
-
-    // Same call as the preset makes for `unicorn/no-array-sort`, for the same
-    // reason: the autofix rewrites `.reverse()` to `.toReversed()`, which is
-    // ES2023. This app compiles against `lib: ES2022` and ships on Hermes,
-    // where change-array-by-copy is not something to bet a release on. Both
-    // sites already reverse a fresh array, so there is no mutation to fix.
-    "unicorn/no-array-reverse": "off",
 
     // react-native-gesture-handler ships its own scrollables for use *inside*
     // gesture-handler containers. Importing them anywhere else silently loses

@@ -1,5 +1,5 @@
+import { extendConfig } from "magic-oxlint-config";
 import base from "magic-oxlint-config/base";
-import { defineConfig } from "oxlint";
 
 /**
  * Root config: plain TypeScript. It covers `packages/*`, `tools/*`, `scripts/`
@@ -8,15 +8,16 @@ import { defineConfig } from "oxlint";
  * The two apps have their own config next to their `package.json`, because
  * oxlint walks up from each file to the nearest config and the presets they
  * need are different (`expo` for mobile, `next` for the site). A nested config
- * *replaces* this one rather than merging with it, so each is self-contained —
- * which is also why `ignorePatterns` is spelled out in all three: `extends`
- * drops the extended config's ignore patterns.
+ * *replaces* this one rather than merging with it, so each is self-contained.
+ *
+ * `extendConfig` rather than oxlint's own `extends`: it flattens the preset and
+ * the additions below into one config, so `ignorePatterns`, `plugins` and
+ * `jsPlugins` all land at the top level. `extends` still drops the extended
+ * config's `ignorePatterns` on oxlint 1.75.0 — verified against 1.1.0 — which
+ * meant re-listing them by hand here and getting it wrong silently.
  */
-export default defineConfig({
-  extends: [base],
-
+export default extendConfig(base, {
   ignorePatterns: [
-    ...(base.ignorePatterns ?? []),
     "**/storybook-static/**",
     "patches/**",
     "packages/database/prisma/migrations/**",
