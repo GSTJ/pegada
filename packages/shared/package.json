@@ -15,7 +15,7 @@
     "zod-i18n-map": "^2.27.0"
   },
   "devDependencies": {
-    "@pegada/tsconfig": "workspace:*",
+    "magic-tsconfig": "^1.0.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "i18next": "^23.12.2",
     "zod": "3.23.8"

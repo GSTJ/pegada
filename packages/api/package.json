@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
-    "@pegada/tsconfig": "workspace:*",
+    "magic-tsconfig": "^1.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.1.0",
     "@types/semver": "^7.7.1",

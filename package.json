@@ -4,7 +4,6 @@
   "license": "AGPL-3.0-or-later",
   "workspaces": [
     "packages/*",
-    "tools/*",
     "apps/*"
   ],
   "scripts": {
@@ -17,10 +16,10 @@
     "database:test": "dotenv -e .env.test -- pnpm -F @pegada/database",
     "test": "dotenv -e .env.test -- turbo test",
     "build": "dotenv -e .env.dev -- turbo build",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt --check",
-    "format:fix": "oxfmt",
+    "lint": "oxlint --report-unused-disable-directives",
+    "lint:fix": "oxlint --report-unused-disable-directives --fix",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt .",
     "i18n:parse": "npx i18next-parser",
     "typecheck": "turbo typecheck",
     "changelog": "python3 .github/scripts/changelog.py --all --repo GSTJ/pegada --output CHANGELOG.md",

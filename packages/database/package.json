@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
-    "@pegada/tsconfig": "workspace:*",
+    "magic-tsconfig": "^1.0.0",
     "@prisma/client": "^5.17.0",
     "prisma": "^5.17.0",
     "tsx": "^4.21.0"

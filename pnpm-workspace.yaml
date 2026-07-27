@@ -1,6 +1,5 @@
 packages:
   - packages/*
-  - tools/*
   - apps/*
 
 # Everything below used to live in package.json under the "pnpm" key and in
