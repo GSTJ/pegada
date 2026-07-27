@@ -3,8 +3,9 @@
 #
 # The tag is ANNOTATED and its message is the generated release notes, so
 # `git show <tag>` tells you what shipped without a network round trip, and it
-# matches the GitHub release body and the CHANGELOG.md entry byte for byte
-# (release-mobile.yml runs the same generator on the same range).
+# matches the GitHub release body byte for byte (release-mobile.yml runs the
+# same generator on the same range). CHANGELOG.md is regenerated at the end for
+# you to commit through a PR, since the ruleset on main requires one.
 #
 #   ./scripts/tag-release.sh              # v<version from app.config.ts>
 #   ./scripts/tag-release.sh v1.5.0-rc1   # explicit, e.g. a release candidate
@@ -63,3 +64,18 @@ git tag -a "$TAG" -m "$MESSAGE"
 git push "$REMOTE" "refs/tags/$TAG"
 
 echo "Tagged and pushed $TAG. release-mobile.yml takes it from here."
+
+# The changelog can only include this version once the tag exists, so it has to
+# be regenerated after tagging. CI can't commit it for you: the "Main" ruleset
+# routes every change to main through a pull request, and a PR opened with
+# GITHUB_TOKEN never gets its required checks, so it could never merge.
+python3 .github/scripts/changelog.py --all --repo "$REPO" --output CHANGELOG.md
+
+if git diff --quiet -- CHANGELOG.md; then
+  echo "CHANGELOG.md was already current."
+else
+  echo
+  echo "CHANGELOG.md now has a $TAG section. Open a PR with it:"
+  echo "  git checkout -b docs/changelog-$TAG"
+  echo "  git commit -m 'docs: add the $TAG changelog entry' -- CHANGELOG.md"
+fi
