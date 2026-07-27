@@ -2,7 +2,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import styled from "styled-components/native";
 
 import Close from "@/assets/images/Close.svg";
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
 export const TitleContainer = styled.View`
   flex-direction: row;

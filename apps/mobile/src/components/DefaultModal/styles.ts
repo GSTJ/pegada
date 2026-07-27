@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 
 import { Button } from "@/components/Button";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const OkButton = styled(Button)`
   width: 100%;

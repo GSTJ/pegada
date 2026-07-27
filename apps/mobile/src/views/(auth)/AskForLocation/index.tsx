@@ -10,10 +10,10 @@ import { useTheme } from "styled-components/native";
 import Information from "@/assets/images/Information.svg";
 import LocationIcon from "@/assets/images/Location.svg";
 import { Button } from "@/components/Button";
-import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { sendError } from "@/services/errorTracking";
-import { SceneName } from "@/types/SceneName";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { sendError } from "@/services/error-tracking";
+import { SceneName } from "@/types/scene-name";
 import { BottomView, Container, InformationRow, LocationView } from "./styles";
 
 enum UpdateLocationError {

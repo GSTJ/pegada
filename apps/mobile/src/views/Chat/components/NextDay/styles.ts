@@ -1,7 +1,7 @@
 import Color from "color";
 import styled from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Container = styled.View`
   margin: ${(props) => props.theme.spacing[4]}px auto ${(props) => props.theme.spacing[5]}px auto;

@@ -6,14 +6,14 @@ import { ActionType } from "typesafe-actions";
 import { LikeLimitReached } from "@pegada/shared/errors/errors";
 
 import { showLikeLimitReached } from "@/components/LikeLimitReached";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { getUnsafeIsPremium } from "@/hooks/usePayments";
-import { sendError } from "@/services/errorTracking";
-import { getError } from "@/services/getError";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { getUnsafeIsPremium } from "@/hooks/use-payments";
+import { sendError } from "@/services/error-tracking";
+import { getError } from "@/services/get-error";
 import { Actions, RootReducer } from "@/store/reducers";
 import { SwipeAction } from "@/store/reducers/dogs/swipe";
-import { SceneName } from "@/types/SceneName";
-import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
+import { SceneName } from "@/types/scene-name";
+import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
 
 function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.request>): any {
   const { id, swipeType: _swipeType } = payload;

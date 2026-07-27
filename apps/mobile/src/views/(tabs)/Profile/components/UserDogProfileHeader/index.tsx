@@ -8,10 +8,10 @@ import { BIO_NUMBER_OF_LINES } from "@/components/MainCard/components/PersonalIn
 import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
 import { Container, Picture } from "@/components/MainCard/styles";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { api } from "@/contexts/TRPCProvider";
-import { useCustomerPlan } from "@/hooks/usePayments";
+import { api } from "@/contexts/trpc-provider";
+import { useCustomerPlan } from "@/hooks/use-payments";
 import { UserPlan } from "@/services/payments";
-import { useGetFormattedYears } from "@/services/useGetFormattedYears";
+import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 import {
   ProfileContainer,
   ProfileUnknownError,

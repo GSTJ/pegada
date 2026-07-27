@@ -8,7 +8,7 @@ import {
   Picture,
   sortByUrl,
 } from "@/components/ProfileImageUploader/utils";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import { AddUserPhoto } from "./components/AddUserPhoto";
 import { dogPictureHeight, numOfColumns } from "./components/AddUserPhoto/styles";
 

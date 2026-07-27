@@ -1,6 +1,6 @@
 import styled from "styled-components/native";
 
-import { Image } from "@/components/Image";
+import { Image } from "@/components/image";
 
 export const Container = styled.ScrollView`
   flex-grow: 1;

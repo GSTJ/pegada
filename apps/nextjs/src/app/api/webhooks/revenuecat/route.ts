@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import PaymentService from "@pegada/api/services/PaymentService";
+import PaymentService from "@pegada/api/services/payment-service";
 import { getSession } from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
 

@@ -2,9 +2,9 @@ import * as Notifications from "expo-notifications";
 
 import { NOTIFICATION_ACTION, NOTIFICATION_CATEGORY } from "@pegada/shared/constants/notifications";
 
-import { getTrcpContext } from "@/contexts/trcpContext";
+import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { getNotificationUrl, NotificationUrl } from "./notification";
 
 // Chat-message pushes carry `chat/<matchId>/<dogId>` in `data.url` (see

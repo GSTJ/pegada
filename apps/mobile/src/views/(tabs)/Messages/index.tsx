@@ -5,18 +5,18 @@ import { useScrollToTop } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import Divider from "@/components/Divider";
+import Divider from "@/components/divider";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api, RouterOutputs } from "@/contexts/TRPCProvider";
-import { handleRequestAppReview } from "@/services/appReview";
-import { sendError } from "@/services/errorTracking";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api, RouterOutputs } from "@/contexts/trpc-provider";
+import { handleRequestAppReview } from "@/services/app-review";
+import { sendError } from "@/services/error-tracking";
 import { syncMatchesWidget } from "@/services/matchesWidget";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { Header } from "@/views/(tabs)/Messages/components/Header";
 import { Message } from "@/views/(tabs)/Messages/components/Message";
-import { EmptyMessages } from "./components/EmptyMessages";
+import { EmptyMessages } from "./components/empty-messages";
 import { SearchBar } from "./components/SearchBar";
 import { Container, DividerContainer, Title } from "./styles";
 

@@ -2,7 +2,7 @@ import Animated from "react-native-reanimated";
 import Color from "color";
 import styled from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
 export const PlanContainer = styled(PressableArea)`
   position: absolute;

@@ -11,7 +11,7 @@ const INLINE_HANDLERS: {
   [T in Topic]: () => Promise<(payload: TopicPayloads[T]) => Promise<unknown>>;
 } = {
   [TOPICS.MAIL]: () => import("./handlers/mail").then((m) => m.handleMail),
-  [TOPICS.PROCESS_IMAGE]: () => import("./handlers/processImage").then((m) => m.handleProcessImage),
+  [TOPICS.PROCESS_IMAGE]: () => import("./handlers/process-image").then((m) => m.handleProcessImage),
   [TOPICS.SEND_PUSH]: () => import("./handlers/push").then((m) => m.handleSendPushNotification),
   [TOPICS.CHECK_PUSH_RECEIPTS]: () =>
     import("./handlers/push").then((m) => m.handleCheckPushReceipts),

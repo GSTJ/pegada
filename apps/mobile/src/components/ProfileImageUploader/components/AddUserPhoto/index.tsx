@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import AddRemove from "@/assets/images/AddRemove.svg";
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 import {
   getMaestroPlaceholderUri,
   ImagePickerError,
@@ -17,8 +17,8 @@ import {
   showImagePickerOptions,
   uploadProfileImage,
 } from "@/components/ProfileImageUploader/utils";
-import { Text } from "@/components/Text";
-import { sendError } from "@/services/errorTracking";
+import { Text } from "@/components/text";
+import { sendError } from "@/services/error-tracking";
 import * as S from "./styles";
 
 type AddUserPhotoProps = {

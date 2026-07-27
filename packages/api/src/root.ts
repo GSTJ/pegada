@@ -5,7 +5,7 @@ import { echoRouter } from "./routes/echo";
 import { imageRouter } from "./routes/image";
 import { matchRouter } from "./routes/match";
 import { messageRouter } from "./routes/message";
-import { myDogRouter } from "./routes/myDog";
+import { myDogRouter } from "./routes/my-dog";
 import { paymentRouter } from "./routes/payment";
 import { swipeRouter } from "./routes/swipe";
 import { userRouter } from "./routes/user";

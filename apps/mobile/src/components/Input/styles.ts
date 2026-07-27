@@ -2,7 +2,7 @@ import { ActivityIndicator } from "react-native";
 import styled from "styled-components/native";
 
 import cancelIcon from "@/assets/images/Cancel.svg";
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
 export const Container = styled.View`
   margin-top: ${(props) => props.theme.spacing[4]}px;

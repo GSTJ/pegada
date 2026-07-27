@@ -7,9 +7,9 @@ import { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/co
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import { renderCustomBackdrop } from "@/components/CustomBackdrop";
+import { renderCustomBackdrop } from "@/components/custom-backdrop";
 import { Input } from "@/components/Input";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import {
   CloseIcon,
   Container,

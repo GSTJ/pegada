@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 import { AdEventType, InterstitialAd, TestIds } from "react-native-google-mobile-ads";
 
-import { useUnsafeIsPremium } from "@/hooks/usePayments";
+import { useUnsafeIsPremium } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 
 const DEFAULT_AD_KEYWORDS = ["dog", "animals", "pets", "puppies"];
 

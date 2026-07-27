@@ -1,1 +1,1 @@
-export { default } from "@/views/Splashscreen";
+export { default } from "@/views/splashscreen";

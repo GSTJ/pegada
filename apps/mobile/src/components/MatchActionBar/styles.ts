@@ -6,8 +6,8 @@ import styled from "styled-components/native";
 import confusedEmoji from "@/assets/images/ConfusedEmoji.webp";
 import heartEyesEmoji from "@/assets/images/HeartEyesEmoji.webp";
 import thinkingEmoji from "@/assets/images/ThinkingEmoji.webp";
-import { Image } from "@/components/Image";
-import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
+import { Image } from "@/components/image";
+import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
 
 // Apple HIG recommends a minimum 44x44pt hit area for tappable targets.
 const MIN_TOUCH_TARGET = 44;

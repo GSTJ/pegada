@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { DogService } from "../services/DogService";
-import { dogInputSchema } from "../shared/dogInputSchema";
+import { DogService } from "../services/dog-service";
+import { dogInputSchema } from "../shared/dog-input-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const getDogSchema = z.object({

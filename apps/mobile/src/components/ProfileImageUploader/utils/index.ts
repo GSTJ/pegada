@@ -11,13 +11,13 @@ import {
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 
-import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import i18n from "@/i18n";
 import { config } from "@/services/config";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { sendError } from "@/services/errorTracking";
-import { getMimeType } from "@/services/getMimeType";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { sendError } from "@/services/error-tracking";
+import { getMimeType } from "@/services/get-mime-type";
 
 export interface Picture {
   id: string;

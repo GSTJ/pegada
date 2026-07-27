@@ -12,7 +12,7 @@ import {
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
 import { Actions, RootReducer } from "@/store/reducers";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { Description, EmptyAnimation, LogoLoading, Title } from "./styles";
 
 export const EmptyComponent = () => {

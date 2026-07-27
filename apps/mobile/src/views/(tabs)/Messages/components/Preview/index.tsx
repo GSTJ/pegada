@@ -1,9 +1,9 @@
 import * as React from "react";
 import { useRouter } from "expo-router";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import { SwipeDog } from "@/store/reducers/dogs/swipe";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { Container, Content, Picture } from "./styles";
 
 interface PreviewProps {

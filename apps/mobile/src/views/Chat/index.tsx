@@ -5,11 +5,11 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { useKeyboardAwareSafeAreaInsets } from "@/hooks/useKeyboardAwareSafeAreaInsets";
+import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
 import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 import { HEADER_HEIGHT } from "./components/Header";
 import { SEND_HEIGHT } from "./components/Send";
-import { MessageProps, useChatPagination } from "./hooks/useChatPagination";
+import { MessageProps, useChatPagination } from "./hooks/use-chat-pagination";
 import { Background, CenteredText, CenteredView, Container } from "./styles";
 
 const Empty = () => {

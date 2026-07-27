@@ -21,19 +21,19 @@ import Erase from "@/assets/images/Erase.svg";
 import Filters from "@/assets/images/Filters.svg";
 import Paperwork from "@/assets/images/Paperwork.svg";
 import SignOut from "@/assets/images/SignOut.svg";
-import Divider from "@/components/Divider";
-import { Text } from "@/components/Text";
-import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
+import Divider from "@/components/divider";
+import { Text } from "@/components/text";
+import { useWarmUpBrowser } from "@/hooks/use-warm-up-browser";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
-import { openWebBrowser } from "@/services/openWebBrowser";
+import { sendError } from "@/services/error-tracking";
+import { openWebBrowser } from "@/services/open-web-browser";
 import { StorageKeys, storeData } from "@/services/storage";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { Config } from "./components/Config";
-import { CurrentPlanConfig } from "./components/CurrentPlanConfig";
-import { LanguageConfig } from "./components/LanguageConfig";
-import { LocationConfig } from "./components/LocationConfig";
-import { ThemeConfig } from "./components/ThemeConfig";
+import { CurrentPlanConfig } from "./components/current-plan-config";
+import { LanguageConfig } from "./components/language-config";
+import { LocationConfig } from "./components/location-config";
+import { ThemeConfig } from "./components/theme-config";
 import UserDogProfileHeader, { useDogProfileHeight } from "./components/UserDogProfileHeader";
 import {
   BackgroundOverlay,
@@ -43,8 +43,8 @@ import {
   ScrollContainer,
   SettingsList,
 } from "./styles";
-import { deleteAccount } from "./utils/deleteAccount";
-import { handleLogout } from "./utils/handleLogout";
+import { deleteAccount } from "./utils/delete-account";
+import { handleLogout } from "./utils/handle-logout";
 
 const openTermsOfUse = () => {
   analytics.track({ event_type: "Open Terms Of Use" });

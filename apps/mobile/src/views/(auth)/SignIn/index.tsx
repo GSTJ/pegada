@@ -9,11 +9,11 @@ import { useTheme } from "styled-components/native";
 import { OTPRequiredError } from "@pegada/shared/errors/errors";
 
 import { Button } from "@/components/Button";
-import { api } from "@/contexts/TRPCProvider";
-import { useKeyboardAwareSafeAreaInsets } from "@/hooks/useKeyboardAwareSafeAreaInsets";
-import { sendError } from "@/services/errorTracking";
-import { getError } from "@/services/getError";
-import { SceneName } from "@/types/SceneName";
+import { api } from "@/contexts/trpc-provider";
+import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
+import { sendError } from "@/services/error-tracking";
+import { getError } from "@/services/get-error";
+import { SceneName } from "@/types/scene-name";
 import EmailInput from "./components/EmailInput";
 import HeroText from "./components/HeroText";
 import {

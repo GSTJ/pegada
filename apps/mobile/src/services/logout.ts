@@ -1,13 +1,13 @@
 import { router } from "expo-router";
 
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { syncMatchesWidgetLoggedOut } from "@/services/matchesWidget";
 import { payments } from "@/services/payments";
-import { queryClient } from "@/services/queryClient";
+import { queryClient } from "@/services/query-client";
 import { store } from "@/store";
 import { Actions } from "@/store/reducers/dogs";
-import { SceneName } from "@/types/SceneName";
-import { setInitialNotification } from "./linking/handlers/initialNotification";
+import { SceneName } from "@/types/scene-name";
+import { setInitialNotification } from "./linking/handlers/initial-notification";
 import { deleteData, StorageKeys } from "./storage";
 
 export const logout = async () => {

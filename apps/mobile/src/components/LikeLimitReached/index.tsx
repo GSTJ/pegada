@@ -12,12 +12,12 @@ import {
   LikeLimitReachedProps,
   useCountdown,
   ZERO_TIME_LEFT,
-} from "@/components/LikeLimitReached/useCountdown";
+} from "@/components/LikeLimitReached/use-countdown";
 import { CloseIcon } from "@/components/Picker/styles";
-import { Text } from "@/components/Text";
-import { useEligibleForTrial } from "@/hooks/usePayments";
+import { Text } from "@/components/text";
+import { useEligibleForTrial } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { CloseButton } from "@/views/UpgradeWall/styles";
 
 const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt }) => {

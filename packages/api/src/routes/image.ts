@@ -1,4 +1,4 @@
-import { ImageService } from "../services/ImageService";
+import { ImageService } from "../services/image-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const imageRouter = createTRPCRouter({

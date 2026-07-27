@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import prisma from "@pegada/database";
 import { BreedSlug } from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
-import { getFormattedYears } from "@pegada/shared/utils/getFormattedYears";
+import { getFormattedYears } from "@pegada/shared/utils/get-formatted-years";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";

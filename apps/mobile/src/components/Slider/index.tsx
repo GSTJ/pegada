@@ -3,7 +3,7 @@ import { View } from "react-native";
 import MultiSlider, { LabelProps, MultiSliderProps } from "@ptomasroos/react-native-multi-slider";
 import { useTheme } from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import { LabelContainer, Marker, TitleContainer, Triangle, WIDTH } from "./styles";
 
 interface TitleProps {

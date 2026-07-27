@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
 
-import { sendError } from "@/services/errorTracking";
-import { initialNotification, setInitialNotification } from "./handlers/initialNotification";
+import { sendError } from "@/services/error-tracking";
+import { initialNotification, setInitialNotification } from "./handlers/initial-notification";
 import { customNotificationHandler, getNotificationUrl } from "./handlers/notification";
 import { handleReplyAction, isReplyAction } from "./handlers/reply";
 

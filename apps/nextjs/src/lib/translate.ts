@@ -1,6 +1,6 @@
 import { ParseKeys, TOptions } from "i18next";
 
-import { TranslationService } from "@pegada/api/services/TranslationService";
+import { TranslationService } from "@pegada/api/services/translation-service";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";

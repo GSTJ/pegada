@@ -6,7 +6,7 @@ import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { Input } from "@/components/Input";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { api } from "@/contexts/TRPCProvider";
+import { api } from "@/contexts/trpc-provider";
 import { InputPicker } from "../Picker";
 
 interface BreedPickerProps {

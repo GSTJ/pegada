@@ -1,7 +1,7 @@
 import { Pressable } from "react-native";
 import styled from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Root = styled(Pressable)`
   flex-direction: row;

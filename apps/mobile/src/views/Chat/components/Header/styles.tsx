@@ -1,9 +1,9 @@
 import Color from "color";
 import styled from "styled-components/native";
 
-import { BlurView } from "@/components/BlurView";
-import { Image } from "@/components/Image";
-import { PressableArea } from "@/components/PressableArea";
+import { BlurView } from "@/components/blur-view";
+import { Image } from "@/components/image";
+import { PressableArea } from "@/components/pressable-area";
 
 export const BackTouchArea = styled(PressableArea)`
   padding: ${(props) => props.theme.spacing[4]}px;

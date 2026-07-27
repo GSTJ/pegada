@@ -2,8 +2,8 @@ import { KeyboardAvoidingView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 
-import Logo from "@/assets/images/Logo";
-import { Text } from "@/components/Text";
+import Logo from "@/assets/images/logo";
+import { Text } from "@/components/text";
 
 export const Container = styled(SafeAreaView).attrs({
   edges: ["left", "right"],

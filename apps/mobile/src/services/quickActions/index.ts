@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import * as QuickActions from "expo-quick-actions";
 import { useTranslation } from "react-i18next";
 
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import {
   customQuickActionHandler,
   flushPendingQuickAction,

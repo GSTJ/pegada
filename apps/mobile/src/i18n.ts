@@ -4,7 +4,7 @@ import { initReactI18next } from "react-i18next";
 
 import { initI18n } from "@pegada/shared/i18n/i18n";
 
-import { sendError } from "./services/errorTracking";
+import { sendError } from "./services/error-tracking";
 import { getData, StorageKeys, storeData } from "./services/storage";
 
 export const getSystemLanguage = () => {

@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 
-import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
-import { PressableArea } from "@/components/PressableArea";
+import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import { PressableArea } from "@/components/pressable-area";
 
 const BACK_CONTAINER_SIZE = 60;
 const HIT_SLOP = {

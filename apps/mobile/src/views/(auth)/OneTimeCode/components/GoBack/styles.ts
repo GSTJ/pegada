@@ -1,6 +1,6 @@
 import styled from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
 export const Container = styled(PressableArea)`
   border-radius: ${(props) => props.theme.radii.md}px;

@@ -9,14 +9,14 @@ import { useTheme } from "styled-components";
 
 import { Button } from "@/components/Button";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
-import { api } from "@/contexts/TRPCProvider";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
 import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
 import { analytics } from "@/services/analytics";
 import { haptics } from "@/services/haptics";
-import { SceneName } from "@/types/SceneName";
-import AnimatedCards from "./AnimatedCards";
-import { ConfettiAnimation } from "./ConfettiAnimation";
+import { SceneName } from "@/types/scene-name";
+import AnimatedCards from "./animated-cards";
+import { ConfettiAnimation } from "./confetti-animation";
 import { Container, Content } from "./styles";
 
 const NewMatch: React.FC = () => {

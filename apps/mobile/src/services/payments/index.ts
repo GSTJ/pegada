@@ -8,11 +8,11 @@ import Purchases, {
 import * as Device from "expo-device";
 import { get } from "lodash";
 
-import { getTrcpContext } from "@/contexts/trcpContext";
+import { getTrcpContext } from "@/contexts/trcp-context";
 import { config } from "@/services/config";
-import { sendError } from "@/services/errorTracking";
-import { getLoggedUserID } from "@/services/getLoggedUserID";
-import { queryClient } from "@/services/queryClient";
+import { sendError } from "@/services/error-tracking";
+import { getLoggedUserID } from "@/services/get-logged-user-id";
+import { queryClient } from "@/services/query-client";
 
 export enum PaymentCacheKey {
   CustomerInfo = "PAYMENT_CUSTOMER_INFO_KEY",

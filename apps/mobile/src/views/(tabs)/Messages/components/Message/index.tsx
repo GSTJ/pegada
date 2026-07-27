@@ -4,9 +4,9 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { ThinkingEmoji } from "@/components/MatchActionBar/styles";
-import { Text } from "@/components/Text";
-import { SceneName } from "@/types/SceneName";
-import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
+import { Text } from "@/components/text";
+import { SceneName } from "@/types/scene-name";
+import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
 import { Match } from "../..";
 import { Container, EmojiContainer, Picture } from "./styles";
 

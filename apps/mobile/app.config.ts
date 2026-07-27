@@ -192,7 +192,7 @@ const config: ExpoConfig = {
     // scheme so simulator runs (local + CI) can resolve real product pricing
     // without an App Store sandbox session. Plugin is a no-op when the file
     // is missing or when the platform isn't iOS.
-    "./plugins/withStoreKitConfiguration",
+    "./plugins/with-store-kit-configuration",
     // Seeds Android's base (unqualified) values/strings.xml with the
     // primary locale's native strings. Without this, Android Lint's
     // ExtraTranslation check treats every string in locales.en /
@@ -200,12 +200,12 @@ const config: ExpoConfig = {
     // locale-tagged resource file, absent from the default one) and
     // FAILS gradlew bundleRelease -- this is what killed the 2026-07-05
     // overnight EAS cloud build. See withDefaultLocaleStrings.js.
-    ["./plugins/withDefaultLocaleStrings", { stringsByKey: defaultLocaleNativeStrings }],
+    ["./plugins/with-default-locale-strings", { stringsByKey: defaultLocaleNativeStrings }],
     // Applies the user's in-app theme choice (mirrored to NSUserDefaults by
     // ThemeProvider) to the iOS window before the splash screen renders, so
     // a forced dark theme boots with a dark splash instead of blinking
     // white->dark on light-mode devices. See withInitialThemeOverride.js.
-    "./plugins/withInitialThemeOverride",
+    "./plugins/with-initial-theme-override",
     // Sourcemap upload for Release native builds only (see
     // posthogSourcemapsEnabled above) -- omitted entirely from the plugins
     // list otherwise, so a plain local build never has the upload step in

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { DogService } from "../services/DogService";
-import { SuggestionService } from "../services/SuggestionService/SuggestionService";
-import { SwipeService } from "../services/SwipeService";
+import { DogService } from "../services/dog-service";
+import { SuggestionService } from "../services/SuggestionService/suggestion-service";
+import { SwipeService } from "../services/swipe-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const DEFAULT_LIMIT = 10;

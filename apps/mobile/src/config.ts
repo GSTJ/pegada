@@ -6,7 +6,7 @@ import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 import * as Updates from "expo-updates";
 
 import { config } from "@/services/config";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { posthog } from "@/services/posthog";
 
 mobileAds()

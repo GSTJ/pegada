@@ -8,18 +8,18 @@ import { useTranslation } from "react-i18next";
 
 import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/errors";
 
-import { Text } from "@/components/Text";
-import { api } from "@/contexts/TRPCProvider";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
-import { getError } from "@/services/getError";
-import { getInitialRouteName } from "@/services/getInitialRouteName";
+import { sendError } from "@/services/error-tracking";
+import { getError } from "@/services/get-error";
+import { getInitialRouteName } from "@/services/get-initial-route-name";
 import { StorageKeys, storeData } from "@/services/storage";
 import { useDidMountEffect } from "@/services/utils";
 import { Underline } from "../SignIn/components/HeroText";
 import GoBack from "./components/GoBack";
 import OTPInput, { OtpInputRef } from "./components/OtpInput";
-import useTimer from "./hooks/useTimer";
+import useTimer from "./hooks/use-timer";
 import {
   Container,
   Content,

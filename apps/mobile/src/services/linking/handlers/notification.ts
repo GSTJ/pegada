@@ -1,8 +1,8 @@
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 
-import { sendError } from "@/services/errorTracking";
-import { SceneName } from "@/types/SceneName";
+import { sendError } from "@/services/error-tracking";
+import { SceneName } from "@/types/scene-name";
 
 export enum NotificationUrl {
   Match = "match/",

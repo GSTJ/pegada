@@ -6,9 +6,9 @@ import { useTheme } from "styled-components/native";
 
 import BackArrow from "@/assets/images/BackArrow.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
-import { api } from "@/contexts/TRPCProvider";
-import { SceneName } from "@/types/SceneName";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
+import { SceneName } from "@/types/scene-name";
 import * as S from "./styles";
 
 export const HEADER_HEIGHT = 65;

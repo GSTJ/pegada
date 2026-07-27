@@ -11,9 +11,9 @@ import { useTheme } from "styled-components";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
-import { useEligibleForTrial } from "@/hooks/usePayments";
+import { useEligibleForTrial } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { haptics } from "@/services/haptics";
 import { payments } from "@/services/payments";
 import Benefits from "@/views/UpgradeWall/components/Benefits";

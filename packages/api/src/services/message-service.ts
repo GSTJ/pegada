@@ -1,0 +1,147 @@
+import prisma from "@pegada/database";
+import {
+  NOTIFICATION_CATEGORY,
+  NOTIFICATION_CHANNEL,
+} from "@pegada/shared/constants/notifications";
+import { Language } from "@pegada/shared/i18n/types/types";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
+
+import { PushNotificationService } from "./push-notification-service";
+import { TranslationService } from "./translation-service";
+
+class MessageService {
+  // Default pagination settings
+  static #defaultLimit: number | undefined = undefined;
+
+  language?: Language;
+
+  constructor(props: { language?: Language }) {
+    this.language = props.language;
+  }
+
+  static async getMessages({
+    matchId,
+    dogId,
+    lt,
+    gt,
+    limit = this.#defaultLimit,
+  }: {
+    matchId: string;
+    dogId: string;
+    lt?: Date;
+    gt?: Date;
+    limit?: number;
+  }) {
+    const messages = await prisma.message.findMany({
+      where: {
+        matchId,
+        deletedAt: null,
+        ...((lt || gt) && { createdAt: { lt, gt } }),
+        // Only messages sent or received by the dog, so the dog can't see messages from other matches
+        OR: [{ senderId: dogId }, { receiverId: dogId }],
+      },
+      take: limit,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return messages;
+  }
+
+  async sendMessage(content: string, senderId: string, matchId: string) {
+    const match = await prisma.match.findUnique({
+      where: { id: matchId, deletedAt: null },
+    });
+
+    if (!match || (match.requesterId !== senderId && match.responderId !== senderId)) {
+      throw new Error("Invalid matchId or senderId");
+    }
+
+    const otherDogId = match.requesterId === senderId ? match.responderId : match.requesterId;
+
+    const newMessage = await prisma.message.create({
+      data: {
+        content,
+        senderId,
+        receiverId: otherDogId,
+        matchId,
+      },
+      include: {
+        sender: {
+          select: {
+            name: true,
+            // First approved photo only: it rides along in the push payload so
+            // the iOS Notification Service Extension can render the sender's
+            // avatar on communication notifications.
+            images: {
+              orderBy: { position: "asc" },
+              where: { status: IMAGE_STATUS.APPROVED },
+              take: 1,
+              select: { url: true },
+            },
+          },
+        },
+        receiver: {
+          select: {
+            name: true,
+            user: {
+              select: {
+                id: true,
+                pushToken: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const otherDog = newMessage.receiver;
+
+    if (otherDog.user.pushToken) {
+      await PushNotificationService.enqueuePushNotification({
+        to: otherDog.user.pushToken,
+        body: content,
+        title: TranslationService.translate("server:notification.message.title", {
+          lng: this.language,
+          replace: { name: newMessage.sender.name },
+        }),
+        channelId: NOTIFICATION_CHANNEL.ChatMessage,
+        categoryId: NOTIFICATION_CATEGORY.ChatMessage,
+        // Lets the iOS Notification Service Extension intercept the push and
+        // restyle it as a communication notification (sender avatar + name).
+        mutableContent: true,
+        data: {
+          url: `chat/${matchId}/${newMessage.senderId}`,
+          senderName: newMessage.sender.name,
+          senderAvatarUrl: newMessage.sender.images[0]?.url,
+        },
+      });
+    }
+
+    return newMessage;
+  }
+
+  /**
+   * Soft-deletes a message the sender owns.
+   *
+   * `senderId` is a Dog id, not a User id — Message.senderId is a relation to
+   * Dog (see schema.prisma), and `sendMessage` stores the sender's dog id.
+   * Both ids are strings, so the arguments used to be trivially swappable at
+   * the call site; taking a named object makes that a compile error.
+   */
+  static async deleteMessage({ messageId, senderId }: { messageId: string; senderId: string }) {
+    const message = await prisma.message.findUnique({
+      where: { id: messageId, deletedAt: null },
+    });
+
+    if (!message || message.senderId !== senderId) {
+      throw new Error("Invalid messageId or the sender is not the owner of the message");
+    }
+
+    await prisma.message.update({
+      where: { id: messageId },
+      data: { deletedAt: new Date() },
+    });
+  }
+}
+
+export default MessageService;

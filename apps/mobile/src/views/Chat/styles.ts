@@ -1,7 +1,7 @@
 import Animated, { FadeInUp } from "react-native-reanimated";
 import styled from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Container = styled.KeyboardAvoidingView`
   background-color: ${(props) => props.theme.colors.background};

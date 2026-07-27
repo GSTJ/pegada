@@ -6,9 +6,9 @@ import * as Device from "expo-device";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { useOfferings } from "@/hooks/usePayments";
+import { useOfferings } from "@/hooks/use-payments";
 import { Container } from "@/views/UpgradeWall/components/PlanPackages/styles";
-import { PlanCard } from "./PlanCard";
+import { PlanCard } from "./plan-card";
 
 const periodToDays = (period: string) => {
   const match = period.match(/P(\d+)(D|W|M|Y)/);

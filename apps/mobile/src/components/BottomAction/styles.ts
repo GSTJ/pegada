@@ -1,6 +1,6 @@
 import styled from "styled-components/native";
 
-import { BlurView } from "@/components/BlurView";
+import { BlurView } from "@/components/blur-view";
 
 export const Container = styled(BlurView)`
   padding: ${(props) => props.theme.spacing[4]}px;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { AuthenticationService } from "../services/AuthenticationService";
+import { AuthenticationService } from "../services/authentication-service";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 const authenticationBodySchema = z.object({

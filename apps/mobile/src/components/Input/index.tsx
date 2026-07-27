@@ -2,7 +2,7 @@ import * as React from "react";
 import { TextInput, TextInputProps, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import * as S from "./styles";
 
 interface TextFieldContainerProps {

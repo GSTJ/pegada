@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components/native";
 
-import { dogClientSchema } from "@pegada/shared/schemas/dogSchema";
+import { dogClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
@@ -24,12 +24,12 @@ import {
 } from "@/components/ProfileImageUploader";
 import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api, RouterInputs } from "@/contexts/TRPCProvider";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api, RouterInputs } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
-import { sendError } from "@/services/errorTracking";
-import { maskDate } from "@/services/maskDate";
+import { sendError } from "@/services/error-tracking";
+import { maskDate } from "@/services/mask-date";
 import { Actions } from "@/store/reducers";
 import { Container } from "./styles";
 

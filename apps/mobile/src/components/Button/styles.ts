@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
-import { Text } from "@/components/Text";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
 
 interface VariantProps {
   variant?: "outline" | "default";

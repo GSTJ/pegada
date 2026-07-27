@@ -7,7 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import { DogQuickClientSchema, dogQuickClientSchema } from "@pegada/shared/schemas/dogSchema";
+import { DogQuickClientSchema, dogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
@@ -18,13 +18,13 @@ import {
 } from "@/components/ProfileImageUploader";
 import { Picture, pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
-import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api } from "@/contexts/TRPCProvider";
-import { useDelayedHeaderHeight } from "@/hooks/useDelayedHeaderHeight";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
-import { SceneName } from "@/types/SceneName";
+import { sendError } from "@/services/error-tracking";
+import { SceneName } from "@/types/scene-name";
 import { Container } from "./styles";
 
 const DEFAULT_VALUES: DogQuickClientSchema = {

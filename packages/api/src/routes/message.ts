@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { DogService } from "../services/DogService";
-import MessageService from "../services/MessageService";
+import { DogService } from "../services/dog-service";
+import MessageService from "../services/message-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const allByMatchSchema = z.object({

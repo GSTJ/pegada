@@ -1,4 +1,4 @@
-import { minimumStrokeSize } from "./minimumStrokeSize";
+import { minimumStrokeSize } from "./minimum-stroke-size";
 
 export enum Font {
   GilroyLight = "Gilroy-Light",

@@ -6,22 +6,22 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import { DogCompleteClientSchema, dogCompleteClientSchema } from "@pegada/shared/schemas/dogSchema";
+import { DogCompleteClientSchema, dogCompleteClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { InputPicker } from "@/components/Picker";
-import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api } from "@/contexts/TRPCProvider";
-import { useDelayedHeaderHeight } from "@/hooks/useDelayedHeaderHeight";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
-import { sendError } from "@/services/errorTracking";
-import { maskDate } from "@/services/maskDate";
-import { SceneName } from "@/types/SceneName";
+import { sendError } from "@/services/error-tracking";
+import { maskDate } from "@/services/mask-date";
+import { SceneName } from "@/types/scene-name";
 import { Container, ImageContainer, ProfileImage } from "./styles";
 
 const CompleteProfile = () => {

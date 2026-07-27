@@ -16,7 +16,7 @@ import { useDidMountEffect } from "@/services/utils";
 import { Actions } from "@/store/reducers";
 import { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
-import { Swipe, useSwipeGesture } from "./hooks/useSwipeGesture";
+import { Swipe, useSwipeGesture } from "./hooks/use-swipe-gesture";
 
 const ROTATION_DEG = 8;
 

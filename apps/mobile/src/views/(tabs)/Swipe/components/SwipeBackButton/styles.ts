@@ -1,7 +1,7 @@
 import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
 export const Container = styled(Animated.View)`
   z-index: 20;

@@ -1,8 +1,8 @@
 import * as QuickActions from "expo-quick-actions";
 import { router } from "expo-router";
 
-import { sendError } from "@/services/errorTracking";
-import { SceneName } from "@/types/SceneName";
+import { sendError } from "@/services/error-tracking";
+import { SceneName } from "@/types/scene-name";
 
 export enum QuickActionId {
   Matches = "matches",

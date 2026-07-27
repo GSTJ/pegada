@@ -1,4 +1,4 @@
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 
 export { default } from "@/views/EditProfile";
 

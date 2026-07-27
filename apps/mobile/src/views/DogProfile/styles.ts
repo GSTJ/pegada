@@ -3,8 +3,8 @@ import Color from "color";
 import { clamp } from "lodash";
 import styled from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
-import { Text } from "@/components/Text";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
 import { height, width } from "@/constants";
 
 const ASPECT_RATIO = 4 / 3;

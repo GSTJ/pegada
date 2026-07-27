@@ -1,7 +1,7 @@
 import Animated from "react-native-reanimated";
 import styled, { css } from "styled-components/native";
 
-import { Image } from "@/components/Image";
+import { Image } from "@/components/image";
 
 export const absoluteFill = css`
   position: absolute;

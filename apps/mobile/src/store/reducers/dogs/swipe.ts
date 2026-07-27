@@ -3,7 +3,7 @@ import { ActionType, createAction, createAsyncAction, createReducer } from "type
 
 import type { RouterOutputs } from "@pegada/api";
 
-import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
+import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
 
 export type SwipeDog = RouterOutputs["swipe"]["all"][number];
 

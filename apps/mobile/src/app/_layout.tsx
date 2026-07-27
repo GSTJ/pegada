@@ -12,14 +12,14 @@ import styled from "styled-components/native";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { config } from "@/services/config";
 import { posthog } from "@/services/posthog";
-import { storedThemePromise, ThemeProvider } from "@/contexts/ThemeProvider";
-import { TRPCProvider } from "@/contexts/TRPCProvider";
-import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { useTrackScreens } from "@/hooks/useTrackScreens";
-import { sendError } from "@/services/errorTracking";
+import { storedThemePromise, ThemeProvider } from "@/contexts/theme-provider";
+import { TRPCProvider } from "@/contexts/trpc-provider";
+import { useProtectedRoute } from "@/hooks/use-protected-route";
+import { useTrackScreens } from "@/hooks/use-track-screens";
+import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
 import { useQuickActions } from "@/services/quickActions";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { store } from "@/store";
 
 // Wait for the assets to load before hiding the SplashScreen

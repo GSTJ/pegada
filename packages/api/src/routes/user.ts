@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { UserService } from "../services/UserService";
+import { UserService } from "../services/user-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userSchema = z.object({

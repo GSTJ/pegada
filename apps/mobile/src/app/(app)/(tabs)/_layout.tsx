@@ -2,9 +2,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Tabs } from "expo-router";
 import { useTheme } from "styled-components/native";
 
-import Logo from "@/assets/images/Logo";
-import Messages from "@/assets/images/Messages";
-import Profile from "@/assets/images/Profile";
+import Logo from "@/assets/images/logo";
+import Messages from "@/assets/images/messages";
+import Profile from "@/assets/images/profile";
 
 interface TabBarIconProps {
   focused: boolean;

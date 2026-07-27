@@ -2,15 +2,15 @@ import * as Notifications from "expo-notifications";
 
 import { NOTIFICATION_ACTION, NOTIFICATION_CATEGORY } from "@pegada/shared/constants/notifications";
 
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { sendError } from "@/services/errorTracking";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { sendError } from "@/services/error-tracking";
 import { getMatchIdFromUrl, handleReplyAction, isReplyAction } from "./reply";
 
 jest.mock("expo-notifications", () => ({ scheduleNotificationAsync: jest.fn() }));
 // Pulled in transitively by ./notification, and untransformed by jest.
 jest.mock("expo-router", () => ({ router: { push: jest.fn() } }));
-jest.mock("@/contexts/trcpContext", () => ({ getTrcpContext: jest.fn() }));
-jest.mock("@/services/errorTracking", () => ({ sendError: jest.fn() }));
+jest.mock("@/contexts/trcp-context", () => ({ getTrcpContext: jest.fn() }));
+jest.mock("@/services/error-tracking", () => ({ sendError: jest.fn() }));
 jest.mock("@/i18n", () => ({ __esModule: true, default: { t: (key: string) => key } }));
 
 const mutate = jest.fn();

@@ -6,7 +6,7 @@ import {
   WidgetSnapshot,
 } from "../../../modules/pegada-widget";
 import i18n from "@/i18n";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { clearWidgetAvatars, downloadWidgetAvatars } from "./avatars";
 
 type Matches = RouterOutputs["match"]["getAll"];

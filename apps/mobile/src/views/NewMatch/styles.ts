@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Color from "color";
 import styled from "styled-components/native";
 
-import { Image } from "@/components/Image";
+import { Image } from "@/components/image";
 
 export const Container = styled.View`
   background-color: ${(props) => props.theme.colors.background};

@@ -17,13 +17,13 @@ import { Button } from "@/components/Button";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import { Slider } from "@/components/Slider";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api, RouterInputs } from "@/contexts/TRPCProvider";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api, RouterInputs } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { Container, DistanceContainer, InputRow, InputSpace, SliderContainer } from "./styles";
 
 const { width } = Dimensions.get("window");

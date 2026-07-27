@@ -2,8 +2,8 @@ import Animated from "react-native-reanimated";
 import Color from "color";
 import styled, { css } from "styled-components/native";
 
-import { Text } from "@/components/Text";
-import { FeedbackStatus } from "../Feedback";
+import { Text } from "@/components/text";
+import { FeedbackStatus } from "../feedback";
 
 interface MessageProps {
   sending: boolean;

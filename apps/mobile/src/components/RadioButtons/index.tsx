@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { Container } from "@/components/Input/styles";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import { Content, OptionButtonProps, RadioButtonContainer, TextButton } from "./styles";
 
 interface RadioButtonsProps {

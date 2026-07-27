@@ -11,8 +11,8 @@ import { useTheme } from "styled-components/native";
 
 import { useBottomActionStyle } from "@/components/BottomAction";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { api } from "@/contexts/TRPCProvider";
-import { sendError } from "@/services/errorTracking";
+import { api } from "@/contexts/trpc-provider";
+import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
 import { updateUserLocation } from "../(auth)/AskForLocation";
 import { Marker } from "./components/Marker";

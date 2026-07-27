@@ -1,8 +1,8 @@
 import { all, call, put, select, takeLatest } from "redux-saga/effects";
 
-import { getTrcpContext } from "@/contexts/trcpContext";
+import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { Actions, RootReducer } from "@/store/reducers";
 import { ListAction } from "@/store/reducers/dogs/list";
 

@@ -1,7 +1,7 @@
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 
 import { sendError } from "../../errors/errors";
-import { UserService } from "../../services/UserService";
+import { UserService } from "../../services/user-service";
 import { config } from "../../shared/config";
 import { enqueue } from "../enqueue";
 import { ICheckPushNotificationReceiptsJobData, ISendNotificationJobData, TOPICS } from "../topics";

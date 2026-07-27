@@ -2,7 +2,7 @@ import Animated from "react-native-reanimated";
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Swipe = styled(LottieView).attrs({
   resizeMode: "cover",

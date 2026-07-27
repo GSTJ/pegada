@@ -10,8 +10,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
-import { PressableArea } from "@/components/PressableArea";
-import { SceneName } from "@/types/SceneName";
+import { PressableArea } from "@/components/pressable-area";
+import { SceneName } from "@/types/scene-name";
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
 import PersonalInfo from "./components/PersonalInfo";

@@ -2,7 +2,7 @@ import * as React from "react";
 import { ViewProps } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { useGetFormattedYears } from "@/services/useGetFormattedYears";
+import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 import { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { Age, Container, Description, Name } from "./styles";
 

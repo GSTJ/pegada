@@ -2,8 +2,8 @@ import * as React from "react";
 import { SlideInLeft, SlideInRight, SlideOutRight } from "react-native-reanimated";
 import { format } from "date-fns";
 
-import { Text } from "@/components/Text";
-import Feedback, { FeedbackStatus } from "../Feedback";
+import { Text } from "@/components/text";
+import Feedback, { FeedbackStatus } from "../feedback";
 import { Info, Message, Time } from "./styles";
 
 interface MessageComponentProps {

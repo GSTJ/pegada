@@ -2,7 +2,7 @@ import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
 import * as LikeFeedbackStyles from "@/components/FeedbackCard/components/LikeFeedback/styles";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Container = styled(LikeFeedbackStyles.Container)`
   background-color: transparent;

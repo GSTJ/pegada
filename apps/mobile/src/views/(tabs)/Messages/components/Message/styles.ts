@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 
-import { Image } from "@/components/Image";
-import { PressableArea } from "@/components/PressableArea";
+import { Image } from "@/components/image";
+import { PressableArea } from "@/components/pressable-area";
 
 export const Container = styled(PressableArea).attrs({ accessible: true })`
   padding: ${(props) => props.theme.spacing[4]}px;

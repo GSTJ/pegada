@@ -4,9 +4,9 @@ import Color from "color";
 import styled from "styled-components/native";
 
 import Close from "@/assets/images/Close.svg";
-import { BlurView } from "@/components/BlurView";
-import { PressableArea } from "@/components/PressableArea";
-import { Text } from "@/components/Text";
+import { BlurView } from "@/components/blur-view";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
 
 export const Container = styled.View`
   flex: 1;

@@ -4,20 +4,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 
 import { MatchActionBar } from "@/components/MatchActionBar";
-import { sendError } from "@/services/errorTracking";
-import { trackUser } from "@/services/getInitialRouteName";
+import { sendError } from "@/services/error-tracking";
+import { trackUser } from "@/services/get-initial-route-name";
 import {
   getPushNotificationToken,
   NotificationTokenError,
   setPushNotificationToken,
-} from "@/services/getPushNotificationToken";
+} from "@/services/get-push-notification-token";
 import { processLinks } from "@/services/linking";
 import { Actions } from "@/store/reducers/dogs";
 import { getCards, getCurrentCardId } from "@/store/selectors";
-import { ChangeLocation } from "./components/ChangeLocation";
+import { ChangeLocation } from "./components/change-location";
 import SwipeBackButton from "./components/SwipeBackButton";
 import SwipeHandler, { swipeHandlerRef } from "./components/SwipeHandler";
-import { Swipe } from "./components/SwipeHandler/hooks/useSwipeGesture";
+import { Swipe } from "./components/SwipeHandler/hooks/use-swipe-gesture";
 import SwipeRequestFeedback from "./components/SwipeRequestFeedback";
 import { Container } from "./styles";
 

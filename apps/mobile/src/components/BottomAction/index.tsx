@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import { BlurViewProps } from "expo-blur";
 import { useTheme } from "styled-components/native";
 
-import { useKeyboardAwareSafeAreaInsets } from "../../hooks/useKeyboardAwareSafeAreaInsets";
+import { useKeyboardAwareSafeAreaInsets } from "../../hooks/use-keyboard-aware-safe-area-insets";
 import { BUTTON_HEIGHT } from "../Button/styles";
 import * as S from "./styles";
 

@@ -4,7 +4,7 @@ import Color from "color";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import { useMatchesWidgetSync } from "@/services/matchesWidget/useMatchesWidgetSync";
+import { useMatchesWidgetSync } from "@/services/matchesWidget/use-matches-widget-sync";
 
 export default () => {
   const theme = useTheme();

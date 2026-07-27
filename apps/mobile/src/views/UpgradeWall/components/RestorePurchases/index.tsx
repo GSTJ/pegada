@@ -6,10 +6,10 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";
 
-import { PressableArea } from "@/components/PressableArea";
-import { Text } from "@/components/Text";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 import { payments } from "@/services/payments";
 
 const RestorePurchases: React.FC = () => {
