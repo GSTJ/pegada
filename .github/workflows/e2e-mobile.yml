@@ -314,7 +314,12 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: quarantine-lint
     runs-on: macos-latest
-    timeout-minutes: 45
+    # A cold .app cache means a full Xcode release build plus a simulator
+    # boot, which measured 44m50s on main — ten seconds under the old
+    # 45-minute budget, so any slower runner killed the job and Actions
+    # reported it as `cancelled`, not `timed out`. 75 leaves real headroom
+    # for a cold build; a warm fingerprint hit still finishes in minutes.
+    timeout-minutes: 75
     outputs:
       app-artifact: ${{ steps.vars.outputs.app-artifact }}
     env:
@@ -981,7 +986,9 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: quarantine-lint
     runs-on: macos-latest
-    timeout-minutes: 45
+    # Same cold-cache build as the required variant, so it carries the same
+    # budget. Keeping the two in step stops one from timing out alone.
+    timeout-minutes: 75
     outputs:
       app-artifact: ${{ steps.vars.outputs.app-artifact }}
       skip: ${{ steps.preflight.outputs.skip }}
