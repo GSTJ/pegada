@@ -1,25 +1,32 @@
+import type { OtpInputRef } from "./components/OtpInput";
+
 import { useRef, useState } from "react";
 import { ActivityIndicator, Platform } from "react-native";
-import { magicToast } from "react-native-magic-toast";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
+
+import {
+  InvalidOTPCodeError,
+  OTPRequiredError,
+} from "@pegada/shared/errors/errors";
 import { format, set } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { InvalidOTPCodeError, OTPRequiredError } from "@pegada/shared/errors/errors";
-
-import { Text } from "@/components/Text";
-import { api } from "@/contexts/TRPCProvider";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
-import { getError } from "@/services/getError";
-import { getInitialRouteName } from "@/services/getInitialRouteName";
+import { sendError } from "@/services/error-tracking";
+import { getError } from "@/services/get-error";
+import { getInitialRouteName } from "@/services/get-initial-route-name";
 import { StorageKeys, storeData } from "@/services/storage";
 import { useDidMountEffect } from "@/services/utils";
+
 import { Underline } from "../SignIn/components/HeroText";
 import GoBack from "./components/GoBack";
-import OTPInput, { OtpInputRef } from "./components/OtpInput";
-import useTimer from "./hooks/useTimer";
+import OTPInput from "./components/OtpInput";
+import useTimer from "./hooks/use-timer";
 import {
   Container,
   Content,
@@ -55,7 +62,7 @@ const OneTimeCode = () => {
   const loginMutation = api.authentication.login.useMutation({
     onSuccess: async (data) => {
       try {
-        const token = data.token;
+        const { token } = data;
         await storeData(StorageKeys.Token, token);
 
         const initialRouteName = await getInitialRouteName();
@@ -101,7 +108,9 @@ const OneTimeCode = () => {
   }, [keyboardInput]);
 
   return (
-    <StyledKeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <StyledKeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Container
         style={{
           paddingTop: insetTop,
@@ -116,7 +125,8 @@ const OneTimeCode = () => {
           <TopColumn>
             <Timer>{formattedTime}</Timer>
             <Description>
-              {t("oneTimeCode.insertCode")} <Text fontWeight="medium">{email}</Text>
+              {t("oneTimeCode.insertCode")}{" "}
+              <Text fontWeight="medium">{email}</Text>
             </Description>
 
             <OTPInput

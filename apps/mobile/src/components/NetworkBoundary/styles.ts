@@ -1,7 +1,7 @@
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Container = styled.ScrollView.attrs({
   contentContainerStyle: { flex: 1 },

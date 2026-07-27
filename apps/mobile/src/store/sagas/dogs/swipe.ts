@@ -1,41 +1,47 @@
+import type { RootReducer } from "@/store/reducers";
+import type { ActionType } from "typesafe-actions";
+
 import { router } from "expo-router";
+
+import { LikeLimitReachedError } from "@pegada/shared/errors/errors";
 import { isBefore } from "date-fns";
 import { all, call, fork, put, select, takeLatest } from "redux-saga/effects";
-import { ActionType } from "typesafe-actions";
-
-import { LikeLimitReached } from "@pegada/shared/errors/errors";
 
 import { showLikeLimitReached } from "@/components/LikeLimitReached";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { getUnsafeIsPremium } from "@/hooks/usePayments";
-import { sendError } from "@/services/errorTracking";
-import { getError } from "@/services/getError";
-import { Actions, RootReducer } from "@/store/reducers";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { getUnsafeIsPremium } from "@/hooks/use-payments";
+import { sendError } from "@/services/error-tracking";
+import { getError } from "@/services/get-error";
+import { Actions } from "@/store/reducers";
 import { SwipeAction } from "@/store/reducers/dogs/swipe";
-import { SceneName } from "@/types/SceneName";
-import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
+import { SceneName } from "@/types/scene-name";
+import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
 
-function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.request>): any {
+const swipeUserRequest = function* ({
+  payload,
+}: ActionType<typeof Actions.dogs.swipe.request>): Generator {
   const { id, swipeType: _swipeType } = payload;
 
   try {
-    const isPremium = yield call(getUnsafeIsPremium);
+    // redux-saga's `yield` is `unknown` to TypeScript — the effect knows what it
+    // resolves to, the generator signature cannot.
+    const isPremium = (yield call(getUnsafeIsPremium)) as boolean;
 
     // If the user is not premium, check if the like limit has been reached
     if (!isPremium && _swipeType !== Swipe.Dislike) {
-      const { likeLimitResetAt }: RootReducer["dogs"]["config"] = yield select(
+      const { likeLimitResetAt } = (yield select(
         (state: RootReducer) => state.dogs.config,
-      );
+      )) as RootReducer["dogs"]["config"];
 
       if (likeLimitResetAt && isBefore(new Date(), likeLimitResetAt)) {
-        throw new LikeLimitReached({ likeLimitResetAt });
+        throw new LikeLimitReachedError({ likeLimitResetAt });
       }
     }
 
-    const response = yield call(getTrcpContext().client.swipe.swipe.mutate, {
+    const response = (yield call(getTrcpContext().client.swipe.swipe.mutate, {
       id,
       swipeType: _swipeType,
-    });
+    })) as { match?: { id: string } } | undefined;
 
     if (response?.match) {
       router.push({
@@ -47,8 +53,8 @@ function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.req
     }
 
     yield put(Actions.dogs.swipe.success());
-  } catch (err: any) {
-    const likeLimitReachedError = getError(err, LikeLimitReached);
+  } catch (error: unknown) {
+    const likeLimitReachedError = getError(error, LikeLimitReachedError);
     if (likeLimitReachedError) {
       const { likeLimitResetAt } = likeLimitReachedError;
       showLikeLimitReached({ likeLimitResetAt });
@@ -56,15 +62,17 @@ function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.req
       return;
     }
 
-    sendError(err);
+    sendError(error);
     yield put(Actions.dogs.swipe.failure({}));
   }
-}
+};
 
 const FETCH_THRESHOLD = 5;
 
-function* handleCardFetching() {
-  const { request, config }: RootReducer["dogs"] = yield select((state: RootReducer) => state.dogs);
+const handleCardFetching = function* () {
+  const { request, config }: RootReducer["dogs"] = yield select(
+    (state: RootReducer) => state.dogs,
+  );
 
   if (
     request.data.length >= FETCH_THRESHOLD ||
@@ -76,9 +84,11 @@ function* handleCardFetching() {
   }
 
   yield put(Actions.dogs.list.request());
-}
+};
 
-export function* handleSwipeUserRequest(props: ActionType<typeof Actions.dogs.swipe.request>) {
+export function* handleSwipeUserRequest(
+  props: ActionType<typeof Actions.dogs.swipe.request>,
+) {
   yield all([fork(() => swipeUserRequest(props)), fork(handleCardFetching)]);
 }
 

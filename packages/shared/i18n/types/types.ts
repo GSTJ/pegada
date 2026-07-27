@@ -1,5 +1,5 @@
 /* oxlint-disable typescript/no-duplicate-enum-values -- `Default` aliases another enum member by design */
-import en from "../locales/en";
+import type en from "../locales/en";
 
 export enum Namespace {
   Translation = "translation",
@@ -21,6 +21,7 @@ export enum Language {
 
 // Overwrite the existing interface so we can add our custom namespace
 declare module "i18next" {
+  // oxlint-disable-next-line typescript/consistent-type-definitions -- module augmentation only merges with an interface; a type alias here is TS2300 "Duplicate identifier".
   interface CustomTypeOptions {
     defaultNS: Namespace.Translation;
     resources: LanguageResources;

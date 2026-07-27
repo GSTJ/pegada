@@ -1,4 +1,7 @@
-import { Topic, TopicPayloads, TOPICS } from "./topics";
+import type { Topic, TopicPayloads } from "./topics";
+
+import { config } from "../shared/config";
+import { TOPICS } from "./topics";
 
 type EnqueueOptions = {
   delaySeconds?: number;
@@ -11,15 +14,17 @@ const INLINE_HANDLERS: {
   [T in Topic]: () => Promise<(payload: TopicPayloads[T]) => Promise<unknown>>;
 } = {
   [TOPICS.MAIL]: () => import("./handlers/mail").then((m) => m.handleMail),
-  [TOPICS.PROCESS_IMAGE]: () => import("./handlers/processImage").then((m) => m.handleProcessImage),
-  [TOPICS.SEND_PUSH]: () => import("./handlers/push").then((m) => m.handleSendPushNotification),
+  [TOPICS.PROCESS_IMAGE]: () =>
+    import("./handlers/process-image").then((m) => m.handleProcessImage),
+  [TOPICS.SEND_PUSH]: () =>
+    import("./handlers/push").then((m) => m.handleSendPushNotification),
   [TOPICS.CHECK_PUSH_RECEIPTS]: () =>
     import("./handlers/push").then((m) => m.handleCheckPushReceipts),
 };
 
 const isVercelQueueAvailable = () =>
-  process.env.QUEUE_DRIVER === "vercel" ||
-  (process.env.QUEUE_DRIVER !== "inline" && process.env.VERCEL === "1");
+  config.QUEUE_DRIVER === "vercel" ||
+  (config.QUEUE_DRIVER !== "inline" && config.VERCEL === "1");
 
 /**
  * Publish a job. On Vercel this goes through Vercel Queues (durable,
@@ -41,8 +46,10 @@ export const enqueue = async <T extends Topic>(
     // Inline mode has no scheduler. The only delayed job is the push
     // receipt audit, which is a prod-observability concern — skip it
     // instead of blocking the request or recursing forever.
-    // eslint-disable-next-line no-console
-    console.log(`[queue] inline driver: skipping delayed job on topic "${topic}"`);
+    // oxlint-disable-next-line no-console -- Operator-facing note that a delayed job was dropped by the inline driver.
+    console.log(
+      `[queue] inline driver: skipping delayed job on topic "${topic}"`,
+    );
     return;
   }
 

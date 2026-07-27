@@ -1,4 +1,5 @@
 import { Dimensions } from "react-native";
+
 import styled from "styled-components/native";
 
 const deviceHeight = Dimensions.get("window").height;

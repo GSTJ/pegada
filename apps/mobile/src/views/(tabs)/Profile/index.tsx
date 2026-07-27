@@ -1,4 +1,11 @@
-import { View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import * as StoreReview from "expo-store-review";
+
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useIsFocused, useScrollToTop } from "@react-navigation/native";
+import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -7,13 +14,6 @@ import Animated, {
   useScrollViewOffset,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import * as StoreReview from "expo-store-review";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useIsFocused, useScrollToTop } from "@react-navigation/native";
-import { t } from "i18next";
-import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import Dog from "@/assets/images/Dog.svg";
@@ -21,20 +21,23 @@ import Erase from "@/assets/images/Erase.svg";
 import Filters from "@/assets/images/Filters.svg";
 import Paperwork from "@/assets/images/Paperwork.svg";
 import SignOut from "@/assets/images/SignOut.svg";
-import Divider from "@/components/Divider";
-import { Text } from "@/components/Text";
-import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
+import Divider from "@/components/divider";
+import { Text } from "@/components/text";
+import { useWarmUpBrowser } from "@/hooks/use-warm-up-browser";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
-import { openWebBrowser } from "@/services/openWebBrowser";
+import { sendError } from "@/services/error-tracking";
+import { openWebBrowser } from "@/services/open-web-browser";
 import { StorageKeys, storeData } from "@/services/storage";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
+
 import { Config } from "./components/Config";
-import { CurrentPlanConfig } from "./components/CurrentPlanConfig";
-import { LanguageConfig } from "./components/LanguageConfig";
-import { LocationConfig } from "./components/LocationConfig";
-import { ThemeConfig } from "./components/ThemeConfig";
-import UserDogProfileHeader, { useDogProfileHeight } from "./components/UserDogProfileHeader";
+import { CurrentPlanConfig } from "./components/current-plan-config";
+import { LanguageConfig } from "./components/language-config";
+import { LocationConfig } from "./components/location-config";
+import { ThemeConfig } from "./components/theme-config";
+import UserDogProfileHeader, {
+  useDogProfileHeight,
+} from "./components/UserDogProfileHeader";
 import {
   BackgroundOverlay,
   BackgroundProfileContainer,
@@ -42,9 +45,11 @@ import {
   Content,
   ScrollContainer,
   SettingsList,
+  SettingsBlock,
+  settingsScroll,
 } from "./styles";
-import { deleteAccount } from "./utils/deleteAccount";
-import { handleLogout } from "./utils/handleLogout";
+import { deleteAccount } from "./utils/delete-account";
+import { handleLogout } from "./utils/handle-logout";
 
 const openTermsOfUse = () => {
   analytics.track({ event_type: "Open Terms Of Use" });
@@ -84,7 +89,12 @@ const Profile = () => {
   const imgStyle = useAnimatedStyle(() => {
     "worklet";
     // should scale down the image a little
-    const scale = interpolate(scrollY.value, [0, TRANSITION_POINT], [1, 0.97], Extrapolation.CLAMP);
+    const scale = interpolate(
+      scrollY.value,
+      [0, TRANSITION_POINT],
+      [1, 0.97],
+      Extrapolation.CLAMP,
+    );
 
     return {
       transform: [{ scale }],
@@ -129,18 +139,17 @@ const Profile = () => {
       </BackgroundProfileContainer>
       <ScrollContainer
         style={{
-          marginTop: marginTop,
+          marginTop,
           borderBottomWidth: theme.stroke.sm,
           borderColor: theme.colors.border,
         }}
       >
         <SettingsList
           bounces={false}
-          contentContainerStyle={{
-            paddingTop: dogProfileHeight - marginTop,
-            flexGrow: 1,
-            zIndex: 10,
-          }}
+          contentContainerStyle={[
+            settingsScroll,
+            { paddingTop: dogProfileHeight - marginTop },
+          ]}
           ref={scrollRef}
           scrollEventThrottle={16}
           stickyHeaderIndices={[0]}
@@ -150,16 +159,11 @@ const Profile = () => {
               {t("profile.settings")}
             </Text>
           </Content>
-          <View
-            style={{
-              backgroundColor: theme.colors.background,
-              paddingTop: theme.spacing[1],
-              // The settings block owns the opaque background below the
-              // photo header: stretch to the viewport bottom and pad past
-              // the floating tab bar so no grey gap shows at scroll end.
-              paddingBottom: theme.spacing[4] + tabBarHeight,
-              flexGrow: 1,
-            }}
+          <SettingsBlock
+            // The settings block owns the opaque background below the photo
+            // header: it pads past the floating tab bar so no grey gap shows
+            // at scroll end.
+            style={{ paddingBottom: theme.spacing[4] + tabBarHeight }}
           >
             <LocationConfig />
             <CurrentPlanConfig />
@@ -171,7 +175,9 @@ const Profile = () => {
               <Filters width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.matchPreferences")}</Config.Title>
-                <Config.Description>{t("profile.matchPreferencesDescription")}</Config.Description>
+                <Config.Description>
+                  {t("profile.matchPreferencesDescription")}
+                </Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -184,7 +190,9 @@ const Profile = () => {
               <Dog width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.editProfile")}</Config.Title>
-                <Config.Description>{t("profile.editProfileDescription")}</Config.Description>
+                <Config.Description>
+                  {t("profile.editProfileDescription")}
+                </Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -199,17 +207,24 @@ const Profile = () => {
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.termsOfUse")}</Config.Title>
-                <Config.Description>{t("profile.termsOfUseDescription")}</Config.Description>
+                <Config.Description>
+                  {t("profile.termsOfUseDescription")}
+                </Config.Description>
               </Config.Container>
 
               <Config.Arrow />
             </Config.Root>
 
-            <Config.Root testID="profile-open-privacy" onPress={openPrivacyPolicy}>
+            <Config.Root
+              testID="profile-open-privacy"
+              onPress={openPrivacyPolicy}
+            >
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.privacyPolicy")}</Config.Title>
-                <Config.Description>{t("profile.privacyPolicyDescription")}</Config.Description>
+                <Config.Description>
+                  {t("profile.privacyPolicyDescription")}
+                </Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -219,7 +234,9 @@ const Profile = () => {
               <Paperwork width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
                 <Config.Title>{t("profile.rateTheApp")}</Config.Title>
-                <Config.Description>{t("profile.rateTheAppDescription")}</Config.Description>
+                <Config.Description>
+                  {t("profile.rateTheAppDescription")}
+                </Config.Description>
               </Config.Container>
 
               <Config.Arrow />
@@ -234,13 +251,18 @@ const Profile = () => {
               </Config.Container>
             </Config.Root>
 
-            <Config.Root testID="profile-delete-account" onPress={deleteAccount}>
+            <Config.Root
+              testID="profile-delete-account"
+              onPress={deleteAccount}
+            >
               <Erase width={22} height={22} fill={theme.colors.text} />
               <Config.Container>
-                <Config.Title color="destructive">{t("profile.deleteAccount")}</Config.Title>
+                <Config.Title color="destructive">
+                  {t("profile.deleteAccount")}
+                </Config.Title>
               </Config.Container>
             </Config.Root>
-          </View>
+          </SettingsBlock>
         </SettingsList>
       </ScrollContainer>
     </Container>

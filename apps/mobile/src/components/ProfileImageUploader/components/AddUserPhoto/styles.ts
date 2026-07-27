@@ -2,8 +2,8 @@ import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
 import Dog from "@/assets/images/Dog.svg";
-import { Image } from "@/components/Image";
-import { PressableArea } from "@/components/PressableArea";
+import { Image } from "@/components/image";
+import { PressableArea } from "@/components/pressable-area";
 import { width } from "@/constants";
 
 export const containerPadding = 16;

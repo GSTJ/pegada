@@ -1,7 +1,9 @@
+import { StyleSheet } from "react-native";
+
 import styled from "styled-components/native";
 
-import { Image } from "@/components/Image";
-import { PressableArea } from "@/components/PressableArea";
+import { Image } from "@/components/image";
+import { PressableArea } from "@/components/pressable-area";
 
 export const Container = styled(PressableArea).attrs({ accessible: true })`
   padding: ${(props) => props.theme.spacing[4]}px;
@@ -28,3 +30,11 @@ export const EmojiContainer = styled.View`
   border-width: ${(props) => props.theme.stroke.md}px;
   border-color: ${({ theme }) => theme.colors.border};
 `;
+
+/**
+ * The emoji component is picked at runtime (or is null), so it cannot be a
+ * styled component — a sheet entry is the only way to keep the size out of JSX.
+ */
+export const { emojiSize } = StyleSheet.create({
+  emojiSize: { width: 15, height: 15 },
+});

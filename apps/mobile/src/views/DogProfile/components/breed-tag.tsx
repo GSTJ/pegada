@@ -1,0 +1,41 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type { BreedSlug } from "@pegada/shared/i18n/i18n";
+
+import { View } from "react-native";
+
+import { Namespace } from "@pegada/shared/i18n/types/types";
+import { useTranslation } from "react-i18next";
+import styled from "styled-components/native";
+
+import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import { Text } from "@/components/text";
+
+const GlassmorphismStyled = styled(TransparentGlassOrDarkBlurView).attrs({
+  glassEffectStyle: "regular",
+})`
+  border-radius: ${(props) => props.theme.radii.md}px;
+  margin-right: auto;
+  margin-bottom: ${(props) => props.theme.spacing[3]}px;
+  border-width: ${(props) => props.theme.stroke.sm}px;
+  border-color: ${(props) => props.theme.colors.border};
+`;
+
+const ViewStyled = styled(View)`
+  padding: ${(props) => props.theme.spacing[2]}px
+    ${(props) => props.theme.spacing[4]}px;
+  padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
+`;
+
+export const BreedTag = (props: { breed: SwipeDog["breed"] }) => {
+  const { t } = useTranslation(Namespace.Breed);
+
+  if (!props.breed?.slug) return null;
+
+  return (
+    <GlassmorphismStyled>
+      <ViewStyled>
+        <Text fontWeight="medium">{t(props.breed.slug as BreedSlug)}</Text>
+      </ViewStyled>
+    </GlassmorphismStyled>
+  );
+};

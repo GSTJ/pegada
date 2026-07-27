@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 import { Container, Content, Dot } from "./styles";
@@ -18,10 +19,10 @@ const DotComponent: React.FC<{
   return <Dot key={index} active={active} style={style} />;
 };
 
-interface PaginationProps {
+type PaginationProps = {
   pages: number;
   currentPage: number;
-}
+};
 
 const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
   if (pages <= 1) return null;
@@ -30,7 +31,12 @@ const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
     <Container>
       <Content>
         {Array.from({ length: pages }).map((_, index) => (
-          <DotComponent key={`${index}-dot`} index={index} currentPage={currentPage} />
+          <DotComponent
+            // oxlint-disable-next-line react/no-array-index-key -- dots are positional; there is no other identity to key on
+            key={`${index}-dot`}
+            index={index}
+            currentPage={currentPage}
+          />
         ))}
       </Content>
     </Container>

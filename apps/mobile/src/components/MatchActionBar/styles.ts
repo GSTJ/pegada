@@ -1,13 +1,13 @@
-import Animated from "react-native-reanimated";
 import Color from "color";
+import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
 // Should preload for a better dog experience, so no inline requires
 import confusedEmoji from "@/assets/images/ConfusedEmoji.webp";
 import heartEyesEmoji from "@/assets/images/HeartEyesEmoji.webp";
 import thinkingEmoji from "@/assets/images/ThinkingEmoji.webp";
-import { Image } from "@/components/Image";
-import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
+import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import { Image } from "@/components/image";
 
 // Apple HIG recommends a minimum 44x44pt hit area for tappable targets.
 const MIN_TOUCH_TARGET = 44;
@@ -64,7 +64,8 @@ export const ActionItemFallbackBackground = styled.View`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
+  background-color: ${(props) =>
+    new Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
 `;
 
 export const ConfusedEmoji = styled(Image).attrs({

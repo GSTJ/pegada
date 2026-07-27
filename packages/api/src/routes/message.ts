@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { DogService } from "../services/DogService";
-import MessageService from "../services/MessageService";
+import { DogService } from "../services/dog-service";
+import MessageService from "../services/message-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const allByMatchSchema = z.object({
@@ -21,41 +21,51 @@ const deleteSchema = z.object({
 });
 
 export const messageRouter = createTRPCRouter({
-  allByMatch: protectedProcedure.input(allByMatchSchema).query(async ({ ctx, input }) => {
-    const { gt, lt, limit, matchId } = input;
+  allByMatch: protectedProcedure
+    .input(allByMatchSchema)
+    .query(async ({ ctx, input }) => {
+      const { gt, lt, limit, matchId } = input;
 
-    const dog = await DogService.getDogByUserId(ctx.session.user.id);
+      const dog = await DogService.getDogByUserId(ctx.session.user.id);
 
-    const messages = await MessageService.getMessages({
-      dogId: dog.id,
-      matchId,
-      gt,
-      lt,
-      limit,
-    });
+      const messages = await MessageService.getMessages({
+        dogId: dog.id,
+        matchId,
+        gt,
+        lt,
+        limit,
+      });
 
-    return messages;
-  }),
-  send: protectedProcedure.input(sendSchema).mutation(async ({ ctx, input }) => {
-    const { matchId, content } = input;
+      return messages;
+    }),
+  send: protectedProcedure
+    .input(sendSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { matchId, content } = input;
 
-    const dog = await DogService.getDogByUserId(ctx.session.user.id);
+      const dog = await DogService.getDogByUserId(ctx.session.user.id);
 
-    const messageService = new MessageService({ language: ctx.language });
-    const newMessage = await messageService.sendMessage(content, dog.id, matchId);
+      const messageService = new MessageService({ language: ctx.language });
+      const newMessage = await messageService.sendMessage(
+        content,
+        dog.id,
+        matchId,
+      );
 
-    return newMessage;
-  }),
-  delete: protectedProcedure.input(deleteSchema).mutation(async ({ ctx, input }) => {
-    const { messageId } = input;
+      return newMessage;
+    }),
+  delete: protectedProcedure
+    .input(deleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { messageId } = input;
 
-    const dog = await DogService.getDogByUserId(ctx.session.user.id);
+      const dog = await DogService.getDogByUserId(ctx.session.user.id);
 
-    const deletedMessage = await MessageService.deleteMessage({
-      messageId,
-      senderId: dog.id,
-    });
+      const deletedMessage = await MessageService.deleteMessage({
+        messageId,
+        senderId: dog.id,
+      });
 
-    return deletedMessage;
-  }),
+      return deletedMessage;
+    }),
 });

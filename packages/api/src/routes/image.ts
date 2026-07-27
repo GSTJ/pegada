@@ -1,4 +1,4 @@
-import { ImageService } from "../services/ImageService";
+import { ImageService } from "../services/image-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const imageRouter = createTRPCRouter({
@@ -14,7 +14,7 @@ export const imageRouter = createTRPCRouter({
   }),
 
   /** Storage-agnostic upload descriptor — see `SignedUpload` in ImageService. */
-  signedUpload: protectedProcedure.query(async () => {
+  signedUpload: protectedProcedure.query(() => {
     return ImageService.getSignedUpload();
   }),
 });

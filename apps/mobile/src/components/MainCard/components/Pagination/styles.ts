@@ -1,7 +1,7 @@
 import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
-import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
+import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
 
 export const Content = styled.View`
   padding: ${(props) => props.theme.spacing[1]}px;
@@ -18,9 +18,9 @@ export const Container = styled(TransparentGlassOrDarkBlurView)`
   overflow: hidden;
 `;
 
-interface IDot {
+type IDot = {
   active: boolean;
-}
+};
 
 export const Dot = styled(Animated.View)<IDot>`
   background-color: #fff;

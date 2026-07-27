@@ -125,7 +125,7 @@ The iOS simulator can't talk to the real App Store. Without a StoreKit
 configuration in the active Xcode scheme, `Purchases.getOfferings()` resolves
 with `current: null` — the upgrade wall then renders empty plan rows and a
 CTA stuck in loading. To avoid that, the repo ships `apps/mobile/Pegada.storekit`
-(checked in — product IDs are not secrets) and `plugins/withStoreKitConfiguration.js`
+(checked in — product IDs are not secrets) and `plugins/with-store-kit-configuration.js`
 wires it into the generated scheme on every `expo prebuild`.
 
 Belt-and-suspenders: the mobile payment service also has a JS-side fallback

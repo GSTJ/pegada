@@ -15,15 +15,18 @@ export enum Theme {
   Default = "light",
 }
 
-export interface StorageDataTypes {
+export type StorageDataTypes = {
   [StorageKeys.Token]: string;
   [StorageKeys.Theme]: Theme;
   [StorageKeys.Language]: string;
   [StorageKeys.AppReviewRequestDate]: string;
   [StorageKeys.AppReviewStatus]: "completed";
-}
+};
 
-export const storeData = async <T extends StorageKeys>(key: T, value: StorageDataTypes[T]) => {
+export const storeData = async <T extends StorageKeys>(
+  key: T,
+  value: StorageDataTypes[T],
+) => {
   await AsyncStorage.setItem(key, value);
   return value;
 };

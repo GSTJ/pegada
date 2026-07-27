@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 
-import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
-import { Text } from "@/components/Text";
+import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import { Text } from "@/components/text";
 
 export const Container = styled(TransparentGlassOrDarkBlurView)`
   margin: ${(props) => props.theme.spacing[6]}px;

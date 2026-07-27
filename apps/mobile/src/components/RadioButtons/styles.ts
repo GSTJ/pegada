@@ -1,13 +1,14 @@
-import { PressableProps } from "react-native";
+import type { PressableProps } from "react-native";
+
 import styled, { css } from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
-import { Text } from "@/components/Text";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
 
-export interface OptionButtonProps extends PressableProps {
+export type OptionButtonProps = {
   marked?: boolean;
   last?: boolean;
-}
+} & PressableProps;
 
 export const Content = styled.View`
   justify-content: space-between;
@@ -18,7 +19,8 @@ export const Content = styled.View`
 `;
 
 export const RadioButtonContainer = styled(PressableArea)<OptionButtonProps>`
-  padding: ${(props) => props.theme.spacing[3]}px ${(props) => props.theme.spacing[4]}px;
+  padding: ${(props) => props.theme.spacing[3]}px
+    ${(props) => props.theme.spacing[4]}px;
 
   background-color: ${(props) => props.theme.colors.background};
 

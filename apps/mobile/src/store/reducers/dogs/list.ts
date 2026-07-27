@@ -1,7 +1,14 @@
-import { produce } from "immer";
-import { ActionType, createAction, createAsyncAction, createReducer } from "typesafe-actions";
+import type { SwipeDog } from "./swipe";
+import type { ActionType } from "typesafe-actions";
 
-import { initialState, SwipeDog } from "./swipe";
+import { produce } from "immer";
+import {
+  createAction,
+  createAsyncAction,
+  createReducer,
+} from "typesafe-actions";
+
+import { initialState } from "./swipe";
 
 export enum ListAction {
   FetchDogsRequest = "FETCH_DOGS_REQUEST",
@@ -34,7 +41,10 @@ const refetchUsersRequest = (state = initialState) =>
     return draft;
   });
 
-const fetchUsersSuccess = (state = initialState, { payload }: ActionType<typeof Actions.success>) =>
+const fetchUsersSuccess = (
+  state: typeof initialState,
+  { payload }: ActionType<typeof Actions.success>,
+) =>
   produce(state, (draft) => {
     draft.request.loading = false;
     draft.request.error = undefined;
@@ -50,7 +60,10 @@ const fetchUsersSuccess = (state = initialState, { payload }: ActionType<typeof 
     return draft;
   });
 
-const fetchUsersFailure = (state = initialState, { payload }: ActionType<typeof Actions.failure>) =>
+const fetchUsersFailure = (
+  state: typeof initialState,
+  { payload }: ActionType<typeof Actions.failure>,
+) =>
   produce(state, (draft) => {
     draft.request.loading = false;
     draft.request.error = payload.message;
@@ -58,7 +71,9 @@ const fetchUsersFailure = (state = initialState, { payload }: ActionType<typeof 
     return draft;
   });
 
-export default createReducer<typeof initialState, ActionType<typeof Actions>>(initialState)
+export default createReducer<typeof initialState, ActionType<typeof Actions>>(
+  initialState,
+)
   .handleAction(Actions.request, fetchUsersRequest)
   .handleAction(Actions.success, fetchUsersSuccess)
   .handleAction(Actions.failure, fetchUsersFailure)

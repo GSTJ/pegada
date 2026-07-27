@@ -1,7 +1,7 @@
-import { handleCallback } from "@vercel/queue";
+import type { ISendNotificationJobData } from "@pegada/api/queue/topics";
 
 import { handleSendPushNotification } from "@pegada/api/queue/handlers/push";
-import { ISendNotificationJobData } from "@pegada/api/queue/topics";
+import { handleCallback } from "@vercel/queue";
 
 // Consumer for the "send-push" topic (see vercel.json).
 const handler = handleCallback(async (message: ISendNotificationJobData) => {

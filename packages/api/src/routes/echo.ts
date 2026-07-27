@@ -1,6 +1,6 @@
 import { RequestHeaders } from "@pegada/shared/types/types";
 
-import { EchoService } from "../services/EchoService";
+import { EchoService } from "../services/echo-service";
 import { semverSchema } from "../shared/config";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 

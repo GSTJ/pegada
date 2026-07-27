@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 
-import { Image } from "@/components/Image";
-import { PressableArea } from "@/components/PressableArea";
+import { Image } from "@/components/image";
+import { PressableArea } from "@/components/pressable-area";
 
 export const Content = styled.View`
   width: 65px;

@@ -1,13 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": ["expo/tsconfig.base", "@pegada/tsconfig/base.json"],
+  "extends": ["expo/tsconfig.base", "magic-tsconfig/expo.json"],
   "compilerOptions": {
     "jsx": "react-native",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "plugins": [
       {
         "name": "@styled/typescript-styled-plugin",
@@ -37,5 +36,11 @@
     "expo-env.d.ts",
     "../nextjs/src/app/global-error.tsx"
   ],
-  "exclude": ["node_modules", "android", "ios", "metro.config.js", "babel.config.js"]
+  "exclude": [
+    "node_modules",
+    "android",
+    "ios",
+    "metro.config.js",
+    "babel.config.js"
+  ]
 }

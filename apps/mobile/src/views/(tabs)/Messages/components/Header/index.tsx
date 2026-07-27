@@ -1,14 +1,16 @@
+import type { Match } from "../..";
+
 import * as React from "react";
-import { FlatList, View } from "react-native";
+import { FlatList } from "react-native";
+
 import { useTheme } from "styled-components/native";
 
-import { Match } from "../..";
 import { Preview } from "../Preview";
-import { Container } from "./styles";
+import { Container, PreviewSeparator } from "./styles";
 
-interface HeaderProps {
+type HeaderProps = {
   matches?: Match[];
-}
+};
 
 export const Header: React.FC<HeaderProps> = ({ matches }) => {
   const theme = useTheme();
@@ -25,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ matches }) => {
         contentContainerStyle={{
           paddingHorizontal: theme.spacing[4],
         }}
-        ItemSeparatorComponent={() => <View style={{ width: theme.spacing[3] }} />}
+        ItemSeparatorComponent={PreviewSeparator}
         showsHorizontalScrollIndicator={false}
       />
     </Container>

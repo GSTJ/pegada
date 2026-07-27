@@ -1,15 +1,20 @@
+import type { MessageProps } from "./hooks/use-chat-pagination";
+
 import { ActivityIndicator, Platform } from "react-native";
+
 import { useLocalSearchParams } from "expo-router";
+
 import { FlashList } from "@shopify/flash-list";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { useKeyboardAwareSafeAreaInsets } from "@/hooks/useKeyboardAwareSafeAreaInsets";
+import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
 import { Header, Message, NextDay, Send } from "@/views/Chat/components";
+
 import { HEADER_HEIGHT } from "./components/Header";
 import { SEND_HEIGHT } from "./components/Send";
-import { MessageProps, useChatPagination } from "./hooks/useChatPagination";
+import { useChatPagination } from "./hooks/use-chat-pagination";
 import { Background, CenteredText, CenteredView, Container } from "./styles";
 
 const Empty = () => {
@@ -25,6 +30,10 @@ const Empty = () => {
 
 const keyExtractor = (message: MessageProps) => String(message.id);
 
+// Hoisted: a component declared during render is a new type on every update,
+// which remounts the empty state each time a message arrives.
+const ListEmptyComponent = () => <Empty />;
+
 const ChatMessageList = () => {
   const { dogId } = useLocalSearchParams();
   const theme = useTheme();
@@ -33,7 +42,9 @@ const ChatMessageList = () => {
 
   const insets = useKeyboardAwareSafeAreaInsets();
 
-  const MessageLoader = hasNextPage ? <ActivityIndicator color={theme.colors.text} /> : null;
+  const MessageLoader = hasNextPage ? (
+    <ActivityIndicator color={theme.colors.text} />
+  ) : null;
 
   const FooterComponent = messages ? MessageLoader : null;
 
@@ -50,9 +61,13 @@ const ChatMessageList = () => {
     paddingBottom: bottomPadding,
   };
 
-  const ListEmptyComponent = () => <Empty />;
-
-  const renderItem = ({ item, index }: { item: MessageProps; index: number }) => {
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: MessageProps;
+    index: number;
+  }) => {
     // Show the date separator above this message when the previous (older)
     // message is on a different day. Hide it for the very first item when
     // older pages may still load — we don't yet know if it's truly first.
@@ -61,7 +76,9 @@ const ChatMessageList = () => {
 
     return (
       <>
-        {showNextDay ? <NextDay message={item} nextMessage={previousMessage} /> : null}
+        {showNextDay ? (
+          <NextDay message={item} nextMessage={previousMessage} />
+        ) : null}
         <Message {...item} self={item.senderId !== dogId}>
           {item.content}
         </Message>
@@ -84,7 +101,7 @@ const ChatMessageList = () => {
   };
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any -- FlashList v2's prop types reject the union this list builds; the props are checked where they are assembled.
     <FlashList {...(flashListProps as any)} />
   );
 };
@@ -92,15 +109,22 @@ const ChatMessageList = () => {
 const Chat = () => {
   const theme = useTheme();
 
+  // The tiled background is a texture, not a surface: it has to sit further
+  // back on dark than on light to read as the same weight.
+  const patternOpacity = theme.dark ? 0.06 : 0.03;
+
   return (
-    <Container testID="chat-screen" behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <Container
+      testID="chat-screen"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Background
         source={
           theme.dark
             ? require("@/assets/images/background-dark.webp")
             : require("@/assets/images/background-light.webp")
         }
-        imageStyle={{ opacity: theme.dark ? 0.06 : 0.03 }}
+        imageStyle={{ opacity: patternOpacity }}
         resizeMode="repeat" // Tiling pattern
       >
         <NetworkBoundary>

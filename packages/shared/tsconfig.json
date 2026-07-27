@@ -1,8 +1,5 @@
 {
-  "extends": "@pegada/tsconfig/internal-package.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
-  },
+  "extends": "magic-tsconfig/internal-package.json",
   "include": ["."],
   "exclude": ["node_modules"]
 }

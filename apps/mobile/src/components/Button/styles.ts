@@ -1,14 +1,14 @@
 import styled, { css } from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
-import { Text } from "@/components/Text";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
 
-interface VariantProps {
+type VariantProps = {
   variant?: "outline" | "default";
-}
-export interface ContainerProps extends VariantProps {
+};
+export type ContainerProps = {
   loading?: boolean;
-}
+} & VariantProps;
 
 export const BUTTON_HEIGHT = 68;
 
@@ -38,5 +38,6 @@ export const Container = styled(PressableArea)<ContainerProps>`
 `;
 
 export const ButtonText = styled(Text)<VariantProps>`
-  color: ${(props) => (props.variant === "outline" ? props.theme.colors.primary : "white")};
+  color: ${(props) =>
+    props.variant === "outline" ? props.theme.colors.primary : "white"};
 `;

@@ -1,10 +1,15 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import { AdEventType, InterstitialAd, TestIds } from "react-native-google-mobile-ads";
 
-import { useUnsafeIsPremium } from "@/hooks/usePayments";
+import {
+  AdEventType,
+  InterstitialAd,
+  TestIds,
+} from "react-native-google-mobile-ads";
+
+import { useUnsafeIsPremium } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 
 const DEFAULT_AD_KEYWORDS = ["dog", "animals", "pets", "puppies"];
 
@@ -56,7 +61,10 @@ export const createForAdRequestTracked = (
   const adLoadedPromise = waitForEvent(AdEventType.LOADED);
 
   // Used to catch errors before the AD is loaded
-  const removeErrorListener = interstitial.addAdEventListener(AdEventType.ERROR, sendError);
+  const removeErrorListener = interstitial.addAdEventListener(
+    AdEventType.ERROR,
+    sendError,
+  );
 
   const safeLoadAndShow = async () => {
     try {
@@ -72,8 +80,8 @@ export const createForAdRequestTracked = (
       await interstitial.show();
 
       await adClosedPromise;
-    } catch (err) {
-      sendError(err);
+    } catch (error) {
+      sendError(error);
     } finally {
       interstitial.removeAllListeners();
     }
@@ -107,7 +115,10 @@ export const useForAdRequestTracked: typeof createForAdRequestTracked = (
   interstitialAdIds,
   keywords,
 ) => {
-  const result = useCreateFreeOnlyForAdRequestTracked(interstitialAdIds, keywords);
+  const result = useCreateFreeOnlyForAdRequestTracked(
+    interstitialAdIds,
+    keywords,
+  );
 
   useEffect(() => {
     result.interstitial.load();

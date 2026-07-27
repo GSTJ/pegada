@@ -40,20 +40,24 @@ export type WidgetSnapshot = {
 };
 
 type PegadaWidgetNativeModule = {
-  setSnapshot(json: string): Promise<void>;
+  setSnapshot: (json: string) => Promise<void>;
 };
 
 // Optional so web (and any environment without the native module, e.g.
 // tests) degrades to a no-op instead of throwing at import time.
-const nativeModule = requireOptionalNativeModule<PegadaWidgetNativeModule>("PegadaWidget");
+const nativeModule =
+  requireOptionalNativeModule<PegadaWidgetNativeModule>("PegadaWidget");
 
 /**
  * Persists the snapshot where the home-screen widgets can read it
  * (App Group UserDefaults on iOS, SharedPreferences on Android) and asks
  * the OS to re-render the widget timelines.
  */
-export const setWidgetSnapshot = async (snapshot: WidgetSnapshot): Promise<void> => {
+export const setWidgetSnapshot = async (
+  snapshot: WidgetSnapshot,
+): Promise<void> => {
   await nativeModule?.setSnapshot(JSON.stringify(snapshot));
 };
 
-export const isWidgetModuleAvailable = () => nativeModule != null;
+export const isWidgetModuleAvailable = () =>
+  nativeModule !== undefined && nativeModule !== null;

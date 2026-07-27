@@ -1,7 +1,7 @@
 import Animated, { FadeInUp } from "react-native-reanimated";
 import styled from "styled-components/native";
 
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Container = styled.KeyboardAvoidingView`
   background-color: ${(props) => props.theme.colors.background};
@@ -19,7 +19,8 @@ export const CenteredView = styled(Animated.View).attrs(() => ({
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding: ${(props) => props.theme.spacing[6]}px ${(props) => props.theme.spacing[3]}px;
+  padding: ${(props) => props.theme.spacing[6]}px
+    ${(props) => props.theme.spacing[3]}px;
 `;
 
 export const CenteredText = styled(Text)`

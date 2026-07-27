@@ -1,10 +1,14 @@
 import * as Notifications from "expo-notifications";
 
-import { NOTIFICATION_ACTION, NOTIFICATION_CATEGORY } from "@pegada/shared/constants/notifications";
+import {
+  NOTIFICATION_ACTION,
+  NOTIFICATION_CATEGORY,
+} from "@pegada/shared/constants/notifications";
 
-import { getTrcpContext } from "@/contexts/trcpContext";
+import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
+
 import { getNotificationUrl, NotificationUrl } from "./notification";
 
 // Chat-message pushes carry `chat/<matchId>/<dogId>` in `data.url` (see
@@ -46,13 +50,17 @@ const warnReplyFailed = () =>
  * on the action) brings it to the foreground first so this can run; there is no
  * reliable way with expo-notifications alone to send the reply without that.
  */
-export const handleReplyAction = async (response: Notifications.NotificationResponse) => {
+export const handleReplyAction = async (
+  response: Notifications.NotificationResponse,
+) => {
   const content = response.userText?.trim();
   const url = getNotificationUrl(response);
   const matchId = getMatchIdFromUrl(url);
 
   if (!content || !matchId) {
-    sendError(new Error("Invalid reply notification: missing content or matchId"));
+    sendError(
+      new Error("Invalid reply notification: missing content or matchId"),
+    );
     return;
   }
 

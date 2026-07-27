@@ -1,5 +1,5 @@
-import { DogService } from "../services/DogService";
-import MatchService from "../services/MatchService";
+import { DogService } from "../services/dog-service";
+import MatchService from "../services/match-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const matchRouter = createTRPCRouter({

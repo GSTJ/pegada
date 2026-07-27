@@ -4,7 +4,7 @@ tags:
   - util
 ---
 # Reusable subflow: sign-in as a FRESH test user via the API's
-# APPLE_MAGIC_EMAIL_REGEX bypass (see packages/api/src/services/AuthenticationService.ts).
+# APPLE_MAGIC_EMAIL_REGEX bypass (see packages/api/src/services/authentication-service.ts).
 #
 # How it differs from login.yaml:
 #   - login.yaml uses the single APPLE_MAGIC_EMAIL (test@pegada.app). That

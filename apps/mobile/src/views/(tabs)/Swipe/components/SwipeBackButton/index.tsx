@@ -1,14 +1,16 @@
-import { SlideInRight, SlideOutRight } from "react-native-reanimated";
 import { useRouter } from "expo-router";
+
+import { SlideInRight, SlideOutRight } from "react-native-reanimated";
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "styled-components/native";
 
 import SwipeBackArrow from "@/assets/images/SwipeBackArrow.svg";
-import { useUnsafeIsPremium } from "@/hooks/usePayments";
+import { useUnsafeIsPremium } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
 import { Actions } from "@/store/reducers";
 import { getLastCardId } from "@/store/selectors";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
+
 import { Container, GoBack } from "./styles";
 
 const SwipeBackButton = () => {

@@ -1,20 +1,31 @@
 import { useState } from "react";
 import * as React from "react";
 import { Alert, Linking, ScrollView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
+
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "styled-components/native";
 
-import Information from "@/assets/images/Information.svg";
-import LocationIcon from "@/assets/images/Location.svg";
 import { Button } from "@/components/Button";
-import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { sendError } from "@/services/errorTracking";
-import { SceneName } from "@/types/SceneName";
-import { BottomView, Container, InformationRow, LocationView } from "./styles";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { sendError } from "@/services/error-tracking";
+import { SceneName } from "@/types/scene-name";
+
+import {
+  BottomView,
+  Container,
+  InformationIcon,
+  InformationRow,
+  LocationIcon,
+  LocationView,
+  Prompt,
+  scrollContent,
+  Title,
+} from "./styles";
 
 enum UpdateLocationError {
   PermissionNotGranted = "Location permission not granted",
@@ -34,7 +45,10 @@ const getApproximatedPosition = async () => {
   return currentPostion.coords;
 };
 
-export const updateUserLocation = async (newLocation?: { longitude: number; latitude: number }) => {
+export const updateUserLocation = async (newLocation?: {
+  longitude: number;
+  latitude: number;
+}) => {
   const { status } = await Location.requestForegroundPermissionsAsync();
 
   if (status !== "granted") {
@@ -56,7 +70,8 @@ export const updateUserLocation = async (newLocation?: { longitude: number; lati
     country: geocode[0]?.country ?? null,
   };
 
-  const newUserData = await getTrcpContext().client.user.update.mutate(location);
+  const newUserData =
+    await getTrcpContext().client.user.update.mutate(location);
 
   getTrcpContext().myDog.get.setData(undefined, (oldDogData) => {
     if (!oldDogData) return undefined;
@@ -82,26 +97,14 @@ const AskForLocation: React.FC = () => {
   return (
     <Container>
       <ScrollView
-        contentContainerStyle={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          paddingTop: insets.top,
-        }}
+        contentContainerStyle={[scrollContent, { paddingTop: insets.top }]}
       >
         <LocationView>
-          <LocationIcon
-            width={100}
-            height={100}
-            fill={theme.colors.primary}
-            style={{ marginBottom: 20 }}
-          />
-          <Text fontSize="xl" fontWeight="bold" style={{ textAlign: "center", marginBottom: 4 }}>
+          <LocationIcon width={100} height={100} fill={theme.colors.primary} />
+          <Title fontSize="xl" fontWeight="bold">
             {t("askForLocation.activateLocation")}
-          </Text>
-          <Text fontSize="xs" style={{ textAlign: "center" }}>
-            {t("askForLocation.permissionPrompt")}
-          </Text>
+          </Title>
+          <Prompt fontSize="xs">{t("askForLocation.permissionPrompt")}</Prompt>
         </LocationView>
       </ScrollView>
       <BottomView
@@ -110,14 +113,7 @@ const AskForLocation: React.FC = () => {
         }}
       >
         <InformationRow>
-          <Information
-            fill={theme.colors.primary}
-            style={{
-              width: 21,
-              height: 21,
-              marginRight: 10,
-            }}
-          />
+          <InformationIcon fill={theme.colors.primary} />
           <Text fontSize="xs" fontWeight="medium">
             {t("askForLocation.locationUsage")}
           </Text>
@@ -152,7 +148,10 @@ const AskForLocation: React.FC = () => {
 
               sendError(error);
 
-              Alert.alert(t("common.somethingWrong"), t("common.tryAgainLater"));
+              Alert.alert(
+                t("common.somethingWrong"),
+                t("common.tryAgainLater"),
+              );
 
               router.push(SceneName.Swipe);
             } finally {

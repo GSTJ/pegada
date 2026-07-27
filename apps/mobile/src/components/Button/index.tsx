@@ -1,12 +1,17 @@
+import type { ContainerProps } from "./styles";
+
+import type { PressableProps } from "react-native";
+
 import * as React from "react";
-import { PressableProps } from "react-native";
 
-import Loading from "@/components/Loading";
-import { ButtonText, Container, ContainerProps } from "./styles";
+import Loading from "@/components/loading";
 
-export interface ButtonProps extends ContainerProps, PressableProps {
+import { ButtonText, Container } from "./styles";
+
+export type ButtonProps = {
   children: string;
-}
+} & ContainerProps &
+  PressableProps;
 
 export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
   const disabled = props.loading || props.disabled;

@@ -1,25 +1,30 @@
+import type {
+  DeletedPicture,
+  Picture,
+} from "@/components/ProfileImageUploader/utils";
+
 import * as React from "react";
 import { View } from "react-native";
+
 import { DraggableGrid } from "react-native-draggable-grid";
 
-import {
-  DeletedPicture,
-  deleteItem,
-  Picture,
-  sortByUrl,
-} from "@/components/ProfileImageUploader/utils";
-import { Text } from "@/components/Text";
+import { deleteItem, sortByUrl } from "@/components/ProfileImageUploader/utils";
+import { Text } from "@/components/text";
+
 import { AddUserPhoto } from "./components/AddUserPhoto";
-import { dogPictureHeight, numOfColumns } from "./components/AddUserPhoto/styles";
+import {
+  dogPictureHeight,
+  numOfColumns,
+} from "./components/AddUserPhoto/styles";
 
 type GenericPictures = (Picture | DeletedPicture)[];
 
-export interface ProfileImagesUploaderProps {
+export type ProfileImagesUploaderProps = {
   onChange: (value: (current: Picture[]) => GenericPictures) => void;
   value: Picture[];
   error?: string;
   setGesturesEnabled: (value: boolean) => void;
-}
+};
 
 const AddUserPhotoWrapper = ({
   picture,
@@ -54,7 +59,14 @@ const AddUserPhotoWrapper = ({
         .sort(sortByUrl),
     );
   };
-  return <AddUserPhoto picture={picture} onDelete={onDelete} onAdd={onAdd} index={index} />;
+  return (
+    <AddUserPhoto
+      picture={picture}
+      onDelete={onDelete}
+      onAdd={onAdd}
+      index={index}
+    />
+  );
 };
 
 export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
@@ -81,7 +93,11 @@ export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
     const index = value.findIndex((p) => p.id === item.id);
     return (
       <View>
-        <AddUserPhotoWrapper picture={item} onChange={onChange} index={Math.max(index, 0)} />
+        <AddUserPhotoWrapper
+          picture={item}
+          onChange={onChange}
+          index={Math.max(index, 0)}
+        />
       </View>
     );
   };

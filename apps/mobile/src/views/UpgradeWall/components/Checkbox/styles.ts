@@ -1,9 +1,9 @@
 import Color from "color";
 import styled, { css } from "styled-components/native";
 
-interface CheckContainerProps {
+type CheckContainerProps = {
   selected?: boolean;
-}
+};
 
 export const Container = styled.View<CheckContainerProps>`
   height: ${({ theme }) => theme.spacing[6]}px;
@@ -20,7 +20,8 @@ export const Container = styled.View<CheckContainerProps>`
   ${(props) =>
     props.selected &&
     css`
-      background-color: ${({ theme }) => Color(theme.colors.primary).alpha(0.2).toString()};
+      background-color: ${({ theme }) =>
+        new Color(theme.colors.primary).alpha(0.2).toString()};
       border-color: ${({ theme }) => theme.colors.primary};
     `}
 `;

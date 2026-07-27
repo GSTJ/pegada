@@ -1,7 +1,7 @@
-import { Image } from "@prisma/client";
-import { ExpoPushMessage } from "expo-server-sdk";
+import type { Language } from "@pegada/shared/i18n/types/types";
+import type { Image } from "@prisma/client";
 
-import { Language } from "@pegada/shared/i18n/types/types";
+import type { ExpoPushMessage } from "expo-server-sdk";
 
 export const TOPICS = {
   MAIL: "mail",

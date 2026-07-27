@@ -1,9 +1,18 @@
 import * as React from "react";
+
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
 
-import { ActionItem, ConfusedEmoji, Container, HeartEyesEmoji, ThinkingEmoji } from "./styles";
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
+import {
+  ActionItem,
+  ConfusedEmoji,
+  Container,
+  HeartEyesEmoji,
+  ThinkingEmoji,
+} from "./styles";
+
+// oxlint-disable-next-line typescript/consistent-type-definitions -- see MainCard: `Container` is a reanimated Animated.View and its string index signature widens every member of an intersection to `any`. `extends` keeps them.
 interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   onNope: () => void;
   onYep: () => void;
@@ -26,7 +35,11 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   return (
     <Container exiting={ZoomOutDown} {...props}>
       <Animated.View entering={dislikeAnimation}>
-        <PressableArea hitSlop={hitSlop} testID="swipe-dislike" onPress={onNope}>
+        <PressableArea
+          hitSlop={hitSlop}
+          testID="swipe-dislike"
+          onPress={onNope}
+        >
           <ActionItem>
             <ConfusedEmoji />
           </ActionItem>

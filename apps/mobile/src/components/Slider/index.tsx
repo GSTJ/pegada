@@ -1,15 +1,28 @@
+import type {
+  LabelProps,
+  MultiSliderProps,
+} from "@ptomasroos/react-native-multi-slider";
+
 import * as React from "react";
 import { View } from "react-native";
-import MultiSlider, { LabelProps, MultiSliderProps } from "@ptomasroos/react-native-multi-slider";
+
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useTheme } from "styled-components/native";
 
-import { Text } from "@/components/Text";
-import { LabelContainer, Marker, TitleContainer, Triangle, WIDTH } from "./styles";
+import { Text } from "@/components/text";
 
-interface TitleProps {
+import {
+  LabelContainer,
+  Marker,
+  TitleContainer,
+  Triangle,
+  WIDTH,
+} from "./styles";
+
+type TitleProps = {
   title: string;
   subtitle: string;
-}
+};
 
 const Title: React.FC<TitleProps> = ({ title, subtitle }) => (
   <TitleContainer>
@@ -22,10 +35,10 @@ const Title: React.FC<TitleProps> = ({ title, subtitle }) => (
   </TitleContainer>
 );
 
-interface CustomLabelProps {
+type CustomLabelProps = {
   left: number;
   children: string | number;
-}
+};
 
 const CustomLabel: React.FC<CustomLabelProps> = ({ left, children }) => {
   // Makes the label text more optically center aligned
@@ -55,6 +68,33 @@ const markerHitSlop = {
 
 const CustomMarker = () => <Marker hitSlop={markerHitSlop} />;
 
+/**
+ * Hoisted out of `Root` so it keeps its identity between renders — a component
+ * declared during render remounts its subtree every time the parent updates.
+ * `max` comes in as a prop instead of a closure variable.
+ */
+const CustomLabels = ({ max, ...label }: LabelProps & { max: number }) => {
+  const oneMarkerValue =
+    Number(label.oneMarkerValue) >= max ? "∞" : label.oneMarkerValue;
+  const twoMarkerValue =
+    Number(label.twoMarkerValue) >= max ? "∞" : label.twoMarkerValue;
+
+  return (
+    <>
+      {Number(label.oneMarkerValue) >= 0 && (
+        <CustomLabel left={label.oneMarkerLeftPosition}>
+          {oneMarkerValue}
+        </CustomLabel>
+      )}
+      {Number(label.twoMarkerValue) >= 0 && (
+        <CustomLabel left={label.twoMarkerLeftPosition}>
+          {twoMarkerValue}
+        </CustomLabel>
+      )}
+    </>
+  );
+};
+
 export const Root = (props: MultiSliderProps) => {
   const theme = useTheme();
 
@@ -62,9 +102,13 @@ export const Root = (props: MultiSliderProps) => {
   // gets claimed by the OS navigation gesture (iOS interactive pop / Android
   // system back) instead of the slider, sending the user back a screen. Inset
   // the track on both platforms so no marker sits in that edge gesture zone.
-  const safePadding = theme.spacing[7];
+  const sliderLength = (props?.sliderLength ?? 0) - theme.spacing[7] * 2;
 
-  const sliderLength = (props?.sliderLength ?? 0) - safePadding * 2;
+  const max = props.max ?? 0;
+  const renderCustomLabels = React.useCallback(
+    (label: LabelProps) => <CustomLabels {...label} max={max} />,
+    [max],
+  );
 
   const hasSecondMarker = (props.values?.length ?? 0) > 1;
 
@@ -72,30 +116,11 @@ export const Root = (props: MultiSliderProps) => {
 
   const safeBorderStyle = {
     height: stroke,
-    width: safePadding,
+    width: theme.spacing[7],
     backgroundColor: theme.colors.border,
     zIndex: -1,
     borderTopRightRadius: theme.radii.md,
     borderBottomRightRadius: theme.radii.md,
-  };
-
-  const CustomLabels = (label: LabelProps) => {
-    const oneMarkerValue =
-      Number(label.oneMarkerValue) >= (props.max ?? 0) ? "∞" : label.oneMarkerValue;
-
-    const twoMarkerValue =
-      Number(label.twoMarkerValue) >= (props.max ?? 0) ? "∞" : label.twoMarkerValue;
-
-    return (
-      <>
-        {Number(label.oneMarkerValue) >= 0 && (
-          <CustomLabel left={label.oneMarkerLeftPosition}>{oneMarkerValue}</CustomLabel>
-        )}
-        {Number(label.twoMarkerValue) >= 0 && (
-          <CustomLabel left={label.twoMarkerLeftPosition}>{twoMarkerValue}</CustomLabel>
-        )}
-      </>
-    );
   };
 
   const style = {
@@ -116,13 +141,15 @@ export const Root = (props: MultiSliderProps) => {
         style={[
           safeBorderStyle,
           {
-            backgroundColor: hasSecondMarker ? theme.colors.border : theme.colors.primary,
+            backgroundColor: hasSecondMarker
+              ? theme.colors.border
+              : theme.colors.primary,
           },
         ]}
       />
       <MultiSlider
         enableLabel
-        customLabel={CustomLabels}
+        customLabel={renderCustomLabels}
         customMarker={CustomMarker}
         trackStyle={trackStyle}
         selectedStyle={selectedStyle}

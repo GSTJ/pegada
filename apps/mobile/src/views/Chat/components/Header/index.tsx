@@ -1,20 +1,26 @@
 import { ActivityIndicator } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
+
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "styled-components/native";
 
 import BackArrow from "@/assets/images/BackArrow.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
-import { api } from "@/contexts/TRPCProvider";
-import { SceneName } from "@/types/SceneName";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
+import { SceneName } from "@/types/scene-name";
+
 import * as S from "./styles";
 
 export const HEADER_HEIGHT = 65;
 
 const DogProfileInfo = ({ dogId }: { dogId: string }) => {
-  const [dog] = api.dog.get.useSuspenseQuery({ id: dogId }, { refetchOnMount: false });
+  const [dog] = api.dog.get.useSuspenseQuery(
+    { id: dogId },
+    { refetchOnMount: false },
+  );
 
   return (
     <S.ProfileInfoContainer>

@@ -1,7 +1,8 @@
 import { Platform } from "react-native";
+
 import * as Haptics from "expo-haptics";
 
-import { sendError } from "@/services/errorTracking";
+import { sendError } from "@/services/error-tracking";
 
 // Every call is wrapped so a haptics failure (unsupported device, simulator,
 // etc.) never throws into calling code — it's purely a "nice to have".

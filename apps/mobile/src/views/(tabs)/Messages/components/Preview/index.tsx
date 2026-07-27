@@ -1,17 +1,20 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+
 import * as React from "react";
+
 import { useRouter } from "expo-router";
 
-import { Text } from "@/components/Text";
-import { SwipeDog } from "@/store/reducers/dogs/swipe";
-import { SceneName } from "@/types/SceneName";
+import { Text } from "@/components/text";
+import { SceneName } from "@/types/scene-name";
+
 import { Container, Content, Picture } from "./styles";
 
-interface PreviewProps {
+type PreviewProps = {
   item: {
     id: string;
     dog: SwipeDog;
   };
-}
+};
 
 export const Preview: React.FC<PreviewProps> = ({ item }) => {
   const router = useRouter();

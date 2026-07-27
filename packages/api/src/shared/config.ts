@@ -10,7 +10,9 @@ export const semverSchema = z.string().refine((version) => {
 
 const configSchema = z.object({
   /** GENERAL */
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
 
   /** POSTHOG (analytics + error tracking + feature flags) */
   POSTHOG_API_KEY: z.string(),
@@ -97,6 +99,16 @@ const configSchema = z.object({
    */
   APPLE_MAGIC_EMAIL_REGEX: z.string().optional(),
 
+  /**
+   * QUEUE
+   *
+   * "vercel" forces Vercel Queues, "inline" forces the in-process handler.
+   * Unset means: queues on Vercel (where VERCEL is "1"), inline everywhere
+   * else — local dev, Maestro e2e and tests need no queue infrastructure.
+   */
+  QUEUE_DRIVER: z.enum(["vercel", "inline"]).optional(),
+  VERCEL: z.string().optional(),
+
   /** MAESTRO E2E
    * When set to "1", unlocks dev-only endpoints used by the Maestro E2E
    * suite to mock RevenueCat purchase flows (RC's native purchase sheet
@@ -109,7 +121,7 @@ const configSchema = z.object({
 const _config = configSchema.safeParse(process.env);
 
 if (!_config.success) {
-  // eslint-disable-next-line no-console
+  // oxlint-disable-next-line no-console -- The process is about to throw on invalid env; this is the only way to say why.
   console.error("❌ Invalid environment variables", _config.error.format());
   throw new Error("Invalid environment variables.");
 }

@@ -1,8 +1,9 @@
 import * as React from "react";
+
 import { useTranslation } from "react-i18next";
 
 import SwipeBackArrow from "@/assets/images/SwipeBackArrow.svg";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 import AdsOff from "@/views/UpgradeWall/assets/AdsOff.svg";
 import HighPriority from "@/views/UpgradeWall/assets/HighPriority.svg";
 import Infinite from "@/views/UpgradeWall/assets/Infinite.svg";

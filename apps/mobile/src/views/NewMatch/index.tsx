@@ -1,23 +1,31 @@
 import { useEffect } from "react";
 import * as React from "react";
 import { BackHandler, ScrollView, View } from "react-native";
-import { Image } from "expo-image";
+
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components";
 
 import { Button } from "@/components/Button";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
-import { api } from "@/contexts/TRPCProvider";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
 import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
 import { analytics } from "@/services/analytics";
 import { haptics } from "@/services/haptics";
-import { SceneName } from "@/types/SceneName";
-import AnimatedCards from "./AnimatedCards";
-import { ConfettiAnimation } from "./ConfettiAnimation";
-import { Container, Content } from "./styles";
+import { SceneName } from "@/types/scene-name";
+
+import AnimatedCards from "./animated-cards";
+import { ConfettiAnimation } from "./confetti-animation";
+import {
+  Container,
+  Content,
+  matchScroll,
+  MatchCaption,
+  MatchWordmark,
+} from "./styles";
 
 const NewMatch: React.FC = () => {
   const { matchId, matchDogId } = useLocalSearchParams<{
@@ -73,10 +81,13 @@ const NewMatch: React.FC = () => {
   useFocusEffect(() => {
     // Assume 'skip' if the user presses the back button
     // This is pertinent to Android devices only.
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      void handleSkip();
-      return false;
-    });
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        void handleSkip();
+        return false;
+      },
+    );
 
     return () => subscription.remove();
   });
@@ -91,49 +102,35 @@ const NewMatch: React.FC = () => {
       <StatusBar style={theme.dark ? "light" : "dark"} />
       <ConfettiAnimation />
       <Content>
-        <ScrollView
-          contentContainerStyle={{
-            alignItems: "center",
-            justifyContent: "center",
-            flexGrow: 1,
-          }}
-        >
+        <ScrollView contentContainerStyle={matchScroll}>
           <AnimatedCards matchDog={matchDog} />
           <Text fontSize="xl" fontWeight="light">
             {t("newMatch.youGotA")}
           </Text>
-          <Image
+          <MatchWordmark
             source={
               theme.dark
                 ? require("@/assets/images/MatchLight.webp")
                 : require("@/assets/images/MatchDark.webp")
             }
-            style={{
-              height: 50,
-              width: "100%",
-            }}
             contentFit="contain"
           />
-          <Text
-            style={{
-              textAlign: "center",
-              marginTop: 12,
-              maxWidth: 200,
-            }}
-            fontSize="lg"
-            fontWeight="light"
-          >
+          <MatchCaption fontSize="lg" fontWeight="light">
             {t("newMatch.youLikedEachOther", {
               replace: { name: matchDog.name },
             })}
-          </Text>
+          </MatchCaption>
         </ScrollView>
 
         <View style={{ padding: theme.spacing[4], gap: theme.spacing[3] }}>
           <Button testID="new-match-send" onPress={handleSendMessage}>
             {t("newMatch.sendMessage")}
           </Button>
-          <Button testID="new-match-skip" variant="outline" onPress={handleSkip}>
+          <Button
+            testID="new-match-skip"
+            variant="outline"
+            onPress={handleSkip}
+          >
             {t("newMatch.keepSwiping")}
           </Button>
         </View>
@@ -142,8 +139,10 @@ const NewMatch: React.FC = () => {
   );
 };
 
-export default () => (
+const NewMatchScreen = () => (
   <NetworkBoundary>
     <NewMatch />
   </NetworkBoundary>
 );
+
+export default NewMatchScreen;

@@ -7,25 +7,25 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 import type { NextRequest } from "next/server";
-import { initTRPC, TRPCError } from "@trpc/server";
-import jwt from "jsonwebtoken";
-import superjson from "superjson";
-import { z, ZodError } from "zod";
 
 import { prisma } from "@pegada/database";
 import { IntentionalError } from "@pegada/shared/errors/errors";
 import { Language } from "@pegada/shared/i18n/types/types";
 import { RequestHeaders } from "@pegada/shared/types/types";
+import { initTRPC, TRPCError } from "@trpc/server";
+import jwt from "jsonwebtoken";
+import superjson from "superjson";
+import { z, ZodError } from "zod";
 
 import { logDebug, sendError } from "./errors/errors";
 import { config } from "./shared/config";
 
 // That was added by me manually
-export interface Session {
+export type Session = {
   user: {
     id: string;
   };
-}
+};
 
 /**
  * 1. CONTEXT
@@ -36,11 +36,11 @@ export interface Session {
  * processing a request
  *
  */
-interface CreateContextOptions {
+type CreateContextOptions = {
   session: Session | null;
   language?: Language;
   req?: NextRequest;
-}
+};
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use
@@ -69,7 +69,7 @@ export const getSession = (bearer: string) => {
   if (!bearer) return null;
 
   try {
-    const unsafeBearerToken = bearer.split(" ")[1];
+    const [, unsafeBearerToken] = bearer.split(" ");
     const safeBearerToken = z.string().parse(unsafeBearerToken);
 
     const decoded = jwt.verify(safeBearerToken, config.JWT_SECRET) as {
@@ -98,7 +98,10 @@ export const getSession = (bearer: string) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
-export const createTRPCContext = (opts: { req: NextRequest; session: Session | null }) => {
+export const createTRPCContext = (opts: {
+  req: NextRequest;
+  session: Session | null;
+}) => {
   const source = opts.req.headers.get(RequestHeaders.XTRPCSource) ?? "unknown";
 
   logDebug(">>> tRPC Request from", source, "by", opts.session?.user);
@@ -136,7 +139,8 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },
@@ -159,7 +163,7 @@ export const createTRPCRouter = t.router;
  * Create a server-side caller
  * @see https://trpc.io/docs/server/server-side-calls
  */
-export const createCallerFactory = t.createCallerFactory;
+export const { createCallerFactory } = t;
 
 /**
  * Public (unauthed) procedure

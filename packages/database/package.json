@@ -32,12 +32,13 @@
     "postinstall": "pnpm run build"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.4.1"
+    "@faker-js/faker": "^8.4.1",
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
-    "@pegada/tsconfig": "workspace:*",
     "@prisma/client": "^5.17.0",
+    "magic-tsconfig": "^1.2.0",
     "prisma": "^5.17.0",
     "tsx": "^4.21.0"
   },

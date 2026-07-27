@@ -1,22 +1,29 @@
+import type { SharedValue } from "react-native-reanimated";
+
 import * as React from "react";
+
+import { useTranslation } from "react-i18next";
 import Animated, {
   Extrapolation,
   interpolate,
-  SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { useTranslation } from "react-i18next";
 
 import { BottomAction } from "@/components/BottomAction";
+
 import { StyledButton } from "./styles";
 
-interface SubmitProps {
+type SubmitProps = {
   loading?: boolean;
   onPress: () => void;
   dragging: SharedValue<number>;
-}
+};
 
-export const Submit: React.FC<SubmitProps> = ({ loading, onPress, dragging }) => {
+export const Submit: React.FC<SubmitProps> = ({
+  loading,
+  onPress,
+  dragging,
+}) => {
   const { t } = useTranslation();
 
   const buttonAnimatedStyle = useAnimatedStyle(() => {
@@ -35,7 +42,11 @@ export const Submit: React.FC<SubmitProps> = ({ loading, onPress, dragging }) =>
   return (
     <Animated.View style={buttonAnimatedStyle}>
       <BottomAction.Container>
-        <StyledButton testID="location-map-confirm" loading={loading} onPress={onPress}>
+        <StyledButton
+          testID="location-map-confirm"
+          loading={loading}
+          onPress={onPress}
+        >
           {t("locationMap.confirmLocation")}
         </StyledButton>
       </BottomAction.Container>

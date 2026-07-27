@@ -1,6 +1,6 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
-import PaymentService from "@pegada/api/services/PaymentService";
+import PaymentService from "@pegada/api/services/payment-service";
 import { getSession } from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
 
@@ -21,7 +21,9 @@ export const OPTIONS = () => {
 };
 
 export const POST = async (req: NextRequest) => {
-  const session = getSession(req.headers.get(RequestHeaders.Authorization) ?? "");
+  const session = getSession(
+    req.headers.get(RequestHeaders.Authorization) ?? "",
+  );
 
   if (session?.user.id !== WEBHOOK_USER_ID) {
     return new Response(null, { status: 401 });

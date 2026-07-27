@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
+import { env } from "./env";
+
 // https://www.prisma.io/docs/guides/other/troubleshooting-orm/help-articles/nextjs-prisma-client-dev-practices
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
@@ -8,9 +10,9 @@ const globalForPrisma = global as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query"] : [],
+    log: env.NODE_ENV === "development" ? ["query"] : [],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;

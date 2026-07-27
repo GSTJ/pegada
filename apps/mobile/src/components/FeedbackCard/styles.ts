@@ -4,12 +4,13 @@ import styled, { css } from "styled-components/native";
 import MainCard from "../MainCard";
 import { absoluteFill } from "../MainCard/styles";
 
-interface IContainer {
+type IContainer = {
   isFirst: boolean;
-}
+};
 
 export const Container = styled(Animated.View)<IContainer>`
-  margin: ${(props) => props.theme.spacing[1]}px ${(props) => props.theme.spacing[1.5]}px;
+  margin: ${(props) => props.theme.spacing[1]}px
+    ${(props) => props.theme.spacing[1.5]}px;
   flex: 1;
   border-radius: ${(props) => props.theme.radii.lg}px;
   background-color: ${(props) => props.theme.colors.background};

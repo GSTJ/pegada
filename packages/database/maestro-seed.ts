@@ -36,7 +36,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { PlanType } from "@prisma/client";
 
 import prisma from ".";
-import { breedData } from "./__mocks__/breed-data";
+import { breedData } from "./fixtures/breed-data";
 
 // ---------------------------------------------------------------------------
 // Shared constants
@@ -57,15 +57,19 @@ const yearsAgo = (n: number) => {
 // Rex / Bella / MatchMe seed (non-destructive flows)
 // ---------------------------------------------------------------------------
 
-async function ensureBreed() {
+const ensureBreed = async () => {
   await prisma.breed.upsert({
     where: { id: GOLDEN_ID },
     update: {},
-    create: { id: GOLDEN_ID, name: "Golden Retriever", slug: "golden-retriever" },
+    create: {
+      id: GOLDEN_ID,
+      name: "Golden Retriever",
+      slug: "golden-retriever",
+    },
   });
-}
+};
 
-async function ensureMagicUserWithRex() {
+const ensureMagicUserWithRex = async () => {
   const magic = await prisma.user.upsert({
     where: { email: "test@pegada.app" },
     update: {
@@ -105,7 +109,17 @@ async function ensureMagicUserWithRex() {
     });
   }
 
-  if (!rex) {
+  if (rex) {
+    rex = await prisma.dog.update({
+      where: { id: rex.id },
+      data: {
+        name: "Rex",
+        preferredMinAge: 1,
+        preferredMaxAge: 15,
+        preferredMaxDistance: 50,
+      },
+    });
+  } else {
     rex = await prisma.dog.create({
       data: {
         userId: magic.id,
@@ -129,22 +143,12 @@ async function ensureMagicUserWithRex() {
         },
       },
     });
-  } else {
-    rex = await prisma.dog.update({
-      where: { id: rex.id },
-      data: {
-        name: "Rex",
-        preferredMinAge: 1,
-        preferredMaxAge: 15,
-        preferredMaxDistance: 50,
-      },
-    });
   }
 
   return { magic, rex };
-}
+};
 
-async function ensureBellaWithMatch(rexId: string) {
+const ensureBellaWithMatch = async (rexId: string) => {
   const bellaUser = await prisma.user.upsert({
     where: { email: "test+bella@pegada.app" },
     update: {
@@ -165,7 +169,7 @@ async function ensureBellaWithMatch(rexId: string) {
     include: { dogs: { where: { deletedAt: null } } },
   });
 
-  let bella = bellaUser.dogs[0];
+  let [bella] = bellaUser.dogs;
   if (!bella) {
     bella = await prisma.dog.create({
       data: {
@@ -239,7 +243,7 @@ async function ensureBellaWithMatch(rexId: string) {
   }
 
   return { bellaUser, bella, match };
-}
+};
 
 /**
  * MatchMe: a FEMALE dog whose owner has already swiped INTERESTED on Rex.
@@ -257,7 +261,7 @@ async function ensureBellaWithMatch(rexId: string) {
  * Rex MUST NOT have any pre-existing Interest in the OTHER direction (the
  * swipe service's `notIn` filter would hide MatchMe from the swipe stack).
  */
-async function ensureMatchMeWithPreLike(rexId: string) {
+const ensureMatchMeWithPreLike = async (rexId: string) => {
   // MatchMe's owner is marked PREMIUM so the SuggestionService priority
   // column evaluates to 1 (premium pre-liker), which forces MatchMe to the
   // TOP of Rex's swipe stack ahead of the new SwipeDog pool below — both
@@ -350,7 +354,7 @@ async function ensureMatchMeWithPreLike(rexId: string) {
   });
 
   return { matchMeUser, matchMe, preLike };
-}
+};
 
 /**
  * SwipeDogN: a small pool of nearby dogs that keep Rex's swipe deck
@@ -371,7 +375,7 @@ async function ensureMatchMeWithPreLike(rexId: string) {
  */
 const SWIPE_DOG_COUNT = 6;
 
-async function ensureSwipePoolDogs(rexId: string) {
+const ensureSwipePoolDogs = async (rexId: string) => {
   const created: { name: string; id: string }[] = [];
 
   for (let i = 1; i <= SWIPE_DOG_COUNT; i++) {
@@ -450,16 +454,15 @@ async function ensureSwipePoolDogs(rexId: string) {
   }
 
   return created;
-}
+};
 
-async function seedMain() {
+const seedMain = async () => {
   await ensureBreed();
   const { magic, rex } = await ensureMagicUserWithRex();
   const { bella, match } = await ensureBellaWithMatch(rex.id);
   const { matchMe, preLike } = await ensureMatchMeWithPreLike(rex.id);
   const swipePool = await ensureSwipePoolDogs(rex.id);
 
-  // eslint-disable-next-line no-console
   console.log(
     JSON.stringify(
       {
@@ -478,7 +481,7 @@ async function seedMain() {
       2,
     ),
   );
-}
+};
 
 // ---------------------------------------------------------------------------
 // delete-me@pegada.app helpers (destructive flow only)
@@ -495,7 +498,9 @@ export const seedDeleteMeUser = async () => {
 
   const breed = breedData.find((b) => b.name === "Shih-tzu") ?? breedData[0];
   if (!breed?.id) {
-    throw new Error("maestro-seed: no breed available to attach to delete-me dog");
+    throw new Error(
+      "maestro-seed: no breed available to attach to delete-me dog",
+    );
   }
 
   // Upsert the breed row before connecting: on a fresh DB (db push
@@ -564,12 +569,18 @@ export const purgeDeleteMeUser = async () => {
       });
       await tx.interest.deleteMany({
         where: {
-          OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+          OR: [
+            { requesterId: { in: dogIds } },
+            { responderId: { in: dogIds } },
+          ],
         },
       });
       await tx.match.deleteMany({
         where: {
-          OR: [{ requesterId: { in: dogIds } }, { responderId: { in: dogIds } }],
+          OR: [
+            { requesterId: { in: dogIds } },
+            { responderId: { in: dogIds } },
+          ],
         },
       });
       await tx.image.deleteMany({ where: { dogId: { in: dogIds } } });
@@ -613,19 +624,15 @@ if (isMain) {
       await seedMain();
     } else if (command === "seed-delete-me") {
       await seedDeleteMeUser();
-      // eslint-disable-next-line no-console
       console.log(`[maestro-seed] seeded ${DELETE_ME_EMAIL}`);
     } else if (command === "purge-delete-me") {
       await purgeDeleteMeUser();
-      // eslint-disable-next-line no-console
       console.log(`[maestro-seed] purged ${DELETE_ME_EMAIL}`);
     } else if (command === "check-delete-me") {
       const exists = await deleteMeExists();
-      // eslint-disable-next-line no-console
       console.log(`[maestro-seed] ${DELETE_ME_EMAIL} exists=${exists}`);
       if (exists) process.exit(1);
     } else {
-      // eslint-disable-next-line no-console
       console.error(
         `[maestro-seed] unknown command "${command}" — use seed|seed-delete-me|purge-delete-me|check-delete-me`,
       );
@@ -634,10 +641,9 @@ if (isMain) {
   };
 
   run()
-    .catch((e) => {
-      // eslint-disable-next-line no-console
-      console.error(e);
+    .finally(() => prisma.$disconnect())
+    .catch((error: unknown) => {
+      console.error(error);
       process.exit(1);
-    })
-    .finally(() => prisma.$disconnect());
+    });
 }

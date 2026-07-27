@@ -1,7 +1,15 @@
 import { useTheme } from "styled-components/native";
 
 import ArrowRight from "@/assets/images/ArrowRight.svg";
-import { ArrowContainer, Container, Description, Root, Title } from "./styles";
+
+import {
+  ArrowContainer,
+  Container,
+  Description,
+  IconSlot,
+  Root,
+  Title,
+} from "./styles";
 
 const Arrow = () => {
   const theme = useTheme();
@@ -14,6 +22,7 @@ const Arrow = () => {
 };
 export const Config = {
   Container,
+  IconSlot,
   Description,
   Root,
   Title,

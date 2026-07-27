@@ -1,10 +1,14 @@
+import type { LanguageDetectorAsyncModule } from "i18next";
+
 import { getLocales } from "expo-localization";
-import i18n, { LanguageDetectorAsyncModule } from "i18next";
+
+import i18n from "i18next";
+
+export { default } from "i18next";
+import { initI18n } from "@pegada/shared/i18n/i18n";
 import { initReactI18next } from "react-i18next";
 
-import { initI18n } from "@pegada/shared/i18n/i18n";
-
-import { sendError } from "./services/errorTracking";
+import { sendError } from "./services/error-tracking";
 import { getData, StorageKeys, storeData } from "./services/storage";
 
 export const getSystemLanguage = () => {
@@ -39,5 +43,3 @@ const languageDetector: LanguageDetectorAsyncModule = {
 };
 
 initI18n(i18n.use(languageDetector).use(initReactI18next)).catch(sendError);
-
-export default i18n;

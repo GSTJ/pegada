@@ -1,4 +1,7 @@
+import type { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
+
 import { Alert } from "react-native";
+
 import { Asset } from "expo-asset";
 import {
   cacheDirectory,
@@ -11,15 +14,13 @@ import {
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 
-import { IMAGE_STATUS } from "@pegada/shared/schemas/dogSchema";
-
+import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
 import { config } from "@/services/config";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { sendError } from "@/services/errorTracking";
-import { getMimeType } from "@/services/getMimeType";
+import { sendError } from "@/services/error-tracking";
+import { getMimeType } from "@/services/get-mime-type";
 
-export interface Picture {
+export type Picture = {
   id: string;
   key: string;
   disabledDrag: boolean;
@@ -28,22 +29,21 @@ export interface Picture {
   position: number;
   status?: keyof typeof IMAGE_STATUS;
   blurhash?: string;
-}
+};
 
 export type DeletedPicture = Omit<Picture, "position">;
 
-export const pictures: Picture[] = Array(6)
-  .fill(null)
-  .map(
-    (_data, index): Picture => ({
-      id: `image-id-${index}`,
-      key: `image-key-${index}`,
-      url: "",
-      disabledDrag: true,
-      disabledReSorted: true,
-      position: index,
-    }),
-  );
+export const pictures: Picture[] = Array.from(
+  { length: 6 },
+  (_data, index): Picture => ({
+    id: `image-id-${index}`,
+    key: `image-key-${index}`,
+    url: "",
+    disabledDrag: true,
+    disabledReSorted: true,
+    position: index,
+  }),
+);
 
 export const sortByUrl = (
   firstItem: Picture | DeletedPicture,
@@ -106,7 +106,9 @@ export const normaliseAssetUri = async (uri: string): Promise<string> => {
     if (!targetDir) {
       // No writable directory — extremely unlikely on a real device, but
       // surface a clear error rather than silently failing the upload.
-      throw new Error("No writable file-system directory available for image copy");
+      throw new Error(
+        "No writable file-system directory available for image copy",
+      );
     }
     const extension = (() => {
       // PH URIs sometimes carry an "?ext=jpg" hint; otherwise default to jpg.
@@ -148,7 +150,8 @@ export enum ImagePickerError {
 }
 
 export const pickImage = async () => {
-  const cameraRollStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const cameraRollStatus =
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (cameraRollStatus.status !== "granted") {
     Alert.alert(
@@ -169,7 +172,7 @@ export const pickImage = async () => {
     throw new Error(ImagePickerError.CANCELED);
   }
 
-  const image = result.assets[0];
+  const [image] = result.assets;
 
   if (!image) {
     throw new Error(ImagePickerError.NO_IMAGE);
@@ -200,7 +203,7 @@ export const takeImage = async () => {
     throw new Error(ImagePickerError.CANCELED);
   }
 
-  const image = result.assets[0];
+  const [image] = result.assets;
 
   if (!image) {
     throw new Error(ImagePickerError.NO_IMAGE);
@@ -214,11 +217,19 @@ export const takeImage = async () => {
  * the catch site in `AddUserPhoto` can attach the failing stage to the error
  * payload sent to PostHog without stringly-typed magic values.
  */
-export type ProfileImageUploadStage = "presign" | "compress" | "upload" | "finalize";
+export type ProfileImageUploadStage =
+  | "presign"
+  | "compress"
+  | "upload"
+  | "finalize";
 
 export class ProfileImageUploadError extends Error {
   readonly stage: ProfileImageUploadStage;
-  constructor(stage: ProfileImageUploadStage, message: string, options?: { cause?: unknown }) {
+  constructor(
+    stage: ProfileImageUploadStage,
+    message: string,
+    options?: { cause?: unknown },
+  ) {
     super(message, options);
     this.name = "ProfileImageUploadError";
     this.stage = stage;
@@ -254,13 +265,19 @@ export const uploadProfileImage = async (
   onProgress?.("presign");
   const upload = await getTrcpContext()
     .image.signedUpload.fetch()
-    .catch((cause) => {
-      throw new ProfileImageUploadError("presign", "Failed to fetch upload descriptor", { cause });
+    .catch((error) => {
+      throw new ProfileImageUploadError(
+        "presign",
+        "Failed to fetch upload descriptor",
+        { cause: error },
+      );
     });
 
   onProgress?.("compress");
-  const compressedImage = await compressImage(localUri).catch((cause) => {
-    throw new ProfileImageUploadError("compress", "compressImage failed", { cause });
+  const compressedImage = await compressImage(localUri).catch((error) => {
+    throw new ProfileImageUploadError("compress", "compressImage failed", {
+      cause: error,
+    });
   });
 
   onProgress?.("upload");
@@ -269,12 +286,17 @@ export const uploadProfileImage = async (
     uploadType: FileSystemUploadType.BINARY_CONTENT,
     httpMethod: upload.method,
     headers: upload.headers,
-  }).catch((cause) => {
-    throw new ProfileImageUploadError("upload", "uploadAsync threw", { cause });
+  }).catch((error) => {
+    throw new ProfileImageUploadError("upload", "uploadAsync threw", {
+      cause: error,
+    });
   });
 
   if (response.status !== 200) {
-    throw new ProfileImageUploadError("upload", `upload PUT returned ${response.status}`);
+    throw new ProfileImageUploadError(
+      "upload",
+      `upload PUT returned ${response.status}`,
+    );
   }
 
   onProgress?.("finalize");
@@ -332,12 +354,16 @@ export const shouldOfferMaestroPlaceholder = (): boolean => {
  * execute it even though the bundler may still ship the PNG.
  */
 export const getMaestroPlaceholderUri = async (): Promise<string> => {
-  const asset = Asset.fromModule(require("@/assets/images/maestro-placeholder.png"));
+  const asset = Asset.fromModule(
+    require("@/assets/images/maestro-placeholder.png"),
+  );
   await asset.downloadAsync();
 
   const localUri = asset.localUri ?? asset.uri;
   if (!localUri) {
-    throw new Error("Maestro placeholder asset has no localUri/uri after downloadAsync");
+    throw new Error(
+      "Maestro placeholder asset has no localUri/uri after downloadAsync",
+    );
   }
 
   // Re-use the same normaliser the real picker pipeline uses so we end up with
@@ -361,7 +387,10 @@ export const showImagePickerOptions = (): Promise<{
             takeImage()
               .then((imageUrl) => resolve(imageUrl))
               .catch((error) => {
-                if (error instanceof Error && error.message !== ImagePickerError.CANCELED) {
+                if (
+                  error instanceof Error &&
+                  error.message !== ImagePickerError.CANCELED
+                ) {
                   sendError(error);
                 }
 
@@ -375,7 +404,10 @@ export const showImagePickerOptions = (): Promise<{
             pickImage()
               .then((imageUrl) => resolve(imageUrl))
               .catch((error) => {
-                if (error instanceof Error && error.message !== ImagePickerError.CANCELED) {
+                if (
+                  error instanceof Error &&
+                  error.message !== ImagePickerError.CANCELED
+                ) {
                   sendError(error);
                 }
 

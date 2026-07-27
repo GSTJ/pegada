@@ -1,12 +1,13 @@
+import type { WidgetSnapshot } from "../../../modules/pegada-widget";
 import type { RouterOutputs } from "@pegada/api";
+
+import i18n from "@/i18n";
+import { sendError } from "@/services/error-tracking";
 
 import {
   isWidgetModuleAvailable,
   setWidgetSnapshot,
-  WidgetSnapshot,
 } from "../../../modules/pegada-widget";
-import i18n from "@/i18n";
-import { sendError } from "@/services/errorTracking";
 import { clearWidgetAvatars, downloadWidgetAvatars } from "./avatars";
 
 type Matches = RouterOutputs["match"]["getAll"];
@@ -44,7 +45,9 @@ export const syncMatchesWidget = async (matches: Matches): Promise<void> => {
 
   try {
     const waiting = matches.filter(isWaitingForReply);
-    const dogsOnWidget = waiting.slice(0, MAX_WIDGET_DOGS).map((match) => match.dog);
+    const dogsOnWidget = waiting
+      .slice(0, MAX_WIDGET_DOGS)
+      .map((match) => match.dog);
 
     const avatarPathByDogId = await downloadWidgetAvatars(
       dogsOnWidget.map((dog) => ({ dogId: dog.id, url: dog.images[0]?.url })),
@@ -60,7 +63,8 @@ export const syncMatchesWidget = async (matches: Matches): Promise<void> => {
       // Only meaningful alongside the "waiting for reply" state: layouts
       // that render the count as its own numeral (MEDIUM) use this instead
       // of `message` so the count isn't shown twice.
-      messageCountless: waiting.length > 0 ? i18n.t("widget.waitingForReplyCountless") : null,
+      messageCountless:
+        waiting.length > 0 ? i18n.t("widget.waitingForReplyCountless") : null,
       dogs: dogsOnWidget.map((dog) => ({
         name: dog.name,
         avatar: avatarPathByDogId.get(dog.id) ?? null,

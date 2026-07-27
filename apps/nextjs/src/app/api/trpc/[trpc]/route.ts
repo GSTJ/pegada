@@ -1,14 +1,16 @@
-import { NextRequest } from "next/server";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-import { ipAddress } from "@vercel/functions";
+import type { Session } from "@pegada/api/trpc";
+
+import type { NextRequest } from "next/server";
 
 import { appRouter, createTRPCContext } from "@pegada/api";
 import { sendError } from "@pegada/api/errors/errors";
 import { config } from "@pegada/api/shared/config";
-import { getSession, Session } from "@pegada/api/trpc";
+import { getSession } from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { ipAddress } from "@vercel/functions";
 
 const setCorsHeaders = (res: Response) => {
   res.headers.set("Access-Control-Allow-Origin", "*");
@@ -84,7 +86,9 @@ const handleRatelimiter = async ({
 };
 
 const handler = async (req: NextRequest) => {
-  const session = getSession(req.headers.get(RequestHeaders.Authorization) ?? "");
+  const session = getSession(
+    req.headers.get(RequestHeaders.Authorization) ?? "",
+  );
 
   const ratelimited = await handleRatelimiter({ req, session });
 
@@ -100,7 +104,7 @@ const handler = async (req: NextRequest) => {
     onError:
       config.NODE_ENV === "development"
         ? ({ error, path }) => {
-            // eslint-disable-next-line no-console
+            // oxlint-disable-next-line no-console -- Server-side request log, development only.
             console.error(`>>> tRPC Error on '${path}'`, error);
           }
         : undefined,

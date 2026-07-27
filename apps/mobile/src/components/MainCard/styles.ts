@@ -1,7 +1,9 @@
+import { LinearGradient } from "expo-linear-gradient";
+
 import Animated from "react-native-reanimated";
 import styled, { css } from "styled-components/native";
 
-import { Image } from "@/components/Image";
+import { Image } from "@/components/image";
 
 export const absoluteFill = css`
   position: absolute;
@@ -37,4 +39,13 @@ export const PreviousImage = styled.Pressable`
 
 export const NextImage = styled.Pressable`
   flex: 1;
+`;
+
+/** Full-bleed gradient that darkens the top of the card. */
+export const Scrim = styled(LinearGradient)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 `;

@@ -1,16 +1,19 @@
-import Animated from "react-native-reanimated";
 import Color from "color";
+import Animated from "react-native-reanimated";
 import styled, { css } from "styled-components/native";
 
-import { Text } from "@/components/Text";
-import { FeedbackStatus } from "../Feedback";
+import { Text } from "@/components/text";
 
-interface MessageProps {
+import { FeedbackStatus } from "../feedback";
+
+type MessageProps = {
   sending: boolean;
   status?: FeedbackStatus;
-}
+};
 
-export const Message = styled(Animated.View).attrs({ accessible: true })<MessageProps>`
+export const Message = styled(Animated.View).attrs({
+  accessible: true,
+})<MessageProps>`
   padding: ${(props) => props.theme.spacing[2.5]}px;
   padding-top: ${(props) => props.theme.spacing[1.5]}px;
   padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
@@ -62,5 +65,5 @@ export const Info = styled.View`
 `;
 
 export const Time = styled(Text).attrs({ fontSize: "xxs" })`
-  color: ${(props) => Color(props.theme.colors.text).alpha(0.5).string()};
+  color: ${(props) => new Color(props.theme.colors.text).alpha(0.5).string()};
 `;

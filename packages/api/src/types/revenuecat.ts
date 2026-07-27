@@ -12,7 +12,12 @@ export type EventType =
   | "TRANSFER"
   | "SUBSCRIBER_ALIAS";
 
-export type PeriodType = "TRIAL" | "INTRO" | "NORMAL" | "PROMOTIONAL" | "PREPAID";
+export type PeriodType =
+  | "TRIAL"
+  | "INTRO"
+  | "NORMAL"
+  | "PROMOTIONAL"
+  | "PREPAID";
 
 export type StoreKind =
   | "AMAZON"
@@ -33,18 +38,18 @@ export type CancellationExpirationReason =
   | "UNKNOWN"
   | "SUBSCRIPTION_PAUSED";
 
-export interface BaseEvent {
+export type BaseEvent = {
   type: EventType;
   id: string;
   app_id: string;
   event_timestamp_ms: number;
   store: StoreKind;
   environment: Environment;
-  subscriber_attributes?: any;
+  subscriber_attributes?: Record<string, unknown>;
   app_user_id?: string;
-}
+};
 
-export interface SubscriptionLifecycleEvent extends BaseEvent {
+export type SubscriptionLifecycleEvent = {
   app_user_id: string;
   original_app_user_id: string;
   aliases: string[];
@@ -61,65 +66,65 @@ export interface SubscriptionLifecycleEvent extends BaseEvent {
   tax_percentage: number | null;
   commission_percentage: number | null;
   takehome_percentage?: number | null;
-  subscriber_attributes: any;
+  subscriber_attributes: Record<string, unknown>;
   transaction_id: string;
   original_transaction_id: string;
   is_family_share: boolean;
   country_code: string;
   offer_code: string | null;
-}
+} & BaseEvent;
 
-export interface EventTest extends BaseEvent {
+export type EventTest = {
   type: "TEST";
-}
+} & BaseEvent;
 
-export interface EventInitialPurchase extends SubscriptionLifecycleEvent {
+export type EventInitialPurchase = {
   type: "INITIAL_PURCHASE";
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventRenewal extends SubscriptionLifecycleEvent {
+export type EventRenewal = {
   type: "RENEWAL";
   is_trial_conversion: boolean;
   grace_period_expiration_at_ms: number;
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventCancellation extends SubscriptionLifecycleEvent {
+export type EventCancellation = {
   type: "CANCELLATION";
   cancel_reason: CancellationExpirationReason;
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventUnancellation extends SubscriptionLifecycleEvent {
+export type EventUnancellation = {
   type: "UNCANCELLATION";
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventNonRenewingPurchase extends SubscriptionLifecycleEvent {
+export type EventNonRenewingPurchase = {
   type: "NON_RENEWING_PURCHASE";
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventSubscriptionPaused extends SubscriptionLifecycleEvent {
+export type EventSubscriptionPaused = {
   type: "SUBSCRIPTION_PAUSED";
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventExpiration extends SubscriptionLifecycleEvent {
+export type EventExpiration = {
   type: "EXPIRATION";
   expiration_reason: CancellationExpirationReason;
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventBillingIssue extends SubscriptionLifecycleEvent {
+export type EventBillingIssue = {
   type: "BILLING_ISSUE";
   grace_period_expiration_at_ms: number;
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventProductChange extends SubscriptionLifecycleEvent {
+export type EventProductChange = {
   type: "PRODUCT_CHANGE";
   new_product_id?: string | null;
-}
+} & SubscriptionLifecycleEvent;
 
-export interface EventTransfer extends BaseEvent {
+export type EventTransfer = {
   type: "TRANSFER";
   transferred_from: string[];
   transferred_to: string[];
-}
+} & BaseEvent;
 
 export type Event =
   | EventTest
@@ -134,10 +139,10 @@ export type Event =
   | EventProductChange
   | EventTransfer;
 
-export interface WebhookPayload {
+export type WebhookPayload = {
   api_version: string;
   event: Event;
-}
+};
 
 export type ObjectType =
   | "list"
@@ -147,37 +152,42 @@ export type ObjectType =
   | "product"
   | "package"
   | "offering";
-export type AppType = "amazon" | "app_store" | "mac_app_store" | "play_store" | "stripe";
+export type AppType =
+  | "amazon"
+  | "app_store"
+  | "mac_app_store"
+  | "play_store"
+  | "stripe";
 export type ProductType = "subscription" | "one_time";
 
-export interface BaseObject {
+export type BaseObject = {
   object: ObjectType;
-}
+};
 
-export interface ObjectList<T> extends BaseObject {
+export type ObjectList<T> = {
   object: "list";
   items: T[];
   next_page?: string | null;
   url: string;
-}
+} & BaseObject;
 
-export interface Project extends BaseObject {
+export type Project = {
   object: "project";
   id: string;
   name: string;
   created_at: number;
-}
+} & BaseObject;
 
-export interface App extends BaseObject {
+export type App = {
   object: "app";
   id: string;
   name: string;
   created_at: number;
   project_id: string;
   type: AppType;
-}
+} & BaseObject;
 
-export interface Product extends BaseObject {
+export type Product = {
   object: "product";
   id: string;
   store_identifier: string;
@@ -186,22 +196,22 @@ export interface Product extends BaseObject {
   app_id: string;
   app?: App;
   display_name: string;
-}
+} & BaseObject;
 
-export interface OneTimeProduct extends Product {
+export type OneTimeProduct = {
   type: "one_time";
-}
+} & Product;
 
-export interface SubscriptionProduct extends Product {
+export type SubscriptionProduct = {
   type: "subscription";
   subscription: {
     duration: string | null;
     grace_period_duration: string | null;
     trial_duration: string | null;
   };
-}
+} & Product;
 
-export interface Entitlement extends BaseObject {
+export type Entitlement = {
   object: "entitlement";
   project_id: string;
   id: string;
@@ -209,14 +219,14 @@ export interface Entitlement extends BaseObject {
   display_name: string;
   created_at: number;
   products: ObjectList<Product>;
-}
+} & BaseObject;
 
-export interface PackageProduct {
+export type PackageProduct = {
   eligibility_criteria: string;
   product: OneTimeProduct | SubscriptionProduct;
-}
+};
 
-export interface Package extends BaseObject {
+export type Package = {
   object: "package";
   id: string;
   lookup_key: string;
@@ -224,9 +234,9 @@ export interface Package extends BaseObject {
   position: number | null;
   created_at: number;
   products: ObjectList<PackageProduct>;
-}
+} & BaseObject;
 
-export interface Offering extends BaseObject {
+export type Offering = {
   object: "offering";
   id: string;
   lookup_key: string;
@@ -235,5 +245,5 @@ export interface Offering extends BaseObject {
   project_id: string;
   is_current: boolean;
   packages: ObjectList<Package>;
-  metadata?: Record<string, any> | null;
-}
+  metadata?: Record<string, unknown> | null;
+} & BaseObject;

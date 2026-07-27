@@ -1,24 +1,33 @@
+import type {
+  Picture,
+  ProfileImageUploadStage,
+} from "@/components/ProfileImageUploader/utils";
+
 import { useState } from "react";
 import * as React from "react";
 import { ActivityIndicator } from "react-native";
-import { magicToast } from "react-native-magic-toast";
-import Animated, { FadeOut, useAnimatedStyle, withSpring } from "react-native-reanimated";
+
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
+import Animated, {
+  FadeOut,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
 import { useTheme } from "styled-components/native";
 
 import AddRemove from "@/assets/images/AddRemove.svg";
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 import {
   getMaestroPlaceholderUri,
   ImagePickerError,
-  Picture,
-  ProfileImageUploadStage,
   shouldOfferMaestroPlaceholder,
   showImagePickerOptions,
   uploadProfileImage,
 } from "@/components/ProfileImageUploader/utils";
-import { Text } from "@/components/Text";
-import { sendError } from "@/services/errorTracking";
+import { Text } from "@/components/text";
+import { sendError } from "@/services/error-tracking";
+
 import * as S from "./styles";
 
 type AddUserPhotoProps = {
@@ -33,6 +42,9 @@ type AddUserPhotoProps = {
   index?: number;
 };
 
+const photoActionTestID = (index: number, hasPicture: boolean) =>
+  hasPicture ? `remove-photo-${index}` : `add-photo-button-${index}`;
+
 const hitSlop = {
   top: 150,
   bottom: 150,
@@ -40,7 +52,12 @@ const hitSlop = {
   right: 100,
 };
 
-export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, onAdd, index }) => {
+export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
+  picture,
+  onDelete,
+  onAdd,
+  index,
+}) => {
   const [localPicture, setLocalPicture] = useState(picture.url);
   const { t } = useTranslation();
 
@@ -79,7 +96,9 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
     sendError(trackedError);
 
     if (__DEV__) {
-      magicToast.alert(t("imagePicker.uploadFailedDev", { reason: `[${stage}] ${reason}` }));
+      magicToast.alert(
+        t("imagePicker.uploadFailedDev", { reason: `[${stage}] ${reason}` }),
+      );
     } else {
       magicToast.alert(t("imagePicker.uploadFailed"));
     }
@@ -99,20 +118,26 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
       });
 
       onAdd({ url: finalUrl });
-    } catch (err) {
+    } catch (error) {
       // When the user cancels the image picker, we don't want to show an error
-      if (err instanceof Error && err.message === ImagePickerError.CANCELED) {
+      if (
+        error instanceof Error &&
+        error.message === ImagePickerError.CANCELED
+      ) {
         return;
       }
 
       // Permissions denied — pickImage/takeImage already showed a native alert
       // explaining what to do. Don't double-toast.
-      if (err instanceof Error && err.message === ImagePickerError.NO_PERMISSION) {
+      if (
+        error instanceof Error &&
+        error.message === ImagePickerError.NO_PERMISSION
+      ) {
         handleDelete();
         return;
       }
 
-      reportUploadFailure(err, stage, "ProfileImageUploader.handleAdd");
+      reportUploadFailure(error, stage, "ProfileImageUploader.handleAdd");
       handleDelete();
     }
   };
@@ -147,8 +172,12 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
       });
 
       onAdd({ url: finalUrl });
-    } catch (err) {
-      reportUploadFailure(err, stage, "ProfileImageUploader.handleMaestroPlaceholderUpload");
+    } catch (error) {
+      reportUploadFailure(
+        error,
+        stage,
+        "ProfileImageUploader.handleMaestroPlaceholderUpload",
+      );
       handleDelete();
     }
   };
@@ -158,7 +187,8 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
   // `shouldOfferMaestroPlaceholder()` short-circuits on
   // `config.ENV === "production"` so App Store builds always evaluate to
   // `false` here regardless of EXPO_PUBLIC_MAESTRO_E2E misconfiguration.
-  const showMaestroSkip = !hasPicture && !isLoading && shouldOfferMaestroPlaceholder();
+  const showMaestroSkip =
+    !hasPicture && !isLoading && shouldOfferMaestroPlaceholder();
 
   return (
     <S.UserPictureContainer>
@@ -176,7 +206,9 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
         ) : null}
         {!hasPicture && (
           <PressableArea
-            testID={typeof index === "number" ? `add-photo-${index}` : undefined}
+            testID={
+              typeof index === "number" ? `add-photo-${index}` : undefined
+            }
             onPress={handleAdd}
             // Takes up the whole component. When the Maestro skip pill is
             // shown, retract the bottom slop so it can't swallow taps meant
@@ -208,7 +240,9 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
         {showMaestroSkip ? (
           <S.MaestroSkipPressable
             testID={
-              typeof index === "number" ? `maestro-skip-photo-${index}` : "maestro-skip-photo"
+              typeof index === "number"
+                ? `maestro-skip-photo-${index}`
+                : "maestro-skip-photo"
             }
             onPress={handleMaestroPlaceholderUpload}
           >
@@ -221,9 +255,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({ picture, onDelete, o
       <S.AddRemoveContainer
         testID={
           typeof index === "number"
-            ? hasPicture
-              ? `remove-photo-${index}`
-              : `add-photo-button-${index}`
+            ? photoActionTestID(index, hasPicture)
             : undefined
         }
         disabled={isLoading}

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { DogService } from "../services/DogService";
-import { dogInputSchema } from "../shared/dogInputSchema";
+import { DogService } from "../services/dog-service";
+import { dogInputSchema } from "../shared/dog-input-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const getDogSchema = z.object({
@@ -14,12 +14,14 @@ export const dogRouter = createTRPCRouter({
     return dog;
   }),
 
-  create: protectedProcedure.input(dogInputSchema).mutation(async ({ ctx, input }) => {
-    const dog = await DogService.createDog({
-      ...input,
-      userId: ctx.session.user.id,
-    });
+  create: protectedProcedure
+    .input(dogInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const dog = await DogService.createDog({
+        ...input,
+        userId: ctx.session.user.id,
+      });
 
-    return dog;
-  }),
+      return dog;
+    }),
 });

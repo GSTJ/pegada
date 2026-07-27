@@ -1,7 +1,7 @@
 import { PlanType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import PaymentService from "../services/PaymentService";
+import PaymentService from "../services/payment-service";
 import { config } from "../shared/config";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 

@@ -2,7 +2,7 @@ import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
 import * as LikeFeedbackStyles from "@/components/FeedbackCard/components/LikeFeedback/styles";
-import { Text } from "@/components/Text";
+import { Text } from "@/components/text";
 
 export const Container = styled(LikeFeedbackStyles.Container)`
   background-color: transparent;
@@ -28,10 +28,12 @@ export const LogoLoading = styled(LottieView).attrs({
 
 export const Title = styled(Text)`
   margin-bottom: ${(props) => props.theme.spacing[1]}px;
+  padding-bottom: 2px;
   text-align: center;
 `;
 
 export const Description = styled(Text)`
+  padding-bottom: 4px;
   text-align: center;
   margin-bottom: ${(props) => props.theme.spacing[4]}px;
   max-width: 274px;

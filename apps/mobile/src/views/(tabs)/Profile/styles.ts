@@ -1,16 +1,20 @@
-import Animated from "react-native-reanimated";
+import { StyleSheet } from "react-native";
+
 import Color from "color";
+import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
-import { PressableArea } from "@/components/PressableArea";
+import { PressableArea } from "@/components/pressable-area";
 
 export const PlanContainer = styled(PressableArea)`
   position: absolute;
   top: ${(props) => props.theme.spacing[4]}px;
   right: ${(props) => props.theme.spacing[4]}px;
-  padding: ${(props) => props.theme.spacing[2]}px ${(props) => props.theme.spacing[3]}px;
+  padding: ${(props) => props.theme.spacing[2]}px
+    ${(props) => props.theme.spacing[3]}px;
   border-radius: ${(props) => props.theme.radii.sm}px;
-  background-color: ${({ theme }) => Color(theme.colors.background).alpha(0.6).string()};
+  background-color: ${({ theme }) =>
+    new Color(theme.colors.background).alpha(0.6).string()};
   z-index: 10;
 `;
 
@@ -58,3 +62,18 @@ export const Content = styled.View`
   border-bottom-width: ${(props) => props.theme.stroke.sm}px;
   background-color: ${({ theme }) => theme.colors.background};
 `;
+
+/**
+ * The opaque block the settings rows sit on. It owns the background below the
+ * photo header, so it has to grow to the bottom of the viewport.
+ */
+export const SettingsBlock = styled.View`
+  background-color: ${({ theme }) => theme.colors.background};
+  padding-top: ${({ theme }) => theme.spacing[1]}px;
+  flex-grow: 1;
+`;
+
+/** `contentContainerStyle` takes a style object, not a component. */
+export const { settingsScroll } = StyleSheet.create({
+  settingsScroll: { flexGrow: 1, zIndex: 10 },
+});

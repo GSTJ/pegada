@@ -7,7 +7,7 @@
 #   language = pt-BR    (StorageKeys.Language; read by i18n detector
 #                        in apps/mobile/src/i18n.ts)
 #   theme    = dark     (StorageKeys.Theme; read by ThemeProvider in
-#                        apps/mobile/src/contexts/ThemeProvider.tsx)
+#                        apps/mobile/src/contexts/theme-provider.tsx)
 #
 # This proves end-to-end persistence: the seed values survive the cold
 # launch and the app's storage layer reads + applies them on mount. A

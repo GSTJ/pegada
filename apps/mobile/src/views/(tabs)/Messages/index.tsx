@@ -1,22 +1,27 @@
+import type { RouterOutputs } from "@/contexts/trpc-provider";
+
 import { useEffect, useRef, useState } from "react";
 import { FlatList, Platform, View } from "react-native";
+
 import { usePathname } from "expo-router";
+
 import { useScrollToTop } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import Divider from "@/components/Divider";
+import Divider from "@/components/divider";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api, RouterOutputs } from "@/contexts/TRPCProvider";
-import { handleRequestAppReview } from "@/services/appReview";
-import { sendError } from "@/services/errorTracking";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { handleRequestAppReview } from "@/services/app-review";
+import { sendError } from "@/services/error-tracking";
 import { syncMatchesWidget } from "@/services/matchesWidget";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { Header } from "@/views/(tabs)/Messages/components/Header";
 import { Message } from "@/views/(tabs)/Messages/components/Message";
-import { EmptyMessages } from "./components/EmptyMessages";
+
+import { EmptyMessages } from "./components/empty-messages";
 import { SearchBar } from "./components/SearchBar";
 import { Container, DividerContainer, Title } from "./styles";
 
@@ -28,7 +33,7 @@ const MemoizedDivider = () => (
   </DividerContainer>
 );
 
-const getKeyMemoized = (item: Match) => item.id + "_message";
+const getKeyMemoized = (item: Match) => `${item.id}_message`;
 
 const Messages = () => {
   const pathname = usePathname();
@@ -47,10 +52,9 @@ const Messages = () => {
       handleRequestAppReview().catch(sendError);
     }
 
-    matches.forEach((match) => {
-      const dog = match.dog;
+    for (const { dog } of matches) {
       getTrcpContext().dog.get.setData({ id: dog.id }, dog);
-    });
+    }
 
     // Refresh the home-screen widget whenever the matches query updates.
     void syncMatchesWidget(matches);
@@ -63,14 +67,14 @@ const Messages = () => {
       if (!search) return matches;
 
       return matches.filter((match) => {
-        const dog = match.dog;
+        const { dog } = match;
         return dog.name.toLowerCase().includes(search.toLowerCase());
       });
     };
 
     const filteredMatches = getFiltered();
 
-    if (!filteredMatches.length) return [];
+    if (filteredMatches.length === 0) return [];
 
     // Most recent messages come first. Sort a copy: with no search term
     // getFiltered hands back the query's own array, and sorting in place
@@ -120,11 +124,22 @@ const Messages = () => {
     </>
   );
 
-  const MemoizedEmptyMessages = <EmptyMessages search={search} setSearch={setSearch} />;
+  const MemoizedEmptyMessages = (
+    <EmptyMessages search={search} setSearch={setSearch} />
+  );
+
+  // Grow the container only when the list is empty, so the empty state fills
+  // the screen. Doing it unconditionally breaks the populated list's layout.
+  const emptyListGrow = data?.length ? undefined : 1;
 
   return (
-    <Container testID="messages-screen" behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      {Boolean(matches?.length) && <SearchBar value={search} onChangeText={setSearch} />}
+    <Container
+      testID="messages-screen"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      {Boolean(matches?.length) && (
+        <SearchBar value={search} onChangeText={setSearch} />
+      )}
       <FlatList
         keyboardShouldPersistTaps="handled"
         data={data}
@@ -143,19 +158,19 @@ const Messages = () => {
         contentContainerStyle={{
           paddingBottom: theme.spacing[4],
           paddingTop: theme.spacing[1],
-          // Increase size only if data is empty
-          // Otherwise it bugs stuff
-          flexGrow: data?.length ? undefined : 1,
+          flexGrow: emptyListGrow,
         }}
       />
     </Container>
   );
 };
 
-export default () => {
+const MessagesScreen = () => {
   return (
     <NetworkBoundary>
       <Messages />
     </NetworkBoundary>
   );
 };
+
+export default MessagesScreen;

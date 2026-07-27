@@ -1,16 +1,22 @@
+import type { PurchasesPackage } from "react-native-purchases";
+
 import { useEffect } from "react";
 import * as React from "react";
-import { magicToast } from "react-native-magic-toast";
-import { PurchasesPackage } from "react-native-purchases";
+
 import * as Device from "expo-device";
 import { useRouter } from "expo-router";
+
 import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
 
-import { useOfferings } from "@/hooks/usePayments";
+import { useOfferings } from "@/hooks/use-payments";
 import { Container } from "@/views/UpgradeWall/components/PlanPackages/styles";
-import { PlanCard } from "./PlanCard";
 
-const periodToDays = (period: string) => {
+import { PlanCard } from "./plan-card";
+
+const periodToDays = (period: string | null | undefined) => {
+  if (!period) return 0;
+
   const match = period.match(/P(\d+)(D|W|M|Y)/);
   if (!match) return 0;
 
@@ -18,7 +24,7 @@ const periodToDays = (period: string) => {
 
   if (!num || !unit) throw new Error("Invalid period format");
 
-  const numVal = parseInt(num, 10);
+  const numVal = Math.trunc(Number(num));
 
   switch (unit) {
     case "D":
@@ -34,12 +40,15 @@ const periodToDays = (period: string) => {
   }
 };
 
-interface OfferingsProps {
+type OfferingsProps = {
   selectedPackage: PurchasesPackage | null | undefined;
   setSelectedPackage: (pkg: PurchasesPackage) => void;
-}
+};
 
-const PlanPackages: React.FC<OfferingsProps> = ({ selectedPackage, setSelectedPackage }) => {
+const PlanPackages: React.FC<OfferingsProps> = ({
+  selectedPackage,
+  setSelectedPackage,
+}) => {
   const router = useRouter();
   const { data: offeringsData, isError } = useOfferings();
   const { t } = useTranslation();
@@ -65,19 +74,25 @@ const PlanPackages: React.FC<OfferingsProps> = ({ selectedPackage, setSelectedPa
 
   const packageWithLessRelativeValue = offeringsData
     ? Object.values(offeringsData.availablePackages).sort((a, b) => {
-        const relativeValueA = a.product.price / periodToDays(a.product.subscriptionPeriod!);
-        const relativeValueB = b.product.price / periodToDays(b.product.subscriptionPeriod!);
+        const relativeValueA =
+          a.product.price / periodToDays(a.product.subscriptionPeriod);
+        const relativeValueB =
+          b.product.price / periodToDays(b.product.subscriptionPeriod);
 
         return relativeValueB - relativeValueA;
       })[0]
     : undefined;
 
+  // `packageList` is rebuilt on every render, so depending on it would run
+  // this effect every render. The first package is the only part that matters.
+  const [defaultPackage] = packageList;
+
   useEffect(() => {
-    if (packageList[0] && !selectedPackage) {
+    if (defaultPackage && !selectedPackage) {
       // Optionally set a default package, or leave it to user interaction
-      setSelectedPackage(packageList[0]);
+      setSelectedPackage(defaultPackage);
     }
-  }, [packageList, selectedPackage, setSelectedPackage]);
+  }, [defaultPackage, selectedPackage, setSelectedPackage]);
 
   return (
     <Container>
@@ -85,8 +100,10 @@ const PlanPackages: React.FC<OfferingsProps> = ({ selectedPackage, setSelectedPa
         // Get old price comparing with the package with less relative value / period * this package period
         const oldPrice = packageWithLessRelativeValue
           ? (packageWithLessRelativeValue.product.price /
-              periodToDays(packageWithLessRelativeValue.product.subscriptionPeriod!)) *
-            periodToDays(planPackage.product.subscriptionPeriod!)
+              periodToDays(
+                packageWithLessRelativeValue.product.subscriptionPeriod,
+              )) *
+            periodToDays(planPackage.product.subscriptionPeriod)
           : undefined;
 
         return (

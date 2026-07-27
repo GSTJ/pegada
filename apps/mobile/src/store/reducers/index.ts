@@ -1,22 +1,26 @@
+import type { initialState as swipeInitialState } from "./dogs/swipe";
+
 import { combineReducers } from "redux";
 
-import * as dogs from "./dogs";
-import * as swipe from "./dogs/swipe";
+import dogsReducer, {
+  Actions as dogsActions,
+  Types as dogsTypes,
+} from "./dogs";
 
 export const Types = {
-  ...dogs.Types,
+  ...dogsTypes,
 };
 
 export const Actions = {
-  dogs: dogs.Actions,
+  dogs: dogsActions,
 };
 
 const rootReducer = combineReducers({
-  dogs: dogs.default,
+  dogs: dogsReducer,
 });
 
-export interface RootReducer {
-  dogs: typeof swipe.initialState;
-}
+export type RootReducer = {
+  dogs: typeof swipeInitialState;
+};
 
 export default rootReducer;

@@ -1,39 +1,45 @@
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+
 import { useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, Alert, Linking, Share, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+
 import { Header, HeaderBackButton } from "@react-navigation/elements";
 import i18n from "i18next";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "styled-components/native";
 
 import MainCard from "@/components/MainCard";
 import { MatchActionBar } from "@/components/MatchActionBar";
-import { NetworkBoundary, UnknownErrorComponent } from "@/components/NetworkBoundary";
-import { Text } from "@/components/Text";
+import {
+  NetworkBoundary,
+  UnknownErrorComponent,
+} from "@/components/NetworkBoundary";
 import { APP_SHARE_LINK_BASE } from "@/constants";
-import { getTrcpContext } from "@/contexts/trcpContext";
-import { api } from "@/contexts/TRPCProvider";
-import { sendError } from "@/services/errorTracking";
-import { useGetFormattedYears } from "@/services/useGetFormattedYears";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { sendError } from "@/services/error-tracking";
+import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 import { Actions } from "@/store/reducers";
-import { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { getCurrentCardId } from "@/store/selectors";
-import { SceneName } from "@/types/SceneName";
+import { SceneName } from "@/types/scene-name";
 import { useCustomTopInset } from "@/views/(tabs)/Swipe";
 import { swipeHandlerRef } from "@/views/(tabs)/Swipe/components/SwipeHandler";
-import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
-import { BreedTag } from "@/views/DogProfile/components/BreedTag";
+import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
+import { BreedTag } from "@/views/DogProfile/components/breed-tag";
 import GoBack from "@/views/DogProfile/components/GoBack";
+
 import * as S from "./styles";
 
 export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
   const { t } = useTranslation();
 
-  const firstName = dog.name.split(" ")[0];
+  const [firstName] = dog.name.split(" ");
 
   const handleShare = async () => {
     try {
@@ -54,9 +60,9 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
 
   return (
     <S.ShareButton>
-      <Text onPress={handleShare} fontWeight="bold" color="primary" style={{ textAlign: "center" }}>
+      <S.ActionLabel onPress={handleShare} fontWeight="bold" color="primary">
         {t("dogProfile.shareProfile", { name: firstName })}
-      </Text>
+      </S.ActionLabel>
     </S.ShareButton>
   );
 };
@@ -93,9 +99,9 @@ export const reportUser = (dog: SwipeDog) => {
           });
 
           router.back();
-        } catch (err) {
+        } catch (error) {
           // Silently fail
-          sendError(err);
+          sendError(error);
         }
       },
     },
@@ -113,7 +119,7 @@ const useSwipeHandler = (id: string) => {
       return swipeHandlerRef.current.gotoDirection(swipeType);
     }
 
-    dispatch(Actions.dogs.swipe.request({ id: id, swipeType }));
+    dispatch(Actions.dogs.swipe.request({ id, swipeType }));
   };
 };
 
@@ -154,18 +160,24 @@ const DogProfile = () => {
       });
 
       router.push(SceneName.Messages);
-    } catch (err) {
-      sendError(err);
+    } catch (error) {
+      sendError(error);
 
-      Alert.alert(t("dogProfile.somethingWrong"), t("dogProfile.tryAgainLater"));
+      Alert.alert(
+        t("dogProfile.somethingWrong"),
+        t("dogProfile.tryAgainLater"),
+      );
     } finally {
       setUnmatchLoading(false);
     }
   };
 
-  const [dog] = api.dog.get.useSuspenseQuery({ id: id as string }, { refetchOnMount: false });
+  const [dog] = api.dog.get.useSuspenseQuery(
+    { id: id as string },
+    { refetchOnMount: false },
+  );
 
-  const firstName = dog.name.split(" ")[0];
+  const [firstName] = dog.name.split(" ");
 
   const mainCardStyle = {
     paddingTop: Math.max(insets.top, theme.spacing[6]),
@@ -200,7 +212,9 @@ const DogProfile = () => {
             <BreedTag breed={dog.breed} />
             <S.Name testID="dog-profile-name" numberOfLines={1}>
               {dog.name}
-              {dog.birthDate ? <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age> : undefined}
+              {dog.birthDate ? (
+                <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age>
+              ) : undefined}
             </S.Name>
             <View style={{ gap: theme.spacing[7] }}>
               <S.Description>{dog.bio}</S.Description>
@@ -214,36 +228,34 @@ const DogProfile = () => {
                   {unmatchLoading ? (
                     <ActivityIndicator color={theme.colors.primary} />
                   ) : (
-                    <Text fontWeight="bold" color="primary" style={{ textAlign: "center" }}>
+                    <S.ActionLabel fontWeight="bold" color="primary">
                       {t("dogProfile.unmatch")}
-                    </Text>
+                    </S.ActionLabel>
                   )}
                 </S.UnmatchButton>
               )}
               <ShareButton dog={dog} />
               <S.ReportButton testID="dog-profile-report">
-                <Text
+                <S.ActionLabel
                   onPress={() => reportUser(dog)}
                   fontWeight="bold"
-                  style={{ textAlign: "center" }}
                 >
                   {t("dogProfile.reportName", { name: firstName })}
-                </Text>
+                </S.ActionLabel>
               </S.ReportButton>
               {__DEV__ && matchId ? (
                 <S.ReportButton>
-                  <Text
+                  <S.ActionLabel
                     onPress={() => {
                       router.push({
                         pathname: SceneName.NewMatch,
-                        params: { matchDogId: dog.id, matchId: matchId },
+                        params: { matchDogId: dog.id, matchId },
                       });
                     }}
                     fontWeight="bold"
-                    style={{ textAlign: "center" }}
                   >
                     Fake Match Screen
-                  </Text>
+                  </S.ActionLabel>
                 </S.ReportButton>
               ) : null}
             </View>
@@ -253,7 +265,9 @@ const DogProfile = () => {
 
       {!matchId && (
         <>
-          <S.MatchActionBarGradient style={{ height: matchActionBarHeight + theme.spacing[8] }} />
+          <S.MatchActionBarGradient
+            style={{ height: matchActionBarHeight + theme.spacing[8] }}
+          />
           <MatchActionBar
             style={{ bottom: topInset }}
             onNope={() => swipeHandler(Swipe.Dislike)}
@@ -266,41 +280,51 @@ const DogProfile = () => {
   );
 };
 
+const ErrorHeaderBackButton = () => {
+  const theme = useTheme();
+
+  return (
+    <HeaderBackButton
+      displayMode="minimal"
+      tintColor={theme.colors.primary}
+      onPress={() => router.back()}
+    />
+  );
+};
+
 const DogProfileErrorState = () => {
   const { t } = useTranslation();
   const theme = useTheme();
 
   return (
-    <View style={{ flexGrow: 1, backgroundColor: theme.colors.background }}>
+    <S.ErrorScreen>
       <Header
         title={t("dogProfile.dogProfile")}
-        headerLeft={() => (
-          <HeaderBackButton
-            displayMode="minimal"
-            tintColor={theme.colors.primary}
-            onPress={() => router.back()}
-          />
-        )}
-        headerRightContainerStyle={{ paddingRight: 16 }}
-        headerLeftContainerStyle={{ paddingLeft: 16 }}
+        headerLeft={ErrorHeaderBackButton}
+        headerRightContainerStyle={S.headerRight}
+        headerLeftContainerStyle={S.headerLeft}
         headerTintColor={theme.colors.text}
-        headerTitleStyle={{
-          fontFamily: theme.typography.fontFamily.bold,
-          fontWeight: "bold",
-          fontSize: theme.typography.sizes.lg.size,
-        }}
+        headerTitleStyle={[
+          S.headerTitle,
+          {
+            fontFamily: theme.typography.fontFamily.bold,
+            fontSize: theme.typography.sizes.lg.size,
+          },
+        ]}
         headerStyle={{
           backgroundColor: theme.colors.background,
         }}
       />
 
       <UnknownErrorComponent />
-    </View>
+    </S.ErrorScreen>
   );
 };
 
-export default () => (
+const DogProfileScreen = () => (
   <NetworkBoundary errorFallback={DogProfileErrorState}>
     <DogProfile />
   </NetworkBoundary>
 );
+
+export default DogProfileScreen;
