@@ -8,9 +8,10 @@ import Loading from "@/components/loading";
 
 import { ButtonText, Container } from "./styles";
 
-export interface ButtonProps extends ContainerProps, PressableProps {
+export type ButtonProps = {
   children: string;
-}
+} & ContainerProps &
+  PressableProps;
 
 export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
   const disabled = props.loading || props.disabled;

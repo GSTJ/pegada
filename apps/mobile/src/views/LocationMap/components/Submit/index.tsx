@@ -13,11 +13,11 @@ import { BottomAction } from "@/components/BottomAction";
 
 import { StyledButton } from "./styles";
 
-interface SubmitProps {
+type SubmitProps = {
   loading?: boolean;
   onPress: () => void;
   dragging: SharedValue<number>;
-}
+};
 
 export const Submit: React.FC<SubmitProps> = ({
   loading,

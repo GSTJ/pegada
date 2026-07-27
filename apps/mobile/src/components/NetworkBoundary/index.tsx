@@ -99,11 +99,11 @@ export const useIsOffline = () => {
   return !isInternetReachable;
 };
 
-interface QueryErrorResetBoundaryValue {
+type QueryErrorResetBoundaryValue = {
   clearReset: () => void;
   isReset: () => boolean;
   reset: () => void;
-}
+};
 
 export type IErrorBoundary = (
   props: QueryErrorResetBoundaryValue,
@@ -129,11 +129,11 @@ export const DefaultLoadingComponent = () => {
   );
 };
 
-interface NetworkBoundaryProps {
+type NetworkBoundaryProps = {
   children: React.ReactNode;
   suspenseFallback?: React.ReactNode;
   errorFallback?: IErrorBoundary;
-}
+};
 
 const QueryAwareErrorBoundary = ({
   children,

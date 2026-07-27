@@ -19,12 +19,12 @@ import {
 
 type GenericPictures = (Picture | DeletedPicture)[];
 
-export interface ProfileImagesUploaderProps {
+export type ProfileImagesUploaderProps = {
   onChange: (value: (current: Picture[]) => GenericPictures) => void;
   value: Picture[];
   error?: string;
   setGesturesEnabled: (value: boolean) => void;
-}
+};
 
 const AddUserPhotoWrapper = ({
   picture,

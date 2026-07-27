@@ -40,10 +40,10 @@ const periodToDays = (period: string | null | undefined) => {
   }
 };
 
-interface OfferingsProps {
+type OfferingsProps = {
   selectedPackage: PurchasesPackage | null | undefined;
   setSelectedPackage: (pkg: PurchasesPackage) => void;
-}
+};
 
 const PlanPackages: React.FC<OfferingsProps> = ({
   selectedPackage,

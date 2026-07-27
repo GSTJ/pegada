@@ -5,10 +5,10 @@ import styled, { css } from "styled-components/native";
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 
-export interface OptionButtonProps extends PressableProps {
+export type OptionButtonProps = {
   marked?: boolean;
   last?: boolean;
-}
+} & PressableProps;
 
 export const Content = styled.View`
   justify-content: space-between;

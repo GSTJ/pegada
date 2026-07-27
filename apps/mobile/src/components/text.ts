@@ -2,11 +2,11 @@ import type { DefaultTheme as DefaultThemeProps } from "styled-components/native
 
 import styled, { css } from "styled-components/native";
 
-export interface TextProps {
+export type TextProps = {
   fontSize?: keyof DefaultThemeProps["typography"]["sizes"];
   color?: keyof DefaultThemeProps["colors"];
   fontWeight?: keyof DefaultThemeProps["typography"]["fontFamily"];
-}
+};
 
 export const Text = styled.Text<TextProps>`
   color: ${(props) => {

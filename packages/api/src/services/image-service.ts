@@ -27,12 +27,12 @@ const PERMANENT_STORAGE_FOLDER = "dogs";
  * config decision: swapping R2 for GCS, Azure, or anything else just
  * returns a different descriptor, shipped clients never change.
  */
-export interface SignedUpload {
+export type SignedUpload = {
   method: "PUT";
   url: string;
   headers: Record<string, string>;
   publicUrl: string;
-}
+};
 
 export class ImageService {
   /**

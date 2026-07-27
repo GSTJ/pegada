@@ -18,9 +18,9 @@ export const Container = styled(TransparentGlassOrDarkBlurView)`
   overflow: hidden;
 `;
 
-interface IDot {
+type IDot = {
   active: boolean;
-}
+};
 
 export const Dot = styled(Animated.View)<IDot>`
   background-color: #fff;

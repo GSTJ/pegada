@@ -6,10 +6,10 @@ import { Text } from "@/components/text";
 
 import { FeedbackStatus } from "../feedback";
 
-interface MessageProps {
+type MessageProps = {
   sending: boolean;
   status?: FeedbackStatus;
-}
+};
 
 export const Message = styled(Animated.View).attrs({
   accessible: true,

@@ -19,10 +19,10 @@ import {
   WIDTH,
 } from "./styles";
 
-interface TitleProps {
+type TitleProps = {
   title: string;
   subtitle: string;
-}
+};
 
 const Title: React.FC<TitleProps> = ({ title, subtitle }) => (
   <TitleContainer>
@@ -35,10 +35,10 @@ const Title: React.FC<TitleProps> = ({ title, subtitle }) => (
   </TitleContainer>
 );
 
-interface CustomLabelProps {
+type CustomLabelProps = {
   left: number;
   children: string | number;
-}
+};
 
 const CustomLabel: React.FC<CustomLabelProps> = ({ left, children }) => {
   // Makes the label text more optically center aligned

@@ -7,16 +7,16 @@ import { Text } from "@/components/text";
 
 import { Content, RadioButtonContainer, TextButton } from "./styles";
 
-interface RadioButtonsProps {
+type RadioButtonsProps = {
   title: string;
   data: string[];
   value: string;
   onChange: React.Dispatch<React.SetStateAction<string>>;
-}
+};
 
-interface RadioButtonProps extends OptionButtonProps {
+type RadioButtonProps = {
   children: string;
-}
+} & OptionButtonProps;
 
 const RadioButton: React.FC<RadioButtonProps> = (props) => {
   return (

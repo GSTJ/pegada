@@ -27,9 +27,9 @@ import {
   RotatedImageRight,
 } from "./styles";
 
-interface AnimatedCardsProps {
+type AnimatedCardsProps = {
   matchDog?: RouterOutputs["dog"]["get"];
-}
+};
 
 const ROTATE_Z = 18;
 

@@ -14,9 +14,9 @@ export const BenefitContainer = styled.View`
   }};
 `;
 
-interface BenefitIconContainerProps {
+type BenefitIconContainerProps = {
   color: string;
-}
+};
 
 export const BenefitIconContainer = styled.View<BenefitIconContainerProps>`
   height: ${({ theme }) => theme.spacing[10]}px;

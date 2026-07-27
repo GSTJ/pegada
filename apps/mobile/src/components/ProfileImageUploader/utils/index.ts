@@ -20,7 +20,7 @@ import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
 import { getMimeType } from "@/services/get-mime-type";
 
-export interface Picture {
+export type Picture = {
   id: string;
   key: string;
   disabledDrag: boolean;
@@ -29,7 +29,7 @@ export interface Picture {
   position: number;
   status?: keyof typeof IMAGE_STATUS;
   blurhash?: string;
-}
+};
 
 export type DeletedPicture = Omit<Picture, "position">;
 

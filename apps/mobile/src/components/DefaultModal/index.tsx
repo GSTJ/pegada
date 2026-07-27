@@ -5,10 +5,10 @@ import { useMagicModal } from "react-native-magic-modal";
 
 import { Container, Description, OkButton, Title } from "./styles";
 
-interface DefaultModalProps {
+type DefaultModalProps = {
   title: string;
   description: string;
-}
+};
 
 export const DefaultModal: React.FC<DefaultModalProps> = ({
   title,

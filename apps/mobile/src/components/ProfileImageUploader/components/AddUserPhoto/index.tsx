@@ -30,7 +30,7 @@ import { sendError } from "@/services/error-tracking";
 
 import * as S from "./styles";
 
-interface AddUserPhotoProps {
+type AddUserPhotoProps = {
   picture: Picture;
   onDelete: () => void;
   onAdd: ({ url }: { url: string }) => void;
@@ -40,7 +40,7 @@ interface AddUserPhotoProps {
    * can target a specific cell without depending on screen coordinates.
    */
   index?: number;
-}
+};
 
 const photoActionTestID = (index: number, hasPicture: boolean) =>
   hasPicture ? `remove-photo-${index}` : `add-photo-button-${index}`;

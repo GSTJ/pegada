@@ -8,10 +8,10 @@ import { Text } from "@/components/text";
 
 import * as S from "./styles";
 
-interface TextFieldContainerProps {
+type TextFieldContainerProps = {
   loading?: boolean;
   children: React.ReactNode;
-}
+};
 
 const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
   loading,
@@ -24,13 +24,13 @@ const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
   </S.Content>
 );
 
-interface InputProps extends TextInputProps {
+type InputProps = {
   canCancel?: boolean;
   loading?: boolean;
   optional?: boolean;
   title?: string;
   error?: string;
-}
+} & TextInputProps;
 
 export const Input = React.forwardRef<TextInput, InputProps>(
   (

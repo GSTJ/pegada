@@ -6,10 +6,10 @@ import { WIDGET_APP_GROUP } from "../../../modules/pegada-widget";
 
 const AVATARS_DIRECTORY_NAME = "widget-avatars";
 
-export interface WidgetAvatarSource {
+export type WidgetAvatarSource = {
   dogId: string;
   url: string | undefined;
-}
+};
 
 /**
  * Platform-split storage backend for the widget avatars.

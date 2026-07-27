@@ -8,15 +8,15 @@ import { VerifyRowView } from "./styles";
 
 const OTP_INPUT_MAX_WIDTH = OTP_INPUT_HEIGHT;
 
-export interface OtpInputRef {
+export type OtpInputRef = {
   focus: () => void;
-}
+};
 
-interface OtpInputProps {
+type OtpInputProps = {
   value: string;
   length: number;
   onChangeText: React.Dispatch<React.SetStateAction<string>>;
-}
+};
 
 const OTPInput = forwardRef<OtpInputRef, OtpInputProps>(
   ({ length, value, onChangeText }, ref) => {

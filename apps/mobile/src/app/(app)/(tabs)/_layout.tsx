@@ -7,10 +7,10 @@ import Logo from "@/assets/images/logo";
 import Messages from "@/assets/images/messages";
 import Profile from "@/assets/images/profile";
 
-interface TabBarIconProps {
+type TabBarIconProps = {
   focused: boolean;
   color: string;
-}
+};
 
 // Hoisted out of the layout: an inline `tabBarIcon` is a fresh component type
 // on every render, which remounts the icon whenever the tab bar updates.

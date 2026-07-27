@@ -8,9 +8,9 @@ import { useTheme } from "styled-components/native";
 import { Preview } from "../Preview";
 import { Container, PreviewSeparator } from "./styles";
 
-interface HeaderProps {
+type HeaderProps = {
   matches?: Match[];
-}
+};
 
 export const Header: React.FC<HeaderProps> = ({ matches }) => {
   const theme = useTheme();

@@ -6,9 +6,9 @@ import { Logo } from "@/components/logo";
 import { Restricter } from "@/components/restricter";
 import { t } from "@/lib/translate";
 
-interface DataProps {
+type DataProps = {
   pageKey: string;
-}
+};
 
 export const getLocalizedMdxData = (pageKey: string) => {
   // The page key is only known at runtime (it comes from the route), so these

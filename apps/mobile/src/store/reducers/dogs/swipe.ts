@@ -11,7 +11,7 @@ import {
 
 export type SwipeDog = RouterOutputs["swipe"]["all"][number];
 
-interface IInitialState {
+type IInitialState = {
   request: {
     data: SwipeDog[];
     loading: boolean;
@@ -23,7 +23,7 @@ interface IInitialState {
     lastCardId?: string;
     likeLimitResetAt?: Date;
   };
-}
+};
 
 export const initialState: IInitialState = {
   request: {

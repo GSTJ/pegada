@@ -13,10 +13,10 @@ import { EmptyAnimation } from "@/views/(tabs)/Swipe/components/SwipeRequestFeed
 
 import { EmptyDescription, EmptyRoot, EmptyTitle } from "../styles";
 
-interface EmptyMessagesProps {
+type EmptyMessagesProps = {
   search: string;
   setSearch: (value: string) => void;
-}
+};
 
 export const EmptyMessages: React.FC<EmptyMessagesProps> = ({
   search,

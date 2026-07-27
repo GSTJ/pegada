@@ -91,13 +91,13 @@ const isR2Url = (url: string) => {
   );
 };
 
-interface Storage {
+type Storage = {
   client: S3Client;
   bucket: string;
   isR2: boolean;
   /** Canonical public URL for a key in this storage. */
   urlForKey: (key: string) => string;
-}
+};
 
 /**
  * Pick the storage (client + bucket) an image URL lives in, by host.

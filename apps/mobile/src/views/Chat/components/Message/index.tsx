@@ -12,14 +12,14 @@ import { Text } from "@/components/text";
 import Feedback, { FeedbackStatus } from "../feedback";
 import { Info, Message, Time } from "./styles";
 
-interface MessageComponentProps {
+type MessageComponentProps = {
   children: string;
   self: boolean;
   createdAt: Date;
   status?: FeedbackStatus;
   id: string;
   newMessage?: boolean;
-}
+};
 
 export const MessageComponent: React.FC<MessageComponentProps> = (props) => {
   const { children, self, createdAt, status, newMessage, id } = props;

@@ -10,6 +10,7 @@ export enum FeedbackStatus {
   Success = "success",
 }
 
+// oxlint-disable-next-line typescript/consistent-type-definitions -- react-native-svg's SvgProps carry a string index signature, which an intersection would widen `status` to `any` through. `extends` keeps it a FeedbackStatus.
 interface FeedbackProps extends React.ComponentProps<typeof Tick> {
   status?: FeedbackStatus;
 }

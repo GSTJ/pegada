@@ -11,7 +11,7 @@ import { config } from "./config";
  * `https://images.pegada.app.example.com/x`, and a host-only match would
  * accept an arbitrary port on our own domain.
  */
-export interface ImageStorageConfig {
+export type ImageStorageConfig = {
   /** R2 bucket custom domain, e.g. https://images.pegada.app */
   publicImagesBaseUrl?: string;
   /** R2 S3 API endpoint, e.g. https://<account>.r2.cloudflarestorage.com */
@@ -20,7 +20,7 @@ export interface ImageStorageConfig {
   awsS3Endpoint?: string;
   awsBucketName: string;
   awsRegion: string;
-}
+};
 
 const originOf = (url: string | undefined) => {
   if (!url) return undefined;

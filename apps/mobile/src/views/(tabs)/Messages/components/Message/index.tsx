@@ -24,9 +24,9 @@ const getEmojiBySwipeType = (swipeType?: Swipe) => {
   }
 };
 
-interface MessageProps {
+type MessageProps = {
   item: Match;
-}
+};
 
 export const Message: React.FC<MessageProps> = ({ item }) => {
   const router = useRouter();

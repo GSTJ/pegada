@@ -12,23 +12,23 @@ export const TOPICS = {
 
 export type Topic = (typeof TOPICS)[keyof typeof TOPICS];
 
-export interface IMailJobData {
+export type IMailJobData = {
   email: string;
   code: string;
   language?: Language;
-}
+};
 
 export type IProcessImageJobData = Partial<Image> & { id: string; url: string };
 
 export type ISendNotificationJobData = ExpoPushMessage;
 
-export interface ICheckPushNotificationReceiptsJobData {
+export type ICheckPushNotificationReceiptsJobData = {
   receipts?: { id: string; pushToken: string }[];
-}
+};
 
-export interface TopicPayloads {
+export type TopicPayloads = {
   [TOPICS.MAIL]: IMailJobData;
   [TOPICS.PROCESS_IMAGE]: IProcessImageJobData;
   [TOPICS.SEND_PUSH]: ISendNotificationJobData;
   [TOPICS.CHECK_PUSH_RECEIPTS]: ICheckPushNotificationReceiptsJobData;
-}
+};

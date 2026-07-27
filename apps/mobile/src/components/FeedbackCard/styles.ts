@@ -4,9 +4,9 @@ import styled, { css } from "styled-components/native";
 import MainCard from "../MainCard";
 import { absoluteFill } from "../MainCard/styles";
 
-interface IContainer {
+type IContainer = {
   isFirst: boolean;
-}
+};
 
 export const Container = styled(Animated.View)<IContainer>`
   margin: ${(props) => props.theme.spacing[1]}px

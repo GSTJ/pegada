@@ -24,13 +24,13 @@ import { useSwipeGesture } from "./hooks/use-swipe-gesture";
 
 const ROTATION_DEG = 8;
 
-interface SwipeHandlerProps {
+type SwipeHandlerProps = {
   card: SwipeDog;
-}
+};
 
-export interface SwipeHandlerRefProps {
+export type SwipeHandlerRefProps = {
   gotoDirection: (swipeType: Swipe) => void;
-}
+};
 
 export const swipeHandlerRef = React.createRef<SwipeHandlerRefProps>();
 

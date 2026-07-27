@@ -43,13 +43,13 @@ const { width } = Dimensions.get("window");
 type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
 export const MAX_FILTER_DISTANCE = 300;
 export const MAX_FILTER_AGE = 10;
-interface Preference extends Pick<
-  MyDogUpdateMutation,
-  "preferredBreedId" | "preferredColor" | "preferredSize"
-> {
+type Preference = {
   preferredMaxDistance: number[];
   preferredAgeRange: number[];
-}
+} & Pick<
+  MyDogUpdateMutation,
+  "preferredBreedId" | "preferredColor" | "preferredSize"
+>;
 
 const schema = z
   .object({

@@ -19,8 +19,8 @@ const rootReducer = combineReducers({
   dogs: dogsReducer,
 });
 
-export interface RootReducer {
+export type RootReducer = {
   dogs: typeof swipeInitialState;
-}
+};
 
 export default rootReducer;

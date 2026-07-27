@@ -14,10 +14,10 @@ export const WIDGET_APP_GROUP = "group.app.pegada";
  * scheme) readable by the widget process: inside the App Group container on
  * iOS, inside the app's document directory on Android.
  */
-export interface WidgetSnapshotDog {
+export type WidgetSnapshotDog = {
   name: string;
   avatar: string | null;
-}
+};
 
 /**
  * All user-facing strings arrive pre-localized from JS (i18next), so the
@@ -31,17 +31,17 @@ export interface WidgetSnapshotDog {
  * `message` isn't the "waiting for reply" variant (all caught up, logged
  * out).
  */
-export interface WidgetSnapshot {
+export type WidgetSnapshot = {
   loggedIn: boolean;
   count: number;
   message: string;
   messageCountless: string | null;
   dogs: WidgetSnapshotDog[];
-}
+};
 
-interface PegadaWidgetNativeModule {
+type PegadaWidgetNativeModule = {
   setSnapshot: (json: string) => Promise<void>;
-}
+};
 
 // Optional so web (and any environment without the native module, e.g.
 // tests) degrades to a no-op instead of throwing at import time.

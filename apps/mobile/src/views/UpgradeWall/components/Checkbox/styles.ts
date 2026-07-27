@@ -1,9 +1,9 @@
 import Color from "color";
 import styled, { css } from "styled-components/native";
 
-interface CheckContainerProps {
+type CheckContainerProps = {
   selected?: boolean;
-}
+};
 
 export const Container = styled.View<CheckContainerProps>`
   height: ${({ theme }) => theme.spacing[6]}px;

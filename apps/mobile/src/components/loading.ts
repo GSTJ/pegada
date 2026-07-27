@@ -1,9 +1,9 @@
 import LottieView from "lottie-react-native";
 import styled from "styled-components/native";
 
-interface LoadingProps {
+type LoadingProps = {
   inverse?: boolean;
-}
+};
 
 export default styled(LottieView).attrs<LoadingProps>((props) => ({
   autoPlay: true,

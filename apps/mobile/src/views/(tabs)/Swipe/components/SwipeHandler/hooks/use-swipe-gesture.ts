@@ -17,15 +17,15 @@ import {
 import { ACTION_OFFSET, ACTION_VELOCITY, CARD } from "@/constants";
 import { haptics } from "@/services/haptics";
 
-export interface Translation {
+export type Translation = {
   x: SharedValue<number>;
   y: SharedValue<number>;
-}
+};
 
-interface Coordinate {
+type Coordinate = {
   x?: number;
   y?: number;
-}
+};
 
 export enum Swipe {
   Dislike = "NOT_INTERESTED",
@@ -100,9 +100,9 @@ const gotoCoordinate = (
   }
 };
 
-interface UseSwipeGestureProps {
+type UseSwipeGestureProps = {
   onSwipeComplete: (data: Swipe) => void;
-}
+};
 
 export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
   const [enabled, setEnabled] = useState(true);

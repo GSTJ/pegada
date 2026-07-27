@@ -3,10 +3,10 @@ import type { Topic, TopicPayloads } from "./topics";
 import { config } from "../shared/config";
 import { TOPICS } from "./topics";
 
-interface EnqueueOptions {
+type EnqueueOptions = {
   delaySeconds?: number;
   idempotencyKey?: string;
-}
+};
 
 // Handlers are imported lazily so heavyweight consumers (sharp, tfjs) stay
 // out of the module graph of regular API routes.

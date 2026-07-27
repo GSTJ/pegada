@@ -21,11 +21,11 @@ import { logDebug, sendError } from "./errors/errors";
 import { config } from "./shared/config";
 
 // That was added by me manually
-export interface Session {
+export type Session = {
   user: {
     id: string;
   };
-}
+};
 
 /**
  * 1. CONTEXT
@@ -36,11 +36,11 @@ export interface Session {
  * processing a request
  *
  */
-interface CreateContextOptions {
+type CreateContextOptions = {
   session: Session | null;
   language?: Language;
   req?: NextRequest;
-}
+};
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use

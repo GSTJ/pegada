@@ -32,6 +32,7 @@ const springConfig = { mass: 0.2 };
 
 const START_IMAGE_INDEX = 0;
 
+// oxlint-disable-next-line typescript/consistent-type-definitions -- `Container` is a reanimated Animated.View, whose props carry a string index signature. `interface … extends` keeps the members below at their declared types; the `{…} & Props` intersection the rule wants intersects each of them with the index signature's `any` and silently widens all three to `any`.
 export interface VisitingCardProps extends React.ComponentProps<
   typeof Container
 > {

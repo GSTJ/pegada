@@ -36,12 +36,12 @@ const getPeriodDetails = (
   };
 };
 
-interface PlanCardProps {
+type PlanCardProps = {
   selected: boolean;
   onPress: () => void;
   planPackage: PurchasesPackage;
   oldPrice?: number;
-}
+};
 
 export const PlanCard: React.FC<PlanCardProps> = ({
   selected,

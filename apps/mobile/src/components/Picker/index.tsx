@@ -24,14 +24,12 @@ import {
   TitleContainer,
 } from "./styles";
 
-export interface Item {
+export type Item = {
   id: string | null;
   name: string;
-}
+};
 
-export interface InputPickerProps<T extends Item> extends Partial<
-  Omit<BottomSheetFlatListProps<T>, "ref">
-> {
+export type InputPickerProps<T extends Item> = {
   title: string;
   placeholder?: string;
   value: T | undefined;
@@ -49,7 +47,7 @@ export interface InputPickerProps<T extends Item> extends Partial<
    * reliably tap a known option (e.g. language/theme switches).
    */
   itemTestIDPrefix?: string;
-}
+} & Partial<Omit<BottomSheetFlatListProps<T>, "ref">>;
 
 const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 

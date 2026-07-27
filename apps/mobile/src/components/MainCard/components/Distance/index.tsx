@@ -9,9 +9,9 @@ import Location from "@/assets/images/Location.svg";
 
 import { Container, Content, DistanceText } from "./styles";
 
-interface DistanceProps {
+type DistanceProps = {
   dog: SwipeDog;
-}
+};
 
 // TODO: Use i18n properly
 const formatDistance = (distance: number, locale: string) => {

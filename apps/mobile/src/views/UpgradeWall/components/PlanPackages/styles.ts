@@ -4,9 +4,9 @@ import styled, { css } from "styled-components/native";
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 
-interface CheckContainerProps {
+type CheckContainerProps = {
   selected?: boolean;
-}
+};
 
 export const Flex = styled.View`
   flex: 1;

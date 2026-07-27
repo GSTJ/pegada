@@ -10,7 +10,7 @@ import { api } from "@/contexts/trpc-provider";
 
 import { InputPicker } from "../Picker";
 
-interface BreedPickerProps {
+type BreedPickerProps = {
   breed?: string | null;
   setBreed: (value: { id: string | null }) => void;
   error?: string;
@@ -18,7 +18,7 @@ interface BreedPickerProps {
   title?: string;
   optional?: boolean;
   testID?: string;
-}
+};
 
 const BreedPicker = ({
   breed,

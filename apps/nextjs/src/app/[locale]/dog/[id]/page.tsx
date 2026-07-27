@@ -9,11 +9,11 @@ import { getFormattedYears } from "@pegada/shared/utils/get-formatted-years";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 
-interface DogProfileProps {
+type DogProfileProps = {
   params: Promise<{
     id: string;
   }>;
-}
+};
 
 const DogProfile = async ({ params }: DogProfileProps) => {
   const { id } = await params;

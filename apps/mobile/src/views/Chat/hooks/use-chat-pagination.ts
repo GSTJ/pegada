@@ -13,10 +13,10 @@ const PAGE_SIZE = 20;
 
 type Message = RouterOutputs["message"]["allByMatch"][number];
 
-export interface MessageProps extends Message {
+export type MessageProps = {
   status?: FeedbackStatus;
   newMessage?: boolean;
-}
+} & Message;
 
 export const useChatPagination = () => {
   const { matchId } = useLocalSearchParams();

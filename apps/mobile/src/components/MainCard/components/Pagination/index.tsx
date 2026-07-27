@@ -19,10 +19,10 @@ const DotComponent: React.FC<{
   return <Dot key={index} active={active} style={style} />;
 };
 
-interface PaginationProps {
+type PaginationProps = {
   pages: number;
   currentPage: number;
-}
+};
 
 const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
   if (pages <= 1) return null;

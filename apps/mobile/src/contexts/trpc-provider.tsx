@@ -26,13 +26,13 @@ export { type RouterInputs, type RouterOutputs } from "@pegada/api";
  */
 export const api = createTRPCReact<AppRouter>();
 
-interface ResponseJSON {
+type ResponseJSON = {
   error?: {
     json?: {
       message?: string;
     };
   };
-}
+};
 
 export const trpcQueryClient = api.createClient({
   links: [

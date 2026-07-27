@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 
 import { differenceInSeconds } from "date-fns";
 
-export interface LikeLimitReachedProps {
+export type LikeLimitReachedProps = {
   likeLimitResetAt: Date;
-}
+};
 const formatTimeLeft = (totalSeconds: number) => {
   // Time's up
   if (totalSeconds < 0) {

@@ -16,14 +16,14 @@ import MaybeFeedback from "./components/MaybeFeedback";
 import NopeFeedback from "./components/NopeFeedback";
 import { AbsolutePosition, Container, StyledMainCard } from "./styles";
 
-interface FeedbackCardProps {
+type FeedbackCardProps = {
   dog: SwipeDog;
   translation: {
     x: SharedValue<number>;
     y: SharedValue<number>;
   };
   isFirst: boolean;
-}
+};
 
 const FeedbackCard: React.FC<FeedbackCardProps> = ({
   dog,

@@ -10,7 +10,7 @@ export enum KeyboardKeys {
   Backspace = "Backspace",
 }
 
-interface OtpDigitProps {
+type OtpDigitProps = {
   children: string;
   length: number;
   index: number;
@@ -18,7 +18,7 @@ interface OtpDigitProps {
   handleErase: (text: string, index: number) => void;
   pointerEvents?: "auto" | "none";
   testID: string;
-}
+};
 
 export const OTP_INPUT_HEIGHT = S.isSmallDevice ? 62 : 80;
 export const OTP_INPUT_MARGIN = 6;

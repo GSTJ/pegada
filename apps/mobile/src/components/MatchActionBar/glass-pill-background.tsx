@@ -12,10 +12,10 @@ const StyledGlassView = styled(GlassView)`
   bottom: 0;
 `;
 
-interface GlassPillBackgroundProps {
+type GlassPillBackgroundProps = {
   tintColor: string;
   colorScheme: "light" | "dark";
-}
+};
 
 /**
  * Only ever rendered after the caller has checked `isLiquidGlassAvailableSafe()`.

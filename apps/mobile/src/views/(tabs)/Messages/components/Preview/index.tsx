@@ -9,12 +9,12 @@ import { SceneName } from "@/types/scene-name";
 
 import { Container, Content, Picture } from "./styles";
 
-interface PreviewProps {
+type PreviewProps = {
   item: {
     id: string;
     dog: SwipeDog;
   };
-}
+};
 
 export const Preview: React.FC<PreviewProps> = ({ item }) => {
   const router = useRouter();

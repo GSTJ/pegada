@@ -9,9 +9,9 @@ enum RevenueCatEntitlement {
   PREMIUM = "premium",
 }
 
-interface RevenueCatEvent {
+type RevenueCatEvent = {
   event: Event;
-}
+};
 
 const isAnonymous = (alias: string) => alias.startsWith("$RCAnonymousID:");
 const findNonAnonymousUserIds = (aliases: string[]): string[] => {
