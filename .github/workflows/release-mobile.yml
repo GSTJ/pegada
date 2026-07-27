@@ -385,9 +385,12 @@ jobs:
             exit 1
           fi
 
+          # `|| true` because pipefail is on and the job's shell runs with -e:
+          # a no-match grep here would kill the step before it can print the
+          # annotation, which is the only reason we got this far.
           TARGET=$(grep -oE "Setting up credentials for target .*" "$RUNNER_TEMP/eas-ios.log" \
             | tail -1 \
-            | sed 's/^Setting up credentials for target //')
+            | sed 's/^Setting up credentials for target //' || true)
 
           echo "::error::EAS has no stored iOS credentials for target ${TARGET:-unknown}. Run 'eas credentials -p ios' from apps/mobile, pick the production profile and that target, sign in with the Apple ID, and reuse the existing distribution certificate."
           {
