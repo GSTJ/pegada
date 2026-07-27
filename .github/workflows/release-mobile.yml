@@ -1,4 +1,4 @@
-name: Release Mobile (build + submit)
+name: Release Mobile (release + build + submit)
 
 # ---------------------------------------------------------------------------
 # WHY GITHUB ACTIONS INSTEAD OF EAS CLOUD BUILDS
@@ -44,9 +44,14 @@ name: Release Mobile (build + submit)
 #
 # A new native binary must NOT be auto-submitted to the stores: it needs
 # TestFlight/internal-track testing and a deliberate staged rollout first. So:
-#   - tag push (v*)        -> builds artifacts only, NEVER submits
+#   - tag push (v*)        -> GitHub release + changelog, then builds
+#                             artifacts, NEVER submits
 #   - manual dispatch      -> submit is an explicit opt-in (defaults to false)
 # `eas submit` is only ever reached when a human sets submit=true on a dispatch.
+#
+# Tags come from `./scripts/tag-release.sh`, which reads the version out of
+# apps/mobile/app.config.ts and writes the generated release notes into the
+# annotated tag's own message.
 # ---------------------------------------------------------------------------
 on:
   workflow_dispatch:
@@ -77,6 +82,119 @@ env:
   EXPO_NO_TELEMETRY: 1
 
 jobs:
+  # -------------------------------------------------------------------------
+  # GitHub release + changelog. Deliberately has NO `needs:` on the build
+  # jobs: the notes describe what's in the tag, which is knowable the second
+  # the tag lands, and waiting 40-90 minutes for a native build to finish
+  # before the release page exists is how this repo ended up with two tags
+  # and zero releases.
+  #
+  # `.github/scripts/changelog.py` is the single source for release text. The
+  # annotated tag's own message comes from the same generator (via
+  # scripts/tag-release.sh), so the tag, the release body and the CHANGELOG.md
+  # entry can't tell three different stories about the same commits, and a
+  # breaking change (`feat!:` or a `BREAKING CHANGE:` footer) shows up in all
+  # three plus the release title.
+  # -------------------------------------------------------------------------
+  github-release:
+    name: GitHub release (notes + changelog)
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # Full history and every tag: the generator diffs this tag against the
+      # previous one, which a shallow clone doesn't have.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          PREVIOUS=$(git tag --list 'v*' --sort=-creatordate | grep -Fxv "$TAG" | head -1 || true)
+
+          python3 .github/scripts/changelog.py \
+            --notes "$TAG" \
+            --previous "$PREVIOUS" \
+            --repo "$GITHUB_REPOSITORY" \
+            --output release-notes.md
+
+          TITLE="$TAG"
+          if python3 .github/scripts/changelog.py \
+            --is-breaking "$TAG" --previous "$PREVIOUS" >/dev/null; then
+            TITLE="$TAG (contains breaking changes)"
+          fi
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+
+          # Anything with a suffix after the version (-rc1, -beta.2) is not a
+          # store release; GitHub should not mark it "Latest".
+          if printf '%s' "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "::group::release notes"
+          cat release-notes.md
+          echo "::endgroup::"
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          TITLE: ${{ steps.notes.outputs.title }}
+          PRERELEASE: ${{ steps.notes.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          FLAGS=()
+          if [ "$PRERELEASE" = "true" ]; then
+            FLAGS+=(--prerelease)
+          else
+            FLAGS+=(--latest)
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "$TITLE" \
+              --notes-file release-notes.md \
+              "${FLAGS[@]}"
+          else
+            gh release create "$TAG" \
+              --title "$TITLE" \
+              --notes-file release-notes.md \
+              "${FLAGS[@]}"
+          fi
+
+      # Regenerated from scratch rather than prepended to, so the file always
+      # matches git history even if a tag was deleted or backfilled.
+      - name: Refresh CHANGELOG.md on the default branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.event.repository.default_branch }}"
+          git checkout -B changelog-refresh "origin/${{ github.event.repository.default_branch }}"
+
+          python3 .github/scripts/changelog.py \
+            --all --repo "$GITHUB_REPOSITORY" --output CHANGELOG.md
+
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs: regenerate the changelog for ${GITHUB_REF_NAME}"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+
   # -------------------------------------------------------------------------
   # iOS: local EAS build on a macOS runner, production profile.
   # -------------------------------------------------------------------------
