@@ -2,6 +2,65 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.0-rc1 (2026-07-26)
+
+### Features
+
+- reply to chat messages straight from the notification ([#75](https://github.com/GSTJ/pegada/pull/75)) ([`69d0d85`](https://github.com/GSTJ/pegada/commit/69d0d858a837feaee4b46e2ccc2de2cf071112ba))
+- **mobile:** home-screen quick actions ([#76](https://github.com/GSTJ/pegada/pull/76)) ([`64210c9`](https://github.com/GSTJ/pegada/commit/64210c9452cdd146b171c459d1b74d841c83d66d))
+- **mobile:** dark iOS icon variant and Android themed icon ([#77](https://github.com/GSTJ/pegada/pull/77)) ([`7721cb0`](https://github.com/GSTJ/pegada/commit/7721cb0f0af6426bcd7419c7743e69a7a342e736))
+- home-screen widgets with matches waiting for a reply (WidgetKit + Glance) ([#83](https://github.com/GSTJ/pegada/pull/83)) ([`b375c66`](https://github.com/GSTJ/pegada/commit/b375c66d65443bc7f8c6b2bf8a66e4e93b9578ec))
+- **mobile:** add Liquid Glass to translucent overlays ([#78](https://github.com/GSTJ/pegada/pull/78)) ([`49fbcb3`](https://github.com/GSTJ/pegada/commit/49fbcb3778d0d545de60f944c6d868db83c46722))
+- **mobile:** haptic feedback across swipe, match and purchase flows ([#74](https://github.com/GSTJ/pegada/pull/74)) ([`8b43721`](https://github.com/GSTJ/pegada/commit/8b43721a319c00e4b91b685f37f5759efd3b59d1))
+- **legal:** add child-safety (CSAE) clause to Terms of Use ([#73](https://github.com/GSTJ/pegada/pull/73)) ([`56ccd98`](https://github.com/GSTJ/pegada/commit/56ccd98857c6f60542ec46e13a13a2be567db0bb))
+- **mobile:** 1.4.0 release — GHA build pipeline, PostHog OTA env ([#63](https://github.com/GSTJ/pegada/pull/63)) ([`06149a2`](https://github.com/GSTJ/pegada/commit/06149a2f1e7c3df106ba3cadeb738eb64b594865))
+
+### Fixes
+
+- **mobile:** forward image props to Expo Image ([#86](https://github.com/GSTJ/pegada/pull/86)) ([`1a7ec86`](https://github.com/GSTJ/pegada/commit/1a7ec869f4d990adb1908c4bf16705dd51936e52))
+- **mobile:** sort a copy of the matches cache, triage lint warnings ([#98](https://github.com/GSTJ/pegada/pull/98)) ([`bcd5b44`](https://github.com/GSTJ/pegada/commit/bcd5b44918f37a1a786be0802522e324e790b717))
+- **database:** add the missing Image status and blurhash migration ([#97](https://github.com/GSTJ/pegada/pull/97)) ([`779ce65`](https://github.com/GSTJ/pegada/commit/779ce65a0d4f25f5498693c0bf016953d87430ac))
+- **api:** scope the image move to the temporary upload folder ([#96](https://github.com/GSTJ/pegada/pull/96)) ([`652d6d2`](https://github.com/GSTJ/pegada/commit/652d6d29dd1f2365fe264e7fb3e648add89f160d))
+- **api:** validate image URLs against the configured storage origins ([#94](https://github.com/GSTJ/pegada/pull/94)) ([`d3fc3cb`](https://github.com/GSTJ/pegada/commit/d3fc3cb48e3ae5709ce47b2337001e55398f008f))
+- **api:** pass message delete ids in the right order ([#93](https://github.com/GSTJ/pegada/pull/93)) ([`b0f996e`](https://github.com/GSTJ/pegada/commit/b0f996e06d14d40ffac269bc83c9fb9c95e76bd6))
+- **mobile:** dark mode error screen readability and splash flash ([#85](https://github.com/GSTJ/pegada/pull/85)) ([`cb9ced5`](https://github.com/GSTJ/pegada/commit/cb9ced5daa0bc8801492fc7895e939bd72f60dfc))
+- **mobile:** key rich-text translation components ([#87](https://github.com/GSTJ/pegada/pull/87)) ([`e8e41a1`](https://github.com/GSTJ/pegada/commit/e8e41a1728b6c2f58f117f63638c38cf352f6cde))
+- **mobile:** size language/theme picker sheets to their content ([#72](https://github.com/GSTJ/pegada/pull/72)) ([`5070de7`](https://github.com/GSTJ/pegada/commit/5070de7cb02cc62c1681d7641873e6a63f86ea69))
+- **mobile:** stop the age-range slider triggering back navigation on iOS ([#71](https://github.com/GSTJ/pegada/pull/71)) ([`155a068`](https://github.com/GSTJ/pegada/commit/155a068335a90268ae1d3f9eefc2a9ee018fb64d))
+- **mobile:** guard Appearance.setColorScheme against null theme ([#70](https://github.com/GSTJ/pegada/pull/70)) ([`ff0e512`](https://github.com/GSTJ/pegada/commit/ff0e51269d871b8fc4ea5350ba9dc859668c194b))
+- **mobile:** stop the first request dying on the apex→www redirect ([#68](https://github.com/GSTJ/pegada/pull/68)) ([`170acff`](https://github.com/GSTJ/pegada/commit/170acffb96d465f6254595451207d29686e720c6))
+
+### Performance
+
+- **ci:** drop redundant Maestro driver warm-up from iOS PR gate ([#69](https://github.com/GSTJ/pegada/pull/69)) ([`144d50a`](https://github.com/GSTJ/pegada/commit/144d50a0a8fbf23bfbafd83adab10560f296516b))
+
+### Dependencies
+
+- force uuid 11 and fast-xml-parser 5, clearing both open advisories ([#100](https://github.com/GSTJ/pegada/pull/100)) ([`aa816ff`](https://github.com/GSTJ/pegada/commit/aa816ff1397695b2d651182482bf2b9d10ebfc64))
+- force brace-expansion 5.0.8, patch minimatch to match ([#92](https://github.com/GSTJ/pegada/pull/92)) ([`8a54df5`](https://github.com/GSTJ/pegada/commit/8a54df5635a3f9c89f950761013c7d0f1e0b0da5))
+- patch the Next.js and postcss advisories ([#91](https://github.com/GSTJ/pegada/pull/91)) ([`8fe8a6f`](https://github.com/GSTJ/pegada/commit/8fe8a6ffb5b66a0989af3d37c4aacc29501ab47b))
+- clear the open Dependabot alerts ([#89](https://github.com/GSTJ/pegada/pull/89)) ([`cde392f`](https://github.com/GSTJ/pegada/commit/cde392f032a687bb2b2ba572f28e38ba9f898813))
+- bump actions/setup-node from 6 to 7 ([#88](https://github.com/GSTJ/pegada/pull/88)) ([`1bde167`](https://github.com/GSTJ/pegada/commit/1bde1679e1fb2ea827c000a1f53a07daee024bad))
+- bump actions/download-artifact from 7 to 8 ([#66](https://github.com/GSTJ/pegada/pull/66)) ([`1d62f67`](https://github.com/GSTJ/pegada/commit/1d62f6770cd4394eba8b09bcbc8597b1c56da666))
+- bump actions/cache from 5 to 6 ([#67](https://github.com/GSTJ/pegada/pull/67)) ([`75b6952`](https://github.com/GSTJ/pegada/commit/75b69527bf10df620cd98fe8adc68d12905cd93a))
+
+### Tests
+
+- **api:** run the api suite on a single worker ([#95](https://github.com/GSTJ/pegada/pull/95)) ([`674279c`](https://github.com/GSTJ/pegada/commit/674279ce209e5cad62dfd5a5aaec07eb53068b2b))
+
+### Build and CI
+
+- generate the changelog, tag and GitHub release from conventional commits ([#102](https://github.com/GSTJ/pegada/pull/102)) ([`bc1f957`](https://github.com/GSTJ/pegada/commit/bc1f957963fb76e72c837754c310c9c6d5dcd4f1))
+- run the test suite on branch pushes ([#99](https://github.com/GSTJ/pegada/pull/99)) ([`b843736`](https://github.com/GSTJ/pegada/commit/b84373634c6a236760e3dec7dbb476643f1b8960))
+- **mobile:** fix release submit jobs — install deps, pin iOS ascAppId ([#65](https://github.com/GSTJ/pegada/pull/65)) ([`2bebb4b`](https://github.com/GSTJ/pegada/commit/2bebb4b1590523993b9f5e53ba5ac3cfb394d4b5))
+
+### Chores
+
+- license under AGPL-3.0 with a 7(b) attribution requirement ([#101](https://github.com/GSTJ/pegada/pull/101)) ([`4fcb212`](https://github.com/GSTJ/pegada/commit/4fcb21213c0b9fa147db6d394b9fda0b1a23fa4d))
+- **mobile:** upload source maps to PostHog on release and OTA builds ([#84](https://github.com/GSTJ/pegada/pull/84)) ([`d93ae51`](https://github.com/GSTJ/pegada/commit/d93ae51e257a79968cb27b67ff5fd54ecb0a371b))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.4.0-rc7...v1.5.0-rc1)
+
 ## v1.4.0-rc7 (2026-07-06)
 
 ### Build and CI

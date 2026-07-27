@@ -90,11 +90,11 @@ jobs:
   # and zero releases.
   #
   # `.github/scripts/changelog.py` is the single source for release text. The
-  # annotated tag's own message comes from the same generator (via
-  # scripts/tag-release.sh), so the tag, the release body and the CHANGELOG.md
-  # entry can't tell three different stories about the same commits, and a
-  # breaking change (`feat!:` or a `BREAKING CHANGE:` footer) shows up in all
-  # three plus the release title.
+  # annotated tag's own message and CHANGELOG.md both come from the same
+  # generator (via scripts/tag-release.sh), so the tag, the release body and the
+  # changelog entry can't tell three different stories about the same commits,
+  # and a breaking change (`feat!:` or a `BREAKING CHANGE:` footer) shows up in
+  # all three plus the release title.
   # -------------------------------------------------------------------------
   github-release:
     name: GitHub release (notes + changelog)
@@ -171,29 +171,40 @@ jobs:
               "${FLAGS[@]}"
           fi
 
-      # Regenerated from scratch rather than prepended to, so the file always
-      # matches git history even if a tag was deleted or backfilled.
-      - name: Refresh CHANGELOG.md on the default branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Reports, never writes. The "Main" ruleset requires every change to
+      # `main` to arrive through a squash-merged pull request, so a bot pushing
+      # a changelog commit straight to the branch gets rejected with GH013 (it
+      # did, on v1.5.0-rc1's first run) and takes the whole job red AFTER the
+      # release was already published. Opening the PR from here instead doesn't
+      # work either: a pull request created with GITHUB_TOKEN does not trigger
+      # workflows, so its required checks would never report and the PR could
+      # never merge.
+      #
+      # `./scripts/tag-release.sh` regenerates CHANGELOG.md locally while
+      # cutting the tag, so the file is normally already committed by the time
+      # this runs. This step exists to catch the case where someone tagged
+      # without it, and it stays green either way; the release itself does not
+      # depend on the file.
+      - name: Check CHANGELOG.md is current
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.event.repository.default_branch }}"
-          git checkout -B changelog-refresh "origin/${{ github.event.repository.default_branch }}"
-
           python3 .github/scripts/changelog.py \
             --all --repo "$GITHUB_REPOSITORY" --output CHANGELOG.md
 
           if git diff --quiet -- CHANGELOG.md; then
-            echo "CHANGELOG.md already current."
+            echo "CHANGELOG.md is current." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "docs: regenerate the changelog for ${GITHUB_REF_NAME}"
-          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          {
+            echo "### CHANGELOG.md is stale"
+            echo
+            echo "Run \`pnpm changelog\` on \`main\` and open a PR with the result."
+            echo
+            echo '```diff'
+            git --no-pager diff -- CHANGELOG.md
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # -------------------------------------------------------------------------
   # iOS: local EAS build on a macOS runner, production profile.

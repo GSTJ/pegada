@@ -55,9 +55,14 @@ DRY_RUN=1 ./scripts/tag-release.sh    # print the notes and stop
 
 The script creates an annotated tag whose message is the generated notes and
 pushes it. That push is what starts `release-mobile.yml`: it publishes the
-GitHub release, refreshes `CHANGELOG.md` on `main`, and builds the native
-artifacts. Anything with a suffix (`-rc1`, `-beta.2`) is marked a prerelease.
-Store submission stays a separate, opt-in manual dispatch.
+GitHub release and builds the native artifacts. Anything with a suffix (`-rc1`,
+`-beta.2`) is marked a prerelease. Store submission stays a separate, opt-in
+manual dispatch.
+
+The script also regenerates `CHANGELOG.md`, which can only include the new
+version once the tag exists. Commit that through a PR like any other change;
+the ruleset on `main` requires one, and CI can't do it for you because a pull
+request opened with `GITHUB_TOKEN` never gets its required checks.
 
 Most changes never need any of this. `deploy-mobile.yml` ships an OTA update
 on every push to `main`; a tag is only for when native actually changed.
