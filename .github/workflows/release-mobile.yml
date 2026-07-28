@@ -21,16 +21,40 @@ name: Release Mobile (release + build + submit)
 # CREDENTIALS
 # ---------------------------------------------------------------------------
 # iOS signing uses EAS's remote credentials (managed via `eas credentials`),
-# fetched non-interactively over the same EXPO_TOKEN auth. In non-interactive
-# mode, EAS CLI only allows REUSING an existing valid provisioning
-# profile/certificate; it refuses to GENERATE a new one without an App Store
-# Connect API key (EXPO_ASC_API_KEY_PATH / EXPO_ASC_KEY_ID /
-# EXPO_ASC_ISSUER_ID), see:
-# https://docs.expo.dev/build/building-on-ci/#optional-provide-an-asc-api-token-for-your-apple-team
-# If the stored credentials are valid this is a non-issue. If EAS decides it
-# needs to mint a new profile mid-build, the iOS job will fail with an
-# InsufficientAuthenticationNonInteractiveError, which needs an ASC API key
-# from Gabriel to fix (only he can create one in App Store Connect).
+# fetched non-interactively over the same EXPO_TOKEN auth. EAS sets them up
+# per TARGET, not per app: the main app plus every extension listed under
+# `extra.eas.build.experimental.ios.appExtensions`, which
+# @bacons/apple-targets populates from apps/mobile/targets/*. Today:
+#
+#   Pegada                     app.pegada
+#   PegadaWidgets              app.pegada.widgets
+#   PegadaNotificationService  app.pegada.notificationservice
+#
+# In non-interactive mode eas-cli will only REUSE a distribution certificate
+# that is already assigned to that specific target. SetUpDistributionCertificate
+# has no branch that adopts an unassigned account certificate and none that
+# creates one; it throws MissingCredentialsNonInteractiveError, printed as
+# "Credentials are not set up. Run this command again in interactive mode."
+# A target EAS has never seen therefore cannot be built from CI. That is what
+# killed v1.5.0-rc1's iOS job seconds after it started (#104), on the first
+# tag since the two extensions landed.
+#
+# An ASC API key (EXPO_ASC_API_KEY_PATH / EXPO_ASC_KEY_ID / EXPO_ASC_ISSUER_ID)
+# does not substitute for that setup. rc1 was already authenticated with one
+# ("Using App Store Connect API Key from EAS credentials service") and still
+# failed at the certificate lookup, which happens before any profile work. The
+# key also cannot link App Group identifiers: eas-cli's
+# syncCapabilityIdentifiersForEntitlementsAsync bails out with "Skipping
+# capability identifier syncing because the current Apple authentication
+# session is not using Cookies", and app.pegada.widgets needs group.app.pegada
+# linked to its App ID.
+#
+# So each new extension target costs one `eas credentials -p ios` run from
+# apps/mobile against the production profile, signed in with the Apple ID
+# (cookie auth, which is what syncs the App Group), reusing the existing
+# distribution certificate. EAS mints and stores that target's provisioning
+# profile once, and every later non-interactive build reuses it. Only Gabriel
+# can do this; it needs App Store Connect access.
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -325,15 +349,68 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # EXPO_APPLE_TEAM_ID backs `ios.appleTeamId` in app.config.ts, which is
+      # the only thing @bacons/apple-targets reads to stamp DEVELOPMENT_TEAM
+      # onto the generated extension targets. Env vars DO survive into
+      # `eas build --local`'s isolated working copy (files don't, see the
+      # GoogleService steps above), so setting it on this step is enough.
+      #
+      # The failure branch translates eas-cli's "Credentials are not set up"
+      # into the actual remediation. On its own that message names neither the
+      # target that is missing credentials nor the command that fixes it, and
+      # it arrives ~40s into a job the release notes have already shipped
+      # ahead of, so it is easy to misread as a generic auth problem (it was:
+      # #104's first diagnosis blamed the ASC API key, which is unrelated).
       - name: EAS build (iOS, production, local)
         working-directory: apps/mobile
+        env:
+          EXPO_APPLE_TEAM_ID: ${{ secrets.EXPO_APPLE_TEAM_ID }}
         run: |
-          eas build \
+          set -uo pipefail
+
+          if [ -z "${EXPO_APPLE_TEAM_ID:-}" ]; then
+            echo "::warning::EXPO_APPLE_TEAM_ID is not set. Prebuild will write \`DevelopmentTeam = undefined\` into the widget and notification-service targets."
+          fi
+
+          if eas build \
             --platform ios \
             --profile production \
             --local \
             --non-interactive \
-            --output "$RUNNER_TEMP/Pegada.ipa"
+            --output "$RUNNER_TEMP/Pegada.ipa" 2>&1 | tee "$RUNNER_TEMP/eas-ios.log"; then
+            exit 0
+          fi
+
+          if ! grep -q "Credentials are not set up" "$RUNNER_TEMP/eas-ios.log"; then
+            exit 1
+          fi
+
+          # `|| true` because pipefail is on and the job's shell runs with -e:
+          # a no-match grep here would kill the step before it can print the
+          # annotation, which is the only reason we got this far.
+          TARGET=$(grep -oE "Setting up credentials for target .*" "$RUNNER_TEMP/eas-ios.log" \
+            | tail -1 \
+            | sed 's/^Setting up credentials for target //' || true)
+
+          echo "::error::EAS has no stored iOS credentials for target ${TARGET:-unknown}. Run 'eas credentials -p ios' from apps/mobile, pick the production profile and that target, sign in with the Apple ID, and reuse the existing distribution certificate."
+          {
+            echo "### iOS credentials missing for \`${TARGET:-unknown}\`"
+            echo
+            echo "EAS stores signing credentials per target. This one has none, and"
+            echo "\`--non-interactive\` can only reuse credentials that already exist."
+            echo
+            echo "Fix it once, from \`apps/mobile\`:"
+            echo
+            echo '```'
+            echo "eas credentials -p ios"
+            echo '```'
+            echo
+            echo "Pick the \`production\` profile and that target, sign in with the Apple ID"
+            echo "(not an ASC API key, which cannot link App Group identifiers), and reuse"
+            echo "the existing distribution certificate. See the CREDENTIALS block at the top"
+            echo "of \`.github/workflows/release-mobile.yml\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
       - name: Upload .ipa artifact
         uses: actions/upload-artifact@v7

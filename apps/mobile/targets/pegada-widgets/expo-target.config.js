@@ -9,8 +9,13 @@
 // deploymentTarget 16.2 is the floor for the ActivityKit content APIs the
 // Live Activity uses; newer-OS features (iOS 17 widget APIs, iOS 18
 // controls) gate themselves with @available / #available in their own Swift
-// files. Team ID comes from EAS credentials at release build time; local
-// simulator builds don't sign.
+// files.
+//
+// DEVELOPMENT_TEAM comes from `ios.appleTeamId` in app.config.ts, at prebuild
+// time, not from EAS credentials. Signing this target in CI also needs its own
+// credentials stored on EAS for app.pegada.widgets, plus group.app.pegada
+// linked to that App ID; see the CREDENTIALS block in
+// .github/workflows/release-mobile.yml. Local simulator builds don't sign.
 module.exports = {
   type: "widget",
   name: "PegadaWidgets",
