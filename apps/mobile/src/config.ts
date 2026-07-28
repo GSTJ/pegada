@@ -2,13 +2,16 @@
 import "react-native-get-random-values";
 import { LogBox, Text } from "react-native";
 
-import * as Updates from "expo-updates";
-
 import mobileAds, { MaxAdContentRating } from "react-native-google-mobile-ads";
 
-import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
-import { posthog } from "@/services/posthog";
+// Side-effect import: constructs the PostHog client (and installs its global
+// uncaught-exception / unhandled-rejection handlers) before anything below
+// runs. `initExpo` registers `environment` and `release` — the OTA update
+// group that ties a stack trace to its uploaded sourcemaps — as super
+// properties itself, which is what the hand-rolled `posthog.register(...)`
+// block that used to live at the bottom of this file was doing.
+import "@/services/observability";
 
 mobileAds()
   .setRequestConfiguration({
@@ -34,16 +37,3 @@ LogBox.ignoreLogs([
   "Sending `onAnimatedValueUpdate` with no listeners registered.",
   "Warning: Overriding previous layout animation with new one before the first began:",
 ]);
-
-// Attach env + release to every event (analytics and errors), the way
-// Bugsnag's releaseStage / metadata used to. codeBundleId ties errors to
-// the exact OTA update group.
-const { manifest } = Updates;
-const metadata = "metadata" in manifest ? manifest.metadata : undefined;
-const updateGroup =
-  metadata && "updateGroup" in metadata ? metadata.updateGroup : undefined;
-
-posthog.register({
-  environment: config.ENV,
-  code_bundle_id: (updateGroup as string) || "",
-});

@@ -18,7 +18,7 @@ import { useTrackScreens } from "@/hooks/use-track-screens";
 import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
-import { posthog } from "@/services/posthog";
+import { getExpoPostHog } from "@/services/observability";
 import { useQuickActions } from "@/services/quickActions";
 import { store } from "@/store";
 import { SceneName } from "@/types/scene-name";
@@ -76,25 +76,38 @@ const App = () => {
     }
   }, []);
 
+  const tree = (
+    <TRPCProvider>
+      <ThemeProvider>
+        <BottomSheetModalProvider>
+          <NetworkBoundary>
+            <Provider store={store}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(app)" />
+                <Stack.Screen name="(auth)" />
+              </Stack>
+            </Provider>
+            <MagicModalPortal />
+          </NetworkBoundary>
+        </BottomSheetModalProvider>
+      </ThemeProvider>
+    </TRPCProvider>
+  );
+
+  // `getExpoPostHog()` is null in a build with no key, and PostHogProvider
+  // cannot be handed one — mounting it with an uninitialised client leaves
+  // every `usePostHog()` consumer queueing events into a socket that never
+  // opens. Rendering the app without the provider is the documented shape;
+  // the error boundary inside NetworkBoundary reports through the shared
+  // client either way, which no-ops just as silently.
+  const posthog = getExpoPostHog();
+  if (!posthog) return <AppContainer>{tree}</AppContainer>;
+
   return (
     <AppContainer>
       <PostHogProvider client={posthog} autocapture={false}>
-        <TRPCProvider>
-          <ThemeProvider>
-            <BottomSheetModalProvider>
-              <NetworkBoundary>
-                <Provider store={store}>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(app)" />
-                    <Stack.Screen name="(auth)" />
-                  </Stack>
-                </Provider>
-                <MagicModalPortal />
-              </NetworkBoundary>
-            </BottomSheetModalProvider>
-          </ThemeProvider>
-        </TRPCProvider>
+        {tree}
       </PostHogProvider>
     </AppContainer>
   );

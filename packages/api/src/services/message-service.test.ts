@@ -4,14 +4,19 @@ import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake
 
 import MessageService from "./message-service";
 
-jest.mock("../shared/posthog", () => ({
-  posthog: {
-    captureException: jest.fn(),
+jest.mock("../shared/observability", () => ({
+  observability: {
+    enabled: false,
+    disabledReason: "explicitly-disabled",
     capture: jest.fn(),
+    captureError: jest.fn(),
     identify: jest.fn(),
-    isFeatureEnabled: jest.fn(),
+    reset: jest.fn(),
+    register: jest.fn(),
+    flush: jest.fn(),
     shutdown: jest.fn(),
   },
+  getPostHogNode: jest.fn(() => null),
 }));
 
 afterAll(async () => {

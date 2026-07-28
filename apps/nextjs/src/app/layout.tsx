@@ -5,6 +5,7 @@ import { Epilogue } from "next/font/google";
 
 import { Analytics } from "@vercel/analytics/react";
 
+import { Providers } from "@/app/providers";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang={locale}>
       <Analytics />
-      <body className={cn(epilogue.variable, "font-epilogue")}>{children}</body>
+      <body className={cn(epilogue.variable, "font-epilogue")}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 };

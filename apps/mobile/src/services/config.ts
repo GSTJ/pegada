@@ -2,8 +2,13 @@ import { z } from "zod";
 
 const configSchema = z.object({
   ENV: z.enum(["development", "production"]),
-  POSTHOG_API_KEY: z.string(),
-  POSTHOG_HOST: z.string(),
+  /**
+   * Optional on purpose. `magic-observability` returns a silent no-op client
+   * without a key, so a clone with no `.env` — or a contributor who never set
+   * a token — boots and runs instead of throwing at import time.
+   */
+  POSTHOG_KEY: z.string().optional(),
+  POSTHOG_HOST: z.string().optional(),
   IOS_GOOGLE_MAPS_API_KEY: z.string(),
   ANDROID_GOOGLE_MAPS_API_KEY: z.string(),
   REVENUE_CAT_IOS_API_KEY: z.string(),
@@ -19,7 +24,14 @@ const configSchema = z.object({
 
 const _config = configSchema.safeParse({
   ENV: process.env.EXPO_PUBLIC_ENV,
-  POSTHOG_API_KEY: process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
+  // `EXPO_PUBLIC_POSTHOG_KEY` is the shared GSTJ convention that
+  // `magic-observability` reads on its own; `EXPO_PUBLIC_POSTHOG_API_KEY` is
+  // the name this project's EAS "production" environment already stores the
+  // token under. Both are accepted, newest first, so the EAS entry can be
+  // renamed whenever without a coordinated deploy.
+  POSTHOG_KEY:
+    process.env.EXPO_PUBLIC_POSTHOG_KEY ??
+    process.env.EXPO_PUBLIC_POSTHOG_API_KEY,
   POSTHOG_HOST: process.env.EXPO_PUBLIC_POSTHOG_HOST,
   IOS_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY,
   ANDROID_GOOGLE_MAPS_API_KEY:
