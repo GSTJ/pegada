@@ -14,9 +14,18 @@ const configSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
 
-  /** POSTHOG (analytics + error tracking + feature flags) */
-  POSTHOG_API_KEY: z.string(),
-  POSTHOG_HOST: z.string(),
+  /**
+   * POSTHOG (analytics + error tracking + feature flags)
+   *
+   * `POSTHOG_KEY` is the shared GSTJ variable name; `POSTHOG_API_KEY` is what
+   * this project's environments already set. Both optional: without a key
+   * `magic-observability` hands back a silent no-op client, so a fresh clone
+   * and the test suite boot without a PostHog project instead of throwing
+   * here at import time.
+   */
+  POSTHOG_KEY: z.string().optional(),
+  POSTHOG_API_KEY: z.string().optional(),
+  POSTHOG_HOST: z.string().optional(),
 
   /** SERVER */
   PORT: z.coerce.number().default(3009),

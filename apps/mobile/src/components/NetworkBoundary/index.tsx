@@ -10,11 +10,12 @@ import {
   QueryErrorResetBoundary,
   useQueryErrorResetBoundary,
 } from "@tanstack/react-query";
-import { PostHogErrorBoundary } from "posthog-react-native";
+import { ObservabilityBoundary } from "magic-observability/expo";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
 import { Button } from "@/components/Button";
+import { observability } from "@/services/observability";
 
 import {
   ContainedText,
@@ -139,13 +140,21 @@ const QueryAwareErrorBoundary = ({
   children,
   errorFallback,
 }: PropsWithChildren<Pick<NetworkBoundaryProps, "errorFallback">>) => {
+  // `ObservabilityBoundary` rather than posthog-react-native's own: same
+  // reporting, but it takes the shared client, so a render error here lands as
+  // the same `$exception` shape as one from `sendError` or the Next app, and
+  // it still renders the fallback when there is no key.
   const handleError = (props: QueryErrorResetBoundaryValue) => {
     const ErrorComponent = errorFallback ?? DefaultErrorComponent;
 
     return (
-      <PostHogErrorBoundary fallback={<ErrorComponent {...props} />}>
+      <ObservabilityBoundary
+        client={observability}
+        context={{ boundary: "network" }}
+        fallback={<ErrorComponent {...props} />}
+      >
         {children}
-      </PostHogErrorBoundary>
+      </ObservabilityBoundary>
     );
   };
 

@@ -1,36 +1,41 @@
 "use client";
 
+import { useEffect } from "react";
+
+import { captureError } from "magic-observability/web";
+
+import { SomethingWentWrong } from "@/components/something-went-wrong";
+
+/**
+ * Next's route-level error boundary. It is a client component, so it reports
+ * through the browser client rather than `magic-observability/next` — the
+ * server half never sees an error React caught during hydration or a client
+ * render.
+ *
+ * The `<html>`/`<body>` wrapper is deliberate and predates this change: this
+ * file stands in for `global-error.tsx` too, and a boundary that replaces the
+ * root layout has to render the document shell itself.
+ */
 const GlobalError = ({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) => {
+  useEffect(() => {
+    captureError(error, {
+      source: "app-error-boundary",
+      // Next replaces a server error's message with a digest in production;
+      // it is the only handle that ties this event to the server-side log.
+      ...(error.digest ? { digest: error.digest } : {}),
+    });
+  }, [error]);
+
   return (
     <html lang="en">
       <body>
-        <section className="bg-white dark:bg-gray-900 min-h-screen flex items-center">
-          <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-            <div className="mx-auto max-w-screen-sm text-center gap-4">
-              <h1 className="text-7xl tracking-tight font-extrabold lg:text-9xl text-primary-600 dark:text-primary-500">
-                500
-              </h1>
-              <p className="mb-4 text-2xl tracking-tight font-bold text-gray-900 md:text-3xl">
-                Something went wrong
-              </p>
-              <p className="text-lg font-light text-gray-500 dark:text-gray-400">
-                We encountered an error. Please try again later.
-              </p>
-              <button
-                type="button"
-                onClick={reset}
-                className="inline-flex text-white bg-primary hover:scale-105 transition-all focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900 my-4"
-              >
-                Try again
-              </button>
-            </div>
-          </div>
-        </section>
+        <SomethingWentWrong reset={reset} />
       </body>
     </html>
   );
