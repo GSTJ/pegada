@@ -32,3 +32,10 @@ Evidence for `web/banner-copy` (Pegada web, Wave 2, PR 5): the landing H1 and
 supporting line realigned to `.github/images/banner.png` in both locales.
 Before/after at 1440x900 and 390x844 x en + pt-BR, the three-way pt-BR candidate
 matrix, and the banner itself as the reference target.
+
+## web/content-sections
+
+Evidence for `web/content-sections` (Pegada web, Wave 2, PR 6): the features
+and how-it-works sections added below the fold. Full-page desktop and mobile
+captures in both locales, a scroll-through GIF, and a hero-viewport before/after
+pair showing zero pixel difference on the first screen.
