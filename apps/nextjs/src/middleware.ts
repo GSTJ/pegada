@@ -1,16 +1,42 @@
+import { NextRequest } from "next/server";
+
 import createMiddleware from "next-intl/middleware";
 
-export default createMiddleware({
+import {
+  DEFAULT_LOCALE_SEGMENT,
+  LOCALE_SEGMENTS,
+  PATHNAME_HEADER,
+} from "@/lib/locales";
+
+const handleI18nRouting = createMiddleware({
   // A list of all locales that are supported
-  locales: ["en-us", "pt-br"],
+  locales: LOCALE_SEGMENTS,
 
   localeDetection: true,
 
   localePrefix: "as-needed",
 
   // If this locale is matched, pathnames work without a prefix (e.g. `/about`)
-  defaultLocale: "en-us",
+  defaultLocale: DEFAULT_LOCALE_SEGMENT,
 });
+
+/**
+ * next-intl rewrites `/privacy-policy` to `/en-us/privacy-policy` before Next
+ * routes it, and the App Router never hands a layout the request path, so
+ * `generateMetadata` has no way to build a self-referencing canonical on its
+ * own. Forwarding the original pathname as a request header is what gets it
+ * there: `new NextRequest(request, { headers })` is the Fetch API's own
+ * clone-with-different-headers, and next-intl copies the request headers onto
+ * the rewrite it emits, so the value survives into the render.
+ */
+const middleware = (request: NextRequest) => {
+  const headers = new Headers(request.headers);
+  headers.set(PATHNAME_HEADER, request.nextUrl.pathname);
+
+  return handleI18nRouting(new NextRequest(request, { headers }));
+};
+
+export default middleware;
 
 export const config = {
   // Skip all paths that should not be internationalized.

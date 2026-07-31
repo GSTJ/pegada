@@ -6,7 +6,14 @@ import { Epilogue } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 
 import { Providers } from "@/app/providers";
-import { getSafeLocale } from "@/lib/get-safe-locale";
+import { getRequestPathname, getSafeLocale } from "@/lib/get-safe-locale";
+import {
+  LOCALE_SEGMENTS,
+  toLanguage,
+  toLocalePath,
+  toOpenGraphLocale,
+  toRoutePath,
+} from "@/lib/locales";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
@@ -16,10 +23,53 @@ const epilogue = Epilogue({
   subsets: ["latin"],
 });
 
+/**
+ * Every relative URL below (canonical, hreflang, `og:image`) is resolved
+ * against this, which is what makes them absolute in the rendered `<head>` —
+ * crawlers and every social scraper reject relative ones.
+ */
+const SITE_URL = new URL("https://www.pegada.app");
+
+const OG_IMAGE = {
+  url: "/og-image.png",
+  width: 1200,
+  height: 630,
+};
+
 export const generateMetadata = () => {
+  const locale = getSafeLocale();
+  const routePath = toRoutePath(getRequestPathname());
+
+  const canonical = toLocalePath(locale, routePath);
+  const images = [{ ...OG_IMAGE, alt: t("metadata.ogImageAlt") }];
+
   return {
+    metadataBase: SITE_URL,
     title: t("metadata.title"),
     description: t("metadata.description"),
+    alternates: {
+      canonical,
+      languages: Object.fromEntries(
+        LOCALE_SEGMENTS.map((segment) => [
+          toLanguage(segment),
+          toLocalePath(segment, routePath),
+        ]),
+      ),
+    },
+    // No `title`/`description` here on purpose: Next falls back to the ones
+    // above, and those are overridden per route (privacy policy, terms, …).
+    // Repeating them would stamp the homepage title onto every sub-page's card.
+    openGraph: {
+      type: "website",
+      locale: toOpenGraphLocale(locale),
+      siteName: "Pegada",
+      url: canonical,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      images,
+    },
     other: { "apple-itunes-app": "app-id=6450865592" },
   } satisfies Metadata;
 };
