@@ -25,3 +25,10 @@ Evidence for `web/metadata-og` (Pegada web, Wave 1, PR 2/4):
   instead of streaming it into the body.
 - `status-before.txt` / `status-after.txt` — HTTP status per path, showing
   the unknown-locale paths going 200 -> 404.
+
+## web/banner-copy
+
+Evidence for `web/banner-copy` (Pegada web, Wave 2, PR 5): the landing H1 and
+supporting line realigned to `.github/images/banner.png` in both locales.
+Before/after at 1440x900 and 390x844 x en + pt-BR, the three-way pt-BR candidate
+matrix, and the banner itself as the reference target.
