@@ -23,8 +23,8 @@
       "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
       "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
       "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186,
-      "/app-store-icon.svg": 635,
-      "/google-play-icon.svg": 376
+      "/google-play-icon.svg": 376,
+      "/app-store-icon.svg": 635
     },
     "clip": {
       "x": 865,
@@ -56,9 +56,9 @@
       "/phone-mockup.png": 4924610,
       "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
       "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
-      "/app-store-icon.svg": 635,
+      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186,
       "/google-play-icon.svg": 376,
-      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186
+      "/app-store-icon.svg": 635
     },
     "clip": {
       "x": 865,
@@ -87,8 +87,8 @@
     },
     "bytes": 4962236,
     "assets": {
-      "/phone-mockup.png": 4924610,
       "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/phone-mockup.png": 4924610,
       "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
       "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186,
       "/app-store-icon.svg": 635,
@@ -155,8 +155,8 @@
     },
     "bytes": 4962236,
     "assets": {
-      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
       "/phone-mockup.png": 4924610,
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
       "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
       "/app-store-icon.svg": 635,
       "/google-play-icon.svg": 376,
