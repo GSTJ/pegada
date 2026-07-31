@@ -49,6 +49,29 @@
         "title": "Say hi",
         "description": "Pick a park, pick a time."
       }
+    },
+    "screens": {
+      "title": "What it looks like",
+      "swipe": {
+        "title": "Who's nearby",
+        "description": "Their photo, their age, the distance.",
+        "alt": "The Pegada swipe screen: one dog's card filling the screen, the distance in the corner, the name and age across the bottom."
+      },
+      "profile": {
+        "title": "The full profile",
+        "description": "Tap the card to read everything their owner wrote.",
+        "alt": "A dog's profile in Pegada, showing breed, age and a short bio under the photo."
+      },
+      "match": {
+        "title": "The match",
+        "description": "Both dogs said yes. You can talk now.",
+        "alt": "Pegada's match screen, with two dog photos overlapping under the word Match."
+      },
+      "chat": {
+        "title": "Sorting out the walk",
+        "description": "Where to meet, and when.",
+        "alt": "A Pegada chat between two owners settling on a morning at the park."
+      }
     }
   },
   "privacyPolicy": {
