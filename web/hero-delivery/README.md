@@ -42,7 +42,7 @@ DPR 3 is the real iPhone 12/13/14/15 case for a 390x844 viewport.
 | metric | before | after | delta |
 | --- | --- | --- | --- |
 | Performance score | 96 | 99 | +3 |
-| LCP | 2.72 s | 2.11 s | -0.61 s (-22.6%) |
+| LCP | 2,720 ms | 2,106 ms | -614 ms (-22.6%) |
 | Total byte weight | 5,192,564 B | 332,466 B | -93.6% |
 | FCP | 757 ms | 756 ms | -1 ms |
 | Speed Index | 757 ms | 756 ms | -1 ms |
