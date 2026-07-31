@@ -1,0 +1,10 @@
+/                        200
+/pt-br                   200
+/privacy-policy          200
+/pt-br/privacy-policy    200
+/garbage-locale-path     404
+/garbage.locale          404
+/apidocs                 404
+/storefront              404
+/robots.txt              404
+/site.map                404

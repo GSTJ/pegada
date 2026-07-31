@@ -1,0 +1,26 @@
+--- /private/tmp/claude-501/-Users-jarvis-jarvis-lab/2a1052d2-0b02-4d95-a15f-65a1715c0c4b/scratchpad/evidence/head-before-pp-en.txt	2026-07-31 17:58:32
++++ /private/tmp/claude-501/-Users-jarvis-jarvis-lab/2a1052d2-0b02-4d95-a15f-65a1715c0c4b/scratchpad/evidence/head-after-pp-en.txt	2026-07-31 17:57:52
+@@ -4,3 +4,23 @@
+ <title>Pegada | Privacy Policy</title>
+ <meta name="description" content="Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS."/>
+ <meta name="apple-itunes-app" content="app-id=6450865592"/>
++<link rel="canonical" href="https://www.pegada.app/privacy-policy"/>
++<link rel="alternate" hrefLang="en-US" href="https://www.pegada.app/privacy-policy"/>
++<link rel="alternate" hrefLang="pt-BR" href="https://www.pegada.app/pt-br/privacy-policy"/>
++<meta property="og:title" content="Pegada | Privacy Policy"/>
++<meta property="og:description" content="Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS."/>
++<meta property="og:url" content="https://www.pegada.app/privacy-policy"/>
++<meta property="og:site_name" content="Pegada"/>
++<meta property="og:locale" content="en_US"/>
++<meta property="og:image" content="https://www.pegada.app/og-image.png"/>
++<meta property="og:image:width" content="1200"/>
++<meta property="og:image:height" content="630"/>
++<meta property="og:image:alt" content="An iPhone running Pegada, showing the profile of a golden retriever named Maui, beside the words “Friends For Your Doggie” and “Pawfect Matches”."/>
++<meta property="og:type" content="website"/>
++<meta name="twitter:card" content="summary_large_image"/>
++<meta name="twitter:title" content="Pegada | Privacy Policy"/>
++<meta name="twitter:description" content="Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS."/>
++<meta name="twitter:image" content="https://www.pegada.app/og-image.png"/>
++<meta name="twitter:image:width" content="1200"/>
++<meta name="twitter:image:height" content="630"/>
++<meta name="twitter:image:alt" content="An iPhone running Pegada, showing the profile of a golden retriever named Maui, beside the words “Friends For Your Doggie” and “Pawfect Matches”."/>
