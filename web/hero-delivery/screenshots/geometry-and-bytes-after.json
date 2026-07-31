@@ -1,0 +1,172 @@
+{
+  "desktop-1440x900@1x": {
+    "geom": {
+      "x": 867.03125,
+      "y": 87,
+      "pageY": 87,
+      "width": 393.9375,
+      "height": 765,
+      "scrollY": 0,
+      "docWidth": 1440,
+      "docHeight": 900,
+      "naturalWidth": 405,
+      "naturalHeight": 786,
+      "complete": true,
+      "currentSrc": "http://localhost:3313/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=640&q=90",
+      "sizes": "45vh",
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 99329,
+    "assets": {
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-f0d58381d9e606c1.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-aa8b078b6f8a4d31.js": 619,
+      "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=640&q=90": 61270,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 865,
+      "y": 85,
+      "width": 398,
+      "height": 769
+    }
+  },
+  "desktop-1440x900@2x": {
+    "geom": {
+      "x": 867.03125,
+      "y": 87,
+      "pageY": 87,
+      "width": 393.9375,
+      "height": 765,
+      "scrollY": 0,
+      "docWidth": 1440,
+      "docHeight": 900,
+      "naturalWidth": 404,
+      "naturalHeight": 786,
+      "complete": true,
+      "currentSrc": "http://localhost:3313/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=828&q=90",
+      "sizes": "45vh",
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 124147,
+    "assets": {
+      "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=828&q=90": 86088,
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-f0d58381d9e606c1.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-aa8b078b6f8a4d31.js": 619,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 865,
+      "y": 85,
+      "width": 398,
+      "height": 769
+    }
+  },
+  "mobile-390x844@1x": {
+    "geom": {
+      "x": 10.28125,
+      "y": 79,
+      "pageY": 960,
+      "width": 369.421875,
+      "height": 717.390625,
+      "scrollY": 881,
+      "docWidth": 390,
+      "docHeight": 1725,
+      "naturalWidth": 379,
+      "naturalHeight": 737,
+      "complete": true,
+      "currentSrc": "http://localhost:3313/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=384&q=90",
+      "sizes": "45vh",
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 69717,
+    "assets": {
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=384&q=90": 31658,
+      "/_next/static/chunks/main-app-f0d58381d9e606c1.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-aa8b078b6f8a4d31.js": 619,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 8,
+      "y": 77,
+      "width": 374,
+      "height": 722
+    }
+  },
+  "mobile-390x844@2x": {
+    "geom": {
+      "x": 10.28125,
+      "y": 79,
+      "pageY": 960,
+      "width": 369.421875,
+      "height": 717.390625,
+      "scrollY": 881,
+      "docWidth": 390,
+      "docHeight": 1725,
+      "naturalWidth": 379,
+      "naturalHeight": 737,
+      "complete": true,
+      "currentSrc": "http://localhost:3313/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=828&q=90",
+      "sizes": "45vh",
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 124147,
+    "assets": {
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=828&q=90": 86088,
+      "/_next/static/chunks/main-app-f0d58381d9e606c1.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-aa8b078b6f8a4d31.js": 619,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 8,
+      "y": 77,
+      "width": 374,
+      "height": 722
+    }
+  },
+  "mobile-390x844@3x": {
+    "geom": {
+      "x": 10.28125,
+      "y": 79,
+      "pageY": 960,
+      "width": 369.421875,
+      "height": 717.390625,
+      "scrollY": 881,
+      "docWidth": 390,
+      "docHeight": 1725,
+      "naturalWidth": 379,
+      "naturalHeight": 737,
+      "complete": true,
+      "currentSrc": "http://localhost:3313/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=1200&q=90",
+      "sizes": "45vh",
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 168141,
+    "assets": {
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-f0d58381d9e606c1.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-aa8b078b6f8a4d31.js": 619,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376,
+      "/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fphone-mockup.c0da667a.webp&w=1200&q=90": 130082
+    },
+    "clip": {
+      "x": 8,
+      "y": 77,
+      "width": 374,
+      "height": 722
+    }
+  }
+}

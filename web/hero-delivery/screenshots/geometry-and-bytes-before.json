@@ -1,0 +1,172 @@
+{
+  "desktop-1440x900@1x": {
+    "geom": {
+      "x": 867.03125,
+      "y": 87,
+      "pageY": 87,
+      "width": 393.9375,
+      "height": 765,
+      "scrollY": 0,
+      "docWidth": 1440,
+      "docHeight": 900,
+      "naturalWidth": 3924,
+      "naturalHeight": 7620,
+      "complete": true,
+      "currentSrc": "http://localhost:3311/phone-mockup.png",
+      "sizes": null,
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 4962236,
+    "assets": {
+      "/phone-mockup.png": 4924610,
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 865,
+      "y": 85,
+      "width": 398,
+      "height": 769
+    }
+  },
+  "desktop-1440x900@2x": {
+    "geom": {
+      "x": 867.03125,
+      "y": 87,
+      "pageY": 87,
+      "width": 393.9375,
+      "height": 765,
+      "scrollY": 0,
+      "docWidth": 1440,
+      "docHeight": 900,
+      "naturalWidth": 3924,
+      "naturalHeight": 7620,
+      "complete": true,
+      "currentSrc": "http://localhost:3311/phone-mockup.png",
+      "sizes": null,
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 4962236,
+    "assets": {
+      "/phone-mockup.png": 4924610,
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376,
+      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186
+    },
+    "clip": {
+      "x": 865,
+      "y": 85,
+      "width": 398,
+      "height": 769
+    }
+  },
+  "mobile-390x844@1x": {
+    "geom": {
+      "x": 10.28125,
+      "y": 79,
+      "pageY": 960,
+      "width": 369.421875,
+      "height": 717.390625,
+      "scrollY": 881,
+      "docWidth": 390,
+      "docHeight": 1725,
+      "naturalWidth": 3924,
+      "naturalHeight": 7620,
+      "complete": true,
+      "currentSrc": "http://localhost:3311/phone-mockup.png",
+      "sizes": null,
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 4962236,
+    "assets": {
+      "/phone-mockup.png": 4924610,
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 8,
+      "y": 77,
+      "width": 374,
+      "height": 722
+    }
+  },
+  "mobile-390x844@2x": {
+    "geom": {
+      "x": 10.28125,
+      "y": 79,
+      "pageY": 960,
+      "width": 369.421875,
+      "height": 717.390625,
+      "scrollY": 881,
+      "docWidth": 390,
+      "docHeight": 1725,
+      "naturalWidth": 3924,
+      "naturalHeight": 7620,
+      "complete": true,
+      "currentSrc": "http://localhost:3311/phone-mockup.png",
+      "sizes": null,
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 4962236,
+    "assets": {
+      "/phone-mockup.png": 4924610,
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
+      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376
+    },
+    "clip": {
+      "x": 8,
+      "y": 77,
+      "width": 374,
+      "height": 722
+    }
+  },
+  "mobile-390x844@3x": {
+    "geom": {
+      "x": 10.28125,
+      "y": 79,
+      "pageY": 960,
+      "width": 369.421875,
+      "height": 717.390625,
+      "scrollY": 881,
+      "docWidth": 390,
+      "docHeight": 1725,
+      "naturalWidth": 3924,
+      "naturalHeight": 7620,
+      "complete": true,
+      "currentSrc": "http://localhost:3311/phone-mockup.png",
+      "sizes": null,
+      "fetchpriority": null,
+      "loading": null
+    },
+    "bytes": 4962236,
+    "assets": {
+      "/_next/static/media/5c9b804ec7dd51d9-s.p.woff2": 35680,
+      "/phone-mockup.png": 4924610,
+      "/_next/static/chunks/main-app-a5fcf847a8c886e8.js": 749,
+      "/app-store-icon.svg": 635,
+      "/google-play-icon.svg": 376,
+      "/_next/static/chunks/app/%5Blocale%5D/page-80b719cb374e7030.js": 186
+    },
+    "clip": {
+      "x": 8,
+      "y": 77,
+      "width": 374,
+      "height": 722
+    }
+  }
+}
