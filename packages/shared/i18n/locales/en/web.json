@@ -11,7 +11,45 @@
       "googlePlay": "Google Play",
       "appStore": "App Store"
     },
-    "madeWithLoveBy": "Made with ❤️ by "
+    "madeWithLoveBy": "Made with ❤️ by ",
+    "features": {
+      "title": "Built for dogs",
+      "match": {
+        "title": "Dogs that suit yours",
+        "description": "Breed, personality, and how far you'd actually walk. That's what we sort by."
+      },
+      "profile": {
+        "title": "The profile is your dog's",
+        "description": "Photos, age, the stuff they hate. You just hold the phone."
+      },
+      "inclusive": {
+        "title": "Mutts welcome",
+        "description": "Pedigree or no papers at all, everyone gets the same shot."
+      },
+      "messaging": {
+        "title": "You decide who talks to your dog",
+        "description": "The chat opens only after a match. Block or report any time."
+      }
+    },
+    "howItWorks": {
+      "title": "From profile to first walk",
+      "profile": {
+        "title": "Set up the profile",
+        "description": "Name, breed, a few photos."
+      },
+      "swipe": {
+        "title": "See who's nearby",
+        "description": "One dog at a time, from your neighborhood. Like or skip."
+      },
+      "match": {
+        "title": "Wait for the match",
+        "description": "If the other dog likes yours back, you both hear about it."
+      },
+      "chat": {
+        "title": "Say hi",
+        "description": "Pick a park, pick a time."
+      }
+    }
   },
   "privacyPolicy": {
     "metadata": {
