@@ -36,6 +36,25 @@ const OG_IMAGE = {
   height: 630,
 };
 
+/**
+ * `public/favicon.ico` is served by convention with no `<link>` at all, which
+ * leaves every non-.ico surface — Android's home screen, iOS's, the 180px
+ * touch icon — to guess. Declaring the set is what makes those resolve; all
+ * of it is generated from `public/logo.svg` by `scripts/generate-icons.sh`.
+ */
+const icons = {
+  icon: [
+    { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+    { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+  ],
+  apple: [
+    { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+  ],
+} satisfies Metadata["icons"];
+
 export const generateMetadata = () => {
   const locale = getSafeLocale();
   const routePath = toRoutePath(getRequestPathname());
@@ -47,6 +66,7 @@ export const generateMetadata = () => {
     metadataBase: SITE_URL,
     title: t("metadata.title"),
     description: t("metadata.description"),
+    icons,
     alternates: {
       canonical,
       languages: Object.fromEntries(
