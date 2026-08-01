@@ -183,17 +183,18 @@ export class AuthenticationService {
       return true;
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Match and clear in one write so a successful OTP cannot be replayed,
+    // including by two requests that arrive at the same time.
+    const consumed = await prisma.user.updateMany({
+      where: {
+        email,
+        code,
+        codeExpiresAt: { gte: new Date() },
+      },
+      data: { code: null, codeExpiresAt: null },
     });
 
-    if (!user) throw new Error("User not found");
-
-    if (user.code !== code || !user.codeExpiresAt) {
-      throw new InvalidOTPCodeError();
-    }
-
-    if (user.codeExpiresAt < new Date()) throw new Error("Code expired");
+    if (consumed.count !== 1) throw new InvalidOTPCodeError();
 
     return true;
   }
