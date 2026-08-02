@@ -5,8 +5,8 @@
     "ogImageAlt": "An iPhone running Pegada, showing the profile of a golden retriever named Maui, beside the words “Friends For Your Doggie” and “Pawfect Matches”."
   },
   "home": {
-    "title": "Friends For Your Doggie",
-    "description": "Pawfect matches by breed and personality, close enough to walk to.",
+    "title": "Find a Match For Your Dog",
+    "description": "Our algorithm ensures that your puppy finds the perfect match based on breed, location, and even personality!",
     "cta": {
       "googlePlay": "Google Play",
       "appStore": "App Store"
