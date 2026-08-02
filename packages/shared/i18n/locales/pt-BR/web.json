@@ -6,74 +6,13 @@
   },
 
   "home": {
-    "title": "Amigos Pro Seu Dog",
-    "description": "Aqui do lado tem cachorro da mesma raça e com o mesmo jeito do seu.",
+    "title": "Dê um Match Pro Seu Dog",
+    "description": "O algoritmo garante que seu cachorrinho encontre o par perfeito baseado na raça, localização e até mesmo personalidade!",
     "cta": {
       "googlePlay": "Google Play",
       "appStore": "App Store"
     },
-    "madeWithLoveBy": "Feito com ❤️ por ",
-    "features": {
-      "title": "Feito pro cachorro",
-      "match": {
-        "title": "Cachorro que combina com o seu",
-        "description": "Raça, jeito e distância que dá pra ir a pé."
-      },
-      "profile": {
-        "title": "O perfil é do seu cachorro",
-        "description": "Foto, idade, o que ele detesta. Você só segura o celular."
-      },
-      "inclusive": {
-        "title": "Vira-lata é bem-vindo",
-        "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito."
-      },
-      "messaging": {
-        "title": "Você decide quem fala com ele",
-        "description": "Conversa só depois do match. E dá pra bloquear ou denunciar a qualquer hora."
-      }
-    },
-    "howItWorks": {
-      "title": "Do perfil ao primeiro passeio",
-      "profile": {
-        "title": "Cria o perfil",
-        "description": "Nome, raça, umas fotos."
-      },
-      "swipe": {
-        "title": "Vê quem tá perto",
-        "description": "Um cachorro por vez, do seu bairro. Curte ou passa."
-      },
-      "match": {
-        "title": "Espera o match",
-        "description": "Se o outro cachorro curtir o seu, os dois ficam sabendo."
-      },
-      "chat": {
-        "title": "Puxa assunto",
-        "description": "Escolhe o parque, marca a hora."
-      }
-    },
-    "screens": {
-      "title": "Como é na tela",
-      "swipe": {
-        "title": "Quem tá por perto",
-        "description": "A foto, a idade, a distância.",
-        "alt": "A tela de swipe do Pegada: o card de um cachorro ocupando a tela, a distância no canto, o nome e a idade embaixo."
-      },
-      "profile": {
-        "title": "O perfil completo",
-        "description": "Toca no card pra ler tudo que o dono escreveu.",
-        "alt": "O perfil de um cachorro no Pegada, com raça, idade e uma descrição curta abaixo da foto."
-      },
-      "match": {
-        "title": "O match",
-        "description": "Os dois curtiram. Já dá pra conversar.",
-        "alt": "A tela de match do Pegada, com as fotos dos dois cachorros sobrepostas embaixo da palavra Match."
-      },
-      "chat": {
-        "title": "Combinando o passeio",
-        "description": "Onde se encontrar e a que horas.",
-        "alt": "Uma conversa no Pegada entre dois donos combinando uma manhã no parque."
-      }
-    }
+    "madeWithLoveBy": "Feito com ❤️ por "
   },
   "privacyPolicy": {
     "metadata": {
