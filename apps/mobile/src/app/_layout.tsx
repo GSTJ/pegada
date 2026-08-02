@@ -20,7 +20,6 @@ import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
 import { getExpoPostHog } from "@/services/observability";
 import { store } from "@/store";
-import { SceneName } from "@/types/scene-name";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);

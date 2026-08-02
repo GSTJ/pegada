@@ -42,7 +42,8 @@ export const ActionItem = styled(PressableArea).attrs({
   hitSlop: { top: 12, bottom: 12, left: 12, right: 12 },
 })`
   padding: ${(props) => props.theme.spacing[2.5]}px;
-  background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
+  background-color: ${(props) =>
+    new Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
 
   border-radius: ${(props) => props.theme.radii.round}px;
 
@@ -52,7 +53,6 @@ export const ActionItem = styled(PressableArea).attrs({
   align-items: center;
   justify-content: center;
 `;
-
 
 export const ConfusedEmoji = styled(Image).attrs({
   source: confusedEmoji,

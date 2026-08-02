@@ -1,5 +1,6 @@
+import type { BlurViewProps } from "expo-blur";
+
 import * as React from "react";
-import { BlurViewProps } from "expo-blur";
 
 import { Container, Gradient } from "./styles";
 

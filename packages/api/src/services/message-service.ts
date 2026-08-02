@@ -1,6 +1,7 @@
 import type { Language } from "@pegada/shared/i18n/types/types";
 
 import prisma from "@pegada/database";
+
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
 
