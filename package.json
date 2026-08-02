@@ -24,7 +24,6 @@
     "typecheck": "turbo typecheck",
     "changelog": "python3 .github/scripts/changelog.py --all --repo GSTJ/pegada --output CHANGELOG.md",
     "convert:images": "./scripts/convert-png-images-to-webp.sh",
-    "generate:icons": "./scripts/generate-icons.sh",
     "download:secrets": "dotenv -- ./scripts/download-secrets.sh"
   },
   "devDependencies": {
