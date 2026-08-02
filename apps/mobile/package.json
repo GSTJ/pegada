@@ -46,7 +46,6 @@
     "expo-device": "~55.0.18",
     "expo-file-system": "~55.0.23",
     "expo-font": "~55.0.7",
-    "expo-glass-effect": "~55.0.11",
     "expo-haptics": "~55.0.15",
     "expo-image": "~55.0.10",
     "expo-image-manipulator": "^55.0.16",
@@ -57,7 +56,6 @@
     "expo-localization": "~55.0.16",
     "expo-location": "~55.1.10",
     "expo-notifications": "^55.0.23",
-    "expo-quick-actions": "^6.0.2",
     "expo-router": "^55.0.14",
     "expo-secure-store": "^55.0.14",
     "expo-splash-screen": "~55.0.21",
@@ -110,7 +108,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "@bacons/apple-targets": "^4.0.7",
     "@pegada/api": "workspace:*",
     "@posthog/cli": "^0.8.1",
     "@types/color": "^3.0.6",

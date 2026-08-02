@@ -6,15 +6,10 @@ import Color from "color";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
-import { useMatchesWidgetSync } from "@/services/matchesWidget/use-matches-widget-sync";
-
 const AppLayout = () => {
   const theme = useTheme();
 
   const { t } = useTranslation();
-
-  // Keeps the home-screen widget fed while the user is signed in.
-  useMatchesWidgetSync();
 
   return (
     <Stack
@@ -29,13 +24,7 @@ const AppLayout = () => {
           backgroundColor: theme.colors.background,
         },
 
-        headerBlurEffect: "regular",
-        scrollEdgeEffects: {
-          bottom: "hidden",
-          left: "hidden",
-          right: "hidden",
-          top: "hidden",
-        },
+        headerBlurEffect: "prominent",
 
         headerStyle: {
           // BlurEffect doesn't work on Android, so opacity is not necessary

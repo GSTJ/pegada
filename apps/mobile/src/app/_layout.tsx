@@ -19,9 +19,7 @@ import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
 import { getExpoPostHog } from "@/services/observability";
-import { useQuickActions } from "@/services/quickActions";
 import { store } from "@/store";
-import { SceneName } from "@/types/scene-name";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);
@@ -51,10 +49,6 @@ const App = () => {
 
   useTrackScreens();
   useGetInitialNotifications();
-  // Quick actions can be triggered from this unauthenticated-safe root
-  // mount, so navigation is gated on having resolved to the fully
-  // authenticated, onboarded route -- see `useQuickActions`'s docblock.
-  useQuickActions(initialRouteName === SceneName.Swipe);
 
   // MAESTRO_E2E only: render magic modals inside the main window instead
   // of RNScreens' FullWindowOverlay. The overlay is a separate native

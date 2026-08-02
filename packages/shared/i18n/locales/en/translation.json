@@ -35,9 +35,6 @@
     "breed": "Breed"
   },
   "chat": {
-    "notificationChannelName": "Messages",
-    "replyAction": "Reply",
-    "replyFailed": "Your reply didn't send. Open the chat to try again.",
     "sendAMessageToStart": "Send a message to start the conversation",
     "today": "Today",
     "yesterday": "Yesterday",
@@ -219,10 +216,6 @@
     "updateError": "An error occurred while updating your preferences.",
     "years": "0-{{maxYears}}+ years"
   },
-  "quickActions": {
-    "matches": "Matches",
-    "editProfile": "Edit profile"
-  },
   "plans": {
     "FREE": "Free",
     "PREMIUM": "Premium",
@@ -334,12 +327,5 @@
     "automatic": "Automatic",
     "dark": "Dark",
     "light": "Light"
-  },
-  "widget": {
-    "waitingForReply": "{{count}} match waiting for your reply",
-    "waitingForReply_plural": "{{count}} matches waiting for your reply",
-    "waitingForReplyCountless": "matches waiting for your reply",
-    "allCaughtUp": "All caught up! Go make new friends",
-    "signedOut": "Sign in to see your matches here"
   }
 }

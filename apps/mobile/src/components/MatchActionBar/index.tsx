@@ -2,8 +2,6 @@ import * as React from "react";
 
 import Animated, { FadeInDown, ZoomOutDown } from "react-native-reanimated";
 
-import { PressableArea } from "@/components/pressable-area";
-
 import {
   ActionItem,
   ConfusedEmoji,
@@ -20,8 +18,6 @@ interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
   animated?: boolean;
 }
 
-const hitSlop = { top: 12, bottom: 12, left: 12, right: 12 };
-
 export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   onNope,
   onYep,
@@ -32,32 +28,23 @@ export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   const dislikeAnimation = animated ? FadeInDown.delay(300) : undefined;
   const maybeAnimation = animated ? FadeInDown.delay(350) : undefined;
   const likeAnimation = animated ? FadeInDown.delay(400) : undefined;
+
   return (
     <Container exiting={ZoomOutDown} {...props}>
       <Animated.View entering={dislikeAnimation}>
-        <PressableArea
-          hitSlop={hitSlop}
-          testID="swipe-dislike"
-          onPress={onNope}
-        >
-          <ActionItem>
-            <ConfusedEmoji />
-          </ActionItem>
-        </PressableArea>
+        <ActionItem testID="swipe-dislike" onPress={onNope}>
+          <ConfusedEmoji />
+        </ActionItem>
       </Animated.View>
       <Animated.View entering={maybeAnimation}>
-        <PressableArea hitSlop={hitSlop} testID="swipe-maybe" onPress={onMaybe}>
-          <ActionItem>
-            <ThinkingEmoji />
-          </ActionItem>
-        </PressableArea>
+        <ActionItem testID="swipe-maybe" onPress={onMaybe}>
+          <ThinkingEmoji />
+        </ActionItem>
       </Animated.View>
       <Animated.View entering={likeAnimation}>
-        <PressableArea hitSlop={hitSlop} testID="swipe-like" onPress={onYep}>
-          <ActionItem>
-            <HeartEyesEmoji />
-          </ActionItem>
-        </PressableArea>
+        <ActionItem testID="swipe-like" onPress={onYep}>
+          <HeartEyesEmoji />
+        </ActionItem>
       </Animated.View>
     </Container>
   );

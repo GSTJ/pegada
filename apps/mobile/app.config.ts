@@ -51,22 +51,10 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
-    // Wires every directory under `targets/` into the Xcode project at
-    // prebuild time: the shared `pegada-widgets` WidgetKit extension
-    // (home-screen widgets, Live Activities, Control Center controls) and the
-    // `notification-service` extension that restyles chat pushes as iOS
-    // communication notifications. iOS allows one widget extension per app, so
-    // every widget-family feature registers in PegadaWidgetsBundle.swift
-    // instead of adding a target. Both targets take their DEVELOPMENT_TEAM
-    // from `ios.appleTeamId` below, and each needs its own credentials set up
-    // on EAS before a release build can sign it (see the CREDENTIALS block in
-    // .github/workflows/release-mobile.yml). Local sim builds don't sign.
-    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
     "expo-router",
-    "expo-quick-actions",
     // react-native-maps 1.20+ enables Google Maps via its own config plugin.
     // The deprecated `ios.config.googleMapsApiKey` / `android.config.googleMaps`
     // fields make Expo prebuild reference a `react-native-google-maps` podspec
@@ -249,10 +237,6 @@ const config: ExpoConfig = {
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./src/assets/images/adaptive-icon.png",
-      // Android 13+ "Themed icons" setting recolors this to the user's
-      // wallpaper-derived palette, so it must be a single-color (white)
-      // silhouette on transparency, not the full-color glyph.
-      monochromeImage: "./src/assets/images/adaptive-icon-monochrome.png",
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
@@ -290,69 +274,10 @@ const config: ExpoConfig = {
       },
     },
     googleServicesFile: "./GoogleService-Info.plist",
-    // iOS 18+ dark home screen icon variant. Expo SDK 55's withIosIcons only
-    // falls back to the top-level `icon` when the `ios.icon` object has NONE
-    // of light/dark/tinted set (see getIcons() in withIosIcons.js) -- with
-    // `dark` present, it does NOT backfill `light`. setIconsAsync then picks
-    // the base/no-appearance asset catalog entry via `icon.light || icon.dark
-    // || icon.tinted`, so omitting `light` here made BOTH the default and the
-    // dark-appearance icon render from icon-dark.png (confirmed via
-    // `expo prebuild` + pixel diff of the generated Contents.json images: the
-    // no-appearance entry was byte-identical to icon-dark.png, not icon.png).
-    // `light` must be set explicitly. The source PNG is the glyph on a
-    // transparent background, per Apple's spec -- iOS supplies the dark
-    // backdrop itself.
-    //
-    // `tinted` is deliberately NOT configured here even though
-    // src/assets/images/icon-tinted.png exists (transparent glyph, ready to
-    // go): Expo SDK 55's prebuild plugin
-    // (@expo/prebuild-config/build/plugins/icons/withIosIcons.js,
-    // generateUniversalIconAsync) hardcodes `removeTransparency: appearance
-    // !== 'dark'` and forces a solid white `backgroundColor` for every
-    // variant except 'dark'. That flattens the transparent source onto
-    // opaque white during `expo prebuild`, before Xcode ever sees it, so
-    // real users who enable iOS's "Tinted" home screen icons would see a
-    // white square with a faint gray glyph -- worse than not shipping the
-    // variant at all, since omitting `tinted` makes iOS fall back to the
-    // normal full-color icon in tinted mode (see `getIcons()` in the same
-    // plugin). Flagged as a blocker to Gabriel in the PR description rather
-    // than shipped silently. Revisit once Expo fixes
-    // `generateUniversalIconAsync`, or patch it via patch-package if that's
-    // worth it later -- icon-tinted.png is already generated and correct.
-    icon: {
-      light: "./src/assets/images/icon.png",
-      dark: "./src/assets/images/icon-dark.png",
-    },
     config: {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
-    // @bacons/apple-targets reads this to stamp DEVELOPMENT_TEAM onto every
-    // target it generates (see with-xcode-changes.js,
-    // applyDevelopmentTeamIdToTargets). It is NOT supplied by EAS credentials
-    // at build time -- prebuild runs long before the signing step, and when
-    // the field is absent the plugin takes its "no team anywhere" branch:
-    // it REMOVES DEVELOPMENT_TEAM from every target and writes the literal
-    // string `DevelopmentTeam = undefined;` into the project's
-    // TargetAttributes (reproduced locally with `expo prebuild -p ios`; it
-    // also warns "iOS builds may fail until this is corrected" on every
-    // single prebuild, including the ones in CI).
-    //
-    // Sourced from the environment rather than hardcoded so the team ID
-    // stays out of a public repo; release-mobile.yml passes it from the
-    // EXPO_APPLE_TEAM_ID secret. Unset (plain local `expo prebuild`,
-    // simulator builds) behaves exactly as before -- those don't sign.
-    appleTeamId: process.env.EXPO_APPLE_TEAM_ID,
-    entitlements: {
-      // Shared storage between the app and the widget extension: the matches
-      // snapshot (UserDefaults) + downloaded avatars (container files).
-      "com.apple.security.application-groups": ["group.app.pegada"],
-      // Communication-notification styling for chat pushes (the
-      // notification-service target carries the same entitlement; both need
-      // the capability enabled on their App IDs in the Apple Developer
-      // portal for device builds).
-      "com.apple.developer.usernotifications.communication": true,
-    },
     // associatedDomains: [
     //   'applinks:pegada.app',
     //   'applinks:www.pegada.app',

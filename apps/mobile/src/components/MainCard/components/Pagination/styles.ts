@@ -1,7 +1,7 @@
 import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
-import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import { TransparentAndroidDarkBlurView } from "@/components/blur-view";
 
 export const Content = styled.View`
   padding: ${(props) => props.theme.spacing[1]}px;
@@ -9,7 +9,7 @@ export const Content = styled.View`
   align-items: center;
 `;
 
-export const Container = styled(TransparentGlassOrDarkBlurView)`
+export const Container = styled(TransparentAndroidDarkBlurView)`
   border-top-left-radius: ${(props) => props.theme.radii.md}px;
   border-bottom-left-radius: ${(props) => props.theme.radii.md}px;
   margin-bottom: auto;
