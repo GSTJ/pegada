@@ -7,12 +7,10 @@ import { Namespace } from "@pegada/shared/i18n/types/types";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components/native";
 
-import { TransparentGlassOrDarkBlurView } from "@/components/blur-view";
+import Glassmorphism from "@/components/Glassmorphism";
 import { Text } from "@/components/text";
 
-const GlassmorphismStyled = styled(TransparentGlassOrDarkBlurView).attrs({
-  glassEffectStyle: "regular",
-})`
+const GlassmorphismStyled = styled(Glassmorphism)`
   border-radius: ${(props) => props.theme.radii.md}px;
   margin-right: auto;
   margin-bottom: ${(props) => props.theme.spacing[3]}px;

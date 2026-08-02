@@ -24,13 +24,7 @@ const AppLayout = () => {
           backgroundColor: theme.colors.background,
         },
 
-        headerBlurEffect: "regular",
-        scrollEdgeEffects: {
-          bottom: "hidden",
-          left: "hidden",
-          right: "hidden",
-          top: "hidden",
-        },
+        headerBlurEffect: "prominent",
 
         headerStyle: {
           // BlurEffect doesn't work on Android, so opacity is not necessary
