@@ -78,6 +78,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   EXPO_NO_TELEMETRY: 1
 

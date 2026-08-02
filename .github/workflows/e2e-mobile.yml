@@ -274,6 +274,9 @@ concurrency:
   # runs). Never cancel push-to-main or scheduled runs midway.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions:
+  contents: read
+
 # Workflow-level env. Each job inherits and may extend.
 env:
   # The single source of truth for which flow stems are HARD-GATED.

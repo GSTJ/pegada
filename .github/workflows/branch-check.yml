@@ -16,6 +16,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   # Dedupe runs alone first: it's a lockfile sanity check, not a per-task
   # matrix concern, and gating the matrix on it avoids paying for 3 parallel
