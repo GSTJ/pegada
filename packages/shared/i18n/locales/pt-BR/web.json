@@ -12,45 +12,7 @@
       "googlePlay": "Google Play",
       "appStore": "App Store"
     },
-    "madeWithLoveBy": "Feito com ❤️ por ",
-    "features": {
-      "title": "Feito pro cachorro",
-      "match": {
-        "title": "Cachorro que combina com o seu",
-        "description": "Raça, jeito e distância que dá pra ir a pé."
-      },
-      "profile": {
-        "title": "O perfil é do seu cachorro",
-        "description": "Foto, idade, o que ele detesta. Você só segura o celular."
-      },
-      "inclusive": {
-        "title": "Vira-lata é bem-vindo",
-        "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito."
-      },
-      "messaging": {
-        "title": "Você decide quem fala com ele",
-        "description": "Conversa só depois do match. E dá pra bloquear ou denunciar a qualquer hora."
-      }
-    },
-    "howItWorks": {
-      "title": "Do perfil ao primeiro passeio",
-      "profile": {
-        "title": "Cria o perfil",
-        "description": "Nome, raça, umas fotos."
-      },
-      "swipe": {
-        "title": "Vê quem tá perto",
-        "description": "Um cachorro por vez, do seu bairro. Curte ou passa."
-      },
-      "match": {
-        "title": "Espera o match",
-        "description": "Se o outro cachorro curtir o seu, os dois ficam sabendo."
-      },
-      "chat": {
-        "title": "Puxa assunto",
-        "description": "Escolhe o parque, marca a hora."
-      }
-    }
+    "madeWithLoveBy": "Feito com ❤️ por "
   },
   "privacyPolicy": {
     "metadata": {
