@@ -57,10 +57,8 @@ const config: ExpoConfig = {
     // `notification-service` extension that restyles chat pushes as iOS
     // communication notifications. iOS allows one widget extension per app, so
     // every widget-family feature registers in PegadaWidgetsBundle.swift
-    // instead of adding a target. Both targets take their DEVELOPMENT_TEAM
-    // from `ios.appleTeamId` below, and each needs its own credentials set up
-    // on EAS before a release build can sign it (see the CREDENTIALS block in
-    // .github/workflows/release-mobile.yml). Local sim builds don't sign.
+    // instead of adding a target. Team ID comes from EAS credentials at build
+    // time; local sim builds don't sign.
     "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
@@ -327,22 +325,6 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
-    // @bacons/apple-targets reads this to stamp DEVELOPMENT_TEAM onto every
-    // target it generates (see with-xcode-changes.js,
-    // applyDevelopmentTeamIdToTargets). It is NOT supplied by EAS credentials
-    // at build time -- prebuild runs long before the signing step, and when
-    // the field is absent the plugin takes its "no team anywhere" branch:
-    // it REMOVES DEVELOPMENT_TEAM from every target and writes the literal
-    // string `DevelopmentTeam = undefined;` into the project's
-    // TargetAttributes (reproduced locally with `expo prebuild -p ios`; it
-    // also warns "iOS builds may fail until this is corrected" on every
-    // single prebuild, including the ones in CI).
-    //
-    // Sourced from the environment rather than hardcoded so the team ID
-    // stays out of a public repo; release-mobile.yml passes it from the
-    // EXPO_APPLE_TEAM_ID secret. Unset (plain local `expo prebuild`,
-    // simulator builds) behaves exactly as before -- those don't sign.
-    appleTeamId: process.env.EXPO_APPLE_TEAM_ID,
     entitlements: {
       // Shared storage between the app and the widget extension: the matches
       // snapshot (UserDefaults) + downloaded avatars (container files).

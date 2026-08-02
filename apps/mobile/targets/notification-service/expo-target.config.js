@@ -19,10 +19,8 @@ module.exports = {
   entitlements: {
     // Communication-notification styling. Must also be enabled on the App ID
     // in the Apple Developer portal for device builds (simulator doesn't
-    // enforce it), and this target needs its own credentials stored on EAS for
-    // app.pegada.notificationservice before a release build can sign it; see
-    // the CREDENTIALS block in .github/workflows/release-mobile.yml. The main
-    // app carries the same entitlement via `ios.entitlements` in app.config.ts.
+    // enforce it). The main app carries the same entitlement via
+    // `ios.entitlements` in app.config.ts.
     "com.apple.developer.usernotifications.communication": true,
   },
 };
