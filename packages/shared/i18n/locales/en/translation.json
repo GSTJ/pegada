@@ -35,9 +35,6 @@
     "breed": "Breed"
   },
   "chat": {
-    "notificationChannelName": "Messages",
-    "replyAction": "Reply",
-    "replyFailed": "Your reply didn't send. Open the chat to try again.",
     "sendAMessageToStart": "Send a message to start the conversation",
     "today": "Today",
     "yesterday": "Yesterday",

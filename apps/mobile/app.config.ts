@@ -51,14 +51,12 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
-    // Wires every directory under `targets/` into the Xcode project at
-    // prebuild time: the shared `pegada-widgets` WidgetKit extension
-    // (home-screen widgets, Live Activities, Control Center controls) and the
-    // `notification-service` extension that restyles chat pushes as iOS
-    // communication notifications. iOS allows one widget extension per app, so
-    // every widget-family feature registers in PegadaWidgetsBundle.swift
-    // instead of adding a target. Team ID comes from EAS credentials at build
-    // time; local sim builds don't sign.
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
     "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
@@ -325,15 +323,10 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    // Shared storage between the app and the widget extension: the matches
+    // snapshot (UserDefaults) + downloaded avatars (container files).
     entitlements: {
-      // Shared storage between the app and the widget extension: the matches
-      // snapshot (UserDefaults) + downloaded avatars (container files).
       "com.apple.security.application-groups": ["group.app.pegada"],
-      // Communication-notification styling for chat pushes (the
-      // notification-service target carries the same entitlement; both need
-      // the capability enabled on their App IDs in the Apple Developer
-      // portal for device builds).
-      "com.apple.developer.usernotifications.communication": true,
     },
     // associatedDomains: [
     //   'applinks:pegada.app',
