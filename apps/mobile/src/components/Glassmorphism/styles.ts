@@ -2,7 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Color from "color";
 import styled, { DefaultTheme } from "styled-components/native";
 
-import { BlurView } from "@/components/BlurView";
+import { BlurView } from "@/components/blur-view";
 
 export const Container = styled(BlurView).attrs({
   intensity: 90,
