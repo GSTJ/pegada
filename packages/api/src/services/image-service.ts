@@ -1,6 +1,8 @@
 import type { DogServerSchema } from "@pegada/shared/schemas/dog-schema";
 import type { Image } from "@prisma/client";
 
+import { randomUUID } from "node:crypto";
+
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import prisma from "@pegada/database";
@@ -16,6 +18,9 @@ import {
 } from "../shared/file-upload";
 
 const PERMANENT_STORAGE_FOLDER = "dogs";
+
+export const createTemporaryUploadKey = () =>
+  `${TEMPORARY_UPLOAD_PREFIX}/${randomUUID()}`;
 
 /**
  * Storage-agnostic upload descriptor returned by `image.signedUpload`.
@@ -42,7 +47,7 @@ export class ImageService {
    * MIN_APP_VERSION is past the release that switched to `signedUpload`.
    */
   static async getSignedUrl() {
-    const key = `${TEMPORARY_UPLOAD_PREFIX}/${Date.now().toString()}`;
+    const key = createTemporaryUploadKey();
 
     const command = new PutObjectCommand({
       Bucket: config.AWS_S3_BUCKET_NAME,
@@ -64,7 +69,7 @@ export class ImageService {
    * just builds its own descriptor here.
    */
   static async getSignedUpload(): Promise<SignedUpload> {
-    const key = `${TEMPORARY_UPLOAD_PREFIX}/${Date.now().toString()}`;
+    const key = createTemporaryUploadKey();
 
     if (r2UploadsEnabled) {
       const command = new PutObjectCommand({
