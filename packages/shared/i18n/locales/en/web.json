@@ -28,7 +28,7 @@
       },
       "messaging": {
         "title": "You decide who talks to your dog",
-        "description": "The chat opens only after a match. Block or report any time."
+        "description": "The chat opens only after a match. Unmatch or report any time."
       }
     },
     "howItWorks": {

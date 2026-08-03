@@ -29,7 +29,7 @@
       },
       "messaging": {
         "title": "Você decide quem fala com ele",
-        "description": "Conversa só depois do match. E dá pra bloquear ou denunciar a qualquer hora."
+        "description": "Conversa só depois do match. E dá pra desfazer o match ou denunciar a qualquer hora."
       }
     },
     "howItWorks": {
