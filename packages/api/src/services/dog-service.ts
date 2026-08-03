@@ -42,13 +42,17 @@ export class DogService {
     existingImages: DogServerSchema["images"] = [],
     newImages: DogServerSchema["images"] = [],
   ) =>
-    newImages?.filter((newImage) =>
-      existingImages?.find(
-        (existingImage) =>
-          newImage.url === existingImage.url &&
-          newImage.position !== existingImage.position,
-      ),
-    ) ?? ([] as DogImagesWithId);
+    newImages.flatMap((newImage) => {
+      const existingImage = existingImages.find(
+        (candidate) => candidate.url === newImage.url,
+      );
+
+      if (!existingImage?.id || newImage.position === existingImage.position) {
+        return [];
+      }
+
+      return [{ ...newImage, id: existingImage.id }];
+    });
 
   static #classifyImages = (
     existingImages: DogServerSchema["images"],
