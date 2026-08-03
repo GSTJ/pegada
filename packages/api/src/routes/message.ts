@@ -1,28 +1,15 @@
-import { z } from "zod";
-
 import { DogService } from "../services/dog-service";
 import MessageService from "../services/message-service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-
-const allByMatchSchema = z.object({
-  matchId: z.string(),
-  limit: z.coerce.number().optional().default(10),
-  gt: z.coerce.date().optional(),
-  lt: z.coerce.date().optional(),
-});
-
-const sendSchema = z.object({
-  matchId: z.string(),
-  content: z.string(),
-});
-
-const deleteSchema = z.object({
-  messageId: z.string(),
-});
+import {
+  messageDeleteInputSchema,
+  messageListInputSchema,
+  messageSendInputSchema,
+} from "./input-schemas";
 
 export const messageRouter = createTRPCRouter({
   allByMatch: protectedProcedure
-    .input(allByMatchSchema)
+    .input(messageListInputSchema)
     .query(async ({ ctx, input }) => {
       const { gt, lt, limit, matchId } = input;
 
@@ -39,7 +26,7 @@ export const messageRouter = createTRPCRouter({
       return messages;
     }),
   send: protectedProcedure
-    .input(sendSchema)
+    .input(messageSendInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { matchId, content } = input;
 
@@ -55,7 +42,7 @@ export const messageRouter = createTRPCRouter({
       return newMessage;
     }),
   delete: protectedProcedure
-    .input(deleteSchema)
+    .input(messageDeleteInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { messageId } = input;
 
