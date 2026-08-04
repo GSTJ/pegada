@@ -204,6 +204,10 @@ def section(repo: str | None, previous: str | None, current: str, heading_level:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", help="owner/name, for commit and PR links")
+    parser.add_argument(
+        "--compare-ref",
+        help="override only the ref shown in the Full diff/history link",
+    )
     parser.add_argument("--tag-pattern", default="v*", help="which tags count as releases")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--notes", metavar="TAG", help="print one release's notes")
@@ -245,7 +249,9 @@ def main() -> int:
             ),
             args.repo,
         )
-        link = compare_link(args.repo, previous_of(args.notes), args.notes)
+        link = compare_link(
+            args.repo, previous_of(args.notes), args.compare_ref or args.notes
+        )
         if link:
             text += f"\n\n{link}"
     else:
