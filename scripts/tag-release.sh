@@ -55,16 +55,15 @@ if python3 .github/scripts/changelog.py --is-breaking HEAD --previous "$PREVIOUS
   TITLE="$TAG (contains breaking changes)"
 fi
 
-MESSAGE=$(printf '%s\n\n%s\n' "$TITLE" "$NOTES")
-
 if [ "${DRY_RUN:-0}" = "1" ]; then
-  printf '%s\n' "$MESSAGE"
+  printf '%s\n\n%s\n' "$TITLE" "$NOTES"
   echo
   echo "(dry run, nothing tagged)"
   exit 0
 fi
 
-git tag -a --cleanup=verbatim "$TAG" -m "$MESSAGE"
+printf '%s\n\n%s\n' "$TITLE" "$NOTES" \
+  | git tag -a --cleanup=verbatim "$TAG" -F -
 git push "$REMOTE" "refs/tags/$TAG"
 
 echo "Tagged and pushed $TAG. release-mobile.yml takes it from here."
