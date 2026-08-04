@@ -238,6 +238,8 @@ const config: ExpoConfig = {
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./src/assets/images/adaptive-icon.png",
+      // Android recolors this white silhouette for themed icons.
+      monochromeImage: "./src/assets/images/adaptive-icon-monochrome.png",
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
@@ -275,6 +277,15 @@ const config: ExpoConfig = {
       },
     },
     googleServicesFile: "./GoogleService-Info.plist",
+    // Expo stops inheriting the top-level icon once any iOS variant is set,
+    // so the light icon must be explicit beside the dark one.
+    //
+    // Keep icon-tinted.png unwired for now. Expo SDK 55 flattens non-dark
+    // variants onto white during prebuild, which breaks tinted mode.
+    icon: {
+      light: "./src/assets/images/icon.png",
+      dark: "./src/assets/images/icon-dark.png",
+    },
     config: {
       usesNonExemptEncryption: false,
     },
