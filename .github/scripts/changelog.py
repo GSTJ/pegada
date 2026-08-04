@@ -93,6 +93,24 @@ class Commit:
         self.breaking_notes = breaking_notes(body)
         self.breaking = bool(match and match.group("bang")) or bool(self.breaking_notes)
 
+    @property
+    def is_release_housekeeping(self) -> bool:
+        """Whether this commit only prepared the changelog for its own tag.
+
+        A release changelog has to be merged before the tag points at it. That
+        preparation commit is therefore inside the release range, but listing
+        it in the release notes would make the generated pre-tag entry differ
+        from the tag and GitHub release generated after the merge.
+
+        Keep this deliberately narrow: normal documentation commits still ship
+        in the changelog. Only the conventional subject emitted by
+        ``scripts/tag-release.sh`` is release housekeeping.
+        """
+        return self.type == "docs" and bool(
+            (self.scope == "release" and re.fullmatch(r"prepare v\S+ changelog", self.subject))
+            or (not self.scope and re.fullmatch(r"add the v\S+ changelog entry", self.subject))
+        )
+
     @staticmethod
     def _split_pr(subject: str) -> tuple[str, str | None]:
         """Squash merges end in `(#123)`. Keep the number, drop it from the text."""
@@ -144,7 +162,9 @@ def read_commits(rev_range: str) -> list[Commit]:
         if not record.strip():
             continue
         sha, subject, body = (record.split(FIELD, 2) + ["", ""])[:3]
-        commits.append(Commit(sha, subject, body))
+        commit = Commit(sha, subject, body)
+        if not commit.is_release_housekeeping:
+            commits.append(commit)
     return commits
 
 
@@ -189,13 +209,21 @@ def compare_link(repo: str | None, previous: str | None, current: str) -> str | 
     return f"[Full history](https://github.com/{repo}/commits/{current})"
 
 
-def section(repo: str | None, previous: str | None, current: str, heading_level: int) -> str:
-    rev_range = f"{previous}..{current}" if previous else current
+def section(
+    repo: str | None,
+    previous: str | None,
+    current: str,
+    heading_level: int,
+    *,
+    revision: str | None = None,
+) -> str:
+    target = revision or current
+    rev_range = f"{previous}..{target}" if previous else target
     body = render_body(read_commits(rev_range), repo)
     link = compare_link(repo, previous, current)
 
     heading = "#" * heading_level
-    parts = [f"{heading} {current} ({tag_date(current)})", "", body]
+    parts = [f"{heading} {current} ({tag_date(target)})", "", body]
     if link:
         parts += ["", link]
     return "\n".join(parts)
@@ -209,6 +237,11 @@ def main() -> int:
         help="override only the ref shown in the Full diff/history link",
     )
     parser.add_argument("--tag-pattern", default="v*", help="which tags count as releases")
+    parser.add_argument(
+        "--upcoming",
+        metavar="TAG",
+        help="prepend an untagged release from the newest tag through HEAD (with --all)",
+    )
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--notes", metavar="TAG", help="print one release's notes")
     mode.add_argument("--all", action="store_true", help="print the whole changelog")
@@ -222,6 +255,11 @@ def main() -> int:
     args = parser.parse_args()
 
     tags = sorted_tags(args.tag_pattern)
+
+    if args.upcoming and not args.all:
+        parser.error("--upcoming requires --all")
+    if args.upcoming in tags:
+        parser.error(f"--upcoming tag already exists: {args.upcoming}")
 
     def previous_of(tag: str) -> str | None:
         if args.previous is not None:
@@ -264,6 +302,17 @@ def main() -> int:
             "Generated from conventional commits by `.github/scripts/changelog.py`."
             " Run `pnpm changelog` to refresh it.",
         ]
+        if args.upcoming:
+            blocks.append("")
+            blocks.append(
+                section(
+                    args.repo,
+                    tags[0] if tags else None,
+                    args.upcoming,
+                    heading_level=2,
+                    revision="HEAD",
+                )
+            )
         for index, tag in enumerate(tags):
             previous = tags[index + 1] if index + 1 < len(tags) else None
             blocks.append("")
