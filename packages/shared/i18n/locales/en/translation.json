@@ -216,6 +216,10 @@
     "updateError": "An error occurred while updating your preferences.",
     "years": "0-{{maxYears}}+ years"
   },
+  "quickActions": {
+    "matches": "Matches",
+    "editProfile": "Edit profile"
+  },
   "plans": {
     "FREE": "Free",
     "PREMIUM": "Premium",
