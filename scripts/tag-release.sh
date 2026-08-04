@@ -4,12 +4,12 @@
 # The tag is ANNOTATED and its message is the generated release notes, so
 # `git show <tag>` tells you what shipped without a network round trip, and it
 # matches the GitHub release body byte for byte (release-mobile.yml runs the
-# same generator on the same range). CHANGELOG.md is regenerated at the end for
-# you to commit through a PR, since the ruleset on main requires one.
+# same generator on the same range). CHANGELOG.md has to be committed through a
+# PR before the tag can be created, since the ruleset on main requires one.
 #
 #   ./scripts/tag-release.sh              # v<version from app.config.ts>
 #   ./scripts/tag-release.sh v1.5.0-rc1   # explicit, e.g. a release candidate
-#   DRY_RUN=1 ./scripts/tag-release.sh    # print the notes, tag nothing
+#   DRY_RUN=1 ./scripts/tag-release.sh    # report readiness, change nothing
 #
 # Pushing the tag is what starts release-mobile.yml: the native builds and the
 # GitHub release. It never submits to a store on its own.
@@ -19,6 +19,7 @@ cd "$(dirname "$0")/.."
 
 REPO=${REPO:-GSTJ/pegada}
 REMOTE=${REMOTE:-origin}
+RELEASE_BRANCH=${RELEASE_BRANCH:-main}
 
 if [ $# -gt 0 ]; then
   TAG=$1
@@ -43,6 +44,28 @@ if git ls-remote --exit-code --tags "$REMOTE" "refs/tags/$TAG" >/dev/null 2>&1; 
   exit 1
 fi
 
+# A dry run is useful from a release PR. Every mutating run must start from a
+# clean, current release branch so the generated commit links and tag target
+# cannot come from an unmerged branch or stale checkout.
+if [ "${DRY_RUN:-0}" != "1" ]; then
+  BRANCH=$(git symbolic-ref --quiet --short HEAD || true)
+  if [ "$BRANCH" != "$RELEASE_BRANCH" ]; then
+    echo "error: releases must be prepared from $RELEASE_BRANCH (currently ${BRANCH:-detached HEAD})" >&2
+    exit 1
+  fi
+
+  if [ -n "$(git status --porcelain)" ]; then
+    echo "error: working tree must be clean before preparing a release" >&2
+    exit 1
+  fi
+
+  git fetch "$REMOTE" "$RELEASE_BRANCH"
+  if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+    echo "error: HEAD must match $REMOTE/$RELEASE_BRANCH before preparing a release" >&2
+    exit 1
+  fi
+fi
+
 PREVIOUS=$(git tag --list 'v*' --sort=-creatordate | head -1)
 NOTES=$(python3 .github/scripts/changelog.py \
   --notes HEAD \
@@ -55,11 +78,45 @@ if python3 .github/scripts/changelog.py --is-breaking HEAD --previous "$PREVIOUS
   TITLE="$TAG (contains breaking changes)"
 fi
 
+# Build the exact changelog the tag will contain before creating the tag. The
+# first invocation writes this file and stops so it can go through a PR. Once
+# that PR is merged, a second invocation sees no diff and may tag main. The
+# docs(release) preparation commit is intentionally omitted by changelog.py,
+# so the pre-tag entry, annotated tag and GitHub release stay identical.
+EXPECTED_CHANGELOG=$(mktemp)
+trap 'rm -f "$EXPECTED_CHANGELOG"' EXIT
+python3 .github/scripts/changelog.py \
+  --all \
+  --upcoming "$TAG" \
+  --repo "$REPO" \
+  --output "$EXPECTED_CHANGELOG"
+
+if ! cmp -s "$EXPECTED_CHANGELOG" CHANGELOG.md; then
+  if [ "${DRY_RUN:-0}" = "1" ]; then
+    printf '%s\n\n%s\n' "$TITLE" "$NOTES"
+    echo
+    echo "(dry run, CHANGELOG.md still needs the $TAG entry)"
+    exit 1
+  fi
+
+  cp "$EXPECTED_CHANGELOG" CHANGELOG.md
+  echo "Prepared CHANGELOG.md for $TAG. Commit it through a PR with:"
+  echo "  docs(release): prepare $TAG changelog"
+  echo
+  echo "Run this script again from updated $RELEASE_BRANCH after that PR merges."
+  exit 1
+fi
+
 if [ "${DRY_RUN:-0}" = "1" ]; then
   printf '%s\n\n%s\n' "$TITLE" "$NOTES"
   echo
-  echo "(dry run, nothing tagged)"
+  echo "(dry run, CHANGELOG.md is ready; nothing tagged)"
   exit 0
+fi
+
+if [ -n "$(git status --porcelain)" ]; then
+  echo "error: working tree must be clean before tagging" >&2
+  exit 1
 fi
 
 printf '%s\n\n%s\n' "$TITLE" "$NOTES" \
@@ -67,18 +124,3 @@ printf '%s\n\n%s\n' "$TITLE" "$NOTES" \
 git push "$REMOTE" "refs/tags/$TAG"
 
 echo "Tagged and pushed $TAG. release-mobile.yml takes it from here."
-
-# The changelog can only include this version once the tag exists, so it has to
-# be regenerated after tagging. CI can't commit it for you: the "Main" ruleset
-# routes every change to main through a pull request, and a PR opened with
-# GITHUB_TOKEN never gets its required checks, so it could never merge.
-python3 .github/scripts/changelog.py --all --repo "$REPO" --output CHANGELOG.md
-
-if git diff --quiet -- CHANGELOG.md; then
-  echo "CHANGELOG.md was already current."
-else
-  echo
-  echo "CHANGELOG.md now has a $TAG section. Open a PR with it:"
-  echo "  git checkout -b docs/changelog-$TAG"
-  echo "  git commit -m 'docs: add the $TAG changelog entry' -- CHANGELOG.md"
-fi

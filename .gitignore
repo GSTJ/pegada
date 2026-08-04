@@ -9,6 +9,10 @@ npm-debug.log
 pnpm-error.log
 .pnpm-debug.log*
 
+# Python
+__pycache__/
+*.pyc
+
 # BUCK
 buck-out/
 \.buckd/
