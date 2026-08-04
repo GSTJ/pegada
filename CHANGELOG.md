@@ -2,6 +2,14 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.0-rc5 (2026-08-03)
+
+### Fixes
+
+- **release:** preserve the full annotated tag message ([#137](https://github.com/GSTJ/pegada/pull/137)) ([`643f807`](https://github.com/GSTJ/pegada/commit/643f80761ce7edd1a7657ba22bac68d73276448c))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.0-rc4...v1.5.0-rc5)
+
 ## v1.5.0-rc4 (2026-08-03)
 
 ### Fixes
