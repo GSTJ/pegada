@@ -106,7 +106,10 @@ export class SuggestionService {
       throw new Error("User ID is required");
     }
 
-    const notInString = notIn.map((id) => `'${id}'`).join(",");
+    const notInCondition =
+      notIn.length > 0
+        ? Prisma.sql`AND "Dog"."id" NOT IN (${Prisma.join(notIn)})`
+        : Prisma.empty;
 
     const potentialMatches = await prisma.$queryRaw<DogSafeSchema[]>`
     /* Select all wanted columns from the subquery */
@@ -182,8 +185,9 @@ export class SuggestionService {
       JOIN "User" ON "Dog"."userId" = "User"."id"
       /* Join the User table with the MainUser table */
       JOIN "User" AS "MainUser" ON "MainUser"."id" = ${dog.userId}
-      /* Exclude dogs that are in the notInString */
-      WHERE "Dog"."id" NOT IN (${notInString})
+      WHERE TRUE
+      /* Exclude dogs already loaded on the client. */
+      ${notInCondition}
       /* Exclude dogs that have been deleted */
       AND "Dog"."deletedAt" IS NULL
       /* Exclude dogs with any rejected images and no approved images. Shadowban */

@@ -1,5 +1,7 @@
 import type { Language } from "@pegada/shared/i18n/types/types";
 
+import { randomInt } from "node:crypto";
+
 import prisma from "@pegada/database";
 import {
   InvalidOTPCodeError,
@@ -119,13 +121,8 @@ export class AuthenticationService {
     return user;
   }
 
-  // Generate a 6 digits number for OTP
   static generateCode() {
-    // Generate a random number between 0 and 999999
-    const num = Math.floor(Math.random() * 1000000);
-
-    // Convert the number to a string and pad it with zeros if necessary
-    return num.toString().padStart(6, "0");
+    return randomInt(0, 1_000_000).toString().padStart(6, "0");
   }
 
   async sendVerification(email: string) {

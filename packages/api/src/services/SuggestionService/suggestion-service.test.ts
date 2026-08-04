@@ -154,6 +154,26 @@ describe("SuggestionService", () => {
       expect(fullPotentialMatches).toHaveLength(10);
     });
 
+    it("excludes every dog the client already loaded", async () => {
+      const [{ dog }, { dog: excludedDog }, { dog: includedDog }] =
+        await Promise.all([
+          generateFakeUserWithDog({ gender: Gender.MALE }),
+          generateFakeUserWithDog({ gender: Gender.FEMALE }),
+          generateFakeUserWithDog({ gender: Gender.FEMALE }),
+        ]);
+
+      const potentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [excludedDog.id],
+      );
+
+      expect(potentialMatches.map(({ id }) => id)).toContain(includedDog.id);
+      expect(potentialMatches.map(({ id }) => id)).not.toContain(
+        excludedDog.id,
+      );
+    });
+
     it("throws an error if dog user ID is not provided", async () => {
       const dog = {} as Dog;
 

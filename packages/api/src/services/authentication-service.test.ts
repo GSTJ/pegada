@@ -60,3 +60,11 @@ describe("AuthenticationService.checkVerification", () => {
     );
   });
 });
+
+describe("AuthenticationService.generateCode", () => {
+  it("returns a zero-padded six-digit code", () => {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      expect(AuthenticationService.generateCode()).toMatch(/^\d{6}$/);
+    }
+  });
+});
