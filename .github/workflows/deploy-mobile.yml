@@ -5,9 +5,9 @@ on:
       - main
     paths:
       - "apps/mobile/**"
-      - "apps/shared/**"
+      - "packages/shared/**"
+      - "pnpm-lock.yaml"
       - ".github/workflows/deploy-mobile.yml"
-      - ".github/scripts/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

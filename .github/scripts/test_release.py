@@ -12,6 +12,18 @@ from pathlib import Path
 SCRIPTS = Path(__file__).resolve().parent
 CHANGELOG_SCRIPT = SCRIPTS / "changelog.py"
 TAG_SCRIPT = SCRIPTS.parents[1] / "scripts" / "tag-release.sh"
+MOBILE_DEPLOY_WORKFLOW = SCRIPTS.parents[1] / ".github" / "workflows" / "deploy-mobile.yml"
+
+
+class MobileDeployWorkflowTest(unittest.TestCase):
+    def test_publish_paths_cover_mobile_runtime_inputs(self) -> None:
+        workflow = MOBILE_DEPLOY_WORKFLOW.read_text()
+
+        self.assertIn('- "apps/mobile/**"', workflow)
+        self.assertIn('- "packages/shared/**"', workflow)
+        self.assertIn('- "pnpm-lock.yaml"', workflow)
+        self.assertNotIn('- "apps/shared/**"', workflow)
+        self.assertNotIn('- ".github/scripts/**"', workflow)
 
 
 class GitRepositoryTest(unittest.TestCase):
