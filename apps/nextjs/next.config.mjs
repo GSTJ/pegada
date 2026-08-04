@@ -10,14 +10,9 @@ const nextConfig = {
   },
 
   images: {
-    /**
-     * Next 15 only serves qualities named here. The hero is the LCP element
-     * and the only optimised image on the site; at the default 75 the
-     * optimiser's re-encode of an already-encoded WebP source costs about
-     * 1.6x the structural error of 90 for ~40KB, which is the wrong trade
-     * for the one image the page is about.
-     */
-    qualities: [90],
+    // Next 15 only serves qualities named here. Keep the LCP hero at 90 and
+    // use 75 for the lazy-loaded screenshot gallery.
+    qualities: [75, 90],
   },
   // Queue consumers import native/dynamic-require packages that webpack
   // can't statically analyse — resolve them at runtime instead.

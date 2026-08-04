@@ -4,6 +4,7 @@ import { Logo } from "@/components/logo";
 import { Restricter } from "@/components/restricter";
 import { Features } from "@/components/sections/features";
 import { HowItWorks } from "@/components/sections/how-it-works";
+import { Screens } from "@/components/sections/screens";
 import { t } from "@/lib/translate";
 
 const App = () => {
@@ -45,6 +46,7 @@ const App = () => {
       </Restricter>
       <Features />
       <HowItWorks />
+      <Screens />
     </>
   );
 };
