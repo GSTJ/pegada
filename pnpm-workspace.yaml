@@ -30,7 +30,7 @@ overrides:
   "@react-native-async-storage/async-storage": 2.2.0
   react-native-svg: 15.15.3
   "@xmldom/xmldom": ^0.8.13
-  brace-expansion: ^5.0.8
+  brace-expansion: ^5.0.9
   braces: ^3.0.3
   diff@4: ^4.0.4
   esbuild: ^0.28.1
