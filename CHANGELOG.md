@@ -2,6 +2,52 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.0-rc2 (2026-08-03)
+
+### Features
+
+- **mobile:** restore themed app icons ([#128](https://github.com/GSTJ/pegada/pull/128)) ([`b40436b`](https://github.com/GSTJ/pegada/commit/b40436b3b092e904b82d3612c6be054b04c78e8e))
+- **mobile:** restore home-screen quick actions ([#127](https://github.com/GSTJ/pegada/pull/127)) ([`34cd604`](https://github.com/GSTJ/pegada/commit/34cd604e53b8a42e85789794cf7baf5f0f0c980d))
+- **web:** show the app below the landing walkthrough ([#123](https://github.com/GSTJ/pegada/pull/123)) ([`494ade2`](https://github.com/GSTJ/pegada/commit/494ade270440f227d43baa8c2a5206b64cce75bd))
+- **web:** explain the product below the landing hero ([#122](https://github.com/GSTJ/pegada/pull/122)) ([`5f97950`](https://github.com/GSTJ/pegada/commit/5f97950e127fc1298e80b09148813d501b5315a4))
+- **web:** align the landing copy with the brand banner ([#121](https://github.com/GSTJ/pegada/pull/121)) ([`011b22d`](https://github.com/GSTJ/pegada/commit/011b22d49691659f32a4a73d24859e506e8197bf))
+- **web:** show four real app screens below how-it-works ([#117](https://github.com/GSTJ/pegada/pull/117)) ([`2247681`](https://github.com/GSTJ/pegada/commit/22476817a61380c7ea3bf39ab619c2e91ed1aa8a))
+- **web:** add features and how-it-works sections below the fold ([#116](https://github.com/GSTJ/pegada/pull/116)) ([`715c93d`](https://github.com/GSTJ/pegada/commit/715c93d32d328b08df9c9659c5b0b1e32d3e774c))
+- **web:** align the landing copy with the brand banner ([#115](https://github.com/GSTJ/pegada/pull/115)) ([`740bc49`](https://github.com/GSTJ/pegada/commit/740bc49cc006c80355d85fd1558c989dec80efaf))
+- **web:** canonical, hreflang and a real social card for the site ([#113](https://github.com/GSTJ/pegada/pull/113)) ([`8e71a7a`](https://github.com/GSTJ/pegada/commit/8e71a7a729c73c886259e0353d3a08273bd524a4))
+- **observability:** route PostHog through magic-observability and unblock OTA sourcemaps ([#111](https://github.com/GSTJ/pegada/pull/111)) ([`19b8d55`](https://github.com/GSTJ/pegada/commit/19b8d551e9306b2afaa6faef074c6163606688d6))
+
+### Fixes
+
+- **api:** harden image ownership and request boundaries ([#133](https://github.com/GSTJ/pegada/pull/133)) ([`c8d75ba`](https://github.com/GSTJ/pegada/commit/c8d75bab90a0e3833675e0bfab8e469084d34732))
+- **ci:** limit workflow token permissions ([#132](https://github.com/GSTJ/pegada/pull/132)) ([`af4a6af`](https://github.com/GSTJ/pegada/commit/af4a6afbcb5552efab591714874b2bef47669c1b))
+- **auth:** consume one-time codes after login ([#118](https://github.com/GSTJ/pegada/pull/118)) ([`38eb8d8`](https://github.com/GSTJ/pegada/commit/38eb8d83ad8b4020497e2c9f8fa635374444d4db))
+- **nextjs:** serve real robots.txt and sitemap.xml ([#112](https://github.com/GSTJ/pegada/pull/112)) ([`fb936e6`](https://github.com/GSTJ/pegada/commit/fb936e68c8adec84bf265e3f3842756861201838))
+- **mobile:** give the widget and notification-service targets a team id ([#109](https://github.com/GSTJ/pegada/pull/109)) ([`2777a62`](https://github.com/GSTJ/pegada/commit/2777a62f9d92e05d1c25322d4b85041212587067))
+
+### Performance
+
+- **web:** serve the hero through next/image and right-size the icons ([#120](https://github.com/GSTJ/pegada/pull/120)) ([`793c277`](https://github.com/GSTJ/pegada/commit/793c277e942befcb03f800d45f15445c12a93967))
+- **web:** serve the hero through next/image and right-size the icons ([#114](https://github.com/GSTJ/pegada/pull/114)) ([`1c12f1a`](https://github.com/GSTJ/pegada/commit/1c12f1a16eaeef8b6a9e1ce872afc9f38b13e8d6))
+
+### Reverts
+
+- **mobile:** back out the native feature drop for a visual review ([#124](https://github.com/GSTJ/pegada/pull/124)) ([`3f0d6ae`](https://github.com/GSTJ/pegada/commit/3f0d6ae82820aaa6a0e5da670e47c7ec0edd8e9d))
+- **web:** back out the landing changes merged without review ([#119](https://github.com/GSTJ/pegada/pull/119)) ([`12cd457`](https://github.com/GSTJ/pegada/commit/12cd45723c2b6c15b99fd51395c2655d7f4904cc))
+
+### Build and CI
+
+- **e2e:** give the iOS build room to finish a cold build ([#106](https://github.com/GSTJ/pegada/pull/106)) ([`b251dfa`](https://github.com/GSTJ/pegada/commit/b251dfaa3c30d410eec16b5c69f229c6dc9b9296))
+- adopt the magic oxlint/oxfmt/tsconfig stack ([#105](https://github.com/GSTJ/pegada/pull/105)) ([`1960e32`](https://github.com/GSTJ/pegada/commit/1960e3282fe7ed0d6bcf10bc3322b0f7c5c1e6c6))
+- stop the release job pushing the changelog to main ([#103](https://github.com/GSTJ/pegada/pull/103)) ([`cec0cd2`](https://github.com/GSTJ/pegada/commit/cec0cd229b987027a0008c11e113c0185f3ff196))
+
+### Chores
+
+- **tooling:** track magic by tag and ban hand-built className ([#110](https://github.com/GSTJ/pegada/pull/110)) ([`84225fa`](https://github.com/GSTJ/pegada/commit/84225fa089627337fcfe65d46de8d888bffaac61))
+- **deps:** let renovate own the github-actions bumps ([#108](https://github.com/GSTJ/pegada/pull/108)) ([`4ef266b`](https://github.com/GSTJ/pegada/commit/4ef266bf66bb7d019a654c4f2e4afaf096b21b3d))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.0-rc1...v1.5.0-rc2)
+
 ## v1.5.0-rc1 (2026-07-26)
 
 ### Features

@@ -44,7 +44,11 @@ if git ls-remote --exit-code --tags "$REMOTE" "refs/tags/$TAG" >/dev/null 2>&1; 
 fi
 
 PREVIOUS=$(git tag --list 'v*' --sort=-creatordate | head -1)
-NOTES=$(python3 .github/scripts/changelog.py --notes HEAD --previous "$PREVIOUS" --repo "$REPO")
+NOTES=$(python3 .github/scripts/changelog.py \
+  --notes HEAD \
+  --previous "$PREVIOUS" \
+  --compare-ref "$TAG" \
+  --repo "$REPO")
 
 TITLE="$TAG"
 if python3 .github/scripts/changelog.py --is-breaking HEAD --previous "$PREVIOUS" >/dev/null; then
