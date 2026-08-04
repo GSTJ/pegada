@@ -26,7 +26,10 @@ const posthogSourcemapsEnabled = Boolean(process.env.POSTHOG_CLI_API_KEY);
 // earlier build. Keep that conflict from failing the native archive.
 const posthogSourcemapPlugins: NonNullable<ExpoConfig["plugins"]> =
   posthogSourcemapsEnabled
-    ? [["posthog-react-native/expo", { skipOnConflict: true }]]
+    ? [
+        "./plugins/with-posthog-release-version",
+        ["posthog-react-native/expo", { skipOnConflict: true }],
+      ]
     : [];
 
 const config: ExpoConfig = {
