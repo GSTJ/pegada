@@ -2,6 +2,15 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.0-rc3 (2026-08-03)
+
+### Fixes
+
+- **mobile:** harden PostHog release uploads ([#135](https://github.com/GSTJ/pegada/pull/135)) ([`a201ab5`](https://github.com/GSTJ/pegada/commit/a201ab59ba31bf7d792dc564c3ed918a1807833b))
+- **release:** keep tag and release compare links aligned ([#134](https://github.com/GSTJ/pegada/pull/134)) ([`d6ca029`](https://github.com/GSTJ/pegada/commit/d6ca0298acb4083d4726cf3c462441605a6aa513))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.0-rc2...v1.5.0-rc3)
+
 ## v1.5.0-rc2 (2026-08-03)
 
 ### Features
