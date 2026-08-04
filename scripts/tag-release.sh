@@ -64,7 +64,7 @@ if [ "${DRY_RUN:-0}" = "1" ]; then
   exit 0
 fi
 
-git tag -a "$TAG" -m "$MESSAGE"
+git tag -a --cleanup=verbatim "$TAG" -m "$MESSAGE"
 git push "$REMOTE" "refs/tags/$TAG"
 
 echo "Tagged and pushed $TAG. release-mobile.yml takes it from here."
