@@ -2,6 +2,14 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.0-rc4 (2026-08-03)
+
+### Fixes
+
+- **release:** preserve changelog headings in tag notes ([#136](https://github.com/GSTJ/pegada/pull/136)) ([`a869028`](https://github.com/GSTJ/pegada/commit/a869028b38a69e5fb8ecbf6a21c68d347548c0e1))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.0-rc3...v1.5.0-rc4)
+
 ## v1.5.0-rc3 (2026-08-03)
 
 ### Fixes
