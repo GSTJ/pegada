@@ -22,6 +22,12 @@ const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/nativ
 // pull POSTHOG_CLI_API_KEY from the EAS "production" environment, so the
 // plugin activates there automatically.
 const posthogSourcemapsEnabled = Boolean(process.env.POSTHOG_CLI_API_KEY);
+// Rebuilding the same release can encounter a symbol set uploaded by an
+// earlier build. Keep that conflict from failing the native archive.
+const posthogSourcemapPlugins: NonNullable<ExpoConfig["plugins"]> =
+  posthogSourcemapsEnabled
+    ? [["posthog-react-native/expo", { skipOnConflict: true }]]
+    : [];
 
 const config: ExpoConfig = {
   /**
@@ -208,9 +214,7 @@ const config: ExpoConfig = {
     // posthogSourcemapsEnabled above) -- omitted entirely from the plugins
     // list otherwise, so a plain local build never has the upload step in
     // its generated Xcode/Gradle project.
-    ...(posthogSourcemapsEnabled
-      ? (["posthog-react-native/expo"] as const)
-      : []),
+    ...posthogSourcemapPlugins,
   ],
   androidStatusBar: {
     barStyle: "dark-content",
