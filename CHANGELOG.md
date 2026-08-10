@@ -2,6 +2,28 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.0 (2026-08-10)
+
+### Breaking changes
+
+- **security:** harden sessions, images and dependencies ([#143](https://github.com/GSTJ/pegada/pull/143)) ([`4198189`](https://github.com/GSTJ/pegada/commit/41981894398313f4231828586de1ea25d6aa1dbc))
+  Access tokens older than 30 days are rejected. Existing users with older sessions will need to sign in again.
+
+### Fixes
+
+- **mobile:** publish changed runtime inputs ([#141](https://github.com/GSTJ/pegada/pull/141)) ([`33fa8a5`](https://github.com/GSTJ/pegada/commit/33fa8a5eccf89a262a51c98dc41651d1da86c572))
+- **release:** keep changelog inside release tags ([#139](https://github.com/GSTJ/pegada/pull/139)) ([`ebb33d3`](https://github.com/GSTJ/pegada/commit/ebb33d3717d8326b6a2fb69620de41041e20a5af))
+
+### Dependencies
+
+- bump brace-expansion to 5.0.9 ([#140](https://github.com/GSTJ/pegada/pull/140)) ([`cfb9c07`](https://github.com/GSTJ/pegada/commit/cfb9c0753d66c6a9b5357f4ed9d0731382df624f))
+
+### Chores
+
+- **deps:** enforce a 14-day package age ([#142](https://github.com/GSTJ/pegada/pull/142)) ([`344ac00`](https://github.com/GSTJ/pegada/commit/344ac002a1435dc5ee8ae475ba4182edb18c1893))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.0-rc5...v1.5.0)
+
 ## v1.5.0-rc5 (2026-08-03)
 
 ### Fixes
