@@ -2,6 +2,8 @@ import type { User } from "@prisma/client";
 
 import prisma from "@pegada/database";
 
+import { deleteImageFromS3 } from "../shared/file-upload";
+
 export class UserService {
   /**
    * Hard-delete the user account and every record that depends on it.
@@ -9,9 +11,10 @@ export class UserService {
    * Required for App Store Guideline 5.1.1(v) — apps that allow account
    * creation must offer in-app account deletion. We delete in dependency
    * order because schema.prisma uses `relationMode = "prisma"` (no DB-level
-   * ON DELETE CASCADE), so Prisma cannot fan out for us. Wrapping in a
-   * transaction guarantees atomicity: either every artifact is gone or
-   * nothing changes.
+   * ON DELETE CASCADE), so Prisma cannot fan out for us. Public image objects
+   * are removed first, then the database rows are removed in one transaction.
+   * A storage failure leaves the account row in place so deletion can be
+   * retried.
    *
    * Order: messages → matches → interests → images → dogs → user.
    * Messages and matches reference dogs; interests reference dogs and
@@ -20,9 +23,17 @@ export class UserService {
   static async deleteAccount(userId: string) {
     const dogs = await prisma.dog.findMany({
       where: { userId },
-      select: { id: true },
+      select: { id: true, images: { select: { url: true } } },
     });
     const dogIds = dogs.map((d) => d.id);
+    const imageUrls = dogs.flatMap((dog) =>
+      dog.images.map((image) => image.url),
+    );
+
+    // Delete public objects before their database references disappear. A
+    // failed storage deletion leaves the account intact so the request can be
+    // retried without losing track of personal data that still needs removal.
+    await Promise.all(imageUrls.map((url) => deleteImageFromS3(url)));
 
     await prisma.$transaction(async (tx) => {
       if (dogIds.length > 0) {

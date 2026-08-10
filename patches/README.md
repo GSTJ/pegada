@@ -6,6 +6,12 @@ Makes it work on monorepos
 
 Fixes typescript errors
 
+# image-size Patch (1.2.1)
+
+Rejects zero-length ICNS and ISO-BMFF entries so malformed ICNS, JXL and HEIF
+images cannot trap Metro's parser in an infinite loop. Drop it once Metro moves
+to an image-size release that contains the upstream fix.
+
 # Minimatch Patches (3.1.5 and 9.0.9)
 
 brace-expansion <= 5.0.8 is vulnerable to CVE-2026-14257 and its incomplete

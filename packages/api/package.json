@@ -12,7 +12,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "jest --runInBand --detectOpenHandles",
     "pretest": "pnpm -F @pegada/database test:db:setup",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
