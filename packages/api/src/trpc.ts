@@ -13,19 +13,13 @@ import { IntentionalError } from "@pegada/shared/errors/errors";
 import { Language } from "@pegada/shared/i18n/types/types";
 import { RequestHeaders } from "@pegada/shared/types/types";
 import { initTRPC, TRPCError } from "@trpc/server";
-import jwt from "jsonwebtoken";
 import superjson from "superjson";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 
 import { logDebug, sendError } from "./errors/errors";
-import { config } from "./shared/config";
+import { signAccessToken, type Session } from "./shared/auth-token";
 
-// That was added by me manually
-export type Session = {
-  user: {
-    id: string;
-  };
-};
+export { getSession, type Session } from "./shared/auth-token";
 
 /**
  * 1. CONTEXT
@@ -57,40 +51,8 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     session: opts.session,
     language: opts.language ?? Language.Default,
     db: prisma,
-    jwtSign: (payload: { sub: string }) => {
-      return jwt.sign(payload, config.JWT_SECRET, {
-        expiresIn: "1000d", // TODO: Use refresh tokens
-      });
-    },
+    jwtSign: signAccessToken,
   };
-};
-
-export const getSession = (bearer: string) => {
-  if (!bearer) return null;
-
-  try {
-    const [, unsafeBearerToken] = bearer.split(" ");
-    const safeBearerToken = z.string().parse(unsafeBearerToken);
-
-    const decoded = jwt.verify(safeBearerToken, config.JWT_SECRET) as {
-      id?: string;
-      sub?: string;
-    };
-
-    if (!decoded.sub) {
-      throw new Error("Invalid token");
-    }
-
-    const session = {
-      user: {
-        id: decoded.sub,
-      },
-    };
-
-    return session;
-  } catch {
-    return null;
-  }
 };
 
 /**

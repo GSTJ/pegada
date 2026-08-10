@@ -1,3 +1,5 @@
+import { MAX_PROFILE_IMAGES } from "@pegada/shared/schemas/dog-schema";
+
 import { config } from "./config";
 import { dogInputSchema } from "./dog-input-schema";
 
@@ -95,5 +97,24 @@ describe("dogInputSchema images", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("rejects more images than the profile can display", () => {
+    const images = Array.from(
+      { length: MAX_PROFILE_IMAGES + 1 },
+      (_, index) => ({
+        url: `${BUCKET_URL}/dogs/${index}`,
+        position: index,
+      }),
+    );
+
+    expect(
+      dogInputSchema.safeParse({
+        name: "Rex",
+        bio: "",
+        gender: "MALE",
+        images,
+      }).success,
+    ).toBe(false);
   });
 });

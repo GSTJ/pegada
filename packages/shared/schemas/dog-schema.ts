@@ -29,6 +29,7 @@ const MIN_NAME_LENGTH = 2;
 const MAX_NAME_LENGTH = 50;
 
 const MAX_BIO_LENGTH = 500;
+export const MAX_PROFILE_IMAGES = 6;
 
 const MAX_WEIGHT = 150;
 
@@ -175,6 +176,7 @@ export const dogServerSchema = z.object({
   ...dogSharedSchema,
   images: z
     .array(serverImageSchema)
+    .max(MAX_PROFILE_IMAGES)
     .refine(
       (value) => {
         const hasImage = value.some((image) => image.url);
@@ -203,6 +205,7 @@ const clientImageSchema = z.object({
 
 const clientImages = z
   .array(clientImageSchema)
+  .max(MAX_PROFILE_IMAGES)
   .refine(
     (value) => {
       const hasImage = value.some((image) => image.url);

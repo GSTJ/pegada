@@ -14,6 +14,8 @@ import {
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 
+import { MAX_PROFILE_IMAGES } from "@pegada/shared/schemas/dog-schema";
+
 import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
 import { config } from "@/services/config";
@@ -34,7 +36,7 @@ export type Picture = {
 export type DeletedPicture = Omit<Picture, "position">;
 
 export const pictures: Picture[] = Array.from(
-  { length: 6 },
+  { length: MAX_PROFILE_IMAGES },
   (_data, index): Picture => ({
     id: `image-id-${index}`,
     key: `image-key-${index}`,
