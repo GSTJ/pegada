@@ -190,6 +190,26 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
   const showMaestroSkip =
     !hasPicture && !isLoading && shouldOfferMaestroPlaceholder();
 
+  // `add-photo-button-{index}` (the `+` pill below) is the ONLY node in this
+  // cell that iOS exposes to the accessibility tree —
+  // react-native-draggable-grid wraps each cell in a pan-responder view that
+  // hides the whole inner subtree, so neither `add-photo-{index}` nor
+  // `maestro-skip-photo-{index}` ever surfaces (verified with
+  // `maestro hierarchy` on iPhone 17 Pro Max / iOS 26). That left Maestro
+  // with a coordinate tap as the only way to reach the placeholder, which
+  // silently stops attaching a photo the moment the grid shifts by a few
+  // points — and CreateProfile refuses to submit without one, so
+  // CompleteProfile and AskForLocation become unreachable.
+  //
+  // Under the same double gate as the pill (`shouldOfferMaestroPlaceholder`:
+  // config.ENV !== "production" AND EXPO_PUBLIC_MAESTRO_E2E === "1"), the
+  // `+` therefore triggers the placeholder upload instead of the system
+  // picker. Production builds are untouched: `showMaestroSkip` is always
+  // false there, so this is exactly `handleAdd`.
+  const handleEmptySlotPress = showMaestroSkip
+    ? handleMaestroPlaceholderUpload
+    : handleAdd;
+
   return (
     <S.UserPictureContainer>
       <S.UserPictureContent>
@@ -260,7 +280,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
         }
         disabled={isLoading}
         inverted={hasPicture}
-        onPress={hasPicture ? handleDelete : handleAdd}
+        onPress={hasPicture ? handleDelete : handleEmptySlotPress}
       >
         <Animated.View style={style}>
           <AddRemove fill={hasPicture ? theme.colors.primary : "white"} />
