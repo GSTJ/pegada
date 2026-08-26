@@ -284,8 +284,20 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
             }
             onPress={handleMaestroPlaceholderUpload}
           >
-            <Text color="white" fontSize="xxs" fontWeight="bold">
-              MAESTRO_E2E_SKIP_PHOTO
+            {/*
+              One line, always. "MAESTRO_E2E_SKIP_PHOTO" is 22 characters in a
+              cell a third of the screen wide: it wrapped mid-word and the cell
+              clipped the second line off. The testID, which is what Android
+              flows actually select on, is unchanged.
+            */}
+            <Text
+              color="white"
+              fontSize="xxs"
+              fontWeight="bold"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              SKIP PHOTO
             </Text>
           </MaestroSkipPressable>
         ) : null}
