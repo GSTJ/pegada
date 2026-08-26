@@ -2,6 +2,14 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.5.1 (2026-08-26)
+
+### Fixes
+
+- **mobile:** support Google Play Billing Library 8 ([#146](https://github.com/GSTJ/pegada/pull/146)) ([`4441cc4`](https://github.com/GSTJ/pegada/commit/4441cc458587984fa11ea89ac916dc82885ec5e6))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.0...v1.5.1)
+
 ## v1.5.0 (2026-08-10)
 
 ### Breaking changes
