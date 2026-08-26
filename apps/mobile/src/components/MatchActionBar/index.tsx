@@ -10,13 +10,12 @@ import {
   ThinkingEmoji,
 } from "./styles";
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- see MainCard: `Container` is a reanimated Animated.View and its string index signature widens every member of an intersection to `any`. `extends` keeps them.
-interface MatchActionBarProps extends React.ComponentProps<typeof Container> {
+type MatchActionBarProps = React.ComponentProps<typeof Container> & {
   onNope: () => void;
   onYep: () => void;
   onMaybe: () => void;
   animated?: boolean;
-}
+};
 
 export const MatchActionBar: React.FC<MatchActionBarProps> = ({
   onNope,

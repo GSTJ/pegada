@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import Location from "@/assets/images/Location.svg";
 
-import { Container, Content, DistanceText } from "./styles";
+import { Container, DistanceText, styles } from "./styles";
 
 type DistanceProps = {
   dog: SwipeDog;
@@ -40,20 +40,24 @@ const Distance: React.FC<DistanceProps> = ({ dog }) => {
 
   if (dog.distance === null || dog.distance === undefined) {
     return (
-      <Container>
+      <Container style={styles.container}>
         <View />
       </Container>
     );
   }
 
   return (
-    <Container>
-      <Content>
+    <Container style={styles.container}>
+      <View style={styles.content}>
         <Location width={14} height={14} fill="#fff" />
-        <DistanceText>
+        <DistanceText
+          style={styles.distanceText}
+          fontWeight="semibold"
+          fontSize="sm"
+        >
           {formatDistance(dog.distance ?? 0, i18n.language)}
         </DistanceText>
-      </Content>
+      </View>
     </Container>
   );
 };

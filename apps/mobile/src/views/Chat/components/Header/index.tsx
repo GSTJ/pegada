@@ -1,10 +1,10 @@
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import BackArrow from "@/assets/images/BackArrow.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -13,6 +13,7 @@ import { api } from "@/contexts/trpc-provider";
 import { SceneName } from "@/types/scene-name";
 
 import * as S from "./styles";
+import { styles } from "./styles";
 
 export const HEADER_HEIGHT = 65;
 
@@ -23,42 +24,43 @@ const DogProfileInfo = ({ dogId }: { dogId: string }) => {
   );
 
   return (
-    <S.ProfileInfoContainer>
+    <View style={styles.profileInfoContainer}>
       <S.Picture
         source={{
           uri: dog.images[0]?.url,
           blurhash: dog.images[0]?.blurhash ?? undefined,
         }}
+        style={styles.picture}
       />
       <Text numberOfLines={1} fontWeight="bold">
         {dog.name}
       </Text>
-    </S.ProfileInfoContainer>
+    </View>
   );
 };
 
 const DogProfileError = () => {
   const { t } = useTranslation();
   return (
-    <S.ProfileInfoContainer>
-      <S.Picture />
+    <View style={styles.profileInfoContainer}>
+      <S.Picture style={styles.picture} />
       <Text numberOfLines={1}>{t("dogProfile.profileInfoError")}</Text>
-    </S.ProfileInfoContainer>
+    </View>
   );
 };
 
 const DogProfileInfoLoading = () => {
   return (
-    <S.ProfileInfoLoadingContainer>
+    <View style={styles.profileInfoLoadingContainer}>
       <ActivityIndicator />
-    </S.ProfileInfoLoadingContainer>
+    </View>
   );
 };
 
 const Header = () => {
   const router = useRouter();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { dogId, matchId } = useLocalSearchParams();
 
@@ -66,12 +68,19 @@ const Header = () => {
 
   return (
     <S.Header
-      style={{
-        paddingTop: insets.top,
-        height: HEADER_HEIGHT + insets.top,
-      }}
+      style={[
+        styles.header,
+        {
+          paddingTop: insets.top,
+          height: HEADER_HEIGHT + insets.top,
+        },
+      ]}
     >
-      <S.BackTouchArea testID="chat-back" onPress={() => router.back()}>
+      <S.BackTouchArea
+        testID="chat-back"
+        onPress={() => router.back()}
+        style={styles.backTouchArea}
+      >
         <BackArrow height={15} width={15} fill={theme.colors.text} />
       </S.BackTouchArea>
       <S.PressableAreaFlex
@@ -81,6 +90,7 @@ const Header = () => {
             params: { matchId: matchId ?? "", id: dogId as string },
           })
         }
+        style={styles.pressableAreaFlex}
       >
         <NetworkBoundary
           errorFallback={DogProfileError}

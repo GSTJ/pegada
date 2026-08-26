@@ -1,35 +1,39 @@
-import styled from "styled-components/native";
+import { StyleSheet } from "react-native-unistyles";
 
-export const InputRow = styled.View`
-  flex-direction: row;
-`;
-
-export const InputSpace = styled.View`
-  width: ${(props) => props.theme.spacing[4]}px;
-`;
-
-export const SliderContainer = styled.View`
-  flex: 1;
-`;
-
-export const Divisor = styled.View`
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.border};
-  margin: ${(props) => props.theme.spacing[5]}px;
-`;
-
-export const ButtonContainer = styled.View`
-  padding: ${(props) => props.theme.spacing[4]}px;
-  border-top-color: ${({ theme }) => theme.colors.border};
-  border-top-width: ${(props) => props.theme.stroke.md}px;
-  background-color: ${({ theme }) => theme.colors.background};
-`;
-
-export const Container = styled.ScrollView`
-  flex-grow: 1;
-  background-color: ${({ theme }) => theme.colors.background};
-`;
-
-export const DistanceContainer = styled.View`
-  margin-bottom: ${(props) => props.theme.spacing[6]}px;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  inputRow: {
+    flexDirection: "row",
+  },
+  inputSpace: {
+    width: theme.spacing[4],
+  },
+  sliderContainer: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  divisor: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginTop: theme.spacing[5],
+    marginRight: theme.spacing[5],
+    marginBottom: theme.spacing[5],
+    marginLeft: theme.spacing[5],
+  },
+  buttonContainer: {
+    paddingTop: theme.spacing[4],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
+    paddingLeft: theme.spacing[4],
+    borderTopColor: theme.colors.border,
+    borderTopWidth: theme.stroke.md,
+    backgroundColor: theme.colors.background,
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: theme.colors.background,
+  },
+  distanceContainer: {
+    marginBottom: theme.spacing[6],
+  },
+}));

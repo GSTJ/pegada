@@ -1,7 +1,8 @@
 import * as React from "react";
+import { View } from "react-native";
 
 import { format } from "date-fns";
-import {
+import Animated, {
   SlideInLeft,
   SlideInRight,
   SlideOutRight,
@@ -10,7 +11,7 @@ import {
 import { Text } from "@/components/text";
 
 import Feedback, { FeedbackStatus } from "../feedback";
-import { Info, Message, Time } from "./styles";
+import { styles, Time } from "./styles";
 
 type MessageComponentProps = {
   children: string;
@@ -34,21 +35,25 @@ export const MessageComponent: React.FC<MessageComponentProps> = (props) => {
   const shouldSlideOutExit = self && status === FeedbackStatus.Error;
   const exitingAnimation = shouldSlideOutExit ? SlideOutRight : undefined;
 
+  styles.useVariants({ sending: self, status });
+
   return (
-    <Message
+    <Animated.View
+      accessible
+      style={styles.message}
       testID={self ? "chat-message-self" : "chat-message-other"}
       key={id + status}
       entering={enteringAnimation}
       exiting={exitingAnimation}
-      sending={self}
-      status={status}
     >
       <Text selectable>{children}</Text>
-      <Info>
-        <Time>{format(createdAt, "HH:mm")}</Time>
+      <View style={styles.info}>
+        <Time style={styles.time} fontSize="xxs">
+          {format(createdAt, "HH:mm")}
+        </Time>
         {self ? <Feedback status={status} /> : null}
-      </Info>
-    </Message>
+      </View>
+    </Animated.View>
   );
 };
 

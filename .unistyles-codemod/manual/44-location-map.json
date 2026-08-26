@@ -1,0 +1,26 @@
+{
+  "$comment": "Hand-converted `LocationMap` (patch 44). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
+  "pristineRef": "f85575d",
+  "units": [
+    {
+      "file": "apps/mobile/src/views/LocationMap/styles.tsx",
+      "pristine": "apps/mobile/src/views/LocationMap/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "MapView",
+          "key": "mapView",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+diff --git a/.unistyles-codemod/manual/30-buttons-boundaries-cards.json b/.unistyles-codemod/manual/30-buttons-boundaries-cards.json
+new file mode 100644
+index 0000000..90ace5e
+--- /dev/null
++++ b/.unistyles-codemod/manual/30-buttons-boundaries-cards.json
+@@ -0,0 +1,151 @@
++{
++  "$comment": "Hand-converted prop-spread and default-export modules (patches 30-39): Button, NetworkBoundary, Glassmorphism, FeedbackCard, divider and loading. `pristineRef` is the last commit before the migration landed in the working tree, same as the roots batch.",
++  "pristineRef": "f85575d",
++  "units": [
++    {
++      "file": "apps/mobile/src/components/divider.tsx",
++      "pristine": "apps/mobile/src/components/divider.ts",
++      "$comment": "A default export has no name to key on; `default` is what the module's exports object calls it, which is exactly what the ledger reads.",
++      "definitionsDetail": [
++        {
++          "name": "default",
++          "key": "divider",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/loading.tsx",
++      "pristine": "apps/mobile/src/components/loading.ts",
++      "definitionsDetail": [
++        {
++          "name": "default",
++          "key": "loading",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/Button/styles.tsx",
++      "pristine": "apps/mobile/src/components/Button/styles.ts",
++      "$comment": "`variant` keeps the prop's own spelling so ground truth and the sheet are asked the same question: the pristine `Container` reads `props.variant !== \"outline\"`, and `default` is both the prop's other value and Unistyles' fallback bucket.",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "wrapper",
++          "variants": {
++            "variant": ["outline", "default"],
++            "disabled": ["true"]
++          },
++          "inheritedFrom": null
++        },
++        {
++          "name": "ButtonText",
++          "key": "buttonText",
++          "mode": "wrapper",
++          "variants": {
++            "variant": ["outline", "default"]
++          },
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/NetworkBoundary/styles.tsx",
++      "pristine": "apps/mobile/src/components/NetworkBoundary/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Content",
++          "key": "content",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Title",
++          "key": "title",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "ContainedText",
++          "key": "containedText",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "DisconnectedIllustration",
++          "key": "disconnectedIllustration",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "ErrorIllustration",
++          "key": "errorIllustration",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/Glassmorphism/styles.tsx",
++      "pristine": "apps/mobile/src/components/Glassmorphism/styles.ts",
++      "$comment": "`Gradient` is absent on purpose: its template was empty, so it carried no styles to compare — all it ever had was the `.attrs` the theme computes, which is now a `withUnistyles` mapper and not a style the ledger can read.",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/FeedbackCard/styles.tsx",
++      "pristine": "apps/mobile/src/components/FeedbackCard/styles.ts",
++      "$comment": "`AbsolutePosition` is why `MainCard/styles.tsx` still exports the `absoluteFill` fragment: the ledger loads the pristine module from git but resolves its imports against the working tree, so deleting the fragment would drop five declarations from ground truth and fail this unit.",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "wrapper",
++          "variants": {
++            "isFirst": ["true"]
++          },
++          "inheritedFrom": null
++        },
++        {
++          "name": "AbsolutePosition",
++          "key": "absolutePosition",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "StyledMainCard",
++          "key": "styledMainCard",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    }
++  ]
++}

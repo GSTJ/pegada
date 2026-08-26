@@ -1,0 +1,438 @@
+diff --git a/.unistyles-codemod/manual/41-add-user-photo.json b/.unistyles-codemod/manual/41-add-user-photo.json
+new file mode 100644
+index 0000000..0fa7d08
+--- /dev/null
++++ b/.unistyles-codemod/manual/41-add-user-photo.json
+@@ -0,0 +1,67 @@
++{
++  "$comment": "Hand-converted `AddUserPhoto` (patch 41). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
++  "pristineRef": "f85575d",
++  "units": [
++    {
++      "file": "apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "DebugImageStatusContainer",
++          "key": "debugImageStatusContainer",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "UserPictureContent",
++          "key": "userPictureContent",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "AnimatedOverlay",
++          "key": "animatedOverlay",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "UserPicture",
++          "key": "userPicture",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "UserPictureContainer",
++          "key": "userPictureContainer",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "AddRemoveContainer",
++          "key": "addRemoveContainer",
++          "mode": "wrapper",
++          "variants": { "inverted": ["true", "default"] },
++          "inheritedFrom": null
++        },
++        {
++          "name": "FadedDog",
++          "key": "fadedDog",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "MaestroSkipPressable",
++          "key": "maestroSkipPressable",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    }
++  ]
++}
+diff --git a/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/index.tsx b/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/index.tsx
+index 77b42b3..bbcf592 100644
+--- a/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/index.tsx
++++ b/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/index.tsx
+@@ -5,7 +5,7 @@ import type {
+ 
+ import { useState } from "react";
+ import * as React from "react";
+-import { ActivityIndicator } from "react-native";
++import { ActivityIndicator, View } from "react-native";
+ 
+ import { useTranslation } from "react-i18next";
+ import { magicToast } from "react-native-magic-toast";
+@@ -28,7 +28,13 @@ import {
+ import { Text } from "@/components/text";
+ import { sendError } from "@/services/error-tracking";
+ 
+-import * as S from "./styles";
++import {
++  AddRemoveContainer,
++  FadedDog,
++  MaestroSkipPressable,
++  styles,
++  UserPicture,
++} from "./styles";
+ 
+ type AddUserPhotoProps = {
+   picture: Picture;
+@@ -184,6 +190,8 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
+ 
+   const isLoading = Boolean(localPicture && !picture.url.includes("http"));
+ 
++  styles.useVariants({ inverted: hasPicture });
++
+   // `shouldOfferMaestroPlaceholder()` short-circuits on
+   // `config.ENV === "production"` so App Store builds always evaluate to
+   // `false` here regardless of EXPO_PUBLIC_MAESTRO_E2E misconfiguration.
+@@ -211,18 +219,22 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
+     : handleAdd;
+ 
+   return (
+-    <S.UserPictureContainer>
+-      <S.UserPictureContent>
+-        <S.UserPicture
++    <View style={styles.userPictureContainer}>
++      <View style={styles.userPictureContent}>
++        <UserPicture
++          style={styles.userPicture}
+           key={localPicture}
+           {...(localPicture
+             ? { source: { uri: localPicture, blurhash: picture.blurhash } }
+             : undefined)}
+         />
+         {isLoading ? (
+-          <S.AnimatedOverlay exiting={FadeOut.duration(150)}>
++          <Animated.View
++            style={styles.animatedOverlay}
++            exiting={FadeOut.duration(150)}
++          >
+             <ActivityIndicator color="#FFF" />
+-          </S.AnimatedOverlay>
++          </Animated.View>
+         ) : null}
+         {!hasPicture && (
+           <PressableArea
+@@ -236,17 +248,22 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
+             // including the pill's strip).
+             hitSlop={showMaestroSkip ? { ...hitSlop, bottom: 0 } : hitSlop}
+           >
+-            <S.FadedDog fill={theme.colors.text} width={40} height={40} />
++            <FadedDog
++              style={styles.fadedDog}
++              fill={theme.colors.text}
++              width={40}
++              height={40}
++            />
+           </PressableArea>
+         )}
+         {
+           /** Picture status is only returned in development mode for debugging */
+           picture.status ? (
+-            <S.DebugImageStatusContainer>
++            <View style={styles.debugImageStatusContainer}>
+               <Text color="white" fontSize="xxs" fontWeight="medium">
+                 {picture.status}
+               </Text>
+-            </S.DebugImageStatusContainer>
++            </View>
+           ) : null
+         }
+         {/*
+@@ -258,7 +275,8 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
+           testID is per-slot so flow 20 can disambiguate which cell to fill.
+         */}
+         {showMaestroSkip ? (
+-          <S.MaestroSkipPressable
++          <MaestroSkipPressable
++            style={styles.maestroSkipPressable}
+             testID={
+               typeof index === "number"
+                 ? `maestro-skip-photo-${index}`
+@@ -269,23 +287,23 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
+             <Text color="white" fontSize="xxs" fontWeight="bold">
+               MAESTRO_E2E_SKIP_PHOTO
+             </Text>
+-          </S.MaestroSkipPressable>
++          </MaestroSkipPressable>
+         ) : null}
+-      </S.UserPictureContent>
+-      <S.AddRemoveContainer
++      </View>
++      <AddRemoveContainer
++        style={styles.addRemoveContainer}
+         testID={
+           typeof index === "number"
+             ? photoActionTestID(index, hasPicture)
+             : undefined
+         }
+         disabled={isLoading}
+-        inverted={hasPicture}
+         onPress={hasPicture ? handleDelete : handleEmptySlotPress}
+       >
+         <Animated.View style={style}>
+           <AddRemove fill={hasPicture ? theme.colors.primary : "white"} />
+         </Animated.View>
+-      </S.AddRemoveContainer>
+-    </S.UserPictureContainer>
++      </AddRemoveContainer>
++    </View>
+   );
+ };
+diff --git a/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts b/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts
+index a08c79a..92079b4 100644
+--- a/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts
++++ b/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts
+@@ -1,5 +1,9 @@
+ import Animated from "react-native-reanimated";
+-import styled from "styled-components/native";
++import {
++  createUnistylesElement,
++  StyleSheet,
++  withUnistyles,
++} from "react-native-unistyles";
+ 
+ import Dog from "@/assets/images/Dog.svg";
+ import { Image } from "@/components/image";
+@@ -13,90 +17,136 @@ export const dogPictureHeight = dogPictureWidth * 1.3;
+ 
+ const AnimatedImage = Animated.createAnimatedComponent(Image);
+ 
+-export const DebugImageStatusContainer = styled.View`
+-  justify-content: center;
+-  align-items: center;
+-  position: absolute;
+-  top: 0;
+-  right: 0;
+-  padding: ${(props) => props.theme.spacing[1]}px;
+-  border-bottom-left-radius: ${(props) => props.theme.radii.sm}px;
+-  background-color: rgba(0, 0, 0, 0.7);
+-`;
+-
+-export const UserPictureContent = styled.View`
+-  border-radius: ${(props) => props.theme.radii.md}px;
+-  align-items: center;
+-  justify-content: center;
+-  overflow: hidden;
+-  width: 100%;
+-  flex: 1;
+-  border: ${(props) => props.theme.stroke.md}px;
+-  border-color: ${(props) => props.theme.colors.border};
+-  background-color: ${(props) => props.theme.colors.input};
+-`;
+-
+-export const AnimatedOverlay = styled(Animated.View)`
+-  background-color: #00000050;
+-  width: 100%;
+-  flex: 1;
+-  justify-content: center;
+-`;
+-
+-export const UserPicture = styled(AnimatedImage)`
+-  position: absolute;
+-  width: 100%;
+-  height: 100%;
+-`;
++/**
++ * `Animated.createAnimatedComponent(Image)` is off the babel plugin's
++ * autoprocess list, so it has to be registered by hand.
++ * `createUnistylesElement` — the wrapper the plugin applies to `Animated.View`
++ * and friends — is what that takes: unlike `withUnistyles` it forwards the
++ * props untouched instead of flattening `style` into one object, which is what
++ * keeps reanimated's own props (and any style array a caller passes) intact.
++ */
++export const UserPicture = createUnistylesElement(
++  AnimatedImage,
++) as typeof AnimatedImage;
+ 
+-export const UserPictureContainer = styled.View`
+-  padding: ${(props) => props.theme.spacing[1.5]}px;
+-  width: ${dogPictureWidth}px;
+-  height: ${dogPictureHeight}px;
+-`;
++export const AddRemoveContainer = withUnistyles(PressableArea);
+ 
+-export const AddRemoveContainer = styled(PressableArea)<{
+-  inverted: boolean;
+-}>`
+-  border-radius: ${(props) => props.theme.radii.round}px;
+-  width: 30px;
+-  height: 30px;
+-  align-items: center;
+-  justify-content: center;
+-  position: absolute;
+-  bottom: 0;
+-  right: 0;
+-  background-color: ${(props) =>
+-    props.inverted ? props.theme.colors.input : props.theme.colors.primary};
++export const FadedDog = withUnistyles(Dog);
+ 
+-  border: ${(props) => props.theme.stroke.md}px;
+-  border-color: ${(props) =>
+-    props.inverted ? props.theme.colors.border : props.theme.colors.primary};
+-`;
++export const MaestroSkipPressable = withUnistyles(PressableArea);
+ 
+-export const FadedDog = styled(Dog)`
+-  opacity: 0.5;
+-`;
++const DEBUG_IMAGE_STATUS_CONTAINER_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.7)";
++const ANIMATED_OVERLAY_BACKGROUND_COLOR = "#00000050";
++const ADD_REMOVE_CONTAINER_BORDER_COLOR = "black";
+ 
+-/**
+- * MAESTRO_E2E placeholder skip button. Visible but unobtrusive — pinned to
+- * the bottom edge of the photo cell so a Maestro `point` tap can target it
+- * without occluding the centered FadedDog (which is the real human tap
+- * target on non-Maestro runs). Rendered only when both gates pass in
+- * `AddUserPhoto.showMaestroSkip` — production builds short-circuit on
+- * `config.ENV === "production"` so they never instantiate this style.
+- */
+-export const MaestroSkipPressable = styled(PressableArea)`
+-  position: absolute;
+-  bottom: 0;
+-  left: 0;
+-  right: 0;
+-  /* Must win hit-testing over the sibling FadedDog PressableArea and its
+-     generous hitSlop — without this, taps on the pill open the regular
+-     image-picker dialog instead (verified on iPhone 17 Pro Max sim). */
+-  z-index: 10;
+-  padding: 4px;
+-  align-items: center;
+-  justify-content: center;
+-  background-color: rgba(0, 0, 0, 0.7);
+-`;
++export const styles = StyleSheet.create((theme) => ({
++  debugImageStatusContainer: {
++    justifyContent: "center",
++    alignItems: "center",
++    position: "absolute",
++    top: 0,
++    right: 0,
++    paddingTop: theme.spacing[1],
++    paddingRight: theme.spacing[1],
++    paddingBottom: theme.spacing[1],
++    paddingLeft: theme.spacing[1],
++    borderBottomLeftRadius: theme.radii.sm,
++    backgroundColor: DEBUG_IMAGE_STATUS_CONTAINER_BACKGROUND_COLOR,
++  },
++  userPictureContent: {
++    borderTopLeftRadius: theme.radii.md,
++    borderTopRightRadius: theme.radii.md,
++    borderBottomRightRadius: theme.radii.md,
++    borderBottomLeftRadius: theme.radii.md,
++    alignItems: "center",
++    justifyContent: "center",
++    overflow: "hidden",
++    width: "100%",
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    borderWidth: theme.stroke.md,
++    borderColor: theme.colors.border,
++    borderStyle: "solid",
++    backgroundColor: theme.colors.input,
++  },
++  animatedOverlay: {
++    backgroundColor: ANIMATED_OVERLAY_BACKGROUND_COLOR,
++    width: "100%",
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    justifyContent: "center",
++  },
++  userPicture: {
++    position: "absolute",
++    width: "100%",
++    height: "100%",
++  },
++  userPictureContainer: {
++    paddingTop: theme.spacing[1.5],
++    paddingRight: theme.spacing[1.5],
++    paddingBottom: theme.spacing[1.5],
++    paddingLeft: theme.spacing[1.5],
++    width: dogPictureWidth,
++    height: dogPictureHeight,
++  },
++  addRemoveContainer: {
++    borderTopLeftRadius: theme.radii.round,
++    borderTopRightRadius: theme.radii.round,
++    borderBottomRightRadius: theme.radii.round,
++    borderBottomLeftRadius: theme.radii.round,
++    width: 30,
++    height: 30,
++    alignItems: "center",
++    justifyContent: "center",
++    position: "absolute",
++    bottom: 0,
++    right: 0,
++    borderWidth: theme.stroke.md,
++    // What `border: <width>px` on its own gives; both buckets below overwrite
++    // it, exactly as the `border-color` declaration after it did.
++    borderColor: ADD_REMOVE_CONTAINER_BORDER_COLOR,
++    borderStyle: "solid",
++    variants: {
++      inverted: {
++        true: {
++          backgroundColor: theme.colors.input,
++          borderColor: theme.colors.border,
++        },
++        default: {
++          backgroundColor: theme.colors.primary,
++          borderColor: theme.colors.primary,
++        },
++      },
++    },
++  },
++  fadedDog: {
++    opacity: 0.5,
++  },
++  /**
++   * MAESTRO_E2E placeholder skip button. Visible but unobtrusive — pinned to
++   * the bottom edge of the photo cell so a Maestro `point` tap can target it
++   * without occluding the centered FadedDog (which is the real human tap
++   * target on non-Maestro runs). Rendered only when both gates pass in
++   * `AddUserPhoto.showMaestroSkip` — production builds short-circuit on
++   * `config.ENV === "production"` so they never instantiate this style.
++   */
++  maestroSkipPressable: {
++    position: "absolute",
++    bottom: 0,
++    left: 0,
++    right: 0,
++    // Must win hit-testing over the sibling FadedDog PressableArea and its
++    // generous hitSlop — without this, taps on the pill open the regular
++    // image-picker dialog instead (verified on iPhone 17 Pro Max sim).
++    zIndex: 10,
++    paddingTop: 4,
++    paddingRight: 4,
++    paddingBottom: 4,
++    paddingLeft: 4,
++    alignItems: "center",
++    justifyContent: "center",
++    backgroundColor: DEBUG_IMAGE_STATUS_CONTAINER_BACKGROUND_COLOR,
++  },
++}));

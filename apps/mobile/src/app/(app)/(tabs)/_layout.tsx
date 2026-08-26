@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import Logo from "@/assets/images/logo";
 import Messages from "@/assets/images/messages";
@@ -27,7 +27,7 @@ const ProfileTabIcon = ({ color }: TabBarIconProps) => (
 );
 
 const TabsLayout = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const insets = useSafeAreaInsets();
 
   return (

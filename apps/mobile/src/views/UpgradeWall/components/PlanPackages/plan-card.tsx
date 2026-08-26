@@ -1,17 +1,17 @@
 import type { PurchasesPackage } from "react-native-purchases";
 
 import * as React from "react";
+import { View } from "react-native";
 
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/text";
 import { Checkbox } from "@/views/UpgradeWall/components/Checkbox";
 import {
-  Flex,
-  PercentContainer,
   PercentText,
   PlanContainer,
   Price,
+  styles as planPackagesStyles,
 } from "@/views/UpgradeWall/components/PlanPackages/styles";
 
 const formatPrice = (value: number, currency: string) =>
@@ -93,20 +93,27 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         return product.title;
     }
   })();
+  planPackagesStyles.useVariants({ selected });
 
   return (
     <PlanContainer
       testID={`upgrade-wall-plan-${identifier}`}
-      selected={selected}
       onPress={onPress}
+      style={planPackagesStyles.planContainer}
+      accessible
     >
       <Checkbox selected={selected} />
-      <Flex>
+      <View style={planPackagesStyles.flex}>
         <Text fontSize="sm" fontWeight="semibold">
           {translatedPlanName}
         </Text>
         {pricePerMonth ? (
-          <Price color="subtitle" fontSize="md" fontWeight="semibold">
+          <Price
+            color="subtitle"
+            fontSize="md"
+            fontWeight="semibold"
+            style={planPackagesStyles.price}
+          >
             {formatPrice(pricePerMonth, currencyCode)}/{t("plans.M")}{" "}
             {percentSaved ? (
               <Text color="subtitle" fontSize="md">
@@ -115,13 +122,17 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             ) : null}
           </Price>
         ) : null}
-      </Flex>
+      </View>
       {percentSaved ? (
-        <PercentContainer>
-          <PercentText fontSize="sm" fontWeight="semibold">
+        <View style={planPackagesStyles.percentContainer}>
+          <PercentText
+            fontSize="sm"
+            fontWeight="semibold"
+            style={planPackagesStyles.percentText}
+          >
             {t("plans.save", { percent: percentSaved })}
           </PercentText>
-        </PercentContainer>
+        </View>
       ) : null}
     </PlanContainer>
   );

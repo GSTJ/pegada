@@ -1,62 +1,82 @@
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import Close from "@/assets/images/Close.svg";
 import { PressableArea } from "@/components/pressable-area";
 
-export const TitleContainer = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${(props) => props.theme.spacing[4]}px;
-  border-bottom-width: ${(props) => props.theme.stroke.md}px;
-  border-color: ${(props) => props.theme.colors.border};
-`;
+export const styles = StyleSheet.create((theme) => ({
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: theme.spacing[4],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
+    paddingLeft: theme.spacing[4],
+    borderBottomWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+  },
+  selectItem: {
+    paddingTop: theme.spacing[4],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
+    paddingLeft: theme.spacing[4],
+    borderBottomWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+    variants: {
+      selected: {
+        true: {
+          backgroundColor: theme.colors.accent,
+        },
+        default: {
+          backgroundColor: theme.colors.background,
+        },
+      },
+    },
+  },
+  searchContainer: {
+    paddingTop: theme.spacing[2],
+    paddingRight: theme.spacing[1.5],
+    paddingBottom: theme.spacing[2],
+    paddingLeft: theme.spacing[1.5],
+    borderBottomWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
+  },
+  searchInput: {
+    color: theme.colors.text,
+    fontFamily: theme.typography.fontFamily.medium,
+    fontWeight: "medium",
+    fontSize: theme.typography.sizes.xs.size,
+    paddingTop: theme.spacing[1.5],
+    paddingRight: theme.spacing[2],
+    paddingBottom: theme.spacing[1.5],
+    paddingLeft: theme.spacing[2],
+    borderTopLeftRadius: theme.radii.sm,
+    borderTopRightRadius: theme.radii.sm,
+    borderBottomRightRadius: theme.radii.sm,
+    borderBottomLeftRadius: theme.radii.sm,
+    borderWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.input,
+  },
+  closeIcon: {},
+  container: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+}));
 
-type SelectedItemProps = {
-  selected?: boolean;
-};
+export const SelectItem = withUnistyles(PressableArea);
 
-export const SelectItem = styled(PressableArea)<SelectedItemProps>`
-  padding: ${(props) => props.theme.spacing[4]}px;
-  border-bottom-width: ${(props) => props.theme.stroke.md}px;
-  border-color: ${(props) => props.theme.colors.border};
-  background-color: ${(props) =>
-    props.selected ? props.theme.colors.accent : props.theme.colors.background};
-`;
+export const SearchInput = withUnistyles(BottomSheetTextInput, (theme) => ({
+  placeholderTextColor: theme.colors.placeholder,
+}));
 
-export const SearchContainer = styled.View`
-  padding: ${(props) => props.theme.spacing[2]}px
-    ${(props) => props.theme.spacing[1.5]}px;
-  border-bottom-width: ${(props) => props.theme.stroke.md}px;
-  border-color: ${(props) => props.theme.colors.border};
-  background-color: ${(props) => props.theme.colors.background};
-`;
-
-export const SearchInput = styled(BottomSheetTextInput).attrs((props) => ({
-  placeholderTextColor: props.theme.colors.placeholder,
-  ...props,
-}))`
-  color: ${(props) => props.theme.colors.text};
-  font-family: ${(props) => props.theme.typography.fontFamily.medium};
-  font-weight: medium;
-  font-size: ${(props) => props.theme.typography.sizes.xs.size}px;
-  padding: ${(props) => props.theme.spacing[1.5]}px
-    ${(props) => props.theme.spacing[2]}px;
-  border-radius: ${(props) => props.theme.radii.sm}px;
-  border-width: ${(props) => props.theme.stroke.md}px;
-  border-color: ${(props) => props.theme.colors.border};
-  background-color: ${(props) => props.theme.colors.input};
-`;
-
-export const CloseIcon = styled(Close).attrs((props) => ({
+export const CloseIcon = withUnistyles(Close, (theme) => ({
   name: "close",
   width: 14,
   height: 14,
-  fill: props.theme.colors.text,
-  ...props,
-}))``;
-
-export const Container = styled.View`
-  flex: 1;
-`;
+  fill: theme.colors.text,
+}));

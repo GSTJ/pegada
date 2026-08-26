@@ -1,13 +1,14 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 
 import * as React from "react";
+import { View } from "react-native";
 
 import { useRouter } from "expo-router";
 
 import { Text } from "@/components/text";
 import { SceneName } from "@/types/scene-name";
 
-import { Container, Content, Picture } from "./styles";
+import { Container, Picture, styles } from "./styles";
 
 type PreviewProps = {
   item: {
@@ -27,18 +28,20 @@ export const Preview: React.FC<PreviewProps> = ({ item }) => {
           params: { dogId: item.dog.id, matchId: item.id },
         })
       }
+      style={styles.container}
     >
       <Picture
         source={{
           uri: item.dog.images[0]?.url,
           blurhash: item.dog.images[0]?.blurhash ?? undefined,
         }}
+        style={styles.picture}
       />
-      <Content>
+      <View style={styles.content}>
         <Text fontSize="xs" fontWeight="semibold" numberOfLines={1}>
           {item.dog.name}
         </Text>
-      </Content>
+      </View>
     </Container>
   );
 };

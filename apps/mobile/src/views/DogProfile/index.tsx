@@ -2,7 +2,14 @@ import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 
 import { useState } from "react";
 import * as React from "react";
-import { ActivityIndicator, Alert, Linking, Share, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Share,
+  View,
+  ScrollView,
+} from "react-native";
 
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,8 +18,8 @@ import { Header, HeaderBackButton } from "@react-navigation/elements";
 import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useUnistyles } from "react-native-unistyles";
 import { useDispatch, useSelector } from "react-redux";
-import { useTheme } from "styled-components/native";
 
 import MainCard from "@/components/MainCard";
 import { MatchActionBar } from "@/components/MatchActionBar";
@@ -35,6 +42,7 @@ import { BreedTag } from "@/views/DogProfile/components/breed-tag";
 import GoBack from "@/views/DogProfile/components/GoBack";
 
 import * as S from "./styles";
+import { styles } from "./styles";
 
 export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
   const { t } = useTranslation();
@@ -59,8 +67,16 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
   };
 
   return (
-    <S.ShareButton>
-      <S.ActionLabel onPress={handleShare} fontWeight="bold" color="primary">
+    <S.ShareButton
+      style={styles.shareButton}
+      hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
+    >
+      <S.ActionLabel
+        onPress={handleShare}
+        fontWeight="bold"
+        color="primary"
+        style={styles.actionLabel}
+      >
         {t("dogProfile.shareProfile", { name: firstName })}
       </S.ActionLabel>
     </S.ShareButton>
@@ -141,7 +157,7 @@ const DogProfile = () => {
   const topInset = useCustomTopInset();
   const router = useRouter();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const matchActionBarHeight = topInset + 100;
 
@@ -189,7 +205,7 @@ const DogProfile = () => {
 
   return (
     <>
-      <S.Container>
+      <ScrollView style={styles.container} bounces={false}>
         <StatusBar style="light" />
 
         <View style={{ backgroundColor: theme.colors.black }}>
@@ -203,48 +219,75 @@ const DogProfile = () => {
 
         <GoBack testID="dog-profile-close" onPress={() => router.back()} />
 
-        <S.BottomColumn
-          style={{
-            paddingBottom: matchId ? theme.spacing[8] : matchActionBarHeight,
-          }}
+        <View
+          style={[
+            styles.bottomColumn,
+            {
+              paddingBottom: matchId ? theme.spacing[8] : matchActionBarHeight,
+            },
+          ]}
         >
-          <S.Content>
+          <View style={styles.content}>
             <BreedTag breed={dog.breed} />
-            <S.Name testID="dog-profile-name" numberOfLines={1}>
+            <S.Name
+              testID="dog-profile-name"
+              numberOfLines={1}
+              style={styles.name}
+              fontWeight="black"
+              fontSize="xl"
+            >
               {dog.name}
               {dog.birthDate ? (
-                <S.Age>, {getFormattedYears(dog.birthDate)}</S.Age>
+                <S.Age style={styles.age} fontWeight="medium" fontSize="xl">
+                  , {getFormattedYears(dog.birthDate)}
+                </S.Age>
               ) : undefined}
             </S.Name>
             <View style={{ gap: theme.spacing[7] }}>
-              <S.Description>{dog.bio}</S.Description>
+              <S.Description style={styles.description}>
+                {dog.bio}
+              </S.Description>
               {Boolean(matchId) && (
                 <S.UnmatchButton
                   disabled={unmatchLoading}
                   onPress={() => {
                     void handleUnmatch();
                   }}
+                  style={styles.unmatchButton}
+                  hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
                 >
                   {unmatchLoading ? (
                     <ActivityIndicator color={theme.colors.primary} />
                   ) : (
-                    <S.ActionLabel fontWeight="bold" color="primary">
+                    <S.ActionLabel
+                      fontWeight="bold"
+                      color="primary"
+                      style={styles.actionLabel}
+                    >
                       {t("dogProfile.unmatch")}
                     </S.ActionLabel>
                   )}
                 </S.UnmatchButton>
               )}
               <ShareButton dog={dog} />
-              <S.ReportButton testID="dog-profile-report">
+              <S.ReportButton
+                testID="dog-profile-report"
+                style={styles.reportButton}
+                hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
+              >
                 <S.ActionLabel
                   onPress={() => reportUser(dog)}
                   fontWeight="bold"
+                  style={styles.actionLabel}
                 >
                   {t("dogProfile.reportName", { name: firstName })}
                 </S.ActionLabel>
               </S.ReportButton>
               {__DEV__ && matchId ? (
-                <S.ReportButton>
+                <S.ReportButton
+                  style={styles.reportButton}
+                  hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
+                >
                   <S.ActionLabel
                     onPress={() => {
                       router.push({
@@ -253,20 +296,24 @@ const DogProfile = () => {
                       });
                     }}
                     fontWeight="bold"
+                    style={styles.actionLabel}
                   >
                     Fake Match Screen
                   </S.ActionLabel>
                 </S.ReportButton>
               ) : null}
             </View>
-          </S.Content>
-        </S.BottomColumn>
-      </S.Container>
+          </View>
+        </View>
+      </ScrollView>
 
       {!matchId && (
         <>
           <S.MatchActionBarGradient
-            style={{ height: matchActionBarHeight + theme.spacing[8] }}
+            style={[
+              styles.matchActionBarGradient,
+              { height: matchActionBarHeight + theme.spacing[8] },
+            ]}
           />
           <MatchActionBar
             style={{ bottom: topInset }}
@@ -281,7 +328,7 @@ const DogProfile = () => {
 };
 
 const ErrorHeaderBackButton = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <HeaderBackButton
@@ -294,10 +341,10 @@ const ErrorHeaderBackButton = () => {
 
 const DogProfileErrorState = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
-    <S.ErrorScreen>
+    <View style={styles.errorScreen}>
       <Header
         title={t("dogProfile.dogProfile")}
         headerLeft={ErrorHeaderBackButton}
@@ -317,7 +364,7 @@ const DogProfileErrorState = () => {
       />
 
       <UnknownErrorComponent />
-    </S.ErrorScreen>
+    </View>
   );
 };
 

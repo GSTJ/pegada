@@ -1,0 +1,191 @@
+# feedback-card-fragment
+
+status: skipped
+reason: <AbsolutePosition> in test/fixtures/feedback-card-fragment/src/components/FeedbackCard/index.tsx overrides .attrs({ pointerEvents }), which styled-components would have won
+
+--- src/components/FeedbackCard/index.tsx ---
+
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type { SharedValue } from "react-native-reanimated";
+
+import * as React from "react";
+
+import {
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+} from "react-native-reanimated";
+
+import { ACTION_OFFSET } from "@/constants";
+
+import LikeFeedback from "./components/LikeFeedback";
+import MaybeFeedback from "./components/MaybeFeedback";
+import NopeFeedback from "./components/NopeFeedback";
+import { AbsolutePosition, Container, StyledMainCard } from "./styles";
+
+type FeedbackCardProps = {
+  dog: SwipeDog;
+  translation: {
+    x: SharedValue<number>;
+    y: SharedValue<number>;
+  };
+  isFirst: boolean;
+};
+
+const FeedbackCard: React.FC<FeedbackCardProps> = ({
+  dog,
+  translation,
+  isFirst,
+}) => {
+  const likeOpacity = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      opacity: interpolate(
+        translation.x.value,
+        [10, ACTION_OFFSET],
+        [0, 1],
+        Extrapolation.CLAMP,
+      ),
+    };
+  });
+
+  const nopeOpacity = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      opacity: interpolate(
+        translation.x.value,
+        [-ACTION_OFFSET, -10],
+        [1, 0],
+        Extrapolation.CLAMP,
+      ),
+    };
+  });
+
+  const maybeOpacity = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      opacity: interpolate(
+        translation.y.value,
+        [-ACTION_OFFSET, -10],
+        [1, 0],
+        Extrapolation.CLAMP,
+      ),
+    };
+  });
+
+  return (
+    <Container isFirst={isFirst}>
+      <AbsolutePosition pointerEvents="auto">
+        <StyledMainCard dog={dog} />
+      </AbsolutePosition>
+      <AbsolutePosition style={maybeOpacity}>
+        <MaybeFeedback />
+      </AbsolutePosition>
+      <AbsolutePosition style={nopeOpacity}>
+        <NopeFeedback />
+      </AbsolutePosition>
+      <AbsolutePosition style={likeOpacity}>
+        <LikeFeedback />
+      </AbsolutePosition>
+    </Container>
+  );
+};
+
+export default FeedbackCard;
+
+--- src/components/FeedbackCard/styles.ts ---
+
+import Animated from "react-native-reanimated";
+import styled, { css } from "styled-components/native";
+
+import MainCard from "../MainCard";
+import { absoluteFill } from "../MainCard/styles";
+
+type IContainer = {
+  isFirst: boolean;
+};
+
+export const Container = styled(Animated.View)<IContainer>`
+  margin: ${(props) => props.theme.spacing[1]}px
+    ${(props) => props.theme.spacing[1.5]}px;
+  flex: 1;
+  border-radius: ${(props) => props.theme.radii.lg}px;
+  background-color: ${(props) => props.theme.colors.background};
+  overflow: hidden;
+
+  ${(props) =>
+    props.isFirst &&
+    css`
+      elevation: 0.5;
+      shadow-color: #000;
+      shadow-offset: 0px 1px;
+      shadow-opacity: 0.1;
+      shadow-radius: 1px;
+    `}
+`;
+
+export const AbsolutePosition = styled(Animated.View).attrs((props) => ({
+  pointerEvents: "none",
+  ...props,
+}))`
+  flex: 1;
+  ${absoluteFill}
+`;
+
+export const StyledMainCard = styled(MainCard)`
+  flex: 1;
+`;
+
+--- src/components/MainCard/styles.ts ---
+
+import { LinearGradient } from "expo-linear-gradient";
+
+import Animated from "react-native-reanimated";
+import styled, { css } from "styled-components/native";
+
+import { Image } from "@/components/image";
+
+export const absoluteFill = css`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+`;
+
+export const Container = styled(Animated.View)`
+  background-color: ${(props) => props.theme.colors.background};
+  overflow: hidden;
+  padding-top: ${(props) => props.theme.spacing[6]}px;
+`;
+
+export const Picture = styled(Image)`
+  flex: 1;
+  ${absoluteFill}
+`;
+
+export const UpperPart = styled.View`
+  flex: 1;
+`;
+
+export const CarouselContainer = styled.View`
+  flex-direction: row;
+  ${absoluteFill}
+`;
+
+export const PreviousImage = styled.Pressable`
+  flex: 1;
+`;
+
+export const NextImage = styled.Pressable`
+  flex: 1;
+`;
+
+/** Full-bleed gradient that darkens the top of the card. */
+export const Scrim = styled(LinearGradient)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+`;

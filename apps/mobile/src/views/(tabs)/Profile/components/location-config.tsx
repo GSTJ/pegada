@@ -3,7 +3,7 @@ import { ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import Location from "@/assets/images/Location.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -31,7 +31,7 @@ const CurrentLocationError = () => {
 };
 
 const CurrentLocationLoading = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <ActivityIndicator
@@ -44,7 +44,7 @@ export const LocationConfig = () => {
   const { t } = useTranslation();
 
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <Config.Root

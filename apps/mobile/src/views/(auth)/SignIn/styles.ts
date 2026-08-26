@@ -1,72 +1,74 @@
-import { KeyboardAvoidingView, Pressable } from "react-native";
+import { ImageBackground } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import Logo from "@/assets/images/logo";
 import { Text } from "@/components/text";
 
-export const Container = styled(SafeAreaView).attrs({
-  edges: ["left", "right"],
-})`
-  flex: 1;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  pressableContainer: {
+    flexGrow: 1,
+  },
+  keyboardAvoidingViewStyled: {
+    flexGrow: 1,
+  },
+  logoStyled: {
+    marginBottom: 25,
+  },
+  topCard: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: theme.spacing[10],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[10],
+    paddingLeft: theme.spacing[4],
+  },
+  bottomCard: {
+    backgroundColor: theme.colors.background,
+    paddingTop: theme.spacing[4],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
+    paddingLeft: theme.spacing[4],
+    borderTopColor: theme.colors.border,
+    borderTopWidth: theme.stroke.md,
+  },
+  title: {
+    color: theme.colors.text,
+    marginBottom: theme.spacing[1],
+  },
+  highlight: {
+    color: theme.colors.primary,
+    marginBottom: theme.spacing[1],
+  },
+  description: {
+    color: theme.colors.text,
+  },
+}));
 
-/**
- * Keyboard-dismiss wrapper for the whole screen. `accessible: false` is
- * load-bearing: Pressables are implicitly accessibility ELEMENTS, and an
- * accessible element COLLAPSES its entire subtree in the a11y tree — the
- * whole SignIn screen (email input, submit button, all testIDs) becomes
- * one opaque node to XCUITest/VoiceOver.
- */
-export const PressableContainer = styled(Pressable).attrs({
-  accessible: false,
-})`
-  flex-grow: 1;
-`;
+export const Container = withUnistyles(SafeAreaView);
 
-export const KeyboardAvoidingViewStyled = styled(KeyboardAvoidingView)`
-  flex-grow: 1;
-`;
+export const LogoStyled = withUnistyles(Logo);
 
-export const LogoStyled = styled(Logo)`
-  margin-bottom: 25px;
-`;
-
-export const TopCard = styled.ImageBackground.attrs((props) => ({
+export const TopCard = withUnistyles(ImageBackground, (theme) => ({
   imageStyle: {
     opacity: 0.2,
-    backgroundColor: props.theme.colors.background,
+    backgroundColor: theme.colors.background,
     transform: [{ scale: 1.05 }],
   },
-}))`
-  flex: 1;
-  background-color: ${(props) => props.theme.colors.background};
-  justify-content: center;
-  align-items: center;
-  padding: ${(props) => props.theme.spacing[10]}px
-    ${(props) => props.theme.spacing[4]}px;
-`;
+}));
 
-export const BottomCard = styled.View`
-  background-color: ${(props) => props.theme.colors.background};
-  padding: ${(props) => props.theme.spacing[4]}px;
-  border-top-color: ${(props) => props.theme.colors.border};
-  border-top-width: ${(props) => props.theme.stroke.md}px;
-`;
+export const Title = withUnistyles(Text);
 
-export const Title = styled(Text).attrs({
-  fontSize: "xl",
-  fontWeight: "bold",
-})`
-  color: ${(props) => props.theme.colors.text};
-  margin-bottom: ${(props) => props.theme.spacing[1]}px;
-`;
+export const Highlight = withUnistyles(Text);
 
-export const Highlight = styled(Title)`
-  color: ${(props) => props.theme.colors.primary};
-`;
-
-export const Description = styled(Text)`
-  color: ${(props) => props.theme.colors.text};
-`;
+export const Description = withUnistyles(Text);

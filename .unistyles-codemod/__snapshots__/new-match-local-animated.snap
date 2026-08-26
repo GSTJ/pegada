@@ -1,0 +1,386 @@
+# new-match-local-animated
+
+status: skipped
+reason: `AnimatedImage` is not imported, so call sites cannot import it either
+useTheme: src/views/NewMatch/index.tsx (1 sites)
+
+--- src/views/NewMatch/animated-cards.tsx ---
+
+import type { RouterOutputs } from "@/contexts/trpc-provider";
+
+import { useEffect } from "react";
+import * as React from "react";
+import { useWindowDimensions, View } from "react-native";
+
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
+
+import {
+  DefaultLoadingComponent,
+  NetworkBoundary,
+} from "@/components/NetworkBoundary";
+import { api } from "@/contexts/trpc-provider";
+
+import {
+  CardsColumn,
+  HeartEyesContainer,
+  HeartEyesEmoji,
+  HeartEyesEmojiStandalone,
+  LoadingBox,
+  RotatedImageLeft,
+  RotatedImageRight,
+} from "./styles";
+
+type AnimatedCardsProps = {
+  matchDog?: RouterOutputs["dog"]["get"];
+};
+
+const ROTATE_Z = 18;
+
+const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
+  const rotateZ = useSharedValue(0);
+
+  const [myDog] = api.myDog.get.useSuspenseQuery(undefined, {
+    refetchOnMount: false,
+  });
+
+  const windowDimensions = useWindowDimensions();
+  const CARD_HEIGHT = windowDimensions.height < 800 ? 200 : 325;
+
+  useEffect(() => {
+    rotateZ.value = withDelay(500, withTiming(ROTATE_Z, { duration: 500 }));
+  }, [rotateZ]);
+
+  const rotatedImageLeftStyle = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      transform: [
+        { translateY: CARD_HEIGHT / 2 },
+        { rotateZ: `${rotateZ.value}deg` },
+        { translateY: -CARD_HEIGHT / 2 },
+      ],
+    };
+  });
+
+  const rotatedImageRightStyle = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      transform: [
+        { translateY: CARD_HEIGHT / 2 },
+        { rotateZ: `${-rotateZ.value}deg` },
+        { translateY: -CARD_HEIGHT / 2 },
+      ],
+    };
+  });
+
+  return (
+    <CardsColumn>
+      <View>
+        <RotatedImageRight
+          source={{
+            uri: myDog?.images[0]?.url,
+            blurhash: myDog?.images[0]?.blurhash ?? undefined,
+          }}
+          style={[
+            rotatedImageLeftStyle,
+            { height: CARD_HEIGHT, width: CARD_HEIGHT / 1.5 },
+          ]}
+        />
+        <RotatedImageLeft
+          source={{
+            uri: matchDog?.images[0]?.url,
+            blurhash: matchDog?.images[0]?.blurhash ?? undefined,
+          }}
+          style={[
+            rotatedImageRightStyle,
+            { height: CARD_HEIGHT, width: CARD_HEIGHT / 1.5 },
+          ]}
+        />
+      </View>
+      <HeartEyesContainer>
+        <HeartEyesEmoji
+          source={require("@/assets/images/HeartEyesEmoji.webp")}
+        />
+      </HeartEyesContainer>
+    </CardsColumn>
+  );
+};
+
+const AnimatedCardsErrorFallback = () => (
+  <HeartEyesEmojiStandalone
+    source={require("@/assets/images/HeartEyesEmoji.webp")}
+  />
+);
+
+const AnimatedCardsLoading = () => (
+  <LoadingBox>
+    <DefaultLoadingComponent />
+  </LoadingBox>
+);
+
+const AnimatedCardsBoundary = ({ matchDog }: AnimatedCardsProps) => (
+  <NetworkBoundary
+    suspenseFallback={<AnimatedCardsLoading />}
+    errorFallback={AnimatedCardsErrorFallback}
+  >
+    <AnimatedCards matchDog={matchDog} />
+  </NetworkBoundary>
+);
+
+export default AnimatedCardsBoundary;
+
+--- src/views/NewMatch/confetti-animation.tsx ---
+
+import { Confetti } from "./styles";
+
+export const ConfettiAnimation = () => (
+  <Confetti
+    source={require("@/assets/animations/confetti.json")}
+    autoPlay
+    loop={false}
+    resizeMode="cover"
+  />
+);
+
+--- src/views/NewMatch/index.tsx ---
+
+import { useEffect } from "react";
+import * as React from "react";
+import { BackHandler, ScrollView, View } from "react-native";
+
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/Button";
+import { NetworkBoundary } from "@/components/NetworkBoundary";
+import { Text } from "@/components/text";
+import { api } from "@/contexts/trpc-provider";
+import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
+import { analytics } from "@/services/analytics";
+import { haptics } from "@/services/haptics";
+import { SceneName } from "@/types/scene-name";
+
+import AnimatedCards from "./animated-cards";
+import { ConfettiAnimation } from "./confetti-animation";
+import {
+  Container,
+  Content,
+  matchScroll,
+  MatchCaption,
+  MatchWordmark,
+} from "./styles";
+import { useUnistyles } from "react-native-unistyles";
+
+const NewMatch: React.FC = () => {
+  const { matchId, matchDogId } = useLocalSearchParams<{
+    matchDogId: string;
+    matchId: string;
+  }>();
+
+  const [matchDog] = api.dog.get.useSuspenseQuery(
+    { id: matchDogId as string },
+    { refetchOnMount: false },
+  );
+
+  const { safeLoadAndShow } = useForAdRequestTracked({
+    ios: "ca-app-pub-6276873083446538/8154113808",
+    android: "ca-app-pub-6276873083446538/5719522151",
+  });
+
+  const { theme } = useUnistyles();
+
+  const { t } = useTranslation();
+
+  const router = useRouter();
+
+  const handleSendMessage = async () => {
+    analytics.track({
+      event_type: "New Match",
+      event_properties: {
+        action: "Send Message",
+      },
+    });
+
+    await safeLoadAndShow();
+
+    router.push({
+      pathname: `${SceneName.Chat}/[matchId]`,
+      params: { dogId: matchDogId, matchId },
+    });
+  };
+
+  const handleSkip = async () => {
+    analytics.track({
+      event_type: "New Match",
+      event_properties: {
+        action: "Skip",
+      },
+    });
+
+    await safeLoadAndShow();
+
+    router.back();
+  };
+
+  useFocusEffect(() => {
+    // Assume 'skip' if the user presses the back button
+    // This is pertinent to Android devices only.
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        void handleSkip();
+        return false;
+      },
+    );
+
+    return () => subscription.remove();
+  });
+
+  // Pairs with the confetti Lottie — celebrates the match as the screen appears.
+  useEffect(() => {
+    haptics.success();
+  }, []);
+
+  return (
+    <Container testID="new-match-screen">
+      <StatusBar style={theme.dark ? "light" : "dark"} />
+      <ConfettiAnimation />
+      <Content>
+        <ScrollView contentContainerStyle={matchScroll}>
+          <AnimatedCards matchDog={matchDog} />
+          <Text fontSize="xl" fontWeight="light">
+            {t("newMatch.youGotA")}
+          </Text>
+          <MatchWordmark
+            source={
+              theme.dark
+                ? require("@/assets/images/MatchLight.webp")
+                : require("@/assets/images/MatchDark.webp")
+            }
+            contentFit="contain"
+          />
+          <MatchCaption fontSize="lg" fontWeight="light">
+            {t("newMatch.youLikedEachOther", {
+              replace: { name: matchDog.name },
+            })}
+          </MatchCaption>
+        </ScrollView>
+
+        <View style={{ padding: theme.spacing[4], gap: theme.spacing[3] }}>
+          <Button testID="new-match-send" onPress={handleSendMessage}>
+            {t("newMatch.sendMessage")}
+          </Button>
+          <Button
+            testID="new-match-skip"
+            variant="outline"
+            onPress={handleSkip}
+          >
+            {t("newMatch.keepSwiping")}
+          </Button>
+        </View>
+      </Content>
+    </Container>
+  );
+};
+
+const NewMatchScreen = () => (
+  <NetworkBoundary>
+    <NewMatch />
+  </NetworkBoundary>
+);
+
+export default NewMatchScreen;
+
+--- src/views/NewMatch/styles.ts ---
+
+import { StyleSheet } from "react-native";
+
+import Color from "color";
+import AnimatedLottieView from "lottie-react-native";
+import Animated from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+import styled from "styled-components/native";
+
+import { Image } from "@/components/image";
+import { Text } from "@/components/text";
+
+export const Container = styled.View`
+  background-color: ${(props) => props.theme.colors.background};
+  flex: 1;
+`;
+
+export const Content = styled(SafeAreaView)`
+  flex: 1;
+  gap: 10px;
+`;
+
+const AnimatedImage = Animated.createAnimatedComponent(Image);
+export const RotatedImageLeft = styled(AnimatedImage)`
+  border-radius: ${(props) => props.theme.radii.lg}px;
+  background-color: ${(props) => props.theme.colors.card};
+  border-width: 1px;
+  border-color: ${(props) => props.theme.colors.border};
+`;
+
+export const RotatedImageRight = styled(RotatedImageLeft)`
+  position: absolute;
+`;
+
+export const HeartEyesContainer = styled.View`
+  border-radius: ${(props) => props.theme.radii.round}px;
+  background-color: ${(props) =>
+    new Color(props.theme.colors.primary).alpha(0.5).rgb().string()};
+  padding: ${(props) => props.theme.spacing[1.5]}px;
+  margin-top: -35px;
+  margin-bottom: ${(props) => props.theme.spacing[2]}px;
+`;
+
+export const CardsColumn = styled.View`
+  align-items: center;
+`;
+
+export const HeartEyesEmoji = styled(Image)`
+  width: 70px;
+  height: 70px;
+`;
+
+/** Same emoji, standing in for the whole card stack when it fails to load. */
+export const HeartEyesEmojiStandalone = styled(HeartEyesEmoji)`
+  margin-bottom: ${({ theme }) => theme.spacing[5]}px;
+`;
+
+export const LoadingBox = styled.View`
+  height: 200px;
+`;
+
+/** `contentContainerStyle` takes a style object, not a component. */
+export const { matchScroll } = StyleSheet.create({
+  matchScroll: {
+    alignItems: "center",
+    justifyContent: "center",
+    flexGrow: 1,
+  },
+});
+
+export const MatchWordmark = styled(Image)`
+  height: 50px;
+  width: 100%;
+`;
+
+export const MatchCaption = styled(Text)`
+  text-align: center;
+  margin-top: 12px;
+  max-width: 200px;
+`;
+
+export const Confetti = styled(AnimatedLottieView)`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+`;

@@ -1,0 +1,74 @@
+[
+  {
+    "name": "layout-plain",
+    "entry": "src/components/layout.ts"
+  },
+  {
+    "name": "divider-const",
+    "entry": "src/components/divider.ts"
+  },
+  {
+    "name": "text-keystone",
+    "entry": "src/components/text.ts"
+  },
+  {
+    "name": "button-variants",
+    "entry": "src/components/Button/styles.ts"
+  },
+  {
+    "name": "pagination-animated-variants",
+    "entry": "src/components/MainCard/components/Pagination/styles.ts"
+  },
+  {
+    "name": "radio-buttons-if-blocks",
+    "entry": "src/components/RadioButtons/styles.ts"
+  },
+  {
+    "name": "feedback-card-fragment",
+    "entry": "src/components/FeedbackCard/styles.ts"
+  },
+  {
+    "name": "main-card-fragment-source",
+    "entry": "src/components/MainCard/styles.ts"
+  },
+  {
+    "name": "messages-message-attrs",
+    "entry": "src/views/(tabs)/Messages/components/Message/styles.ts"
+  },
+  {
+    "name": "signin-attrs-array",
+    "entry": "src/views/(auth)/SignIn/styles.ts"
+  },
+  {
+    "name": "input-attrs-object",
+    "entry": "src/components/Input/styles.ts"
+  },
+  {
+    "name": "chat-message-two-branches",
+    "entry": "src/views/Chat/components/Message/styles.ts"
+  },
+  {
+    "name": "app-review-self-consumer",
+    "entry": "src/services/app-review.tsx"
+  },
+  {
+    "name": "checkbox-variant-color",
+    "entry": "src/views/UpgradeWall/components/Checkbox/styles.ts"
+  },
+  {
+    "name": "slider-consts",
+    "entry": "src/components/Slider/styles.ts"
+  },
+  {
+    "name": "ask-for-location-stylesheet-clash",
+    "entry": "src/views/(auth)/AskForLocation/styles.ts"
+  },
+  {
+    "name": "glassmorphism-attrs-fn",
+    "entry": "src/components/Glassmorphism/styles.ts"
+  },
+  {
+    "name": "new-match-local-animated",
+    "entry": "src/views/NewMatch/styles.ts"
+  }
+]

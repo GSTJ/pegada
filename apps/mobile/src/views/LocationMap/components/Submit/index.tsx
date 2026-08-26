@@ -11,7 +11,7 @@ import Animated, {
 
 import { BottomAction } from "@/components/BottomAction";
 
-import { StyledButton } from "./styles";
+import { StyledButton, styles } from "./styles";
 
 type SubmitProps = {
   loading?: boolean;
@@ -46,6 +46,7 @@ export const Submit: React.FC<SubmitProps> = ({
           testID="location-map-confirm"
           loading={loading}
           onPress={onPress}
+          style={styles.styledButton}
         >
           {t("locationMap.confirmLocation")}
         </StyledButton>

@@ -1,0 +1,104 @@
+diff --git a/apps/mobile/src/components/MainCard/components/PersonalInfo/styles.ts b/apps/mobile/src/components/MainCard/components/PersonalInfo/styles.ts
+deleted file mode 100644
+index e607212..0000000
+--- a/apps/mobile/src/components/MainCard/components/PersonalInfo/styles.ts
++++ /dev/null
+@@ -1,27 +0,0 @@
+-import styled from "styled-components/native";
+-
+-import { Text } from "@/components/text";
+-
+-export const Container = styled.View`
+-  padding: ${(props) => props.theme.spacing[6]}px;
+-  padding-bottom: ${(props) => props.theme.spacing[28]}px;
+-  padding-top: ${(props) => props.theme.spacing[12]}px;
+-`;
+-
+-export const Name = styled(Text).attrs({
+-  fontWeight: "black",
+-  fontSize: "xl",
+-})`
+-  color: #fff;
+-  margin-bottom: ${(props) => props.theme.spacing[1]}px;
+-`;
+-
+-export const Age = styled(Name).attrs({
+-  fontWeight: "medium",
+-})`
+-  font-size: 18px;
+-`;
+-
+-export const Description = styled(Text)`
+-  color: #fff;
+-`;
+diff --git a/apps/mobile/src/components/MainCard/components/PersonalInfo/styles.tsx b/apps/mobile/src/components/MainCard/components/PersonalInfo/styles.tsx
+new file mode 100644
+index 0000000..3d14b2c
+--- /dev/null
++++ b/apps/mobile/src/components/MainCard/components/PersonalInfo/styles.tsx
+@@ -0,0 +1,65 @@
++import type { TextProps } from "@/components/text";
++
++import type { ViewProps } from "react-native";
++
++import { View } from "react-native";
++
++import { StyleSheet } from "react-native-unistyles";
++
++import { Text } from "@/components/text";
++
++/**
++ * These stay components rather than becoming bare style objects: the profile
++ * header (`views/(tabs)/Profile/components/UserDogProfileHeader`) renders all
++ * four from the outside, and the typography props that used to be `.attrs`
++ * defaults belong with the element, not with every call site.
++ */
++export const Container = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.container, style]} />
++);
++
++export const Name = ({ style, ...props }: TextProps) => (
++  <Text
++    {...props}
++    fontWeight="black"
++    fontSize="xl"
++    style={[styles.name, style]}
++  />
++);
++
++/** `styled(Name)`: same rules, one attr overridden and its own font size. */
++export const Age = ({ style, ...props }: TextProps) => (
++  <Text
++    {...props}
++    fontWeight="medium"
++    fontSize="xl"
++    style={[styles.age, style]}
++  />
++);
++
++export const Description = ({ style, ...props }: TextProps) => (
++  <Text {...props} style={[styles.description, style]} />
++);
++
++const NAME_COLOR = "#fff";
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    paddingTop: theme.spacing[12],
++    paddingRight: theme.spacing[6],
++    paddingBottom: theme.spacing[28],
++    paddingLeft: theme.spacing[6],
++  },
++  name: {
++    color: NAME_COLOR,
++    marginBottom: theme.spacing[1],
++  },
++  age: {
++    color: NAME_COLOR,
++    marginBottom: theme.spacing[1],
++    fontSize: 18,
++  },
++  description: {
++    color: NAME_COLOR,
++  },
++}));

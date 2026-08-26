@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import * as React from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import { KeyboardAvoidingView, Platform, View } from "react-native";
 
 import * as StoreReview from "expo-store-review";
 
 import { useTranslation } from "react-i18next";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
 import { magicToast } from "react-native-magic-toast";
-import { useTheme } from "styled-components";
-import styled from "styled-components/native";
+import {
+  StyleSheet,
+  withUnistyles,
+  useUnistyles,
+} from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
@@ -17,42 +20,6 @@ import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { getData, StorageKeys, storeData } from "@/services/storage";
-
-const Container = styled.View`
-  padding: ${({ theme }) => theme.spacing[5]}px;
-  margin: ${({ theme }) => theme.spacing[4]}px;
-  background-color: ${({ theme }) => theme.colors.background};
-  border-radius: ${({ theme }) => theme.radii.lg}px;
-  align-self: center;
-  max-width: 300px;
-  width: 100%;
-  border-width: ${({ theme }) => theme.stroke.sm}px;
-  border-color: ${({ theme }) => theme.colors.border};
-`;
-
-const SmallButton = styled(Button)`
-  padding-top: 0px;
-  padding-bottom: 0px;
-  height: ${({ theme }) => theme.spacing[12]}px;
-  flex: 1;
-`;
-
-const CenterText = styled(Text)`
-  text-align: center;
-`;
-
-const ButtonRow = styled.View`
-  flex-direction: row;
-  gap: ${({ theme }) => theme.spacing[2]}px;
-  margin-top: ${({ theme }) => theme.spacing[5]}px;
-`;
-
-const Title = styled(CenterText).attrs({
-  fontSize: "lg",
-  fontWeight: "bold",
-})`
-  margin-bottom: ${({ theme }) => theme.spacing[1]}px;
-`;
 
 const handleReview = async () => {
   try {
@@ -67,7 +34,7 @@ const handleReview = async () => {
 const NotLikingTheAppModal: React.FC = () => {
   const [feedback, setFeedback] = React.useState("");
   const { t } = useTranslation();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const { hide } = useMagicModal();
 
   const handleSend = () => {
@@ -85,9 +52,13 @@ const NotLikingTheAppModal: React.FC = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Container>
-        <Title>{t("appReview.notLikingTheAppModal.title")}</Title>
-        <CenterText style={{ marginBottom: theme.spacing[1] }}>
+      <View style={styles.container}>
+        <Title style={styles.title} fontSize="lg" fontWeight="bold">
+          {t("appReview.notLikingTheAppModal.title")}
+        </Title>
+        <CenterText
+          style={[styles.centerText, { marginBottom: theme.spacing[1] }]}
+        >
           {t("appReview.notLikingTheAppModal.description")}
         </CenterText>
         <Input
@@ -99,12 +70,12 @@ const NotLikingTheAppModal: React.FC = () => {
           returnKeyType="send"
           placeholder={t("appReview.notLikingTheAppModal.placeholder")}
         />
-        <ButtonRow>
-          <SmallButton onPress={handleSend}>
+        <View style={styles.buttonRow}>
+          <SmallButton onPress={handleSend} style={styles.smallButton}>
             {t("appReview.notLikingTheAppModal.send")}
           </SmallButton>
-        </ButtonRow>
-      </Container>
+        </View>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -144,20 +115,26 @@ const AreYouLikingTheAppModal: React.FC = () => {
   };
 
   return (
-    <Container>
-      <Title>{t("appReview.areYouLikingTheAppModal.title")}</Title>
-      <CenterText>
+    <View style={styles.container}>
+      <Title style={styles.title} fontSize="lg" fontWeight="bold">
+        {t("appReview.areYouLikingTheAppModal.title")}
+      </Title>
+      <CenterText style={styles.centerText}>
         {t("appReview.areYouLikingTheAppModal.description")}
       </CenterText>
-      <ButtonRow>
-        <SmallButton onPress={openNotLikingTheAppModal} variant="outline">
+      <View style={styles.buttonRow}>
+        <SmallButton
+          onPress={openNotLikingTheAppModal}
+          variant="outline"
+          style={styles.smallButton}
+        >
           {t("appReview.areYouLikingTheAppModal.no")}
         </SmallButton>
-        <SmallButton onPress={openReviewModal}>
+        <SmallButton onPress={openReviewModal} style={styles.smallButton}>
           {t("appReview.areYouLikingTheAppModal.yes")}
         </SmallButton>
-      </ButtonRow>
-    </Container>
+      </View>
+    </View>
   );
 };
 
@@ -185,3 +162,52 @@ export const handleRequestAppReview = async () => {
   // Finally, we ask for a review
   magicModal.show(() => <AreYouLikingTheAppModal />);
 };
+
+const styles = StyleSheet.create((theme) => ({
+  container: {
+    paddingTop: theme.spacing[5],
+    paddingRight: theme.spacing[5],
+    paddingBottom: theme.spacing[5],
+    paddingLeft: theme.spacing[5],
+    marginTop: theme.spacing[4],
+    marginRight: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+    marginLeft: theme.spacing[4],
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: theme.radii.lg,
+    borderTopRightRadius: theme.radii.lg,
+    borderBottomRightRadius: theme.radii.lg,
+    borderBottomLeftRadius: theme.radii.lg,
+    alignSelf: "center",
+    maxWidth: 300,
+    width: "100%",
+    borderWidth: theme.stroke.sm,
+    borderColor: theme.colors.border,
+  },
+  smallButton: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    height: theme.spacing[12],
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  centerText: {
+    textAlign: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: theme.spacing[2],
+    marginTop: theme.spacing[5],
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: theme.spacing[1],
+  },
+}));
+
+const SmallButton = withUnistyles(Button);
+
+const CenterText = withUnistyles(Text);
+
+const Title = withUnistyles(Text);

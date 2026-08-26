@@ -1,0 +1,122 @@
+diff --git a/apps/mobile/src/views/DogProfile/components/GoBack/styles.ts b/apps/mobile/src/views/DogProfile/components/GoBack/styles.ts
+deleted file mode 100644
+index 0d3144a..0000000
+--- a/apps/mobile/src/views/DogProfile/components/GoBack/styles.ts
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import styled from "styled-components/native";
+-
+-import { PressableArea } from "@/components/pressable-area";
+-
+-const BACK_CONTAINER_SIZE = 60;
+-const HIT_SLOP = {
+-  top: 15,
+-  bottom: 15,
+-  left: 15,
+-  right: 15,
+-};
+-
+-export const Container = styled(PressableArea).attrs({
+-  hitSlop: HIT_SLOP,
+-})`
+-  margin-top: ${-BACK_CONTAINER_SIZE / 2}px;
+-  right: ${(props) => props.theme.spacing[4]}px;
+-  border-radius: ${BACK_CONTAINER_SIZE}px;
+-  overflow: hidden;
+-
+-  align-self: flex-end;
+-
+-  z-index: 2;
+-
+-  border-width: ${(props) => props.theme.stroke.sm}px;
+-  border-color: ${(props) => props.theme.colors.border};
+-`;
+-
+-export const Content = styled.View`
+-  width: ${BACK_CONTAINER_SIZE}px;
+-  height: ${BACK_CONTAINER_SIZE}px;
+-  border-radius: ${BACK_CONTAINER_SIZE}px;
+-
+-  justify-content: center;
+-  align-items: center;
+-  padding-top: ${(props) => props.theme.spacing[1]}px;
+-`;
+diff --git a/apps/mobile/src/views/DogProfile/components/GoBack/styles.tsx b/apps/mobile/src/views/DogProfile/components/GoBack/styles.tsx
+new file mode 100644
+index 0000000..f1d0127
+--- /dev/null
++++ b/apps/mobile/src/views/DogProfile/components/GoBack/styles.tsx
+@@ -0,0 +1,73 @@
++import type {
++  PressableProps,
++  StyleProp,
++  ViewProps,
++  ViewStyle,
++} from "react-native";
++
++import { View } from "react-native";
++
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++import { PressableArea } from "@/components/pressable-area";
++
++const BACK_CONTAINER_SIZE = 60;
++const HIT_SLOP = {
++  top: 15,
++  bottom: 15,
++  left: 15,
++  right: 15,
++};
++
++/** `PressableArea` is not autoprocessed, so the sheet reaches it wrapped. */
++const ThemedPressableArea = withUnistyles(PressableArea);
++
++/** `Pressable` also accepts a style callback; composing needs a plain style. */
++type ContainerProps = { style?: StyleProp<ViewStyle> } & Omit<
++  PressableProps,
++  "style"
++>;
++
++/**
++ * Stays a component: `index.tsx` types its own props off `typeof Container`.
++ * `hitSlop` was a static `.attrs`, so it still sits after the spread and beats
++ * the caller, exactly as styled-components had it.
++ */
++export const Container = ({ style, ...props }: ContainerProps) => (
++  <ThemedPressableArea
++    {...props}
++    hitSlop={HIT_SLOP}
++    style={[styles.container, style]}
++  />
++);
++
++export const Content = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.content, style]} />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    marginTop: -BACK_CONTAINER_SIZE / 2,
++    right: theme.spacing[4],
++    borderTopLeftRadius: BACK_CONTAINER_SIZE,
++    borderTopRightRadius: BACK_CONTAINER_SIZE,
++    borderBottomRightRadius: BACK_CONTAINER_SIZE,
++    borderBottomLeftRadius: BACK_CONTAINER_SIZE,
++    overflow: "hidden",
++    alignSelf: "flex-end",
++    zIndex: 2,
++    borderWidth: theme.stroke.sm,
++    borderColor: theme.colors.border,
++  },
++  content: {
++    width: BACK_CONTAINER_SIZE,
++    height: BACK_CONTAINER_SIZE,
++    borderTopLeftRadius: BACK_CONTAINER_SIZE,
++    borderTopRightRadius: BACK_CONTAINER_SIZE,
++    borderBottomRightRadius: BACK_CONTAINER_SIZE,
++    borderBottomLeftRadius: BACK_CONTAINER_SIZE,
++    justifyContent: "center",
++    alignItems: "center",
++    paddingTop: theme.spacing[1],
++  },
++}));

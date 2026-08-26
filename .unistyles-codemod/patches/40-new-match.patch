@@ -1,0 +1,490 @@
+diff --git a/.unistyles-codemod/manual/40-new-match.json b/.unistyles-codemod/manual/40-new-match.json
+new file mode 100644
+index 0000000..36d5a94
+--- /dev/null
++++ b/.unistyles-codemod/manual/40-new-match.json
+@@ -0,0 +1,96 @@
++{
++  "$comment": "Hand-converted animation-critical modules (patches 40-49). Same `pristineRef` as batch 10 — the codemod skipped every module in here, so its content at that commit is what the app renders today.",
++  "pristineRef": "f85575d",
++  "units": [
++    {
++      "file": "apps/mobile/src/views/NewMatch/styles.tsx",
++      "pristine": "apps/mobile/src/views/NewMatch/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Content",
++          "key": "content",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "RotatedImageLeft",
++          "key": "rotatedImageLeft",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "RotatedImageRight",
++          "key": "rotatedImageRight",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": "RotatedImageLeft"
++        },
++        {
++          "name": "HeartEyesContainer",
++          "key": "heartEyesContainer",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "CardsColumn",
++          "key": "cardsColumn",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "HeartEyesEmoji",
++          "key": "heartEyesEmoji",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "HeartEyesEmojiStandalone",
++          "key": "heartEyesEmojiStandalone",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": "HeartEyesEmoji"
++        },
++        {
++          "name": "LoadingBox",
++          "key": "loadingBox",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "MatchWordmark",
++          "key": "matchWordmark",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "MatchCaption",
++          "key": "matchCaption",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Confetti",
++          "key": "confetti",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    }
++  ]
++}
+diff --git a/.unistyles-codemod/src/evaluate.ts b/.unistyles-codemod/src/evaluate.ts
+index 2f8f690..1e14363 100644
+--- a/.unistyles-codemod/src/evaluate.ts
++++ b/.unistyles-codemod/src/evaluate.ts
+@@ -137,6 +137,9 @@ export class Loader {
+   readonly #unistyles = {
+     StyleSheet: { create: <T>(sheet: T): T => sheet, configure: () => {} },
+     withUnistyles: <T>(component: T) => component,
++    // The registration `createUnistylesElement` performs is a native-side
++    // concern; for the ledger it is the same identity wrapper as `withUnistyles`.
++    createUnistylesElement: <T>(component: T) => component,
+     useUnistyles: () => ({ theme: {}, rt: {} }),
+     UnistylesRuntime: createStub("UnistylesRuntime"),
+   };
+diff --git a/apps/mobile/src/views/NewMatch/animated-cards.tsx b/apps/mobile/src/views/NewMatch/animated-cards.tsx
+index 9e1216e..8a993e7 100644
+--- a/apps/mobile/src/views/NewMatch/animated-cards.tsx
++++ b/apps/mobile/src/views/NewMatch/animated-cards.tsx
+@@ -18,13 +18,11 @@ import {
+ import { api } from "@/contexts/trpc-provider";
+ 
+ import {
+-  CardsColumn,
+-  HeartEyesContainer,
+   HeartEyesEmoji,
+   HeartEyesEmojiStandalone,
+-  LoadingBox,
+   RotatedImageLeft,
+   RotatedImageRight,
++  styles,
+ } from "./styles";
+ 
+ type AnimatedCardsProps = {
+@@ -70,7 +68,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
+   });
+ 
+   return (
+-    <CardsColumn>
++    <View style={styles.cardsColumn}>
+       <View>
+         <RotatedImageRight
+           source={{
+@@ -93,25 +91,27 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
+           ]}
+         />
+       </View>
+-      <HeartEyesContainer>
++      <View style={styles.heartEyesContainer}>
+         <HeartEyesEmoji
++          style={styles.heartEyesEmoji}
+           source={require("@/assets/images/HeartEyesEmoji.webp")}
+         />
+-      </HeartEyesContainer>
+-    </CardsColumn>
++      </View>
++    </View>
+   );
+ };
+ 
+ const AnimatedCardsErrorFallback = () => (
+   <HeartEyesEmojiStandalone
++    style={styles.heartEyesEmojiStandalone}
+     source={require("@/assets/images/HeartEyesEmoji.webp")}
+   />
+ );
+ 
+ const AnimatedCardsLoading = () => (
+-  <LoadingBox>
++  <View style={styles.loadingBox}>
+     <DefaultLoadingComponent />
+-  </LoadingBox>
++  </View>
+ );
+ 
+ const AnimatedCardsBoundary = ({ matchDog }: AnimatedCardsProps) => (
+diff --git a/apps/mobile/src/views/NewMatch/confetti-animation.tsx b/apps/mobile/src/views/NewMatch/confetti-animation.tsx
+index b34eac0..4c7a4a2 100644
+--- a/apps/mobile/src/views/NewMatch/confetti-animation.tsx
++++ b/apps/mobile/src/views/NewMatch/confetti-animation.tsx
+@@ -1,7 +1,8 @@
+-import { Confetti } from "./styles";
++import { Confetti, styles } from "./styles";
+ 
+ export const ConfettiAnimation = () => (
+   <Confetti
++    style={styles.confetti}
+     source={require("@/assets/animations/confetti.json")}
+     autoPlay
+     loop={false}
+diff --git a/apps/mobile/src/views/NewMatch/index.tsx b/apps/mobile/src/views/NewMatch/index.tsx
+index 9ae423e..a6e3f91 100644
+--- a/apps/mobile/src/views/NewMatch/index.tsx
++++ b/apps/mobile/src/views/NewMatch/index.tsx
+@@ -19,13 +19,7 @@ import { SceneName } from "@/types/scene-name";
+ 
+ import AnimatedCards from "./animated-cards";
+ import { ConfettiAnimation } from "./confetti-animation";
+-import {
+-  Container,
+-  Content,
+-  matchScroll,
+-  MatchCaption,
+-  MatchWordmark,
+-} from "./styles";
++import { Content, MatchCaption, MatchWordmark, styles } from "./styles";
+ 
+ const NewMatch: React.FC = () => {
+   const { matchId, matchDogId } = useLocalSearchParams<{
+@@ -98,16 +92,17 @@ const NewMatch: React.FC = () => {
+   }, []);
+ 
+   return (
+-    <Container testID="new-match-screen">
++    <View style={styles.container} testID="new-match-screen">
+       <StatusBar style={theme.dark ? "light" : "dark"} />
+       <ConfettiAnimation />
+-      <Content>
+-        <ScrollView contentContainerStyle={matchScroll}>
++      <Content style={styles.content}>
++        <ScrollView contentContainerStyle={styles.matchScroll}>
+           <AnimatedCards matchDog={matchDog} />
+           <Text fontSize="xl" fontWeight="light">
+             {t("newMatch.youGotA")}
+           </Text>
+           <MatchWordmark
++            style={styles.matchWordmark}
+             source={
+               theme.dark
+                 ? require("@/assets/images/MatchLight.webp")
+@@ -115,7 +110,11 @@ const NewMatch: React.FC = () => {
+             }
+             contentFit="contain"
+           />
+-          <MatchCaption fontSize="lg" fontWeight="light">
++          <MatchCaption
++            style={styles.matchCaption}
++            fontSize="lg"
++            fontWeight="light"
++          >
+             {t("newMatch.youLikedEachOther", {
+               replace: { name: matchDog.name },
+             })}
+@@ -135,7 +134,7 @@ const NewMatch: React.FC = () => {
+           </Button>
+         </View>
+       </Content>
+-    </Container>
++    </View>
+   );
+ };
+ 
+diff --git a/apps/mobile/src/views/NewMatch/styles.ts b/apps/mobile/src/views/NewMatch/styles.ts
+deleted file mode 100644
+index f57fd16..0000000
+--- a/apps/mobile/src/views/NewMatch/styles.ts
++++ /dev/null
+@@ -1,86 +0,0 @@
+-import { StyleSheet } from "react-native";
+-
+-import Color from "color";
+-import AnimatedLottieView from "lottie-react-native";
+-import Animated from "react-native-reanimated";
+-import { SafeAreaView } from "react-native-safe-area-context";
+-import styled from "styled-components/native";
+-
+-import { Image } from "@/components/image";
+-import { Text } from "@/components/text";
+-
+-export const Container = styled.View`
+-  background-color: ${(props) => props.theme.colors.background};
+-  flex: 1;
+-`;
+-
+-export const Content = styled(SafeAreaView)`
+-  flex: 1;
+-  gap: 10px;
+-`;
+-
+-const AnimatedImage = Animated.createAnimatedComponent(Image);
+-export const RotatedImageLeft = styled(AnimatedImage)`
+-  border-radius: ${(props) => props.theme.radii.lg}px;
+-  background-color: ${(props) => props.theme.colors.card};
+-  border-width: 1px;
+-  border-color: ${(props) => props.theme.colors.border};
+-`;
+-
+-export const RotatedImageRight = styled(RotatedImageLeft)`
+-  position: absolute;
+-`;
+-
+-export const HeartEyesContainer = styled.View`
+-  border-radius: ${(props) => props.theme.radii.round}px;
+-  background-color: ${(props) =>
+-    new Color(props.theme.colors.primary).alpha(0.5).rgb().string()};
+-  padding: ${(props) => props.theme.spacing[1.5]}px;
+-  margin-top: -35px;
+-  margin-bottom: ${(props) => props.theme.spacing[2]}px;
+-`;
+-
+-export const CardsColumn = styled.View`
+-  align-items: center;
+-`;
+-
+-export const HeartEyesEmoji = styled(Image)`
+-  width: 70px;
+-  height: 70px;
+-`;
+-
+-/** Same emoji, standing in for the whole card stack when it fails to load. */
+-export const HeartEyesEmojiStandalone = styled(HeartEyesEmoji)`
+-  margin-bottom: ${({ theme }) => theme.spacing[5]}px;
+-`;
+-
+-export const LoadingBox = styled.View`
+-  height: 200px;
+-`;
+-
+-/** `contentContainerStyle` takes a style object, not a component. */
+-export const { matchScroll } = StyleSheet.create({
+-  matchScroll: {
+-    alignItems: "center",
+-    justifyContent: "center",
+-    flexGrow: 1,
+-  },
+-});
+-
+-export const MatchWordmark = styled(Image)`
+-  height: 50px;
+-  width: 100%;
+-`;
+-
+-export const MatchCaption = styled(Text)`
+-  text-align: center;
+-  margin-top: 12px;
+-  max-width: 200px;
+-`;
+-
+-export const Confetti = styled(AnimatedLottieView)`
+-  position: absolute;
+-  width: 100%;
+-  height: 100%;
+-  top: 0;
+-`;
+diff --git a/apps/mobile/src/views/NewMatch/styles.tsx b/apps/mobile/src/views/NewMatch/styles.tsx
+new file mode 100644
+index 0000000..60891f1
+--- /dev/null
++++ b/apps/mobile/src/views/NewMatch/styles.tsx
+@@ -0,0 +1,139 @@
++import type { LocalImageProps } from "@/components/image";
++import type { AnimatedProps } from "react-native-reanimated";
++
++import Color from "color";
++import AnimatedLottieView from "lottie-react-native";
++import Animated from "react-native-reanimated";
++import { SafeAreaView } from "react-native-safe-area-context";
++import {
++  createUnistylesElement,
++  StyleSheet,
++  withUnistyles,
++} from "react-native-unistyles";
++
++import { Image } from "@/components/image";
++import { Text } from "@/components/text";
++
++/** `react-native-safe-area-context` is not on the autoprocess list. */
++export const Content = withUnistyles(SafeAreaView);
++
++const AnimatedImage = Animated.createAnimatedComponent(Image);
++
++/**
++ * The rotating cards are the one place `withUnistyles` cannot be used:
++ * it flattens the `style` array into a single object, which would collapse the
++ * animated style `animated-cards.tsx` passes in. `createUnistylesElement` is
++ * what the babel plugin applies to `Animated.View` and friends — it hands the
++ * array through untouched and registers the node so a theme switch still
++ * re-resolves the sheet.
++ */
++const ThemedAnimatedImage = createUnistylesElement(
++  AnimatedImage,
++) as typeof AnimatedImage;
++
++type RotatedImageProps = AnimatedProps<LocalImageProps>;
++
++/** The caller's animated style stays last in the array, so it still wins. */
++export const RotatedImageLeft = ({ style, ...props }: RotatedImageProps) => (
++  <ThemedAnimatedImage {...props} style={[styles.rotatedImageLeft, style]} />
++);
++
++/** `styled(RotatedImageLeft)`: the same declarations plus `position`. */
++export const RotatedImageRight = ({ style, ...props }: RotatedImageProps) => (
++  <ThemedAnimatedImage {...props} style={[styles.rotatedImageRight, style]} />
++);
++
++/** `expo-image` is not autoprocessed either, and it carries no animation. */
++export const HeartEyesEmoji = withUnistyles(Image);
++
++/** Same emoji, standing in for the whole card stack when it fails to load. */
++export const HeartEyesEmojiStandalone = withUnistyles(Image);
++
++export const MatchWordmark = withUnistyles(Image);
++
++export const MatchCaption = withUnistyles(Text);
++
++export const Confetti = withUnistyles(AnimatedLottieView);
++
++export const styles = StyleSheet.create((theme) => ({
++  container: {
++    backgroundColor: theme.colors.background,
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++  content: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    gap: 10,
++  },
++  rotatedImageLeft: {
++    borderTopLeftRadius: theme.radii.lg,
++    borderTopRightRadius: theme.radii.lg,
++    borderBottomRightRadius: theme.radii.lg,
++    borderBottomLeftRadius: theme.radii.lg,
++    backgroundColor: theme.colors.card,
++    borderWidth: 1,
++    borderColor: theme.colors.border,
++  },
++  rotatedImageRight: {
++    borderTopLeftRadius: theme.radii.lg,
++    borderTopRightRadius: theme.radii.lg,
++    borderBottomRightRadius: theme.radii.lg,
++    borderBottomLeftRadius: theme.radii.lg,
++    backgroundColor: theme.colors.card,
++    borderWidth: 1,
++    borderColor: theme.colors.border,
++    position: "absolute",
++  },
++  heartEyesContainer: {
++    borderTopLeftRadius: theme.radii.round,
++    borderTopRightRadius: theme.radii.round,
++    borderBottomRightRadius: theme.radii.round,
++    borderBottomLeftRadius: theme.radii.round,
++    backgroundColor: new Color(theme.colors.primary).alpha(0.5).rgb().string(),
++    paddingTop: theme.spacing[1.5],
++    paddingRight: theme.spacing[1.5],
++    paddingBottom: theme.spacing[1.5],
++    paddingLeft: theme.spacing[1.5],
++    marginTop: -35,
++    marginBottom: theme.spacing[2],
++  },
++  cardsColumn: {
++    alignItems: "center",
++  },
++  heartEyesEmoji: {
++    width: 70,
++    height: 70,
++  },
++  heartEyesEmojiStandalone: {
++    width: 70,
++    height: 70,
++    marginBottom: theme.spacing[5],
++  },
++  loadingBox: {
++    height: 200,
++  },
++  /** `contentContainerStyle` takes a style object, not a component. */
++  matchScroll: {
++    alignItems: "center",
++    justifyContent: "center",
++    flexGrow: 1,
++  },
++  matchWordmark: {
++    height: 50,
++    width: "100%",
++  },
++  matchCaption: {
++    textAlign: "center",
++    marginTop: 12,
++    maxWidth: 200,
++  },
++  confetti: {
++    position: "absolute",
++    width: "100%",
++    height: "100%",
++    top: 0,
++  },
++}));

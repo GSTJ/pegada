@@ -1,0 +1,52 @@
+diff --git a/apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.ts b/apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.ts
+deleted file mode 100644
+index 89c905c..0000000
+--- a/apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.ts
++++ /dev/null
+@@ -1,9 +0,0 @@
+-import styled from "styled-components/native";
+-
+-export const Container = styled.View`
+-  flex: 1;
+-  justify-content: center;
+-  align-items: center;
+-  background-color: #cbffd0;
+-  border-radius: ${(props) => props.theme.radii.md}px;
+-`;
+diff --git a/apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.tsx b/apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.tsx
+new file mode 100644
+index 0000000..f465d93
+--- /dev/null
++++ b/apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.tsx
+@@ -0,0 +1,31 @@
++import type { ViewProps } from "react-native";
++
++import { View } from "react-native";
++
++import { StyleSheet } from "react-native-unistyles";
++
++/**
++ * Stays a component: `MaybeFeedback`, `NopeFeedback` and
++ * `SwipeRequestFeedback` all build on it with `withUnistyles(Container)` and
++ * only override the background, so the base has to travel with the element.
++ */
++export const Container = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.container, style]} />
++);
++
++const CONTAINER_BACKGROUND_COLOR = "#cbffd0";
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    justifyContent: "center",
++    alignItems: "center",
++    backgroundColor: CONTAINER_BACKGROUND_COLOR,
++    borderTopLeftRadius: theme.radii.md,
++    borderTopRightRadius: theme.radii.md,
++    borderBottomRightRadius: theme.radii.md,
++    borderBottomLeftRadius: theme.radii.md,
++  },
++}));

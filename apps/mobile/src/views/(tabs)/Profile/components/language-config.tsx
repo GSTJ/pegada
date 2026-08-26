@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 import { Language } from "@pegada/shared/i18n/types/types";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import Translate from "@/assets/images/Translate.svg";
 import { PickerSheet } from "@/components/Picker";
@@ -29,7 +29,7 @@ export const LanguageConfig = () => {
 
   const currentLanguage = i18n.language;
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const value = languagesPickerData.find(
     ({ id }) => id === currentLanguage,

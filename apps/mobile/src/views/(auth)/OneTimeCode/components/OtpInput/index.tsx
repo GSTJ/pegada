@@ -2,9 +2,10 @@ import type { TextInput } from "react-native";
 
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import * as React from "react";
+import { View } from "react-native";
 
 import OtpDigit, { OTP_INPUT_HEIGHT, OTP_INPUT_MARGIN } from "../OtpDigit";
-import { VerifyRowView } from "./styles";
+import { styles } from "./styles";
 
 const OTP_INPUT_MAX_WIDTH = OTP_INPUT_HEIGHT;
 
@@ -56,7 +57,7 @@ const OTPInput = forwardRef<OtpInputRef, OtpInputProps>(
     const otp_max_width = (OTP_INPUT_MAX_WIDTH + OTP_INPUT_MARGIN) * length;
 
     return (
-      <VerifyRowView style={{ maxWidth: otp_max_width }}>
+      <View style={[styles.verifyRowView, { maxWidth: otp_max_width }]}>
         {Array.from({ length }, (_, index) => {
           const previousValue = value?.[index - 1];
           const isFirst = index === 0;
@@ -78,7 +79,7 @@ const OTPInput = forwardRef<OtpInputRef, OtpInputProps>(
             </OtpDigit>
           );
         })}
-      </VerifyRowView>
+      </View>
     );
   },
 );

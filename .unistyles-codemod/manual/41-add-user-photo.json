@@ -1,0 +1,67 @@
+{
+  "$comment": "Hand-converted `AddUserPhoto` (patch 41). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
+  "pristineRef": "f85575d",
+  "units": [
+    {
+      "file": "apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "DebugImageStatusContainer",
+          "key": "debugImageStatusContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "UserPictureContent",
+          "key": "userPictureContent",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "AnimatedOverlay",
+          "key": "animatedOverlay",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "UserPicture",
+          "key": "userPicture",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "UserPictureContainer",
+          "key": "userPictureContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "AddRemoveContainer",
+          "key": "addRemoveContainer",
+          "mode": "wrapper",
+          "variants": { "inverted": ["true", "default"] },
+          "inheritedFrom": null
+        },
+        {
+          "name": "FadedDog",
+          "key": "fadedDog",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "MaestroSkipPressable",
+          "key": "maestroSkipPressable",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    }
+  ]
+}

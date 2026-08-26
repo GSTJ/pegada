@@ -1,69 +1,80 @@
 import Color from "color";
-import Animated from "react-native-reanimated";
-import styled, { css } from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
 import { FeedbackStatus } from "../feedback";
 
-type MessageProps = {
-  sending: boolean;
-  status?: FeedbackStatus;
-};
+export const Time = withUnistyles(Text);
 
-export const Message = styled(Animated.View).attrs({
-  accessible: true,
-})<MessageProps>`
-  padding: ${(props) => props.theme.spacing[2.5]}px;
-  padding-top: ${(props) => props.theme.spacing[1.5]}px;
-  padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
-  align-items: flex-end;
-  max-width: 60%;
-  background-color: ${(props) => props.theme.colors.card};
-  border-color: ${(props) => props.theme.colors.border};
-  border-width: ${(props) => props.theme.stroke.sm}px;
-  border-radius: ${(props) => props.theme.radii.md}px;
+const MESSAGE_SHADOW_COLOR = "#000";
+const MESSAGE_BORDER_COLOR = "#dd2e44";
 
-  elevation: 0.5;
-  shadow-color: #000;
-  shadow-offset: 0px 1px;
-  shadow-opacity: 0.05;
-  shadow-radius: 0px;
-
-  flex-direction: row;
-
-  flex-wrap: wrap;
-
-  margin-bottom: ${(props) => props.theme.spacing[1]}px;
-
-  gap: ${(props) => props.theme.spacing[1.5]}px;
-
-  ${(props) =>
-    props.sending
-      ? css`
-          margin-left: auto;
-          border-bottom-right-radius: 0;
-        `
-      : css`
-          margin-right: auto;
-          border-bottom-left-radius: 0;
-        `};
-
-  ${(props) =>
-    props.status === FeedbackStatus.Error &&
-    css`
-      border-color: #dd2e44;
-    `};
-`;
-
-export const Info = styled.View`
-  margin: 0 0 0 auto;
-  padding-left: ${(props) => props.theme.spacing[1]}px;
-  flex-direction: row;
-  align-items: center;
-  gap: ${(props) => props.theme.spacing[1]}px;
-`;
-
-export const Time = styled(Text).attrs({ fontSize: "xxs" })`
-  color: ${(props) => new Color(props.theme.colors.text).alpha(0.5).string()};
-`;
+export const styles = StyleSheet.create((theme) => ({
+  /**
+   * The two prop conditionals become two variant groups. Both of them override
+   * a corner radius and a colour the base already set, and in that direction
+   * Unistyles agrees with styled-components: the base first, the buckets on
+   * top.
+   */
+  message: {
+    paddingTop: theme.spacing[1.5],
+    paddingRight: theme.spacing[2.5],
+    paddingBottom: theme.spacing[2.5],
+    paddingLeft: theme.spacing[2.5],
+    alignItems: "flex-end",
+    maxWidth: "60%",
+    backgroundColor: theme.colors.card,
+    borderColor: theme.colors.border,
+    borderWidth: theme.stroke.sm,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    elevation: 0.5,
+    shadowColor: MESSAGE_SHADOW_COLOR,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 0,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: theme.spacing[1],
+    gap: theme.spacing[1.5],
+    variants: {
+      sending: {
+        true: {
+          marginLeft: "auto",
+          borderBottomRightRadius: 0,
+        },
+        default: {
+          marginRight: "auto",
+          borderBottomLeftRadius: 0,
+        },
+      },
+      status: {
+        [FeedbackStatus.Error]: {
+          borderColor: MESSAGE_BORDER_COLOR,
+        },
+        // Declared but empty: the guard only ever matched `Error`, and spelling
+        // the other two out is what lets the call site hand the prop straight
+        // to `useVariants` instead of narrowing it first.
+        [FeedbackStatus.Loading]: {},
+        [FeedbackStatus.Success]: {},
+        default: {},
+      },
+    },
+  },
+  info: {
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    marginLeft: "auto",
+    paddingLeft: theme.spacing[1],
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing[1],
+  },
+  time: {
+    color: new Color(theme.colors.text).alpha(0.5).string(),
+  },
+}));

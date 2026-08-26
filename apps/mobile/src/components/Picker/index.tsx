@@ -4,25 +4,18 @@ import type { ListRenderItemInfo } from "react-native";
 
 import { useState } from "react";
 import * as React from "react";
-import { Pressable, useWindowDimensions } from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
 
 import { BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { renderCustomBackdrop } from "@/components/custom-backdrop";
 import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
 
-import {
-  CloseIcon,
-  Container,
-  SearchContainer,
-  SearchInput,
-  SelectItem,
-  TitleContainer,
-} from "./styles";
+import { CloseIcon, SearchInput, SelectItem, styles } from "./styles";
 
 export type Item = {
   id: string | null;
@@ -64,14 +57,15 @@ const PickerSelectItem = <T extends Item>({
   onClose: () => void;
   testID?: string;
 }) => {
+  styles.useVariants({ selected: value?.id === item.id });
   return (
     <SelectItem
       testID={testID}
-      selected={value?.id === item.id}
       onPress={() => {
         onChange?.(item);
         onClose();
       }}
+      style={styles.selectItem}
     >
       <Text>{item.name}</Text>
     </SelectItem>
@@ -84,7 +78,7 @@ const UnForwardedPickerSheet = <T extends Item>(
 ) => {
   const { t } = useTranslation();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const insets = useSafeAreaInsets();
 
@@ -169,22 +163,23 @@ const UnForwardedPickerSheet = <T extends Item>(
       handleStyle={handleStyle}
       backdropComponent={renderCustomBackdrop}
     >
-      <TitleContainer>
+      <View style={styles.titleContainer}>
         <Text fontSize="lg" fontWeight="medium">
           {title}
         </Text>
         <Pressable hitSlop={hitSlop} onPress={onClose}>
-          <CloseIcon />
+          <CloseIcon style={styles.closeIcon} />
         </Pressable>
-      </TitleContainer>
+      </View>
       {searchable ? (
-        <SearchContainer>
+        <View style={styles.searchContainer}>
           <SearchInput
             placeholder={t("pickerSheet.search")}
             value={filter}
             onChangeText={setFilter}
+            style={styles.searchInput}
           />
-        </SearchContainer>
+        </View>
       ) : null}
       <BottomSheetFlatList
         keyExtractor={keyExtractor}
@@ -208,7 +203,7 @@ export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
   const pickerSheetRef = React.useRef<BottomSheetModal>(null);
 
   return (
-    <Container>
+    <View style={styles.container}>
       <Pressable
         testID={props.testID}
         disabled={props.loading}
@@ -234,6 +229,6 @@ export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
         {...props}
         ref={pickerSheetRef}
       />
-    </Container>
+    </View>
   );
 };

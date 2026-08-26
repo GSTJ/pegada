@@ -1,10 +1,10 @@
 import { Stack } from "expo-router";
 
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 const AuthLayout = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { t } = useTranslation();
 

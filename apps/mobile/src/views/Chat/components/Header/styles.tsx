@@ -1,47 +1,65 @@
 import Color from "color";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { BlurView } from "@/components/blur-view";
 import { Image } from "@/components/image";
 import { PressableArea } from "@/components/pressable-area";
 
-export const BackTouchArea = styled(PressableArea)`
-  padding: ${(props) => props.theme.spacing[4]}px;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  backTouchArea: {
+    paddingTop: theme.spacing[4],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
+    paddingLeft: theme.spacing[4],
+  },
+  picture: {
+    width: 38,
+    height: 38,
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    marginRight: theme.spacing[3.5],
+    backgroundColor: new Color(theme.colors.text).alpha(0.2).string(),
+  },
+  profileInfoContainer: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: theme.spacing[16],
+  },
+  profileInfoLoadingContainer: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 45,
+    justifyContent: "center",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomColor: theme.colors.border,
+    borderBottomWidth: theme.stroke.sm,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  pressableAreaFlex: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+}));
 
-export const Picture = styled(Image)`
-  width: 38px;
-  height: 38px;
-  border-radius: ${(props) => props.theme.radii.round}px;
-  margin-right: ${(props) => props.theme.spacing[3.5]}px;
-  background-color: ${(props) =>
-    new Color(props.theme.colors.text).alpha(0.2).string()};
-`;
+export const BackTouchArea = withUnistyles(PressableArea);
 
-export const ProfileInfoContainer = styled.View`
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-  margin-right: ${(props) => props.theme.spacing[16]}px;
-`;
+export const Picture = withUnistyles(Image);
 
-export const ProfileInfoLoadingContainer = styled(ProfileInfoContainer)`
-  justify-content: center;
-  margin-right: 45px;
-`;
+export const Header = withUnistyles(BlurView);
 
-export const Header = styled(BlurView)`
-  flex-direction: row;
-  align-items: center;
-  border-bottom-color: ${(props) => props.theme.colors.border};
-  border-bottom-width: ${(props) => props.theme.stroke.sm}px;
-
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-`;
-
-export const PressableAreaFlex = styled(PressableArea)`
-  flex: 1;
-`;
+export const PressableAreaFlex = withUnistyles(PressableArea);

@@ -4,7 +4,7 @@ import { Animated, StyleSheet } from "react-native";
 
 import Constants from "expo-constants";
 
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import SplashscreenImage from "@/assets/images/splash-android.png";
 
@@ -13,7 +13,7 @@ const styles = StyleSheet.create<{ splashImage: ImageStyle }>({
 });
 
 const AnimatedSplashScreen = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const backgroundColor = theme.dark
     ? Constants.expoConfig?.ios?.splash?.dark?.backgroundColor

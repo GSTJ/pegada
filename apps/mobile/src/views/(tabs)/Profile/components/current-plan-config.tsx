@@ -1,11 +1,15 @@
-import { Linking, Platform } from "react-native";
+import { Linking, Platform, View } from "react-native";
 
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import styled, { useTheme } from "styled-components/native";
+import {
+  StyleSheet,
+  withUnistyles,
+  useUnistyles,
+} from "react-native-unistyles";
 
 import Premium from "@/assets/images/Badge.svg";
 import Loading from "@/components/loading";
@@ -15,22 +19,12 @@ import { SceneName } from "@/types/scene-name";
 
 import { Config } from "./Config";
 
-const PlanLoading = styled.View`
-  width: 18px;
-  height: 18px;
-  transform: translateY(2px) translateX(-12px);
-`;
-
-const StyledLoading = styled(Loading)`
-  height: 12px;
-`;
-
 export const CurrentPlanConfig = () => {
   const plan = useCustomerPlan();
   const { t } = useTranslation();
 
   const router = useRouter();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const userPlan = plan.data?.userPlan;
 
@@ -73,9 +67,9 @@ export const CurrentPlanConfig = () => {
       <Config.Container>
         <Config.Title>{t("profile.plan.currentPlan")}</Config.Title>
         {plan.isLoading ? (
-          <PlanLoading>
-            <StyledLoading inverse />
-          </PlanLoading>
+          <View style={styles.planLoading}>
+            <StyledLoading inverse style={styles.styledLoading} />
+          </View>
         ) : null}
         {userPlan ? (
           <Config.Description>{t(`plans.${userPlan}`)}</Config.Description>
@@ -98,3 +92,16 @@ export const CurrentPlanConfig = () => {
     </Config.Root>
   );
 };
+
+const styles = StyleSheet.create({
+  planLoading: {
+    width: 18,
+    height: 18,
+    transform: [{ translateX: -12 }, { translateY: 2 }],
+  },
+  styledLoading: {
+    height: 12,
+  },
+});
+
+const StyledLoading = withUnistyles(Loading);

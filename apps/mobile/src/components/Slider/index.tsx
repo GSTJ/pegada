@@ -7,17 +7,11 @@ import * as React from "react";
 import { View } from "react-native";
 
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
-import {
-  LabelContainer,
-  Marker,
-  TitleContainer,
-  Triangle,
-  WIDTH,
-} from "./styles";
+import { WIDTH, styles } from "./styles";
 
 type TitleProps = {
   title: string;
@@ -25,14 +19,14 @@ type TitleProps = {
 };
 
 const Title: React.FC<TitleProps> = ({ title, subtitle }) => (
-  <TitleContainer>
+  <View style={styles.titleContainer}>
     <Text fontWeight="bold" fontSize="lg">
       {title}
     </Text>
     <Text fontWeight="bold" fontSize="lg">
       {subtitle}
     </Text>
-  </TitleContainer>
+  </View>
 );
 
 type CustomLabelProps = {
@@ -45,17 +39,20 @@ const CustomLabel: React.FC<CustomLabelProps> = ({ left, children }) => {
   const ADJUSTMENT_PADDING = 3;
 
   return (
-    <LabelContainer
-      style={{
-        left: left - WIDTH / 2,
-        paddingBottom: ADJUSTMENT_PADDING,
-      }}
+    <View
+      style={[
+        styles.labelContainer,
+        {
+          left: left - WIDTH / 2,
+          paddingBottom: ADJUSTMENT_PADDING,
+        },
+      ]}
     >
       <Text color="background" fontWeight="semibold">
         {children}
       </Text>
-      <Triangle />
-    </LabelContainer>
+      <View style={styles.triangle} />
+    </View>
   );
 };
 
@@ -66,7 +63,9 @@ const markerHitSlop = {
   right: 15,
 };
 
-const CustomMarker = () => <Marker hitSlop={markerHitSlop} />;
+const CustomMarker = () => (
+  <View hitSlop={markerHitSlop} style={styles.marker} />
+);
 
 /**
  * Hoisted out of `Root` so it keeps its identity between renders — a component
@@ -96,7 +95,7 @@ const CustomLabels = ({ max, ...label }: LabelProps & { max: number }) => {
 };
 
 export const Root = (props: MultiSliderProps) => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   // When the slider reaches the edge of the screen, a horizontal drag there
   // gets claimed by the OS navigation gesture (iOS interactive pop / Android

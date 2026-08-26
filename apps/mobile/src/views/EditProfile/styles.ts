@@ -1,21 +1,24 @@
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { Input } from "@/components/Input";
 
-export const Container = styled.ScrollView`
-  flex: 1;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  wideColumn: {
+    flexGrow: 1.5,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  gap: {
+    width: theme.spacing[3],
+  },
+  multilineInput: {
+    minHeight: 75,
+  },
+}));
 
-/** The wider half of the weight / birth-date row. */
-export const WideColumn = styled.View`
-  flex: 1.5;
-`;
-
-/** The fixed gutter between two fields sharing a row. */
-export const Gap = styled.View`
-  width: ${({ theme }) => theme.spacing[3]}px;
-`;
-
-export const MultilineInput = styled(Input)`
-  min-height: 75px;
-`;
+export const MultilineInput = withUnistyles(Input);

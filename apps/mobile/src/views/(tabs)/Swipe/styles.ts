@@ -1,20 +1,27 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { PressableArea } from "@/components/pressable-area";
 
-export const Container = styled(SafeAreaView).attrs({
-  edges: ["left", "right"],
-})`
-  flex: 1;
-  background-color: ${(props) => props.theme.colors.background};
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    backgroundColor: theme.colors.background,
+  },
+  locationButton: {
+    paddingTop: theme.spacing[2],
+    paddingRight: theme.spacing[2],
+    paddingBottom: theme.spacing[2],
+    paddingLeft: theme.spacing[2],
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: theme.spacing[2],
+  },
+}));
 
-/** The "change location" pill above the card stack. */
-export const LocationButton = styled(PressableArea)`
-  padding: ${({ theme }) => theme.spacing[2]}px;
-  flex-direction: row;
-  align-items: center;
-  align-self: center;
-  margin-bottom: ${({ theme }) => theme.spacing[2]}px;
-`;
+export const Container = withUnistyles(SafeAreaView);
+
+export const LocationButton = withUnistyles(PressableArea);

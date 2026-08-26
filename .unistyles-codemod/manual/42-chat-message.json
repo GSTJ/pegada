@@ -1,0 +1,35 @@
+{
+  "$comment": "Hand-converted `Chat/Message` (patch 42). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
+  "pristineRef": "f85575d",
+  "units": [
+    {
+      "file": "apps/mobile/src/views/Chat/components/Message/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "Message",
+          "key": "message",
+          "mode": "inline",
+          "variants": {
+            "sending": ["true", "default"],
+            "status": ["error", "loading", "success", "default"]
+          },
+          "inheritedFrom": null
+        },
+        {
+          "name": "Info",
+          "key": "info",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Time",
+          "key": "time",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    }
+  ]
+}

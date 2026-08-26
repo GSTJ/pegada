@@ -1,6 +1,10 @@
-import styled from "styled-components/native";
+import { StyleSheet } from "react-native-unistyles";
 
-export const Container = styled.View`
-  flex: 1;
-  z-index: -1;
-`;
+export const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    zIndex: -1,
+  },
+});

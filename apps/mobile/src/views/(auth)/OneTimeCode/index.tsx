@@ -1,7 +1,12 @@
 import type { OtpInputRef } from "./components/OtpInput";
 
 import { useRef, useState } from "react";
-import { ActivityIndicator, Platform } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+  View,
+} from "react-native";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 
@@ -27,16 +32,7 @@ import { Underline } from "../SignIn/components/HeroText";
 import GoBack from "./components/GoBack";
 import OTPInput from "./components/OtpInput";
 import useTimer from "./hooks/use-timer";
-import {
-  Container,
-  Content,
-  Description,
-  LoadingContainer,
-  ResendCode,
-  StyledKeyboardAvoidingView,
-  Timer,
-  TopColumn,
-} from "./styles";
+import { Description, ResendCode, Timer, styles } from "./styles";
 
 const CODE_LENGTH = 6;
 const INITIAL_TIMEOUT_IN_SECONDS = 50;
@@ -106,25 +102,32 @@ const OneTimeCode = () => {
       loginMutation.mutate({ email: email as string, code: keyboardInput });
     }
   }, [keyboardInput]);
+  styles.useVariants({ disabled: Boolean(timer) });
 
   return (
-    <StyledKeyboardAvoidingView
+    <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.styledKeyboardAvoidingView}
     >
-      <Container
-        style={{
-          paddingTop: insetTop,
-          paddingBottom: Math.max(insets.bottom, 16),
-          paddingLeft: insets.left + 20,
-          paddingRight: insets.right + 20,
-        }}
+      <View
+        style={[
+          styles.container,
+          {
+            paddingTop: insetTop,
+            paddingBottom: Math.max(insets.bottom, 16),
+            paddingLeft: insets.left + 20,
+            paddingRight: insets.right + 20,
+          },
+        ]}
       >
         <GoBack onPress={() => router.back()} />
 
-        <Content>
-          <TopColumn>
-            <Timer>{formattedTime}</Timer>
-            <Description>
+        <View style={styles.content}>
+          <View style={styles.topColumn}>
+            <Timer style={styles.timer} fontSize="xxxl" fontWeight="bold">
+              {formattedTime}
+            </Timer>
+            <Description style={styles.description}>
               {t("oneTimeCode.insertCode")}{" "}
               <Text fontWeight="medium">{email}</Text>
             </Description>
@@ -135,14 +138,14 @@ const OneTimeCode = () => {
               value={keyboardInput}
               onChangeText={setKeyboardInput}
             />
-          </TopColumn>
-        </Content>
+          </View>
+        </View>
 
         <ResendCode
-          disabled={Boolean(timer)}
           onPress={() => {
             handleResendCode();
           }}
+          style={styles.resendCode}
         >
           <Underline>
             <Text fontSize="lg" fontWeight="bold">
@@ -152,12 +155,12 @@ const OneTimeCode = () => {
         </ResendCode>
 
         {loginMutation.isPending ? (
-          <LoadingContainer>
+          <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="white" />
-          </LoadingContainer>
+          </View>
         ) : null}
-      </Container>
-    </StyledKeyboardAvoidingView>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

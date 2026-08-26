@@ -2,6 +2,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 
 import { useEffect } from "react";
 import * as React from "react";
+import { View } from "react-native";
 
 import * as Device from "expo-device";
 import { useRouter } from "expo-router";
@@ -10,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
 
 import { useOfferings } from "@/hooks/use-payments";
-import { Container } from "@/views/UpgradeWall/components/PlanPackages/styles";
+import { styles as planPackagesStyles } from "@/views/UpgradeWall/components/PlanPackages/styles";
 
 import { PlanCard } from "./plan-card";
 
@@ -95,7 +96,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   }, [defaultPackage, selectedPackage, setSelectedPackage]);
 
   return (
-    <Container>
+    <View style={planPackagesStyles.container}>
       {packageList?.map((planPackage) => {
         // Get old price comparing with the package with less relative value / period * this package period
         const oldPrice = packageWithLessRelativeValue
@@ -116,7 +117,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
           />
         );
       })}
-    </Container>
+    </View>
   );
 };
 

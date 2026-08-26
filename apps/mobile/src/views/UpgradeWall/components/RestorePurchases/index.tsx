@@ -6,7 +6,7 @@ import { router } from "expo-router";
 
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components";
+import { useUnistyles } from "react-native-unistyles";
 
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
@@ -34,7 +34,7 @@ const RestorePurchases: React.FC = () => {
       analytics.track({ event_type: "Restore Purchases Success" });
     },
   });
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <PressableArea

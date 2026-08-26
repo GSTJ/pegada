@@ -1,47 +1,49 @@
 import * as React from "react";
+import { View } from "react-native";
 
 import { Trans } from "react-i18next";
 
-import {
-  Container,
-  FlexRowView,
-  Line,
-  RotatedRectangle,
-  Title,
-  UnderlineContainer,
-  WhiteTitle,
-} from "./styles";
+import { Title, WhiteTitle, styles } from "./styles";
 
 export const Underline: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => (
-  <UnderlineContainer>
-    <Line />
+  <View style={styles.underlineContainer}>
+    <View style={styles.line} />
     {children}
-  </UnderlineContainer>
+  </View>
 );
 
 export const RectangleHighLight: React.FC<{
   children?: React.ReactNode;
 }> = ({ children }) => (
-  <UnderlineContainer>
-    <RotatedRectangle />
-    <WhiteTitle>{children}</WhiteTitle>
-  </UnderlineContainer>
+  <View style={styles.underlineContainer}>
+    <View style={styles.rotatedRectangle} />
+    <WhiteTitle style={styles.whiteTitle} fontSize="xxl" fontWeight="bold">
+      {children}
+    </WhiteTitle>
+  </View>
 );
 
 const HeroText: React.FC = () => {
   return (
-    <Container>
+    <View style={styles.container}>
       <Trans
         i18nKey="insertEmail.findDogsNearYou"
         components={{
-          view: <FlexRowView key="view" />,
-          title: <Title key="title" />,
+          view: <View key="view" style={styles.flexRowView} />,
+          title: (
+            <Title
+              key="title"
+              style={styles.title}
+              fontSize="xxl"
+              fontWeight="bold"
+            />
+          ),
           highlight: <RectangleHighLight key="highlight" />,
         }}
       />
-    </Container>
+    </View>
   );
 };
 

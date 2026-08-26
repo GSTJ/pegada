@@ -1,0 +1,105 @@
+# pagination-animated-variants
+
+status: converted
+definitions: 3
+variant groups: 1
+
+--- src/components/MainCard/components/Pagination/index.tsx ---
+
+import * as React from "react";
+
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+
+import { Container, styles } from "./styles";
+import { View } from "react-native";
+
+const DotComponent: React.FC<{
+  index: number;
+  currentPage: number;
+}> = ({ index, currentPage }) => {
+  const active = index === currentPage;
+
+  const style = useAnimatedStyle(() => {
+    "worklet";
+    const size = withTiming(active ? 8 : 6, { duration: 200 });
+    return { width: size, height: size };
+  });
+    styles.useVariants({ active });
+
+  return <Animated.View key={index} style={[styles.dot, style]} />;
+};
+
+type PaginationProps = {
+  pages: number;
+  currentPage: number;
+};
+
+const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
+  if (pages <= 1) return null;
+
+  return (
+    <Container style={styles.container}>
+      <View style={styles.content}>
+        {Array.from({ length: pages }).map((_, index) => (
+          <DotComponent
+            // oxlint-disable-next-line react/no-array-index-key -- dots are positional; there is no other identity to key on
+            key={`${index}-dot`}
+            index={index}
+            currentPage={currentPage}
+          />
+        ))}
+      </View>
+    </Container>
+  );
+};
+
+export default Pagination;
+
+--- src/components/MainCard/components/Pagination/styles.ts ---
+
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import { TransparentAndroidDarkBlurView } from "@/components/blur-view";
+
+const DOT_BACKGROUND_COLOR = "#fff";
+
+export const styles = StyleSheet.create((theme) => ({
+  content: {
+    paddingTop: theme.spacing[1],
+    paddingRight: theme.spacing[1],
+    paddingBottom: theme.spacing[1],
+    paddingLeft: theme.spacing[1],
+    marginBottom: "auto",
+    alignItems: "center",
+  },
+  container: {
+    borderTopLeftRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    marginBottom: "auto",
+    alignSelf: "flex-end",
+    width: 24,
+    overflow: "hidden",
+  },
+  dot: {
+    backgroundColor: DOT_BACKGROUND_COLOR,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    marginTop: theme.spacing[1],
+    marginRight: theme.spacing[1],
+    marginBottom: theme.spacing[1],
+    marginLeft: theme.spacing[1],
+    variants: {
+      active: {
+        true: {
+          opacity: 1,
+        },
+        default: {
+          opacity: 0.6,
+        },
+      },
+    },
+  },
+}));
+
+export const Container = withUnistyles(TransparentAndroidDarkBlurView);

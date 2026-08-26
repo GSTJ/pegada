@@ -1,0 +1,154 @@
+# button-variants
+
+status: skipped
+reason: <Container> in test/fixtures/button-variants/src/components/Button/index.tsx spreads props, so its variants and attrs cannot be resolved
+useTheme: src/components/BottomAction/index.tsx (1 sites)
+
+--- src/components/BottomAction/index.tsx ---
+
+import type { BlurViewProps } from "expo-blur";
+
+import * as React from "react";
+import { Platform } from "react-native";
+import { useKeyboardAwareSafeAreaInsets } from "../../hooks/use-keyboard-aware-safe-area-insets";
+import { BUTTON_HEIGHT } from "../Button/styles";
+import * as S from "./styles";
+import { useUnistyles } from "react-native-unistyles";
+
+export const useBottomActionStyle = () => {
+  const insets = useKeyboardAwareSafeAreaInsets();
+  const { theme } = useUnistyles();
+
+  const bottomActionConstantSize = BUTTON_HEIGHT + theme.spacing[4];
+
+  // For some reason, android doesn't work with this workaround
+  // and its better for contentInset bottom to be 0
+  const bottomActionKeyboardOpenSize =
+    Platform.OS === "ios" ? bottomActionConstantSize + theme.spacing[4] : 0;
+
+  const paddingBottom = Math.max(insets.bottom, theme.spacing[4]);
+
+  const height = BUTTON_HEIGHT + theme.spacing[4] + paddingBottom;
+
+  const contentContainerStyle = {
+    // That moves the content up to account for the bottom action
+    paddingBottom: height - bottomActionKeyboardOpenSize + theme.spacing[4] / 2,
+  };
+
+  return {
+    height,
+    paddingBottom,
+    // All this weirdness is necessary in order for the Scrollview to focus
+    // correctly on inputs when the keyboard is open with the KeyboardAvoidingView
+    scrollViewProps: {
+      contentInset: {
+        // That tells the scrollview to give an inset while focusing on the input, basically
+        bottom: bottomActionKeyboardOpenSize,
+      },
+      contentContainerStyle,
+      showsVerticalScrollIndicator: false,
+    },
+  };
+};
+
+const Container: React.FC<BlurViewProps> = React.forwardRef((props, ref) => {
+  const { height, paddingBottom } = useBottomActionStyle();
+
+  return (
+    <S.Container
+      {...props}
+      ref={ref}
+      style={[
+        {
+          height,
+          paddingBottom,
+        },
+        props.style,
+      ]}
+    />
+  );
+});
+
+export const BottomAction = {
+  Container,
+};
+
+--- src/components/Button/index.tsx ---
+
+import type { ContainerProps } from "./styles";
+
+import type { PressableProps } from "react-native";
+
+import * as React from "react";
+
+import Loading from "@/components/loading";
+
+import { ButtonText, Container } from "./styles";
+
+export type ButtonProps = {
+  children: string;
+} & ContainerProps &
+  PressableProps;
+
+export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
+  const disabled = props.loading || props.disabled;
+  const onPress = disabled ? null : props.onPress;
+
+  return (
+    <Container {...props} disabled={disabled} onPress={onPress}>
+      {props.loading ? (
+        <Loading inverse />
+      ) : (
+        <ButtonText fontWeight="bold" fontSize="lg" variant={props.variant}>
+          {children}
+        </ButtonText>
+      )}
+    </Container>
+  );
+};
+
+--- src/components/Button/styles.ts ---
+
+import styled, { css } from "styled-components/native";
+
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
+
+type VariantProps = {
+  variant?: "outline" | "default";
+};
+export type ContainerProps = {
+  loading?: boolean;
+} & VariantProps;
+
+export const BUTTON_HEIGHT = 68;
+
+export const Container = styled(PressableArea)<ContainerProps>`
+  padding: ${(props) => props.theme.spacing[4]}px;
+  border-radius: ${(props) => props.theme.radii.md}px;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+  height: ${BUTTON_HEIGHT}px;
+
+  border-width: ${(props) => props.theme.stroke.xxl}px;
+  border-color: ${(props) => props.theme.colors.primary};
+
+  ${(props) =>
+    props.variant !== "outline" &&
+    css`
+      background-color: ${props.theme.colors.primary};
+    `}
+
+  ${(props) =>
+    props.disabled &&
+    css`
+      opacity: 0.5;
+    `}
+`;
+
+export const ButtonText = styled(Text)<VariantProps>`
+  color: ${(props) =>
+    props.variant === "outline" ? props.theme.colors.primary : "white"};
+`;

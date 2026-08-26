@@ -1,0 +1,126 @@
+diff --git a/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/index.tsx b/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/index.tsx
+index 017892c..d5d858a 100644
+--- a/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/index.tsx
++++ b/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/index.tsx
+@@ -3,10 +3,9 @@ import * as React from "react";
+ 
+ import { Container, Content, ErrorText, TextInput } from "./styles";
+ 
+-// oxlint-disable-next-line typescript/consistent-type-definitions -- the styled `TextInput`'s props carry a string index signature, which an intersection would widen `error` to `any` through. `extends` keeps it a string.
+-interface EmailInputProps extends React.ComponentProps<typeof TextInput> {
++type EmailInputProps = React.ComponentProps<typeof TextInput> & {
+   error?: string;
+-}
++};
+ 
+ const EmailInput: React.FC<EmailInputProps> = (props) => {
+   const [email, setEmailNumber] = useState("");
+diff --git a/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.ts b/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.ts
+deleted file mode 100644
+index e8ce4b0..0000000
+--- a/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.ts
++++ /dev/null
+@@ -1,30 +0,0 @@
+-import styled from "styled-components/native";
+-
+-import { Text } from "@/components/text";
+-
+-export const Container = styled.View`
+-  margin-top: ${(props) => props.theme.spacing[5]}px;
+-  margin-bottom: ${(props) => props.theme.spacing[3.5]}px;
+-`;
+-
+-export const Content = styled.View`
+-  border-radius: ${(props) => props.theme.radii.md}px;
+-  border: 1px ${(props) => props.theme.colors.border};
+-  background-color: ${(props) => props.theme.colors.input};
+-  overflow: hidden;
+-`;
+-
+-export const TextInput = styled.TextInput.attrs((props) => ({
+-  placeholderTextColor: props.theme.colors.placeholder,
+-  accessible: true,
+-}))`
+-  padding: ${(props) => props.theme.spacing[4]}px 20px;
+-  font-family: ${(props) => props.theme.typography.fontFamily.medium};
+-  font-weight: medium;
+-  font-size: ${(props) => props.theme.typography.sizes.lg.size}px;
+-  color: ${(props) => props.theme.colors.text};
+-`;
+-
+-export const ErrorText = styled(Text)`
+-  margin-top: 5px;
+-`;
+diff --git a/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.tsx b/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.tsx
+new file mode 100644
+index 0000000..bb6d03f
+--- /dev/null
++++ b/apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.tsx
+@@ -0,0 +1,67 @@
++import type { TextProps } from "@/components/text";
++
++import type { TextInputProps, ViewProps } from "react-native";
++
++import { TextInput as NativeTextInput, View } from "react-native";
++
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++import { Text } from "@/components/text";
++
++/** The former `.attrs(props => …)`: the placeholder colour is the theme's. */
++const ThemedTextInput = withUnistyles(NativeTextInput, (theme) => ({
++  placeholderTextColor: theme.colors.placeholder,
++}));
++
++/**
++ * These stay components rather than becoming bare style objects: `index.tsx`
++ * types its own props off `typeof TextInput`, so the field has to keep a
++ * component's shape, and the rest of the module reads better beside it.
++ */
++export const Container = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.container, style]} />
++);
++
++export const Content = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.content, style]} />
++);
++
++/** `accessible` was a plain `.attrs` default, so it still beats the caller. */
++export const TextInput = ({ style, ...props }: TextInputProps) => (
++  <ThemedTextInput {...props} accessible style={[styles.textInput, style]} />
++);
++
++export const ErrorText = ({ style, ...props }: TextProps) => (
++  <Text {...props} style={[styles.errorText, style]} />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    marginTop: theme.spacing[5],
++    marginBottom: theme.spacing[3.5],
++  },
++  content: {
++    borderTopLeftRadius: theme.radii.md,
++    borderTopRightRadius: theme.radii.md,
++    borderBottomRightRadius: theme.radii.md,
++    borderBottomLeftRadius: theme.radii.md,
++    borderWidth: 1,
++    borderColor: theme.colors.border,
++    borderStyle: "solid",
++    backgroundColor: theme.colors.input,
++    overflow: "hidden",
++  },
++  textInput: {
++    paddingTop: theme.spacing[4],
++    paddingRight: 20,
++    paddingBottom: theme.spacing[4],
++    paddingLeft: 20,
++    fontFamily: theme.typography.fontFamily.medium,
++    fontWeight: "medium",
++    fontSize: theme.typography.sizes.lg.size,
++    color: theme.colors.text,
++  },
++  errorText: {
++    marginTop: 5,
++  },
++}));

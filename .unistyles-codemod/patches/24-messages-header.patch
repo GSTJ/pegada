@@ -1,0 +1,49 @@
+diff --git a/apps/mobile/src/views/(tabs)/Messages/components/Header/styles.ts b/apps/mobile/src/views/(tabs)/Messages/components/Header/styles.ts
+deleted file mode 100644
+index e4b6d1f..0000000
+--- a/apps/mobile/src/views/(tabs)/Messages/components/Header/styles.ts
++++ /dev/null
+@@ -1,10 +0,0 @@
+-import styled from "styled-components/native";
+-
+-export const Container = styled.View`
+-  background-color: ${(props) => props.theme.colors.background};
+-`;
+-
+-/** The gutter between two match previews. */
+-export const PreviewSeparator = styled.View`
+-  width: ${({ theme }) => theme.spacing[3]}px;
+-`;
+diff --git a/apps/mobile/src/views/(tabs)/Messages/components/Header/styles.tsx b/apps/mobile/src/views/(tabs)/Messages/components/Header/styles.tsx
+new file mode 100644
+index 0000000..00055df
+--- /dev/null
++++ b/apps/mobile/src/views/(tabs)/Messages/components/Header/styles.tsx
+@@ -0,0 +1,27 @@
++import type { ViewProps } from "react-native";
++
++import { View } from "react-native";
++
++import { StyleSheet } from "react-native-unistyles";
++
++export const Container = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.container, style]} />
++);
++
++/**
++ * The gutter between two match previews. It stays a component because the
++ * list hands it to `ItemSeparatorComponent`, which wants a component type
++ * rather than a style.
++ */
++export const PreviewSeparator = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.previewSeparator, style]} />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    backgroundColor: theme.colors.background,
++  },
++  previewSeparator: {
++    width: theme.spacing[3],
++  },
++}));

@@ -3,7 +3,7 @@ import { ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import ArrowDown from "@/assets/images/ArrowDown.svg";
 import Location from "@/assets/images/Location.svg";
@@ -12,7 +12,7 @@ import { Text } from "@/components/text";
 import { SceneName } from "@/types/scene-name";
 
 import { useCurrentCityText } from "../../../../hooks/use-current-city-text";
-import { LocationButton } from "../styles";
+import { LocationButton, styles } from "../styles";
 
 const CurrentLocation = () => {
   const currentCityText = useCurrentCityText();
@@ -37,7 +37,7 @@ const CurrentLocationError = () => {
 };
 
 const CurrentLocationLoading = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <ActivityIndicator
@@ -48,7 +48,7 @@ const CurrentLocationLoading = () => {
 };
 
 export const ChangeLocation = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const router = useRouter();
 
   return (
@@ -56,6 +56,7 @@ export const ChangeLocation = () => {
       onPress={() => {
         router.push(SceneName.LocationMap);
       }}
+      style={styles.locationButton}
     >
       <Location
         style={{

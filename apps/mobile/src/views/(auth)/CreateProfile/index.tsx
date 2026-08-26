@@ -3,7 +3,7 @@ import type { Picture } from "@/components/ProfileImageUploader/utils";
 import type { DogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { useState } from "react";
-import { Platform } from "react-native";
+import { Platform, KeyboardAvoidingView, View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -12,12 +12,12 @@ import { dogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { Fill, KeyboardScreen } from "@/components/layout";
+import { styles as componentsStyles } from "@/components/layout";
 import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
 import { pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
@@ -29,7 +29,7 @@ import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 
-import { Container, DragHint, MultilineInput, PhotoHint } from "./styles";
+import { DragHint, MultilineInput, PhotoHint, styles } from "./styles";
 
 const DEFAULT_VALUES: DogQuickClientSchema = {
   name: "",
@@ -99,17 +99,19 @@ const CreateProfile = () => {
 
   const [gesturesEnabled, setGesturesEnabled] = useState(true);
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { scrollViewProps } = useBottomActionStyle();
 
   return (
-    <KeyboardScreen
+    <KeyboardAvoidingView
       keyboardVerticalOffset={headerHeight}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={componentsStyles.keyboardScreen}
     >
-      <Fill>
-        <Container
+      <View style={componentsStyles.fill}>
+        <ScrollView
+          style={styles.container}
           {...scrollViewProps}
           contentContainerStyle={{
             padding: theme.spacing[4],
@@ -129,7 +131,7 @@ const CreateProfile = () => {
                 <Text fontWeight="bold" fontSize="lg">
                   {t("createProfile.profilePictures")}
                 </Text>
-                <PhotoHint fontSize="xs">
+                <PhotoHint fontSize="xs" style={styles.photoHint}>
                   {t("createProfile.minimumOnePhoto")}
                 </PhotoHint>
                 <ProfileImagesUploader
@@ -144,7 +146,11 @@ const CreateProfile = () => {
                   }}
                   error={fieldState.error?.message}
                 />
-                <DragHint fontSize="xs" fontWeight="medium">
+                <DragHint
+                  fontSize="xs"
+                  fontWeight="medium"
+                  style={styles.dragHint}
+                >
                   {t("createProfile.clickAndHold")}
                 </DragHint>
               </>
@@ -183,6 +189,7 @@ const CreateProfile = () => {
                 multiline
                 optional
                 error={fieldState.error?.message}
+                style={styles.multilineInput}
               />
             )}
           />
@@ -207,7 +214,7 @@ const CreateProfile = () => {
               />
             )}
           />
-        </Container>
+        </ScrollView>
         <BottomAction.Container>
           <Button
             loading={dogCreateMutation.isPending}
@@ -217,8 +224,8 @@ const CreateProfile = () => {
             {t("createProfile.createProfile")}
           </Button>
         </BottomAction.Container>
-      </Fill>
-    </KeyboardScreen>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

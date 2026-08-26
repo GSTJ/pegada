@@ -1,0 +1,74 @@
+diff --git a/apps/mobile/src/components/loading.ts b/apps/mobile/src/components/loading.ts
+deleted file mode 100644
+index 4c5737f..0000000
+--- a/apps/mobile/src/components/loading.ts
++++ /dev/null
+@@ -1,18 +0,0 @@
+-import LottieView from "lottie-react-native";
+-import styled from "styled-components/native";
+-
+-type LoadingProps = {
+-  inverse?: boolean;
+-};
+-
+-export default styled(LottieView).attrs<LoadingProps>((props) => ({
+-  autoPlay: true,
+-  source: props.inverse
+-    ? require("@/assets/animations/inverseLoadingDots.json")
+-    : require("@/assets/animations/primaryLoadingDots.json"),
+-  ...props,
+-}))`
+-  width: 50px;
+-  height: 20px;
+-  margin: auto;
+-`;
+diff --git a/apps/mobile/src/components/loading.tsx b/apps/mobile/src/components/loading.tsx
+new file mode 100644
+index 0000000..e79b2bc
+--- /dev/null
++++ b/apps/mobile/src/components/loading.tsx
+@@ -0,0 +1,44 @@
++import type { LottieViewProps } from "lottie-react-native";
++
++import LottieView from "lottie-react-native";
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++/** Lottie is not autoprocessed, so the sheet reaches it wrapped. */
++const ThemedLottieView = withUnistyles(LottieView);
++
++type LoadingProps = {
++  inverse?: boolean;
++} & Omit<LottieViewProps, "source"> &
++  Partial<Pick<LottieViewProps, "source">>;
++
++/**
++ * The dots the whole app spins on. `.attrs` spread `...props` last, so a
++ * caller always won over the defaults — hence `autoPlay` before the spread and
++ * `source` only filling in when the caller left it out.
++ */
++const Loading = ({ inverse, source, style, ...props }: LoadingProps) => (
++  <ThemedLottieView
++    autoPlay
++    {...props}
++    source={
++      source ??
++      (inverse
++        ? require("@/assets/animations/inverseLoadingDots.json")
++        : require("@/assets/animations/primaryLoadingDots.json"))
++    }
++    style={[styles.loading, style]}
++  />
++);
++
++export default Loading;
++
++const styles = StyleSheet.create({
++  loading: {
++    width: 50,
++    height: 20,
++    marginTop: "auto",
++    marginRight: "auto",
++    marginBottom: "auto",
++    marginLeft: "auto",
++  },
++});

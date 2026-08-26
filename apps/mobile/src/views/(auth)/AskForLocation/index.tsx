@@ -1,13 +1,13 @@
 import { useState } from "react";
 import * as React from "react";
-import { Alert, Linking, ScrollView } from "react-native";
+import { Alert, Linking, ScrollView, View } from "react-native";
 
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { Text } from "@/components/text";
@@ -16,15 +16,12 @@ import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 
 import {
-  BottomView,
-  Container,
   InformationIcon,
-  InformationRow,
   LocationIcon,
-  LocationView,
   Prompt,
   scrollContent,
   Title,
+  styles,
 } from "./styles";
 
 enum UpdateLocationError {
@@ -89,35 +86,48 @@ export const updateUserLocation = async (newLocation?: {
 
 const AskForLocation: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
   const router = useRouter();
 
   return (
-    <Container>
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={[scrollContent, { paddingTop: insets.top }]}
       >
-        <LocationView>
-          <LocationIcon width={100} height={100} fill={theme.colors.primary} />
-          <Title fontSize="xl" fontWeight="bold">
+        <View style={styles.locationView}>
+          <LocationIcon
+            width={100}
+            height={100}
+            fill={theme.colors.primary}
+            style={styles.locationIcon}
+          />
+          <Title fontSize="xl" fontWeight="bold" style={styles.title}>
             {t("askForLocation.activateLocation")}
           </Title>
-          <Prompt fontSize="xs">{t("askForLocation.permissionPrompt")}</Prompt>
-        </LocationView>
+          <Prompt fontSize="xs" style={styles.prompt}>
+            {t("askForLocation.permissionPrompt")}
+          </Prompt>
+        </View>
       </ScrollView>
-      <BottomView
-        style={{
-          paddingBottom: Math.max(insets.bottom + 8, 20),
-        }}
+      <View
+        style={[
+          styles.bottomView,
+          {
+            paddingBottom: Math.max(insets.bottom + 8, 20),
+          },
+        ]}
       >
-        <InformationRow>
-          <InformationIcon fill={theme.colors.primary} />
+        <View style={styles.informationRow}>
+          <InformationIcon
+            fill={theme.colors.primary}
+            style={styles.informationIcon}
+          />
           <Text fontSize="xs" fontWeight="medium">
             {t("askForLocation.locationUsage")}
           </Text>
-        </InformationRow>
+        </View>
 
         <Button
           testID="location-allow"
@@ -161,8 +171,8 @@ const AskForLocation: React.FC = () => {
         >
           {t("askForLocation.enableLocation")}
         </Button>
-      </BottomView>
-    </Container>
+      </View>
+    </View>
   );
 };
 

@@ -1,40 +1,44 @@
 import LottieView from "lottie-react-native";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import * as LikeFeedbackStyles from "@/components/FeedbackCard/components/LikeFeedback/styles";
 import { Text } from "@/components/text";
 
-export const Container = styled(LikeFeedbackStyles.Container)`
-  background-color: transparent;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    backgroundColor: "transparent",
+  },
+  emptyAnimation: {
+    width: 100,
+    height: 100,
+  },
+  logoLoading: {
+    width: 150,
+    height: 150,
+    marginTop: "auto",
+    marginRight: "auto",
+    marginBottom: "auto",
+    marginLeft: "auto",
+  },
+  title: {
+    marginBottom: theme.spacing[1],
+    paddingBottom: 2,
+    textAlign: "center",
+  },
+  description: {
+    paddingBottom: 4,
+    textAlign: "center",
+    marginBottom: theme.spacing[4],
+    maxWidth: 274,
+  },
+}));
 
-export const EmptyAnimation = styled(LottieView).attrs({
-  autoPlay: true,
-  source: require("@/assets/animations/empty.json"),
-})`
-  width: 100px;
-  height: 100px;
-`;
+export const Container = withUnistyles(LikeFeedbackStyles.Container);
 
-export const LogoLoading = styled(LottieView).attrs({
-  autoPlay: true,
-  source: require("@/assets/animations/loadingLogo.json"),
-  speed: 0.5,
-})`
-  width: 150px;
-  height: 150px;
-  margin: auto;
-`;
+export const EmptyAnimation = withUnistyles(LottieView);
 
-export const Title = styled(Text)`
-  margin-bottom: ${(props) => props.theme.spacing[1]}px;
-  padding-bottom: 2px;
-  text-align: center;
-`;
+export const LogoLoading = withUnistyles(LottieView);
 
-export const Description = styled(Text)`
-  padding-bottom: 4px;
-  text-align: center;
-  margin-bottom: ${(props) => props.theme.spacing[4]}px;
-  max-width: 274px;
-`;
+export const Title = withUnistyles(Text);
+
+export const Description = withUnistyles(Text);

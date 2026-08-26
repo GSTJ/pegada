@@ -1,0 +1,128 @@
+diff --git a/apps/mobile/src/views/(tabs)/Profile/components/Config/styles.ts b/apps/mobile/src/views/(tabs)/Profile/components/Config/styles.ts
+deleted file mode 100644
+index a5652cb..0000000
+--- a/apps/mobile/src/views/(tabs)/Profile/components/Config/styles.ts
++++ /dev/null
+@@ -1,39 +0,0 @@
+-import { Pressable } from "react-native";
+-
+-import styled from "styled-components/native";
+-
+-import { Text } from "@/components/text";
+-
+-export const Root = styled(Pressable)`
+-  flex-direction: row;
+-  align-items: center;
+-  gap: ${(props) => props.theme.spacing[3.5]}px;
+-  padding: ${(props) => props.theme.spacing[4]}px;
+-`;
+-
+-export const Container = styled.View`
+-  flex: 1;
+-`;
+-
+-/** Fixed-width slot so every row's icon lines up, whatever its own size. */
+-export const IconSlot = styled.View`
+-  width: 22px;
+-  align-items: center;
+-`;
+-
+-export const ArrowContainer = styled.View`
+-  align-items: flex-end;
+-`;
+-
+-export const Title = styled(Text).attrs((props) => ({
+-  numberOfLines: 1,
+-  fontWeight: "semibold",
+-  fontSize: "sm",
+-  ...props,
+-}))``;
+-
+-export const Description = styled(Text).attrs((props) => ({
+-  numberOfLines: 2,
+-  fontSize: "xs",
+-  ...props,
+-}))``;
+diff --git a/apps/mobile/src/views/(tabs)/Profile/components/Config/styles.tsx b/apps/mobile/src/views/(tabs)/Profile/components/Config/styles.tsx
+new file mode 100644
+index 0000000..b5da731
+--- /dev/null
++++ b/apps/mobile/src/views/(tabs)/Profile/components/Config/styles.tsx
+@@ -0,0 +1,77 @@
++import type { TextProps } from "@/components/text";
++
++import type {
++  PressableProps,
++  StyleProp,
++  ViewProps,
++  ViewStyle,
++} from "react-native";
++
++import { Pressable, View } from "react-native";
++
++import { StyleSheet } from "react-native-unistyles";
++
++import { Text } from "@/components/text";
++
++/** `Pressable` also accepts a style callback; composing needs a plain style. */
++type RootProps = { style?: StyleProp<ViewStyle> } & Omit<
++  PressableProps,
++  "style"
++>;
++
++/**
++ * These stay components: `index.tsx` bundles them into the `Config` namespace
++ * and the profile screen renders every one of them from the outside.
++ */
++export const Root = ({ style, ...props }: RootProps) => (
++  <Pressable {...props} style={[styles.root, style]} />
++);
++
++export const Container = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.container, style]} />
++);
++
++/** Fixed-width slot so every row's icon lines up, whatever its own size. */
++export const IconSlot = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.iconSlot, style]} />
++);
++
++export const ArrowContainer = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.arrowContainer, style]} />
++);
++
++/**
++ * Both declared nothing but `.attrs(props => ({ …, ...props }))`, so they carry
++ * no styles at all — only typography defaults the caller still wins against.
++ */
++export const Title = (props: TextProps) => (
++  <Text numberOfLines={1} fontWeight="semibold" fontSize="sm" {...props} />
++);
++
++export const Description = (props: TextProps) => (
++  <Text numberOfLines={2} fontSize="xs" {...props} />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  root: {
++    flexDirection: "row",
++    alignItems: "center",
++    gap: theme.spacing[3.5],
++    paddingTop: theme.spacing[4],
++    paddingRight: theme.spacing[4],
++    paddingBottom: theme.spacing[4],
++    paddingLeft: theme.spacing[4],
++  },
++  container: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++  iconSlot: {
++    width: 22,
++    alignItems: "center",
++  },
++  arrowContainer: {
++    alignItems: "flex-end",
++  },
++}));

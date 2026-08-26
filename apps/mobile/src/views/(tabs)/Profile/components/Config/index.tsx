@@ -1,4 +1,4 @@
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import ArrowRight from "@/assets/images/ArrowRight.svg";
 
@@ -12,7 +12,7 @@ import {
 } from "./styles";
 
 const Arrow = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <ArrowContainer>

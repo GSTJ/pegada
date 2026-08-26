@@ -1,0 +1,13 @@
+diff --git a/apps/mobile/src/services/theme-utils.ts b/apps/mobile/src/services/theme-utils.ts
+deleted file mode 100644
+index 1a2e572..0000000
+--- a/apps/mobile/src/services/theme-utils.ts
++++ /dev/null
+@@ -1,7 +0,0 @@
+-import type { DefaultTheme } from "styled-components/native";
+-
+-export const getSpacing =
+-  (spacing: keyof DefaultTheme["spacing"]) =>
+-  ({ theme }: { theme: DefaultTheme }) => {
+-    return `${theme.spacing[spacing]}px`;
+-  };

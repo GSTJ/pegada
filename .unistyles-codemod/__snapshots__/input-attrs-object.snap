@@ -1,0 +1,222 @@
+# input-attrs-object
+
+status: converted
+definitions: 7
+variant groups: 0
+
+--- src/components/Input/index.tsx ---
+
+import type { TextInput, TextInputProps, ViewProps } from "react-native";
+
+import * as React from "react";
+
+import { useTranslation } from "react-i18next";
+
+import { Text } from "@/components/text";
+
+import * as S from "./styles";
+import { styles } from "./styles";
+import { ActivityIndicator, View } from "react-native";
+
+type TextFieldContainerProps = {
+  loading?: boolean;
+  children: React.ReactNode;
+};
+
+const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
+  loading,
+  children,
+  ...props
+}) => (
+  <View style={styles.content} {...props}>
+    {!loading && children}
+    {loading ? <ActivityIndicator style={styles.activityIndicatorComponent} /> : null}
+  </View>
+);
+
+type InputProps = {
+  canCancel?: boolean;
+  loading?: boolean;
+  optional?: boolean;
+  title?: string;
+  error?: string;
+} & TextInputProps;
+
+export const Input = React.forwardRef<TextInput, InputProps>(
+  (
+    {
+      title,
+      canCancel = true,
+      error,
+      loading = false,
+      optional = false,
+      ...props
+    },
+    ref,
+  ) => {
+    const { t } = useTranslation();
+
+    return (
+      <View style={styles.container}>
+        {Boolean(title || optional) && (
+          <View style={styles.titleContainer}>
+            <Text fontWeight="bold" fontSize="lg">
+              {title}
+            </Text>
+            {optional ? (
+              <Text fontSize="xs">{t("common.optional")}</Text>
+            ) : null}
+          </View>
+        )}
+        <TextFieldContainer loading={loading}>
+          <S.TextInput style={styles.textInput}
+            value={props.value}
+            onChangeText={props.onChangeText}
+            ref={ref}
+            {...props}
+          />
+          {Boolean(props.value) && canCancel ? (
+            <S.CancelTouchArea onPress={() => props.onChangeText?.("")} style={styles.cancelTouchArea} hitSlop={{
+                            top: 10,
+                            bottom: 10,
+                            left: 10,
+                            right: 10,
+                          }}>
+              <S.CancelIcon style={styles.cancelIcon} />
+            </S.CancelTouchArea>
+          ) : null}
+        </TextFieldContainer>
+        {Boolean(error) && (
+          <Text color="destructive" fontSize="xs">
+            *{error}
+          </Text>
+        )}
+      </View>
+    );
+  },
+);
+
+--- src/components/Input/styles.ts ---
+
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import { TextInput as RNTextInput } from "react-native";
+import cancelIcon from "@/assets/images/Cancel.svg";
+import { PressableArea } from "@/components/pressable-area";
+
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    marginTop: theme.spacing[4],
+  },
+  content: {
+    flexDirection: "row",
+    backgroundColor: theme.colors.input,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    paddingTop: theme.spacing[3.5],
+    paddingRight: theme.spacing[3.5],
+    paddingBottom: theme.spacing[3.5],
+    paddingLeft: theme.spacing[3.5],
+    borderWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+    borderStyle: "solid",
+    alignItems: "center",
+  },
+  titleContainer: {
+    marginBottom: theme.spacing[3],
+  },
+  cancelTouchArea: {
+    paddingLeft: theme.spacing[2.5],
+  },
+  cancelIcon: {
+    opacity: 0.5,
+    width: theme.spacing[4],
+    height: theme.spacing[4],
+  },
+  textInput: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    color: theme.colors.text,
+    fontFamily: theme.typography.fontFamily.medium,
+    fontWeight: "medium",
+    fontSize: theme.typography.sizes.xs.size,
+  },
+  activityIndicatorComponent: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+}));
+
+export const CancelTouchArea = withUnistyles(PressableArea);
+
+export const CancelIcon = withUnistyles(cancelIcon, (theme) => ({ fill: theme.colors.placeholder }));
+
+export const TextInput = withUnistyles(RNTextInput, (theme) => ({ placeholderTextColor: theme.colors.placeholder, selectionColor: theme.colors.primary }));
+
+--- src/components/RadioButtons/index.tsx ---
+
+import type { OptionButtonProps } from "./styles";
+
+import * as React from "react";
+
+import { Container } from "@/components/Input/styles";
+import { Text } from "@/components/text";
+
+import { Content, RadioButtonContainer, TextButton } from "./styles";
+
+type RadioButtonsProps = {
+  title: string;
+  data: string[];
+  value: string;
+  onChange: React.Dispatch<React.SetStateAction<string>>;
+};
+
+type RadioButtonProps = {
+  children: string;
+} & OptionButtonProps;
+
+const RadioButton: React.FC<RadioButtonProps> = (props) => {
+  return (
+    <RadioButtonContainer
+      onPress={props.onPress}
+      marked={props.marked}
+      last={props.last}
+    >
+      <TextButton marked={props.marked} fontWeight="bold" fontSize="md">
+        {props.children}
+      </TextButton>
+    </RadioButtonContainer>
+  );
+};
+
+export const RadioButtons: React.FC<RadioButtonsProps> = ({
+  title,
+  data,
+  onChange,
+  value,
+}) => {
+  return (
+    <Container>
+      <Text fontWeight="bold" fontSize="lg">
+        {title}
+      </Text>
+      <Content>
+        {data.map((item, index) => {
+          return (
+            <RadioButton
+              key={item}
+              marked={item === value}
+              onPress={() => onChange(item)}
+              last={index === data.length - 1}
+            >
+              {item}
+            </RadioButton>
+          );
+        })}
+      </Content>
+    </Container>
+  );
+};

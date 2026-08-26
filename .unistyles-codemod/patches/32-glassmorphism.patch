@@ -1,0 +1,69 @@
+diff --git a/apps/mobile/src/components/Glassmorphism/styles.ts b/apps/mobile/src/components/Glassmorphism/styles.ts
+deleted file mode 100644
+index f94ac85..0000000
+--- a/apps/mobile/src/components/Glassmorphism/styles.ts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-import { LinearGradient } from "expo-linear-gradient";
+-
+-import Color from "color";
+-import styled, { type DefaultTheme } from "styled-components/native";
+-
+-import { BlurView } from "@/components/blur-view";
+-
+-export const Container = styled(BlurView).attrs({
+-  intensity: 90,
+-})`
+-  overflow: hidden;
+-`;
+-
+-export const getGradientProps = (props: { theme: DefaultTheme }) => ({
+-  colors: [
+-    new Color(props.theme.colors.card).fade(0.3).rgb().string(),
+-    new Color(props.theme.colors.card).fade(0.5).rgb().string(),
+-  ],
+-  start: { x: 0, y: 1 },
+-  end: { x: 1, y: 0 },
+-});
+-
+-export const Gradient = styled(LinearGradient).attrs(getGradientProps)``;
+diff --git a/apps/mobile/src/components/Glassmorphism/styles.tsx b/apps/mobile/src/components/Glassmorphism/styles.tsx
+new file mode 100644
+index 0000000..f9ea516
+--- /dev/null
++++ b/apps/mobile/src/components/Glassmorphism/styles.tsx
+@@ -0,0 +1,34 @@
++import type { BlurViewProps } from "expo-blur";
++
++import { LinearGradient } from "expo-linear-gradient";
++
++import Color from "color";
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++import { BlurView } from "@/components/blur-view";
++
++const ThemedBlurView = withUnistyles(BlurView);
++
++/**
++ * A static `.attrs` object beat the caller, so `intensity` lands after the
++ * spread — `Glassmorphism` passes everything it is given straight through.
++ */
++export const Container = ({ style, ...props }: BlurViewProps) => (
++  <ThemedBlurView {...props} intensity={90} style={[styles.container, style]} />
++);
++
++/** The former `.attrs(getGradientProps)`: the theme decides every value. */
++export const Gradient = withUnistyles(LinearGradient, (theme) => ({
++  colors: [
++    new Color(theme.colors.card).fade(0.3).rgb().string(),
++    new Color(theme.colors.card).fade(0.5).rgb().string(),
++  ] as const,
++  start: { x: 0, y: 1 },
++  end: { x: 1, y: 0 },
++}));
++
++const styles = StyleSheet.create({
++  container: {
++    overflow: "hidden",
++  },
++});

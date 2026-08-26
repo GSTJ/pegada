@@ -1,0 +1,136 @@
+# radio-buttons-if-blocks
+
+status: converted
+definitions: 3
+variant groups: 3
+
+--- src/components/RadioButtons/index.tsx ---
+
+import type { OptionButtonProps } from "./styles";
+
+import * as React from "react";
+
+import { Container } from "@/components/Input/styles";
+import { Text } from "@/components/text";
+
+import { RadioButtonContainer, TextButton, styles } from "./styles";
+import { View } from "react-native";
+
+type RadioButtonsProps = {
+  title: string;
+  data: string[];
+  value: string;
+  onChange: React.Dispatch<React.SetStateAction<string>>;
+};
+
+type RadioButtonProps = {
+  children: string;
+} & OptionButtonProps;
+
+const RadioButton: React.FC<RadioButtonProps> = (props) => {
+    styles.useVariants({ last: props.last, marked: props.marked });
+  return (
+    <RadioButtonContainer
+      onPress={props.onPress} style={styles.radioButtonContainer}
+    >
+      <TextButton fontWeight="bold" fontSize="md" style={styles.textButton}>
+        {props.children}
+      </TextButton>
+    </RadioButtonContainer>
+  );
+};
+
+export const RadioButtons: React.FC<RadioButtonsProps> = ({
+  title,
+  data,
+  onChange,
+  value,
+}) => {
+  return (
+    <Container>
+      <Text fontWeight="bold" fontSize="lg">
+        {title}
+      </Text>
+      <View style={styles.content}>
+        {data.map((item, index) => {
+          return (
+            <RadioButton
+              key={item}
+              marked={item === value}
+              onPress={() => onChange(item)}
+              last={index === data.length - 1}
+            >
+              {item}
+            </RadioButton>
+          );
+        })}
+      </View>
+    </Container>
+  );
+};
+
+--- src/components/RadioButtons/styles.ts ---
+
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import type { PressableProps } from "react-native";
+import { PressableArea } from "@/components/pressable-area";
+import { Text } from "@/components/text";
+
+export type OptionButtonProps = {
+  marked?: boolean;
+  last?: boolean;
+} & PressableProps;
+
+export const styles = StyleSheet.create((theme) => ({
+  content: {
+    justifyContent: "space-between",
+    flexGrow: 1,
+    alignItems: "center",
+    flexDirection: "row",
+    paddingTop: theme.spacing[3],
+  },
+  radioButtonContainer: {
+    paddingTop: theme.spacing[3],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
+    paddingLeft: theme.spacing[4],
+    backgroundColor: theme.colors.background,
+    borderWidth: theme.stroke.xxl,
+    borderColor: theme.colors.primary,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    alignItems: "center",
+    variants: {
+      last: {
+        true: {},
+        default: {
+          marginRight: theme.spacing[3],
+        },
+      },
+      marked: {
+        true: {
+          backgroundColor: theme.colors.primary,
+        },
+      },
+    },
+  },
+  textButton: {
+    color: theme.colors.primary,
+    variants: {
+      marked: {
+        true: {
+          color: theme.colors.background,
+        },
+      },
+    },
+  },
+}));
+
+export const RadioButtonContainer = withUnistyles(PressableArea);
+
+export const TextButton = withUnistyles(Text);

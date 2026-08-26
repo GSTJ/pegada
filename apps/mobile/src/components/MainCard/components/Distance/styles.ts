@@ -1,29 +1,39 @@
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { TransparentAndroidDarkBlurView } from "@/components/blur-view";
 import { Text } from "@/components/text";
 
-export const Container = styled(TransparentAndroidDarkBlurView)`
-  margin: ${(props) => props.theme.spacing[6]}px;
-  margin-top: 0px;
-  border-radius: ${(props) => props.theme.radii.md}px;
-  margin-bottom: auto;
-  overflow: hidden;
-  align-self: flex-start;
-`;
+const DISTANCE_TEXT_COLOR = "#fff";
 
-export const Content = styled.View`
-  padding: ${(props) => props.theme.spacing[2.5]}px;
-  align-items: center;
-  flex-direction: row;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    marginTop: 0,
+    marginRight: theme.spacing[6],
+    marginBottom: "auto",
+    marginLeft: theme.spacing[6],
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    overflow: "hidden",
+    alignSelf: "flex-start",
+  },
+  content: {
+    paddingTop: theme.spacing[2.5],
+    paddingRight: theme.spacing[2.5],
+    paddingBottom: theme.spacing[2.5],
+    paddingLeft: theme.spacing[2.5],
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  distanceText: {
+    marginLeft: theme.spacing[1],
+    marginBottom: theme.spacing[1],
+    flexGrow: 0,
+    color: DISTANCE_TEXT_COLOR,
+  },
+}));
 
-export const DistanceText = styled(Text).attrs({
-  fontWeight: "semibold",
-  fontSize: "sm",
-})`
-  margin-left: ${(props) => props.theme.spacing[1]}px;
-  margin-bottom: ${(props) => props.theme.spacing[1]}px;
-  flex-grow: 0;
-  color: #fff;
-`;
+export const Container = withUnistyles(TransparentAndroidDarkBlurView);
+
+export const DistanceText = withUnistyles(Text);

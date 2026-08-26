@@ -1,0 +1,1245 @@
+diff --git a/.unistyles-codemod/manual/10-inheritance-roots.json b/.unistyles-codemod/manual/10-inheritance-roots.json
+new file mode 100644
+index 0000000..cbedc5a
+--- /dev/null
++++ b/.unistyles-codemod/manual/10-inheritance-roots.json
+@@ -0,0 +1,318 @@
++{
++  "$comment": "Hand-converted inheritance roots (patches 10-19). `pristineRef` is the last commit before the migration landed in the working tree; the checkpoint commit on top of it is where the codemod output starts.",
++  "pristineRef": "f85575d",
++  "units": [
++    {
++      "file": "apps/mobile/src/components/text.tsx",
++      "pristine": "apps/mobile/src/components/text.ts",
++      "$comment": "One unit per variant group: the ledger caps the prop matrix at 64 combinations, and 15 colours x 7 weights x 9 sizes is well past it. `applyVariants` resolves every other group to its `default` bucket, so each unit still compares a complete style object.",
++      "definitionsDetail": [
++        {
++          "name": "Text",
++          "key": "text",
++          "mode": "inline",
++          "variants": {
++            "color": [
++              "transparent",
++              "black",
++              "white",
++              "premium",
++              "primary",
++              "secondary",
++              "background",
++              "text",
++              "subtitle",
++              "card",
++              "placeholder",
++              "accent",
++              "destructive",
++              "border",
++              "input",
++              "default"
++            ]
++          },
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/text.tsx",
++      "pristine": "apps/mobile/src/components/text.ts",
++      "definitionsDetail": [
++        {
++          "name": "Text",
++          "key": "text",
++          "mode": "inline",
++          "variants": {
++            "fontWeight": [
++              "light",
++              "medium",
++              "regular",
++              "semibold",
++              "bold",
++              "black",
++              "default"
++            ]
++          },
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/text.tsx",
++      "pristine": "apps/mobile/src/components/text.ts",
++      "definitionsDetail": [
++        {
++          "name": "Text",
++          "key": "text",
++          "mode": "inline",
++          "variants": {
++            "fontSize": [
++              "xxxl",
++              "xxl",
++              "xl",
++              "lg",
++              "md",
++              "sm",
++              "xs",
++              "xxs",
++              "default"
++            ]
++          },
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/blur-view.tsx",
++      "definitionsDetail": [
++        {
++          "name": "BlurView",
++          "key": "blurView",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "TransparentAndroidDarkBlurView",
++          "key": "transparentAndroidDarkBlurView",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/MainCard/styles.tsx",
++      "pristine": "apps/mobile/src/components/MainCard/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Picture",
++          "key": "picture",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "UpperPart",
++          "key": "upperPart",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "CarouselContainer",
++          "key": "carouselContainer",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "PreviousImage",
++          "key": "previousImage",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "NextImage",
++          "key": "nextImage",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Scrim",
++          "key": "scrim",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/MainCard/components/PersonalInfo/styles.tsx",
++      "pristine": "apps/mobile/src/components/MainCard/components/PersonalInfo/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Name",
++          "key": "name",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Age",
++          "key": "age",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": "Name"
++        },
++        {
++          "name": "Description",
++          "key": "description",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.tsx",
++      "pristine": "apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/DefaultModal/styles.tsx",
++      "pristine": "apps/mobile/src/components/DefaultModal/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "OkButton",
++          "key": "okButton",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Title",
++          "key": "title",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Description",
++          "key": "description",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/views/UpgradeWall/styles.tsx",
++      "pristine": "apps/mobile/src/views/UpgradeWall/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Content",
++          "key": "content",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Header",
++          "key": "header",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "CloseButton",
++          "key": "closeButton",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "HeroImage",
++          "key": "heroImage",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Title",
++          "key": "title",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "Subtitle",
++          "key": "subtitle",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "CancelAnytime",
++          "key": "cancelAnytime",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "CloseIcon",
++          "key": "closeIcon",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "GradientEffect",
++          "key": "gradientEffect",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    }
++  ]
++}
+diff --git a/.unistyles-codemod/package.json b/.unistyles-codemod/package.json
+index 1a69652..ecd58e9 100644
+--- a/.unistyles-codemod/package.json
++++ b/.unistyles-codemod/package.json
+@@ -7,6 +7,7 @@
+     "analyze": "tsx src/cli.ts analyze",
+     "transform": "tsx src/cli.ts transform",
+     "parity": "tsx src/parity.ts",
++    "parity:manual": "tsx src/parity-manual.ts",
+     "snapshots": "tsx test/run.ts",
+     "fixtures": "tsx test/generate.ts",
+     "test": "tsx test/run.ts && tsx src/parity.ts"
+diff --git a/.unistyles-codemod/parity-manual-report.json b/.unistyles-codemod/parity-manual-report.json
+new file mode 100644
+index 0000000..e5168e4
+--- /dev/null
++++ b/.unistyles-codemod/parity-manual-report.json
+@@ -0,0 +1,785 @@
++{
++  "modules": [
++    {
++      "file": "apps/mobile/src/components/text.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"transparent\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"black\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"white\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"premium\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"primary\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"secondary\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"background\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"text\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"subtitle\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"card\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"placeholder\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"accent\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"destructive\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"border\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: \"input\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ color: undefined }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"transparent\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"black\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"white\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"premium\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"primary\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"secondary\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"background\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"text\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"subtitle\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"card\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"placeholder\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"accent\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"destructive\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"border\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: \"input\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ color: undefined }",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/text.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: \"light\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: \"medium\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: \"regular\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: \"semibold\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: \"bold\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: \"black\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontWeight: undefined }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: \"light\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: \"medium\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: \"regular\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: \"semibold\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: \"bold\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: \"black\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontWeight: undefined }",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/text.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"xxxl\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"xxl\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"xl\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"lg\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"md\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"sm\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"xs\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: \"xxs\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "light",
++          "props": "{ fontSize: undefined }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"xxxl\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"xxl\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"xl\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"lg\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"md\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"sm\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"xs\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: \"xxs\" }",
++          "status": "pass"
++        },
++        {
++          "definition": "Text",
++          "theme": "dark",
++          "props": "{ fontSize: undefined }",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/blur-view.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "BlurView",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "BlurView",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "TransparentAndroidDarkBlurView",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "TransparentAndroidDarkBlurView",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/MainCard/styles.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Container",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Container",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Picture",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Picture",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "UpperPart",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "UpperPart",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CarouselContainer",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CarouselContainer",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "PreviousImage",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "PreviousImage",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "NextImage",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "NextImage",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Scrim",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Scrim",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/MainCard/components/PersonalInfo/styles.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Container",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Container",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Name",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Name",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Age",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Age",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Description",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Description",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Container",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Container",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/components/DefaultModal/styles.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "OkButton",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "OkButton",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Container",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Container",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Title",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Title",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Description",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Description",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/views/UpgradeWall/styles.tsx",
++      "status": "checked",
++      "checks": [
++        {
++          "definition": "Container",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Container",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Content",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Content",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Header",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Header",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CloseButton",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CloseButton",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "HeroImage",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "HeroImage",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Title",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Title",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Subtitle",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "Subtitle",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CancelAnytime",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CancelAnytime",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CloseIcon",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "CloseIcon",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "GradientEffect",
++          "theme": "light",
++          "props": "{}",
++          "status": "pass"
++        },
++        {
++          "definition": "GradientEffect",
++          "theme": "dark",
++          "props": "{}",
++          "status": "pass"
++        }
++      ]
++    }
++  ],
++  "totals": {
++    "modules": 9,
++    "definitions": 29,
++    "comparisons": 120,
++    "failures": 0,
++    "unverifiable": 0
++  }
++}
+diff --git a/.unistyles-codemod/src/parity-manual.ts b/.unistyles-codemod/src/parity-manual.ts
+new file mode 100644
+index 0000000..06e1cd0
+--- /dev/null
++++ b/.unistyles-codemod/src/parity-manual.ts
+@@ -0,0 +1,112 @@
++/**
++ * The parity ledger, pointed at modules the transform *skipped*.
++ *
++ *   tsx src/parity-manual.ts [git-ref]
++ *
++ * `parity.ts` reads `report.json`, so it only ever checks what the codemod
++ * itself converted. The skipped modules (inheritance roots, prop spreads,
++ * two-branch conditionals) are converted by hand, and they are exactly the ones
++ * worth proving: everything else in the app inherits from them.
++ *
++ * Each batch drops a `manual/NN-<slug>.json` describing what it emitted —
++ * definition name, the sheet key it landed on, its variant buckets — and this
++ * runs the same `checkParity` the automated gate does over the lot. Splitting
++ * the input per file keeps parallel batches from fighting over one JSON.
++ *
++ * A unit may name a `pristine` path: the hand conversions rename `styles.ts` to
++ * `styles.tsx` when they emit a component, and the pre-migration source still
++ * lives at the old path in git.
++ */
++
++import { execFileSync } from "node:child_process";
++import fs from "node:fs";
++import path from "node:path";
++import process from "node:process";
++import { fileURLToPath } from "node:url";
++
++import { checkParity, type DefinitionInfo, type ParityReport } from "./ledger.ts";
++
++interface ManualUnit {
++  file: string;
++  /** Where the pre-migration source lives in `ref`, when the file was renamed. */
++  pristine?: string;
++  definitionsDetail: DefinitionInfo[];
++}
++
++interface ManualBatch {
++  /** The last commit before the migration, for batches that predate a rename. */
++  pristineRef?: string;
++  units: ManualUnit[];
++}
++
++const here = path.dirname(fileURLToPath(import.meta.url));
++const codemodRoot = path.resolve(here, "..");
++const repoRoot = path.resolve(codemodRoot, "..");
++const manualRoot = path.join(codemodRoot, "manual");
++
++if (!fs.existsSync(manualRoot)) {
++  console.log("[parity:manual] no manual/ directory — nothing to check");
++  process.exit(0);
++}
++
++const batches = fs
++  .readdirSync(manualRoot)
++  .filter((entry) => entry.endsWith(".json"))
++  .sort()
++  .map((entry) => JSON.parse(fs.readFileSync(path.join(manualRoot, entry), "utf8")) as ManualBatch);
++
++const units = batches.flatMap((batch) => batch.units);
++const refs = new Map(
++  batches.flatMap((batch) => batch.units.map((unit) => [unit.file, batch.pristineRef])),
++);
++const pristinePaths = new Map(units.map((unit) => [unit.file, unit.pristine ?? unit.file]));
++
++const cliRef = process.argv[2];
++
++const pristine = (file: string) =>
++  execFileSync("git", ["show", `${cliRef ?? refs.get(file) ?? "HEAD"}:${pristinePaths.get(file) ?? file}`], {
++    cwd: repoRoot,
++    encoding: "utf8",
++    maxBuffer: 32 * 1024 * 1024,
++  });
++
++const parity: ParityReport = checkParity(repoRoot, units, pristine);
++
++fs.writeFileSync(
++  path.join(codemodRoot, "parity-manual-report.json"),
++  `${JSON.stringify(parity, null, 2)}\n`,
++);
++
++const { totals } = parity;
++console.log(
++  `[parity:manual] ${totals.comparisons - totals.failures}/${totals.comparisons} comparisons match ` +
++    `across ${totals.definitions} definitions in ${totals.modules} modules`,
++);
++
++for (const module of parity.modules) {
++  if (module.status === "unverifiable") {
++    console.error(`[parity:manual] UNVERIFIABLE ${module.file} — ${module.reason}`);
++  }
++
++  for (const check of module.checks) {
++    if (check.status === "pass") continue;
++    console.error(
++      `[parity:manual] FAIL ${module.file} ${check.definition} [${check.theme}] ${check.props}`,
++    );
++    for (const diff of check.diffs ?? []) {
++      console.error(
++        `           ${diff.property}: styled-components ${JSON.stringify(diff.expected)} ` +
++          `vs unistyles ${JSON.stringify(diff.actual)}`,
++      );
++    }
++  }
++}
++
++if (totals.failures > 0 || totals.unverifiable > 0) {
++  console.error(
++    `\n[parity:manual] ${totals.failures} mismatch(es), ${totals.unverifiable} unverifiable module(s)`,
++  );
++  process.exit(1);
++}
++
++console.log("[parity:manual] clean");

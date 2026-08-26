@@ -1,0 +1,947 @@
+# layout-plain
+
+status: converted
+definitions: 3
+variant groups: 0
+useTheme: src/views/EditProfile/index.tsx (1 sites)
+useTheme: src/views/(auth)/CompleteProfile/index.tsx (1 sites)
+useTheme: src/views/(auth)/CreateProfile/index.tsx (1 sites)
+
+--- src/components/layout.ts ---
+
+import { StyleSheet } from "react-native-unistyles";
+
+export const styles = StyleSheet.create({
+  fill: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  row: {
+    flexDirection: "row",
+  },
+  keyboardScreen: {
+    flexGrow: 1,
+  },
+});
+
+--- src/views/(auth)/CompleteProfile/index.tsx ---
+
+import type { DogCompleteClientSchema } from "@pegada/shared/schemas/dog-schema";
+
+import { Platform } from "react-native";
+
+import { useLocalSearchParams, useRouter } from "expo-router";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { dogCompleteClientSchema } from "@pegada/shared/schemas/dog-schema";
+import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
+import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
+import BreedPicker from "@/components/BreedPicker";
+import { Button } from "@/components/Button";
+import { Input } from "@/components/Input";
+import { Fill, KeyboardScreen, Row } from "@/components/layout";
+import { InputPicker } from "@/components/Picker";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
+import { analytics } from "@/services/analytics";
+import { colors, sizes } from "@/services/consts";
+import { sendError } from "@/services/error-tracking";
+import { maskDate } from "@/services/mask-date";
+import { SceneName } from "@/types/scene-name";
+
+import {
+  Container,
+  Gap,
+  ImageContainer,
+  Note,
+  ProfileImage,
+  WideColumn,
+} from "./styles";
+import { useUnistyles } from "react-native-unistyles";
+
+const CompleteProfile = () => {
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  const { profileImageUrl } = useLocalSearchParams();
+
+  const { control, handleSubmit, getValues, watch } =
+    useForm<DogCompleteClientSchema>({
+      defaultValues: {
+        birthDate: "",
+        breedId: "",
+      },
+      resolver: zodResolver(dogCompleteClientSchema),
+    });
+
+  const form = watch();
+
+  const headerHeight = useDelayedHeaderHeight();
+
+  const hasChanged = Object.values(form).some(Boolean);
+
+  const myDogUpdateMutation = api.myDog.update.useMutation({
+    onSuccess: (data) => {
+      analytics.track({
+        event_type: "Complete Dog Profile",
+        event_properties: data ?? {},
+      });
+      getTrcpContext().myDog.get.setData(undefined, data);
+      router.replace(SceneName.AskForLocation);
+    },
+    onError: (error) => {
+      magicToast.alert(t("editProfile.profileError"));
+      sendError(error);
+    },
+  });
+
+  const saveUser = handleSubmit(async (data) => {
+    if (hasChanged) {
+      const { birthDate, breedId, color, size } = data;
+      const dogData = {
+        ...(birthDate && { birthDate }),
+        ...(breedId && { breedId }),
+        ...(color && { color }),
+        ...(size && { size }),
+      };
+
+      await myDogUpdateMutation.mutateAsync(dogData);
+    }
+
+    if (!hasChanged) {
+      analytics.track({ event_type: "Skip Complete Dog Profile" });
+      router.replace(SceneName.AskForLocation);
+    }
+  });
+
+  const { theme } = useUnistyles();
+
+  const { scrollViewProps } = useBottomActionStyle();
+  const continueText = hasChanged
+    ? t("completeProfile.save")
+    : t("common.skip");
+
+  return (
+    <KeyboardScreen
+      keyboardVerticalOffset={headerHeight}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <Fill>
+        <Container
+          {...scrollViewProps}
+          contentContainerStyle={{
+            paddingHorizontal: theme.spacing[4],
+            paddingBottom:
+              theme.spacing[8] +
+              scrollViewProps.contentContainerStyle.paddingBottom,
+          }}
+          keyboardDismissMode="interactive"
+        >
+          <ImageContainer>
+            <ProfileImage source={{ uri: profileImageUrl as string }} />
+          </ImageContainer>
+
+          <Row>
+            <Fill>
+              <Controller
+                name="breedId"
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { onChange, value }, fieldState }) => (
+                  <BreedPicker
+                    testID="complete-profile-breed"
+                    title={t("completeProfile.breed")}
+                    breed={value}
+                    setBreed={(breed) => onChange(breed.id)}
+                    error={fieldState.error?.message}
+                    optional
+                  />
+                )}
+              />
+            </Fill>
+
+            <Gap />
+
+            <WideColumn>
+              <Controller
+                name="birthDate"
+                control={control}
+                rules={{ required: true }}
+                render={({
+                  field: { onChange, onBlur, value, name },
+                  fieldState,
+                }) => (
+                  <Input
+                    testID="complete-profile-birth-date"
+                    title={t("completeProfile.birthDate")}
+                    placeholder="DD/MM/YYYY"
+                    value={value ?? ""}
+                    onBlur={onBlur}
+                    optional
+                    onChangeText={(value: string) => {
+                      const currentLength = getValues()[name]?.length ?? 0;
+                      const isErasing = value.length < currentLength;
+
+                      if (isErasing) return onChange(value);
+
+                      // Mask to MM/DD/YYYY
+                      onChange(maskDate(value));
+                    }}
+                    numberOfLines={1}
+                    keyboardType="numeric"
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </WideColumn>
+          </Row>
+
+          <Row>
+            <Controller
+              name="size"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => (
+                <InputPicker
+                  testID="complete-profile-size"
+                  optional
+                  title={t("completeProfile.size")}
+                  placeholder={t("sizes.small")}
+                  data={sizes}
+                  value={sizes.find((sizeValue) => sizeValue.id === value)}
+                  onChange={(size) => onChange(size.id)}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+
+            <Gap />
+            <Controller
+              name="color"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => (
+                <InputPicker
+                  testID="complete-profile-color"
+                  optional
+                  title={t("completeProfile.color")}
+                  placeholder={colors[0]?.name}
+                  data={colors}
+                  value={colors.find((color) => color.id === value)}
+                  onChange={(color) => onChange(color.id)}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          </Row>
+
+          <Note fontSize="xs">{t("completeProfile.additionalInfo")}</Note>
+        </Container>
+        <BottomAction.Container>
+          <Button
+            loading={myDogUpdateMutation.isPending}
+            onPress={() => saveUser()}
+            testID="profile-submit"
+          >
+            {continueText}
+          </Button>
+        </BottomAction.Container>
+      </Fill>
+    </KeyboardScreen>
+  );
+};
+
+export default CompleteProfile;
+
+--- src/views/(auth)/CreateProfile/index.tsx ---
+
+import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
+import type { Picture } from "@/components/ProfileImageUploader/utils";
+import type { DogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
+
+import { useState } from "react";
+import { Platform } from "react-native";
+
+import { useRouter } from "expo-router";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { dogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
+import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
+import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
+import { Button } from "@/components/Button";
+import { Input } from "@/components/Input";
+import { Fill, KeyboardScreen } from "@/components/layout";
+import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
+import { pictures } from "@/components/ProfileImageUploader/utils";
+import { RadioButtons } from "@/components/RadioButtons";
+import { Text } from "@/components/text";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
+import { analytics } from "@/services/analytics";
+import { sendError } from "@/services/error-tracking";
+import { SceneName } from "@/types/scene-name";
+
+import { Container, DragHint, MultilineInput, PhotoHint } from "./styles";
+import { useUnistyles } from "react-native-unistyles";
+
+const DEFAULT_VALUES: DogQuickClientSchema = {
+  name: "",
+  bio: "",
+  images: pictures,
+  gender: "MALE",
+};
+
+const CreateProfile = () => {
+  const { t } = useTranslation();
+
+  const { control, handleSubmit, getValues } = useForm({
+    defaultValues: DEFAULT_VALUES,
+    resolver: zodResolver(dogQuickClientSchema),
+  });
+
+  const headerHeight = useDelayedHeaderHeight();
+
+  const router = useRouter();
+
+  const dogCreateMutation = api.dog.create.useMutation({
+    onMutate: () => {
+      analytics.track({ event_type: "Save Profile Pressed" });
+    },
+    onSuccess: (data) => {
+      getTrcpContext().myDog.get.setData(undefined, data);
+
+      analytics.track({
+        event_type: "Create Dog Profile",
+        event_properties: {
+          name: data.name,
+          gender: data.gender,
+        },
+      });
+
+      router.replace({
+        pathname: SceneName.CompleteProfile,
+        params: {
+          dogId: data.id,
+          // Todo: don't - use caches
+          profileImageUrl: data.images[0]?.url ?? "",
+        },
+      });
+    },
+    onError: (error) => {
+      magicToast.alert(t("editProfile.profileError"));
+      sendError(error);
+    },
+  });
+
+  const saveUser = handleSubmit(async (data) => {
+    const dogData = {
+      name: data.name,
+      bio: data.bio,
+      gender: data.gender,
+      images: data.images
+        .filter((image) => Boolean(image.url))
+        .map((image, index) => ({
+          id: image.id,
+          url: image.url as string,
+          position: index,
+        })),
+    };
+
+    await dogCreateMutation.mutateAsync(dogData);
+  });
+
+  const [gesturesEnabled, setGesturesEnabled] = useState(true);
+
+  const { theme } = useUnistyles();
+
+  const { scrollViewProps } = useBottomActionStyle();
+
+  return (
+    <KeyboardScreen
+      keyboardVerticalOffset={headerHeight}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <Fill>
+        <Container
+          {...scrollViewProps}
+          contentContainerStyle={{
+            padding: theme.spacing[4],
+            paddingBottom:
+              theme.spacing[4] +
+              scrollViewProps.contentContainerStyle.paddingBottom,
+          }}
+          scrollEnabled={gesturesEnabled}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Controller
+            name="images"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, value }, fieldState }) => (
+              <>
+                <Text fontWeight="bold" fontSize="lg">
+                  {t("createProfile.profilePictures")}
+                </Text>
+                <PhotoHint fontSize="xs">
+                  {t("createProfile.minimumOnePhoto")}
+                </PhotoHint>
+                <ProfileImagesUploader
+                  setGesturesEnabled={setGesturesEnabled}
+                  value={value as Picture[]}
+                  onChange={(
+                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                  ) => {
+                    // This getValues is needed to ensure the update happens
+                    // correctly even when adding images fast.
+                    onChange(cb(getValues("images") as Picture[]));
+                  }}
+                  error={fieldState.error?.message}
+                />
+                <DragHint fontSize="xs" fontWeight="medium">
+                  {t("createProfile.clickAndHold")}
+                </DragHint>
+              </>
+            )}
+          />
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value }, fieldState }) => (
+              <Input
+                testID="profile-name"
+                title={t("createProfile.dogName")}
+                placeholder={t("createProfile.howToCallDog")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                maxLength={50}
+                error={fieldState.error?.message}
+                autoCorrect={false}
+              />
+            )}
+          />
+          <Controller
+            name="bio"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value }, fieldState }) => (
+              <MultilineInput
+                title={t("createProfile.bio")}
+                placeholder={t("createProfile.tellSomethingCool")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                maxLength={500}
+                multiline
+                optional
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="gender"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, value } }) => (
+              <RadioButtons
+                title={t("completeProfile.gender")}
+                data={[t("completeProfile.male"), t("completeProfile.female")]}
+                value={
+                  value === "MALE"
+                    ? t("completeProfile.male")
+                    : t("completeProfile.female")
+                }
+                onChange={(value) => {
+                  onChange(
+                    value === t("completeProfile.male") ? "MALE" : "FEMALE",
+                  );
+                }}
+              />
+            )}
+          />
+        </Container>
+        <BottomAction.Container>
+          <Button
+            loading={dogCreateMutation.isPending}
+            onPress={() => saveUser()}
+            testID="profile-submit"
+          >
+            {t("createProfile.createProfile")}
+          </Button>
+        </BottomAction.Container>
+      </Fill>
+    </KeyboardScreen>
+  );
+};
+
+export default CreateProfile;
+
+--- src/views/(tabs)/Messages/components/Message/index.tsx ---
+
+import type { Match } from "../..";
+
+import * as React from "react";
+import { View } from "react-native";
+
+import { useRouter } from "expo-router";
+
+import { useTranslation } from "react-i18next";
+
+import { Fill } from "@/components/layout";
+import { ThinkingEmoji } from "@/components/MatchActionBar/styles";
+import { Text } from "@/components/text";
+import { SceneName } from "@/types/scene-name";
+import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
+
+import { Container, emojiSize, EmojiContainer, Picture } from "./styles";
+
+const getEmojiBySwipeType = (swipeType?: Swipe) => {
+  switch (swipeType) {
+    case Swipe.Maybe:
+      return ThinkingEmoji;
+    default:
+      return null;
+  }
+};
+
+type MessageProps = {
+  item: Match;
+};
+
+export const Message: React.FC<MessageProps> = ({ item }) => {
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  const Emoji = getEmojiBySwipeType(
+    // TODO: Return this when we get swipeType back
+    undefined, // item.interest?.swipeType
+  );
+
+  return (
+    <Container
+      testID="messages-chat-row"
+      onPress={() =>
+        router.push({
+          pathname: `${SceneName.Chat}/[matchId]`,
+          params: { dogId: item.dog.id, matchId: item.id },
+        })
+      }
+    >
+      <View>
+        <Picture
+          source={{
+            uri: item.dog.images[0]?.url,
+            blurhash: item.dog.images[0]?.blurhash ?? undefined,
+          }}
+        />
+        {Emoji ? (
+          <EmojiContainer>
+            <Emoji style={emojiSize} />
+          </EmojiContainer>
+        ) : null}
+      </View>
+      <Fill>
+        <Text fontWeight="semibold" numberOfLines={1}>
+          {item.dog.name}
+        </Text>
+        <Text fontSize="xs" numberOfLines={2}>
+          {item.lastMessage?.content ?? t("matches.sendFirstMessage")}
+        </Text>
+      </Fill>
+    </Container>
+  );
+};
+
+--- src/views/EditProfile/index.tsx ---
+
+import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
+import type { Picture } from "@/components/ProfileImageUploader/utils";
+import type { RouterInputs } from "@/contexts/trpc-provider";
+
+import type { ScrollView } from "react-native";
+
+import { useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
+
+import { useRouter } from "expo-router";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { dogClientSchema } from "@pegada/shared/schemas/dog-schema";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { format } from "date-fns";
+import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { magicToast } from "react-native-magic-toast";
+import { useDispatch } from "react-redux";
+import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
+import BreedPicker from "@/components/BreedPicker";
+import { Button } from "@/components/Button";
+import { Input } from "@/components/Input";
+import { Fill, KeyboardScreen, Row } from "@/components/layout";
+import { NetworkBoundary } from "@/components/NetworkBoundary";
+import { InputPicker } from "@/components/Picker";
+import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
+import { pictures } from "@/components/ProfileImageUploader/utils";
+import { RadioButtons } from "@/components/RadioButtons";
+import { getTrcpContext } from "@/contexts/trcp-context";
+import { api } from "@/contexts/trpc-provider";
+import { analytics } from "@/services/analytics";
+import { colors, sizes } from "@/services/consts";
+import { sendError } from "@/services/error-tracking";
+import { maskDate } from "@/services/mask-date";
+import { Actions } from "@/store/reducers";
+
+import { Container, Gap, MultilineInput, WideColumn } from "./styles";
+import { useUnistyles } from "react-native-unistyles";
+
+type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
+type EditProfileForm = Partial<MyDogUpdateMutation>;
+
+const EditProfile = () => {
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  const { control, handleSubmit, setValue, getValues } =
+    useForm<EditProfileForm>({
+      defaultValues: {
+        name: "",
+        bio: "",
+        gender: "MALE",
+        weight: undefined,
+        birthDate: "",
+        breedId: "",
+        color: undefined,
+        size: undefined,
+        images: pictures,
+      },
+      resolver: zodResolver(dogClientSchema),
+    });
+
+  const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
+    refetchOnMount: false,
+  });
+
+  if (!dog) {
+    throw new Error("Dog not found");
+  }
+
+  useEffect(() => {
+    setValue("name", dog.name);
+    if (dog.bio) {
+      setValue("bio", dog.bio);
+    }
+
+    if (dog.birthDate) {
+      setValue("birthDate", format(dog.birthDate, "dd/MM/yyyy"));
+    }
+
+    if (dog.weight) {
+      setValue("weight", dog.weight);
+    }
+
+    setValue("breedId", dog.breed?.id);
+    setValue("color", dog.color);
+    setValue("size", dog.size);
+    setValue("gender", dog.gender);
+    setValue(
+      "images",
+      pictures.map((picture, index) => {
+        const matchingImage = dog?.images?.[index];
+
+        if (!matchingImage) return picture;
+
+        return {
+          ...picture,
+          id: matchingImage?.id,
+          key: matchingImage?.id,
+          url: matchingImage?.url,
+          status: matchingImage?.status,
+          blurhash: matchingImage?.blurhash,
+          position: matchingImage?.position,
+          disabledDrag: false,
+          disabledReSorted: false,
+        };
+      }),
+    );
+  }, [dog, setValue]);
+
+  const dispatch = useDispatch();
+
+  const [gesturesEnabled, setGesturesEnabled] = useState(true);
+
+  const nonDelayedHeaderHeight = useHeaderHeight();
+
+  const { theme } = useUnistyles();
+
+  const { scrollViewProps } = useBottomActionStyle();
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const myDogUpdateMutation = api.myDog.update.useMutation({
+    onMutate: () => {
+      analytics.track({ event_type: "Save Profile Pressed" });
+    },
+    onSuccess: (data) => {
+      dispatch(Actions.dogs.list.refetch());
+      getTrcpContext().myDog.get.setData(undefined, data);
+      magicToast.success(t("editProfile.profileUpdated"), 1000);
+      router.back();
+    },
+    onError: (error) => {
+      magicToast.alert(t("editProfile.profileError"));
+      sendError(error);
+    },
+  });
+
+  const saveUser = handleSubmit(async (data) => {
+    const updateData = {
+      bio: data.bio,
+      name: data.name,
+      gender: data.gender,
+      // Null so those fields are removed correctly in the database
+      weight: data.weight ? data.weight : null,
+      birthDate: data.birthDate ? data.birthDate : null,
+      breedId: data.breedId ? data.breedId : null,
+      color: data.color ? data.color : null,
+      size: data.size ?? null,
+      images: data.images?.map((image, index) => ({
+        id: image.id,
+        url: image.url,
+        position: index,
+      })),
+    };
+
+    await myDogUpdateMutation.mutateAsync(updateData);
+  });
+
+  return (
+    <KeyboardScreen behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <Fill>
+        <Container
+          ref={scrollViewRef}
+          {...scrollViewProps}
+          contentContainerStyle={{
+            padding: theme.spacing[4],
+            paddingBottom:
+              theme.spacing[4] +
+              scrollViewProps.contentContainerStyle.paddingBottom,
+            paddingTop: nonDelayedHeaderHeight + theme.spacing[4],
+          }}
+          scrollEnabled={gesturesEnabled}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Controller
+            name="images"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, value }, fieldState }) => {
+              return (
+                <ProfileImagesUploader
+                  value={value as Picture[]}
+                  onChange={(
+                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                  ) => {
+                    // This getValues is needed to ensure the update happens
+                    // correctly even when adding images fast.
+                    onChange(cb(getValues("images") as Picture[]));
+                  }}
+                  error={fieldState.error?.message}
+                  setGesturesEnabled={setGesturesEnabled}
+                />
+              );
+            }}
+          />
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value }, fieldState }) => {
+              return (
+                <Input
+                  testID="edit-profile-name"
+                  title={t("editProfile.dogName")}
+                  placeholder={t("editProfile.dogNamePlaceholder")}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  maxLength={50}
+                  error={fieldState.error?.message}
+                  autoCorrect={false}
+                />
+              );
+            }}
+          />
+          <Controller
+            name="bio"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value }, fieldState }) => (
+              <MultilineInput
+                testID="edit-profile-bio"
+                title={t("editProfile.bio")}
+                placeholder={t("editProfile.bioPlaceholder")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                maxLength={500}
+                multiline
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Row>
+            <Fill>
+              <Controller
+                name="weight"
+                control={control}
+                rules={{ required: true }}
+                render={({
+                  field: { onChange, onBlur, value },
+                  fieldState,
+                }) => (
+                  <Input
+                    title={t("editProfile.weight")}
+                    placeholder="1"
+                    value={String(value ?? "")}
+                    onBlur={onBlur}
+                    onChangeText={(value: string) =>
+                      // Only allow numbers
+                      onChange(value.replaceAll(/[^0-9]/g, ""))
+                    }
+                    maxLength={3}
+                    numberOfLines={1}
+                    keyboardType="numeric"
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </Fill>
+            <Gap />
+            <WideColumn>
+              <Controller
+                name="birthDate"
+                control={control}
+                rules={{ required: true }}
+                render={({
+                  field: { onChange, onBlur, value, name },
+                  fieldState,
+                }) => (
+                  <Input
+                    title={t("editProfile.birthDate")}
+                    placeholder="DD/MM/YYYY"
+                    value={String(value)}
+                    onBlur={onBlur}
+                    onChangeText={(value: string) => {
+                      const oldValue = getValues()[name];
+                      const isErasing =
+                        value.length < (oldValue ? oldValue.length : 0);
+
+                      if (isErasing) return onChange(value);
+
+                      // Mask to MM/DD/YYYY
+                      onChange(maskDate(value));
+                    }}
+                    numberOfLines={1}
+                    keyboardType="numeric"
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </WideColumn>
+          </Row>
+
+          <Controller
+            name="breedId"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, value }, fieldState }) => (
+              <BreedPicker
+                breed={value}
+                setBreed={(breed) => onChange(breed.id)}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Row>
+            <Controller
+              name="size"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => (
+                <InputPicker
+                  title={t("editProfile.size")}
+                  placeholder={t("sizes.small")}
+                  data={sizes}
+                  value={sizes.find((sizeValue) => sizeValue.id === value)}
+                  onChange={(size) => onChange(size.id)}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+
+            <Gap />
+            <Controller
+              name="color"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => (
+                <InputPicker
+                  title={t("editProfile.color")}
+                  placeholder={colors[0]?.name}
+                  data={colors}
+                  value={colors.find((color) => color.id === value)}
+                  onChange={(color) => onChange(color.id)}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          </Row>
+          <Controller
+            name="gender"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, value } }) => (
+              <RadioButtons
+                title={t("editProfile.gender")}
+                data={[t("editProfile.male"), t("editProfile.female")]}
+                value={
+                  value === "MALE"
+                    ? t("editProfile.male")
+                    : t("editProfile.female")
+                }
+                onChange={(value) => {
+                  onChange(value === t("editProfile.male") ? "MALE" : "FEMALE");
+                }}
+              />
+            )}
+          />
+        </Container>
+        <BottomAction.Container>
+          <Button
+            testID="edit-profile-save"
+            loading={myDogUpdateMutation.isPending}
+            onPress={() => saveUser()}
+          >
+            {t("editProfile.saveProfile")}
+          </Button>
+        </BottomAction.Container>
+      </Fill>
+    </KeyboardScreen>
+  );
+};
+
+const EditProfileScreen = () => (
+  <NetworkBoundary>
+    <EditProfile />
+  </NetworkBoundary>
+);
+
+export default EditProfileScreen;

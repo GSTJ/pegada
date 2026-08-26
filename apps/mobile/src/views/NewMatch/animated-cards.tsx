@@ -18,13 +18,11 @@ import {
 import { api } from "@/contexts/trpc-provider";
 
 import {
-  CardsColumn,
-  HeartEyesContainer,
   HeartEyesEmoji,
   HeartEyesEmojiStandalone,
-  LoadingBox,
   RotatedImageLeft,
   RotatedImageRight,
+  styles,
 } from "./styles";
 
 type AnimatedCardsProps = {
@@ -70,7 +68,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
   });
 
   return (
-    <CardsColumn>
+    <View style={styles.cardsColumn}>
       <View>
         <RotatedImageRight
           source={{
@@ -93,25 +91,27 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ matchDog }) => {
           ]}
         />
       </View>
-      <HeartEyesContainer>
+      <View style={styles.heartEyesContainer}>
         <HeartEyesEmoji
+          style={styles.heartEyesEmoji}
           source={require("@/assets/images/HeartEyesEmoji.webp")}
         />
-      </HeartEyesContainer>
-    </CardsColumn>
+      </View>
+    </View>
   );
 };
 
 const AnimatedCardsErrorFallback = () => (
   <HeartEyesEmojiStandalone
+    style={styles.heartEyesEmojiStandalone}
     source={require("@/assets/images/HeartEyesEmoji.webp")}
   />
 );
 
 const AnimatedCardsLoading = () => (
-  <LoadingBox>
+  <View style={styles.loadingBox}>
     <DefaultLoadingComponent />
-  </LoadingBox>
+  </View>
 );
 
 const AnimatedCardsBoundary = ({ matchDog }: AnimatedCardsProps) => (

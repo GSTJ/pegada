@@ -21,7 +21,7 @@ import SwipeBackButton from "./components/SwipeBackButton";
 import SwipeHandler, { swipeHandlerRef } from "./components/SwipeHandler";
 import { Swipe } from "./components/SwipeHandler/hooks/use-swipe-gesture";
 import SwipeRequestFeedback from "./components/SwipeRequestFeedback";
-import { Container } from "./styles";
+import { Container, styles } from "./styles";
 
 export const useCustomTopInset = () => {
   const insets = useSafeAreaInsets();
@@ -73,9 +73,13 @@ const Matches = () => {
   }, [dispatch]);
 
   return (
-    <Container testID="swipe-screen" style={{ paddingTop: topInset }}>
+    <Container
+      testID="swipe-screen"
+      style={[styles.container, { paddingTop: topInset }]}
+      edges={["left", "right"]}
+    >
       <ChangeLocation />
-      <Container>
+      <Container style={styles.container} edges={["left", "right"]}>
         <SwipeBackButton />
         <SwipeRequestFeedback />
         {cards

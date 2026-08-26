@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert, Platform, View } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -8,8 +8,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
 import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
+import { useUnistyles } from "react-native-unistyles";
 import { useDispatch } from "react-redux";
-import { useTheme } from "styled-components/native";
 
 import { useBottomActionStyle } from "@/components/BottomAction";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -20,7 +20,7 @@ import { Actions } from "@/store/reducers";
 import { updateUserLocation } from "../(auth)/AskForLocation";
 import { Marker } from "./components/Marker";
 import { Submit } from "./components/Submit";
-import { Container, MapView } from "./styles";
+import { MapView, styles } from "./styles";
 
 const LocationMap = () => {
   const mapRef = useRef(null);
@@ -85,10 +85,10 @@ const LocationMap = () => {
     left: 10,
   };
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
-    <Container testID="location-map-screen">
+    <View style={styles.container} testID="location-map-screen">
       <MapView
         ref={mapRef}
         showsUserLocation
@@ -135,7 +135,7 @@ const LocationMap = () => {
         onPress={() => userMutation.mutate()}
         dragging={dragging}
       />
-    </Container>
+    </View>
   );
 };
 

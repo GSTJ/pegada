@@ -1,27 +1,28 @@
 import Color from "color";
-import styled, { css } from "styled-components/native";
+import { StyleSheet } from "react-native-unistyles";
 
-type CheckContainerProps = {
-  selected?: boolean;
-};
-
-export const Container = styled.View<CheckContainerProps>`
-  height: ${({ theme }) => theme.spacing[6]}px;
-  width: ${({ theme }) => theme.spacing[6]}px;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: ${({ theme }) => theme.radii.round}px;
-
-  background-color: ${({ theme }) => theme.colors.card};
-  border-width: ${({ theme }) => theme.stroke.lg}px;
-  border-color: ${({ theme }) => theme.colors.border};
-
-  ${(props) =>
-    props.selected &&
-    css`
-      background-color: ${({ theme }) =>
-        new Color(theme.colors.primary).alpha(0.2).toString()};
-      border-color: ${({ theme }) => theme.colors.primary};
-    `}
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    height: theme.spacing[6],
+    width: theme.spacing[6],
+    alignItems: "center",
+    justifyContent: "center",
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    backgroundColor: theme.colors.card,
+    borderWidth: theme.stroke.lg,
+    borderColor: theme.colors.border,
+    variants: {
+      selected: {
+        true: {
+          backgroundColor: new Color(theme.colors.primary)
+            .alpha(0.2)
+            .toString(),
+          borderColor: theme.colors.primary,
+        },
+      },
+    },
+  },
+}));

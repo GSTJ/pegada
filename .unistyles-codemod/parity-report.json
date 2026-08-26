@@ -1,0 +1,2555 @@
+{
+  "modules": [
+    {
+      "file": "apps/mobile/src/app/_layout.tsx",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "AppContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "AppContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/BottomAction/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/BreedPicker/index.tsx",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "DisabledInput",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DisabledInput",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/components/MaybeFeedback/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/components/NopeFeedback/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/Input/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TitleContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TitleContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CancelTouchArea",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CancelTouchArea",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CancelIcon",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CancelIcon",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TextInput",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TextInput",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ActivityIndicatorComponent",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ActivityIndicatorComponent",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/layout.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Fill",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Fill",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Row",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Row",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "KeyboardScreen",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "KeyboardScreen",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/LikeLimitReached/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "PinnedCloseButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PinnedCloseButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Header",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Header",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CountdownContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CountdownContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/components/Distance/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DistanceText",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DistanceText",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/components/Pagination/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Dot",
+          "theme": "light",
+          "props": "{ active: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "Dot",
+          "theme": "light",
+          "props": "{ active: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Dot",
+          "theme": "dark",
+          "props": "{ active: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "Dot",
+          "theme": "dark",
+          "props": "{ active: false }",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/Picker/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "TitleContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TitleContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SelectItem",
+          "theme": "light",
+          "props": "{ selected: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "SelectItem",
+          "theme": "light",
+          "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "SelectItem",
+          "theme": "dark",
+          "props": "{ selected: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "SelectItem",
+          "theme": "dark",
+          "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "SearchContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SearchContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SearchInput",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SearchInput",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CloseIcon",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CloseIcon",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/RadioButtons/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: true, marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: true, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: false, marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: false, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: true, marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: true, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: false, marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: false, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "TextButton",
+          "theme": "light",
+          "props": "{ marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "TextButton",
+          "theme": "light",
+          "props": "{ marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "TextButton",
+          "theme": "dark",
+          "props": "{ marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "TextButton",
+          "theme": "dark",
+          "props": "{ marked: false }",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/Slider/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "TitleContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TitleContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LabelContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LabelContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Triangle",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Triangle",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Marker",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Marker",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/services/app-review.tsx",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SmallButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SmallButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenterText",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenterText",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ButtonRow",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ButtonRow",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/AskForLocation/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LocationView",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LocationView",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BottomView",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BottomView",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InformationRow",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InformationRow",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LocationIcon",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LocationIcon",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InformationIcon",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InformationIcon",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Prompt",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Prompt",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/CompleteProfile/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "WideColumn",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "WideColumn",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Gap",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Gap",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Note",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Note",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ImageContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ImageContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ProfileImage",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ProfileImage",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/CreateProfile/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PhotoHint",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PhotoHint",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DragHint",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DragHint",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MultilineInput",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MultilineInput",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpInput/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "VerifyRowView",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "VerifyRowView",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ResendCode",
+          "theme": "light",
+          "props": "{ disabled: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "ResendCode",
+          "theme": "light",
+          "props": "{ disabled: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "ResendCode",
+          "theme": "dark",
+          "props": "{ disabled: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "ResendCode",
+          "theme": "dark",
+          "props": "{ disabled: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "TopColumn",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TopColumn",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Timer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Timer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LoadingContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LoadingContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "StyledKeyboardAvoidingView",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "StyledKeyboardAvoidingView",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/SignIn/components/HeroText/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "WhiteTitle",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "WhiteTitle",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TextHighlight",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TextHighlight",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "UnderlineContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "UnderlineContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Line",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Line",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "RotatedRectangle",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "RotatedRectangle",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "FlexRowView",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "FlexRowView",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/SignIn/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PressableContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PressableContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "KeyboardAvoidingViewStyled",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "KeyboardAvoidingViewStyled",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LogoStyled",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LogoStyled",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TopCard",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "TopCard",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BottomCard",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BottomCard",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Highlight",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Highlight",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/Message/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Picture",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Picture",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmojiContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmojiContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/Preview/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Picture",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Picture",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SectionSeparator",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SectionSeparator",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DividerContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DividerContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyRoot",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyRoot",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyTitle",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyTitle",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyDescription",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyDescription",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/current-plan-config.tsx",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "PlanLoading",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanLoading",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "StyledLoading",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "StyledLoading",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "PlanContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ScrollContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ScrollContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SettingsList",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SettingsList",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BackgroundProfileContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BackgroundProfileContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BackgroundOverlay",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BackgroundOverlay",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SettingsBlock",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SettingsBlock",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeBackButton/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "GoBack",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "GoBack",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeHandler/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeRequestFeedback/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyAnimation",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "EmptyAnimation",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LogoLoading",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LogoLoading",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LocationButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "LocationButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/Header/styles.tsx",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "BackTouchArea",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BackTouchArea",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Picture",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Picture",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ProfileInfoContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ProfileInfoContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ProfileInfoLoadingContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ProfileInfoLoadingContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Header",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Header",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PressableAreaFlex",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PressableAreaFlex",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/NextDay/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DateText",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DateText",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/Send/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Input",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Input",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Background",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Background",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenteredView",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenteredView",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenteredText",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenteredText",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/components/breed-tag.tsx",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "GlassmorphismStyled",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "GlassmorphismStyled",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ViewStyled",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ViewStyled",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BottomColumn",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "BottomColumn",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ShareButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ShareButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ReportButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ReportButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MatchActionBarGradient",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MatchActionBarGradient",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "UnmatchButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "UnmatchButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Name",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Name",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Age",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Age",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ActionLabel",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ActionLabel",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ErrorScreen",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ErrorScreen",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/EditProfile/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "WideColumn",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "WideColumn",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Gap",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Gap",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MultilineInput",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MultilineInput",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/ForceUpdate/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenterText",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "CenterText",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Bubble/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Swipe",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Swipe",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Row",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Row",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Rect",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Rect",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Title",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Description",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Marker/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Content",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Shadow",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Shadow",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MarkerWrapper",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "MarkerWrapper",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Submit/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "StyledButton",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "StyledButton",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Preferences/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "InputRow",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InputRow",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InputSpace",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "InputSpace",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SliderContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "SliderContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Divisor",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Divisor",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ButtonContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "ButtonContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DistanceContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "DistanceContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/Checkbox/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{ selected: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{ selected: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{ selected: false }",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/PlanPackages/styles.ts",
+      "status": "checked",
+      "checks": [
+        {
+          "definition": "Flex",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Flex",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
+          "theme": "light",
+          "props": "{ selected: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
+          "theme": "light",
+          "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
+          "theme": "dark",
+          "props": "{ selected: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
+          "theme": "dark",
+          "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "PercentContainer",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PercentContainer",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PercentText",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "PercentText",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Price",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "Price",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "OldPrice",
+          "theme": "light",
+          "props": "{}",
+          "status": "pass"
+        },
+        {
+          "definition": "OldPrice",
+          "theme": "dark",
+          "props": "{}",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "modules": 44,
+    "definitions": 181,
+    "comparisons": 380,
+    "failures": 0,
+    "unverifiable": 0
+  }
+}

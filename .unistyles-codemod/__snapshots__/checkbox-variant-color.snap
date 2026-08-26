@@ -1,0 +1,53 @@
+# checkbox-variant-color
+
+status: converted
+definitions: 1
+variant groups: 1
+useTheme: src/views/UpgradeWall/components/Checkbox/index.tsx (1 sites)
+
+--- src/views/UpgradeWall/components/Checkbox/index.tsx ---
+
+import Check from "@/assets/images/Check.svg";
+
+import { styles } from "./styles";
+import { View } from "react-native";
+import { useUnistyles } from "react-native-unistyles";
+
+export const Checkbox = ({ selected }: { selected?: boolean }) => {
+  const { theme } = useUnistyles();
+    styles.useVariants({ selected });
+  return (
+    <View style={styles.container}>
+      {selected ? <Check color={theme.colors.primary} /> : null}
+    </View>
+  );
+};
+
+--- src/views/UpgradeWall/components/Checkbox/styles.ts ---
+
+import { StyleSheet } from "react-native-unistyles";
+import Color from "color";
+
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    height: theme.spacing[6],
+    width: theme.spacing[6],
+    alignItems: "center",
+    justifyContent: "center",
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    backgroundColor: theme.colors.card,
+    borderWidth: theme.stroke.lg,
+    borderColor: theme.colors.border,
+    variants: {
+      selected: {
+        true: {
+          backgroundColor: new Color(theme.colors.primary).alpha(0.2).toString(),
+          borderColor: theme.colors.primary,
+        },
+      },
+    },
+  },
+}));

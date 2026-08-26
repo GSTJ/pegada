@@ -5,7 +5,7 @@ import type {
 
 import { useState } from "react";
 import * as React from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
@@ -14,7 +14,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import AddRemove from "@/assets/images/AddRemove.svg";
 import { PressableArea } from "@/components/pressable-area";
@@ -28,7 +28,13 @@ import {
 import { Text } from "@/components/text";
 import { sendError } from "@/services/error-tracking";
 
-import * as S from "./styles";
+import {
+  AddRemoveContainer,
+  FadedDog,
+  MaestroSkipPressable,
+  styles,
+  UserPicture,
+} from "./styles";
 
 type AddUserPhotoProps = {
   picture: Picture;
@@ -61,7 +67,7 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
   const [localPicture, setLocalPicture] = useState(picture.url);
   const { t } = useTranslation();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const hasPicture = Boolean(localPicture || picture.url);
 
@@ -184,6 +190,8 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
 
   const isLoading = Boolean(localPicture && !picture.url.includes("http"));
 
+  styles.useVariants({ inverted: hasPicture });
+
   // `shouldOfferMaestroPlaceholder()` short-circuits on
   // `config.ENV === "production"` so App Store builds always evaluate to
   // `false` here regardless of EXPO_PUBLIC_MAESTRO_E2E misconfiguration.
@@ -211,18 +219,22 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
     : handleAdd;
 
   return (
-    <S.UserPictureContainer>
-      <S.UserPictureContent>
-        <S.UserPicture
+    <View style={styles.userPictureContainer}>
+      <View style={styles.userPictureContent}>
+        <UserPicture
+          style={styles.userPicture}
           key={localPicture}
           {...(localPicture
             ? { source: { uri: localPicture, blurhash: picture.blurhash } }
             : undefined)}
         />
         {isLoading ? (
-          <S.AnimatedOverlay exiting={FadeOut.duration(150)}>
+          <Animated.View
+            style={styles.animatedOverlay}
+            exiting={FadeOut.duration(150)}
+          >
             <ActivityIndicator color="#FFF" />
-          </S.AnimatedOverlay>
+          </Animated.View>
         ) : null}
         {!hasPicture && (
           <PressableArea
@@ -236,17 +248,22 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
             // including the pill's strip).
             hitSlop={showMaestroSkip ? { ...hitSlop, bottom: 0 } : hitSlop}
           >
-            <S.FadedDog fill={theme.colors.text} width={40} height={40} />
+            <FadedDog
+              style={styles.fadedDog}
+              fill={theme.colors.text}
+              width={40}
+              height={40}
+            />
           </PressableArea>
         )}
         {
           /** Picture status is only returned in development mode for debugging */
           picture.status ? (
-            <S.DebugImageStatusContainer>
+            <View style={styles.debugImageStatusContainer}>
               <Text color="white" fontSize="xxs" fontWeight="medium">
                 {picture.status}
               </Text>
-            </S.DebugImageStatusContainer>
+            </View>
           ) : null
         }
         {/*
@@ -258,7 +275,8 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
           testID is per-slot so flow 20 can disambiguate which cell to fill.
         */}
         {showMaestroSkip ? (
-          <S.MaestroSkipPressable
+          <MaestroSkipPressable
+            style={styles.maestroSkipPressable}
             testID={
               typeof index === "number"
                 ? `maestro-skip-photo-${index}`
@@ -269,23 +287,23 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
             <Text color="white" fontSize="xxs" fontWeight="bold">
               MAESTRO_E2E_SKIP_PHOTO
             </Text>
-          </S.MaestroSkipPressable>
+          </MaestroSkipPressable>
         ) : null}
-      </S.UserPictureContent>
-      <S.AddRemoveContainer
+      </View>
+      <AddRemoveContainer
+        style={styles.addRemoveContainer}
         testID={
           typeof index === "number"
             ? photoActionTestID(index, hasPicture)
             : undefined
         }
         disabled={isLoading}
-        inverted={hasPicture}
         onPress={hasPicture ? handleDelete : handleEmptySlotPress}
       >
         <Animated.View style={style}>
           <AddRemove fill={hasPicture ? theme.colors.primary : "white"} />
         </Animated.View>
-      </S.AddRemoveContainer>
-    </S.UserPictureContainer>
+      </AddRemoveContainer>
+    </View>
   );
 };
