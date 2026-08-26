@@ -58,6 +58,7 @@ export function classifyDefinition(
 
   convertTemplate(definition.quasis, definition.interpolations, ir, context);
   assertNoLateOverride(ir);
+  mirrorBooleanFallback(ir);
   ir.base = dedupeKeepingLast(ir.base);
   return ir;
 }
@@ -561,6 +562,39 @@ function addVariant(ir: StyleIR, group: string, key: string, entries: StyleEntry
   existing.set(key, dedupeKeepingLast([...(existing.get(key) ?? []), ...entries]));
   ir.variants.set(group, existing);
   for (const [name] of entries) ir.trace.push({ key: name, where: "variant" });
+}
+
+/**
+ * Gives every boolean group an explicit `false` bucket.
+ *
+ * `${(props) => (props.x ? a : b)}` compiles to `{ true: a, default: b }`,
+ * which reads like "b unless x" but is not what Unistyles does with it:
+ * `default` is only consulted when the group was given *no* value, so a call
+ * site that hands over a real `false` — which every one of ours does — matches
+ * neither bucket and gets the base style back. styled-components' else-branch
+ * covers both the false and the absent case, so both keys have to carry it.
+ *
+ * `false` is written before `default` so the emitted sheet reads
+ * true/false/default rather than leaving the odd one out at the end.
+ */
+function mirrorBooleanFallback(ir: StyleIR): void {
+  for (const [group, buckets] of ir.variants) {
+    if (!buckets.has("true") || !buckets.has("default")) continue;
+
+    const fallback = buckets.get("default")!;
+    const ordered = new Map<string, StyleEntry[]>();
+
+    // Rewritten rather than topped up: a `styled(Base)` clones the base's
+    // groups before adding its own declarations to them, so a `false` copied
+    // on the base's behalf would be a round out of date by now.
+    for (const [key, entries] of buckets) {
+      if (key === "false") continue;
+      if (key === "default") ordered.set("false", fallback.slice());
+      ordered.set(key, entries);
+    }
+
+    ir.variants.set(group, ordered);
+  }
 }
 
 function cloneVariants(variants: VariantGroups): VariantGroups {

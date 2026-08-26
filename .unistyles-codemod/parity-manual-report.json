@@ -1273,6 +1273,12 @@
         {
           "definition": "Container",
           "theme": "light",
+          "props": "{ variant: \"outline\", disabled: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
           "props": "{ variant: undefined, disabled: true }",
           "status": "pass"
         },
@@ -1280,6 +1286,12 @@
           "definition": "Container",
           "theme": "light",
           "props": "{ variant: undefined, disabled: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "light",
+          "props": "{ variant: undefined, disabled: undefined }",
           "status": "pass"
         },
         {
@@ -1297,6 +1309,12 @@
         {
           "definition": "Container",
           "theme": "dark",
+          "props": "{ variant: \"outline\", disabled: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
           "props": "{ variant: undefined, disabled: true }",
           "status": "pass"
         },
@@ -1304,6 +1322,12 @@
           "definition": "Container",
           "theme": "dark",
           "props": "{ variant: undefined, disabled: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{ variant: undefined, disabled: undefined }",
           "status": "pass"
         },
         {
@@ -1446,6 +1470,12 @@
         },
         {
           "definition": "Container",
+          "theme": "light",
+          "props": "{ isFirst: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
           "theme": "dark",
           "props": "{ isFirst: true }",
           "status": "pass"
@@ -1454,6 +1484,12 @@
           "definition": "Container",
           "theme": "dark",
           "props": "{ isFirst: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{ isFirst: undefined }",
           "status": "pass"
         },
         {
@@ -1710,6 +1746,12 @@
         },
         {
           "definition": "AddRemoveContainer",
+          "theme": "light",
+          "props": "{ inverted: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "AddRemoveContainer",
           "theme": "dark",
           "props": "{ inverted: true }",
           "status": "pass"
@@ -1718,6 +1760,12 @@
           "definition": "AddRemoveContainer",
           "theme": "dark",
           "props": "{ inverted: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "AddRemoveContainer",
+          "theme": "dark",
+          "props": "{ inverted: undefined }",
           "status": "pass"
         },
         {
@@ -1800,6 +1848,30 @@
         },
         {
           "definition": "Message",
+          "theme": "light",
+          "props": "{ sending: undefined, status: \"error\" }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "light",
+          "props": "{ sending: undefined, status: \"loading\" }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "light",
+          "props": "{ sending: undefined, status: \"success\" }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "light",
+          "props": "{ sending: undefined, status: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
           "theme": "dark",
           "props": "{ sending: true, status: \"error\" }",
           "status": "pass"
@@ -1844,6 +1916,30 @@
           "definition": "Message",
           "theme": "dark",
           "props": "{ sending: false, status: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "dark",
+          "props": "{ sending: undefined, status: \"error\" }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "dark",
+          "props": "{ sending: undefined, status: \"loading\" }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "dark",
+          "props": "{ sending: undefined, status: \"success\" }",
+          "status": "pass"
+        },
+        {
+          "definition": "Message",
+          "theme": "dark",
+          "props": "{ sending: undefined, status: undefined }",
           "status": "pass"
         },
         {
@@ -1996,7 +2092,7 @@
   "totals": {
     "modules": 28,
     "definitions": 105,
-    "comparisons": 304,
+    "comparisons": 320,
     "failures": 0,
     "unverifiable": 0
   }

@@ -37,6 +37,9 @@ export const styles = StyleSheet.create((theme) => ({
         true: {
           opacity: 0.5,
         },
+        false: {
+          opacity: 1,
+        },
         default: {
           opacity: 1,
         },

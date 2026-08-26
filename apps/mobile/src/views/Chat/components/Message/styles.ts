@@ -41,10 +41,18 @@ export const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing[1],
     gap: theme.spacing[1.5],
     variants: {
+      // `false` and `default` are spelled out separately because Unistyles
+      // reserves `default` for a group that was given no value at all — an
+      // incoming message passes a real `false`, which matched neither bucket
+      // and left the bubble with four rounded corners instead of a tail.
       sending: {
         true: {
           marginLeft: "auto",
           borderBottomRightRadius: 0,
+        },
+        false: {
+          marginRight: "auto",
+          borderBottomLeftRadius: 0,
         },
         default: {
           marginRight: "auto",

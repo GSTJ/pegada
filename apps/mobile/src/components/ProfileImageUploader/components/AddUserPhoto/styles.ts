@@ -1,9 +1,5 @@
 import Animated from "react-native-reanimated";
-import {
-  createUnistylesElement,
-  StyleSheet,
-  withUnistyles,
-} from "react-native-unistyles";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import Dog from "@/assets/images/Dog.svg";
 import { Image } from "@/components/image";
@@ -19,15 +15,28 @@ const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 /**
  * `Animated.createAnimatedComponent(Image)` is off the babel plugin's
- * autoprocess list, so it has to be registered by hand.
- * `createUnistylesElement` — the wrapper the plugin applies to `Animated.View`
- * and friends — is what that takes: unlike `withUnistyles` it forwards the
- * props untouched instead of flattening `style` into one object, which is what
- * keeps reanimated's own props (and any style array a caller passes) intact.
+ * autoprocess list, so it has to be wrapped by hand — and the wrapper has to
+ * be `withUnistyles`, not `createUnistylesElement`.
+ *
+ * `createUnistylesElement` is the one the plugin applies to `Animated.View`,
+ * and it works by handing the node's ref to `UnistylesShadowRegistry.add` so
+ * the C++ side can rewrite the shadow node in place. `expo-image` cannot play
+ * that game: its ref is the `ExpoImage` *class instance*, not a host view, so
+ * `findShadowNodeForHandle` comes up empty and the registry throws
+ * "Could not find shadow node" — from inside a ref callback, which means the
+ * nearest error boundary eats the whole screen. That is what replaced
+ * EditProfile and the CreateProfile photo grid with the "Oops" fallback.
+ *
+ * `withUnistyles` resolves the sheet in JS and passes a plain object down the
+ * `style` prop, which is also the only way `expo-image` sees a style at all:
+ * its `render` flattens `style` and re-emits half of it as native props
+ * (`borderColor` and friends go through `processColor` there), so a style
+ * injected straight into the shadow node would be skipped anyway.
+ *
+ * Flattening is safe here because this component is animated in name only —
+ * no caller passes it an animated style.
  */
-export const UserPicture = createUnistylesElement(
-  AnimatedImage,
-) as typeof AnimatedImage;
+export const UserPicture = withUnistyles(AnimatedImage);
 
 export const AddRemoveContainer = withUnistyles(PressableArea);
 
@@ -109,10 +118,18 @@ export const styles = StyleSheet.create((theme) => ({
     borderColor: ADD_REMOVE_CONTAINER_BORDER_COLOR,
     borderStyle: "solid",
     variants: {
+      // `false` and `default` carry the same declarations on purpose: Unistyles
+      // only reaches for `default` when the group was given no value, and the
+      // call site hands over a real boolean. With `default` alone, an empty
+      // slot matched no bucket at all and the `+` button lost its pink fill.
       inverted: {
         true: {
           backgroundColor: theme.colors.input,
           borderColor: theme.colors.border,
+        },
+        false: {
+          backgroundColor: theme.colors.primary,
+          borderColor: theme.colors.primary,
         },
         default: {
           backgroundColor: theme.colors.primary,

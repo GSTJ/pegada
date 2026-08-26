@@ -44,7 +44,7 @@
           "name": "AddRemoveContainer",
           "key": "addRemoveContainer",
           "mode": "wrapper",
-          "variants": { "inverted": ["true", "default"] },
+          "variants": { "inverted": ["true", "false", "default"] },
           "inheritedFrom": null
         },
         {

@@ -10,7 +10,7 @@
           "key": "message",
           "mode": "inline",
           "variants": {
-            "sending": ["true", "default"],
+            "sending": ["true", "false", "default"],
             "status": ["error", "loading", "success", "default"]
           },
           "inheritedFrom": null

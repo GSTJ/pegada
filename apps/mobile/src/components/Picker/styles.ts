@@ -28,6 +28,9 @@ export const styles = StyleSheet.create((theme) => ({
         true: {
           backgroundColor: theme.colors.accent,
         },
+        false: {
+          backgroundColor: theme.colors.background,
+        },
         default: {
           backgroundColor: theme.colors.background,
         },

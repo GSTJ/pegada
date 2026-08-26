@@ -37,6 +37,9 @@ export const styles = StyleSheet.create((theme) => ({
     variants: {
       last: {
         true: {},
+        false: {
+          marginRight: theme.spacing[3],
+        },
         default: {
           marginRight: theme.spacing[3],
         },

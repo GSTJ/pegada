@@ -1,0 +1,48 @@
+diff --git a/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts b/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts
+index e06cc62..09a8b23 100644
+--- a/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts
++++ b/apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts
+@@ -118,11 +118,19 @@ export const styles = StyleSheet.create((theme) => ({
+     borderColor: ADD_REMOVE_CONTAINER_BORDER_COLOR,
+     borderStyle: "solid",
+     variants: {
++      // `false` and `default` carry the same declarations on purpose: Unistyles
++      // only reaches for `default` when the group was given no value, and the
++      // call site hands over a real boolean. With `default` alone, an empty
++      // slot matched no bucket at all and the `+` button lost its pink fill.
+       inverted: {
+         true: {
+           backgroundColor: theme.colors.input,
+           borderColor: theme.colors.border,
+         },
++        false: {
++          backgroundColor: theme.colors.primary,
++          borderColor: theme.colors.primary,
++        },
+         default: {
+           backgroundColor: theme.colors.primary,
+           borderColor: theme.colors.primary,
+diff --git a/apps/mobile/src/views/Chat/components/Message/styles.ts b/apps/mobile/src/views/Chat/components/Message/styles.ts
+index 0d90387..6e29b3f 100644
+--- a/apps/mobile/src/views/Chat/components/Message/styles.ts
++++ b/apps/mobile/src/views/Chat/components/Message/styles.ts
+@@ -41,11 +41,19 @@ export const styles = StyleSheet.create((theme) => ({
+     marginBottom: theme.spacing[1],
+     gap: theme.spacing[1.5],
+     variants: {
++      // `false` and `default` are spelled out separately because Unistyles
++      // reserves `default` for a group that was given no value at all — an
++      // incoming message passes a real `false`, which matched neither bucket
++      // and left the bubble with four rounded corners instead of a tail.
+       sending: {
+         true: {
+           marginLeft: "auto",
+           borderBottomRightRadius: 0,
+         },
++        false: {
++          marginRight: "auto",
++          borderBottomLeftRadius: 0,
++        },
+         default: {
+           marginRight: "auto",
+           borderBottomLeftRadius: 0,

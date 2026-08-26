@@ -290,8 +290,14 @@ function callDynamic(
 
 /**
  * How Unistyles merges a style: the base object first, then one bucket per
- * variant group. A value with no matching bucket falls through to `default`,
- * which is also what an absent (`undefined`) value selects.
+ * variant group.
+ *
+ * `default` is NOT a catch-all. Unistyles only reaches for it when the group
+ * was given no value at all — `Parser::getStylesForVariant` stringifies the
+ * selected value, looks that key up, and returns *nothing* when it is missing.
+ * A literal `false` therefore selects the `false` bucket or no bucket, never
+ * `default`, and this used to model it the other way round: the ledger stayed
+ * green on `{ true: …, default: … }` groups that the app rendered unstyled.
  */
 function applyVariants(entry: unknown, props: Record<string, unknown>): unknown {
   if (typeof entry !== "object" || entry === null) return entry;
@@ -302,7 +308,7 @@ function applyVariants(entry: unknown, props: Record<string, unknown>): unknown 
   let merged: Record<string, unknown> = { ...base };
   for (const [group, buckets] of Object.entries(variants as Record<string, any>)) {
     const value = props[group];
-    const picked = value === undefined ? buckets.default : (buckets[String(value)] ?? buckets.default);
+    const picked = value === undefined ? buckets.default : buckets[String(value)];
     if (picked) merged = { ...merged, ...picked };
   }
 
@@ -322,8 +328,12 @@ function combos(definition: DefinitionInfo): { label: string; props: Record<stri
   let result: Record<string, unknown>[] = [{}];
 
   for (const [group, keys] of groups) {
+    // A boolean group is sampled at `undefined` as well as at `true`/`false`:
+    // the three select three different buckets in Unistyles (`true`, `false`,
+    // `default`) where styled-components only ever saw truthy or falsy, so an
+    // optional prop left off at a call site is its own way to lose styles.
     const values = keys.includes("true")
-      ? [true, false]
+      ? [true, false, undefined]
       : [...keys.filter((key) => key !== "default"), undefined];
 
     result = result.flatMap((partial) => values.map((value) => ({ ...partial, [group]: value })));

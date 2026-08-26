@@ -1,0 +1,26 @@
+diff --git a/apps/mobile/src/views/(auth)/SignIn/index.tsx b/apps/mobile/src/views/(auth)/SignIn/index.tsx
+index 67765f1..45f865f 100644
+--- a/apps/mobile/src/views/(auth)/SignIn/index.tsx
++++ b/apps/mobile/src/views/(auth)/SignIn/index.tsx
+@@ -115,8 +115,20 @@ const InsertEmail = () => {
+           </TopCard>
+           <View style={[styles.bottomCard, { paddingBottom: bottomInset }]}>
+             <Title style={styles.title} fontSize="xl" fontWeight="bold">
++              {/*
++                The leading text is an expression rather than bare JSX text on
++                purpose. "insertEmail.insertEmail" is `Insert your <1>email</1>`,
++                and react-i18next resolves `<1>` positionally against these
++                children — so `Insert your <Highlight>` has to stay exactly two
++                children. Written as text it does not: `<Highlight>` no longer
++                fits on the line once the sheet and the two size props are on
++                it, and the formatter splits the string off from its trailing
++                space as `Insert your{" "}`, which pushes `<Highlight>` to index
++                2 and binds `<1>` to the whitespace. The pink `email` then
++                disappears from the headline.
++              */}
+               <Trans i18nKey="insertEmail.insertEmail">
+-                Insert your{" "}
++                {"Insert your "}
+                 <Highlight
+                   style={styles.highlight}
+                   fontSize="xl"

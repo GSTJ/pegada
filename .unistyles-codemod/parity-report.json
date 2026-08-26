@@ -360,6 +360,12 @@
         },
         {
           "definition": "Dot",
+          "theme": "light",
+          "props": "{ active: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Dot",
           "theme": "dark",
           "props": "{ active: true }",
           "status": "pass"
@@ -368,6 +374,12 @@
           "definition": "Dot",
           "theme": "dark",
           "props": "{ active: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Dot",
+          "theme": "dark",
+          "props": "{ active: undefined }",
           "status": "pass"
         }
       ]
@@ -402,6 +414,12 @@
         },
         {
           "definition": "SelectItem",
+          "theme": "light",
+          "props": "{ selected: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "SelectItem",
           "theme": "dark",
           "props": "{ selected: true }",
           "status": "pass"
@@ -410,6 +428,12 @@
           "definition": "SelectItem",
           "theme": "dark",
           "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "SelectItem",
+          "theme": "dark",
+          "props": "{ selected: undefined }",
           "status": "pass"
         },
         {
@@ -493,6 +517,12 @@
         {
           "definition": "RadioButtonContainer",
           "theme": "light",
+          "props": "{ last: true, marked: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
           "props": "{ last: false, marked: true }",
           "status": "pass"
         },
@@ -500,6 +530,30 @@
           "definition": "RadioButtonContainer",
           "theme": "light",
           "props": "{ last: false, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: false, marked: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: undefined, marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: undefined, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "light",
+          "props": "{ last: undefined, marked: undefined }",
           "status": "pass"
         },
         {
@@ -517,6 +571,12 @@
         {
           "definition": "RadioButtonContainer",
           "theme": "dark",
+          "props": "{ last: true, marked: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
           "props": "{ last: false, marked: true }",
           "status": "pass"
         },
@@ -527,6 +587,30 @@
           "status": "pass"
         },
         {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: false, marked: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: undefined, marked: true }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: undefined, marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "RadioButtonContainer",
+          "theme": "dark",
+          "props": "{ last: undefined, marked: undefined }",
+          "status": "pass"
+        },
+        {
           "definition": "TextButton",
           "theme": "light",
           "props": "{ marked: true }",
@@ -540,6 +624,12 @@
         },
         {
           "definition": "TextButton",
+          "theme": "light",
+          "props": "{ marked: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "TextButton",
           "theme": "dark",
           "props": "{ marked: true }",
           "status": "pass"
@@ -548,6 +638,12 @@
           "definition": "TextButton",
           "theme": "dark",
           "props": "{ marked: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "TextButton",
+          "theme": "dark",
+          "props": "{ marked: undefined }",
           "status": "pass"
         }
       ]
@@ -966,6 +1062,12 @@
         },
         {
           "definition": "ResendCode",
+          "theme": "light",
+          "props": "{ disabled: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "ResendCode",
           "theme": "dark",
           "props": "{ disabled: true }",
           "status": "pass"
@@ -974,6 +1076,12 @@
           "definition": "ResendCode",
           "theme": "dark",
           "props": "{ disabled: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "ResendCode",
+          "theme": "dark",
+          "props": "{ disabled: undefined }",
           "status": "pass"
         },
         {
@@ -2430,6 +2538,12 @@
         },
         {
           "definition": "Container",
+          "theme": "light",
+          "props": "{ selected: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
           "theme": "dark",
           "props": "{ selected: true }",
           "status": "pass"
@@ -2438,6 +2552,12 @@
           "definition": "Container",
           "theme": "dark",
           "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "Container",
+          "theme": "dark",
+          "props": "{ selected: undefined }",
           "status": "pass"
         }
       ]
@@ -2484,6 +2604,12 @@
         },
         {
           "definition": "PlanContainer",
+          "theme": "light",
+          "props": "{ selected: undefined }",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
           "theme": "dark",
           "props": "{ selected: true }",
           "status": "pass"
@@ -2492,6 +2618,12 @@
           "definition": "PlanContainer",
           "theme": "dark",
           "props": "{ selected: false }",
+          "status": "pass"
+        },
+        {
+          "definition": "PlanContainer",
+          "theme": "dark",
+          "props": "{ selected: undefined }",
           "status": "pass"
         },
         {
@@ -2548,7 +2680,7 @@
   "totals": {
     "modules": 44,
     "definitions": 181,
-    "comparisons": 380,
+    "comparisons": 402,
     "failures": 0,
     "unverifiable": 0
   }
