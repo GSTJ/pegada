@@ -142,6 +142,7 @@ const OneTimeCode = () => {
         </View>
 
         <ResendCode
+          testID="otp-resend"
           onPress={() => {
             handleResendCode();
           }}

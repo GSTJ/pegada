@@ -30,6 +30,7 @@ executionOrder:
     - 30-create-profile-bio-keyboard
     - 31-edit-profile-save-seeded-images
     - 32-edit-profile-input-keyboard
+    - 33-otp-resend-underline
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before
