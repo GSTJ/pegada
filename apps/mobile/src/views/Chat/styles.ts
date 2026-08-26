@@ -36,4 +36,4 @@ export const CenteredView = withUnistyles(Animated.View, () => ({
   entering: FadeInUp,
 }));
 
-export const CenteredText = withUnistyles(Text);
+export const CenteredText = Text;

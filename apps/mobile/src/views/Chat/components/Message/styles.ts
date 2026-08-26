@@ -1,11 +1,11 @@
 import Color from "color";
-import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
 import { FeedbackStatus } from "../feedback";
 
-export const Time = withUnistyles(Text);
+export const Time = Text;
 
 const MESSAGE_SHADOW_COLOR = "#000";
 const MESSAGE_BORDER_COLOR = "#dd2e44";

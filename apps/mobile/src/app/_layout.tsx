@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import "@/config";
 import { router, SplashScreen, Stack } from "expo-router";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";

@@ -65,4 +65,4 @@ export const styles = StyleSheet.create((theme) => ({
 
 export const RadioButtonContainer = withUnistyles(PressableArea);
 
-export const TextButton = withUnistyles(Text);
+export const TextButton = Text;

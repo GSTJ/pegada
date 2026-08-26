@@ -67,8 +67,8 @@ export const TopCard = withUnistyles(ImageBackground, (theme) => ({
   },
 }));
 
-export const Title = withUnistyles(Text);
+export const Title = Text;
 
-export const Highlight = withUnistyles(Text);
+export const Highlight = Text;
 
-export const Description = withUnistyles(Text);
+export const Description = Text;

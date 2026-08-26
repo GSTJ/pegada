@@ -45,6 +45,6 @@ export const styles = StyleSheet.create((theme) => ({
   },
 }));
 
-export const Note = withUnistyles(Text);
+export const Note = Text;
 
 export const ProfileImage = withUnistyles(Image);

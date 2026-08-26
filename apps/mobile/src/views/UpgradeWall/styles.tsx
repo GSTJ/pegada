@@ -36,11 +36,11 @@ export const Header = withUnistyles(BlurView);
 
 export const HeroImage = withUnistyles(Image);
 
-export const Title = withUnistyles(Text);
+export const Title = Text;
 
-export const Subtitle = withUnistyles(Text);
+export const Subtitle = Text;
 
-export const CancelAnytime = withUnistyles(Text);
+export const CancelAnytime = Text;
 
 export const CloseIcon = withUnistyles(Close, (theme) => ({
   width: 10,

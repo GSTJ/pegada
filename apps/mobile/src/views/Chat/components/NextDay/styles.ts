@@ -1,5 +1,5 @@
 import Color from "color";
-import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
@@ -33,4 +33,4 @@ export const styles = StyleSheet.create((theme) => ({
   },
 }));
 
-export const DateText = withUnistyles(Text);
+export const DateText = Text;

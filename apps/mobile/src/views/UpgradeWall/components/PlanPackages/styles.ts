@@ -64,8 +64,8 @@ export const styles = StyleSheet.create((theme) => ({
 
 export const PlanContainer = withUnistyles(PressableArea);
 
-export const PercentText = withUnistyles(Text);
+export const PercentText = Text;
 
-export const Price = withUnistyles(Text);
+export const Price = Text;
 
-export const OldPrice = withUnistyles(Text);
+export const OldPrice = Text;

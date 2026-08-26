@@ -22,4 +22,4 @@ export const styles = StyleSheet.create((theme) => ({
 
 export const Container = withUnistyles(SafeAreaView);
 
-export const CenterText = withUnistyles(Text);
+export const CenterText = Text;

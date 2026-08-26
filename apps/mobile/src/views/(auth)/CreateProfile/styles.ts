@@ -20,8 +20,8 @@ export const styles = StyleSheet.create({
   },
 });
 
-export const PhotoHint = withUnistyles(Text);
+export const PhotoHint = Text;
 
-export const DragHint = withUnistyles(Text);
+export const DragHint = Text;
 
 export const MultilineInput = withUnistyles(Input);

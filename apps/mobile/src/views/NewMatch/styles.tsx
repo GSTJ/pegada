@@ -72,7 +72,7 @@ export const HeartEyesEmojiStandalone = withUnistyles(Image);
 
 export const MatchWordmark = withUnistyles(Image);
 
-export const MatchCaption = withUnistyles(Text);
+export const MatchCaption = Text;
 
 export const Confetti = withUnistyles(AnimatedLottieView);
 

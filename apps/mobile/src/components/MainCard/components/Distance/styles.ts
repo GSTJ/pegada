@@ -36,4 +36,4 @@ export const styles = StyleSheet.create((theme) => ({
 
 export const Container = withUnistyles(TransparentAndroidDarkBlurView);
 
-export const DistanceText = withUnistyles(Text);
+export const DistanceText = Text;

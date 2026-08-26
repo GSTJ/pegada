@@ -1367,6 +1367,11 @@ function ensureImport(file: SourceFile, module: CollectedModule, origin: ImportO
  */
 function releaseTypeOnlyBinding(file: SourceFile, name: string): void {
   for (const declaration of [...file.getImportDeclarations()]) {
+    // Same trap as in `pruneUnusedImports`: `import "@/config";` has no clause,
+    // so it falls straight through to the empty-clause check at the bottom and
+    // gets deleted even though this pass has no business touching it.
+    if (!declaration.getImportClause()) continue;
+
     const wholeDeclarationIsType = declaration.isTypeOnly();
 
     for (const specifier of [...declaration.getNamedImports()]) {
@@ -1440,10 +1445,19 @@ function applyStylesModule(
   // every constant it reads has to already be initialised.
   file.addStatements(`\n${emitStyleSheet(prepared, styleSheet, shared)}`);
 
+  let usesWithUnistyles = false;
+
   for (const item of wrappers) {
     const base = bases.get(item.definition.name)!;
-    const mapper = item.mapper ? `, ${item.mapper}` : "";
     const keyword = exported.get(item.definition.name) ? "export const" : "const";
+
+    if (!item.mapper && isSheetMergingBase(item)) {
+      file.addStatements(`\n${keyword} ${item.definition.name} = ${base};\n`);
+      continue;
+    }
+
+    usesWithUnistyles = true;
+    const mapper = item.mapper ? `, ${item.mapper}` : "";
     file.addStatements(
       `\n${keyword} ${item.definition.name} = ${withUni}(${base}${mapper});\n`,
     );
@@ -1457,14 +1471,80 @@ function applyStylesModule(
     for (const specifier of [...declaration.getNamedImports()]) {
       if (specifier.getName() === "css") specifier.remove();
     }
+
+    // Dropped here rather than left to `pruneUnusedImports`, which now reads a
+    // clause-less declaration as a deliberate side-effect import and keeps it.
+    // This one is a leftover, not a side effect: it is only empty because the
+    // two lines above emptied it.
+    if (
+      declaration.getNamedImports().length === 0 &&
+      !declaration.getDefaultImport() &&
+      !declaration.getNamespaceImport()
+    ) {
+      declaration.remove();
+    }
   }
 
   const names = [namedImport("StyleSheet", styleSheet)];
-  if (wrappers.length > 0) names.push(namedImport("withUnistyles", withUni));
+  if (usesWithUnistyles) names.push(namedImport("withUnistyles", withUni));
   file.insertStatements(0, `import { ${names.join(", ")} } from "${UNISTYLES_MODULE}";\n`);
   pruneUnusedImports(file);
   pruneUnusedTypes(file);
   separateImports(file);
+}
+
+/**
+ * Bases that end the migration as `<Autoprocessed {...props} style={[ownSheet,
+ * style]} />` — a component that puts its own Unistyles sheet and whatever the
+ * caller hands it on the *same* react-native node.
+ *
+ * `withUnistyles` must not sit in front of one of those. It resolves the
+ * caller's sheet reference in JS (`uni__getStyles()`) and passes a plain
+ * object down, so the node ends up holding one real Unistyle and one anonymous
+ * object. `unistyleFromValue` turns the anonymous half into an EXOTIC
+ * Unistyle whose `UnistyleData::parsedStyle` starts empty, and only
+ * `Parser::rebuildUnistylesInDependencyMap` ever fills it in. Every other
+ * commit path — `HybridShadowRegistry::link` for a family that came back from
+ * `suspend` (what a screen going Offscreen does, so any navigation away and
+ * back), and `flush` — builds its props straight from
+ * `parseStylesToShadowTreeStyles`, which skips any `UnistyleData` without a
+ * `parsedStyle`. The commit then carries only the base sheet, and because it
+ * lands in `nativeProps_DEPRECATED` (which merges and persists) the caller's
+ * declaration is gone for good on that node. That is the chat timestamp
+ * rendering `colors.text` at full opacity instead of `Color(text).alpha(0.5)`,
+ * on one row, on some runs.
+ *
+ * Aliasing instead of wrapping keeps the caller's style a real Unistyle:
+ * `Text` receives `styles.time` itself, renders `[styles.text, styles.time]`,
+ * `UnistylesShadowRegistry.add` flattens that to two registry-backed styles,
+ * no exotic is created, and both halves re-derive on a theme change. The
+ * `withUnistyles` theme subscription is not lost either — it was redundant,
+ * because both sheets already carry the Theme dependency.
+ *
+ * Only bases with no `.attrs` mapper qualify: a mapper turns theme values into
+ * *props*, which only `withUnistyles` can do.
+ *
+ * To extend this list, check what the converted base renders. A base that
+ * forwards into another `withUnistyles` (`blur-view`'s `BlurView`,
+ * `Button`, `Glassmorphism`) is already safe — that wrapper flattens the whole
+ * array into one object, so the node holds an exotic and nothing else.
+ *
+ * Three bases do qualify and are deliberately not here yet:
+ * `FeedbackCard/components/LikeFeedback/styles#Container` and
+ * `DefaultModal/styles#Container` (both `<View {...props} style={[styles
+ * .container, style]} />`) and `components/Input#Input` (`<View {...props}
+ * style={[styles.content, props.style]}>`). All three are produced by hand
+ * patches rather than by this transform, so the rule below cannot reach them,
+ * and `Input`'s style plumbing was rewritten in 01b99fb. They need their own
+ * patch edits, not an entry here.
+ */
+const SHEET_MERGING_BASES = new Map<string, string>([["@/components/text", "Text"]]);
+
+function isSheetMergingBase(item: PreparedDefinition): boolean {
+  const origin = item.origin;
+  if (!origin || origin.kind !== "named") return false;
+
+  return SHEET_MERGING_BASES.get(origin.moduleSpecifier) === item.wrapped;
 }
 
 /**
@@ -1579,6 +1659,16 @@ function pruneUnusedImports(file: SourceFile): void {
 
   for (const declaration of [...file.getImportDeclarations()]) {
     if (declaration.getModuleSpecifierValue() === UNISTYLES_MODULE) continue;
+
+    // `import "@/config";` binds nothing, so every "is this binding still
+    // referenced?" test below answers no and the trailing empty-clause check
+    // deletes the line. A side-effect import is the one kind of import whose
+    // whole point is that nothing references it: `@/config` is what installs
+    // `react-native-get-random-values`, and without it `uuid`'s v4 throws
+    // "crypto.getRandomValues() not supported" the first time chat send calls
+    // it. Nothing in the module graph can tell us whether the side effect is
+    // still wanted, so it is never ours to drop.
+    if (!declaration.getImportClause()) continue;
 
     for (const specifier of [...declaration.getNamedImports()]) {
       const local = specifier.getAliasNode()?.getText() ?? specifier.getName();

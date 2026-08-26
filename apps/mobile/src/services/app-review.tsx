@@ -208,6 +208,6 @@ const styles = StyleSheet.create((theme) => ({
 
 const SmallButton = withUnistyles(Button);
 
-const CenterText = withUnistyles(Text);
+const CenterText = Text;
 
-const Title = withUnistyles(Text);
+const Title = Text;

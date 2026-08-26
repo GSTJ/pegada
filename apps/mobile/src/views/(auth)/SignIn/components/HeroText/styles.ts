@@ -1,4 +1,4 @@
-import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
@@ -53,8 +53,8 @@ export const styles = StyleSheet.create((theme) => ({
   },
 }));
 
-export const Title = withUnistyles(Text);
+export const Title = Text;
 
-export const WhiteTitle = withUnistyles(Text);
+export const WhiteTitle = Text;
 
-export const TextHighlight = withUnistyles(Text);
+export const TextHighlight = Text;

@@ -39,6 +39,6 @@ export const EmptyAnimation = withUnistyles(LottieView);
 
 export const LogoLoading = withUnistyles(LottieView);
 
-export const Title = withUnistyles(Text);
+export const Title = Text;
 
-export const Description = withUnistyles(Text);
+export const Description = Text;

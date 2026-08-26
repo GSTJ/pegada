@@ -108,10 +108,10 @@ export const MatchActionBarGradient = withUnistyles(LinearGradient, (theme) => {
 
 export const UnmatchButton = withUnistyles(PressableArea);
 
-export const Name = withUnistyles(Text);
+export const Name = Text;
 
-export const Age = withUnistyles(Text);
+export const Age = Text;
 
-export const Description = withUnistyles(Text);
+export const Description = Text;
 
-export const ActionLabel = withUnistyles(Text);
+export const ActionLabel = Text;

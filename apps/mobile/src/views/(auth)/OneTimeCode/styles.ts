@@ -76,6 +76,6 @@ export const styles = StyleSheet.create((theme) => ({
 
 export const ResendCode = withUnistyles(PressableArea);
 
-export const Timer = withUnistyles(Text);
+export const Timer = Text;
 
-export const Description = withUnistyles(Text);
+export const Description = Text;
