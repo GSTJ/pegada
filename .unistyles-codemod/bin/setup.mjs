@@ -19,7 +19,7 @@ const DEPS = {
   "@react-native/normalize-colors": "0.83.6",
   "react-native-edge-to-edge": "1.8.1",
   "react-native-nitro-modules": "0.36.5",
-  "react-native-unistyles": "3.3.0",
+  "react-native-unistyles": "3.2.5",
 };
 
 const log = (step, detail) => console.log(`[setup] ${step}${detail ? ` — ${detail}` : ""}`);

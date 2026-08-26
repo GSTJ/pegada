@@ -19,7 +19,7 @@ import { checkParity, type ParityReport } from "./ledger.ts";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const codemodRoot = path.resolve(here, "..");
 const repoRoot = path.resolve(codemodRoot, "..");
-const ref = process.argv[2] ?? "HEAD";
+const ref = process.argv[2] ?? "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239";
 
 const reportPath = path.join(codemodRoot, "report.json");
 if (!fs.existsSync(reportPath)) {

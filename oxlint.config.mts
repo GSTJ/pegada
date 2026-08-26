@@ -18,6 +18,7 @@ import base from "magic-oxlint-config/base";
  */
 export default extendConfig(base, {
   ignorePatterns: [
+    ".unistyles-codemod/**",
     "**/storybook-static/**",
     "patches/**",
     "packages/database/prisma/migrations/**",

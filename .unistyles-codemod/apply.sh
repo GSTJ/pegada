@@ -18,7 +18,7 @@ if [[ "${1:-}" == "--analyze" ]]; then
 fi
 
 # The last commit before the migration. Everything downstream is relative to
-# it: the revert restores apps/mobile from it and the parity ledger reads the
+# it: the revert restores apps/mobile from it and both parity ledgers read the
 # pristine sources from it. It used to be HEAD, which only worked while the
 # migration was uncommitted — now that it is committed, reverting to HEAD would
 # hand the transform its own output and the run would be a silent no-op.
@@ -26,9 +26,7 @@ fi
 # It is d22dbde rather than the f85575d the codemod was authored on. The two
 # hold the same apps/mobile apart from d22dbde's Maestro add-photo affordance,
 # and that affordance has to survive the migration: reverting to f85575d would
-# quietly throw it away every run. The `manual/` batches still pin f85575d,
-# which is fine — they only read `styles.ts` files, and those are byte-identical
-# across the two.
+# quietly throw it away every run.
 base="${UNISTYLES_BASE_REF:-d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239}"
 if ! git rev-parse --verify --quiet "$base^{commit}" >/dev/null; then
   echo "FAILED: base ref $base does not resolve" >&2
@@ -48,6 +46,14 @@ git checkout -q "$base" -- apps/mobile
 git diff --name-only --diff-filter=A -z "$base" HEAD -- apps/mobile |
   while IFS= read -r -d '' file; do rm -f "$file"; done
 git reset -q -- apps/mobile
+
+# The migration owns styling and its four runtime dependencies. Release and
+# native integration can move while this long-lived branch is open, so keep
+# the branch's package manifest and app config instead of rewinding those two
+# files to the pristine styling baseline. setup.mjs still normalizes the four
+# migration dependencies below.
+git checkout -q HEAD -- apps/mobile/package.json apps/mobile/app.config.ts
+git reset -q -- apps/mobile/package.json apps/mobile/app.config.ts
 
 echo "==> setup (deps, babel, StyleSheet.configure, theme bridge)"
 node "$here/bin/setup.mjs"

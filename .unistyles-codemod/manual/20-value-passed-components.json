@@ -1,6 +1,6 @@
 {
   "$comment": "Hand-converted modules the transform skipped because a styled component was passed as a value (patches 20-29). `pristineRef` is the last commit before the migration landed; the transform never touched these files, so that ref still holds their styled-components source at the old `styles.ts` path.",
-  "pristineRef": "f85575d",
+  "pristineRef": "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239",
   "units": [
     {
       "file": "apps/mobile/src/components/MatchActionBar/styles.tsx",

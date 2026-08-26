@@ -1,6 +1,6 @@
 {
   "$comment": "Hand-converted `Chat/Message` (patch 42). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
-  "pristineRef": "f85575d",
+  "pristineRef": "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239",
   "units": [
     {
       "file": "apps/mobile/src/views/Chat/components/Message/styles.ts",

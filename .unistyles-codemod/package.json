@@ -10,7 +10,7 @@
     "parity:manual": "tsx src/parity-manual.ts",
     "snapshots": "tsx test/run.ts",
     "fixtures": "tsx test/generate.ts",
-    "test": "tsx test/run.ts && tsx src/parity.ts"
+    "test": "tsx test/run.ts && tsx src/parity.ts && tsx src/parity-manual.ts"
   },
   "dependencies": {
     "css-to-react-native": "3.2.0",

@@ -1,6 +1,6 @@
 {
   "$comment": "Hand-converted prop-spread and default-export modules (patches 30-39): Button, NetworkBoundary, Glassmorphism, FeedbackCard, divider and loading. `pristineRef` is the last commit before the migration landed in the working tree, same as the roots batch.",
-  "pristineRef": "f85575d",
+  "pristineRef": "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239",
   "units": [
     {
       "file": "apps/mobile/src/components/divider.tsx",

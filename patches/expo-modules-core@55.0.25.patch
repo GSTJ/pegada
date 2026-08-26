@@ -1,0 +1,29 @@
+diff --git a/android/cmake/main.cmake b/android/cmake/main.cmake
+index c79b8c62a57b0d09cc3205b83dce14a60f87319b..cbf572588ef11eae74470439eefe61d78c90e6d8 100644
+--- a/android/cmake/main.cmake
++++ b/android/cmake/main.cmake
+@@ -71,22 +71,8 @@
+ if (REACT_NATIVE_WORKLETS_DIR)
+-  add_library(worklets SHARED IMPORTED)
+-
+-  if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+-    set(BUILD_TYPE "debug")
+-  else ()
+-    set(BUILD_TYPE "release")
+-  endif ()
+-
+-  set_target_properties(
+-    worklets
+-    PROPERTIES
+-    IMPORTED_LOCATION
+-    "${REACT_NATIVE_WORKLETS_DIR}/android/build/intermediates/cmake/${BUILD_TYPE}/obj/${ANDROID_ABI}/libworklets.so"
+-  )
+-
++  find_package(react-native-worklets CONFIG REQUIRED)
+   target_link_libraries(
+     expo-modules-core
+     PRIVATE
+-    worklets
++    react-native-worklets::worklets
+   )
+ endif ()

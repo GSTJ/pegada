@@ -1,6 +1,6 @@
 {
   "$comment": "Hand-converted inheritance roots (patches 10-19). `pristineRef` is the last commit before the migration landed in the working tree; the checkpoint commit on top of it is where the codemod output starts.",
-  "pristineRef": "f85575d",
+  "pristineRef": "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239",
   "units": [
     {
       "file": "apps/mobile/src/components/text.tsx",
