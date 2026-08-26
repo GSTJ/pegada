@@ -1,0 +1,36 @@
+diff --git a/apps/mobile/src/views/(tabs)/Profile/index.tsx b/apps/mobile/src/views/(tabs)/Profile/index.tsx
+index 7a24de9..062d301 100644
+--- a/apps/mobile/src/views/(tabs)/Profile/index.tsx
++++ b/apps/mobile/src/views/(tabs)/Profile/index.tsx
+@@ -151,10 +151,27 @@ const Profile = () => {
+           stickyHeaderIndices={[0]}
+           style={styles.settingsList}
+         >
+-          <View style={styles.content}>
+-            <Text fontWeight="bold" fontSize="lg">
+-              {t("profile.settings")}
+-            </Text>
++          {/*
++            The sticky header, and the outer view stays bare on purpose.
++            ScrollView does not render a sticky child directly: it wraps the
++            child in an Animated.View of its own, moves the child's `style` up
++            onto that wrapper and hands the child `{ flex: 1 }` in its place
++            (ScrollViewStickyHeader). A sheet written on the child therefore
++            paints on a node Unistyles was never handed, so it keeps the theme
++            the screen booted with — white "Settings" on a white band after a
++            switch to dark, with every other row on the screen following along.
++
++            One level down the painted node is the node the sheet was passed
++            to, which is the node the runtime updates. The wrapper sizes to
++            this subtree either way, which is also how it sized before the
++            migration, when the style lived below the wrapper too.
++          */}
++          <View>
++            <View style={styles.content}>
++              <Text fontWeight="bold" fontSize="lg">
++                {t("profile.settings")}
++              </Text>
++            </View>
+           </View>
+           <View
+             // The settings block owns the opaque background below the photo

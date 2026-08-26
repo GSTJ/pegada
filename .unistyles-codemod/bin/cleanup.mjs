@@ -17,6 +17,10 @@
 // it is, and `grep styled-components apps/mobile` returning zero is the
 // invariant this stage asserts at the end. The package name is not lost: it is
 // all over this directory and all over git history, one level up from the app.
+//
+// It also carries the migration's other standing gate, on sticky headers — the
+// one place React Native takes a style off the element it was written on. See
+// section 9.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -505,7 +509,61 @@ function rewriteProse() {
   log("prose", touched.length === 0 ? "already clean" : `${touched.length} comment(s) rewritten`);
 }
 
-/* 9. the invariant ------------------------------------------------------- */
+/* 9. sticky headers ------------------------------------------------------ */
+// The one React Native API in this app that moves a style off the element it
+// was written on. `ScrollView` does not render a `stickyHeaderIndices` child
+// directly: it wraps the child in an `Animated.View` of its own, hoists the
+// child's `style` onto that wrapper and hands the child `{ flex: 1 }` in its
+// place (ScrollViewStickyHeader). Before the migration that was harmless — the
+// child computed its own style below the wrapper — but a Unistyles sheet
+// passed there lands on a node the runtime was never handed, so it holds the
+// theme the screen booted with for the life of the screen. Profile's header
+// rendered white "Settings" on a white band in dark mode for two rounds
+// because of it.
+//
+// `Profile/index.tsx` is written around it: the sticky child is a bare view
+// and the sheet sits one level down. This gate exists because no screenshot
+// pass can catch a repeat — the bug only appears when the theme changes on a
+// mounted tree, and every parity screen boots into its theme instead. So a
+// sticky header the migration has not been through stops the run.
+const REVIEWED_STICKY_HEADERS = ["src/views/(tabs)/Profile/index.tsx"];
+
+function assertStickyHeadersReviewed() {
+  const found = [];
+
+  const walk = (directory) => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const full = path.join(directory, entry.name);
+
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (/\.tsx?$/.test(entry.name) && read(full).includes("stickyHeaderIndices")) {
+        found.push(path.relative(mobile, full));
+      }
+    }
+  };
+
+  walk(path.join(mobile, "src"));
+
+  const unreviewed = found.filter((file) => !REVIEWED_STICKY_HEADERS.includes(file));
+  const stale = REVIEWED_STICKY_HEADERS.filter((file) => !found.includes(file));
+
+  if (unreviewed.length > 0) {
+    throw new Error(
+      `sticky header not reviewed for live theme switching:\n  ${unreviewed.join("\n  ")}\n` +
+        `  Keep the sheet off the sticky child itself — ScrollView hoists that style\n` +
+        `  onto a wrapper Unistyles cannot update — then add the file above.`,
+    );
+  }
+
+  if (stale.length > 0) {
+    throw new Error(`no sticky header left in:\n  ${stale.join("\n  ")}\n  Drop it from the list.`);
+  }
+
+  log("sticky headers", `${found.length} reviewed`);
+}
+
+/* 10. the invariant ------------------------------------------------------ */
 // The point of the whole stage, asserted rather than assumed. Any future patch
 // that reintroduces the name — in a dependency, a config, an import or a
 // comment — fails the run here instead of at review time.
@@ -553,6 +611,7 @@ try {
   rewriteThemeProvider();
   rewriteAbsoluteFill();
   rewriteProse();
+  assertStickyHeadersReviewed();
   assertGone();
   log("done");
 } catch (error) {
