@@ -14,8 +14,8 @@ export const styles = StyleSheet.create((theme) => ({
   /**
    * The two prop conditionals become two variant groups. Both of them override
    * a corner radius and a colour the base already set, and in that direction
-   * Unistyles agrees with styled-components: the base first, the buckets on
-   * top.
+   * Unistyles agrees with the cascade it replaced: the base first, the
+   * buckets on top.
    */
   message: {
     paddingTop: theme.spacing[1.5],

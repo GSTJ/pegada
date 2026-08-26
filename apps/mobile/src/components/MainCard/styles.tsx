@@ -7,25 +7,21 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import Animated from "react-native-reanimated";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
-import { css } from "styled-components/native";
 
 import { Image } from "@/components/image";
 
 /**
- * Nothing renders this any more — `FeedbackCard` converted and inlines the same
- * five declarations, as everything in this module already did. It survives for
- * the parity ledger: the pristine `FeedbackCard/styles.ts` interpolates it, and
- * the ledger loads that module from git while resolving its imports against the
- * working tree, so deleting this drops five declarations from ground truth and
- * fails the `AbsolutePosition` check. It goes when styled-components does.
+ * The five declarations every full-bleed layer in the card stack repeats.
+ * Exported because `FeedbackCard` spreads it too, which is how its
+ * pre-migration source consumed it.
  */
-export const absoluteFill = css`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-`;
+export const absoluteFill = {
+  position: "absolute",
+  top: 0,
+  bottom: 0,
+  right: 0,
+  left: 0,
+} as const;
 
 /** `expo-image` is not autoprocessed, so the sheet reaches it wrapped. */
 const ThemedImage = withUnistyles(Image);
@@ -59,11 +55,7 @@ export const styles = StyleSheet.create((theme) => ({
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 0,
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
+    ...absoluteFill,
   },
   upperPart: {
     flexGrow: 1,
@@ -72,11 +64,7 @@ export const styles = StyleSheet.create((theme) => ({
   },
   carouselContainer: {
     flexDirection: "row",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
+    ...absoluteFill,
   },
   previousImage: {
     flexGrow: 1,
@@ -89,10 +77,6 @@ export const styles = StyleSheet.create((theme) => ({
     flexBasis: 0,
   },
   scrim: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...absoluteFill,
   },
 }));

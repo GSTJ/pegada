@@ -9,8 +9,8 @@
 # 28621911520 and 28624965129). `maestro hierarchy` opens a fresh session,
 # so this is the deterministic liveness probe: signin-email present means
 # the JS bundle evaluated and SignIn mounted — catching every launch-crash
-# class this gate has eaten (entitlements, env, styled-components DOM
-# branch, Ads SDK abort).
+# class this gate has eaten (entitlements, env, a DOM-only branch of a
+# styling library reaching the native bundle, Ads SDK abort).
 set -euo pipefail
 
 if maestro hierarchy 2>/dev/null | grep -q '"signin-email"'; then

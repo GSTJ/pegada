@@ -18,7 +18,7 @@ export type TextProps = {
  * The app's only text primitive: theme keys in, resolved typography out.
  *
  * It stays a component rather than becoming a bare stylesheet because ~40
- * modules build on it — `styled(Text)` on the styled-components side, a plain
+ * modules build on it — `styled(Text)` on the pre-migration side, a plain
  * `const Title = Text` alias on the converted one — and both need something
  * they can render. The three theme-key props are Unistyles variants, so a
  * theme switch re-resolves them without the call sites knowing anything

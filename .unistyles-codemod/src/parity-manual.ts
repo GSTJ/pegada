@@ -30,6 +30,8 @@ interface ManualUnit {
   file: string;
   /** Where the pre-migration source lives in `ref`, when the file was renamed. */
   pristine?: string;
+  /** Sibling modules the ground-truth side imports; see `ParityUnit`. */
+  pristineDeps?: string[];
   definitionsDetail: DefinitionInfo[];
 }
 

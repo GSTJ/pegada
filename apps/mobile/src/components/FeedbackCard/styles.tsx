@@ -7,6 +7,7 @@ import Animated from "react-native-reanimated";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import MainCard from "../MainCard";
+import { absoluteFill } from "../MainCard/styles";
 
 /** A card is a composite, not a host component: it needs wrapping. */
 const ThemedMainCard = withUnistyles(MainCard);
@@ -78,11 +79,7 @@ const styles = StyleSheet.create((theme) => ({
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 0,
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
+    ...absoluteFill,
   },
   styledMainCard: {
     flexGrow: 1,
