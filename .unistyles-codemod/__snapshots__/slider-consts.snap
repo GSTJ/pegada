@@ -1,0 +1,227 @@
+# slider-consts
+
+status: converted
+definitions: 4
+variant groups: 0
+useTheme: src/components/Slider/index.tsx (1 sites)
+
+--- src/components/Slider/index.tsx ---
+
+import type {
+  LabelProps,
+  MultiSliderProps,
+} from "@ptomasroos/react-native-multi-slider";
+
+import * as React from "react";
+import { View } from "react-native";
+
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { Text } from "@/components/text";
+
+import {
+  WIDTH, styles } from "./styles";
+import { useUnistyles } from "react-native-unistyles";
+
+type TitleProps = {
+  title: string;
+  subtitle: string;
+};
+
+const Title: React.FC<TitleProps> = ({ title, subtitle }) => (
+  <View style={styles.titleContainer}>
+    <Text fontWeight="bold" fontSize="lg">
+      {title}
+    </Text>
+    <Text fontWeight="bold" fontSize="lg">
+      {subtitle}
+    </Text>
+  </View>
+);
+
+type CustomLabelProps = {
+  left: number;
+  children: string | number;
+};
+
+const CustomLabel: React.FC<CustomLabelProps> = ({ left, children }) => {
+  // Makes the label text more optically center aligned
+  const ADJUSTMENT_PADDING = 3;
+
+  return (
+    <View
+      style={[styles.labelContainer, {
+                        left: left - WIDTH / 2,
+                        paddingBottom: ADJUSTMENT_PADDING,
+                      }]}
+    >
+      <Text color="background" fontWeight="semibold">
+        {children}
+      </Text>
+      <View style={styles.triangle} />
+    </View>
+  );
+};
+
+const markerHitSlop = {
+  top: 15,
+  bottom: 15,
+  left: 15,
+  right: 15,
+};
+
+const CustomMarker = () => <View hitSlop={markerHitSlop} style={styles.marker} />;
+
+/**
+ * Hoisted out of `Root` so it keeps its identity between renders — a component
+ * declared during render remounts its subtree every time the parent updates.
+ * `max` comes in as a prop instead of a closure variable.
+ */
+const CustomLabels = ({ max, ...label }: LabelProps & { max: number }) => {
+  const oneMarkerValue =
+    Number(label.oneMarkerValue) >= max ? "∞" : label.oneMarkerValue;
+  const twoMarkerValue =
+    Number(label.twoMarkerValue) >= max ? "∞" : label.twoMarkerValue;
+
+  return (
+    <>
+      {Number(label.oneMarkerValue) >= 0 && (
+        <CustomLabel left={label.oneMarkerLeftPosition}>
+          {oneMarkerValue}
+        </CustomLabel>
+      )}
+      {Number(label.twoMarkerValue) >= 0 && (
+        <CustomLabel left={label.twoMarkerLeftPosition}>
+          {twoMarkerValue}
+        </CustomLabel>
+      )}
+    </>
+  );
+};
+
+export const Root = (props: MultiSliderProps) => {
+  const { theme } = useUnistyles();
+
+  // When the slider reaches the edge of the screen, a horizontal drag there
+  // gets claimed by the OS navigation gesture (iOS interactive pop / Android
+  // system back) instead of the slider, sending the user back a screen. Inset
+  // the track on both platforms so no marker sits in that edge gesture zone.
+  const sliderLength = (props?.sliderLength ?? 0) - theme.spacing[7] * 2;
+
+  const max = props.max ?? 0;
+  const renderCustomLabels = React.useCallback(
+    (label: LabelProps) => <CustomLabels {...label} max={max} />,
+    [max],
+  );
+
+  const hasSecondMarker = (props.values?.length ?? 0) > 1;
+
+  const stroke = 3;
+
+  const safeBorderStyle = {
+    height: stroke,
+    width: theme.spacing[7],
+    backgroundColor: theme.colors.border,
+    zIndex: -1,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+  };
+
+  const style = {
+    flexDirection: "row",
+    alignItems: "center",
+  } as const;
+
+  const trackStyle = {
+    backgroundColor: theme.colors.border,
+    height: stroke,
+  };
+  const selectedStyle = {
+    backgroundColor: theme.colors.primary,
+  };
+  return (
+    <View style={style}>
+      <View
+        style={[
+          safeBorderStyle,
+          {
+            backgroundColor: hasSecondMarker
+              ? theme.colors.border
+              : theme.colors.primary,
+          },
+        ]}
+      />
+      <MultiSlider
+        enableLabel
+        customLabel={renderCustomLabels}
+        customMarker={CustomMarker}
+        trackStyle={trackStyle}
+        selectedStyle={selectedStyle}
+        {...props}
+        max={props.max ? props.max + 1 : props.max}
+        sliderLength={sliderLength}
+      />
+      <View style={safeBorderStyle} />
+    </View>
+  );
+};
+
+export const Slider = {
+  Root,
+  Title,
+  Label: CustomLabel,
+};
+
+--- src/components/Slider/styles.ts ---
+
+import { StyleSheet } from "react-native-unistyles";
+
+export const WIDTH = 36;
+const HEIGHT = 24;
+const TRIANGLE_SIZE = 4;
+
+export const styles = StyleSheet.create((theme) => ({
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: theme.spacing[6],
+  },
+  labelContainer: {
+    position: "absolute",
+    top: HEIGHT + 20,
+    width: WIDTH,
+    height: HEIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    borderTopLeftRadius: theme.radii.sm,
+    borderTopRightRadius: theme.radii.sm,
+    borderBottomRightRadius: theme.radii.sm,
+    borderBottomLeftRadius: theme.radii.sm,
+    elevation: 5,
+    shadowColor: theme.colors.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  triangle: {
+    position: "absolute",
+    top: -(TRIANGLE_SIZE / 2),
+    left: WIDTH / 2 - TRIANGLE_SIZE / 2,
+    width: TRIANGLE_SIZE,
+    height: TRIANGLE_SIZE,
+    backgroundColor: theme.colors.primary,
+    transform: [{ rotate: "45deg" }],
+  },
+  marker: {
+    height: 20,
+    width: 20,
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    backgroundColor: theme.colors.background,
+    borderWidth: 2.3,
+    borderColor: theme.colors.primary,
+    transform: [{ translateY: 1 }],
+  },
+}));

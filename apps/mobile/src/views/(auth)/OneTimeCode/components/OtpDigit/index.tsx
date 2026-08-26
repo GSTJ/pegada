@@ -2,7 +2,7 @@ import type { TextInput } from "react-native";
 
 import { forwardRef, useState } from "react";
 
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import * as S from "./styles";
 
@@ -11,7 +11,8 @@ export enum KeyboardKeys {
 }
 
 type OtpDigitProps = {
-  children: string;
+  /** One character of the code, or nothing while that slot is still empty. */
+  children?: string;
   length: number;
   index: number;
   handleChange: (text: string, index: number) => void;
@@ -42,7 +43,7 @@ const OtpDigit = forwardRef<
   ) => {
     const [selected, setSelected] = useState(false);
 
-    const { colors } = useTheme();
+    const { colors } = useUnistyles().theme;
 
     const isFirst = index === 0;
     const isLast = index === length - 1;
@@ -50,7 +51,7 @@ const OtpDigit = forwardRef<
     const rightMargin = isLast ? 0 : OTP_INPUT_MARGIN;
     const selectedBorderColor = colors.border;
 
-    const digit = Number.isNaN(Number(children)) ? "" : children;
+    const digit = children && !Number.isNaN(Number(children)) ? children : "";
 
     return (
       <S.Container
@@ -79,11 +80,7 @@ const OtpDigit = forwardRef<
           importantForAutofill={isFirst ? "yes" : "no"}
           textContentType={isFirst ? "oneTimeCode" : "none"}
           autoComplete={isFirst ? "sms-otp" : "off"}
-          onKeyPress={({
-            nativeEvent: { key },
-          }: {
-            nativeEvent: { key: KeyboardKeys };
-          }) => {
+          onKeyPress={({ nativeEvent: { key } }) => {
             if (key === KeyboardKeys.Backspace)
               return handleErase(digit, index);
           }}

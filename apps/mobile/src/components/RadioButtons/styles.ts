@@ -1,6 +1,6 @@
 import type { PressableProps } from "react-native";
 
-import styled, { css } from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
@@ -10,52 +10,59 @@ export type OptionButtonProps = {
   last?: boolean;
 } & PressableProps;
 
-export const Content = styled.View`
-  justify-content: space-between;
-  flex-grow: 1;
-  align-items: center;
-  flex-direction: row;
-  padding-top: ${(props) => props.theme.spacing[3]}px;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  content: {
+    justifyContent: "space-between",
+    flexGrow: 1,
+    alignItems: "center",
+    flexDirection: "row",
+    paddingTop: theme.spacing[3],
+  },
+  radioButtonContainer: {
+    paddingTop: theme.spacing[3],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
+    paddingLeft: theme.spacing[4],
+    backgroundColor: theme.colors.background,
+    borderWidth: theme.stroke.xxl,
+    borderColor: theme.colors.primary,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    alignItems: "center",
+    variants: {
+      last: {
+        true: {},
+        false: {
+          marginRight: theme.spacing[3],
+        },
+        default: {
+          marginRight: theme.spacing[3],
+        },
+      },
+      marked: {
+        true: {
+          backgroundColor: theme.colors.primary,
+        },
+      },
+    },
+  },
+  textButton: {
+    color: theme.colors.primary,
+    variants: {
+      marked: {
+        true: {
+          color: theme.colors.background,
+        },
+      },
+    },
+  },
+}));
 
-export const RadioButtonContainer = styled(PressableArea)<OptionButtonProps>`
-  padding: ${(props) => props.theme.spacing[3]}px
-    ${(props) => props.theme.spacing[4]}px;
+export const RadioButtonContainer = withUnistyles(PressableArea);
 
-  background-color: ${(props) => props.theme.colors.background};
-
-  border-width: ${(props) => props.theme.stroke.xxl}px;
-  border-color: ${(props) => props.theme.colors.primary};
-
-  border-radius: ${(props) => props.theme.radii.md}px;
-  flex: 1;
-  align-items: center;
-
-  ${(props) => {
-    if (!props?.last) {
-      return css`
-        margin-right: ${(props) => props.theme.spacing[3]}px;
-      `;
-    }
-  }};
-
-  ${(props) => {
-    if (props?.marked) {
-      return css`
-        background-color: ${(props) => props.theme.colors.primary};
-      `;
-    }
-  }};
-`;
-
-export const TextButton = styled(Text)<OptionButtonProps>`
-  color: ${(props) => props.theme.colors.primary};
-
-  ${(props) => {
-    if (props?.marked) {
-      return css`
-        color: ${(props) => props.theme.colors.background};
-      `;
-    }
-  }}
-`;
+export const TextButton = Text;

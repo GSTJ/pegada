@@ -1,7 +1,9 @@
-import styled from "styled-components/native";
+import { StyleSheet } from "react-native-unistyles";
 
-export const VerifyRowView = styled.View`
-  flex-direction: row;
-  margin-bottom: ${(props) => props.theme.spacing[2]}px;
-  margin-top: ${(props) => props.theme.spacing[6]}px;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  verifyRowView: {
+    flexDirection: "row",
+    marginBottom: theme.spacing[2],
+    marginTop: theme.spacing[6],
+  },
+}));

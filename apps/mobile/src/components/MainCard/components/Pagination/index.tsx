@@ -1,8 +1,12 @@
 import * as React from "react";
+import { View } from "react-native";
 
-import { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
-import { Container, Content, Dot } from "./styles";
+import { Container, styles } from "./styles";
 
 const DotComponent: React.FC<{
   index: number;
@@ -15,8 +19,9 @@ const DotComponent: React.FC<{
     const size = withTiming(active ? 8 : 6, { duration: 200 });
     return { width: size, height: size };
   });
+  styles.useVariants({ active });
 
-  return <Dot key={index} active={active} style={style} />;
+  return <Animated.View key={index} style={[styles.dot, style]} />;
 };
 
 type PaginationProps = {
@@ -28,8 +33,8 @@ const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
   if (pages <= 1) return null;
 
   return (
-    <Container>
-      <Content>
+    <Container style={styles.container}>
+      <View style={styles.content}>
         {Array.from({ length: pages }).map((_, index) => (
           <DotComponent
             // oxlint-disable-next-line react/no-array-index-key -- dots are positional; there is no other identity to key on
@@ -38,7 +43,7 @@ const Pagination: React.FC<PaginationProps> = ({ pages, currentPage }) => {
             currentPage={currentPage}
           />
         ))}
-      </Content>
+      </View>
     </Container>
   );
 };

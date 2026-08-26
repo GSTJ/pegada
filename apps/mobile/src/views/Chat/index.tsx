@@ -1,12 +1,17 @@
 import type { MessageProps } from "./hooks/use-chat-pagination";
 
-import { ActivityIndicator, Platform } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
+  ImageBackground,
+} from "react-native";
 
 import { useLocalSearchParams } from "expo-router";
 
 import { FlashList } from "@shopify/flash-list";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
@@ -15,15 +20,19 @@ import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 import { HEADER_HEIGHT } from "./components/Header";
 import { SEND_HEIGHT } from "./components/Send";
 import { useChatPagination } from "./hooks/use-chat-pagination";
-import { Background, CenteredText, CenteredView, Container } from "./styles";
+import { CenteredText, CenteredView, styles } from "./styles";
 
 const Empty = () => {
   const { t } = useTranslation();
 
   return (
-    <CenteredView>
-      <CenteredText fontWeight="bold">{t("chat.youMatched")}</CenteredText>
-      <CenteredText>{t("chat.sendAMessageToStart")}</CenteredText>
+    <CenteredView style={styles.centeredView}>
+      <CenteredText fontWeight="bold" style={styles.centeredText}>
+        {t("chat.youMatched")}
+      </CenteredText>
+      <CenteredText style={styles.centeredText}>
+        {t("chat.sendAMessageToStart")}
+      </CenteredText>
     </CenteredView>
   );
 };
@@ -36,7 +45,7 @@ const ListEmptyComponent = () => <Empty />;
 
 const ChatMessageList = () => {
   const { dogId } = useLocalSearchParams();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { messages, hasNextPage, loadMore } = useChatPagination();
 
@@ -107,33 +116,35 @@ const ChatMessageList = () => {
 };
 
 const Chat = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   // The tiled background is a texture, not a surface: it has to sit further
   // back on dark than on light to read as the same weight.
   const patternOpacity = theme.dark ? 0.06 : 0.03;
 
   return (
-    <Container
+    <KeyboardAvoidingView
       testID="chat-screen"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.container}
     >
-      <Background
+      <ImageBackground
         source={
           theme.dark
             ? require("@/assets/images/background-dark.webp")
             : require("@/assets/images/background-light.webp")
         }
         imageStyle={{ opacity: patternOpacity }}
-        resizeMode="repeat" // Tiling pattern
+        resizeMode="repeat"
+        style={styles.background} // Tiling pattern
       >
         <NetworkBoundary>
           <ChatMessageList />
         </NetworkBoundary>
         <Send />
         <Header />
-      </Background>
-    </Container>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 

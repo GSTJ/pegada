@@ -4,10 +4,10 @@ import { Stack } from "expo-router";
 
 import Color from "color";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 const AppLayout = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { t } = useTranslation();
 

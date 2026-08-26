@@ -1,35 +1,44 @@
-import styled from "styled-components/native";
+import { TextInput } from "react-native";
+
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { BlurView } from "@/components/blur-view";
 
-export const Input = styled.TextInput.attrs((props) => ({
-  placeholderTextColor: props.theme.colors.placeholder,
-  selectionColor: props.theme.colors.primary,
-}))`
-  border-radius: ${(props) => props.theme.radii.md}px;
-  padding: ${(props) => props.theme.spacing[2]}px
-    ${(props) => props.theme.spacing[4]}px;
+export const styles = StyleSheet.create((theme) => ({
+  input: {
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    paddingTop: theme.spacing[2],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[2],
+    paddingLeft: theme.spacing[4],
+    backgroundColor: theme.colors.card,
+    borderWidth: theme.stroke.sm,
+    borderColor: theme.colors.border,
+    color: theme.colors.text,
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.sizes.md.size,
+  },
+  container: {
+    paddingTop: 0,
+    paddingRight: theme.spacing[2],
+    paddingBottom: 0,
+    paddingLeft: theme.spacing[2],
+    borderTopColor: theme.colors.border,
+    borderTopWidth: theme.stroke.sm,
+    justifyContent: "center",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+}));
 
-  background-color: ${(props) => props.theme.colors.card};
+export const Input = withUnistyles(TextInput, (theme) => ({
+  placeholderTextColor: theme.colors.placeholder,
+  selectionColor: theme.colors.primary,
+}));
 
-  border-width: ${(props) => props.theme.stroke.sm}px;
-  border-color: ${(props) => props.theme.colors.border};
-
-  color: ${(props) => props.theme.colors.text};
-  font-family: ${(props) => props.theme.typography.fontFamily.regular};
-
-  font-size: ${(props) => props.theme.typography.sizes.md.size}px;
-`;
-
-export const Container = styled(BlurView)`
-  padding: 0 ${(props) => props.theme.spacing[2]}px;
-  border-top-color: ${(props) => props.theme.colors.border};
-  border-top-width: ${(props) => props.theme.stroke.sm}px;
-
-  justify-content: center;
-
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-`;
+export const Container = withUnistyles(BlurView);

@@ -6,7 +6,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components";
+import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -19,13 +19,7 @@ import { SceneName } from "@/types/scene-name";
 
 import AnimatedCards from "./animated-cards";
 import { ConfettiAnimation } from "./confetti-animation";
-import {
-  Container,
-  Content,
-  matchScroll,
-  MatchCaption,
-  MatchWordmark,
-} from "./styles";
+import { Content, MatchCaption, MatchWordmark, styles } from "./styles";
 
 const NewMatch: React.FC = () => {
   const { matchId, matchDogId } = useLocalSearchParams<{
@@ -43,7 +37,7 @@ const NewMatch: React.FC = () => {
     android: "ca-app-pub-6276873083446538/5719522151",
   });
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { t } = useTranslation();
 
@@ -98,16 +92,17 @@ const NewMatch: React.FC = () => {
   }, []);
 
   return (
-    <Container testID="new-match-screen">
+    <View style={styles.container} testID="new-match-screen">
       <StatusBar style={theme.dark ? "light" : "dark"} />
       <ConfettiAnimation />
-      <Content>
-        <ScrollView contentContainerStyle={matchScroll}>
+      <Content style={styles.content}>
+        <ScrollView contentContainerStyle={styles.matchScroll}>
           <AnimatedCards matchDog={matchDog} />
           <Text fontSize="xl" fontWeight="light">
             {t("newMatch.youGotA")}
           </Text>
           <MatchWordmark
+            style={styles.matchWordmark}
             source={
               theme.dark
                 ? require("@/assets/images/MatchLight.webp")
@@ -115,7 +110,11 @@ const NewMatch: React.FC = () => {
             }
             contentFit="contain"
           />
-          <MatchCaption fontSize="lg" fontWeight="light">
+          <MatchCaption
+            style={styles.matchCaption}
+            fontSize="lg"
+            fontWeight="light"
+          >
             {t("newMatch.youLikedEachOther", {
               replace: { name: matchDog.name },
             })}
@@ -135,7 +134,7 @@ const NewMatch: React.FC = () => {
           </Button>
         </View>
       </Content>
-    </Container>
+    </View>
   );
 };
 

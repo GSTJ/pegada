@@ -1,32 +1,31 @@
-import Animated from "react-native-reanimated";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { PressableArea } from "@/components/pressable-area";
 
-export const Container = styled(Animated.View)`
-  z-index: 20;
-  position: absolute;
-  right: 0;
-`;
+const GO_BACK_SHADOW_COLOR = "#000";
 
-export const GoBack = styled(PressableArea)`
-  width: 68px;
-  height: 50px;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    zIndex: 20,
+    position: "absolute",
+    right: 0,
+  },
+  goBack: {
+    width: 68,
+    height: 50,
+    borderTopLeftRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    backgroundColor: theme.colors.card,
+    justifyContent: "center",
+    marginLeft: "auto",
+    marginTop: theme.spacing[24],
+    paddingLeft: theme.spacing[4],
+    shadowColor: GO_BACK_SHADOW_COLOR,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.025,
+    shadowRadius: 2,
+    elevation: 25,
+  },
+}));
 
-  border-top-left-radius: ${(props) => props.theme.radii.md}px;
-  border-bottom-left-radius: ${(props) => props.theme.radii.md}px;
-
-  background-color: ${(props) => props.theme.colors.card};
-
-  justify-content: center;
-
-  margin-left: auto;
-  margin-top: ${(props) => props.theme.spacing[24]}px;
-  padding-left: ${(props) => props.theme.spacing[4]}px;
-
-  shadow-color: #000;
-  shadow-offset: 0 2px;
-  shadow-opacity: 0.025;
-  shadow-radius: 2px;
-  elevation: 25;
-`;
+export const GoBack = withUnistyles(PressableArea);

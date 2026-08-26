@@ -2,10 +2,8 @@ import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUpload
 import type { Picture } from "@/components/ProfileImageUploader/utils";
 import type { RouterInputs } from "@/contexts/trpc-provider";
 
-import type { ScrollView } from "react-native";
-
 import { useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, KeyboardAvoidingView, View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -16,14 +14,14 @@ import { format } from "date-fns";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
+import { useUnistyles } from "react-native-unistyles";
 import { useDispatch } from "react-redux";
-import { useTheme } from "styled-components/native";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import BreedPicker from "@/components/BreedPicker";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { Fill, KeyboardScreen, Row } from "@/components/layout";
+import { styles as componentsStyles } from "@/components/layout";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { InputPicker } from "@/components/Picker";
 import { ProfileImagesUploader } from "@/components/ProfileImageUploader";
@@ -37,7 +35,7 @@ import { sendError } from "@/services/error-tracking";
 import { maskDate } from "@/services/mask-date";
 import { Actions } from "@/store/reducers";
 
-import { Container, Gap, MultilineInput, WideColumn } from "./styles";
+import { MultilineInput, styles } from "./styles";
 
 type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
 type EditProfileForm = Partial<MyDogUpdateMutation>;
@@ -116,7 +114,7 @@ const EditProfile = () => {
 
   const nonDelayedHeaderHeight = useHeaderHeight();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const { scrollViewProps } = useBottomActionStyle();
   const scrollViewRef = useRef<ScrollView>(null);
@@ -159,9 +157,12 @@ const EditProfile = () => {
   });
 
   return (
-    <KeyboardScreen behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <Fill>
-        <Container
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={componentsStyles.keyboardScreen}
+    >
+      <View style={componentsStyles.fill}>
+        <ScrollView
           ref={scrollViewRef}
           {...scrollViewProps}
           contentContainerStyle={{
@@ -173,6 +174,7 @@ const EditProfile = () => {
           }}
           scrollEnabled={gesturesEnabled}
           keyboardShouldPersistTaps="handled"
+          style={styles.container}
         >
           <Controller
             name="images"
@@ -230,11 +232,12 @@ const EditProfile = () => {
                 maxLength={500}
                 multiline
                 error={fieldState.error?.message}
+                style={styles.multilineInput}
               />
             )}
           />
-          <Row>
-            <Fill>
+          <View style={componentsStyles.row}>
+            <View style={componentsStyles.fill}>
               <Controller
                 name="weight"
                 control={control}
@@ -259,9 +262,9 @@ const EditProfile = () => {
                   />
                 )}
               />
-            </Fill>
-            <Gap />
-            <WideColumn>
+            </View>
+            <View style={styles.gap} />
+            <View style={styles.wideColumn}>
               <Controller
                 name="birthDate"
                 control={control}
@@ -291,8 +294,8 @@ const EditProfile = () => {
                   />
                 )}
               />
-            </WideColumn>
-          </Row>
+            </View>
+          </View>
 
           <Controller
             name="breedId"
@@ -307,7 +310,7 @@ const EditProfile = () => {
             )}
           />
 
-          <Row>
+          <View style={componentsStyles.row}>
             <Controller
               name="size"
               control={control}
@@ -324,7 +327,7 @@ const EditProfile = () => {
               )}
             />
 
-            <Gap />
+            <View style={styles.gap} />
             <Controller
               name="color"
               control={control}
@@ -340,7 +343,7 @@ const EditProfile = () => {
                 />
               )}
             />
-          </Row>
+          </View>
           <Controller
             name="gender"
             control={control}
@@ -360,7 +363,7 @@ const EditProfile = () => {
               />
             )}
           />
-        </Container>
+        </ScrollView>
         <BottomAction.Container>
           <Button
             testID="edit-profile-save"
@@ -370,8 +373,8 @@ const EditProfile = () => {
             {t("editProfile.saveProfile")}
           </Button>
         </BottomAction.Container>
-      </Fill>
-    </KeyboardScreen>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

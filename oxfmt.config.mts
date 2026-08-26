@@ -29,6 +29,12 @@ const config = {
     "apps/mobile/google-services.json",
     "apps/mobile/GoogleService-Info.plist",
     "packages/database/prisma/migrations/**",
+    // The one-shot styled-components -> unistyles codemod. It lives outside the
+    // pnpm workspace with its own npm install, and every `apply.sh` run
+    // rewrites `report.json` and the `manual/*.json` ledgers, so a formatter
+    // pointed at it would be permanently one run behind. It goes when the
+    // migration is done.
+    ".unistyles-codemod/**",
   ],
 };
 

@@ -1,36 +1,14 @@
 import { StyleSheet } from "react-native";
 
-import styled from "styled-components/native";
+import {
+  StyleSheet as UnistylesStyleSheet,
+  withUnistyles,
+} from "react-native-unistyles";
 
 import { Image } from "@/components/image";
 import { PressableArea } from "@/components/pressable-area";
 
-export const Container = styled(PressableArea).attrs({ accessible: true })`
-  padding: ${(props) => props.theme.spacing[4]}px;
-  flex-direction: row;
-  align-items: center;
-`;
-
 export const PICTURE_SIZE = 55;
-export const Picture = styled(Image)`
-  width: ${PICTURE_SIZE}px;
-  height: ${PICTURE_SIZE}px;
-  border-radius: ${(props) => props.theme.radii.round}px;
-  margin-right: ${(props) => props.theme.spacing[3.5]}px;
-  background-color: ${({ theme }) => theme.colors.card};
-`;
-
-export const EmojiContainer = styled.View`
-  position: absolute;
-  bottom: -${(props) => props.theme.spacing[1]}px;
-  right: ${(props) => props.theme.spacing[1]}px;
-  background-color: ${({ theme }) => theme.colors.background};
-  border-radius: ${(props) => props.theme.radii.round}px;
-  padding: ${(props) => props.theme.spacing[1]}px;
-  border-width: ${(props) => props.theme.stroke.md}px;
-  border-color: ${({ theme }) => theme.colors.border};
-`;
-
 /**
  * The emoji component is picked at runtime (or is null), so it cannot be a
  * styled component — a sheet entry is the only way to keep the size out of JSX.
@@ -38,3 +16,44 @@ export const EmojiContainer = styled.View`
 export const { emojiSize } = StyleSheet.create({
   emojiSize: { width: 15, height: 15 },
 });
+
+export const styles = UnistylesStyleSheet.create((theme) => ({
+  container: {
+    paddingTop: theme.spacing[4],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
+    paddingLeft: theme.spacing[4],
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  picture: {
+    width: PICTURE_SIZE,
+    height: PICTURE_SIZE,
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    marginRight: theme.spacing[3.5],
+    backgroundColor: theme.colors.card,
+  },
+  emojiContainer: {
+    position: "absolute",
+    bottom: -theme.spacing[1],
+    right: theme.spacing[1],
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    paddingTop: theme.spacing[1],
+    paddingRight: theme.spacing[1],
+    paddingBottom: theme.spacing[1],
+    paddingLeft: theme.spacing[1],
+    borderWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+  },
+}));
+
+export const Container = withUnistyles(PressableArea);
+
+export const Picture = withUnistyles(Image);

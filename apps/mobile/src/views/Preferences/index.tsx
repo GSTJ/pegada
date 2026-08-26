@@ -3,7 +3,7 @@ import type { Resolver } from "react-hook-form";
 
 import { useEffect } from "react";
 import * as React from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -12,8 +12,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { t } from "i18next";
 import { Controller, useForm } from "react-hook-form";
 import { magicToast } from "react-native-magic-toast";
+import { useUnistyles } from "react-native-unistyles";
 import { useDispatch } from "react-redux";
-import { useTheme } from "styled-components/native";
 import { z } from "zod";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
@@ -30,13 +30,7 @@ import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
-import {
-  Container,
-  DistanceContainer,
-  InputRow,
-  InputSpace,
-  SliderContainer,
-} from "./styles";
+import { styles } from "./styles";
 
 const { width } = Dimensions.get("window");
 
@@ -161,11 +155,11 @@ const Preferences: React.FC = () => {
 
   const headerHeight = useHeaderHeight();
   const { scrollViewProps } = useBottomActionStyle();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <>
-      <Container
+      <ScrollView
         testID="preferences-screen"
         {...scrollViewProps}
         keyboardShouldPersistTaps="handled"
@@ -176,6 +170,7 @@ const Preferences: React.FC = () => {
             scrollViewProps.contentContainerStyle.paddingBottom +
             theme.spacing[4],
         }}
+        style={styles.container}
       >
         <Controller
           name="preferredBreedId"
@@ -191,7 +186,7 @@ const Preferences: React.FC = () => {
             />
           )}
         />
-        <InputRow>
+        <View style={styles.inputRow}>
           <Controller
             name="preferredSize"
             control={control}
@@ -220,7 +215,7 @@ const Preferences: React.FC = () => {
               />
             )}
           />
-          <InputSpace />
+          <View style={styles.inputSpace} />
           <Controller
             name="preferredColor"
             control={control}
@@ -246,12 +241,12 @@ const Preferences: React.FC = () => {
               />
             )}
           />
-        </InputRow>
+        </View>
         <Controller
           control={control}
           name="preferredAgeRange"
           render={({ field: { onChange, onBlur, value } }) => (
-            <SliderContainer>
+            <View style={styles.sliderContainer}>
               <Slider.Title
                 title={t("preferences.ageRange")}
                 subtitle={t("preferences.years", { maxYears: MAX_FILTER_AGE })}
@@ -264,13 +259,13 @@ const Preferences: React.FC = () => {
                 min={0}
                 max={MAX_FILTER_AGE}
               />
-            </SliderContainer>
+            </View>
           )}
         />
         <Controller
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
-            <DistanceContainer>
+            <View style={styles.distanceContainer}>
               <Slider.Title
                 title={t("preferences.maxDistance")}
                 subtitle={`1-${MAX_FILTER_DISTANCE}+ km`}
@@ -284,11 +279,11 @@ const Preferences: React.FC = () => {
                 onValuesChange={onChange}
                 onValuesChangeFinish={onBlur}
               />
-            </DistanceContainer>
+            </View>
           )}
           name="preferredMaxDistance"
         />
-      </Container>
+      </ScrollView>
       <BottomAction.Container>
         <Button
           testID="preferences-save"

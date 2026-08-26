@@ -1,0 +1,20 @@
+{
+  "name": "unistyles-codemod",
+  "private": true,
+  "type": "module",
+  "description": "One-shot styled-components -> react-native-unistyles@3 transform for apps/mobile. Not part of the pnpm workspace on purpose: it installs its own node_modules with npm so it can never perturb the app's lockfile.",
+  "scripts": {
+    "analyze": "tsx src/cli.ts analyze",
+    "transform": "tsx src/cli.ts transform",
+    "parity": "tsx src/parity.ts",
+    "parity:manual": "tsx src/parity-manual.ts",
+    "snapshots": "tsx test/run.ts",
+    "fixtures": "tsx test/generate.ts",
+    "test": "tsx test/run.ts && tsx src/parity.ts && tsx src/parity-manual.ts"
+  },
+  "dependencies": {
+    "css-to-react-native": "3.2.0",
+    "ts-morph": "28.0.0",
+    "tsx": "4.20.6"
+  }
+}

@@ -3,10 +3,9 @@ import * as React from "react";
 
 import { Container, Content, ErrorText, TextInput } from "./styles";
 
-// oxlint-disable-next-line typescript/consistent-type-definitions -- the styled `TextInput`'s props carry a string index signature, which an intersection would widen `error` to `any` through. `extends` keeps it a string.
-interface EmailInputProps extends React.ComponentProps<typeof TextInput> {
+type EmailInputProps = React.ComponentProps<typeof TextInput> & {
   error?: string;
-}
+};
 
 const EmailInput: React.FC<EmailInputProps> = (props) => {
   const [email, setEmailNumber] = useState("");

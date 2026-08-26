@@ -1,59 +1,64 @@
-import { ActivityIndicator } from "react-native";
+import { TextInput as RNTextInput } from "react-native";
 
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import cancelIcon from "@/assets/images/Cancel.svg";
 import { PressableArea } from "@/components/pressable-area";
 
-export const Container = styled.View`
-  margin-top: ${(props) => props.theme.spacing[4]}px;
-`;
-
-export const Content = styled.View`
-  flex-direction: row;
-  background-color: ${(props) => props.theme.colors.input};
-  border-radius: ${(props) => props.theme.radii.md}px;
-  padding: ${(props) => props.theme.spacing[3.5]}px;
-  border: ${(props) => props.theme.stroke.md}px;
-  border-color: ${(props) => props.theme.colors.border};
-  align-items: center;
-`;
-
-export const TitleContainer = styled.View`
-  margin-bottom: ${(props) => props.theme.spacing[3]}px;
-`;
-
-export const CancelTouchArea = styled(PressableArea).attrs({
-  hitSlop: {
-    top: 10,
-    bottom: 10,
-    left: 10,
-    right: 10,
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    marginTop: theme.spacing[4],
   },
-})`
-  padding-left: ${(props) => props.theme.spacing[2.5]}px;
-`;
+  content: {
+    flexDirection: "row",
+    backgroundColor: theme.colors.input,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    paddingTop: theme.spacing[3.5],
+    paddingRight: theme.spacing[3.5],
+    paddingBottom: theme.spacing[3.5],
+    paddingLeft: theme.spacing[3.5],
+    borderWidth: theme.stroke.md,
+    borderColor: theme.colors.border,
+    borderStyle: "solid",
+    alignItems: "center",
+  },
+  titleContainer: {
+    marginBottom: theme.spacing[3],
+  },
+  cancelTouchArea: {
+    paddingLeft: theme.spacing[2.5],
+  },
+  cancelIcon: {
+    opacity: 0.5,
+    width: theme.spacing[4],
+    height: theme.spacing[4],
+  },
+  textInput: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    color: theme.colors.text,
+    fontFamily: theme.typography.fontFamily.medium,
+    fontWeight: "medium",
+    fontSize: theme.typography.sizes.xs.size,
+  },
+  activityIndicatorComponent: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+}));
 
-export const CancelIcon = styled(cancelIcon).attrs((props) => ({
-  fill: props.theme.colors.placeholder,
-}))`
-  opacity: 0.5;
-  width: ${(props) => props.theme.spacing[4]}px;
-  height: ${(props) => props.theme.spacing[4]}px;
-`;
+export const CancelTouchArea = withUnistyles(PressableArea);
 
-export const TextInput = styled.TextInput.attrs((props) => ({
-  placeholderTextColor: props.theme.colors.placeholder,
-  selectionColor: props.theme.colors.primary,
-  ...props,
-}))`
-  flex: 1;
-  color: ${(props) => props.theme.colors.text};
-  font-family: ${(props) => props.theme.typography.fontFamily.medium};
-  font-weight: medium;
-  font-size: ${(props) => props.theme.typography.sizes.xs.size}px;
-`;
+export const CancelIcon = withUnistyles(cancelIcon, (theme) => ({
+  fill: theme.colors.placeholder,
+}));
 
-export const ActivityIndicatorComponent = styled(ActivityIndicator)`
-  flex: 1;
-`;
+export const TextInput = withUnistyles(RNTextInput, (theme) => ({
+  placeholderTextColor: theme.colors.placeholder,
+  selectionColor: theme.colors.primary,
+}));

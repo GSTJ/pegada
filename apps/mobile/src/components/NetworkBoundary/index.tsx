@@ -12,7 +12,7 @@ import {
 } from "@tanstack/react-query";
 import { ObservabilityBoundary } from "magic-observability/expo";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { observability } from "@/services/observability";
@@ -122,7 +122,7 @@ export const DefaultErrorComponent: IErrorBoundary = ({ reset, isReset }) => {
 };
 
 export const DefaultLoadingComponent = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   return (
     <Content>
       <ActivityIndicator color={theme.colors.text} />

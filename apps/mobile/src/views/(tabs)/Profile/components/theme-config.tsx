@@ -4,7 +4,7 @@ import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
 
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import LightMode from "@/assets/images/LightMode.svg";
 import { PickerSheet } from "@/components/Picker";
@@ -16,7 +16,7 @@ import { Config } from "./Config";
 export const ThemeConfig = () => {
   const { activeTheme, setActiveTheme } = useActiveTheme();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const { t } = useTranslation();
 
   const data = [

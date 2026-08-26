@@ -1,0 +1,140 @@
+diff --git a/.unistyles-codemod/manual/44-location-map.json b/.unistyles-codemod/manual/44-location-map.json
+new file mode 100644
+index 0000000..2ec1153
+--- /dev/null
++++ b/.unistyles-codemod/manual/44-location-map.json
+@@ -0,0 +1,26 @@
++{
++  "$comment": "Hand-converted `LocationMap` (patch 44). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
++  "pristineRef": "f85575d",
++  "units": [
++    {
++      "file": "apps/mobile/src/views/LocationMap/styles.tsx",
++      "pristine": "apps/mobile/src/views/LocationMap/styles.ts",
++      "definitionsDetail": [
++        {
++          "name": "Container",
++          "key": "container",
++          "mode": "inline",
++          "variants": {},
++          "inheritedFrom": null
++        },
++        {
++          "name": "MapView",
++          "key": "mapView",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": null
++        }
++      ]
++    }
++  ]
++}
+diff --git a/apps/mobile/src/views/LocationMap/index.tsx b/apps/mobile/src/views/LocationMap/index.tsx
+index 20c4f0f..34871be 100644
+--- a/apps/mobile/src/views/LocationMap/index.tsx
++++ b/apps/mobile/src/views/LocationMap/index.tsx
+@@ -1,5 +1,5 @@
+ import { useRef, useState } from "react";
+-import { Alert, Platform } from "react-native";
++import { Alert, Platform, View } from "react-native";
+ 
+ import { useRouter } from "expo-router";
+ 
+@@ -20,7 +20,7 @@ import { Actions } from "@/store/reducers";
+ import { updateUserLocation } from "../(auth)/AskForLocation";
+ import { Marker } from "./components/Marker";
+ import { Submit } from "./components/Submit";
+-import { Container, MapView } from "./styles";
++import { MapView, styles } from "./styles";
+ 
+ const LocationMap = () => {
+   const mapRef = useRef(null);
+@@ -88,7 +88,7 @@ const LocationMap = () => {
+   const { theme } = useUnistyles();
+ 
+   return (
+-    <Container testID="location-map-screen">
++    <View style={styles.container} testID="location-map-screen">
+       <MapView
+         ref={mapRef}
+         showsUserLocation
+@@ -135,7 +135,7 @@ const LocationMap = () => {
+         onPress={() => userMutation.mutate()}
+         dragging={dragging}
+       />
+-    </Container>
++    </View>
+   );
+ };
+ 
+diff --git a/apps/mobile/src/views/LocationMap/styles.ts b/apps/mobile/src/views/LocationMap/styles.ts
+deleted file mode 100644
+index 3817e58..0000000
+--- a/apps/mobile/src/views/LocationMap/styles.ts
++++ /dev/null
+@@ -1,15 +0,0 @@
+-import RNMap from "react-native-maps";
+-import styled from "styled-components/native";
+-
+-export const Container = styled.View`
+-  flex: 1;
+-`;
+-
+-export const MapView = styled(RNMap).attrs({
+-  showsUserLocation: true,
+-  rotateEnabled: false,
+-  showsCompass: false,
+-  pitchEnabled: false,
+-})`
+-  flex: 1;
+-`;
+diff --git a/apps/mobile/src/views/LocationMap/styles.tsx b/apps/mobile/src/views/LocationMap/styles.tsx
+new file mode 100644
+index 0000000..a866645
+--- /dev/null
++++ b/apps/mobile/src/views/LocationMap/styles.tsx
+@@ -0,0 +1,43 @@
++import type { MapViewProps } from "react-native-maps";
++
++import { forwardRef } from "react";
++
++import RNMap from "react-native-maps";
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++const Map = withUnistyles(RNMap);
++
++/**
++ * The four props below are the former `.attrs()`, and they sit *after* the
++ * spread on purpose: a static `.attrs()` object beat whatever the caller
++ * passed, and `index.tsx` passes `showsUserLocation` itself. Moving them in
++ * front would quietly hand that decision to the call site.
++ */
++export const MapView = forwardRef<RNMap, MapViewProps>(
++  ({ style, ...props }, ref) => (
++    <Map
++      {...props}
++      ref={ref}
++      showsUserLocation
++      rotateEnabled={false}
++      showsCompass={false}
++      pitchEnabled={false}
++      style={[styles.mapView, style]}
++    />
++  ),
++);
++
++MapView.displayName = "MapView";
++
++export const styles = StyleSheet.create({
++  container: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++  mapView: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++});

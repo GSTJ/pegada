@@ -1,0 +1,108 @@
+diff --git a/.unistyles-codemod/manual/20-value-passed-components.json b/.unistyles-codemod/manual/20-value-passed-components.json
+new file mode 100644
+index 0000000..15831eb
+--- /dev/null
++++ b/.unistyles-codemod/manual/20-value-passed-components.json
+@@ -0,0 +1,102 @@
++{
++  "$comment": "Hand-converted modules the transform skipped because a styled component was passed as a value (patches 20-29). `pristineRef` is the last commit before the migration landed; the transform never touched these files, so that ref still holds their styled-components source at the old `styles.ts` path.",
++  "pristineRef": "f85575d",
++  "units": [
++    {
++      "file": "apps/mobile/src/components/MatchActionBar/styles.tsx",
++      "pristine": "apps/mobile/src/components/MatchActionBar/styles.ts",
++      "definitionsDetail": [
++        { "name": "Container", "key": "container", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "ActionItem", "key": "actionItem", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "ConfusedEmoji", "key": "confusedEmoji", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "ThinkingEmoji", "key": "thinkingEmoji", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        {
++          "$comment": "`styled(ConfusedEmoji)` in this same module, so the emitted sheet folds the 55x55 box in and ground truth has to keep it too.",
++          "name": "HeartEyesEmoji",
++          "key": "heartEyesEmoji",
++          "mode": "wrapper",
++          "variants": {},
++          "inheritedFrom": "ConfusedEmoji"
++        }
++      ]
++    },
++    {
++      "$comment": "Deliberately carries no definitions. Its one styled component has a `// Optically align` line comment in the template, and styled-components' native renderer hands the flattened template straight to `postcss.parse`, which rejects `//` — so `generateStyleObject` throws a CssSyntaxError and there is no ground truth to compare against. The unit stays listed so the omission is on the record rather than looking like an oversight; the sheet was derived with the codemod's own css pipeline instead. See the patch for the details.",
++      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/GoBack/styles.tsx",
++      "pristine": "apps/mobile/src/views/(auth)/OneTimeCode/components/GoBack/styles.ts",
++      "definitionsDetail": []
++    },
++    {
++      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.tsx",
++      "pristine": "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.ts",
++      "definitionsDetail": [
++        { "name": "Container", "key": "container", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "TextInput", "key": "textInput", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "AbsoluteContainer", "key": "absoluteContainer", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "StyledText", "key": "styledText", "mode": "inline", "variants": {}, "inheritedFrom": null }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.tsx",
++      "pristine": "apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.ts",
++      "definitionsDetail": [
++        { "name": "Container", "key": "container", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "Content", "key": "content", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "TextInput", "key": "textInput", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "ErrorText", "key": "errorText", "mode": "inline", "variants": {}, "inheritedFrom": null }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/views/(tabs)/Messages/components/Header/styles.tsx",
++      "pristine": "apps/mobile/src/views/(tabs)/Messages/components/Header/styles.ts",
++      "definitionsDetail": [
++        { "name": "Container", "key": "container", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "PreviewSeparator", "key": "previewSeparator", "mode": "inline", "variants": {}, "inheritedFrom": null }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/views/(tabs)/Messages/components/SearchBar/styles.tsx",
++      "pristine": "apps/mobile/src/views/(tabs)/Messages/components/SearchBar/styles.ts",
++      "definitionsDetail": [
++        { "name": "TextField", "key": "textField", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "SearchFieldContainer", "key": "searchFieldContainer", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "Container", "key": "container", "mode": "wrapper", "variants": {}, "inheritedFrom": null }
++      ]
++    },
++    {
++      "$comment": "`Title` and `Description` declared no CSS at all — only `.attrs` typography defaults — so they have no sheet entry, and the ledger proving them empty on both sides is the point.",
++      "file": "apps/mobile/src/views/(tabs)/Profile/components/Config/styles.tsx",
++      "pristine": "apps/mobile/src/views/(tabs)/Profile/components/Config/styles.ts",
++      "definitionsDetail": [
++        { "name": "Root", "key": "root", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "Container", "key": "container", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "IconSlot", "key": "iconSlot", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "ArrowContainer", "key": "arrowContainer", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "Title", "key": "title", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "Description", "key": "description", "mode": "inline", "variants": {}, "inheritedFrom": null }
++      ]
++    },
++    {
++      "$comment": "`ProfileOfflineError` is gone rather than converted: nothing imported it, and `OfflineComponent` destructures `reset` and drops every other prop, so its background colour never reached an element.",
++      "file": "apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.tsx",
++      "pristine": "apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts",
++      "definitionsDetail": [
++        { "name": "HeaderCard", "key": "headerCard", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "Shade", "key": "shade", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "Scrim", "key": "scrim", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "InfoBlock", "key": "infoBlock", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "NameRow", "key": "nameRow", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "ProfileContainer", "key": "profileContainer", "mode": "inline", "variants": {}, "inheritedFrom": null },
++        { "name": "ProfileUnknownError", "key": "profileUnknownError", "mode": "wrapper", "variants": {}, "inheritedFrom": null }
++      ]
++    },
++    {
++      "file": "apps/mobile/src/views/DogProfile/components/GoBack/styles.tsx",
++      "pristine": "apps/mobile/src/views/DogProfile/components/GoBack/styles.ts",
++      "definitionsDetail": [
++        { "name": "Container", "key": "container", "mode": "wrapper", "variants": {}, "inheritedFrom": null },
++        { "name": "Content", "key": "content", "mode": "inline", "variants": {}, "inheritedFrom": null }
++      ]
++    }
++  ]
++}

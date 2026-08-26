@@ -1,28 +1,39 @@
 import Animated, { FadeInUp } from "react-native-reanimated";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
-export const Container = styled.KeyboardAvoidingView`
-  background-color: ${(props) => props.theme.colors.background};
-  flex: 1;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    backgroundColor: theme.colors.background,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  background: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    backgroundColor: theme.colors.background,
+  },
+  centeredView: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: theme.spacing[6],
+    paddingRight: theme.spacing[3],
+    paddingBottom: theme.spacing[6],
+    paddingLeft: theme.spacing[3],
+  },
+  centeredText: {
+    textAlign: "center",
+  },
+}));
 
-export const Background = styled.ImageBackground`
-  flex: 1;
-  background-color: ${(props) => props.theme.colors.background};
-`;
-
-export const CenteredView = styled(Animated.View).attrs(() => ({
+export const CenteredView = withUnistyles(Animated.View, () => ({
   entering: FadeInUp,
-}))`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: ${(props) => props.theme.spacing[6]}px
-    ${(props) => props.theme.spacing[3]}px;
-`;
+}));
 
-export const CenteredText = styled(Text)`
-  text-align: center;
-`;
+export const CenteredText = Text;

@@ -1,0 +1,157 @@
+diff --git a/apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts b/apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts
+deleted file mode 100644
+index c72ca36..0000000
+--- a/apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts
++++ /dev/null
+@@ -1,52 +0,0 @@
+-import { LinearGradient } from "expo-linear-gradient";
+-
+-import styled from "styled-components/native";
+-
+-import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
+-import { Container } from "@/components/MainCard/styles";
+-import {
+-  OfflineComponent,
+-  UnknownErrorComponent,
+-} from "@/components/NetworkBoundary";
+-
+-/** The MainCard shell, squared off because it sits flush under the header. */
+-export const HeaderCard = styled(Container)`
+-  border-radius: 0;
+-`;
+-
+-/** Bottom-anchored gradient the name and bio sit on top of. */
+-export const Shade = styled(LinearGradient)`
+-  margin-top: auto;
+-`;
+-
+-/** Top-anchored gradient that darkens the status bar area. */
+-export const Scrim = styled(LinearGradient)`
+-  position: absolute;
+-  top: 0;
+-  left: 0;
+-  right: 0;
+-  bottom: 0;
+-`;
+-
+-export const InfoBlock = styled(PersonalInfo.Container)`
+-  padding-bottom: 35px;
+-`;
+-
+-export const NameRow = styled.View`
+-  flex-direction: row;
+-  align-items: center;
+-`;
+-
+-export const ProfileContainer = styled.View`
+-  justify-content: center;
+-  align-items: center;
+-  background-color: ${({ theme }) => theme.colors.card};
+-`;
+-
+-export const ProfileOfflineError = styled(OfflineComponent)`
+-  background-color: ${({ theme }) => theme.colors.card};
+-`;
+-
+-export const ProfileUnknownError = styled(UnknownErrorComponent)`
+-  background-color: ${({ theme }) => theme.colors.card};
+-`;
+diff --git a/apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.tsx b/apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.tsx
+new file mode 100644
+index 0000000..311565c
+--- /dev/null
++++ b/apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.tsx
+@@ -0,0 +1,93 @@
++import type { IErrorBoundary } from "@/components/NetworkBoundary";
++import type { AnimatedProps } from "react-native-reanimated";
++
++import type { ViewProps } from "react-native";
++
++import type { LinearGradientProps } from "expo-linear-gradient";
++
++import { View } from "react-native";
++
++import { LinearGradient } from "expo-linear-gradient";
++
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
++import { Container } from "@/components/MainCard/styles";
++import { UnknownErrorComponent } from "@/components/NetworkBoundary";
++
++const ThemedGradient = withUnistyles(LinearGradient);
++
++/**
++ * `UnknownErrorComponent` hands its props to a styled-components ScrollView,
++ * which the babel plugin never sees, so the sheet has to arrive resolved.
++ */
++const ThemedUnknownError = withUnistyles(UnknownErrorComponent);
++
++/** The MainCard shell, squared off because it sits flush under the header. */
++export const HeaderCard = ({ style, ...props }: AnimatedProps<ViewProps>) => (
++  <Container {...props} style={[styles.headerCard, style]} />
++);
++
++/** Bottom-anchored gradient the name and bio sit on top of. */
++export const Shade = ({ style, ...props }: LinearGradientProps) => (
++  <ThemedGradient {...props} style={[styles.shade, style]} />
++);
++
++/** Top-anchored gradient that darkens the status bar area. */
++export const Scrim = ({ style, ...props }: LinearGradientProps) => (
++  <ThemedGradient {...props} style={[styles.scrim, style]} />
++);
++
++export const InfoBlock = ({ style, ...props }: ViewProps) => (
++  <PersonalInfo.Container {...props} style={[styles.infoBlock, style]} />
++);
++
++export const NameRow = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.nameRow, style]} />
++);
++
++export const ProfileContainer = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.profileContainer, style]} />
++);
++
++/**
++ * Stays a component: the boundary takes it as an `errorFallback` value, and
++ * calls it with the reset handlers this one has no use for.
++ */
++export const ProfileUnknownError: IErrorBoundary = () => (
++  <ThemedUnknownError style={styles.profileUnknownError} />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  headerCard: {
++    borderTopLeftRadius: 0,
++    borderTopRightRadius: 0,
++    borderBottomRightRadius: 0,
++    borderBottomLeftRadius: 0,
++  },
++  shade: {
++    marginTop: "auto",
++  },
++  scrim: {
++    position: "absolute",
++    top: 0,
++    left: 0,
++    right: 0,
++    bottom: 0,
++  },
++  infoBlock: {
++    paddingBottom: 35,
++  },
++  nameRow: {
++    flexDirection: "row",
++    alignItems: "center",
++  },
++  profileContainer: {
++    justifyContent: "center",
++    alignItems: "center",
++    backgroundColor: theme.colors.card,
++  },
++  profileUnknownError: {
++    backgroundColor: theme.colors.card,
++  },
++}));

@@ -1,13 +1,13 @@
 import * as React from "react";
 
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import BackArrow from "@/assets/images/BackArrow.svg";
 
 import { Container } from "./styles";
 
 const GoBack: React.FC<React.ComponentProps<typeof Container>> = (props) => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   return (
     <Container {...props}>

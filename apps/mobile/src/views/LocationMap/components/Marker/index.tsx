@@ -1,6 +1,7 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import * as React from "react";
+import { View } from "react-native";
 
 import Animated, {
   Extrapolation,
@@ -10,10 +11,10 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
-import { useTheme } from "styled-components";
+import { useUnistyles } from "react-native-unistyles";
 
 import { Bubble } from "../Bubble";
-import { Container, Content, MarkerWrapper, Shadow } from "./styles";
+import { Shadow, styles } from "./styles";
 
 type MarkerIconProps = React.ComponentProps<typeof Svg>;
 
@@ -31,7 +32,7 @@ export const Marker: React.FC<{
   dragging: SharedValue<number>;
   touchStarted: boolean;
 }> = ({ dragging, touchStarted }) => {
-  const { colors } = useTheme();
+  const { colors } = useUnistyles().theme;
 
   const markerViewStyle = useAnimatedStyle(() => {
     "worklet";
@@ -56,17 +57,17 @@ export const Marker: React.FC<{
   });
 
   return (
-    <Container>
-      <Content>
-        <Shadow />
+    <View style={styles.container} pointerEvents="none">
+      <View style={styles.content}>
+        <Shadow style={styles.shadow} />
         <Animated.View style={markerViewStyle}>
           <MarkerIcon fill={colors.primary} />
-          <MarkerWrapper style={animatedMarkerStyle}>
+          <Animated.View style={[styles.markerWrapper, animatedMarkerStyle]}>
             <MarkerIcon fill={colors.text} />
-          </MarkerWrapper>
+          </Animated.View>
         </Animated.View>
         {!touchStarted && <Bubble entering={FadeInDown} exiting={FadeOutUp} />}
-      </Content>
-    </Container>
+      </View>
+    </View>
   );
 };

@@ -2,7 +2,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 
 import { useState } from "react";
 import * as React from "react";
-import { Alert, Platform, View } from "react-native";
+import { Alert, Platform, ScrollView, View } from "react-native";
 
 import { isDevice } from "expo-device";
 import { useRouter } from "expo-router";
@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components";
+import { useUnistyles } from "react-native-unistyles";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
@@ -26,11 +26,10 @@ import RestorePurchases from "@/views/UpgradeWall/components/RestorePurchases";
 import {
   CloseButton,
   CloseIcon,
-  Container,
-  Content,
   GradientEffect,
   Header,
   HeroImage,
+  styles,
   Subtitle,
   Title,
 } from "./styles";
@@ -69,7 +68,7 @@ const useTranslatedTrialDuration = (
 
 const UpgradeWall: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -163,8 +162,9 @@ const UpgradeWall: React.FC = () => {
   const headerHeight = 40 + paddingTop;
 
   return (
-    <Container testID="upgrade-wall-screen">
-      <Content
+    <View testID="upgrade-wall-screen" style={styles.container}>
+      <ScrollView
+        style={styles.content}
         {...bottomActionStyle.scrollViewProps}
         contentContainerStyle={{
           ...bottomActionStyle.scrollViewProps.contentContainerStyle,
@@ -176,6 +176,7 @@ const UpgradeWall: React.FC = () => {
         }}
       >
         <HeroImage
+          style={styles.heroImage}
           source={
             theme.dark
               ? require("@/views/UpgradeWall/assets/background-dark.webp")
@@ -184,10 +185,12 @@ const UpgradeWall: React.FC = () => {
         />
         <View style={{ gap: theme.spacing[7] }}>
           <View>
-            <Title fontSize="xl" fontWeight="bold">
+            <Title style={styles.title} fontSize="xl" fontWeight="bold">
               {title}
             </Title>
-            <Subtitle fontWeight="semibold">{trialSubtitle}</Subtitle>
+            <Subtitle style={styles.subtitle} fontWeight="semibold">
+              {trialSubtitle}
+            </Subtitle>
           </View>
 
           <PlanPackages
@@ -197,14 +200,17 @@ const UpgradeWall: React.FC = () => {
         </View>
 
         <Benefits />
-      </Content>
+      </ScrollView>
 
       <Header
         intensity={100}
-        style={{
-          height: headerHeight,
-          paddingTop,
-        }}
+        style={[
+          styles.header,
+          {
+            height: headerHeight,
+            paddingTop,
+          },
+        ]}
       >
         <RestorePurchases />
         <CloseButton
@@ -224,7 +230,7 @@ const UpgradeWall: React.FC = () => {
         </CloseButton>
       </Header>
 
-      <GradientEffect />
+      <GradientEffect style={styles.gradientEffect} />
 
       <BottomAction.Container>
         <Button
@@ -238,7 +244,7 @@ const UpgradeWall: React.FC = () => {
           {buttonText}
         </Button>
       </BottomAction.Container>
-    </Container>
+    </View>
   );
 };
 

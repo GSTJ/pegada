@@ -5,24 +5,10 @@ import { View } from "react-native";
 
 import { Namespace } from "@pegada/shared/i18n/types/types";
 import { useTranslation } from "react-i18next";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import Glassmorphism from "@/components/Glassmorphism";
 import { Text } from "@/components/text";
-
-const GlassmorphismStyled = styled(Glassmorphism)`
-  border-radius: ${(props) => props.theme.radii.md}px;
-  margin-right: auto;
-  margin-bottom: ${(props) => props.theme.spacing[3]}px;
-  border-width: ${(props) => props.theme.stroke.sm}px;
-  border-color: ${(props) => props.theme.colors.border};
-`;
-
-const ViewStyled = styled(View)`
-  padding: ${(props) => props.theme.spacing[2]}px
-    ${(props) => props.theme.spacing[4]}px;
-  padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
-`;
 
 export const BreedTag = (props: { breed: SwipeDog["breed"] }) => {
   const { t } = useTranslation(Namespace.Breed);
@@ -30,10 +16,31 @@ export const BreedTag = (props: { breed: SwipeDog["breed"] }) => {
   if (!props.breed?.slug) return null;
 
   return (
-    <GlassmorphismStyled>
-      <ViewStyled>
+    <GlassmorphismStyled style={styles.glassmorphismStyled}>
+      <View style={styles.viewStyled}>
         <Text fontWeight="medium">{t(props.breed.slug as BreedSlug)}</Text>
-      </ViewStyled>
+      </View>
     </GlassmorphismStyled>
   );
 };
+
+const styles = StyleSheet.create((theme) => ({
+  glassmorphismStyled: {
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    marginRight: "auto",
+    marginBottom: theme.spacing[3],
+    borderWidth: theme.stroke.sm,
+    borderColor: theme.colors.border,
+  },
+  viewStyled: {
+    paddingTop: theme.spacing[2],
+    paddingRight: theme.spacing[4],
+    paddingBottom: theme.spacing[2.5],
+    paddingLeft: theme.spacing[4],
+  },
+}));
+
+const GlassmorphismStyled = withUnistyles(Glassmorphism);

@@ -3,7 +3,7 @@ import type { Match } from "../..";
 import * as React from "react";
 import { FlatList } from "react-native";
 
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { Preview } from "../Preview";
 import { Container, PreviewSeparator } from "./styles";
@@ -13,7 +13,7 @@ type HeaderProps = {
 };
 
 export const Header: React.FC<HeaderProps> = ({ matches }) => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   if (!matches?.length) return null;
 

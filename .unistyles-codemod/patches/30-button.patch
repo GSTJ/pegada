@@ -1,0 +1,200 @@
+diff --git a/apps/mobile/src/components/Button/index.tsx b/apps/mobile/src/components/Button/index.tsx
+index b126d1c..357798d 100644
+--- a/apps/mobile/src/components/Button/index.tsx
++++ b/apps/mobile/src/components/Button/index.tsx
+@@ -1,6 +1,6 @@
+ import type { ContainerProps } from "./styles";
+ 
+-import type { PressableProps } from "react-native";
++import type { PressableProps, StyleProp, ViewStyle } from "react-native";
+ 
+ import * as React from "react";
+ 
+@@ -8,10 +8,17 @@ import Loading from "@/components/loading";
+ 
+ import { ButtonText, Container } from "./styles";
+ 
++/**
++ * `Pressable`'s style callback is gone from the public type: composing it with
++ * the sheet needs a plain style, and the callback never worked here anyway —
++ * styled-components handed it to `PressableArea` inside an array, where the
++ * function was never called.
++ */
+ export type ButtonProps = {
+   children: string;
++  style?: StyleProp<ViewStyle>;
+ } & ContainerProps &
+-  PressableProps;
++  Omit<PressableProps, "style">;
+ 
+ export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
+   const disabled = props.loading || props.disabled;
+diff --git a/apps/mobile/src/components/Button/styles.ts b/apps/mobile/src/components/Button/styles.ts
+deleted file mode 100644
+index a0799b2..0000000
+--- a/apps/mobile/src/components/Button/styles.ts
++++ /dev/null
+@@ -1,43 +0,0 @@
+-import styled, { css } from "styled-components/native";
+-
+-import { PressableArea } from "@/components/pressable-area";
+-import { Text } from "@/components/text";
+-
+-type VariantProps = {
+-  variant?: "outline" | "default";
+-};
+-export type ContainerProps = {
+-  loading?: boolean;
+-} & VariantProps;
+-
+-export const BUTTON_HEIGHT = 68;
+-
+-export const Container = styled(PressableArea)<ContainerProps>`
+-  padding: ${(props) => props.theme.spacing[4]}px;
+-  border-radius: ${(props) => props.theme.radii.md}px;
+-  justify-content: center;
+-  align-items: center;
+-
+-  overflow: hidden;
+-  height: ${BUTTON_HEIGHT}px;
+-
+-  border-width: ${(props) => props.theme.stroke.xxl}px;
+-  border-color: ${(props) => props.theme.colors.primary};
+-
+-  ${(props) =>
+-    props.variant !== "outline" &&
+-    css`
+-      background-color: ${props.theme.colors.primary};
+-    `}
+-
+-  ${(props) =>
+-    props.disabled &&
+-    css`
+-      opacity: 0.5;
+-    `}
+-`;
+-
+-export const ButtonText = styled(Text)<VariantProps>`
+-  color: ${(props) =>
+-    props.variant === "outline" ? props.theme.colors.primary : "white"};
+-`;
+diff --git a/apps/mobile/src/components/Button/styles.tsx b/apps/mobile/src/components/Button/styles.tsx
+new file mode 100644
+index 0000000..e7d8eb4
+--- /dev/null
++++ b/apps/mobile/src/components/Button/styles.tsx
+@@ -0,0 +1,114 @@
++import type { TextProps } from "@/components/text";
++
++import type { PressableProps, StyleProp, ViewStyle } from "react-native";
++
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++import { PressableArea } from "@/components/pressable-area";
++import { Text } from "@/components/text";
++
++type VariantProps = {
++  variant?: "outline" | "default";
++};
++export type ContainerProps = {
++  loading?: boolean;
++} & VariantProps;
++
++export const BUTTON_HEIGHT = 68;
++
++/** `PressableArea` is not autoprocessed, so the sheet reaches it wrapped. */
++const ThemedPressableArea = withUnistyles(PressableArea);
++
++/** `Pressable` also accepts a style callback; composing needs a plain style. */
++type ButtonContainerProps = { style?: StyleProp<ViewStyle> } & Omit<
++  PressableProps,
++  "style"
++> &
++  ContainerProps;
++
++/**
++ * Unistyles spells "no variant selected" `default`, which is also one of the
++ * prop's own values. Both mean the filled button, so the prop's `"default"`
++ * arrives as no value at all.
++ */
++const variantKey = (variant: VariantProps["variant"]) =>
++  variant === "outline" ? ("outline" as const) : undefined;
++
++/**
++ * `Button` spreads its own props onto this, so the two prop conditionals stay
++ * props: they select variants here rather than at the call site.
++ */
++export const Container = ({
++  variant,
++  disabled,
++  style,
++  ...props
++}: ButtonContainerProps) => {
++  // `disabled` is nullable on `Pressable`; the sheet only knows true or absent.
++  styles.useVariants({
++    variant: variantKey(variant),
++    disabled: disabled ?? undefined,
++  });
++
++  return (
++    <ThemedPressableArea
++      {...props}
++      disabled={disabled}
++      style={[styles.container, style]}
++    />
++  );
++};
++
++export const ButtonText = ({
++  variant,
++  style,
++  ...props
++}: VariantProps & TextProps) => {
++  styles.useVariants({ variant: variantKey(variant) });
++
++  return <Text {...props} style={[styles.buttonText, style]} />;
++};
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    paddingTop: theme.spacing[4],
++    paddingRight: theme.spacing[4],
++    paddingBottom: theme.spacing[4],
++    paddingLeft: theme.spacing[4],
++    borderTopLeftRadius: theme.radii.md,
++    borderTopRightRadius: theme.radii.md,
++    borderBottomRightRadius: theme.radii.md,
++    borderBottomLeftRadius: theme.radii.md,
++    justifyContent: "center",
++    alignItems: "center",
++    overflow: "hidden",
++    height: BUTTON_HEIGHT,
++    borderWidth: theme.stroke.xxl,
++    borderColor: theme.colors.primary,
++    variants: {
++      variant: {
++        outline: {},
++        default: {
++          backgroundColor: theme.colors.primary,
++        },
++      },
++      disabled: {
++        true: {
++          opacity: 0.5,
++        },
++      },
++    },
++  },
++  buttonText: {
++    variants: {
++      variant: {
++        outline: {
++          color: theme.colors.primary,
++        },
++        default: {
++          color: "white",
++        },
++      },
++    },
++  },
++}));

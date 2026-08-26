@@ -1,7 +1,7 @@
 import { ActivityIndicator, useWindowDimensions, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import Premium from "@/assets/images/Premium.svg";
 import { BIO_NUMBER_OF_LINES } from "@/components/MainCard/components/PersonalInfo";
@@ -33,7 +33,7 @@ const UserDogProfileHeader = () => {
     refetchOnMount: false,
   });
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const plan = useCustomerPlan();
 
@@ -98,7 +98,7 @@ const UserDogProfileHeader = () => {
 };
 
 const LoadingFallback = () => {
-  const theme = useTheme();
+  const { theme } = useUnistyles();
   const insets = useSafeAreaInsets();
   const dogProfileHeight = useDogProfileHeight();
 

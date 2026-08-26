@@ -1,12 +1,14 @@
 import type { TextInput, TextInputProps, ViewProps } from "react-native";
 
 import * as React from "react";
+import { ActivityIndicator, View } from "react-native";
 
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/text";
 
 import * as S from "./styles";
+import { styles } from "./styles";
 
 type TextFieldContainerProps = {
   loading?: boolean;
@@ -18,10 +20,12 @@ const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
   children,
   ...props
 }) => (
-  <S.Content {...props}>
+  <View {...props} style={[styles.content, props.style]}>
     {!loading && children}
-    {loading ? <S.ActivityIndicatorComponent /> : null}
-  </S.Content>
+    {loading ? (
+      <ActivityIndicator style={styles.activityIndicatorComponent} />
+    ) : null}
+  </View>
 );
 
 type InputProps = {
@@ -47,16 +51,16 @@ export const Input = React.forwardRef<TextInput, InputProps>(
     const { t } = useTranslation();
 
     return (
-      <S.Container>
+      <View style={styles.container}>
         {Boolean(title || optional) && (
-          <S.TitleContainer>
+          <View style={styles.titleContainer}>
             <Text fontWeight="bold" fontSize="lg">
               {title}
             </Text>
             {optional ? (
               <Text fontSize="xs">{t("common.optional")}</Text>
             ) : null}
-          </S.TitleContainer>
+          </View>
         )}
         <TextFieldContainer loading={loading}>
           <S.TextInput
@@ -64,10 +68,20 @@ export const Input = React.forwardRef<TextInput, InputProps>(
             onChangeText={props.onChangeText}
             ref={ref}
             {...props}
+            style={[styles.textInput, props.style]}
           />
           {Boolean(props.value) && canCancel ? (
-            <S.CancelTouchArea onPress={() => props.onChangeText?.("")}>
-              <S.CancelIcon />
+            <S.CancelTouchArea
+              onPress={() => props.onChangeText?.("")}
+              style={styles.cancelTouchArea}
+              hitSlop={{
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10,
+              }}
+            >
+              <S.CancelIcon style={styles.cancelIcon} />
             </S.CancelTouchArea>
           ) : null}
         </TextFieldContainer>
@@ -76,7 +90,7 @@ export const Input = React.forwardRef<TextInput, InputProps>(
             *{error}
           </Text>
         )}
-      </S.Container>
+      </View>
     );
   },
 );

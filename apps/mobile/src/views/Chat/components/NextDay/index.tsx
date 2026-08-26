@@ -1,3 +1,5 @@
+import { View } from "react-native";
+
 import { Language } from "@pegada/shared/i18n/types/types";
 import {
   format,
@@ -11,7 +13,7 @@ import { enUS, pt } from "date-fns/locale";
 
 import i18n from "@/i18n";
 
-import { Container, DateText } from "./styles";
+import { DateText, styles } from "./styles";
 
 const formatDate = (date: Date) => {
   const currentLanguage = i18n.language;
@@ -46,11 +48,11 @@ const Component = ({
   }
 
   return (
-    <Container>
-      <DateText fontSize="xs" fontWeight="medium">
+    <View style={styles.container}>
+      <DateText fontSize="xs" fontWeight="medium" style={styles.dateText}>
         {formatDate(currentMessageDate)}
       </DateText>
-    </Container>
+    </View>
   );
 };
 

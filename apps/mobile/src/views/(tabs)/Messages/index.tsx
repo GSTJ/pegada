@@ -1,13 +1,13 @@
 import type { RouterOutputs } from "@/contexts/trpc-provider";
 
 import { useEffect, useRef, useState } from "react";
-import { FlatList, Platform, View } from "react-native";
+import { FlatList, Platform, View, KeyboardAvoidingView } from "react-native";
 
 import { usePathname } from "expo-router";
 
 import { useScrollToTop } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import Divider from "@/components/divider";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -22,14 +22,14 @@ import { Message } from "@/views/(tabs)/Messages/components/Message";
 
 import { EmptyMessages } from "./components/empty-messages";
 import { SearchBar } from "./components/SearchBar";
-import { Container, DividerContainer, Title } from "./styles";
+import { styles } from "./styles";
 
 export type Match = RouterOutputs["match"]["getAll"][number];
 
 const MemoizedDivider = () => (
-  <DividerContainer>
+  <View style={styles.dividerContainer}>
     <Divider />
-  </DividerContainer>
+  </View>
 );
 
 const getKeyMemoized = (item: Match) => `${item.id}_message`;
@@ -87,7 +87,7 @@ const Messages = () => {
     return sortedMatches;
   })();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   // useCallback makes the header images re-render and flicker
   // useMemo is the right hook for this case, solving the issue
@@ -102,9 +102,9 @@ const Messages = () => {
           paddingBottom: theme.spacing[4],
         }}
       >
-        <Title>
+        <View style={styles.title}>
           <Text fontWeight="bold">{t("matches.matchedDogs")}</Text>
-        </Title>
+        </View>
         <Header matches={data} />
       </View>
       <View
@@ -113,9 +113,9 @@ const Messages = () => {
           marginBottom: theme.spacing[1],
         }}
       >
-        <Title>
+        <View style={styles.title}>
           <Text fontWeight="bold">{t("matches.messages")}</Text>
-        </Title>
+        </View>
       </View>
     </>
   );
@@ -129,9 +129,10 @@ const Messages = () => {
   const emptyListGrow = data?.length ? undefined : 1;
 
   return (
-    <Container
+    <KeyboardAvoidingView
       testID="messages-screen"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.container}
     >
       {Boolean(matches?.length) && (
         <SearchBar value={search} onChangeText={setSearch} />
@@ -157,7 +158,7 @@ const Messages = () => {
           flexGrow: emptyListGrow,
         }}
       />
-    </Container>
+    </KeyboardAvoidingView>
   );
 };
 

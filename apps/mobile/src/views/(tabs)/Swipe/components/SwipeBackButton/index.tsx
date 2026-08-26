@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
 
-import { SlideInRight, SlideOutRight } from "react-native-reanimated";
+import Animated, { SlideInRight, SlideOutRight } from "react-native-reanimated";
+import { useUnistyles } from "react-native-unistyles";
 import { useDispatch, useSelector } from "react-redux";
-import { useTheme } from "styled-components/native";
 
 import SwipeBackArrow from "@/assets/images/SwipeBackArrow.svg";
 import { useUnsafeIsPremium } from "@/hooks/use-payments";
@@ -11,12 +11,12 @@ import { Actions } from "@/store/reducers";
 import { getLastCardId } from "@/store/selectors";
 import { SceneName } from "@/types/scene-name";
 
-import { Container, GoBack } from "./styles";
+import { GoBack, styles } from "./styles";
 
 const SwipeBackButton = () => {
   const dispatch = useDispatch();
   const lastCardId = useSelector(getLastCardId);
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const isPremium = useUnsafeIsPremium();
   const router = useRouter();
@@ -37,11 +37,19 @@ const SwipeBackButton = () => {
   };
 
   return (
-    <Container exiting={SlideOutRight} entering={SlideInRight}>
-      <GoBack disabled={!canGoBack} onPress={handleGoBack}>
+    <Animated.View
+      exiting={SlideOutRight}
+      entering={SlideInRight}
+      style={styles.container}
+    >
+      <GoBack
+        disabled={!canGoBack}
+        onPress={handleGoBack}
+        style={styles.goBack}
+      >
         <SwipeBackArrow width={21} height={15} fill={theme.colors.primary} />
       </GoBack>
-    </Container>
+    </Animated.View>
   );
 };
 

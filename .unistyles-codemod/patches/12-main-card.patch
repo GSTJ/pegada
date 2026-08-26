@@ -1,0 +1,222 @@
+diff --git a/apps/mobile/src/components/MainCard/index.tsx b/apps/mobile/src/components/MainCard/index.tsx
+index 61dc394..27ad140 100644
+--- a/apps/mobile/src/components/MainCard/index.tsx
++++ b/apps/mobile/src/components/MainCard/index.tsx
+@@ -2,6 +2,7 @@ import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+ 
+ import { useState } from "react";
+ import * as React from "react";
++import { Pressable, View } from "react-native";
+ 
+ import { useRouter } from "expo-router";
+ 
+@@ -18,15 +19,7 @@ import { SceneName } from "@/types/scene-name";
+ import Distance from "./components/Distance";
+ import Pagination from "./components/Pagination";
+ import PersonalInfo from "./components/PersonalInfo";
+-import {
+-  CarouselContainer,
+-  Container,
+-  NextImage,
+-  Picture,
+-  PreviousImage,
+-  Scrim,
+-  UpperPart,
+-} from "./styles";
++import { Container, Picture, Scrim, styles } from "./styles";
+ 
+ const springConfig = { mass: 0.2 };
+ 
+@@ -102,11 +95,12 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
+       <Picture
+         source={{
+           uri: images[currentImage]?.url,
+-          blurhash: images[currentImage]?.blurhash,
++          blurhash: images[currentImage]?.blurhash ?? undefined,
+         }}
+         key={images[currentImage]?.id}
+       />
+       <Scrim
++        style={styles.scrim}
+         colors={[
+           "rgba(0, 0, 0, .5)",
+           "rgba(0, 0, 0, 0)",
+@@ -114,14 +108,14 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
+           "rgba(0, 0, 0, 0)",
+         ]}
+       />
+-      <UpperPart>
++      <View style={styles.upperPart}>
+         <Distance dog={dog} />
+         <Pagination pages={images.length} currentPage={currentImage} />
+-        <CarouselContainer>
+-          <PreviousImage onPress={gotoPreviousImage} />
+-          <NextImage onPress={gotoNextImage} />
+-        </CarouselContainer>
+-      </UpperPart>
++        <View style={styles.carouselContainer}>
++          <Pressable style={styles.previousImage} onPress={gotoPreviousImage} />
++          <Pressable style={styles.nextImage} onPress={gotoNextImage} />
++        </View>
++      </View>
+       {Boolean(shouldShowPersonalInfo) && (
+         <PressableArea
+           testID="swipe-card-open-profile"
+diff --git a/apps/mobile/src/components/MainCard/styles.ts b/apps/mobile/src/components/MainCard/styles.ts
+deleted file mode 100644
+index e149c71..0000000
+--- a/apps/mobile/src/components/MainCard/styles.ts
++++ /dev/null
+@@ -1,51 +0,0 @@
+-import { LinearGradient } from "expo-linear-gradient";
+-
+-import Animated from "react-native-reanimated";
+-import styled, { css } from "styled-components/native";
+-
+-import { Image } from "@/components/image";
+-
+-export const absoluteFill = css`
+-  position: absolute;
+-  top: 0;
+-  bottom: 0;
+-  right: 0;
+-  left: 0;
+-`;
+-
+-export const Container = styled(Animated.View)`
+-  background-color: ${(props) => props.theme.colors.background};
+-  overflow: hidden;
+-  padding-top: ${(props) => props.theme.spacing[6]}px;
+-`;
+-
+-export const Picture = styled(Image)`
+-  flex: 1;
+-  ${absoluteFill}
+-`;
+-
+-export const UpperPart = styled.View`
+-  flex: 1;
+-`;
+-
+-export const CarouselContainer = styled.View`
+-  flex-direction: row;
+-  ${absoluteFill}
+-`;
+-
+-export const PreviousImage = styled.Pressable`
+-  flex: 1;
+-`;
+-
+-export const NextImage = styled.Pressable`
+-  flex: 1;
+-`;
+-
+-/** Full-bleed gradient that darkens the top of the card. */
+-export const Scrim = styled(LinearGradient)`
+-  position: absolute;
+-  top: 0;
+-  left: 0;
+-  right: 0;
+-  bottom: 0;
+-`;
+diff --git a/apps/mobile/src/components/MainCard/styles.tsx b/apps/mobile/src/components/MainCard/styles.tsx
+new file mode 100644
+index 0000000..63a795a
+--- /dev/null
++++ b/apps/mobile/src/components/MainCard/styles.tsx
+@@ -0,0 +1,95 @@
++import type { LocalImageProps } from "@/components/image";
++import type { AnimatedProps } from "react-native-reanimated";
++
++import type { ViewProps } from "react-native";
++
++import { LinearGradient } from "expo-linear-gradient";
++
++import Animated from "react-native-reanimated";
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++import { css } from "styled-components/native";
++
++import { Image } from "@/components/image";
++
++/**
++ * Still a styled-components fragment because `FeedbackCard/styles.ts` is still
++ * styled-components and interpolates it. Everything in this module inlines the
++ * same five declarations instead; delete this when FeedbackCard converts.
++ */
++export const absoluteFill = css`
++  position: absolute;
++  top: 0;
++  bottom: 0;
++  right: 0;
++  left: 0;
++`;
++
++/** `expo-image` is not autoprocessed, so the sheet reaches it wrapped. */
++const ThemedImage = withUnistyles(Image);
++
++/**
++ * The card shell. It stays a component because the profile header renders the
++ * same shell squared off (`styled(Container)` in
++ * `views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts`).
++ *
++ * Callers pass their animated style through `style`, which lands after the
++ * sheet — animated styles have to stay last to win.
++ */
++export const Container = ({ style, ...props }: AnimatedProps<ViewProps>) => (
++  <Animated.View {...props} style={[styles.container, style]} />
++);
++
++export const Picture = ({ style, ...props }: LocalImageProps) => (
++  <ThemedImage {...props} style={[styles.picture, style]} />
++);
++
++/** Full-bleed gradient that darkens the top of the card. */
++export const Scrim = withUnistyles(LinearGradient);
++
++export const styles = StyleSheet.create((theme) => ({
++  container: {
++    backgroundColor: theme.colors.background,
++    overflow: "hidden",
++    paddingTop: theme.spacing[6],
++  },
++  picture: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    position: "absolute",
++    top: 0,
++    bottom: 0,
++    right: 0,
++    left: 0,
++  },
++  upperPart: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++  carouselContainer: {
++    flexDirection: "row",
++    position: "absolute",
++    top: 0,
++    bottom: 0,
++    right: 0,
++    left: 0,
++  },
++  previousImage: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++  nextImage: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++  },
++  scrim: {
++    position: "absolute",
++    top: 0,
++    left: 0,
++    right: 0,
++    bottom: 0,
++  },
++}));

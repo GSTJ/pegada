@@ -14,6 +14,7 @@ import {
   DefaultTheme as NavigationLightTheme,
   ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
+import { UnistylesRuntime } from "react-native-unistyles";
 import { ThemeProvider as StyledThemeProvider } from "styled-components/native";
 
 import { sendError } from "@/services/error-tracking";
@@ -100,6 +101,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
   // shows the theme background instead of a stale system color.
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(theme.colors.background).catch(sendError);
+  }, [theme]);
+
+  // Unistyles keeps its own theme registry, outside React. This provider stays
+  // the source of truth (it owns the stored override), so every resolved theme
+  // is mirrored into the runtime — otherwise `StyleSheet.create` styles would
+  // keep following the system scheme while styled-components followed the user.
+  useEffect(() => {
+    UnistylesRuntime.setTheme(theme.dark ? "dark" : "light");
   }, [theme]);
 
   // React Navigation paints every screen container with ITS theme, not the

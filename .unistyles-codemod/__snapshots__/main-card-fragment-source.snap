@@ -1,0 +1,434 @@
+# main-card-fragment-source
+
+status: skipped
+reason: `Container` is used as a value, not just rendered, in test/fixtures/main-card-fragment-source/src/components/MainCard/index.tsx
+useTheme: src/views/(tabs)/Profile/components/UserDogProfileHeader/index.tsx (2 sites)
+
+--- src/components/FeedbackCard/styles.ts ---
+
+import Animated from "react-native-reanimated";
+import styled, { css } from "styled-components/native";
+
+import MainCard from "../MainCard";
+import { absoluteFill } from "../MainCard/styles";
+
+type IContainer = {
+  isFirst: boolean;
+};
+
+export const Container = styled(Animated.View)<IContainer>`
+  margin: ${(props) => props.theme.spacing[1]}px
+    ${(props) => props.theme.spacing[1.5]}px;
+  flex: 1;
+  border-radius: ${(props) => props.theme.radii.lg}px;
+  background-color: ${(props) => props.theme.colors.background};
+  overflow: hidden;
+
+  ${(props) =>
+    props.isFirst &&
+    css`
+      elevation: 0.5;
+      shadow-color: #000;
+      shadow-offset: 0px 1px;
+      shadow-opacity: 0.1;
+      shadow-radius: 1px;
+    `}
+`;
+
+export const AbsolutePosition = styled(Animated.View).attrs((props) => ({
+  pointerEvents: "none",
+  ...props,
+}))`
+  flex: 1;
+  ${absoluteFill}
+`;
+
+export const StyledMainCard = styled(MainCard)`
+  flex: 1;
+`;
+
+--- src/components/MainCard/index.tsx ---
+
+import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+
+import { useState } from "react";
+import * as React from "react";
+
+import { useRouter } from "expo-router";
+
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from "react-native-reanimated";
+
+import { PressableArea } from "@/components/pressable-area";
+import { SceneName } from "@/types/scene-name";
+
+import Distance from "./components/Distance";
+import Pagination from "./components/Pagination";
+import PersonalInfo from "./components/PersonalInfo";
+import {
+  CarouselContainer,
+  Container,
+  NextImage,
+  Picture,
+  PreviousImage,
+  Scrim,
+  UpperPart,
+} from "./styles";
+
+const springConfig = { mass: 0.2 };
+
+const START_IMAGE_INDEX = 0;
+
+// oxlint-disable-next-line typescript/consistent-type-definitions -- `Container` is a reanimated Animated.View, whose props carry a string index signature. `interface … extends` keeps the members below at their declared types; the `{…} & Props` intersection the rule wants intersects each of them with the index signature's `any` and silently widens all three to `any`.
+export interface VisitingCardProps extends React.ComponentProps<
+  typeof Container
+> {
+  dog: SwipeDog;
+  shouldShowPersonalInfo?: boolean;
+  startImageIndex?: number;
+}
+
+const VisitingCard: React.FC<VisitingCardProps> = ({
+  dog,
+  shouldShowPersonalInfo = true,
+  startImageIndex = START_IMAGE_INDEX,
+  ...props
+}) => {
+  const { images = [] } = dog;
+  const [currentImage, setCurrentImage] = useState(startImageIndex);
+  const router = useRouter();
+
+  const rotation = useSharedValue(0);
+
+  const openUserProfile = () => {
+    router.push({
+      pathname: `${SceneName.Profile}/[id]`,
+      params: {
+        id: dog.id,
+        currentImageIndex: currentImage,
+      },
+    });
+  };
+
+  const gotoPreviousImage = () => {
+    // If there is only one image, open the user profile for now.
+    // Not ideal to be here, but improves UX a little - just a quick fix
+    if (images.length <= 1 && shouldShowPersonalInfo) return openUserProfile();
+
+    if (currentImage !== 0) return setCurrentImage((index) => index - 1);
+
+    rotation.value = withSequence(
+      withSpring(-0.5, springConfig),
+      withSpring(0, springConfig),
+    );
+  };
+
+  const gotoNextImage = () => {
+    // If there is only one image, open the user profile for now.
+    // Not ideal to be here, but improves UX a little - just a quick fix
+    if (images.length <= 1 && shouldShowPersonalInfo) return openUserProfile();
+
+    if (currentImage + 1 < images.length) {
+      return setCurrentImage((index) => index + 1);
+    }
+    rotation.value = withSequence(
+      withSpring(0.5, springConfig),
+      withSpring(0, springConfig),
+    );
+  };
+
+  const transform = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      transform: [{ perspective: 100 }, { rotateY: `${rotation.value}deg` }],
+    };
+  });
+
+  return (
+    <Container testID="swipe-card" {...props} style={[props.style, transform]}>
+      <Picture
+        source={{
+          uri: images[currentImage]?.url,
+          blurhash: images[currentImage]?.blurhash,
+        }}
+        key={images[currentImage]?.id}
+      />
+      <Scrim
+        colors={[
+          "rgba(0, 0, 0, .5)",
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 0, 0, 0)",
+        ]}
+      />
+      <UpperPart>
+        <Distance dog={dog} />
+        <Pagination pages={images.length} currentPage={currentImage} />
+        <CarouselContainer>
+          <PreviousImage onPress={gotoPreviousImage} />
+          <NextImage onPress={gotoNextImage} />
+        </CarouselContainer>
+      </UpperPart>
+      {Boolean(shouldShowPersonalInfo) && (
+        <PressableArea
+          testID="swipe-card-open-profile"
+          onPress={openUserProfile}
+        >
+          <PersonalInfo dog={dog} />
+        </PressableArea>
+      )}
+    </Container>
+  );
+};
+
+export default VisitingCard;
+
+--- src/components/MainCard/styles.ts ---
+
+import { LinearGradient } from "expo-linear-gradient";
+
+import Animated from "react-native-reanimated";
+import styled, { css } from "styled-components/native";
+
+import { Image } from "@/components/image";
+
+export const absoluteFill = css`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+`;
+
+export const Container = styled(Animated.View)`
+  background-color: ${(props) => props.theme.colors.background};
+  overflow: hidden;
+  padding-top: ${(props) => props.theme.spacing[6]}px;
+`;
+
+export const Picture = styled(Image)`
+  flex: 1;
+  ${absoluteFill}
+`;
+
+export const UpperPart = styled.View`
+  flex: 1;
+`;
+
+export const CarouselContainer = styled.View`
+  flex-direction: row;
+  ${absoluteFill}
+`;
+
+export const PreviousImage = styled.Pressable`
+  flex: 1;
+`;
+
+export const NextImage = styled.Pressable`
+  flex: 1;
+`;
+
+/** Full-bleed gradient that darkens the top of the card. */
+export const Scrim = styled(LinearGradient)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+`;
+
+--- src/views/(tabs)/Profile/components/UserDogProfileHeader/index.tsx ---
+
+import { ActivityIndicator, useWindowDimensions, View } from "react-native";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Premium from "@/assets/images/Premium.svg";
+import { BIO_NUMBER_OF_LINES } from "@/components/MainCard/components/PersonalInfo";
+import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
+import { Picture } from "@/components/MainCard/styles";
+import { NetworkBoundary } from "@/components/NetworkBoundary";
+import { api } from "@/contexts/trpc-provider";
+import { useCustomerPlan } from "@/hooks/use-payments";
+import { UserPlan } from "@/services/payments";
+import { useGetFormattedYears } from "@/services/use-get-formatted-years";
+import {
+  HeaderCard,
+  InfoBlock,
+  NameRow,
+  ProfileContainer,
+  ProfileUnknownError,
+  Scrim,
+  Shade,
+} from "@/views/(tabs)/Profile/components/UserDogProfileHeader/styles";
+import { useUnistyles } from "react-native-unistyles";
+
+export const useDogProfileHeight = () => {
+  const { height } = useWindowDimensions();
+  return height / 2.5;
+};
+
+const UserDogProfileHeader = () => {
+  const dogProfileHeight = useDogProfileHeight();
+  const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
+    refetchOnMount: false,
+  });
+
+  const { theme } = useUnistyles();
+
+  const plan = useCustomerPlan();
+
+  const getFormattedYears = useGetFormattedYears();
+
+  if (!dog) {
+    throw new Error("Dog not found");
+  }
+
+  return (
+    <HeaderCard style={{ height: dogProfileHeight }}>
+      <Picture
+        source={{
+          uri: dog.images[0]?.url,
+          blurhash: dog.images[0]?.blurhash ?? undefined,
+        }}
+      />
+      <Shade
+        colors={[
+          "rgba(0, 0, 0, 0)",
+          "rgba(0, 0, 0, .5)",
+          "rgba(0, 0, 0, .5)",
+          "rgba(0, 0, 0, .7)",
+        ]}
+      >
+        <InfoBlock>
+          <NameRow style={{ gap: theme.spacing[1.5] }}>
+            <PersonalInfo.Name
+              testID="profile-dog-name"
+              style={{ fontSize: theme.typography.sizes.xl.size }}
+            >
+              {dog.name}
+              {dog.birthDate ? (
+                <PersonalInfo.Age
+                  style={{ fontSize: theme.typography.sizes.lg.size }}
+                >
+                  , {getFormattedYears(dog.birthDate)}
+                </PersonalInfo.Age>
+              ) : null}
+            </PersonalInfo.Name>
+            {plan.data?.userPlan === UserPlan.Premium ? (
+              <Premium
+                testID="profile-premium-badge"
+                fill={theme.colors.premium}
+                width={22}
+                height={22}
+              />
+            ) : null}
+          </NameRow>
+          {dog.bio ? (
+            <PersonalInfo.Description
+              numberOfLines={BIO_NUMBER_OF_LINES}
+              style={{ fontSize: theme.typography.sizes.sm.size }}
+            >
+              {dog.bio}
+            </PersonalInfo.Description>
+          ) : null}
+        </InfoBlock>
+      </Shade>
+    </HeaderCard>
+  );
+};
+
+const LoadingFallback = () => {
+  const { theme } = useUnistyles();
+  const insets = useSafeAreaInsets();
+  const dogProfileHeight = useDogProfileHeight();
+
+  return (
+    <ProfileContainer
+      style={{
+        paddingTop: insets.top,
+        height: dogProfileHeight,
+      }}
+    >
+      <ActivityIndicator color={theme.colors.primary} />
+    </ProfileContainer>
+  );
+};
+
+const WrappedUserDogProfileHeader = () => {
+  const dogProfileHeight = useDogProfileHeight();
+
+  return (
+    <View style={{ height: dogProfileHeight }}>
+      <NetworkBoundary
+        errorFallback={ProfileUnknownError}
+        suspenseFallback={<LoadingFallback />}
+      >
+        <UserDogProfileHeader />
+      </NetworkBoundary>
+      <Scrim
+        colors={["rgba(0, 0, 0, .5)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
+      />
+    </View>
+  );
+};
+
+export default WrappedUserDogProfileHeader;
+
+--- src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts ---
+
+import { LinearGradient } from "expo-linear-gradient";
+
+import styled from "styled-components/native";
+
+import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
+import { Container } from "@/components/MainCard/styles";
+import {
+  OfflineComponent,
+  UnknownErrorComponent,
+} from "@/components/NetworkBoundary";
+
+/** The MainCard shell, squared off because it sits flush under the header. */
+export const HeaderCard = styled(Container)`
+  border-radius: 0;
+`;
+
+/** Bottom-anchored gradient the name and bio sit on top of. */
+export const Shade = styled(LinearGradient)`
+  margin-top: auto;
+`;
+
+/** Top-anchored gradient that darkens the status bar area. */
+export const Scrim = styled(LinearGradient)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+`;
+
+export const InfoBlock = styled(PersonalInfo.Container)`
+  padding-bottom: 35px;
+`;
+
+export const NameRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+export const ProfileContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.card};
+`;
+
+export const ProfileOfflineError = styled(OfflineComponent)`
+  background-color: ${({ theme }) => theme.colors.card};
+`;
+
+export const ProfileUnknownError = styled(UnknownErrorComponent)`
+  background-color: ${({ theme }) => theme.colors.card};
+`;

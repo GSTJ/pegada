@@ -1,0 +1,318 @@
+{
+  "$comment": "Hand-converted inheritance roots (patches 10-19). `pristineRef` is the last commit before the migration landed in the working tree; the checkpoint commit on top of it is where the codemod output starts.",
+  "pristineRef": "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239",
+  "units": [
+    {
+      "file": "apps/mobile/src/components/text.tsx",
+      "pristine": "apps/mobile/src/components/text.ts",
+      "$comment": "One unit per variant group: the ledger caps the prop matrix at 64 combinations, and 15 colours x 7 weights x 9 sizes is well past it. `applyVariants` resolves every other group to its `default` bucket, so each unit still compares a complete style object.",
+      "definitionsDetail": [
+        {
+          "name": "Text",
+          "key": "text",
+          "mode": "inline",
+          "variants": {
+            "color": [
+              "transparent",
+              "black",
+              "white",
+              "premium",
+              "primary",
+              "secondary",
+              "background",
+              "text",
+              "subtitle",
+              "card",
+              "placeholder",
+              "accent",
+              "destructive",
+              "border",
+              "input",
+              "default"
+            ]
+          },
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/text.tsx",
+      "pristine": "apps/mobile/src/components/text.ts",
+      "definitionsDetail": [
+        {
+          "name": "Text",
+          "key": "text",
+          "mode": "inline",
+          "variants": {
+            "fontWeight": [
+              "light",
+              "medium",
+              "regular",
+              "semibold",
+              "bold",
+              "black",
+              "default"
+            ]
+          },
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/text.tsx",
+      "pristine": "apps/mobile/src/components/text.ts",
+      "definitionsDetail": [
+        {
+          "name": "Text",
+          "key": "text",
+          "mode": "inline",
+          "variants": {
+            "fontSize": [
+              "xxxl",
+              "xxl",
+              "xl",
+              "lg",
+              "md",
+              "sm",
+              "xs",
+              "xxs",
+              "default"
+            ]
+          },
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/blur-view.tsx",
+      "definitionsDetail": [
+        {
+          "name": "BlurView",
+          "key": "blurView",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "TransparentAndroidDarkBlurView",
+          "key": "transparentAndroidDarkBlurView",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/styles.tsx",
+      "pristine": "apps/mobile/src/components/MainCard/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Picture",
+          "key": "picture",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "UpperPart",
+          "key": "upperPart",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CarouselContainer",
+          "key": "carouselContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "PreviousImage",
+          "key": "previousImage",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "NextImage",
+          "key": "nextImage",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Scrim",
+          "key": "scrim",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/components/PersonalInfo/styles.tsx",
+      "pristine": "apps/mobile/src/components/MainCard/components/PersonalInfo/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Name",
+          "key": "name",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Age",
+          "key": "age",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "Name"
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.tsx",
+      "pristine": "apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/DefaultModal/styles.tsx",
+      "pristine": "apps/mobile/src/components/DefaultModal/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "OkButton",
+          "key": "okButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/styles.tsx",
+      "pristine": "apps/mobile/src/views/UpgradeWall/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Header",
+          "key": "header",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CloseButton",
+          "key": "closeButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "HeroImage",
+          "key": "heroImage",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Subtitle",
+          "key": "subtitle",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CancelAnytime",
+          "key": "cancelAnytime",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CloseIcon",
+          "key": "closeIcon",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "GradientEffect",
+          "key": "gradientEffect",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,30 +1,50 @@
-import Animated from "react-native-reanimated";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { TransparentAndroidDarkBlurView } from "@/components/blur-view";
 
-export const Content = styled.View`
-  padding: ${(props) => props.theme.spacing[1]}px;
-  margin-bottom: auto;
-  align-items: center;
-`;
+const DOT_BACKGROUND_COLOR = "#fff";
 
-export const Container = styled(TransparentAndroidDarkBlurView)`
-  border-top-left-radius: ${(props) => props.theme.radii.md}px;
-  border-bottom-left-radius: ${(props) => props.theme.radii.md}px;
-  margin-bottom: auto;
-  align-self: flex-end;
-  width: 24px;
-  overflow: hidden;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  content: {
+    paddingTop: theme.spacing[1],
+    paddingRight: theme.spacing[1],
+    paddingBottom: theme.spacing[1],
+    paddingLeft: theme.spacing[1],
+    marginBottom: "auto",
+    alignItems: "center",
+  },
+  container: {
+    borderTopLeftRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    marginBottom: "auto",
+    alignSelf: "flex-end",
+    width: 24,
+    overflow: "hidden",
+  },
+  dot: {
+    backgroundColor: DOT_BACKGROUND_COLOR,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    marginTop: theme.spacing[1],
+    marginRight: theme.spacing[1],
+    marginBottom: theme.spacing[1],
+    marginLeft: theme.spacing[1],
+    variants: {
+      active: {
+        true: {
+          opacity: 1,
+        },
+        false: {
+          opacity: 0.6,
+        },
+        default: {
+          opacity: 0.6,
+        },
+      },
+    },
+  },
+}));
 
-type IDot = {
-  active: boolean;
-};
-
-export const Dot = styled(Animated.View)<IDot>`
-  background-color: #fff;
-  opacity: ${(props) => (props.active ? 1 : 0.6)};
-  border-radius: ${(props) => props.theme.radii.md}px;
-  margin: ${(props) => props.theme.spacing[1]}px;
-`;
+export const Container = withUnistyles(TransparentAndroidDarkBlurView);

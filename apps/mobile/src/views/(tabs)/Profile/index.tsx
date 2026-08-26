@@ -1,3 +1,5 @@
+import { View } from "react-native";
+
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as StoreReview from "expo-store-review";
@@ -14,7 +16,7 @@ import Animated, {
   useScrollViewOffset,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import Dog from "@/assets/images/Dog.svg";
 import Erase from "@/assets/images/Erase.svg";
@@ -38,16 +40,7 @@ import { ThemeConfig } from "./components/theme-config";
 import UserDogProfileHeader, {
   useDogProfileHeight,
 } from "./components/UserDogProfileHeader";
-import {
-  BackgroundOverlay,
-  BackgroundProfileContainer,
-  Container,
-  Content,
-  ScrollContainer,
-  SettingsList,
-  SettingsBlock,
-  settingsScroll,
-} from "./styles";
+import { settingsScroll, styles } from "./styles";
 import { deleteAccount } from "./utils/delete-account";
 import { handleLogout } from "./utils/handle-logout";
 
@@ -76,7 +69,7 @@ const Profile = () => {
 
   const router = useRouter();
 
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollY = useScrollViewOffset(scrollRef);
@@ -129,22 +122,25 @@ const Profile = () => {
   const tabBarHeight = useBottomTabBarHeight();
 
   return (
-    <Container testID="profile-screen">
+    <View testID="profile-screen" style={styles.container}>
       {isFocused ? <StatusBar style="light" /> : null}
-      <BackgroundProfileContainer>
+      <View style={styles.backgroundProfileContainer}>
         <Animated.View style={imgStyle}>
           <UserDogProfileHeader />
         </Animated.View>
-        <BackgroundOverlay style={overlayStyle} />
-      </BackgroundProfileContainer>
-      <ScrollContainer
-        style={{
-          marginTop,
-          borderBottomWidth: theme.stroke.sm,
-          borderColor: theme.colors.border,
-        }}
+        <Animated.View style={[styles.backgroundOverlay, overlayStyle]} />
+      </View>
+      <View
+        style={[
+          styles.scrollContainer,
+          {
+            marginTop,
+            borderBottomWidth: theme.stroke.sm,
+            borderColor: theme.colors.border,
+          },
+        ]}
       >
-        <SettingsList
+        <Animated.ScrollView
           bounces={false}
           contentContainerStyle={[
             settingsScroll,
@@ -153,17 +149,21 @@ const Profile = () => {
           ref={scrollRef}
           scrollEventThrottle={16}
           stickyHeaderIndices={[0]}
+          style={styles.settingsList}
         >
-          <Content>
+          <View style={styles.content}>
             <Text fontWeight="bold" fontSize="lg">
               {t("profile.settings")}
             </Text>
-          </Content>
-          <SettingsBlock
+          </View>
+          <View
             // The settings block owns the opaque background below the photo
             // header: it pads past the floating tab bar so no grey gap shows
             // at scroll end.
-            style={{ paddingBottom: theme.spacing[4] + tabBarHeight }}
+            style={[
+              styles.settingsBlock,
+              { paddingBottom: theme.spacing[4] + tabBarHeight },
+            ]}
           >
             <LocationConfig />
             <CurrentPlanConfig />
@@ -262,10 +262,10 @@ const Profile = () => {
                 </Config.Title>
               </Config.Container>
             </Config.Root>
-          </SettingsBlock>
-        </SettingsList>
-      </ScrollContainer>
-    </Container>
+          </View>
+        </Animated.ScrollView>
+      </View>
+    </View>
   );
 };
 

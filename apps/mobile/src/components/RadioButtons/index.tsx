@@ -1,11 +1,12 @@
 import type { OptionButtonProps } from "./styles";
 
 import * as React from "react";
+import { View } from "react-native";
 
-import { Container } from "@/components/Input/styles";
+import { styles as inputStyles } from "@/components/Input/styles";
 import { Text } from "@/components/text";
 
-import { Content, RadioButtonContainer, TextButton } from "./styles";
+import { RadioButtonContainer, TextButton, styles } from "./styles";
 
 type RadioButtonsProps = {
   title: string;
@@ -19,13 +20,13 @@ type RadioButtonProps = {
 } & OptionButtonProps;
 
 const RadioButton: React.FC<RadioButtonProps> = (props) => {
+  styles.useVariants({ last: props.last, marked: props.marked });
   return (
     <RadioButtonContainer
       onPress={props.onPress}
-      marked={props.marked}
-      last={props.last}
+      style={styles.radioButtonContainer}
     >
-      <TextButton marked={props.marked} fontWeight="bold" fontSize="md">
+      <TextButton fontWeight="bold" fontSize="md" style={styles.textButton}>
         {props.children}
       </TextButton>
     </RadioButtonContainer>
@@ -39,11 +40,11 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
   value,
 }) => {
   return (
-    <Container>
+    <View style={inputStyles.container}>
       <Text fontWeight="bold" fontSize="lg">
         {title}
       </Text>
-      <Content>
+      <View style={styles.content}>
         {data.map((item, index) => {
           return (
             <RadioButton
@@ -56,7 +57,7 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
             </RadioButton>
           );
         })}
-      </Content>
-    </Container>
+      </View>
+    </View>
   );
 };

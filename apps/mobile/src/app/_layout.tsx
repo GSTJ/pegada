@@ -1,14 +1,14 @@
-import "@/config";
 import { useEffect, useState } from "react";
 
+import "@/config";
 import { router, SplashScreen, Stack } from "expo-router";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { Provider } from "react-redux";
-import styled from "styled-components/native";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { storedThemePromise, ThemeProvider } from "@/contexts/theme-provider";
@@ -25,11 +25,6 @@ import { SceneName } from "@/types/scene-name";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);
-
-const AppContainer = styled(GestureHandlerRootView)`
-  flex: 1;
-`;
-
 const App = () => {
   const { initialRouteName } = useProtectedRoute();
   const [themeReady, setThemeReady] = useState(false);
@@ -100,10 +95,11 @@ const App = () => {
   // the error boundary inside NetworkBoundary reports through the shared
   // client either way, which no-ops just as silently.
   const posthog = getExpoPostHog();
-  if (!posthog) return <AppContainer>{tree}</AppContainer>;
+  if (!posthog)
+    return <AppContainer style={styles.appContainer}>{tree}</AppContainer>;
 
   return (
-    <AppContainer>
+    <AppContainer style={styles.appContainer}>
       <PostHogProvider client={posthog} autocapture={false}>
         {tree}
       </PostHogProvider>
@@ -112,3 +108,13 @@ const App = () => {
 };
 
 export default App;
+
+const styles = StyleSheet.create({
+  appContainer: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+});
+
+const AppContainer = withUnistyles(GestureHandlerRootView);

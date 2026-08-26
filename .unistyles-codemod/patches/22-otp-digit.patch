@@ -1,0 +1,162 @@
+diff --git a/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/index.tsx b/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/index.tsx
+index 641b117..2bb7cec 100644
+--- a/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/index.tsx
++++ b/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/index.tsx
+@@ -11,7 +11,8 @@ export enum KeyboardKeys {
+ }
+ 
+ type OtpDigitProps = {
+-  children: string;
++  /** One character of the code, or nothing while that slot is still empty. */
++  children?: string;
+   length: number;
+   index: number;
+   handleChange: (text: string, index: number) => void;
+@@ -50,7 +51,7 @@ const OtpDigit = forwardRef<
+     const rightMargin = isLast ? 0 : OTP_INPUT_MARGIN;
+     const selectedBorderColor = colors.border;
+ 
+-    const digit = Number.isNaN(Number(children)) ? "" : children;
++    const digit = children && !Number.isNaN(Number(children)) ? children : "";
+ 
+     return (
+       <S.Container
+@@ -79,11 +80,7 @@ const OtpDigit = forwardRef<
+           importantForAutofill={isFirst ? "yes" : "no"}
+           textContentType={isFirst ? "oneTimeCode" : "none"}
+           autoComplete={isFirst ? "sms-otp" : "off"}
+-          onKeyPress={({
+-            nativeEvent: { key },
+-          }: {
+-            nativeEvent: { key: KeyboardKeys };
+-          }) => {
++          onKeyPress={({ nativeEvent: { key } }) => {
+             if (key === KeyboardKeys.Backspace)
+               return handleErase(digit, index);
+           }}
+diff --git a/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.ts b/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.ts
+deleted file mode 100644
+index 815122d..0000000
+--- a/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.ts
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import { Dimensions } from "react-native";
+-
+-import styled from "styled-components/native";
+-
+-const deviceHeight = Dimensions.get("window").height;
+-
+-export const isSmallDevice = deviceHeight < 700;
+-
+-export const Container = styled.View`
+-  flex: 1;
+-  border-radius: ${(props) => props.theme.radii.md}px;
+-  border-width: ${(props) => props.theme.stroke.lg}px;
+-  background-color: ${(props) => props.theme.colors.input};
+-`;
+-
+-export const TextInput = styled.TextInput`
+-  flex: 1;
+-  text-align: center;
+-  color: transparent;
+-`;
+-
+-export const AbsoluteContainer = styled.View`
+-  position: absolute;
+-  left: 0;
+-  bottom: 0;
+-  top: 0;
+-  right: 0;
+-  align-items: center;
+-  justify-content: center;
+-`;
+-
+-export const StyledText = styled.Text`
+-  font-family: ${(props) => props.theme.typography.fontFamily.bold};
+-  font-weight: bold;
+-  color: ${(props) => props.theme.colors.text};
+-  font-size: ${isSmallDevice ? 24 : 30}px;
+-`;
+diff --git a/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.tsx b/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.tsx
+new file mode 100644
+index 0000000..9eca3ef
+--- /dev/null
++++ b/apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.tsx
+@@ -0,0 +1,77 @@
++import type { TextInputProps, TextProps, ViewProps } from "react-native";
++
++import { forwardRef } from "react";
++import {
++  Dimensions,
++  Text,
++  TextInput as NativeTextInput,
++  View,
++} from "react-native";
++
++import { StyleSheet } from "react-native-unistyles";
++
++const deviceHeight = Dimensions.get("window").height;
++
++export const isSmallDevice = deviceHeight < 700;
++
++/**
++ * These stay components rather than becoming bare style objects: `index.tsx`
++ * types its own props off `typeof Container`, and the digit boxes are the
++ * module's vocabulary — every one of them is composed with a caller style.
++ */
++export const Container = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.container, style]} />
++);
++
++/** `OtpInput` drives focus through a ref, so this one has to forward it. */
++export const TextInput = forwardRef<NativeTextInput, TextInputProps>(
++  ({ style, ...props }, ref) => (
++    <NativeTextInput {...props} ref={ref} style={[styles.textInput, style]} />
++  ),
++);
++
++TextInput.displayName = "TextInput";
++
++export const AbsoluteContainer = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.absoluteContainer, style]} />
++);
++
++export const StyledText = ({ style, ...props }: TextProps) => (
++  <Text {...props} style={[styles.styledText, style]} />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    borderTopLeftRadius: theme.radii.md,
++    borderTopRightRadius: theme.radii.md,
++    borderBottomRightRadius: theme.radii.md,
++    borderBottomLeftRadius: theme.radii.md,
++    borderWidth: theme.stroke.lg,
++    backgroundColor: theme.colors.input,
++  },
++  textInput: {
++    flexGrow: 1,
++    flexShrink: 1,
++    flexBasis: 0,
++    textAlign: "center",
++    color: "transparent",
++  },
++  absoluteContainer: {
++    position: "absolute",
++    left: 0,
++    bottom: 0,
++    top: 0,
++    right: 0,
++    alignItems: "center",
++    justifyContent: "center",
++  },
++  styledText: {
++    fontFamily: theme.typography.fontFamily.bold,
++    fontWeight: "bold",
++    color: theme.colors.text,
++    fontSize: isSmallDevice ? 24 : 30,
++  },
++}));

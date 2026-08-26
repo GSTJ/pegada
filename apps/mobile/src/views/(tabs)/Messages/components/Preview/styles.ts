@@ -1,24 +1,33 @@
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { Image } from "@/components/image";
 import { PressableArea } from "@/components/pressable-area";
 
-export const Content = styled.View`
-  width: 65px;
-  align-items: center;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  content: {
+    width: 65,
+    alignItems: "center",
+  },
+  picture: {
+    width: 80,
+    height: 100,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    marginBottom: theme.spacing[1],
+    backgroundColor: theme.colors.border,
+  },
+  container: {
+    borderTopLeftRadius: theme.spacing[2.5],
+    borderTopRightRadius: theme.spacing[2.5],
+    borderBottomRightRadius: theme.spacing[2.5],
+    borderBottomLeftRadius: theme.spacing[2.5],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+}));
 
-export const Picture = styled(Image)`
-  width: 80px;
-  height: 100px;
-  border-radius: ${(props) => props.theme.radii.md}px;
-  margin-bottom: ${(props) => props.theme.spacing[1]}px;
+export const Picture = withUnistyles(Image);
 
-  background-color: ${(props) => props.theme.colors.border};
-`;
-
-export const Container = styled(PressableArea)`
-  border-radius: ${(props) => props.theme.spacing[2.5]}px;
-  align-items: center;
-  justify-content: center;
-`;
+export const Container = withUnistyles(PressableArea);

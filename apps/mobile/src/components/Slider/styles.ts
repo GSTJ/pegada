@@ -1,47 +1,52 @@
-import styled from "styled-components/native";
-
-export const TitleContainer = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: ${(props) => props.theme.spacing[6]}px;
-`;
+import { StyleSheet } from "react-native-unistyles";
 
 export const WIDTH = 36;
 const HEIGHT = 24;
 const TRIANGLE_SIZE = 4;
 
-export const LabelContainer = styled.View`
-  position: absolute;
-  top: ${HEIGHT + 20}px;
-  width: ${WIDTH}px;
-  height: ${HEIGHT}px;
-  align-items: center;
-  justify-content: center;
-  background-color: ${(props) => props.theme.colors.primary};
-  border-radius: ${(props) => props.theme.radii.sm}px;
-  elevation: 5;
-  shadow-color: ${(props) => props.theme.colors.text};
-  shadow-offset: 0px 2px;
-  shadow-opacity: 0.2;
-  shadow-radius: 2px;
-`;
-
-export const Triangle = styled.View`
-  position: absolute;
-  top: -${TRIANGLE_SIZE / 2}px;
-  left: ${WIDTH / 2 - TRIANGLE_SIZE / 2}px;
-  width: ${TRIANGLE_SIZE}px;
-  height: ${TRIANGLE_SIZE}px;
-  background-color: ${(props) => props.theme.colors.primary};
-  transform: rotate(45deg);
-`;
-
-export const Marker = styled.View`
-  height: 20px;
-  width: 20px;
-  border-radius: ${(props) => props.theme.radii.round}px;
-  background-color: ${(props) => props.theme.colors.background};
-  border-width: 2.3px;
-  border-color: ${(props) => props.theme.colors.primary};
-  transform: translateY(1px);
-`;
+export const styles = StyleSheet.create((theme) => ({
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: theme.spacing[6],
+  },
+  labelContainer: {
+    position: "absolute",
+    top: HEIGHT + 20,
+    width: WIDTH,
+    height: HEIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    borderTopLeftRadius: theme.radii.sm,
+    borderTopRightRadius: theme.radii.sm,
+    borderBottomRightRadius: theme.radii.sm,
+    borderBottomLeftRadius: theme.radii.sm,
+    elevation: 5,
+    shadowColor: theme.colors.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  triangle: {
+    position: "absolute",
+    top: -(TRIANGLE_SIZE / 2),
+    left: WIDTH / 2 - TRIANGLE_SIZE / 2,
+    width: TRIANGLE_SIZE,
+    height: TRIANGLE_SIZE,
+    backgroundColor: theme.colors.primary,
+    transform: [{ rotate: "45deg" }],
+  },
+  marker: {
+    height: 20,
+    width: 20,
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    backgroundColor: theme.colors.background,
+    borderWidth: 2.3,
+    borderColor: theme.colors.primary,
+    transform: [{ translateY: 1 }],
+  },
+}));

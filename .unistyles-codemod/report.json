@@ -1,0 +1,2141 @@
+{
+  "units": [
+    {
+      "file": "apps/mobile/src/app/_layout.tsx",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [],
+      "definitionsDetail": [
+        {
+          "name": "AppContainer",
+          "key": "appContainer",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/blur-view.tsx",
+      "status": "skipped",
+      "reason": "`BlurView` is wrapped by a styled() in another module"
+    },
+    {
+      "file": "apps/mobile/src/components/BottomAction/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/BottomAction/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/BreedPicker/index.tsx",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [],
+      "definitionsDetail": [
+        {
+          "name": "DisabledInput",
+          "key": "disabledInput",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/Button/styles.ts",
+      "status": "skipped",
+      "reason": "<Container> in apps/mobile/src/components/Button/index.tsx spreads props, so its variants and attrs cannot be resolved"
+    },
+    {
+      "file": "apps/mobile/src/components/DefaultModal/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is wrapped by a styled() in another module"
+    },
+    {
+      "file": "apps/mobile/src/components/divider.ts",
+      "status": "skipped",
+      "reason": "default export: the styled component is the module's default export, so it has no name"
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/components/LikeFeedback/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is wrapped by a styled() in another module"
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/components/MaybeFeedback/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/FeedbackCard/components/MaybeFeedback/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/components/NopeFeedback/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/FeedbackCard/components/NopeFeedback/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/FeedbackCard/styles.ts",
+      "status": "skipped",
+      "reason": "<AbsolutePosition> in apps/mobile/src/components/FeedbackCard/index.tsx overrides .attrs({ pointerEvents }), which styled-components would have won"
+    },
+    {
+      "file": "apps/mobile/src/components/Glassmorphism/styles.ts",
+      "status": "skipped",
+      "reason": "<Container> in apps/mobile/src/components/Glassmorphism/index.tsx spreads props, so its variants and attrs cannot be resolved"
+    },
+    {
+      "file": "apps/mobile/src/components/Input/styles.ts",
+      "status": "converted",
+      "definitions": 7,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/Input/index.tsx",
+        "apps/mobile/src/components/RadioButtons/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "TitleContainer",
+          "key": "titleContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CancelTouchArea",
+          "key": "cancelTouchArea",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CancelIcon",
+          "key": "cancelIcon",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "TextInput",
+          "key": "textInput",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ActivityIndicatorComponent",
+          "key": "activityIndicatorComponent",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/layout.ts",
+      "status": "converted",
+      "definitions": 3,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/EditProfile/index.tsx",
+        "apps/mobile/src/views/(auth)/CompleteProfile/index.tsx",
+        "apps/mobile/src/views/(auth)/CreateProfile/index.tsx",
+        "apps/mobile/src/views/(tabs)/Messages/components/Message/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Fill",
+          "key": "fill",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Row",
+          "key": "row",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "KeyboardScreen",
+          "key": "keyboardScreen",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/LikeLimitReached/styles.ts",
+      "status": "converted",
+      "definitions": 4,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/LikeLimitReached/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "PinnedCloseButton",
+          "key": "pinnedCloseButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Header",
+          "key": "header",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CountdownContainer",
+          "key": "countdownContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/loading.ts",
+      "status": "skipped",
+      "reason": "default export: the styled component is the module's default export, so it has no name"
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/components/Distance/styles.ts",
+      "status": "converted",
+      "definitions": 3,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/MainCard/components/Distance/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "DistanceText",
+          "key": "distanceText",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/components/Pagination/styles.ts",
+      "status": "converted",
+      "definitions": 3,
+      "variants": 1,
+      "consumers": [
+        "apps/mobile/src/components/MainCard/components/Pagination/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Dot",
+          "key": "dot",
+          "mode": "inline",
+          "variants": {
+            "active": [
+              "true",
+              "false",
+              "default"
+            ]
+          },
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/components/PersonalInfo/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is wrapped by a styled() in another module"
+    },
+    {
+      "file": "apps/mobile/src/components/MainCard/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is wrapped by a styled() in another module"
+    },
+    {
+      "file": "apps/mobile/src/components/MatchActionBar/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is used as a value, not just rendered, in apps/mobile/src/components/MatchActionBar/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/components/NetworkBoundary/styles.ts",
+      "status": "skipped",
+      "reason": "<Container> in apps/mobile/src/components/NetworkBoundary/index.tsx spreads props, so its variants and attrs cannot be resolved"
+    },
+    {
+      "file": "apps/mobile/src/components/Picker/styles.ts",
+      "status": "converted",
+      "definitions": 6,
+      "variants": 1,
+      "consumers": [
+        "apps/mobile/src/components/LikeLimitReached/index.tsx",
+        "apps/mobile/src/components/Picker/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "TitleContainer",
+          "key": "titleContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SelectItem",
+          "key": "selectItem",
+          "mode": "wrapper",
+          "variants": {
+            "selected": [
+              "true",
+              "false",
+              "default"
+            ]
+          },
+          "inheritedFrom": null
+        },
+        {
+          "name": "SearchContainer",
+          "key": "searchContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SearchInput",
+          "key": "searchInput",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CloseIcon",
+          "key": "closeIcon",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/styles.ts",
+      "status": "skipped",
+      "reason": "`AnimatedImage` is not imported, so call sites cannot import it either"
+    },
+    {
+      "file": "apps/mobile/src/components/RadioButtons/styles.ts",
+      "status": "converted",
+      "definitions": 3,
+      "variants": 3,
+      "consumers": [
+        "apps/mobile/src/components/RadioButtons/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "RadioButtonContainer",
+          "key": "radioButtonContainer",
+          "mode": "wrapper",
+          "variants": {
+            "last": [
+              "true",
+              "false",
+              "default"
+            ],
+            "marked": [
+              "true"
+            ]
+          },
+          "inheritedFrom": null
+        },
+        {
+          "name": "TextButton",
+          "key": "textButton",
+          "mode": "wrapper",
+          "variants": {
+            "marked": [
+              "true"
+            ]
+          },
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/Slider/styles.ts",
+      "status": "converted",
+      "definitions": 4,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/components/Slider/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "TitleContainer",
+          "key": "titleContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LabelContainer",
+          "key": "labelContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Triangle",
+          "key": "triangle",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Marker",
+          "key": "marker",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/components/text.ts",
+      "status": "skipped",
+      "reason": "`Text` is wrapped by a styled() in another module"
+    },
+    {
+      "file": "apps/mobile/src/services/app-review.tsx",
+      "status": "converted",
+      "definitions": 5,
+      "variants": 0,
+      "consumers": [],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SmallButton",
+          "key": "smallButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CenterText",
+          "key": "centerText",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ButtonRow",
+          "key": "buttonRow",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "CenterText"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/AskForLocation/styles.ts",
+      "status": "converted",
+      "definitions": 8,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/AskForLocation/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LocationView",
+          "key": "locationView",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "BottomView",
+          "key": "bottomView",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "InformationRow",
+          "key": "informationRow",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LocationIcon",
+          "key": "locationIcon",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "InformationIcon",
+          "key": "informationIcon",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Prompt",
+          "key": "prompt",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/CompleteProfile/styles.ts",
+      "status": "converted",
+      "definitions": 6,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/CompleteProfile/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "WideColumn",
+          "key": "wideColumn",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Gap",
+          "key": "gap",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Note",
+          "key": "note",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ImageContainer",
+          "key": "imageContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ProfileImage",
+          "key": "profileImage",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/CreateProfile/styles.ts",
+      "status": "converted",
+      "definitions": 4,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/CreateProfile/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "PhotoHint",
+          "key": "photoHint",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "DragHint",
+          "key": "dragHint",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "MultilineInput",
+          "key": "multilineInput",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/GoBack/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is used as a value, not just rendered, in apps/mobile/src/views/(auth)/OneTimeCode/components/GoBack/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is used as a value, not just rendered, in apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpInput/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpInput/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "VerifyRowView",
+          "key": "verifyRowView",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/styles.ts",
+      "status": "converted",
+      "definitions": 8,
+      "variants": 1,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/OneTimeCode/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ResendCode",
+          "key": "resendCode",
+          "mode": "wrapper",
+          "variants": {
+            "disabled": [
+              "true",
+              "false",
+              "default"
+            ]
+          },
+          "inheritedFrom": null
+        },
+        {
+          "name": "TopColumn",
+          "key": "topColumn",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Timer",
+          "key": "timer",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LoadingContainer",
+          "key": "loadingContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "StyledKeyboardAvoidingView",
+          "key": "styledKeyboardAvoidingView",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/SignIn/components/EmailInput/styles.ts",
+      "status": "skipped",
+      "reason": "`TextInput` is used as a value, not just rendered, in apps/mobile/src/views/(auth)/SignIn/components/EmailInput/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/SignIn/components/HeroText/styles.ts",
+      "status": "converted",
+      "definitions": 8,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/SignIn/components/HeroText/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "WhiteTitle",
+          "key": "whiteTitle",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "Title"
+        },
+        {
+          "name": "TextHighlight",
+          "key": "textHighlight",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "Title"
+        },
+        {
+          "name": "UnderlineContainer",
+          "key": "underlineContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Line",
+          "key": "line",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "RotatedRectangle",
+          "key": "rotatedRectangle",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "FlexRowView",
+          "key": "flexRowView",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/SignIn/styles.ts",
+      "status": "converted",
+      "definitions": 9,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(auth)/SignIn/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "PressableContainer",
+          "key": "pressableContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "KeyboardAvoidingViewStyled",
+          "key": "keyboardAvoidingViewStyled",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LogoStyled",
+          "key": "logoStyled",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "TopCard",
+          "key": "topCard",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "BottomCard",
+          "key": "bottomCard",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Highlight",
+          "key": "highlight",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "Title"
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/Header/styles.ts",
+      "status": "skipped",
+      "reason": "`PreviewSeparator` is used as a value, not just rendered, in apps/mobile/src/views/(tabs)/Messages/components/Header/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/Message/styles.ts",
+      "status": "converted",
+      "definitions": 3,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Messages/components/Message/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Picture",
+          "key": "picture",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "EmojiContainer",
+          "key": "emojiContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/Preview/styles.ts",
+      "status": "converted",
+      "definitions": 3,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Messages/components/Preview/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Picture",
+          "key": "picture",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/SearchBar/styles.ts",
+      "status": "skipped",
+      "reason": "`TextField` is used as a value, not just rendered, in apps/mobile/src/views/(tabs)/Messages/components/SearchBar/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/styles.ts",
+      "status": "converted",
+      "definitions": 7,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Messages/index.tsx",
+        "apps/mobile/src/views/(tabs)/Messages/components/empty-messages.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SectionSeparator",
+          "key": "sectionSeparator",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "DividerContainer",
+          "key": "dividerContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "EmptyRoot",
+          "key": "emptyRoot",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "EmptyTitle",
+          "key": "emptyTitle",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "EmptyDescription",
+          "key": "emptyDescription",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/Config/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is used as a value, not just rendered, in apps/mobile/src/views/(tabs)/Profile/components/Config/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/current-plan-config.tsx",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [],
+      "definitionsDetail": [
+        {
+          "name": "PlanLoading",
+          "key": "planLoading",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "StyledLoading",
+          "key": "styledLoading",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/styles.ts",
+      "status": "skipped",
+      "reason": "`ProfileUnknownError` is used as a value, not just rendered, in apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/styles.ts",
+      "status": "converted",
+      "definitions": 8,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Profile/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "PlanContainer",
+          "key": "planContainer",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ScrollContainer",
+          "key": "scrollContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SettingsList",
+          "key": "settingsList",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "BackgroundProfileContainer",
+          "key": "backgroundProfileContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "BackgroundOverlay",
+          "key": "backgroundOverlay",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SettingsBlock",
+          "key": "settingsBlock",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeBackButton/styles.ts",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Swipe/components/SwipeBackButton/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "GoBack",
+          "key": "goBack",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeHandler/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeRequestFeedback/styles.ts",
+      "status": "converted",
+      "definitions": 5,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Messages/components/empty-messages.tsx",
+        "apps/mobile/src/views/(tabs)/Swipe/components/SwipeRequestFeedback/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "EmptyAnimation",
+          "key": "emptyAnimation",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LogoLoading",
+          "key": "logoLoading",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/styles.ts",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/(tabs)/Swipe/index.tsx",
+        "apps/mobile/src/views/(tabs)/Swipe/components/change-location.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "LocationButton",
+          "key": "locationButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/Header/styles.tsx",
+      "status": "converted",
+      "definitions": 6,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/Chat/components/Header/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "BackTouchArea",
+          "key": "backTouchArea",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Picture",
+          "key": "picture",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ProfileInfoContainer",
+          "key": "profileInfoContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ProfileInfoLoadingContainer",
+          "key": "profileInfoLoadingContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": "ProfileInfoContainer"
+        },
+        {
+          "name": "Header",
+          "key": "header",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "PressableAreaFlex",
+          "key": "pressableAreaFlex",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/Message/styles.ts",
+      "status": "skipped",
+      "reason": "a conditional block has two css branches"
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/NextDay/styles.ts",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/Chat/components/NextDay/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "DateText",
+          "key": "dateText",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/Send/styles.ts",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/Chat/components/Send/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Input",
+          "key": "input",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/styles.ts",
+      "status": "converted",
+      "definitions": 4,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/Chat/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Background",
+          "key": "background",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CenteredView",
+          "key": "centeredView",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CenteredText",
+          "key": "centeredText",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/components/breed-tag.tsx",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [],
+      "definitionsDetail": [
+        {
+          "name": "GlassmorphismStyled",
+          "key": "glassmorphismStyled",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ViewStyled",
+          "key": "viewStyled",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/components/GoBack/styles.ts",
+      "status": "skipped",
+      "reason": "`Container` is used as a value, not just rendered, in apps/mobile/src/views/DogProfile/components/GoBack/index.tsx"
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/styles.ts",
+      "status": "converted",
+      "definitions": 12,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/DogProfile/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "BottomColumn",
+          "key": "bottomColumn",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ShareButton",
+          "key": "shareButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ReportButton",
+          "key": "reportButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "MatchActionBarGradient",
+          "key": "matchActionBarGradient",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "UnmatchButton",
+          "key": "unmatchButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Name",
+          "key": "name",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Age",
+          "key": "age",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "Name"
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ActionLabel",
+          "key": "actionLabel",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ErrorScreen",
+          "key": "errorScreen",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/EditProfile/styles.ts",
+      "status": "converted",
+      "definitions": 4,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/EditProfile/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "WideColumn",
+          "key": "wideColumn",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Gap",
+          "key": "gap",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "MultilineInput",
+          "key": "multilineInput",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/ForceUpdate/styles.ts",
+      "status": "converted",
+      "definitions": 2,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/ForceUpdate/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "CenterText",
+          "key": "centerText",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Bubble/styles.ts",
+      "status": "converted",
+      "definitions": 7,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/LocationMap/components/Bubble/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Swipe",
+          "key": "swipe",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Row",
+          "key": "row",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Rect",
+          "key": "rect",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Title",
+          "key": "title",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Description",
+          "key": "description",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Marker/styles.ts",
+      "status": "converted",
+      "definitions": 4,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/LocationMap/components/Marker/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Content",
+          "key": "content",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Shadow",
+          "key": "shadow",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "MarkerWrapper",
+          "key": "markerWrapper",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Submit/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/LocationMap/components/Submit/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "StyledButton",
+          "key": "styledButton",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/styles.ts",
+      "status": "skipped",
+      "reason": "<MapView> in apps/mobile/src/views/LocationMap/index.tsx overrides .attrs({ showsUserLocation }), which styled-components would have won"
+    },
+    {
+      "file": "apps/mobile/src/views/NewMatch/styles.ts",
+      "status": "skipped",
+      "reason": "`AnimatedImage` is not imported, so call sites cannot import it either"
+    },
+    {
+      "file": "apps/mobile/src/views/Preferences/styles.ts",
+      "status": "converted",
+      "definitions": 7,
+      "variants": 0,
+      "consumers": [
+        "apps/mobile/src/views/Preferences/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "InputRow",
+          "key": "inputRow",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "InputSpace",
+          "key": "inputSpace",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "SliderContainer",
+          "key": "sliderContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Divisor",
+          "key": "divisor",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "ButtonContainer",
+          "key": "buttonContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "DistanceContainer",
+          "key": "distanceContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/Benefits/styles.ts",
+      "status": "skipped",
+      "reason": "prop-dependent interpolation `({ color, theme }) =>\n    new Color(color).alpha(theme.dark ? 0.2 : 0.1).toString()`"
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/Checkbox/styles.ts",
+      "status": "converted",
+      "definitions": 1,
+      "variants": 1,
+      "consumers": [
+        "apps/mobile/src/views/UpgradeWall/components/Checkbox/index.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {
+            "selected": [
+              "true"
+            ]
+          },
+          "inheritedFrom": null
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/PlanPackages/styles.ts",
+      "status": "converted",
+      "definitions": 7,
+      "variants": 1,
+      "consumers": [
+        "apps/mobile/src/views/UpgradeWall/components/PlanPackages/index.tsx",
+        "apps/mobile/src/views/UpgradeWall/components/PlanPackages/plan-card.tsx"
+      ],
+      "definitionsDetail": [
+        {
+          "name": "Flex",
+          "key": "flex",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "PlanContainer",
+          "key": "planContainer",
+          "mode": "wrapper",
+          "variants": {
+            "selected": [
+              "true"
+            ]
+          },
+          "inheritedFrom": null
+        },
+        {
+          "name": "PercentContainer",
+          "key": "percentContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "PercentText",
+          "key": "percentText",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Price",
+          "key": "price",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "OldPrice",
+          "key": "oldPrice",
+          "mode": "wrapper",
+          "variants": {},
+          "inheritedFrom": "Price"
+        }
+      ]
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/styles.ts",
+      "status": "skipped",
+      "reason": "`CloseButton` is wrapped by a styled() in another module"
+    }
+  ],
+  "useTheme": [
+    {
+      "file": "apps/mobile/src/services/app-review.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/splashscreen.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/app/(app)/_layout.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/app/(auth)/_layout.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/components/BottomAction/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/components/NetworkBoundary/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/components/Picker/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/components/Slider/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/index.tsx",
+      "status": "converted",
+      "sites": 2
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/index.tsx",
+      "status": "converted",
+      "sites": 3
+    },
+    {
+      "file": "apps/mobile/src/views/EditProfile/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/ForceUpdate/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/NewMatch/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/Preferences/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/app/(app)/(tabs)/_layout.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/AskForLocation/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/CompleteProfile/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/CreateProfile/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/SignIn/index.tsx",
+      "status": "converted",
+      "sites": 2
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/components/ProfileImageUploader/components/AddUserPhoto/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/empty-messages.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/current-plan-config.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/language-config.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/location-config.tsx",
+      "status": "converted",
+      "sites": 2
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/theme-config.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/change-location.tsx",
+      "status": "converted",
+      "sites": 2
+    },
+    {
+      "file": "apps/mobile/src/views/Chat/components/Header/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/DogProfile/components/GoBack/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/LocationMap/components/Marker/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/Checkbox/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/RestorePurchases/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/GoBack/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(auth)/OneTimeCode/components/OtpDigit/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Messages/components/Header/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/Config/index.tsx",
+      "status": "converted",
+      "sites": 1
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Profile/components/UserDogProfileHeader/index.tsx",
+      "status": "converted",
+      "sites": 2
+    },
+    {
+      "file": "apps/mobile/src/views/(tabs)/Swipe/components/SwipeBackButton/index.tsx",
+      "status": "converted",
+      "sites": 1
+    }
+  ],
+  "totals": {
+    "styleModules": 71,
+    "converted": 44,
+    "skipped": 27,
+    "definitions": 181,
+    "variantGroups": 8,
+    "consumersTouched": 40
+  }
+}

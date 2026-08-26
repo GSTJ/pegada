@@ -1,6 +1,6 @@
 import type { ContainerProps } from "./styles";
 
-import type { PressableProps } from "react-native";
+import type { PressableProps, StyleProp, ViewStyle } from "react-native";
 
 import * as React from "react";
 
@@ -8,10 +8,17 @@ import Loading from "@/components/loading";
 
 import { ButtonText, Container } from "./styles";
 
+/**
+ * `Pressable`'s style callback is gone from the public type: composing it with
+ * the sheet needs a plain style, and the callback never worked here anyway —
+ * styled-components handed it to `PressableArea` inside an array, where the
+ * function was never called.
+ */
 export type ButtonProps = {
   children: string;
+  style?: StyleProp<ViewStyle>;
 } & ContainerProps &
-  PressableProps;
+  Omit<PressableProps, "style">;
 
 export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
   const disabled = props.loading || props.disabled;

@@ -2,6 +2,7 @@ import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 
 import { useState } from "react";
 import * as React from "react";
+import { Pressable, View } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -18,15 +19,7 @@ import { SceneName } from "@/types/scene-name";
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
 import PersonalInfo from "./components/PersonalInfo";
-import {
-  CarouselContainer,
-  Container,
-  NextImage,
-  Picture,
-  PreviousImage,
-  Scrim,
-  UpperPart,
-} from "./styles";
+import { Container, Picture, Scrim, styles } from "./styles";
 
 const springConfig = { mass: 0.2 };
 
@@ -102,11 +95,12 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
       <Picture
         source={{
           uri: images[currentImage]?.url,
-          blurhash: images[currentImage]?.blurhash,
+          blurhash: images[currentImage]?.blurhash ?? undefined,
         }}
         key={images[currentImage]?.id}
       />
       <Scrim
+        style={styles.scrim}
         colors={[
           "rgba(0, 0, 0, .5)",
           "rgba(0, 0, 0, 0)",
@@ -114,14 +108,14 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
           "rgba(0, 0, 0, 0)",
         ]}
       />
-      <UpperPart>
+      <View style={styles.upperPart}>
         <Distance dog={dog} />
         <Pagination pages={images.length} currentPage={currentImage} />
-        <CarouselContainer>
-          <PreviousImage onPress={gotoPreviousImage} />
-          <NextImage onPress={gotoNextImage} />
-        </CarouselContainer>
-      </UpperPart>
+        <View style={styles.carouselContainer}>
+          <Pressable style={styles.previousImage} onPress={gotoPreviousImage} />
+          <Pressable style={styles.nextImage} onPress={gotoNextImage} />
+        </View>
+      </View>
       {Boolean(shouldShowPersonalInfo) && (
         <PressableArea
           testID="swipe-card-open-profile"

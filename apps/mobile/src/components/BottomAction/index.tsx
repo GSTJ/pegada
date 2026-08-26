@@ -1,17 +1,20 @@
+import type { View } from "react-native";
+
 import type { BlurViewProps } from "expo-blur";
 
 import * as React from "react";
 import { Platform } from "react-native";
 
-import { useTheme } from "styled-components/native";
+import { useUnistyles } from "react-native-unistyles";
 
 import { useKeyboardAwareSafeAreaInsets } from "../../hooks/use-keyboard-aware-safe-area-insets";
 import { BUTTON_HEIGHT } from "../Button/styles";
 import * as S from "./styles";
+import { styles } from "./styles";
 
 export const useBottomActionStyle = () => {
   const insets = useKeyboardAwareSafeAreaInsets();
-  const theme = useTheme();
+  const { theme } = useUnistyles();
 
   const bottomActionConstantSize = BUTTON_HEIGHT + theme.spacing[4];
 
@@ -45,7 +48,10 @@ export const useBottomActionStyle = () => {
   };
 };
 
-const Container: React.FC<BlurViewProps> = React.forwardRef((props, ref) => {
+const Container: React.FC<BlurViewProps> = React.forwardRef<
+  View,
+  BlurViewProps
+>((props, ref) => {
   const { height, paddingBottom } = useBottomActionStyle();
 
   return (
@@ -53,11 +59,14 @@ const Container: React.FC<BlurViewProps> = React.forwardRef((props, ref) => {
       {...props}
       ref={ref}
       style={[
-        {
-          height,
-          paddingBottom,
-        },
-        props.style,
+        styles.container,
+        [
+          {
+            height,
+            paddingBottom,
+          },
+          props.style,
+        ],
       ]}
     />
   );

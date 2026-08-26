@@ -1,0 +1,41 @@
+diff --git a/apps/mobile/src/components/divider.ts b/apps/mobile/src/components/divider.ts
+deleted file mode 100644
+index 837a417..0000000
+--- a/apps/mobile/src/components/divider.ts
++++ /dev/null
+@@ -1,6 +0,0 @@
+-import styled from "styled-components/native";
+-
+-export default styled.View`
+-  background-color: ${(props) => props.theme.colors.border};
+-  height: ${(props) => props.theme.stroke.sm}px;
+-`;
+diff --git a/apps/mobile/src/components/divider.tsx b/apps/mobile/src/components/divider.tsx
+new file mode 100644
+index 0000000..d67b026
+--- /dev/null
++++ b/apps/mobile/src/components/divider.tsx
+@@ -0,0 +1,23 @@
++import type { ViewProps } from "react-native";
++
++import { View } from "react-native";
++
++import { StyleSheet } from "react-native-unistyles";
++
++/**
++ * The module's default export, so it never had a name of its own; the sheet
++ * key borrows the file's. It stays a component because both call sites render
++ * it as one, one of them with its own margin.
++ */
++const Divider = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.divider, style]} />
++);
++
++export default Divider;
++
++const styles = StyleSheet.create((theme) => ({
++  divider: {
++    backgroundColor: theme.colors.border,
++    height: theme.stroke.sm,
++  },
++}));

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
 
 import { useSendMessage } from "../../hooks/use-send-message";
-import { Container, Input } from "./styles";
+import { Container, Input, styles } from "./styles";
 
 export const SEND_HEIGHT = 65;
 
@@ -25,10 +25,13 @@ const Send = () => {
 
   return (
     <Container
-      style={{
-        height: SEND_HEIGHT + insets.bottom,
-        paddingBottom: insets.bottom,
-      }}
+      style={[
+        styles.container,
+        {
+          height: SEND_HEIGHT + insets.bottom,
+          paddingBottom: insets.bottom,
+        },
+      ]}
     >
       <Input
         testID="chat-input"
@@ -40,6 +43,7 @@ const Send = () => {
         enablesReturnKeyAutomatically
         blurOnSubmit={false}
         placeholder={t("send.placeholder")}
+        style={styles.input}
       />
     </Container>
   );

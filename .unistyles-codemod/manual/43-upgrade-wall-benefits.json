@@ -1,0 +1,47 @@
+{
+  "$comment": "Hand-converted `UpgradeWall/Benefits` (patch 43). Same `pristineRef` as batch 10 — the codemod skipped this module, so its content at that commit is what the app renders today.",
+  "pristineRef": "d22dbde4f2ab5c1cf1afa4abb045a0c1d3823239",
+  "units": [
+    {
+      "file": "apps/mobile/src/views/UpgradeWall/components/Benefits/styles.ts",
+      "definitionsDetail": [
+        {
+          "name": "BenefitContainer",
+          "key": "benefitContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "$comment": "A dynamic style function rather than a variant group: `color` is a hex string chosen per benefit. The samples are the four the call site actually passes.",
+          "name": "BenefitIconContainer",
+          "key": "benefitIconContainer",
+          "mode": "inline",
+          "variants": {},
+          "dynamicArgs": ["color"],
+          "samples": [
+            { "color": "#25F714" },
+            { "color": "#09EAFF" },
+            { "color": "#E43CFF" },
+            { "color": "#FFB800" }
+          ],
+          "inheritedFrom": null
+        },
+        {
+          "name": "ContentContainer",
+          "key": "contentContainer",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        },
+        {
+          "name": "Container",
+          "key": "container",
+          "mode": "inline",
+          "variants": {},
+          "inheritedFrom": null
+        }
+      ]
+    }
+  ]
+}

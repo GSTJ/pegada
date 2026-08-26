@@ -79,13 +79,17 @@ tags:
 # config.ENV !== "production" AND EXPO_PUBLIC_MAESTRO_E2E=1 (both set by
 # the CI build and the local Release e2e build).
 #
-# 20-02-on-create-profile screenshot on iPhone 17 Pro Max: the pill is
-# anchored to the bottom edge of the first photo cell, text region
-# Point tap (not id): react-native-draggable-grid wraps each cell in its
-# pan-responder view and hides descendants from the a11y tree, so the
-# pill's testID never surfaces. Calibrated on iPhone 17 Pro Max.
+# react-native-draggable-grid wraps each cell in a pan-responder view that
+# hides the cell's inner subtree from the a11y tree, so neither the pill's
+# own testID nor `add-photo-{index}` ever surfaces. `add-photo-button-0`
+# (the `+`) is the one node in the cell that DOES surface, and under the
+# Maestro gate it triggers the placeholder upload — see the comment on
+# `handleEmptySlotPress` in components/ProfileImageUploader/components/
+# AddUserPhoto. This used to be `tapOn: point: "16%, 35%"`, which stopped
+# attaching a photo whenever the grid shifted by a few points and left
+# CreateProfile unable to submit.
 - tapOn:
-    point: "16%, 35%"
+    id: "add-photo-button-0"
 
 # Wait for the S3 upload — ProfileImagesUploader shows an
 # ActivityIndicator overlay until the presigned PUT returns. 15s covers

@@ -2,7 +2,7 @@ import type { BreedSlug } from "@pegada/shared/i18n/i18n";
 
 import { Namespace } from "@pegada/shared/i18n/types/types";
 import { useTranslation } from "react-i18next";
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { Input } from "@/components/Input";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -53,11 +53,6 @@ const BreedPicker = ({
     />
   );
 };
-
-const DisabledInput = styled(Input)`
-  opacity: 0.5;
-`;
-
 const BreedPickerLoading = () => {
   const { t } = useTranslation();
 
@@ -66,6 +61,7 @@ const BreedPickerLoading = () => {
       title={t("breedPicker.breed")}
       loading
       pointerEvents="none"
+      style={styles.disabledInput}
     />
   );
 };
@@ -79,6 +75,7 @@ const BreedPickerError = () => {
       value={t("breedPicker.error")}
       canCancel={false}
       pointerEvents="none"
+      style={styles.disabledInput}
     />
   );
 };
@@ -93,3 +90,11 @@ const BreedPickerBoundary = (props: BreedPickerProps) => (
 );
 
 export default BreedPickerBoundary;
+
+const styles = StyleSheet.create({
+  disabledInput: {
+    opacity: 0.5,
+  },
+});
+
+const DisabledInput = withUnistyles(Input);

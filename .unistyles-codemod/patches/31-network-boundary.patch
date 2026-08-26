@@ -1,0 +1,187 @@
+diff --git a/apps/mobile/src/components/NetworkBoundary/styles.ts b/apps/mobile/src/components/NetworkBoundary/styles.ts
+deleted file mode 100644
+index deaa6fc..0000000
+--- a/apps/mobile/src/components/NetworkBoundary/styles.ts
++++ /dev/null
+@@ -1,58 +0,0 @@
+-import LottieView from "lottie-react-native";
+-import styled from "styled-components/native";
+-
+-import { Text } from "@/components/text";
+-
+-export const Container = styled.ScrollView.attrs({
+-  contentContainerStyle: { flex: 1 },
+-})`
+-  /* This boundary can replace the whole navigation tree, so nothing themed
+-     renders behind it — without its own background the text sits directly on
+-     the native window, which can be a mismatched backdrop (e.g. black while
+-     the JS theme is light). Painting the theme background keeps text and
+-     backdrop always coming from the same theme. */
+-  background-color: ${(props) => props.theme.colors.background};
+-`;
+-
+-export const Content = styled.View`
+-  justify-content: center;
+-  align-items: center;
+-  padding: ${(props) => props.theme.spacing[5]}px;
+-  flex-grow: 1;
+-  flex-shrink: 0;
+-  margin: 0 ${(props) => props.theme.spacing[6]}px;
+-`;
+-
+-export const Title = styled(Text).attrs({
+-  fontSize: "lg",
+-  fontWeight: "bold",
+-})`
+-  text-align: center;
+-`;
+-
+-export const ContainedText = styled(Text)`
+-  max-width: 350px;
+-  margin-bottom: ${(props) => props.theme.spacing[6]}px;
+-  text-align: center;
+-`;
+-
+-export const DisconnectedIllustration = styled(LottieView).attrs({
+-  autoPlay: true,
+-  loop: true,
+-  source: require("@/assets/animations/disconnected.json"),
+-})`
+-  width: 150px;
+-  height: 150px;
+-  align-self: center;
+-`;
+-
+-export const ErrorIllustration = styled(LottieView).attrs({
+-  autoPlay: true,
+-  loop: true,
+-  delay: 2000,
+-  source: require("@/assets/animations/error.json"),
+-})`
+-  height: 150px;
+-  width: 150px;
+-  align-self: center;
+-`;
+diff --git a/apps/mobile/src/components/NetworkBoundary/styles.tsx b/apps/mobile/src/components/NetworkBoundary/styles.tsx
+new file mode 100644
+index 0000000..93a38a2
+--- /dev/null
++++ b/apps/mobile/src/components/NetworkBoundary/styles.tsx
+@@ -0,0 +1,117 @@
++import type { TextProps } from "@/components/text";
++import type { LottieViewProps } from "lottie-react-native";
++
++import type { ScrollViewProps, ViewProps } from "react-native";
++
++import { ScrollView, View } from "react-native";
++
++import LottieView from "lottie-react-native";
++import { StyleSheet, withUnistyles } from "react-native-unistyles";
++
++import { Text } from "@/components/text";
++
++/** Lottie is not autoprocessed, so the sheet reaches it wrapped. */
++const ThemedLottieView = withUnistyles(LottieView);
++
++/** Every one of these was a static `.attrs`, which beat the caller's prop. */
++type IllustrationProps = Omit<LottieViewProps, "source">;
++
++const CONTENT_CONTAINER_STYLE = { flex: 1 };
++
++/**
++ * This boundary can replace the whole navigation tree, so nothing themed
++ * renders behind it — without its own background the text sits directly on
++ * the native window, which can be a mismatched backdrop (e.g. black while
++ * the JS theme is light). Painting the theme background keeps text and
++ * backdrop always coming from the same theme.
++ */
++export const Container = ({ style, ...props }: ScrollViewProps) => (
++  <ScrollView
++    {...props}
++    contentContainerStyle={CONTENT_CONTAINER_STYLE}
++    style={[styles.container, style]}
++  />
++);
++
++export const Content = ({ style, ...props }: ViewProps) => (
++  <View {...props} style={[styles.content, style]} />
++);
++
++export const Title = ({ style, ...props }: TextProps) => (
++  <Text
++    {...props}
++    fontSize="lg"
++    fontWeight="bold"
++    style={[styles.title, style]}
++  />
++);
++
++export const ContainedText = ({ style, ...props }: TextProps) => (
++  <Text {...props} style={[styles.containedText, style]} />
++);
++
++export const DisconnectedIllustration = ({
++  style,
++  ...props
++}: IllustrationProps) => (
++  <ThemedLottieView
++    {...props}
++    autoPlay
++    loop
++    source={require("@/assets/animations/disconnected.json")}
++    style={[styles.disconnectedIllustration, style]}
++  />
++);
++
++/**
++ * The `.attrs` also set `delay: 2000`, which Lottie has no such prop for —
++ * styled-components let the extra attr through and the view dropped it. It is
++ * gone rather than carried over as a lie.
++ */
++export const ErrorIllustration = ({ style, ...props }: IllustrationProps) => (
++  <ThemedLottieView
++    {...props}
++    autoPlay
++    loop
++    source={require("@/assets/animations/error.json")}
++    style={[styles.errorIllustration, style]}
++  />
++);
++
++const styles = StyleSheet.create((theme) => ({
++  container: {
++    backgroundColor: theme.colors.background,
++  },
++  content: {
++    justifyContent: "center",
++    alignItems: "center",
++    paddingTop: theme.spacing[5],
++    paddingRight: theme.spacing[5],
++    paddingBottom: theme.spacing[5],
++    paddingLeft: theme.spacing[5],
++    flexGrow: 1,
++    flexShrink: 0,
++    marginTop: 0,
++    marginRight: theme.spacing[6],
++    marginBottom: 0,
++    marginLeft: theme.spacing[6],
++  },
++  title: {
++    textAlign: "center",
++  },
++  containedText: {
++    maxWidth: 350,
++    marginBottom: theme.spacing[6],
++    textAlign: "center",
++  },
++  disconnectedIllustration: {
++    width: 150,
++    height: 150,
++    alignSelf: "center",
++  },
++  errorIllustration: {
++    height: 150,
++    width: 150,
++    alignSelf: "center",
++  },
++}));

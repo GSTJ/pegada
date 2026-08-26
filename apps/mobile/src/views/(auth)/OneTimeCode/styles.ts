@@ -1,61 +1,81 @@
-import { KeyboardAvoidingView } from "react-native";
-
-import styled from "styled-components/native";
+import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 
-export const Container = styled.View`
-  flex: 1;
-  background-color: ${(props) => props.theme.colors.background};
-`;
+const LOADING_CONTAINER_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.5)";
 
-export const Content = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-`;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    backgroundColor: theme.colors.background,
+  },
+  content: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  resendCode: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.secondary,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
+    paddingTop: theme.spacing[2.5],
+    paddingRight: theme.spacing[2.5],
+    paddingBottom: theme.spacing[2.5],
+    paddingLeft: theme.spacing[2.5],
+    alignSelf: "center",
+    variants: {
+      disabled: {
+        true: {
+          opacity: 0.5,
+        },
+        false: {
+          opacity: 1,
+        },
+        default: {
+          opacity: 1,
+        },
+      },
+    },
+  },
+  topColumn: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  timer: {
+    color: theme.colors.text,
+  },
+  description: {
+    color: theme.colors.text,
+    textAlign: "center",
+    marginTop: theme.spacing[2.5],
+    maxWidth: 300,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: LOADING_CONTAINER_BACKGROUND_COLOR,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  styledKeyboardAvoidingView: {
+    flexGrow: 1,
+  },
+}));
 
-export const ResendCode = styled(PressableArea)`
-  align-items: center;
-  justify-content: center;
-  background-color: ${(props) => props.theme.colors.secondary};
-  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-  border-radius: ${(props) => props.theme.radii.md}px;
-  padding: ${(props) => props.theme.spacing[2.5]}px;
-  align-self: center;
-`;
+export const ResendCode = withUnistyles(PressableArea);
 
-export const TopColumn = styled.View`
-  justify-content: center;
-  align-items: center;
-`;
+export const Timer = Text;
 
-export const Timer = styled(Text).attrs({
-  fontSize: "xxxl",
-  fontWeight: "bold",
-})`
-  color: ${(props) => props.theme.colors.text};
-`;
-
-export const Description = styled(Text)`
-  color: ${(props) => props.theme.colors.text};
-  text-align: center;
-  margin-top: ${(props) => props.theme.spacing[2.5]}px;
-  max-width: 300px;
-`;
-
-export const LoadingContainer = styled.View`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
-`;
-
-export const StyledKeyboardAvoidingView = styled(KeyboardAvoidingView)`
-  flex-grow: 1;
-`;
+export const Description = Text;

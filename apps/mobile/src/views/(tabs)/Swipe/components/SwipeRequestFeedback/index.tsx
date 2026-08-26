@@ -18,13 +18,23 @@ import { Container, Content } from "@/components/NetworkBoundary/styles";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
-import { Description, EmptyAnimation, LogoLoading, Title } from "./styles";
+import {
+  Description,
+  EmptyAnimation,
+  LogoLoading,
+  Title,
+  styles,
+} from "./styles";
 
 export const EmptyComponent = () => {
   return (
     <Container>
       <Content>
-        <EmptyAnimation />
+        <EmptyAnimation
+          style={styles.emptyAnimation}
+          autoPlay
+          source={require("@/assets/animations/empty.json")}
+        />
       </Content>
     </Container>
   );
@@ -36,12 +46,17 @@ const EmptyState = () => {
   return (
     <Content>
       <View>
-        <LogoLoading />
+        <LogoLoading
+          style={styles.logoLoading}
+          autoPlay
+          source={require("@/assets/animations/loadingLogo.json")}
+          speed={0.5}
+        />
         <Animated.View entering={FadeInDown} exiting={FadeOutDown}>
-          <Title fontWeight="bold">
+          <Title fontWeight="bold" style={styles.title}>
             {t("swipeRequestFeedback.emptyTitle")}
           </Title>
-          <Description fontSize="xs">
+          <Description fontSize="xs" style={styles.description}>
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
           <Button
@@ -64,7 +79,12 @@ const SwipeRequestFeedback = () => {
   if (request.loading) {
     return (
       <Content>
-        <LogoLoading />
+        <LogoLoading
+          style={styles.logoLoading}
+          autoPlay
+          source={require("@/assets/animations/loadingLogo.json")}
+          speed={0.5}
+        />
       </Content>
     );
   }

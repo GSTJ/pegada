@@ -1,29 +1,36 @@
 import Color from "color";
-import styled from "styled-components/native";
+import { StyleSheet } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 
-export const Container = styled.View`
-  margin: ${(props) => props.theme.spacing[4]}px auto
-    ${(props) => props.theme.spacing[5]}px auto;
+const CONTAINER_SHADOW_COLOR = "#000";
 
-  padding: ${(props) => props.theme.spacing[0.5]}px
-    ${(props) => props.theme.spacing[2.5]}px
-    ${(props) => props.theme.spacing[1.5]}px
-    ${(props) => props.theme.spacing[2.5]}px;
+export const styles = StyleSheet.create((theme) => ({
+  container: {
+    marginTop: theme.spacing[4],
+    marginRight: "auto",
+    marginBottom: theme.spacing[5],
+    marginLeft: "auto",
+    paddingTop: theme.spacing[0.5],
+    paddingRight: theme.spacing[2.5],
+    paddingBottom: theme.spacing[1.5],
+    paddingLeft: theme.spacing[2.5],
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    backgroundColor: theme.colors.card,
+    borderColor: theme.colors.border,
+    borderWidth: theme.stroke.sm,
+    elevation: 1,
+    shadowColor: CONTAINER_SHADOW_COLOR,
+    shadowOffset: { width: 0, height: 0.5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 0.5,
+  },
+  dateText: {
+    color: new Color(theme.colors.text).alpha(0.5).string(),
+  },
+}));
 
-  border-radius: ${(props) => props.theme.radii.round}px;
-  background-color: ${(props) => props.theme.colors.card};
-  border-color: ${(props) => props.theme.colors.border};
-  border-width: ${(props) => props.theme.stroke.sm}px;
-
-  elevation: 1;
-  shadow-color: #000;
-  shadow-offset: 0px 0.5px;
-  shadow-opacity: 0.1;
-  shadow-radius: 0.5px;
-`;
-
-export const DateText = styled(Text)`
-  color: ${(props) => new Color(props.theme.colors.text).alpha(0.5).string()};
-`;
+export const DateText = Text;
