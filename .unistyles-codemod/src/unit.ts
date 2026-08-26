@@ -983,19 +983,31 @@ function convertElement(
   const host = variantArguments.length > 0 ? enclosingBlock(file, opening, use.tag) : null;
 
   const styleAttribute = attributes.get("style");
-  const previous = styleAttribute ? readAttributeValue(styleAttribute) : null;
-  // The caller's style goes last: it is the override, and animated styles in
-  // particular have to sit on top of the static ones.
-  const styleSource = previous
-    ? `{[${stylesName}.${prepared.key}, ${previous}]}`
+  // Whatever the call site already puts in `style` — a written prop, or a
+  // spread that carries one. styled-components *merged* that on top of the
+  // component's own css (it rendered `style={[generated, incoming]}`), so it
+  // follows our stylesheet entry in the array instead of displacing it.
+  const override = styleOverride(file, use.tag, opening);
+  const styleSource = override
+    ? `{[${stylesName}.${prepared.key}, ${override}]}`
     : `{${stylesName}.${prepared.key}}`;
 
-  if (styleAttribute) {
+  // JSX resolves duplicate props last-wins, so the attribute has to sit after
+  // every spread that could restate `style`. Writing it before one (which is
+  // what this used to do) hands the whole prop to the spread and silently drops
+  // the component's own colour, font and flex.
+  const written = opening.getAttributes();
+  const styleIndex = styleAttribute ? written.indexOf(styleAttribute) : -1;
+  const lastSpread = written.reduce(
+    (last, attribute, index) => (Node.isJsxSpreadAttribute(attribute) ? index : last),
+    -1,
+  );
+
+  if (lastSpread > styleIndex) {
+    styleAttribute?.remove();
+    opening.addAttribute({ name: "style", initializer: styleSource });
+  } else if (styleAttribute) {
     styleAttribute.setInitializer(styleSource);
-  } else if (opening.getAttributes().some((attribute) => Node.isJsxSpreadAttribute(attribute))) {
-    // A spread may itself carry `style`. styled-components let the incoming
-    // prop win over the component's own styles, so ours has to come first.
-    opening.insertAttribute(0, { name: "style", initializer: styleSource });
   } else {
     opening.addAttribute({ name: "style", initializer: styleSource });
   }
@@ -1017,6 +1029,100 @@ function convertElement(
   // In wrapper mode the tag keeps its name — it now resolves to the
   // withUnistyles component the styles module exports in its place. The
   // rewrite loop recognises it as done by the `style` attribute we just added.
+}
+
+/**
+ * What the call site's `style` prop already evaluates to, or `null` when it
+ * has none. A written `style` contributes itself and a spread contributes its
+ * own `style` member; the last one in source order is the whole prop, because
+ * that is how JSX resolves a repeated name.
+ */
+function styleOverride(
+  file: SourceFile,
+  tag: string,
+  opening: JsxOpeningElement | JsxSelfClosingElement,
+): string | null {
+  let override: string | null = null;
+
+  for (const attribute of opening.getAttributes()) {
+    if (Node.isJsxAttribute(attribute)) {
+      if (attribute.getNameNode().getText() === "style") {
+        override = readAttributeValue(attribute);
+      }
+      continue;
+    }
+
+    const spread = spreadStyle(file, tag, attribute.getExpression(), attribute.getExpression());
+    if (spread) override = spread;
+  }
+
+  return override;
+}
+
+/**
+ * How to read `style` back off a spread expression, or `null` when the spread
+ * provably cannot carry one. Anything we cannot decide throws: guessing here
+ * either drops the caller's override or drops the component's own styles, and
+ * both are invisible until someone screenshots the app.
+ */
+function spreadStyle(file: SourceFile, tag: string, node: Node, whole: Node): string | null {
+  if (Node.isParenthesizedExpression(node)) {
+    return spreadStyle(file, tag, node.getExpression(), whole);
+  }
+
+  if (Node.isAsExpression(node) || Node.isSatisfiesExpression(node)) {
+    return spreadStyle(file, tag, node.getExpression(), whole);
+  }
+
+  // `{...undefined}` and `{...null}` are legal and contribute nothing.
+  if (node.getKind() === SyntaxKind.NullKeyword) return null;
+  if (Node.isIdentifier(node) && node.getText() === "undefined") return null;
+
+  // A literal says outright whether it writes `style`. A nested spread would
+  // put that back in doubt, so it is not decidable here.
+  if (Node.isObjectLiteralExpression(node)) {
+    const properties = node.getProperties();
+    if (properties.every(Node.isPropertyAssignment)) {
+      const style = properties.find((property) => property.getName() === "style");
+      if (!style) return null;
+      const initializer = style.getInitializer();
+      if (initializer) return initializer.getText();
+    }
+  }
+
+  // Both arms of a ternary have to be innocent for the whole thing to be: a
+  // single arm carrying `style` cannot be re-read without re-evaluating the
+  // condition, which is not always free.
+  if (Node.isConditionalExpression(node)) {
+    const whenTrue = spreadStyle(file, tag, node.getWhenTrue(), whole);
+    const whenFalse = spreadStyle(file, tag, node.getWhenFalse(), whole);
+    if (!whenTrue && !whenFalse) return null;
+  }
+
+  // A plain reference is safe to read twice, so ask the checker whether it
+  // even has a `style` to read. `props.style` on a props type that has none
+  // would not compile.
+  if (Node.isIdentifier(node) || isReferenceChain(node)) {
+    const type = node.getType();
+    if (type.isAny() || type.isUnknown()) {
+      throw new UnsupportedError(
+        `<${tag}> in ${rel(file)} spreads \`${whole.getText()}\`, whose type is not resolvable`,
+      );
+    }
+
+    return type.getProperty("style") ? `${node.getText()}.style` : null;
+  }
+
+  throw new UnsupportedError(
+    `<${tag}> in ${rel(file)} spreads \`${whole.getText()}\`, whose \`style\` cannot be resolved`,
+  );
+}
+
+/** `a`, `a.b`, `a.b.c` — re-readable without re-running anything. */
+function isReferenceChain(node: Node): boolean {
+  if (Node.isIdentifier(node) || Node.isThisExpression(node)) return true;
+  if (!Node.isPropertyAccessExpression(node)) return false;
+  return !node.hasQuestionDotToken() && isReferenceChain(node.getExpression());
 }
 
 type HostBlock = ReturnType<typeof enclosingBlock>;

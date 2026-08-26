@@ -111,7 +111,6 @@ const CreateProfile = () => {
     >
       <View style={componentsStyles.fill}>
         <ScrollView
-          style={styles.container}
           {...scrollViewProps}
           contentContainerStyle={{
             padding: theme.spacing[4],
@@ -121,6 +120,7 @@ const CreateProfile = () => {
           }}
           scrollEnabled={gesturesEnabled}
           keyboardShouldPersistTaps="handled"
+          style={styles.container}
         >
           <Controller
             name="images"

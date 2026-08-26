@@ -163,7 +163,6 @@ const EditProfile = () => {
     >
       <View style={componentsStyles.fill}>
         <ScrollView
-          style={styles.container}
           ref={scrollViewRef}
           {...scrollViewProps}
           contentContainerStyle={{
@@ -175,6 +174,7 @@ const EditProfile = () => {
           }}
           scrollEnabled={gesturesEnabled}
           keyboardShouldPersistTaps="handled"
+          style={styles.container}
         >
           <Controller
             name="images"

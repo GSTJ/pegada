@@ -12,7 +12,7 @@ export const Bubble: React.FC<React.ComponentProps<typeof Animated.View>> = (
   const { t } = useTranslation();
 
   return (
-    <Animated.View style={styles.container} {...props}>
+    <Animated.View {...props} style={[styles.container, props.style]}>
       <View style={styles.row}>
         <View style={styles.content}>
           <Title style={styles.title} fontWeight="bold" fontSize="sm">

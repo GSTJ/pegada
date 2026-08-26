@@ -98,7 +98,6 @@ const CompleteProfile = () => {
     >
       <View style={componentsStyles.fill}>
         <ScrollView
-          style={styles.container}
           {...scrollViewProps}
           contentContainerStyle={{
             paddingHorizontal: theme.spacing[4],
@@ -107,6 +106,7 @@ const CompleteProfile = () => {
               scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           keyboardDismissMode="interactive"
+          style={styles.container}
         >
           <View style={styles.imageContainer}>
             <ProfileImage

@@ -160,7 +160,6 @@ const Preferences: React.FC = () => {
   return (
     <>
       <ScrollView
-        style={styles.container}
         testID="preferences-screen"
         {...scrollViewProps}
         keyboardShouldPersistTaps="handled"
@@ -171,6 +170,7 @@ const Preferences: React.FC = () => {
             scrollViewProps.contentContainerStyle.paddingBottom +
             theme.spacing[4],
         }}
+        style={styles.container}
       >
         <Controller
           name="preferredBreedId"

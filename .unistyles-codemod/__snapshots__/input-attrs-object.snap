@@ -28,7 +28,7 @@ const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
   children,
   ...props
 }) => (
-  <View style={styles.content} {...props}>
+  <View {...props} style={[styles.content, props.style]}>
     {!loading && children}
     {loading ? <ActivityIndicator style={styles.activityIndicatorComponent} /> : null}
   </View>
@@ -69,11 +69,11 @@ export const Input = React.forwardRef<TextInput, InputProps>(
           </View>
         )}
         <TextFieldContainer loading={loading}>
-          <S.TextInput style={styles.textInput}
+          <S.TextInput
             value={props.value}
             onChangeText={props.onChangeText}
             ref={ref}
-            {...props}
+            {...props} style={[styles.textInput, props.style]}
           />
           {Boolean(props.value) && canCancel ? (
             <S.CancelTouchArea onPress={() => props.onChangeText?.("")} style={styles.cancelTouchArea} hitSlop={{
