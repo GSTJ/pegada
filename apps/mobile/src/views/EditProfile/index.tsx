@@ -2,7 +2,7 @@ import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUpload
 import type { Picture } from "@/components/ProfileImageUploader/utils";
 import type { RouterInputs } from "@/contexts/trpc-provider";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Platform, KeyboardAvoidingView, View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
@@ -29,6 +29,10 @@ import { pictures } from "@/components/ProfileImageUploader/utils";
 import { RadioButtons } from "@/components/RadioButtons";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
+import {
+  ScrollIntoViewProvider,
+  useKeyboardAwareScroll,
+} from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/error-tracking";
@@ -116,8 +120,13 @@ const EditProfile = () => {
 
   const { theme } = useUnistyles();
 
-  const { scrollViewProps } = useBottomActionStyle();
-  const scrollViewRef = useRef<ScrollView>(null);
+  const { scrollViewProps, height: bottomActionHeight } =
+    useBottomActionStyle();
+
+  // The pinned Save Profile bar is painted over the scroll area, so a focused
+  // field has to clear the bar, not just the keyboard.
+  const { containerProps, scrollProps, requestScrollIntoView } =
+    useKeyboardAwareScroll({ bottomInset: bottomActionHeight });
 
   const myDogUpdateMutation = api.myDog.update.useMutation({
     onMutate: () => {
@@ -161,219 +170,226 @@ const EditProfile = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={componentsStyles.keyboardScreen}
     >
-      <View style={componentsStyles.fill}>
-        <ScrollView
-          ref={scrollViewRef}
-          {...scrollViewProps}
-          contentContainerStyle={{
-            padding: theme.spacing[4],
-            paddingBottom:
-              theme.spacing[4] +
-              scrollViewProps.contentContainerStyle.paddingBottom,
-            paddingTop: nonDelayedHeaderHeight + theme.spacing[4],
-          }}
-          scrollEnabled={gesturesEnabled}
-          keyboardShouldPersistTaps="handled"
-          style={styles.container}
-        >
-          <Controller
-            name="images"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value }, fieldState }) => {
-              return (
-                <ProfileImagesUploader
-                  value={value as Picture[]}
-                  onChange={(
-                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
-                  ) => {
-                    // This getValues is needed to ensure the update happens
-                    // correctly even when adding images fast.
-                    onChange(cb(getValues("images") as Picture[]));
-                  }}
-                  error={fieldState.error?.message}
-                  setGesturesEnabled={setGesturesEnabled}
-                />
-              );
+      <ScrollIntoViewProvider value={requestScrollIntoView}>
+        <View {...containerProps} style={componentsStyles.fill}>
+          <ScrollView
+            {...scrollViewProps}
+            {...scrollProps}
+            contentContainerStyle={{
+              padding: theme.spacing[4],
+              paddingBottom:
+                theme.spacing[4] +
+                scrollViewProps.contentContainerStyle.paddingBottom,
+              paddingTop: nonDelayedHeaderHeight + theme.spacing[4],
             }}
-          />
-          <Controller
-            name="name"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value }, fieldState }) => {
-              return (
-                <Input
-                  testID="edit-profile-name"
-                  title={t("editProfile.dogName")}
-                  placeholder={t("editProfile.dogNamePlaceholder")}
+            scrollEnabled={gesturesEnabled}
+            keyboardShouldPersistTaps="handled"
+            style={styles.container}
+          >
+            <Controller
+              name="images"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => {
+                return (
+                  <ProfileImagesUploader
+                    value={value as Picture[]}
+                    onChange={(
+                      cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                    ) => {
+                      // This getValues is needed to ensure the update happens
+                      // correctly even when adding images fast.
+                      onChange(cb(getValues("images") as Picture[]));
+                    }}
+                    error={fieldState.error?.message}
+                    setGesturesEnabled={setGesturesEnabled}
+                  />
+                );
+              }}
+            />
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value }, fieldState }) => {
+                return (
+                  <Input
+                    testID="edit-profile-name"
+                    title={t("editProfile.dogName")}
+                    placeholder={t("editProfile.dogNamePlaceholder")}
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    maxLength={50}
+                    error={fieldState.error?.message}
+                    autoCorrect={false}
+                  />
+                );
+              }}
+            />
+            <Controller
+              name="bio"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                <MultilineInput
+                  testID="edit-profile-bio"
+                  title={t("editProfile.bio")}
+                  placeholder={t("editProfile.bioPlaceholder")}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  maxLength={50}
+                  maxLength={500}
+                  multiline
                   error={fieldState.error?.message}
-                  autoCorrect={false}
+                  style={styles.multilineInput}
                 />
-              );
-            }}
-          />
-          <Controller
-            name="bio"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <MultilineInput
-                testID="edit-profile-bio"
-                title={t("editProfile.bio")}
-                placeholder={t("editProfile.bioPlaceholder")}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                maxLength={500}
-                multiline
-                error={fieldState.error?.message}
-                style={styles.multilineInput}
-              />
-            )}
-          />
-          <View style={componentsStyles.row}>
-            <View style={componentsStyles.fill}>
-              <Controller
-                name="weight"
-                control={control}
-                rules={{ required: true }}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState,
-                }) => (
-                  <Input
-                    title={t("editProfile.weight")}
-                    placeholder="1"
-                    value={String(value ?? "")}
-                    onBlur={onBlur}
-                    onChangeText={(value: string) =>
-                      // Only allow numbers
-                      onChange(value.replaceAll(/[^0-9]/g, ""))
-                    }
-                    maxLength={3}
-                    numberOfLines={1}
-                    keyboardType="numeric"
-                    error={fieldState.error?.message}
-                  />
-                )}
-              />
+              )}
+            />
+            <View style={componentsStyles.row}>
+              <View style={componentsStyles.fill}>
+                <Controller
+                  name="weight"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState,
+                  }) => (
+                    <Input
+                      testID="edit-profile-weight"
+                      title={t("editProfile.weight")}
+                      placeholder="1"
+                      value={String(value ?? "")}
+                      onBlur={onBlur}
+                      onChangeText={(value: string) =>
+                        // Only allow numbers
+                        onChange(value.replaceAll(/[^0-9]/g, ""))
+                      }
+                      maxLength={3}
+                      numberOfLines={1}
+                      keyboardType="numeric"
+                      error={fieldState.error?.message}
+                    />
+                  )}
+                />
+              </View>
+              <View style={styles.gap} />
+              <View style={styles.wideColumn}>
+                <Controller
+                  name="birthDate"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({
+                    field: { onChange, onBlur, value, name },
+                    fieldState,
+                  }) => (
+                    <Input
+                      testID="edit-profile-birthdate"
+                      title={t("editProfile.birthDate")}
+                      placeholder="DD/MM/YYYY"
+                      value={String(value)}
+                      onBlur={onBlur}
+                      onChangeText={(value: string) => {
+                        const oldValue = getValues()[name];
+                        const isErasing =
+                          value.length < (oldValue ? oldValue.length : 0);
+
+                        if (isErasing) return onChange(value);
+
+                        // Mask to MM/DD/YYYY
+                        onChange(maskDate(value));
+                      }}
+                      numberOfLines={1}
+                      keyboardType="numeric"
+                      error={fieldState.error?.message}
+                    />
+                  )}
+                />
+              </View>
             </View>
-            <View style={styles.gap} />
-            <View style={styles.wideColumn}>
-              <Controller
-                name="birthDate"
-                control={control}
-                rules={{ required: true }}
-                render={({
-                  field: { onChange, onBlur, value, name },
-                  fieldState,
-                }) => (
-                  <Input
-                    title={t("editProfile.birthDate")}
-                    placeholder="DD/MM/YYYY"
-                    value={String(value)}
-                    onBlur={onBlur}
-                    onChangeText={(value: string) => {
-                      const oldValue = getValues()[name];
-                      const isErasing =
-                        value.length < (oldValue ? oldValue.length : 0);
 
-                      if (isErasing) return onChange(value);
-
-                      // Mask to MM/DD/YYYY
-                      onChange(maskDate(value));
-                    }}
-                    numberOfLines={1}
-                    keyboardType="numeric"
-                    error={fieldState.error?.message}
-                  />
-                )}
-              />
-            </View>
-          </View>
-
-          <Controller
-            name="breedId"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value }, fieldState }) => (
-              <BreedPicker
-                breed={value}
-                setBreed={(breed) => onChange(breed.id)}
-                error={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <View style={componentsStyles.row}>
             <Controller
-              name="size"
+              name="breedId"
               control={control}
               rules={{ required: true }}
               render={({ field: { onChange, value }, fieldState }) => (
-                <InputPicker
-                  title={t("editProfile.size")}
-                  placeholder={t("sizes.small")}
-                  data={sizes}
-                  value={sizes.find((sizeValue) => sizeValue.id === value)}
-                  onChange={(size) => onChange(size.id)}
+                <BreedPicker
+                  testID="edit-profile-breed"
+                  breed={value}
+                  setBreed={(breed) => onChange(breed.id)}
                   error={fieldState.error?.message}
                 />
               )}
             />
 
-            <View style={styles.gap} />
+            <View style={componentsStyles.row}>
+              <Controller
+                name="size"
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { onChange, value }, fieldState }) => (
+                  <InputPicker
+                    title={t("editProfile.size")}
+                    placeholder={t("sizes.small")}
+                    data={sizes}
+                    value={sizes.find((sizeValue) => sizeValue.id === value)}
+                    onChange={(size) => onChange(size.id)}
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+
+              <View style={styles.gap} />
+              <Controller
+                name="color"
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { onChange, value }, fieldState }) => (
+                  <InputPicker
+                    title={t("editProfile.color")}
+                    placeholder={colors[0]?.name}
+                    data={colors}
+                    value={colors.find((color) => color.id === value)}
+                    onChange={(color) => onChange(color.id)}
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </View>
             <Controller
-              name="color"
+              name="gender"
               control={control}
               rules={{ required: true }}
-              render={({ field: { onChange, value }, fieldState }) => (
-                <InputPicker
-                  title={t("editProfile.color")}
-                  placeholder={colors[0]?.name}
-                  data={colors}
-                  value={colors.find((color) => color.id === value)}
-                  onChange={(color) => onChange(color.id)}
-                  error={fieldState.error?.message}
+              render={({ field: { onChange, value } }) => (
+                <RadioButtons
+                  title={t("editProfile.gender")}
+                  data={[t("editProfile.male"), t("editProfile.female")]}
+                  value={
+                    value === "MALE"
+                      ? t("editProfile.male")
+                      : t("editProfile.female")
+                  }
+                  onChange={(value) => {
+                    onChange(
+                      value === t("editProfile.male") ? "MALE" : "FEMALE",
+                    );
+                  }}
                 />
               )}
             />
-          </View>
-          <Controller
-            name="gender"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value } }) => (
-              <RadioButtons
-                title={t("editProfile.gender")}
-                data={[t("editProfile.male"), t("editProfile.female")]}
-                value={
-                  value === "MALE"
-                    ? t("editProfile.male")
-                    : t("editProfile.female")
-                }
-                onChange={(value) => {
-                  onChange(value === t("editProfile.male") ? "MALE" : "FEMALE");
-                }}
-              />
-            )}
-          />
-        </ScrollView>
-        <BottomAction.Container>
-          <Button
-            testID="edit-profile-save"
-            loading={myDogUpdateMutation.isPending}
-            onPress={() => saveUser()}
-          >
-            {t("editProfile.saveProfile")}
-          </Button>
-        </BottomAction.Container>
-      </View>
+          </ScrollView>
+          <BottomAction.Container>
+            <Button
+              testID="edit-profile-save"
+              loading={myDogUpdateMutation.isPending}
+              onPress={() => saveUser()}
+            >
+              {t("editProfile.saveProfile")}
+            </Button>
+          </BottomAction.Container>
+        </View>
+      </ScrollIntoViewProvider>
     </KeyboardAvoidingView>
   );
 };

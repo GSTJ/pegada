@@ -76,6 +76,17 @@ export default extendConfig(expo, {
         "func-style": "off",
       },
     },
+    {
+      // Maestro post-checks are CLI scripts, not app code: they run under
+      // plain node against a booted device, read the harness's environment
+      // directly (there is no validated env module out here) and report by
+      // printing.
+      files: [".maestro/**"],
+      rules: {
+        "no-console": "off",
+        "no-restricted-properties": "off",
+      },
+    },
     // Must stay last — see the root config for why.
     {
       files: ["**/__mocks__/**"],
