@@ -1,7 +1,12 @@
 import { MAX_PROFILE_IMAGES } from "@pegada/shared/schemas/dog-schema";
 
 import { config } from "./config";
-import { dogInputSchema } from "./dog-input-schema";
+import {
+  assertDogImageOriginsAllowed,
+  dogInputSchema,
+  dogUpdateInputSchema,
+  FOREIGN_IMAGE_ORIGIN_MESSAGE,
+} from "./dog-input-schema";
 
 /**
  * .env.test leaves R2 and AWS_S3_ENDPOINT unset, so the only allowed origin
@@ -74,7 +79,7 @@ describe("dogInputSchema images", () => {
     ]);
   });
 
-  it("keeps the check through .partial(), which is what myDog.update accepts", () => {
+  it("keeps the check through .partial()", () => {
     const partial = dogInputSchema.partial();
 
     expect(
@@ -116,5 +121,68 @@ describe("dogInputSchema images", () => {
         images,
       }).success,
     ).toBe(false);
+  });
+});
+
+/**
+ * `myDog.update` cannot use `dogInputSchema.partial()`: an update echoes the
+ * dog's stored photos back, and a URL already in our database may predate the
+ * allowlist (a retired storage origin, a dev fixture). The origin check
+ * therefore runs in the mutation, where the dog's own URLs are known.
+ */
+describe("assertDogImageOriginsAllowed", () => {
+  const STORED = "https://placedog.net/640/480?id=1";
+
+  it("accepts a URL on the configured bucket", () => {
+    expect(() =>
+      assertDogImageOriginsAllowed(
+        [{ url: `${BUCKET_URL}/dogs/1` }],
+        new Set(),
+      ),
+    ).not.toThrow();
+  });
+
+  it("accepts a foreign URL the dog already has", () => {
+    expect(() =>
+      assertDogImageOriginsAllowed([{ url: STORED }], new Set([STORED])),
+    ).not.toThrow();
+  });
+
+  it("rejects a foreign URL the dog does not have", () => {
+    expect(() =>
+      assertDogImageOriginsAllowed(
+        [{ url: "https://example.com/payload.png" }],
+        new Set([STORED]),
+      ),
+    ).toThrow(FOREIGN_IMAGE_ORIGIN_MESSAGE);
+  });
+
+  it("does not let one grandfathered URL vouch for a different host", () => {
+    expect(() =>
+      assertDogImageOriginsAllowed(
+        [{ url: STORED }, { url: "https://placedog.net.example.com/x.png" }],
+        new Set([STORED]),
+      ),
+    ).toThrow(FOREIGN_IMAGE_ORIGIN_MESSAGE);
+  });
+
+  it("ignores empty slots and an absent images field", () => {
+    expect(() =>
+      assertDogImageOriginsAllowed([{ url: undefined }], new Set()),
+    ).not.toThrow();
+    expect(() =>
+      assertDogImageOriginsAllowed(undefined, new Set()),
+    ).not.toThrow();
+  });
+});
+
+describe("dogUpdateInputSchema", () => {
+  it("validates shape but leaves the origin check to the mutation", () => {
+    expect(
+      dogUpdateInputSchema.safeParse({
+        images: [{ url: "https://example.com/payload.png", position: 0 }],
+      }).success,
+    ).toBe(true);
+    expect(dogUpdateInputSchema.safeParse({ name: "R" }).success).toBe(false);
   });
 });
