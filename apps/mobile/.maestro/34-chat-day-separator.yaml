@@ -1,0 +1,45 @@
+appId: ${APP_ID}
+name: Chat - the day separator must not carry a stray abbreviation dot
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #5 (COSMETIC).
+#
+# The separator above an older day's messages rendered "Fri., 31 Jul". The
+# date-fns pattern was "EEE., d MMM" and `.` is a literal in a date-fns
+# pattern, not an escape - so an abbreviated weekday got a period bolted on in
+# front of the comma. In pt-BR it was worse: that locale's own abbreviation
+# already ends in a period, so it read "sex.., 31 de jul".
+#
+# scripts/pre/34-backdate-chat.sh back-dates the seeded Rex<->Bella
+# conversation so the separator lands on the this-year-but-not-this-week
+# branch deterministically; freshly seeded messages are 30 minutes old and
+# would render "Today".
+#
+# The gate is the NEGATIVE assertion - it is true for every locale and every
+# date. The positive one pins the en-US shape. `views/Chat/components/NextDay`
+# also has a unit test that fixes the format for a frozen clock.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "messages-screen"
+- runFlow: utils/dismiss-app-review.yaml
+- tapOn:
+    id: "messages-chat-row"
+    index: 0
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 34-01-chat-day-separator
+
+- assertNotVisible: ".*[A-Z][a-z]{2}\\., [0-9]{1,2} .*"
+- assertVisible: ".*[A-Z][a-z]{2}, [0-9]{1,2} [A-Z][a-z]{2}.*"

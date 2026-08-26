@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+name: util - dismiss the "Are you liking the app?" modal
+tags:
+  - util
+---
+# The Messages tab fires `handleRequestAppReview` once `myDog.get` resolves,
+# and the modal lands over the list — it has eaten the tap that follows in
+# every capture run that did not suppress it. Suppressing it up front means
+# seeding `appReviewStatus: "completed"` into AsyncStorage, which any flow
+# that launches with `clearState: true` immediately wipes, so it has to be
+# dismissed reactively instead.
+#
+# "Yes" is the branch that closes cleanly: it stores the completed status and
+# calls StoreReview.requestReview, which on a simulator either no-ops or shows
+# an empty system sheet. "No" opens a second, focused feedback modal instead.
+- tapOn:
+    text: "Yes"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    text: "Not Now"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 3000
