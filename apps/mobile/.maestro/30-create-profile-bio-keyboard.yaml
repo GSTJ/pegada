@@ -1,0 +1,67 @@
+appId: ${APP_ID}
+name: Keyboard - CreateProfile Bio must sit above the keyboard and the pinned bar
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #1 (MAJOR).
+#
+# Focusing the multiline Bio field left it *entirely* behind the keyboard and
+# the pinned "Create Profile" bar: the caret was in Bio, the keyboard was up,
+# and every typed character was invisible. The ScrollView never moved.
+#
+# Root cause: `behavior="padding"` KeyboardAvoidingView shrinks the scroll
+# area in the same transaction that the keyboard appears, so UIKit's built-in
+# scroll-the-first-responder-into-view decides against the pre-shrink frame,
+# concludes Bio is already visible, and does nothing. `useKeyboardAwareScroll`
+# now does it explicitly, measured against the settled layout, so the same
+# guarantee holds on Android (where UIKit's behaviour has no equivalent).
+#
+# THE ASSERTION, and why it is platform-agnostic: Maestro's `above:` compares
+# the two elements' top edges in the accessibility tree. `profile-submit` is
+# the button inside the bottom-action bar, i.e. the top of the region that is
+# painted over the scroll area. A Bio field that has been left behind the
+# keyboard has a top edge *below* that button, so the relation is false. No
+# coordinates, no screen size, no keyboard geometry - it reads the same on
+# Android.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-fresh.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- assertVisible:
+    id: "profile-name"
+- takeScreenshot: 30-01-create-profile
+
+# Attach the E2E placeholder photo first. Without it the form is shorter than
+# it ever is in practice, and the bug needs the real content height to show.
+- tapOn:
+    id: "add-photo-button-0"
+- waitForAnimationToEnd:
+    timeout: 20000
+- takeScreenshot: 30-02-photo-attached
+
+# Bio is on screen with the keyboard DOWN, so this is an ordinary tap on a
+# visible field - the bug is entirely in what happens next.
+- tapOn:
+    id: "profile-bio"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 30-03-bio-focused
+# Type before asserting: `waitForAnimationToEnd` returns while the keyboard is
+# still sliding in, and the layout has to be settled for the assertions below
+# to mean anything.
+- inputText: "Loves long walks"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 30-04-bio-typed
+- assertVisible:
+    id: "profile-bio"
+    above:
+      id: "profile-submit"
+# The user-visible symptom: typed text must land somewhere the user can see.
+- assertVisible:
+    text: "Loves long walks"
+    above:
+      id: "profile-submit"

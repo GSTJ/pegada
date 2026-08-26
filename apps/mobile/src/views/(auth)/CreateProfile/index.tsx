@@ -25,6 +25,10 @@ import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
 import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
+import {
+  ScrollIntoViewProvider,
+  useKeyboardAwareScroll,
+} from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
@@ -101,7 +105,13 @@ const CreateProfile = () => {
 
   const { theme } = useUnistyles();
 
-  const { scrollViewProps } = useBottomActionStyle();
+  const { scrollViewProps, height: bottomActionHeight } =
+    useBottomActionStyle();
+
+  // The pinned Create Profile bar is painted over the scroll area, so a
+  // focused field has to clear the bar, not just the keyboard.
+  const { containerProps, scrollProps, requestScrollIntoView } =
+    useKeyboardAwareScroll({ bottomInset: bottomActionHeight });
 
   return (
     <KeyboardAvoidingView
@@ -109,122 +119,129 @@ const CreateProfile = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={componentsStyles.keyboardScreen}
     >
-      <View style={componentsStyles.fill}>
-        <ScrollView
-          {...scrollViewProps}
-          contentContainerStyle={{
-            padding: theme.spacing[4],
-            paddingBottom:
-              theme.spacing[4] +
-              scrollViewProps.contentContainerStyle.paddingBottom,
-          }}
-          scrollEnabled={gesturesEnabled}
-          keyboardShouldPersistTaps="handled"
-          style={styles.container}
-        >
-          <Controller
-            name="images"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value }, fieldState }) => (
-              <>
-                <Text fontWeight="bold" fontSize="lg">
-                  {t("createProfile.profilePictures")}
-                </Text>
-                <PhotoHint fontSize="xs" style={styles.photoHint}>
-                  {t("createProfile.minimumOnePhoto")}
-                </PhotoHint>
-                <ProfileImagesUploader
-                  setGesturesEnabled={setGesturesEnabled}
-                  value={value as Picture[]}
-                  onChange={(
-                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
-                  ) => {
-                    // This getValues is needed to ensure the update happens
-                    // correctly even when adding images fast.
-                    onChange(cb(getValues("images") as Picture[]));
-                  }}
-                  error={fieldState.error?.message}
-                />
-                <DragHint
-                  fontSize="xs"
-                  fontWeight="medium"
-                  style={styles.dragHint}
-                >
-                  {t("createProfile.clickAndHold")}
-                </DragHint>
-              </>
-            )}
-          />
-          <Controller
-            name="name"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                testID="profile-name"
-                title={t("createProfile.dogName")}
-                placeholder={t("createProfile.howToCallDog")}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                maxLength={50}
-                error={fieldState.error?.message}
-                autoCorrect={false}
-              />
-            )}
-          />
-          <Controller
-            name="bio"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <MultilineInput
-                title={t("createProfile.bio")}
-                placeholder={t("createProfile.tellSomethingCool")}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                maxLength={500}
-                multiline
-                optional
-                error={fieldState.error?.message}
-                style={styles.multilineInput}
-              />
-            )}
-          />
-          <Controller
-            name="gender"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value } }) => (
-              <RadioButtons
-                title={t("completeProfile.gender")}
-                data={[t("completeProfile.male"), t("completeProfile.female")]}
-                value={
-                  value === "MALE"
-                    ? t("completeProfile.male")
-                    : t("completeProfile.female")
-                }
-                onChange={(value) => {
-                  onChange(
-                    value === t("completeProfile.male") ? "MALE" : "FEMALE",
-                  );
-                }}
-              />
-            )}
-          />
-        </ScrollView>
-        <BottomAction.Container>
-          <Button
-            loading={dogCreateMutation.isPending}
-            onPress={() => saveUser()}
-            testID="profile-submit"
+      <ScrollIntoViewProvider value={requestScrollIntoView}>
+        <View {...containerProps} style={componentsStyles.fill}>
+          <ScrollView
+            {...scrollViewProps}
+            {...scrollProps}
+            contentContainerStyle={{
+              padding: theme.spacing[4],
+              paddingBottom:
+                theme.spacing[4] +
+                scrollViewProps.contentContainerStyle.paddingBottom,
+            }}
+            scrollEnabled={gesturesEnabled}
+            keyboardShouldPersistTaps="handled"
+            style={styles.container}
           >
-            {t("createProfile.createProfile")}
-          </Button>
-        </BottomAction.Container>
-      </View>
+            <Controller
+              name="images"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => (
+                <>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {t("createProfile.profilePictures")}
+                  </Text>
+                  <PhotoHint fontSize="xs" style={styles.photoHint}>
+                    {t("createProfile.minimumOnePhoto")}
+                  </PhotoHint>
+                  <ProfileImagesUploader
+                    setGesturesEnabled={setGesturesEnabled}
+                    value={value as Picture[]}
+                    onChange={(
+                      cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                    ) => {
+                      // This getValues is needed to ensure the update happens
+                      // correctly even when adding images fast.
+                      onChange(cb(getValues("images") as Picture[]));
+                    }}
+                    error={fieldState.error?.message}
+                  />
+                  <DragHint
+                    fontSize="xs"
+                    fontWeight="medium"
+                    style={styles.dragHint}
+                  >
+                    {t("createProfile.clickAndHold")}
+                  </DragHint>
+                </>
+              )}
+            />
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                <Input
+                  testID="profile-name"
+                  title={t("createProfile.dogName")}
+                  placeholder={t("createProfile.howToCallDog")}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  maxLength={50}
+                  error={fieldState.error?.message}
+                  autoCorrect={false}
+                />
+              )}
+            />
+            <Controller
+              name="bio"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                <MultilineInput
+                  testID="profile-bio"
+                  title={t("createProfile.bio")}
+                  placeholder={t("createProfile.tellSomethingCool")}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  maxLength={500}
+                  multiline
+                  optional
+                  error={fieldState.error?.message}
+                  style={styles.multilineInput}
+                />
+              )}
+            />
+            <Controller
+              name="gender"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value } }) => (
+                <RadioButtons
+                  title={t("completeProfile.gender")}
+                  data={[
+                    t("completeProfile.male"),
+                    t("completeProfile.female"),
+                  ]}
+                  value={
+                    value === "MALE"
+                      ? t("completeProfile.male")
+                      : t("completeProfile.female")
+                  }
+                  onChange={(value) => {
+                    onChange(
+                      value === t("completeProfile.male") ? "MALE" : "FEMALE",
+                    );
+                  }}
+                />
+              )}
+            />
+          </ScrollView>
+          <BottomAction.Container>
+            <Button
+              loading={dogCreateMutation.isPending}
+              onPress={() => saveUser()}
+              testID="profile-submit"
+            >
+              {t("createProfile.createProfile")}
+            </Button>
+          </BottomAction.Container>
+        </View>
+      </ScrollIntoViewProvider>
     </KeyboardAvoidingView>
   );
 };

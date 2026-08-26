@@ -1,4 +1,9 @@
-import type { TextInput, TextInputProps, ViewProps } from "react-native";
+import type {
+  TextInput,
+  TextInputProps,
+  View as ViewType,
+  ViewProps,
+} from "react-native";
 
 import * as React from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -6,6 +11,7 @@ import { ActivityIndicator, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { Text } from "@/components/text";
+import { useRequestScrollIntoView } from "@/hooks/use-keyboard-aware-scroll";
 
 import * as S from "./styles";
 import { styles } from "./styles";
@@ -15,18 +21,17 @@ type TextFieldContainerProps = {
   children: React.ReactNode;
 };
 
-const TextFieldContainer: React.FC<TextFieldContainerProps & ViewProps> = ({
-  loading,
-  children,
-  ...props
-}) => (
-  <View {...props} style={[styles.content, props.style]}>
+const TextFieldContainer = React.forwardRef<
+  ViewType,
+  TextFieldContainerProps & ViewProps
+>(({ loading, children, ...props }, ref) => (
+  <View {...props} ref={ref} style={[styles.content, props.style]}>
     {!loading && children}
     {loading ? (
       <ActivityIndicator style={styles.activityIndicatorComponent} />
     ) : null}
   </View>
-);
+));
 
 type InputProps = {
   canCancel?: boolean;
@@ -50,6 +55,21 @@ export const Input = React.forwardRef<TextInput, InputProps>(
   ) => {
     const { t } = useTranslation();
 
+    // Inside a keyboard-aware scroll area this asks to be scrolled clear of
+    // the keyboard and of whatever is pinned over it. Everywhere else it is a
+    // no-op, so the primitive is unchanged for callers outside one.
+    const requestScrollIntoView = useRequestScrollIntoView();
+
+    // The padded box, not the bare TextInput: React Native measures a
+    // TextInput as its text frame, so scrolling to that alone would still
+    // leave the box's bottom padding under the pinned bar.
+    const boxRef = React.useRef<ViewType>(null);
+
+    const handleFocus: TextInputProps["onFocus"] = (event) => {
+      requestScrollIntoView(boxRef.current);
+      props.onFocus?.(event);
+    };
+
     return (
       <View style={styles.container}>
         {Boolean(title || optional) && (
@@ -62,12 +82,13 @@ export const Input = React.forwardRef<TextInput, InputProps>(
             ) : null}
           </View>
         )}
-        <TextFieldContainer loading={loading}>
+        <TextFieldContainer ref={boxRef} loading={loading}>
           <S.TextInput
             value={props.value}
             onChangeText={props.onChangeText}
             ref={ref}
             {...props}
+            onFocus={handleFocus}
             style={[styles.textInput, props.style]}
           />
           {Boolean(props.value) && canCancel ? (
