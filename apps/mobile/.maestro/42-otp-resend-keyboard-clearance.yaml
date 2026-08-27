@@ -1,0 +1,74 @@
+appId: ${APP_ID}
+name: Keyboard - the one-time-code screen's resend control must clear the keypad
+tags:
+  - regression
+---
+# REGRESSION GUARD - the half of Android tour finding #1 that the first fix
+# missed.
+#
+# `useKeyboardOverlap` learns the keyboard's height from `keyboardDidShow`,
+# which fires when the keyboard APPEARS. This screen is never entered that way:
+# sign-in autofocuses its email field, so the IME is already up when Continue
+# is tapped, and focus moves from one field straight to another. The IME never
+# leaves, no event fires, and the screen was laid out as though there were no
+# keyboard at all — which put `otp-resend`, the only way out of a code that
+# never arrives, at y=2222 of a 2400px screen with the keypad starting at 1633.
+# It was not merely hard to reach: on Android a view under the IME is dropped
+# from the accessibility tree, so it could not be tapped by any means.
+#
+# THE ASSERTION reads the same on both platforms. `otp-resend` has to be in the
+# tree, and it has to be BELOW the last code cell — without that second half a
+# future layout could park the control mid-screen and pass while telling us
+# nothing. checks/42-*.mjs adds the Android-only number (how far the control's
+# bottom edge clears the ime InsetsSource) and no-ops on iOS.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: utils/dismiss-system-dialogs.yaml
+
+# Straight in with the autofocus keyboard up — never dismissed, never re-shown.
+# Reproducing the bug depends on that: dismissing the IME anywhere along the
+# way makes the next `keyboardDidShow` fire and the screen corrects itself.
+- tapOn:
+    id: "signin-email"
+- waitForAnimationToEnd
+- eraseText: 50
+- inputText: "maestro-fresh@pegada.app"
+- tapOn:
+    id: "signin-submit"
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: utils/dismiss-system-dialogs.yaml
+- extendedWaitUntil:
+    visible:
+      id: "otp-digit-0"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 42-01-otp-keypad-up
+
+- assertVisible:
+    id: "otp-digit-0"
+- assertVisible:
+    id: "otp-resend"
+# Below the code cells, i.e. still at the foot of the screen. A resend control
+# that had floated up into the middle of the form would satisfy the assertion
+# above for the wrong reason.
+- assertVisible:
+    id: "otp-digit-5"
+    above:
+      id: "otp-resend"
+
+# And it has to work. Tapping it re-requests the code, which resets the timer
+# and leaves the screen exactly where it was.
+- tapOn:
+    id: "otp-resend"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: 42-02-after-resend
+- assertVisible:
+    id: "otp-digit-0"
+- assertVisible:
+    id: "otp-resend"

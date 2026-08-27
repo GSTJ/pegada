@@ -97,7 +97,24 @@ export const ScrollIntoViewProvider = ScrollIntoViewContext.Provider;
  */
 export const useKeyboardOverlap = () => {
   const insets = useSafeAreaInsets();
-  const [overlap, setOverlap] = React.useState(0);
+
+  // Seeded, not zero: `keyboardDidShow` fires when the keyboard APPEARS, and a
+  // screen can be entered with it already up — sign-in's email field is
+  // focused, tapping Continue pushes the one-time-code screen, focus moves
+  // from one field straight to another and the IME never leaves. No event
+  // fires, and a hook that only listens would leave that screen padded by 0
+  // with its resend control behind the keypad. `Keyboard.metrics()` is React
+  // Native's own record of the last `keyboardDidShow` (nulled on hide), which
+  // is exactly the state this needs to catch up to. Computed lazily so the
+  // first committed frame is already correct rather than flashing unpadded.
+  const [overlap, setOverlap] = React.useState(() => {
+    const metrics = Keyboard.metrics();
+    if (!metrics) return 0;
+
+    return Platform.OS === "ios"
+      ? Math.max(0, Dimensions.get("window").height - metrics.screenY)
+      : metrics.height + insets.bottom;
+  });
 
   // Read at event time, not captured: re-subscribing on every inset change
   // would drop the listener for a frame mid-animation.

@@ -45,6 +45,10 @@ executionOrder:
     - 39-location-map-pan-chrome
     - 40-preferences-sheet-back-and-keyboard
     - 41-otp-digits-only-keypad
+    # 42 is the half of finding #1 the first fix missed: a screen ENTERED with
+    # the keyboard already up never sees `keyboardDidShow`, so it never
+    # consumed the IME inset at all.
+    - 42-otp-resend-keyboard-clearance
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before
