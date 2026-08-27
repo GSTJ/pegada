@@ -217,6 +217,10 @@
     "updateError": "An error occurred while updating your preferences.",
     "years": "0-{{maxYears}}+ years"
   },
+  "profilePhotos": {
+    "addPhoto": "Add photo {{position}}",
+    "removePhoto": "Remove photo {{position}}"
+  },
   "quickActions": {
     "matches": "Matches",
     "editProfile": "Edit profile"
