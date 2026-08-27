@@ -3,9 +3,36 @@ import {
   DeleteObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 import { config } from "../shared/config";
 import { assertAllowedImageUrl } from "./image-url";
+
+/**
+ * How long object storage gets before a request is abandoned.
+ *
+ * The SDK's own defaults for both of these are 0, which means "wait forever",
+ * and forever is what it does. Point AWS_S3_ENDPOINT at an address that
+ * swallows packets without answering — `10.0.2.2:9002`, the Android
+ * emulator's host alias, is the one that keeps happening, because it is the
+ * value that makes the DEVICE's presigned PUT work — and `dog.create` copies
+ * the object out of dogs-temporary/ and never returns. No error, no timeout,
+ * nothing logged; the Create Profile button spins until the user kills the
+ * app. It has been mistaken for an app blocker more than once
+ * (.unistyles-migration/tour-android-main/MANIFEST.md, workaround 3).
+ *
+ * Anything upstream of this — a tRPC mutation, a queue handler — can report a
+ * failure. It cannot report a hang.
+ */
+export const S3_REQUEST_TIMEOUTS = {
+  /** TCP connect. A reachable bucket answers in tens of milliseconds. */
+  connectionTimeout: 5_000,
+  /** Idle time between bytes once connected. Covers a stalled body. */
+  requestTimeout: 30_000,
+} as const;
+
+/** One handler per client: they own their own keep-alive agents. */
+const timeoutHandler = () => new NodeHttpHandler({ ...S3_REQUEST_TIMEOUTS });
 
 /**
  * Legacy S3 client (shipped app binaries upload here via `image.signedUrl`).
@@ -18,6 +45,7 @@ export const client = new S3Client({
     accessKeyId: config.AWS_ACCESS_KEY_ID,
     secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
   },
+  requestHandler: timeoutHandler(),
   // Dev/e2e: MinIO endpoint override. forcePathStyle because MinIO does
   // not serve virtual-hosted-style buckets (bucket.localhost:9002).
   ...(config.AWS_S3_ENDPOINT
@@ -45,6 +73,7 @@ export const r2Client = r2UploadsEnabled
       endpoint: config.R2_ENDPOINT,
       // R2 does not serve virtual-hosted-style buckets either.
       forcePathStyle: true,
+      requestHandler: timeoutHandler(),
       credentials: {
         // Both are guaranteed by the r2UploadsEnabled gate above; the empty
         // fallbacks are only there to satisfy the optional types.
