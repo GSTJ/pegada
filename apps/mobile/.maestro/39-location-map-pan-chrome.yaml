@@ -1,0 +1,80 @@
+appId: ${APP_ID}
+name: Location map - panning must not take the screen's chrome with it
+tags:
+  - regression
+---
+# REGRESSION GUARD - Android tour finding #4 (MAJOR).
+#
+# One pan of the location map permanently removed the "Confirm Location"
+# button, the "Are you here?" callout and the pin's pink fill. Not for the
+# duration of the gesture — for good: the tour's `MAP-03-ten-seconds-later.png`
+# is ten seconds after the finger came off and the footer is still gone, the
+# pin still black. The screen's only action was unreachable, so the location
+# could not be changed at all.
+#
+# All three are driven by the same `dragging` shared value (the CTA's opacity,
+# the dark marker overlay's opacity) or by the `touchStarted` latch that is
+# never cleared (the callout). Whatever is meant to hand `dragging` back to 0
+# when the camera settles was not running.
+#
+# The button is asserted BY TEXT rather than by `location-map-confirm`: that
+# testID does not surface in the accessibility tree on either platform (the
+# tour recorded `assertVisible` WARNing on it even in stills where the button
+# is plainly on screen), so asserting on it would pass for the wrong reason.
+# The pin's tint is not in the tree at all — checks/39-*.mjs measures it in the
+# frame buffer.
+#
+# The map itself is blank in this harness on purpose:
+# EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY / ..._IOS_... are `ci-stub`, so
+# Google serves no tiles. What is under test is the screen's chrome.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: utils/dismiss-app-review.yaml
+- tapOn:
+    id: "profile-open-location"
+- waitForAnimationToEnd:
+    timeout: 15000
+- assertVisible:
+    id: "location-map-screen"
+- takeScreenshot: 39-01-location-map-at-rest
+
+# Pre-condition: at rest the screen has its callout and its CTA.
+- assertVisible: "Are you here?"
+- assertVisible: "Confirm Location"
+
+# Small pans only. The confirmed coordinate becomes the user's location and
+# the swipe deck is anchored to it, so a long drag would move Rex out of San
+# Francisco and quietly break every deck-based flow after this one.
+- swipe:
+    start: "50%, 45%"
+    end: "58%, 40%"
+    duration: 1000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 39-02-after-first-pan
+- assertVisible: "Confirm Location"
+- assertVisible: "Are you here?"
+
+# Twice, because the first pan is the one that sets the latch and the second
+# proves the recovery is not a one-off.
+- swipe:
+    start: "50%, 40%"
+    end: "44%, 47%"
+    duration: 1000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 39-03-after-second-pan
+- assertVisible: "Confirm Location"
+- assertVisible: "Are you here?"
+- assertVisible:
+    id: "location-map-screen"

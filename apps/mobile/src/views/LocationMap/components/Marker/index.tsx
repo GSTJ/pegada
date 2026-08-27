@@ -30,8 +30,13 @@ const MarkerIcon: React.FC<MarkerIconProps> = (props) => (
 
 export const Marker: React.FC<{
   dragging: SharedValue<number>;
-  touchStarted: boolean;
-}> = ({ dragging, touchStarted }) => {
+  /**
+   * True only while the camera is actually moving. It used to be
+   * `touchStarted`, a latch that was set on the first touch and never cleared,
+   * so the callout below vanished on the first pan and never came back.
+   */
+  isDragging: boolean;
+}> = ({ dragging, isDragging }) => {
   const { colors } = useUnistyles().theme;
 
   const markerViewStyle = useAnimatedStyle(() => {
@@ -66,7 +71,7 @@ export const Marker: React.FC<{
             <MarkerIcon fill={colors.text} />
           </Animated.View>
         </Animated.View>
-        {!touchStarted && <Bubble entering={FadeInDown} exiting={FadeOutUp} />}
+        {!isDragging && <Bubble entering={FadeInDown} exiting={FadeOutUp} />}
       </View>
     </View>
   );

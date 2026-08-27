@@ -28,11 +28,15 @@ export const Submit: React.FC<SubmitProps> = ({
 
   const buttonAnimatedStyle = useAnimatedStyle(() => {
     "worklet";
+    // Faded out by the time the drag is two thirds of the way in, rather than
+    // by starting at `opacity: 1.5`. That is not a legal opacity: Android
+    // hands it to `View.setAlpha`, whose contract is 0..1, and the button was
+    // missing from the accessibility tree entirely on that platform — visible
+    // on screen, unreachable to Maestro and to TalkBack alike.
     const opacity = interpolate(
       dragging.value,
-      [0, 1],
-      // 1.5 so it goes a little faster
-      [1.5, 0],
+      [0, 2 / 3],
+      [1, 0],
       Extrapolation.CLAMP,
     );
 
@@ -40,7 +44,17 @@ export const Submit: React.FC<SubmitProps> = ({
   });
 
   return (
-    <Animated.View style={buttonAnimatedStyle}>
+    /*
+      Full-bleed and absolute, not a bare wrapper. `BottomAction.Container` is
+      itself `position: absolute; bottom: 0`, so an auto-height parent measured
+      zero — and a zero-height ancestor makes every descendant fail Android's
+      `isVisibleToUser`, which is the second reason "Confirm Location" never
+      surfaced. `box-none` keeps the overlay out of the map's gestures.
+    */
+    <Animated.View
+      pointerEvents="box-none"
+      style={[styles.submitOverlay, buttonAnimatedStyle]}
+    >
       <BottomAction.Container>
         <StyledButton
           testID="location-map-confirm"
