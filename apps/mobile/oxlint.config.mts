@@ -67,10 +67,13 @@ export default extendConfig(expo, {
     },
     {
       // Expo config plugins and native target configs run in the build
-      // toolchain, not in the app: CommonJS, and they log.
+      // toolchain, not in the app: CommonJS, they log, and they read the build
+      // environment directly — `src/services/config.ts` is the app's env
+      // boundary and is not loadable from a prebuild.
       files: ["plugins/**", "targets/**"],
       rules: {
         "no-console": "off",
+        "no-restricted-properties": "off",
         "typescript/no-require-imports": "off",
         "import/no-default-export": "off",
         "func-style": "off",
