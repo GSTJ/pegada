@@ -9,6 +9,7 @@
     "ios": "expo run:ios",
     "eject": "expo eject",
     "test": "jest --runInBand",
+    "test:checks": "node --test .maestro/checks/lib/*.test.mjs",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",

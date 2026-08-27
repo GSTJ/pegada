@@ -29,8 +29,9 @@ const isPink = ([r, g, b]) =>
 /** The pin is ~31x37dp; even at 1x that is far more than this many pixels. */
 const MIN_PIN_PIXELS = 150;
 
-const platform = (process.env.MAESTRO_PLATFORM ?? "ios").toLowerCase();
-const screen = captureScreen({ platform });
+// No platform argument: `captureScreen` resolves the device itself and
+// refuses to sample one the flow did not run on.
+const screen = captureScreen();
 
 // The marker's container is an absolute fill with `justifyContent: center`,
 // and its content sits 20dp above the middle. This window is deliberately

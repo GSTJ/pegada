@@ -11,6 +11,8 @@
 
 import { execFileSync } from "node:child_process";
 
+import { androidShell, resolveDevice } from "./device.mjs";
+
 /** `[x1,y1][x2,y2]` -> a rect. */
 const parseBounds = (bounds) => {
   const match = /\[(-?\d+),(-?\d+)]\[(-?\d+),(-?\d+)]/.exec(bounds ?? "");
@@ -26,10 +28,13 @@ const parseBounds = (bounds) => {
  *
  * @returns {Map<string, {x:number,y:number,right:number,bottom:number,width:number,height:number}>}
  */
-export const readHierarchy = ({
-  device = process.env.MAESTRO_DEVICE_ID ?? process.env.SIM_UDID,
-} = {}) => {
-  const args = device ? ["--device", device, "hierarchy"] : ["hierarchy"];
+export const readHierarchy = ({ device = resolveDevice() } = {}) => {
+  // Always `--device`. The id used to be `MAESTRO_DEVICE_ID ?? SIM_UDID`, and
+  // since the shared env sets SIM_UDID on the Android runner too, an Android
+  // check with MAESTRO_DEVICE_ID unset dumped the simulator's tree — flow 32
+  // reported `edit-profile-name=false edit-profile-save=false`, which was just
+  // the simulator sitting on a different screen.
+  const args = ["--device", device.id, "hierarchy"];
   const raw = execFileSync("maestro", args, {
     maxBuffer: 64 * 1024 * 1024,
     stdio: ["ignore", "pipe", "pipe"],
@@ -67,10 +72,8 @@ export const readHierarchy = ({
   // a 1080x74 strip as "the screen" and every check expressed as a fraction of
   // it silently inverts. The window manager knows the real display size, so
   // ask it instead of guessing from the tree.
-  if ((process.env.MAESTRO_PLATFORM ?? "ios").toLowerCase() === "android") {
-    const size = execFileSync("adb", ["shell", "wm", "size"], {
-      stdio: ["ignore", "pipe", "pipe"],
-    }).toString();
+  if (device.platform === "android") {
+    const size = androidShell(device, "shell", "wm", "size");
     // "Override size:" wins when present — that is the size actually rendered.
     const match = [
       ...size.matchAll(/(?:Physical|Override) size:\s*(\d+)x(\d+)/g),

@@ -18,6 +18,14 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { adbBinary, resolveDevice } from "./device.mjs";
+
+const defaultExec = (command, args, options = {}) =>
+  execFileSync(command, args, {
+    stdio: ["ignore", "pipe", "pipe"],
+    ...options,
+  });
+
 /** Decodes the uncompressed BMP variants `simctl io screenshot` emits. */
 const decodeBmp = (buffer) => {
   if (buffer.readUInt16LE(0) !== 0x4d42) throw new Error("not a BMP file");
@@ -72,16 +80,26 @@ const decodeAndroidRaw = (buffer) => {
 };
 
 /**
- * Grabs the current screen of the booted device.
+ * Grabs the current screen of the device this check is allowed to look at.
  *
- * @param {{ platform?: "ios" | "android", device?: string }} options
+ * The device is resolved, not defaulted. Both the platform and the id used to
+ * come from environment variables with fallbacks — `MAESTRO_PLATFORM ?? "ios"`
+ * and `SIM_UDID ?? "booted"` — and since the Android runner has `SIM_UDID` set
+ * as well, a check running beside an Android flow screenshotted the simulator
+ * and passed. `resolveDevice` throws in that situation instead.
+ *
+ * `exec` is injectable so the device pinning itself can be asserted.
+ *
+ * @param {{ device?: { platform: "ios" | "android", id: string }, exec?: Function }} options
  */
 export const captureScreen = ({
-  platform = process.env.MAESTRO_PLATFORM ?? "ios",
-  device = process.env.SIM_UDID ?? "booted",
+  device = resolveDevice(),
+  exec = defaultExec,
 } = {}) => {
-  if (platform === "android") {
-    const raw = execFileSync("adb", ["exec-out", "screencap"], {
+  if (device.platform === "android") {
+    // `-s` is not optional: this machine routinely has two emulators up, and
+    // an unpinned adb takes the first one it lists.
+    const raw = exec(adbBinary(), ["-s", device.id, "exec-out", "screencap"], {
       maxBuffer: 256 * 1024 * 1024,
     });
     return decodeAndroidRaw(raw);
@@ -93,9 +111,9 @@ export const captureScreen = ({
     // simctl narrates to stderr ("Note: No display specified…"); keep the
     // check's own output readable. A real failure still throws with the
     // captured stderr attached.
-    execFileSync(
+    exec(
       "xcrun",
-      ["simctl", "io", device, "screenshot", "--type=bmp", file],
+      ["simctl", "io", device.id, "screenshot", "--type=bmp", file],
       { stdio: ["ignore", "ignore", "pipe"] },
     );
     return decodeBmp(readFileSync(file));

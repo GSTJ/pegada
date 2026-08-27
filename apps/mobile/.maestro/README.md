@@ -100,6 +100,38 @@ maestro test apps/mobile/.maestro/
 
 Set these in **Settings → Secrets and variables → Actions** in the repository.
 
+## Post-checks and the device they measure
+
+Some flows end on the screen under test and hand off to a `checks/<NN>-*.mjs`
+script that measures something the selector language cannot express — a frame
+buffer, a node's real bounds, the Android IME inset. Those scripts drive a
+second tool (`simctl`, `adb`, `maestro hierarchy`), so they have to be told
+which device to point it at.
+
+They will not guess. `checks/lib/device.mjs` resolves one device, proves it is
+attached on the platform claimed for it, and throws otherwise:
+
+| Environment                                 | Result                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `MAESTRO_PLATFORM` + `MAESTRO_DEVICE_ID`    | used as given, if that device is really up                         |
+| `MAESTRO_PLATFORM` alone                    | `ANDROID_SERIAL` / `SIM_UDID`, or the only device of that platform |
+| neither, one device up                      | that device                                                        |
+| neither, an emulator **and** a simulator up | throws, asks for `MAESTRO_PLATFORM`                                |
+
+The last row is the point. Before this, the platform defaulted to `ios` and
+the device to `SIM_UDID ?? "booted"` — and the Android runner has `SIM_UDID`
+set too, because both runners source the same env. A check could measure the
+simulator while its flow drove the emulator and report PASS. A green that
+describes a different device is worse than a red.
+
+`scripts/run-flow.sh` (iOS) and the Android runner both export the pair, so
+neither ever lands in the ambiguous case. The resolution rules have their own
+tests:
+
+```sh
+pnpm -F @pegada/mobile test:checks
+```
+
 ## Maestro-only mocks
 
 The premium upgrade journey (`25-upgrade-journey.yaml`) is the **only** flow

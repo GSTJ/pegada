@@ -32,7 +32,9 @@ const INK = 140;
 /** A glyph at 420dpi is hundreds of pixels; 60 rules out compression noise. */
 const MIN_INK_PIXELS = 60;
 
-const screen = captureScreen({ platform: "android" });
+// `isAndroid()` above already resolved the device, so this samples the same
+// emulator rather than asserting a platform of its own.
+const screen = captureScreen();
 const barHeight = statusBarInsetPx() ?? Math.round(screen.height * 0.031);
 
 const countInk = (x0, x1) => {

@@ -23,16 +23,29 @@
  * `null` off Android so a shared check can degrade to (1) alone.
  */
 
-import { execFileSync } from "node:child_process";
+import { androidShell, resolveDevice } from "./device.mjs";
 
-const isAndroid = () =>
-  (process.env.MAESTRO_PLATFORM ?? "ios").toLowerCase() === "android";
+// Resolved once per process: every helper below wants the same device, and
+// `resolveDevice` shells out to `adb devices` / `simctl list`.
+let resolved;
+const device = () => (resolved ??= resolveDevice());
 
-const adb = (...args) =>
-  execFileSync("adb", args, {
-    maxBuffer: 32 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "pipe"],
-  }).toString();
+/**
+ * The resolved device when it is an emulator/handset, else null.
+ *
+ * Was `MAESTRO_PLATFORM ?? "ios"`, i.e. "assume iOS unless told otherwise" —
+ * so an Android run that forgot the variable silently reported "not Android"
+ * and every geometry assertion below degraded to null without saying so.
+ */
+const androidDevice = () => {
+  const current = device();
+  return current.platform === "android" ? current : null;
+};
+
+const isAndroid = () => androidDevice() !== null;
+
+/** `adb` pinned to the resolved serial — never the first device it lists. */
+const adb = (...args) => androidShell(device(), ...args);
 
 /** Device pixels per dp. `maestro hierarchy` reports Android bounds in pixels. */
 export const density = () => {
