@@ -23,6 +23,7 @@
     "minio:verify:test": "COMPOSE_FILE=./docker-compose.test.yml PROJECT=pegada-minio-verify-test HOST_PORT=9104 bash ./scripts/verify-minio-bucket.sh",
     "db:seed": "npx prisma db seed",
     "maestro:seed": "tsx ./maestro-seed.ts seed",
+    "maestro:reset-match": "tsx ./maestro-seed.ts reset-match",
     "maestro:purge": "tsx ./maestro-seed.ts purge",
     "maestro:check-deleted": "tsx ./maestro-seed.ts check",
     "db:setup": "pnpm db:up && pnpm migrate deploy && pnpm db:seed",
