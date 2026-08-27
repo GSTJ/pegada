@@ -181,4 +181,21 @@ describe("NewMatch exits", () => {
       mockRouter.replace.mock.invocationCallOrder[0]!,
     );
   });
+
+  it("pops exactly once when Android's back button is the skip", async () => {
+    render();
+
+    // Returning false hands the press on to the navigator, which pops by
+    // itself — on top of the `router.back()` the skip handler queues once the
+    // interstitial closes. One press, two pops, and the second one lands on
+    // whatever was under the tab the user was on.
+    expect(mockBackHandlers[0]?.()).toBe(true);
+
+    // The pop is deferred behind `await safeLoadAndShow()`, so it lands a
+    // microtask later than the handler returns.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  });
 });
