@@ -31,8 +31,23 @@ tags:
 - runFlow: utils/dismiss-system-dialogs.yaml
 - waitForAnimationToEnd
 # The numeric keypad's accessory pill is the reliable "we are on the OTP
-# screen" tell on iOS - see utils/login-fresh.yaml.
-- assertVisible: "Next"
+# screen" tell on iOS - see utils/login-fresh.yaml. Android has no such pill;
+# `maestro hierarchy` does include the IME window there, and Gboard's action
+# key happens to be labelled "Next" too, so the assertion passed for a reason
+# that has nothing to do with this app. Wait on the first code cell instead.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Next"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "otp-digit-0"
+          timeout: 15000
 - assertVisible:
     id: "otp-resend"
 - takeScreenshot: 33-01-otp-resend

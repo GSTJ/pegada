@@ -46,6 +46,10 @@ const fillComponent = (screen, predicate, seen, start) => {
   let minY = height;
   let maxX = 0;
   let maxY = 0;
+  // Per-column extent of the fill, which is what tells the pill's inside from
+  // the wedge of background that shows through inside its bounding box.
+  const columnTop = new Int32Array(width).fill(-1);
+  const columnBottom = new Int32Array(width).fill(-1);
 
   const visit = (index) => {
     const inBounds = index >= 0 && index < width * height && seen[index] === 0;
@@ -68,6 +72,8 @@ const fillComponent = (screen, predicate, seen, start) => {
     minY = Math.min(minY, y);
     maxX = Math.max(maxX, x);
     maxY = Math.max(maxY, y);
+    if (columnTop[x] === -1 || y < columnTop[x]) columnTop[x] = y;
+    if (y > columnBottom[x]) columnBottom[x] = y;
 
     if (x > 0) visit(index - 1);
     if (x < width - 1) visit(index + 1);
@@ -83,6 +89,9 @@ const fillComponent = (screen, predicate, seen, start) => {
     bottom: maxY + 1,
     width: maxX - minX + 1,
     height: maxY - minY + 1,
+    /** Is (x, y) strictly enclosed by the fill in its own column? */
+    encloses: (x, y) =>
+      columnTop[x] !== -1 && y > columnTop[x] && y < columnBottom[x],
   };
 };
 
@@ -128,7 +137,24 @@ if (pill.height > screen.height * 0.06) {
   );
 }
 
-const labelRuns = groupRuns(rowsMatching(screen, isLabel, pill, 3), 2);
+// Only pixels the pill actually encloses. Its bounding box is a rectangle,
+// but the photo cell it is pinned to has a rounded bottom-left corner and
+// clips to it, so the page background shows through inside the box as a wedge
+// that deepens row by row towards the pill's bottom edge. Those pixels are
+// near-white, exactly like the label, and on a 2.625x Android display the
+// wedge is wide enough to clear the 3-pixel row threshold for 19 rows — read
+// as a second line of text, i.e. a wrap that is not there. Asking whether the
+// pill continues BELOW a pixel in its own column separates the two without
+// hard-coding a radius, a density or an inset.
+const labelRuns = groupRuns(
+  rowsMatching(
+    screen,
+    (pixel, x, y) => isLabel(pixel) && pill.encloses(x, y),
+    pill,
+    3,
+  ),
+  2,
+);
 if (labelRuns.length === 0) {
   fail(TAG, "found the pill but no label inside it.");
 }

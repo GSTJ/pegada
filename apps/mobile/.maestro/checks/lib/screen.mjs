@@ -104,7 +104,12 @@ export const captureScreen = ({
   }
 };
 
-/** Bounding box of every pixel matching `predicate`, or null when there is none. */
+/**
+ * Bounding box of every pixel matching `predicate`, or null when there is none.
+ *
+ * `predicate` is called as `(rgb, x, y)`, so a caller can reject a pixel on
+ * position as well as colour.
+ */
 export const boundingBox = (screen, predicate, region = {}) => {
   const x0 = region.x ?? 0;
   const y0 = region.y ?? 0;
@@ -119,7 +124,7 @@ export const boundingBox = (screen, predicate, region = {}) => {
 
   for (let y = y0; y < y1; y += 1) {
     for (let x = x0; x < x1; x += 1) {
-      if (predicate(screen.at(x, y))) {
+      if (predicate(screen.at(x, y), x, y)) {
         count += 1;
         minX = Math.min(minX, x);
         minY = Math.min(minY, y);
@@ -141,7 +146,12 @@ export const boundingBox = (screen, predicate, region = {}) => {
   };
 };
 
-/** The y values inside `region` that hold at least `minCount` matching pixels. */
+/**
+ * The y values inside `region` that hold at least `minCount` matching pixels.
+ *
+ * `predicate` is called as `(rgb, x, y)`, so a caller can reject a pixel on
+ * position as well as colour.
+ */
 export const rowsMatching = (screen, predicate, region = {}, minCount = 1) => {
   const x0 = region.x ?? 0;
   const y0 = region.y ?? 0;
@@ -152,7 +162,7 @@ export const rowsMatching = (screen, predicate, region = {}, minCount = 1) => {
   for (let y = y0; y < y1; y += 1) {
     let count = 0;
     for (let x = x0; x < x1; x += 1) {
-      if (predicate(screen.at(x, y))) count += 1;
+      if (predicate(screen.at(x, y), x, y)) count += 1;
     }
     if (count >= minCount) rows.push(y);
   }

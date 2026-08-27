@@ -54,11 +54,33 @@ tags:
 # the screen. Stopping on the breed picker parks Weight one row higher: clear
 # of the bar with the keyboard down, and squarely behind the keyboard once it
 # comes up, which is the state under test.
-- scrollUntilVisible:
-    element:
-      id: "edit-profile-breed"
-    direction: DOWN
-    timeout: 20000
+#
+# Android needs `centerElement` on top of that. The rows are taller there
+# relative to the screen, so "breed is inside the screen" still leaves Weight's
+# CENTRE 8px above the Save bar's top edge — `above:` passes (it compares top
+# edges) but the tap lands on the bar's padding, focuses nothing, and the
+# `eraseText`/`inputText` that follow are silently no-ops against an unfocused
+# field. Centring breed is the same intent stated in a way that does not depend
+# on row heights: it parks Weight a whole row clear of the bar.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "edit-profile-breed"
+          direction: DOWN
+          timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "edit-profile-breed"
+          direction: DOWN
+          centerElement: true
+          timeout: 20000
 - waitForAnimationToEnd:
     timeout: 2000
 - takeScreenshot: 32-02-weight-in-view
@@ -95,6 +117,20 @@ tags:
 
 # Re-enter the screen for the Name case rather than tapping upwards through a
 # scrolled list with the keyboard up - that taps an off-viewport centre.
+#
+# The keyboard has to go first on Android. `utils/back.yaml` presses the system
+# Back key there, and Android's first Back always goes to the IME: it closed
+# the keypad and left the flow still on EditProfile, so the `profile-open-edit`
+# tap below had nothing to hit. iOS taps a chevron and is unaffected, so this
+# is scoped rather than pushed into the shared util, where it would change what
+# "go back one screen" means for every other flow.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
 - runFlow: utils/back.yaml
 - waitForAnimationToEnd:
     timeout: 6000

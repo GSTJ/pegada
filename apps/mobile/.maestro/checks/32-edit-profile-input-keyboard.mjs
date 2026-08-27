@@ -5,7 +5,7 @@
  * This asserts what `above:` cannot: the field's BOTTOM edge clears the
  * bottom-action bar, rather than merely starting above it.
  *
- * Geometry, all in points, straight out of `maestro hierarchy`:
+ * Geometry, straight out of `maestro hierarchy`:
  *
  *   barTop      = save button's top - the bar's own top padding
  *   fieldBottom = the field's text frame bottom + the Input's bottom padding
@@ -15,8 +15,16 @@
  * `Input` component's `content` style (`paddingBottom: theme.spacing[3.5]`,
  * `borderWidth: theme.stroke.md`) and `BottomAction`'s container
  * (`paddingTop: theme.spacing[4]`).
+ *
+ * The three constants below are style units — points on iOS, dp on Android —
+ * but `maestro hierarchy` reports iOS bounds in points and Android bounds in
+ * PIXELS. Left unscaled on a 2.625x device they would shrink the correction to
+ * a third of its real size and the required clearance with it, so the check
+ * would run far more permissively than it reads. Everything is therefore
+ * converted to device units up front.
  */
 
+import { density } from "./lib/android-ime.mjs";
 import { readHierarchy } from "./lib/hierarchy.mjs";
 import { fail, pass } from "./lib/report.mjs";
 
@@ -50,19 +58,23 @@ if (save.y > screen.height * 0.75) {
   );
 }
 
-const barTop = save.y - BAR_PADDING_TOP;
-const fieldBottom = field.bottom + INPUT_BOX_BELOW_TEXT;
+const scale = density() ?? 1;
+const units = (styleUnits) => Math.round(styleUnits * scale);
+const dp = (deviceUnits) => Math.round((deviceUnits / scale) * 10) / 10;
+
+const barTop = save.y - units(BAR_PADDING_TOP);
+const fieldBottom = field.bottom + units(INPUT_BOX_BELOW_TEXT);
 const clearance = barTop - fieldBottom;
 
 console.log(
-  `[${TAG}] field bottom ${fieldBottom}, bar top ${barTop}, clearance ${clearance}pt`,
+  `[${TAG}] field bottom ${dp(fieldBottom)}, bar top ${dp(barTop)}, clearance ${dp(clearance)}pt`,
 );
 
-if (clearance < REQUIRED_CLEARANCE) {
+if (clearance < units(REQUIRED_CLEARANCE)) {
   fail(
     TAG,
-    `the focused field is sliced by the bottom-action bar: it ends at ${fieldBottom}pt and the bar starts at ${barTop}pt (${clearance}pt, need >= ${REQUIRED_CLEARANCE}pt).`,
+    `the focused field is sliced by the bottom-action bar: it ends at ${dp(fieldBottom)}pt and the bar starts at ${dp(barTop)}pt (${dp(clearance)}pt, need >= ${REQUIRED_CLEARANCE}pt).`,
   );
 }
 
-pass(TAG, `focused field clears the bottom-action bar by ${clearance}pt`);
+pass(TAG, `focused field clears the bottom-action bar by ${dp(clearance)}pt`);
