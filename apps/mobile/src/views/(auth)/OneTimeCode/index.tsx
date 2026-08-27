@@ -1,12 +1,7 @@
 import type { OtpInputRef } from "./components/OtpInput";
 
 import { useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  KeyboardAvoidingView,
-  View,
-} from "react-native";
+import { ActivityIndicator, Keyboard, View } from "react-native";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 
@@ -21,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
+import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
@@ -58,6 +54,12 @@ const OneTimeCode = () => {
   const loginMutation = api.authentication.login.useMutation({
     onSuccess: async (data) => {
       try {
+        // The last code cell is still focused, and nothing on the screen this
+        // navigates to is. On Android that leaves the keypad up over
+        // CreateProfile with no field to type into — an orphan, covering the
+        // form's first input.
+        Keyboard.dismiss();
+
         const { token } = data;
         await storeData(StorageKeys.Token, token);
 
@@ -104,10 +106,19 @@ const OneTimeCode = () => {
   }, [keyboardInput]);
   styles.useVariants({ disabled: Boolean(timer) });
 
+  const keyboardOverlap = useKeyboardOverlap();
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.styledKeyboardAvoidingView}
+    /*
+      Not a KeyboardAvoidingView: `behavior` has to be left undefined on
+      Android, where the component then does nothing at all. The first code
+      cell autofocuses, so the keypad is up before this screen has drawn once.
+    */
+    <View
+      style={[
+        styles.styledKeyboardAvoidingView,
+        { paddingBottom: keyboardOverlap },
+      ]}
     >
       <View
         style={[
@@ -161,7 +172,7 @@ const OneTimeCode = () => {
           </View>
         ) : null}
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

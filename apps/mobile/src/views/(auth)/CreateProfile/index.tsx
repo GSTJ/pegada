@@ -3,7 +3,7 @@ import type { Picture } from "@/components/ProfileImageUploader/utils";
 import type { DogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { useState } from "react";
-import { Platform, KeyboardAvoidingView, View, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -24,10 +24,10 @@ import { RadioButtons } from "@/components/RadioButtons";
 import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
-import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
 import {
   ScrollIntoViewProvider,
   useKeyboardAwareScroll,
+  useKeyboardOverlap,
 } from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
@@ -49,8 +49,6 @@ const CreateProfile = () => {
     defaultValues: DEFAULT_VALUES,
     resolver: zodResolver(dogQuickClientSchema),
   });
-
-  const headerHeight = useDelayedHeaderHeight();
 
   const router = useRouter();
 
@@ -113,11 +111,26 @@ const CreateProfile = () => {
   const { containerProps, scrollProps, requestScrollIntoView } =
     useKeyboardAwareScroll({ bottomInset: bottomActionHeight });
 
+  // Shrinks this screen to the part the keyboard leaves visible, which is
+  // what makes the measurement above meaningful: `useKeyboardAwareScroll`
+  // measures the container's on-screen rect, and without this the container
+  // still reaches the bottom of the display on Android.
+  const keyboardOverlap = useKeyboardOverlap();
+
   return (
-    <KeyboardAvoidingView
-      keyboardVerticalOffset={headerHeight}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={componentsStyles.keyboardScreen}
+    /*
+      Not a KeyboardAvoidingView: `behavior` has to be left undefined on
+      Android, where the component then does nothing at all, so every field
+      below the IME's top edge stayed there. `useKeyboardOverlap` computes the
+      padding the component would have computed on iOS, on both platforms —
+      and it needs no `keyboardVerticalOffset`, because it measures the
+      keyboard against the window rather than against this view's own frame.
+    */
+    <View
+      style={[
+        componentsStyles.keyboardScreen,
+        { paddingBottom: keyboardOverlap },
+      ]}
     >
       <ScrollIntoViewProvider value={requestScrollIntoView}>
         <View {...containerProps} style={componentsStyles.fill}>
@@ -242,7 +255,7 @@ const CreateProfile = () => {
           </BottomAction.Container>
         </View>
       </ScrollIntoViewProvider>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

@@ -49,9 +49,38 @@ tags:
 # the email screen with a QWERTY keyboard. The OTP screen swaps in iOS's
 # CAN see even though app-rendered RN text cannot. Assert it here so a
 # into "OTP cells never filled" timeouts in every dependent flow.
-- assertVisible: "Next"
-- tapOn:
-    point: "50%, 43%"
+#
+# Android's keypad has no "Next" pill — its IME action is an unlabelled arrow
+# glyph — so there the same guard is "the first OTP cell exists", which is
+# equally specific: it only renders on the OneTimeCode screen.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Next"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "otp-digit-0"
+          timeout: 15000
+# The first cell autofocuses, but on iOS the tap is what reliably brings the
+# keypad up. The point is calibrated for the iOS layout, so Android taps the
+# cell by id instead.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: "50%, 43%"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: "otp-digit-0"
 - waitForAnimationToEnd
 # OTP: per-digit entry — see utils/login-returning.yaml for why a single
 # inputText: "424242" races React's commit phase. Each cell auto-advances

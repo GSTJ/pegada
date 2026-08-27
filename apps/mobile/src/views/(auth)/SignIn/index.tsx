@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Alert,
-  Keyboard,
-  Platform,
-  Pressable,
-  KeyboardAvoidingView,
-  View,
-} from "react-native";
+import { Alert, Keyboard, Pressable, View } from "react-native";
 
 import { useRouter } from "expo-router";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
@@ -19,6 +12,7 @@ import { useUnistyles } from "react-native-unistyles";
 import { Button } from "@/components/Button";
 import { api } from "@/contexts/trpc-provider";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
+import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
 import { SceneName } from "@/types/scene-name";
@@ -53,6 +47,10 @@ const InsertEmail = () => {
   const insets = useSafeAreaInsets();
   const bottomInset = useCustomBottomInset();
   const { theme } = useUnistyles();
+
+  // The email field autofocuses, so the keyboard is up on the first frame of a
+  // cold launch and this screen is the one that has to survive it.
+  const keyboardOverlap = useKeyboardOverlap();
 
   const router = useRouter();
   const { t } = useTranslation();
@@ -96,9 +94,17 @@ const InsertEmail = () => {
       style={styles.pressableContainer}
       accessible={false}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboardAvoidingViewStyled}
+      {/*
+        Not a KeyboardAvoidingView: `behavior` has to be left undefined on
+        Android, where the component then does nothing at all, and this screen
+        opens with the keyboard already up. `useKeyboardOverlap` gives the same
+        padding the component would compute on iOS, on both platforms.
+      */}
+      <View
+        style={[
+          styles.keyboardAvoidingViewStyled,
+          { paddingBottom: keyboardOverlap },
+        ]}
       >
         <Container style={styles.container} edges={["left", "right"]}>
           <TopCard
@@ -160,7 +166,7 @@ const InsertEmail = () => {
             </Button>
           </View>
         </Container>
-      </KeyboardAvoidingView>
+      </View>
     </Pressable>
   );
 };

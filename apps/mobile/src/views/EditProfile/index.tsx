@@ -3,7 +3,7 @@ import type { Picture } from "@/components/ProfileImageUploader/utils";
 import type { RouterInputs } from "@/contexts/trpc-provider";
 
 import { useEffect, useState } from "react";
-import { Platform, KeyboardAvoidingView, View, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -32,6 +32,7 @@ import { api } from "@/contexts/trpc-provider";
 import {
   ScrollIntoViewProvider,
   useKeyboardAwareScroll,
+  useKeyboardOverlap,
 } from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
@@ -128,6 +129,12 @@ const EditProfile = () => {
   const { containerProps, scrollProps, requestScrollIntoView } =
     useKeyboardAwareScroll({ bottomInset: bottomActionHeight });
 
+  // Shrinks this screen to the part the keyboard leaves visible, which is
+  // what makes the measurement above meaningful: `useKeyboardAwareScroll`
+  // measures the container's on-screen rect, and without this the container
+  // still reaches the bottom of the display on Android.
+  const keyboardOverlap = useKeyboardOverlap();
+
   const myDogUpdateMutation = api.myDog.update.useMutation({
     onMutate: () => {
       analytics.track({ event_type: "Save Profile Pressed" });
@@ -166,9 +173,19 @@ const EditProfile = () => {
   });
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={componentsStyles.keyboardScreen}
+    /*
+      Not a KeyboardAvoidingView: `behavior` has to be left undefined on
+      Android, where the component then does nothing at all, so every field
+      below the IME's top edge stayed there. `useKeyboardOverlap` computes the
+      padding the component would have computed on iOS, on both platforms —
+      and it needs no `keyboardVerticalOffset`, because it measures the
+      keyboard against the window rather than against this view's own frame.
+    */
+    <View
+      style={[
+        componentsStyles.keyboardScreen,
+        { paddingBottom: keyboardOverlap },
+      ]}
     >
       <ScrollIntoViewProvider value={requestScrollIntoView}>
         <View {...containerProps} style={componentsStyles.fill}>
@@ -390,7 +407,7 @@ const EditProfile = () => {
           </BottomAction.Container>
         </View>
       </ScrollIntoViewProvider>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

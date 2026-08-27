@@ -1,5 +1,6 @@
 import type {
   HostInstance,
+  KeyboardEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
@@ -7,7 +8,15 @@ import type {
 } from "react-native";
 
 import * as React from "react";
-import { Keyboard, TextInput } from "react-native";
+import {
+  Dimensions,
+  Keyboard,
+  LayoutAnimation,
+  Platform,
+  TextInput,
+} from "react-native";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
  * Breathing room left between the focused input's bottom edge and the top of
@@ -49,6 +58,95 @@ export const useRequestScrollIntoView = () =>
   React.useContext(ScrollIntoViewContext);
 
 export const ScrollIntoViewProvider = ScrollIntoViewContext.Provider;
+
+/**
+ * How much of the window's bottom edge the soft keyboard covers, in dp.
+ *
+ * Spread the returned value as `paddingBottom` on whatever reaches the bottom
+ * of the window and the screen shrinks to the part the user can still see —
+ * pinned bars ride up, `position: absolute; bottom: 0` composers ride up, and
+ * `useKeyboardAwareScroll` below measures a container that already excludes
+ * the keyboard. That is the same guarantee `KeyboardAvoidingView` gives with
+ * `behavior="padding"`, and the arithmetic is deliberately identical to its
+ * `_relativeKeyboardHeight` — but it holds on Android, where the component
+ * gives none.
+ *
+ * Why the component does not: the app is edge-to-edge
+ * (`react-native-edge-to-edge`), and from Android 15 that makes
+ * `android:windowSoftInputMode="adjustResize"` a no-op. The window keeps its
+ * full height and the IME arrives as a window inset the app must consume, so
+ * every screen here passed `behavior={Platform.OS === "ios" ? "padding" :
+ * undefined}` — nothing at all on Android. Measured on an API 36 emulator with
+ * the keyboard up: the app window is still [0,0][1080,2400] while the ime
+ * InsetsSource covers [0,1517][1080,2400].
+ *
+ * The two platforms read different halves of the same event because React
+ * Native fills them in differently:
+ *
+ *  * iOS reports the keyboard's own top edge in `screenY`, so the covered
+ *    height is the window height minus it. `keyboardWillChangeFrame` covers
+ *    show, hide and every resize in between (an autocomplete bar appearing,
+ *    a hardware keyboard connecting), and reports `screenY` at the window's
+ *    bottom when the keyboard goes away — so hide needs no special case.
+ *  * Android's `ReactRootView` sets `screenY` to the bottom of the window's
+ *    *visible display frame*, which is only the keyboard's top edge if the
+ *    window resized — i.e. never, here. Its `height` is honest, though:
+ *    `imeInsets.bottom - systemBarInsets.bottom`. Adding the bottom safe-area
+ *    inset back gives the full inset the IME occupies, which is the number
+ *    this hook is about.
+ */
+export const useKeyboardOverlap = () => {
+  const insets = useSafeAreaInsets();
+  const [overlap, setOverlap] = React.useState(0);
+
+  // Read at event time, not captured: re-subscribing on every inset change
+  // would drop the listener for a frame mid-animation.
+  const bottomInsetRef = React.useRef(insets.bottom);
+  bottomInsetRef.current = insets.bottom;
+
+  React.useEffect(() => {
+    const apply = (next: number, event?: KeyboardEvent) => {
+      // Ride the keyboard's own curve rather than snapping a frame early or
+      // late. This is what KeyboardAvoidingView does, and dropping it is
+      // visible on iOS as a jump.
+      if (event?.duration && event.easing) {
+        LayoutAnimation.configureNext({
+          duration: event.duration > 10 ? event.duration : 10,
+          update: { duration: event.duration, type: event.easing },
+        });
+      }
+      setOverlap((current) => (current === next ? current : next));
+    };
+
+    if (Platform.OS === "ios") {
+      const subscription = Keyboard.addListener(
+        "keyboardWillChangeFrame",
+        (event) => {
+          const covered =
+            Dimensions.get("window").height - event.endCoordinates.screenY;
+          apply(Math.max(0, covered), event);
+        },
+      );
+
+      return () => subscription.remove();
+    }
+
+    const subscriptions = [
+      Keyboard.addListener("keyboardDidShow", (event) => {
+        apply(event.endCoordinates.height + bottomInsetRef.current, event);
+      }),
+      Keyboard.addListener("keyboardDidHide", (event) => {
+        apply(0, event);
+      }),
+    ];
+
+    return () => {
+      for (const subscription of subscriptions) subscription.remove();
+    };
+  }, []);
+
+  return overlap;
+};
 
 type Options = {
   /**

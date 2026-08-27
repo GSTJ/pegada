@@ -33,6 +33,13 @@ executionOrder:
     - 33-otp-resend-underline
     - 34-chat-day-separator
     - 35-photo-skip-affordance
+    # 36-41 are the regression guards for the six findings of the Android app
+    # tour. Every one of them is a platform behaviour iOS does not have, so
+    # they assert through signals that read the same on both: an element under
+    # the Android IME drops out of the accessibility tree, which is what
+    # `assertVisible` sees. The Android-only measurements (IME insets, status
+    # bar pixels, `mInputShown`) live in checks/36-41 and no-op on iOS.
+    - 36-signin-signup-keyboard-clearance
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before

@@ -62,5 +62,24 @@ export const readHierarchy = ({
 
   walk(tree);
 
+  // On Android the dump is not one window: SystemUI's status bar is in there
+  // too, and in a pre-order walk it comes FIRST — so the heuristic above picks
+  // a 1080x74 strip as "the screen" and every check expressed as a fraction of
+  // it silently inverts. The window manager knows the real display size, so
+  // ask it instead of guessing from the tree.
+  if ((process.env.MAESTRO_PLATFORM ?? "ios").toLowerCase() === "android") {
+    const size = execFileSync("adb", ["shell", "wm", "size"], {
+      stdio: ["ignore", "pipe", "pipe"],
+    }).toString();
+    // "Override size:" wins when present — that is the size actually rendered.
+    const match = [
+      ...size.matchAll(/(?:Physical|Override) size:\s*(\d+)x(\d+)/g),
+    ].at(-1);
+    if (match) {
+      const [width, height] = [Number(match[1]), Number(match[2])];
+      screen = { x: 0, y: 0, right: width, bottom: height, width, height };
+    }
+  }
+
   return { byTestId, screen: screen ?? { width: 0, height: 0 } };
 };
