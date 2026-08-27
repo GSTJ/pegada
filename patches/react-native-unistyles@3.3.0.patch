@@ -1,0 +1,35 @@
+diff --git a/cxx/converters/TransformOriginConverter.cpp b/cxx/converters/TransformOriginConverter.cpp
+index 27437fbd2d92bbe26acfc1151bd44573cad4006c..46fb94ba8875ee83fa11a809a2d9697ecbeaff02 100644
+--- a/cxx/converters/TransformOriginConverter.cpp
++++ b/cxx/converters/TransformOriginConverter.cpp
+@@ -1,10 +1,29 @@
+ #include "TransformOriginConverter.h"
+ 
++// `facebook::react::parseUnprocessedTransformOriginString` only exists on React
++// Native's `main`. No published release declares it (checked 0.79 through
++// 0.84), and `__has_include` cannot see that: the header has shipped for years,
++// it is the function inside it that is missing. So the guard passes on
++// react-native 0.83.6 and the Android build fails to compile the call.
++//
++// Android-only, because `RN_SERIALIZABLE_STATE` is defined solely by unistyles'
++// own Android autolinking cmake (nitrogen/generated/android/
++// unistyles+autolinking.cmake). iOS already takes the `#else` below.
++//
++// So gate on the react-native version too. `cxxreact/ReactNativeVersion.h`
++// ships in the same `reactnative` prefab module as `conversions.h`, so if one
++// is reachable the other is. 0.84 is the newest release without the symbol;
++// once it lands, this whole patch can go.
+ #if defined(RN_SERIALIZABLE_STATE) &&                                          \
+-    __has_include(<react/renderer/components/view/conversions.h>)
++    __has_include(<react/renderer/components/view/conversions.h>) &&           \
++    __has_include(<cxxreact/ReactNativeVersion.h>)
++#include <cxxreact/ReactNativeVersion.h>
+ #include <react/renderer/components/view/conversions.h>
++#if REACT_NATIVE_VERSION_MAJOR > 0 ||                                          \
++    (REACT_NATIVE_VERSION_MAJOR == 0 && REACT_NATIVE_VERSION_MINOR > 84)
+ #define UNISTYLES_HAS_RN_TRANSFORM_ORIGIN_PARSER 1
+ #endif
++#endif
+ 
+ namespace margelo::nitro::unistyles::converters {
+ 

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Idempotent half of the migration: everything that is NOT a per-file source
-// transform. Adds the runtime deps, rewires babel, writes src/unistyles.ts,
-// boots it from index.js, adds the UnistylesThemes augmentation and bridges
-// the existing ThemeProvider into UnistylesRuntime.
+// transform. Adds the runtime deps and the one dependency patch they need,
+// rewires babel, writes src/unistyles.ts, boots it from index.js, adds the
+// UnistylesThemes augmentation and bridges the existing ThemeProvider into
+// UnistylesRuntime.
 //
 // Safe to run repeatedly; every step checks for its own output first.
 
@@ -12,6 +13,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const codemod = path.resolve(here, "..");
 const repoRoot = path.resolve(here, "..", "..");
 const mobile = path.join(repoRoot, "apps", "mobile");
 
@@ -46,6 +48,84 @@ function addDeps() {
   );
   write(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
   log("deps", Object.keys(DEPS).join(", "));
+}
+
+/* 1b. dependency patch ---------------------------------------------------- */
+// react-native-unistyles 3.3.0 does not compile against react-native 0.83.6 on
+// Android: `cxx/converters/TransformOriginConverter.cpp` calls
+// `facebook::react::parseUnprocessedTransformOriginString`, which only exists
+// on react-native's `main`. Its `__has_include` guard cannot tell the
+// difference, because the header it probes has shipped for years and only the
+// function inside it is missing. iOS is unaffected — `RN_SERIALIZABLE_STATE`
+// is defined solely by unistyles' Android autolinking cmake, so iOS already
+// takes the `#else`.
+//
+// The patch is a pnpm patch, and it belongs to this step for the same reason
+// the version pin above does: whoever adds the dependency owns the shape it
+// has to be installed in. The canonical copy lives here, next to the codemod
+// that needs it; `patches/` gets a copy because that is where the repo keeps
+// them and where pnpm-workspace.yaml points.
+const PATCH = "react-native-unistyles@3.3.0.patch";
+const PATCH_ENTRY = `  react-native-unistyles@3.3.0: patches/${PATCH}`;
+
+const PATCH_DOC = `# react-native-unistyles Patch (3.3.0)
+
+\`cxx/converters/TransformOriginConverter.cpp\` calls
+\`facebook::react::parseUnprocessedTransformOriginString\`, which exists only on
+react-native's \`main\` branch. No published release declares it, including the
+0.83.6 this repo pins, and the \`__has_include\` guard around the call cannot
+see that: the header is there, the function is not. So the guard passes and
+\`:app:assembleRelease\` fails to compile. It is Android-only because
+\`RN_SERIALIZABLE_STATE\` is defined solely by unistyles' own Android
+autolinking cmake; iOS already compiles the fallback.
+
+The patch adds a react-native version gate next to the header probe, so the
+parser is compiled only on a release new enough to have the symbol. Below that,
+Android takes the same \`return std::nullopt\` iOS ships today, which leaves a
+string \`transformOrigin\` unparsed on both platforms. Drop the patch once
+react-native ships the function and unistyles gates it on a version rather than
+on a header.
+`;
+
+function addDependencyPatch() {
+  const source = path.join(codemod, "dependency-patches", PATCH);
+  const target = path.join(repoRoot, "patches", PATCH);
+  const patch = read(source);
+
+  if (!fs.existsSync(target) || read(target) !== patch) {
+    write(target, patch);
+    log("patch", `patches/${PATCH}`);
+  } else {
+    log("patch", "already copied");
+  }
+
+  const workspacePath = path.join(repoRoot, "pnpm-workspace.yaml");
+  const workspace = read(workspacePath);
+
+  if (workspace.includes(PATCH_ENTRY)) {
+    log("patch", "already registered in pnpm-workspace.yaml");
+  } else {
+    const lines = workspace.split("\n");
+    const start = lines.indexOf("patchedDependencies:");
+    if (start === -1) throw new Error("pnpm-workspace.yaml: no patchedDependencies block");
+
+    // The block ends at the first line that is not indented — the blank line
+    // before `overrides:`. Appending there keeps the existing entries in the
+    // order they were added, which is the order the file already uses.
+    let end = start + 1;
+    while (end < lines.length && lines[end].startsWith("  ")) end += 1;
+
+    lines.splice(end, 0, PATCH_ENTRY);
+    write(workspacePath, lines.join("\n"));
+    log("patch", "registered in pnpm-workspace.yaml");
+  }
+
+  const docPath = path.join(repoRoot, "patches", "README.md");
+  const doc = read(docPath);
+
+  if (doc.includes("# react-native-unistyles Patch (3.3.0)")) return log("patch", "already documented");
+  write(docPath, `${doc.trimEnd()}\n\n${PATCH_DOC}`);
+  log("patch", "documented in patches/README.md");
 }
 
 /* 2. babel --------------------------------------------------------------- */
@@ -185,6 +265,7 @@ function patchThemeProvider() {
 /* ------------------------------------------------------------------------ */
 try {
   addDeps();
+  addDependencyPatch();
   patchBabel();
   writeUnistyles();
   patchIndex();

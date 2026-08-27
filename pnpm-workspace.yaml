@@ -26,6 +26,7 @@ patchedDependencies:
   minimatch@3.1.5: patches/minimatch@3.1.5.patch
   minimatch@9.0.9: patches/minimatch@9.0.9.patch
   expo-modules-core@55.0.25: patches/expo-modules-core@55.0.25.patch
+  react-native-unistyles@3.3.0: patches/react-native-unistyles@3.3.0.patch
 
 overrides:
   "@react-native-async-storage/async-storage": 2.2.0
