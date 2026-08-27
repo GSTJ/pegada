@@ -18,7 +18,7 @@ import { MAX_PROFILE_IMAGES } from "@pegada/shared/schemas/dog-schema";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
-import { config } from "@/services/config";
+import { isMaestroE2EBuild } from "@/services/e2e";
 import { sendError } from "@/services/error-tracking";
 import { getMimeType } from "@/services/get-mime-type";
 
@@ -306,37 +306,17 @@ export const uploadProfileImage = async (
 };
 
 /**
- * Whether the `MAESTRO_E2E_SKIP_PHOTO` affordance should render. The
- * affordance is GATED on TWO independent env signals so production builds
- * can never expose it even if one gate is misconfigured:
+ * Whether the `MAESTRO_E2E_SKIP_PHOTO` affordance should render.
  *
- *   1. `config.ENV !== "production"` — production releases always set
- *      `EXPO_PUBLIC_ENV=production` (the Zod schema accepts only
- *      `"development"` | `"production"`), so a real App Store build
- *      always fails this check regardless of other env state.
- *   2. `config.MAESTRO_E2E === "1"` — only set in the Maestro CI build
- *      (`.github/workflows/e2e-mobile.yml`) and when developers explicitly
- *      run `EXPO_PUBLIC_MAESTRO_E2E=1 expo run:ios`.
- *
- * Mirrors the BE-mocked purchase gating from PR #35
- * (`services/payments` → `isMaestroMockMode`, paired with `MAESTRO_E2E=1`
- * AND `NODE_ENV !== "production"` on the API side), so the whole
- * Maestro-only escape hatch surface uses one consistent pattern.
- *
- * `__DEV__` is intentionally NOT used: the verify step needs to exercise
- * the affordance in a `--configuration Release` simulator build (which
- * sets `__DEV__ === false`), and the iOS 26 picker issue we are working
- * around only reproduces in Release builds anyway. The two env-based
- * gates above already provide defense-in-depth without coupling to the
- * compile-time DEV flag.
+ * The two-signal gate this used to spell out inline now lives once, in
+ * `services/e2e` — the interstitial suppression needs the same one, and two
+ * copies of a production escape hatch is one too many.
  *
  * Metro may still include the placeholder PNG (~218 bytes) in Release
  * bundles because `require(...)` inside a function body is not statically
  * eliminable — accepted tradeoff for the runtime safety.
  */
-export const shouldOfferMaestroPlaceholder = (): boolean => {
-  return config.ENV !== "production" && config.MAESTRO_E2E === "1";
-};
+export const shouldOfferMaestroPlaceholder = (): boolean => isMaestroE2EBuild();
 
 /**
  * Resolves the bundled `maestro-placeholder.png` to a readable `file://`

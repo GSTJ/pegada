@@ -79,19 +79,21 @@ tags:
 # it showed a SwipeDog2 profile (post-tap on the swipe card's personal
 - tapOn:
     id: "new-match-send"
-# === CRITICAL: AdMob interstitial blocks navigation ===
-# NewMatch.handleSendMessage calls `await safeLoadAndShow()` BEFORE
-# router.replace(chat) — see views/NewMatch/index.tsx + services/advertise-
-# ment/interstitial.ts. The ad is a full-screen Google interstitial
-# (TestIds.INTERSTITIAL in __DEV__, real id otherwise). It can take
-# several seconds to load + show + close. During that window every
-# downstream tap lands on the ad UI instead of the chat.
+# NewMatch.handleSendMessage awaits `safeLoadAndShow()` before
+# router.replace(chat). In a Maestro build that call is a no-op —
+# createForAdRequestTracked returns an inert interstitial when
+# isMaestroE2EBuild() holds, because a full-screen Google interstitial eats
+# every downstream tap for as long as it is up and it appears on a schedule
+# AdMob owns, not one a flow can wait for. This step used to be a blind 20s
+# budget for that window.
 #
-# We wait a generous 20s for the ad to complete and the chat to mount.
-# The ad will auto-close once shown; if it never shows (e.g. no net /
-# RevenueCat marked premium), the wait is benign.
-- waitForAnimationToEnd:
-    timeout: 20000
+# So assert the destination instead of sleeping through the uncertainty: if
+# the ad ever comes back, this fails here rather than by taking the next tap
+# somewhere unexpected.
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
+    timeout: 10000
 - takeScreenshot: 22-04-on-chat-screen
 
 # --- 4. Type a unique message and send via keyboard -----------------------
