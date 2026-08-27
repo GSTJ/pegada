@@ -53,7 +53,13 @@ const NewMatch: React.FC = () => {
 
     await safeLoadAndShow();
 
-    router.push({
+    // `replace`, not `push`. This screen is a one-shot celebration: the swipe
+    // saga pushes it the moment the API answers a like with `{ match }`, and
+    // taking a CTA spends it. Pushing the chat on top left it in the stack, so
+    // `chat-back` re-entered the confetti for a match the user had already
+    // acknowledged — and the only way out of THAT was "Keep swiping", i.e. two
+    // back presses to leave a conversation.
+    router.replace({
       pathname: `${SceneName.Chat}/[matchId]`,
       params: { dogId: matchDogId, matchId },
     });
