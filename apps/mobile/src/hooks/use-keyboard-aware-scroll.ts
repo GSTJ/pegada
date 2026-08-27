@@ -18,6 +18,12 @@ import {
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  keyboardOverlapEvents,
+  overlapForEvent,
+  seedOverlap,
+} from "./keyboard-overlap";
+
 /**
  * Breathing room left between the focused input's bottom edge and the top of
  * whatever is pinned over the scroll area (the BottomAction bar). Half a
@@ -98,23 +104,23 @@ export const ScrollIntoViewProvider = ScrollIntoViewContext.Provider;
 export const useKeyboardOverlap = () => {
   const insets = useSafeAreaInsets();
 
-  // Seeded, not zero: `keyboardDidShow` fires when the keyboard APPEARS, and a
-  // screen can be entered with it already up — sign-in's email field is
-  // focused, tapping Continue pushes the one-time-code screen, focus moves
-  // from one field straight to another and the IME never leaves. No event
-  // fires, and a hook that only listens would leave that screen padded by 0
-  // with its resend control behind the keypad. `Keyboard.metrics()` is React
-  // Native's own record of the last `keyboardDidShow` (nulled on hide), which
-  // is exactly the state this needs to catch up to. Computed lazily so the
-  // first committed frame is already correct rather than flashing unpadded.
-  const [overlap, setOverlap] = React.useState(() => {
-    const metrics = Keyboard.metrics();
-    if (!metrics) return 0;
+  const platform = Platform.OS === "ios" ? "ios" : "android";
 
-    return Platform.OS === "ios"
-      ? Math.max(0, Dimensions.get("window").height - metrics.screenY)
-      : metrics.height + insets.bottom;
-  });
+  // Seeded, not zero: a screen can be entered with the keyboard already up —
+  // sign-in's email field is focused, tapping Continue pushes the one-time-code
+  // screen, focus moves from one field straight to another and the IME never
+  // leaves. Nothing fires, and a hook that only listened would leave that
+  // screen padded by 0 with its resend control behind the keypad. Computed
+  // lazily so the first committed frame is already correct rather than
+  // flashing unpadded.
+  const [overlap, setOverlap] = React.useState(() =>
+    seedOverlap({
+      bottomInset: insets.bottom,
+      metrics: Keyboard.metrics(),
+      platform,
+      windowHeight: Dimensions.get("window").height,
+    }),
+  );
 
   // Read at event time, not captured: re-subscribing on every inset change
   // would drop the listener for a frame mid-animation.
@@ -122,45 +128,34 @@ export const useKeyboardOverlap = () => {
   bottomInsetRef.current = insets.bottom;
 
   React.useEffect(() => {
-    const apply = (next: number, event?: KeyboardEvent) => {
-      // Ride the keyboard's own curve rather than snapping a frame early or
-      // late. This is what KeyboardAvoidingView does, and dropping it is
-      // visible on iOS as a jump.
-      if (event?.duration && event.easing) {
-        LayoutAnimation.configureNext({
-          duration: event.duration > 10 ? event.duration : 10,
-          update: { duration: event.duration, type: event.easing },
+    const subscriptions = keyboardOverlapEvents(platform).map((name) =>
+      Keyboard.addListener(name, (event: KeyboardEvent) => {
+        const next = overlapForEvent({
+          bottomInset: bottomInsetRef.current,
+          coordinates: event.endCoordinates,
+          name,
+          platform,
+          windowHeight: Dimensions.get("window").height,
         });
-      }
-      setOverlap((current) => (current === next ? current : next));
-    };
 
-    if (Platform.OS === "ios") {
-      const subscription = Keyboard.addListener(
-        "keyboardWillChangeFrame",
-        (event) => {
-          const covered =
-            Dimensions.get("window").height - event.endCoordinates.screenY;
-          apply(Math.max(0, covered), event);
-        },
-      );
+        // Ride the keyboard's own curve rather than snapping a frame early or
+        // late. This is what KeyboardAvoidingView does, and dropping it is
+        // visible on iOS as a jump.
+        if (event.duration && event.easing) {
+          LayoutAnimation.configureNext({
+            duration: event.duration > 10 ? event.duration : 10,
+            update: { duration: event.duration, type: event.easing },
+          });
+        }
 
-      return () => subscription.remove();
-    }
-
-    const subscriptions = [
-      Keyboard.addListener("keyboardDidShow", (event) => {
-        apply(event.endCoordinates.height + bottomInsetRef.current, event);
+        setOverlap((current) => (current === next ? current : next));
       }),
-      Keyboard.addListener("keyboardDidHide", (event) => {
-        apply(0, event);
-      }),
-    ];
+    );
 
     return () => {
       for (const subscription of subscriptions) subscription.remove();
     };
-  }, []);
+  }, [platform]);
 
   return overlap;
 };
