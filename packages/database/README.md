@@ -70,6 +70,10 @@ It tears its project down with `-v`, brings MinIO back up, and drives the real
 upload path — signed PUT into `dogs-temporary/`, then an anonymous GET, which
 must return 200.
 
+`docker-compose.test.yml` carries the same pair on `localhost:9004`, so the
+test environment is not the one place the upload path has nothing to talk to.
+`pnpm database minio:verify:test` is the same proof against that file.
+
 ## Integration
 
 This package is designed to be used by:
