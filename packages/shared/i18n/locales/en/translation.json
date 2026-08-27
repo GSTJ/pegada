@@ -201,6 +201,7 @@
     "resendCode": "Resend the code"
   },
   "pickerSheet": {
+    "close": "Close",
     "search": "Search"
   },
   "preferences": {

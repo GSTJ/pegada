@@ -1,3 +1,4 @@
+import type { Item } from "./types";
 import type { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
 
 import type { ListRenderItemInfo } from "react-native";
@@ -21,12 +22,10 @@ import { renderCustomBackdrop } from "@/components/custom-backdrop";
 import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
 
-import { CloseIcon, SearchInput, SelectItem, styles } from "./styles";
+import { PickerSelectItem } from "./select-item";
+import { CloseIcon, SearchInput, styles } from "./styles";
 
-export type Item = {
-  id: string | null;
-  name: string;
-};
+export type { Item };
 
 export type InputPickerProps<T extends Item> = {
   title: string;
@@ -49,34 +48,6 @@ export type InputPickerProps<T extends Item> = {
 } & Partial<Omit<BottomSheetFlatListProps<T>, "ref">>;
 
 const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
-
-const PickerSelectItem = <T extends Item>({
-  item,
-  value,
-  onChange,
-  onClose,
-  testID,
-}: {
-  item: T;
-  value: T | undefined;
-  onChange: (value: T) => void;
-  onClose: () => void;
-  testID?: string;
-}) => {
-  styles.useVariants({ selected: value?.id === item.id });
-  return (
-    <SelectItem
-      testID={testID}
-      onPress={() => {
-        onChange?.(item);
-        onClose();
-      }}
-      style={styles.selectItem}
-    >
-      <Text>{item.name}</Text>
-    </SelectItem>
-  );
-};
 
 const UnForwardedPickerSheet = <T extends Item>(
   props: InputPickerProps<T>,
@@ -207,7 +178,15 @@ const UnForwardedPickerSheet = <T extends Item>(
         <Text fontSize="lg" fontWeight="medium">
           {title}
         </Text>
-        <Pressable hitSlop={hitSlop} onPress={onClose}>
+        {/* An icon-only Pressable announces nothing: the SVG carries no
+            label and the Pressable has none of its own, so VoiceOver reads
+            the sheet's only dismiss control as an unlabelled button. */}
+        <Pressable
+          hitSlop={hitSlop}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t("pickerSheet.close")}
+        >
           <CloseIcon style={styles.closeIcon} />
         </Pressable>
       </View>
