@@ -52,6 +52,9 @@ export const DELETE_ME_EMAIL = "delete-me@pegada.app";
 const MAGIC_EMAIL = "test@pegada.app";
 /** MatchMe's owner. Premium, so MatchMe sorts to the top of Rex's deck. */
 const MATCHME_EMAIL = "test+matchme@pegada.app";
+/** Rex's canonical bio. Named because the reset has to restore it, not only
+ * the create has to set it. */
+const REX_BIO = "Friendly Rex looking for playmates in SF.";
 
 const yearsAgo = (n: number) => {
   const d = new Date();
@@ -120,6 +123,17 @@ const ensureMagicUserWithRex = async () => {
       where: { id: rex.id },
       data: {
         name: "Rex",
+        // `bio` and `preferredSize` are here because the flows and the tour
+        // WRITE them — tour chunk 08 types into Bio and picks size Medium,
+        // flow 24 edits both — and the pixel matrix compares the next
+        // capture against a baseline taken before any of that. Leaving them
+        // out is what produced the DATA rows in
+        // .unistyles-migration/verify-r1/MATRIX-GATE.md: 05-profile off by
+        // one line of bio, 06-preferences off by one row's value, and half
+        // of 07-edit-profile. A field a test can change belongs in the
+        // reset.
+        bio: REX_BIO,
+        preferredSize: null,
         preferredMinAge: 1,
         preferredMaxAge: 15,
         preferredMaxDistance: 50,
@@ -136,7 +150,7 @@ const ensureMagicUserWithRex = async () => {
         weight: 30,
         breedId: GOLDEN_ID,
         birthDate: yearsAgo(3),
-        bio: "Friendly Rex looking for playmates in SF.",
+        bio: REX_BIO,
         preferredMinAge: 1,
         preferredMaxAge: 15,
         preferredMaxDistance: 50,
