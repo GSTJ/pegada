@@ -1,0 +1,110 @@
+appId: ${APP_ID}
+name: Cosmetic - the one-time-code keypad must offer digits and nothing else
+tags:
+  - regression
+---
+# REGRESSION GUARD - Android tour finding #6 (COSMETIC).
+#
+# The code cells are `keyboardType="number-pad"` and `handleChange` drops
+# anything that is not 0-9, but the keypad that came up offered four keys that
+# could only ever be a dead end. Read straight out of the IME's accessibility
+# tree on an API 36 emulator:
+#
+#     1  2  3  Dash
+#     4  5  6  Space
+#     7  8  9  Delete
+#     ,  0  .  Next
+#
+# `number-pad` maps to Android's TYPE_CLASS_NUMBER, and Gboard's layout for
+# that class is the general-purpose number pad — punctuation included. The
+# digits-only PIN layout is TYPE_NUMBER_VARIATION_PASSWORD, which React Native
+# derives from `secureTextEntry` on a numeric field.
+#
+# THE ASSERTION: on Android `maestro hierarchy` includes the input-method
+# window, so every key is an element whose accessibility label is what the key
+# types. Asserting the labels are absent is the finding, stated literally.
+#
+# Android-gated because iOS's numeric pad has no punctuation to begin with, so
+# there is nothing to assert there.
+#
+# NOT COVERED HERE, deliberately: the other half of tour finding #6, the dog
+# profile's distance chip "drawn under the status bar". It does not reproduce.
+# The tour's own `15a-dog-profile.png` puts the chip's top edge at y=154px
+# against a 74px status-bar inset — 80px of clearance — and the chip is
+# positioned off `Math.max(insets.top, theme.spacing[6])`, which on this device
+# is the status-bar inset exactly, so it can sit flush against the bar but
+# never under it. On the current build it does not render on that screen at all
+# (`dog.distance` comes back null for the deck's dogs in this harness), so
+# there is nothing to measure. Left un-asserted rather than guarded by a test
+# that would pass for the wrong reason.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: utils/dismiss-system-dialogs.yaml
+- tapOn:
+    id: "signin-email"
+- waitForAnimationToEnd
+- eraseText: 50
+- inputText: "test@pegada.app"
+- tapOn:
+    id: "signin-submit"
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: utils/dismiss-system-dialogs.yaml
+# The first cell autofocuses, so the keypad is up and its window is in the
+# hierarchy by the time this resolves.
+- extendedWaitUntil:
+    visible:
+      id: "otp-digit-0"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 41-01-otp-keypad
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # Labels, not glyphs: the minus key is labelled "Dash", and a bare "."
+      # is a regex that matches every single-character key on the pad.
+      - assertNotVisible: ","
+      - assertNotVisible: "Dash"
+      - assertNotVisible: "\\."
+      - assertNotVisible: "Space"
+      # And the pad still has to be a pad — if the keyboard were simply gone,
+      # everything above would pass for the wrong reason.
+      - assertVisible: "1"
+      - assertVisible: "0"
+
+# The code still has to go in. `secureTextEntry` is what buys the PIN layout on
+# Android, and it changes how the field reports itself; entering the code and
+# landing on the deck is what proves it did not cost anything.
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25000
+- runFlow: utils/dismiss-system-dialogs.yaml
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 15000
+- assertVisible:
+    id: "swipe-screen"
+- takeScreenshot: 41-02-after-otp

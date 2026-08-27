@@ -1,6 +1,7 @@
 import type { TextInput } from "react-native";
 
 import { forwardRef, useState } from "react";
+import { Platform } from "react-native";
 
 import { useUnistyles } from "react-native-unistyles";
 
@@ -70,6 +71,21 @@ const OtpDigit = forwardRef<
           accessibilityHint="Enter the verification code"
           value={digit}
           keyboardType="number-pad"
+          // A six-digit code, on a keypad that offered a dash, a space, a
+          // comma and a full stop. `number-pad` maps to Android's
+          // TYPE_CLASS_NUMBER, and Gboard's layout for that class is the
+          // general-purpose number pad — punctuation included. The digits-only
+          // PIN layout is TYPE_NUMBER_VARIATION_PASSWORD, which React Native
+          // derives from `secureTextEntry` on a numeric field. The masking it
+          // brings with it is invisible here: this input already renders its
+          // text in `transparent` and the digit the user sees is a separate
+          // overlay. iOS is left alone — its numeric pad has no punctuation to
+          // begin with, and `textContentType="oneTimeCode"` autofill is worth
+          // more than a no-op.
+          secureTextEntry={Platform.OS === "android"}
+          // Sentence capitalisation on a digit field is meaningless, and RN
+          // ORs the flag into the inputType regardless of the keyboard class.
+          autoCapitalize="none"
           onChangeText={(text: string) => handleChange(text, index)}
           numberOfLines={1}
           maxLength={length}
