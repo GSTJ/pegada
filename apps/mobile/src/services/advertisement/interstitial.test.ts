@@ -78,7 +78,11 @@ jest.mock<Record<string, unknown>>("@/services/config", () => ({
   },
 }));
 
-import { AD_LOAD_TIMEOUT_MS, createForAdRequestTracked } from "./interstitial";
+import {
+  AD_LOAD_TIMEOUT_MS,
+  createAdRequestSlot,
+  createForAdRequestTracked,
+} from "./interstitial";
 
 const AD_IDS = { android: "android-unit", ios: "ios-unit" };
 
@@ -158,5 +162,39 @@ describe("safeLoadAndShow", () => {
     const { interstitial } = createForAdRequestTracked(AD_IDS);
 
     expect(interstitial).toBe(mockAd);
+  });
+});
+
+describe("the ad request slot", () => {
+  it("builds once for a key and hands the same object back", () => {
+    const slot = createAdRequestSlot();
+    const create = jest.fn(() => ({
+      interstitial: { load: () => {} },
+      safeLoadAndShow: async () => {},
+    }));
+
+    // Two renders of the same screen. Before this existed,
+    // createForAdRequestTracked ran on every one of them: a new
+    // InterstitialAd, a new listener set and a new ad request each time, and
+    // the identity change re-fired the load() effect too.
+    const first = slot("key", create);
+    const second = slot("key", create);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(second).toBe(first);
+  });
+
+  it("rebuilds when the key changes, so upgrading swaps the ad out", () => {
+    const slot = createAdRequestSlot();
+    const create = jest.fn(() => ({
+      interstitial: { load: () => {} },
+      safeLoadAndShow: async () => {},
+    }));
+
+    const free = slot("false|ios|android|dog", create);
+    const premium = slot("true|ios|android|dog", create);
+
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(premium).not.toBe(free);
   });
 });

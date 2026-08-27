@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 
 import {
@@ -148,28 +148,52 @@ export const createForAdRequestTracked = (
   };
 };
 
-/** The same as above, but mocked for Premium users. We don't show them ads, ever. */
-const useCreateFreeOnlyForAdRequestTracked: typeof createForAdRequestTracked = (
-  interstitialAdIds,
-  keywords,
-) => {
-  const isPremium = useUnsafeIsPremium();
+type AdRequest = ReturnType<typeof createForAdRequestTracked>;
 
-  if (isPremium) {
-    // Mock the interstitial ad
-    return noInterstitial();
-  }
+/**
+ * Holds one value, rebuilt only when its key changes.
+ *
+ * `createForAdRequestTracked` is not a pure function of its arguments: it
+ * constructs an InterstitialAd, registers listeners on it and starts an ad
+ * request. Called straight from a hook body it therefore ran on EVERY render
+ * of the screen, and since each call returned a fresh object, the `useEffect`
+ * below saw a new dependency every time and fired `load()` again. One
+ * NewMatch mount was worth as many ad objects, listener sets and network
+ * requests as it had renders.
+ *
+ * Deliberately a slot per hook instance rather than a module-level cache:
+ * `safeLoadAndShow` ends with `removeAllListeners()`, so an interstitial that
+ * outlived its screen would come back stripped of the LOADED promise and the
+ * analytics listeners it was built with.
+ *
+ * Exported for the test — this is the part with the bug in it.
+ */
+export const createAdRequestSlot = () => {
+  let current: { key: string; value: AdRequest } | undefined;
 
-  return createForAdRequestTracked(interstitialAdIds, keywords);
+  return (key: string, create: () => AdRequest): AdRequest => {
+    if (current?.key !== key) current = { key, value: create() };
+
+    return current.value;
+  };
 };
 
 export const useForAdRequestTracked: typeof createForAdRequestTracked = (
   interstitialAdIds,
-  keywords,
+  keywords = DEFAULT_AD_KEYWORDS,
 ) => {
-  const result = useCreateFreeOnlyForAdRequestTracked(
-    interstitialAdIds,
-    keywords,
+  // Premium users never see an ad. Part of the key rather than an early
+  // return, so upgrading mid-session swaps the inert object in.
+  const isPremium = useUnsafeIsPremium();
+
+  const slot = useRef(createAdRequestSlot()).current;
+
+  const result = slot(
+    `${isPremium}|${interstitialAdIds.ios}|${interstitialAdIds.android}|${keywords.join(",")}`,
+    () =>
+      isPremium
+        ? noInterstitial()
+        : createForAdRequestTracked(interstitialAdIds, keywords),
   );
 
   useEffect(() => {
