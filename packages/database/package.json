@@ -19,6 +19,7 @@
     "build": "npx prisma generate",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "db:up": "docker-compose up --build --detach",
+    "minio:verify": "bash ./scripts/verify-minio-bucket.sh",
     "db:seed": "npx prisma db seed",
     "maestro:seed": "tsx ./maestro-seed.ts seed",
     "maestro:purge": "tsx ./maestro-seed.ts purge",
