@@ -24,4 +24,14 @@ export default extendConfig(next, {
     // the winner to stylesheet order, where `cn` keeps the last one.
     "magic/no-manual-classname": "error",
   },
+
+  overrides: [
+    {
+      // `tests/` runs under plain `node --test`, outside next entirely: it
+      // sets the environment the config under test reads, so it is the one
+      // place that has to touch process.env directly.
+      files: ["tests/**"],
+      rules: { "no-restricted-properties": "off" },
+    },
+  ],
 });
