@@ -40,6 +40,7 @@ executionOrder:
     # `assertVisible` sees. The Android-only measurements (IME insets, status
     # bar pixels, `mInputShown`) live in checks/36-41 and no-op on iOS.
     - 36-signin-signup-keyboard-clearance
+    - 37-chat-composer-keyboard
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before
