@@ -75,7 +75,6 @@ model User {
   // Plan
   plan PlanType @default(FREE)
 
-  @@index([id])
   @@index([latitude])
   @@index([longitude])
 }
@@ -136,7 +135,6 @@ model Dog {
   @@index([breedId], map: "dog_breedid_idx")
   @@index([preferredBreedId], map: "dog_preferredbreedid_idx")
   @@index([gender])
-  @@index([id])
 }
 
 enum ImageStatus {
@@ -161,6 +159,12 @@ model Image {
   position Int
 
   @@index([dogId], map: "image_dogid_idx")
+  // The swipe deck's shadow-ban gate runs `EXISTS (dogId = ? AND status =
+  // 'APPROVED')` and `NOT EXISTS (dogId = ? AND status = 'REJECTED')` once per
+  // candidate dog, and the images it returns are selected the same way. With
+  // dogId alone that is an index scan plus a heap fetch to read `status`;
+  // covering both turns it into an index-only scan.
+  @@index([dogId, status])
 }
 
 model Breed {
@@ -191,6 +195,10 @@ model Interest {
 
   @@index([responderId], map: "interest_responderid_idx")
   @@index([requesterId], map: "interest_requesterid_idx")
+  // "exclude dogs you have already swiped" filters on both columns at once,
+  // once per candidate dog. `requesterId` alone matches every dog the viewer
+  // ever swiped and then filters.
+  @@index([requesterId, responderId])
   @@index([updatedAt])
   @@index([deletedAt])
   @@index([swipeType])
