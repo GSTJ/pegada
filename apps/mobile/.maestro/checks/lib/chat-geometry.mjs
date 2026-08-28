@@ -81,3 +81,31 @@ export const lastReadableMessage = (messages, band) => {
 
 export const describe = (rect) =>
   rect ? `[${rect.x},${rect.y}]..[${rect.right},${rect.bottom}]` : "absent";
+
+/**
+ * Drives one of the tiny `checks/lib/*.yaml` fragments.
+ *
+ * A check normally only reads. These two bugs are about what happens BETWEEN
+ * two states — "the row you were reading is still there once the keyboard is
+ * up" — and Maestro runs a check after a flow, not in the middle of one. So
+ * the check performs the transition itself: same binary, same device, one
+ * `tapOn` per fragment, and a hierarchy read on either side.
+ *
+ * The fragments are tagged `util`, which `config.yaml` excludes, so they never
+ * run as flows of their own.
+ */
+export const driveFragment = (name, { device = resolveDevice() } = {}) => {
+  const url = new URL(`${name}.yaml`, import.meta.url);
+  execFileSync(
+    "maestro",
+    [
+      "--device",
+      device.id,
+      "test",
+      "-e",
+      `APP_ID=${process.env.APP_ID ?? "app.pegada"}`,
+      url.pathname,
+    ],
+    { stdio: ["ignore", "inherit", "inherit"], maxBuffer: 32 * 1024 * 1024 },
+  );
+};

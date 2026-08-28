@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+name: util - dismiss the keyboard and scroll back into the conversation history
+tags:
+  - util
+---
+# Driven by checks/44-chat-keyboard-anchor.mjs. Leaves the chat mid-thread
+# with the keyboard down, which is the state the mid-history half of the
+# check measures from.
+#
+# Three swipes, not one: one swipe from the end of a 40-message thread lands
+# close enough to the bottom that the rows the keyboard would cover are the
+# last ones anyway, and the check would be re-testing the at-bottom case.
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 5000
+- swipe:
+    direction: DOWN
+    duration: 400
+- swipe:
+    direction: DOWN
+    duration: 400
+- swipe:
+    direction: DOWN
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 5000

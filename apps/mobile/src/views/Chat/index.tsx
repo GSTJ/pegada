@@ -40,15 +40,27 @@ const keyExtractor = (message: MessageProps) => String(message.id);
 // which remounts the empty state each time a message arrives.
 const ListEmptyComponent = () => <Empty />;
 
-const ChatMessageList = () => {
+const ChatMessageList = ({ keyboardOverlap }: { keyboardOverlap: number }) => {
   const { dogId } = useLocalSearchParams();
   const { theme } = useUnistyles();
 
   const { messages, hasNextPage, loadMore } = useChatPagination();
 
-  const { listRef, listProps } = useChatListAnchor<MessageProps>();
-
   const insets = useKeyboardAwareSafeAreaInsets();
+
+  // The strip along the bottom of the screen the conversation cannot use —
+  // `screenHeight - composerTop`. All three terms move together and not by the
+  // same amount: the keyboard takes `keyboardOverlap` from the container, and
+  // the composer gives back the bottom safe-area inset at the same time
+  // (`useKeyboardAwareSafeAreaInsets` drops it while the IME is up, because
+  // the home indicator is drawn over the keyboard). Anchoring on the sum is
+  // what keeps a row's distance to the composer's top edge fixed; anchoring on
+  // the keyboard alone slides the whole thread up by that inset — 34pt of
+  // drift on this device, harmless but visible.
+  const occludedBottom = keyboardOverlap + SEND_HEIGHT + insets.bottom;
+
+  const { listRef, listProps } =
+    useChatListAnchor<MessageProps>(occludedBottom);
 
   const MessageLoader = hasNextPage ? (
     <ActivityIndicator color={theme.colors.text} />
@@ -149,6 +161,13 @@ const Chat = () => {
   // on Android, where `behavior` has to be left undefined — so the composer
   // stayed pinned to the bottom of the display, under the IME, and everything
   // typed into it was invisible.
+  //
+  // The list needs the same number: shrinking the container takes the height
+  // off the BOTTOM of its viewport, which is the edge the reader is on, so it
+  // has to move its offset by the same amount to stay on the same message.
+  // Read once and passed down rather than read again inside the list — the
+  // hook drives `LayoutAnimation` from its listener, and two subscriptions
+  // would configure the next animation twice.
   const keyboardOverlap = useKeyboardOverlap();
 
   return (
@@ -167,7 +186,7 @@ const Chat = () => {
         style={styles.background} // Tiling pattern
       >
         <NetworkBoundary>
-          <ChatMessageList />
+          <ChatMessageList keyboardOverlap={keyboardOverlap} />
         </NetworkBoundary>
         <Send />
         <Header />
