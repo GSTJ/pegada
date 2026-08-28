@@ -1,0 +1,130 @@
+appId: ${APP_ID}
+name: grand journey 05 - account B signs up as FEMALE on the same device
+tags:
+  - util
+---
+# Segment 5. The second real account, created through the UI on the same
+# device and in the same process as the first.
+#
+# Landing on `profile-name` at all is the assertion that matters up front: the
+# app has just been handed a different identity with no relaunch, and it
+# resolved it to "brand-new account, no dog, go to CreateProfile" rather than
+# serving anything cached from A.
+- runFlow: ../utils/login-journey-b.yaml
+- extendedWaitUntil:
+    visible:
+      id: "profile-name"
+    timeout: 25000
+- takeScreenshot: 50-16-b-create-profile
+
+- tapOn:
+    id: "add-photo-button-0"
+- waitForAnimationToEnd:
+    timeout: 20000
+
+# FEMALE, and this is the tap the whole journey rests on.
+#
+# `#buildPreferenceConditions` hard-codes the deck to the opposite gender:
+#
+#   "Dog"."gender" = <MALE ? FEMALE : MALE>
+#
+# so if B stayed MALE — the form default — A's deck could never contain B and
+# B's deck could never contain A, and there is no mutual match to be had. Until
+# `RadioButtons` learned `itemTestIDPrefix` the option could only be addressed
+# by its TRANSLATED label, which is why no flow in this suite has ever created
+# a FEMALE dog.
+#
+# Keyboard down, before the name field is focused — see segment 01 for the run
+# that proved what happens otherwise.
+- scrollUntilVisible:
+    element:
+      id: "gender-item-FEMALE"
+    direction: DOWN
+    timeout: 10000
+# Scrolled clear of the pinned "Create Profile" bar, not merely on-screen —
+# segment 01 has the measurements and the story. This is the tap that made it
+# worth chasing: here a miss lands on the submit button, and B stays MALE.
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: "gender-item-FEMALE"
+        selected: true
+    commands:
+      - swipe:
+          start: "50%, 75%"
+          end: "50%, 45%"
+          duration: 400
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "gender-item-FEMALE"
+      - waitForAnimationToEnd
+- assertVisible:
+    id: "gender-item-FEMALE"
+    selected: true
+- assertVisible:
+    id: "gender-item-MALE"
+    selected: false
+- takeScreenshot: 50-17-b-gender-female
+
+- tapOn:
+    id: "profile-name"
+- waitForAnimationToEnd
+- eraseText: 50
+- waitForAnimationToEnd
+- inputText: "Bianca"
+- waitForAnimationToEnd
+- takeScreenshot: 50-18-b-profile-filled
+
+- tapOn:
+    id: "profile-submit"
+- extendedWaitUntil:
+    visible:
+      id: "complete-profile-birth-date"
+    timeout: 20000
+- tapOn:
+    id: "complete-profile-birth-date"
+- waitForAnimationToEnd
+- inputText: "01/01/2020"
+- waitForAnimationToEnd
+- tapOn:
+    id: "profile-submit"
+- extendedWaitUntil:
+    visible:
+      id: "location-allow"
+    timeout: 20000
+
+# The permission was granted once, by segment 01's `launchApp`, and it belongs
+# to the app rather than the account — so B gets the same coordinates A did and
+# the two dogs sit on top of each other. Nothing in the journey depends on that
+# distance, only on the colour filter, but it does mean the distance chip on
+# each other's cards renders a real number rather than nothing.
+- tapOn:
+    id: "location-allow"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "location-allow"
+    optional: true
+# Opposite answers per platform — segment 01 has the reasoning; the short
+# version is that the shared util's last tap is "Don't Allow", which is the
+# right answer to iOS's tracking prompt and the wrong one to Android's location
+# dialog.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: "While using the app|Only this time|Allow|ALLOW"
+          optional: true
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow: ../utils/dismiss-system-dialogs.yaml
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 30000
+- takeScreenshot: 50-19-b-deck-reached

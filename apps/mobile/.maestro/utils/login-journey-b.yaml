@@ -1,0 +1,80 @@
+appId: ${APP_ID}
+name: util - login as grand-journey account B (journey-b@pegada.app)
+tags:
+  - util
+---
+# Account B of the grand journey (50-grand-journey.yaml). Everything here is
+# utils/login-returning.yaml with one address changed; the address is what
+# matters, so read this comment rather than diffing the steps.
+#
+# journey-b@pegada.app must be listed in APPLE_MAGIC_EMAIL, NOT matched by
+# APPLE_MAGIC_EMAIL_REGEX — see utils/login-journey-a.yaml for why the regex
+# path is fatal to a journey that logs the same account in twice. B logs in
+# twice as well: once to create the account, once to read A's message and
+# reply to it.
+#
+#   export APPLE_MAGIC_EMAIL='test@pegada.app,delete-me@pegada.app,journey-a@pegada.app,journey-b@pegada.app'
+#
+# The address is hardcoded because `${VAR}` in `inputText:` resolves to the
+# literal string "undefined" when a flow is reached through `runFlow:` — the
+# same reason every other login util in this directory hardcodes its own.
+- runFlow: dismiss-system-dialogs.yaml
+- tapOn:
+    id: "signin-email"
+- waitForAnimationToEnd
+# A stray keystroke from the tap landing on the keyboard would produce
+# `vjourney-b@pegada.app`, which is NOT in APPLE_MAGIC_EMAIL: the API rotates a
+# random code into the DB for it and rejects 424242 on the next screen.
+- eraseText: 50
+- waitForAnimationToEnd
+- inputText: "journey-b@pegada.app"
+- tapOn:
+    id: "signin-submit"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: dismiss-system-dialogs.yaml
+- waitForAnimationToEnd
+# Proof the OTP screen actually swapped in. iOS shows a "Next" accessory over
+# the numeric keypad; Android's IME action is an unlabelled arrow, so there the
+# equivalent anchor is the first OTP cell.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Next"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "otp-digit-0"
+          timeout: 15000
+- tapOn:
+    id: "otp-digit-0"
+- waitForAnimationToEnd
+# Per-digit entry: a single `inputText: "424242"` outruns React's commit phase
+# and leaves cells half filled. 25ms is the driver round-trip floor.
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25000
+- runFlow: dismiss-system-dialogs.yaml
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd

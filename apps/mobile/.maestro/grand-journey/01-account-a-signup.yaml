@@ -1,0 +1,236 @@
+appId: ${APP_ID}
+name: grand journey 01 - account A signs up and reaches the deck
+tags:
+  - util
+---
+# Segment 1 of 50-grand-journey.yaml. A brand-new account, created entirely
+# through the UI: magic-link sign-in, one photo, a name, a gender, a birth
+# date, and the location grant.
+#
+# What is new here versus 20-account-creation-journey.yaml, which walks the
+# same screens:
+#
+#   * the gender radio is TAPPED, by testID. Before `RadioButtons` carried
+#     `itemTestIDPrefix` the control could only be reached by matching its
+#     translated label, so every account this suite ever created was the
+#     default MALE — and the deck only ever shows the opposite gender, so a
+#     two-account journey was not expressible at all.
+#   * the segment ENDS on an assertion, not a screenshot. Flow 20 finishes
+#     with `takeScreenshot: 20-07-on-swipe` and a post-check that counts rows
+#     without reading a column, which is how a fresh account that never
+#     reached the deck — or reached it with NULL coordinates — went unnoticed
+#     for as long as it did.
+#
+# Colour and breed are deliberately left unset on this dog. Every seeded SF
+# dog is GOLDEN, and the deck's colour preference passes dogs whose colour is
+# NULL, which is what lets segment 07 isolate this dog with one picker tap
+# instead of a fixture.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      photos: all
+      location: inuse
+      notifications: allow
+- waitForAnimationToEnd
+- assertVisible:
+    id: "signin-email"
+- takeScreenshot: 50-01-sign-in
+
+- runFlow: ../utils/login-journey-a.yaml
+# The auth router sends an account with no dog to CreateProfile.
+- extendedWaitUntil:
+    visible:
+      id: "profile-name"
+    timeout: 25000
+- takeScreenshot: 50-02-create-profile
+
+# Photo. `add-photo-button-0` is the only node in a photo cell iOS exposes —
+# react-native-draggable-grid wraps each cell in a pan responder that hides the
+# subtree — and under the double gate (config.ENV !== "production" AND
+# EXPO_PUBLIC_MAESTRO_E2E=1) it uploads a bundled placeholder through the real
+# presign + compress + PUT pipeline.
+- tapOn:
+    id: "add-photo-button-0"
+- waitForAnimationToEnd:
+    timeout: 20000
+- takeScreenshot: 50-03-photo-attached
+
+# GENDER BEFORE NAME, and the order is load-bearing.
+#
+# The radio sits at the bottom of the form's ScrollView, below the bio. With
+# the keyboard up it is off-screen — but it is still in the accessibility
+# tree, because the iOS keyboard is a separate window and Maestro's
+# `assertVisible` cannot see the occlusion. So `tapOn: gender-item-MALE`
+# happily resolved the node's coordinates and delivered the tap to whatever
+# was actually painted there: the keyboard.
+#
+# That is not a hypothetical. The first run of this segment typed the name
+# first and came out of it with a dog named "Aresd" — the `d` key sits where
+# the radio would have been — and a gender the tap never changed. It passed
+# anyway, because MALE happens to be the form default (`DEFAULT_VALUES` in
+# CreateProfile), so account A wanted the value it already had.
+#
+# Account B does not. B must be FEMALE or the deck's opposite-gender filter
+# hides each account from the other and the whole two-account journey is
+# untestable — and it would have failed the same silent way, as a stray
+# keystroke in the name field and a dog that stayed MALE.
+#
+# Selecting the radio while the keyboard is DOWN is the fix. `scrollUntilVisible`
+# keeps it honest on shorter screens (Android) where the radio needs a scroll
+# even with no keyboard up.
+- scrollUntilVisible:
+    element:
+      id: "gender-item-FEMALE"
+    direction: DOWN
+    timeout: 10000
+- assertVisible:
+    id: "gender-item-MALE"
+- assertVisible:
+    id: "gender-item-FEMALE"
+
+# ...and one more occluder under it, for the same blind-spot reason.
+#
+# The radio row is the LAST thing in the ScrollView, and the "Create Profile"
+# BottomAction is pinned over the bottom of the screen. `scrollUntilVisible`
+# stops the moment the row is on-screen, which is not the same as clear of that
+# bar. Measured on an iPhone 17 Pro Max at the point it stopped:
+#
+#     profile-submit      y 854..922
+#     gender-item-FEMALE  y 903..951
+#
+# Nineteen points of overlap, and Maestro scored the row "100% visible" because
+# it reads visibility off the accessibility frame and the pinned bar is not an
+# accessibility element. The tap went to the bar. On account B that was a
+# submit press with an empty name — the run ended with "*Name needs at least 2
+# characters" on screen and a dog that was still MALE.
+#
+# The ScrollView already reserves the bar's height in
+# `contentContainerStyle.paddingBottom`, so scrolling to the TRUE end of the
+# list clears it; the row only sits under the bar while the list is stopped
+# short. Loop rather than a fixed extra swipe, because how far short it stopped
+# depends on the screen. The loop's exit condition is the assertion.
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: "gender-item-FEMALE"
+        selected: true
+    commands:
+      # Started at 75% of the screen: below the draggable photo grid, whose pan
+      # responder would take a vertical drag as a photo reorder, and above the
+      # pinned bar.
+      - swipe:
+          start: "50%, 75%"
+          end: "50%, 45%"
+          duration: 400
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "gender-item-FEMALE"
+      - waitForAnimationToEnd
+
+# Both directions, on the account that does not need either. A is MALE by
+# default, so tapping MALE alone would pass whether or not the tap landed —
+# which is exactly how the occlusion above survived a green run. Selecting
+# FEMALE first makes the control prove it works before A sets it back.
+- assertVisible:
+    id: "gender-item-FEMALE"
+    selected: true
+- assertVisible:
+    id: "gender-item-MALE"
+    selected: false
+- tapOn:
+    id: "gender-item-MALE"
+- waitForAnimationToEnd
+# `accessibilityState={{ selected }}` on RadioButton is what makes any of this
+# observable — without it a tap that missed is indistinguishable from one that
+# landed on the already-default option.
+- assertVisible:
+    id: "gender-item-MALE"
+    selected: true
+- assertVisible:
+    id: "gender-item-FEMALE"
+    selected: false
+- takeScreenshot: 50-04-gender-selected
+
+# Name last, so the keyboard comes up over a form that is already complete.
+# `eraseText` guards the same stray-keystroke class the login utils do.
+- tapOn:
+    id: "profile-name"
+- waitForAnimationToEnd
+- eraseText: 50
+- waitForAnimationToEnd
+- inputText: "Ares"
+- waitForAnimationToEnd
+- takeScreenshot: 50-04b-profile-filled
+
+# Submit with the keyboard up: `hideKeyboard` is unreliable here and the
+# pinned BottomAction button is above it either way.
+- tapOn:
+    id: "profile-submit"
+- extendedWaitUntil:
+    visible:
+      id: "complete-profile-birth-date"
+    timeout: 20000
+- takeScreenshot: 50-05-complete-profile
+
+- tapOn:
+    id: "complete-profile-birth-date"
+- waitForAnimationToEnd
+- inputText: "01/01/2020"
+- waitForAnimationToEnd
+- tapOn:
+    id: "profile-submit"
+- extendedWaitUntil:
+    visible:
+      id: "location-allow"
+    timeout: 20000
+- takeScreenshot: 50-06-ask-for-location
+
+# Tapped twice: the first synthetic tap after a screen transition is regularly
+# eaten on iOS 26, and the handler is idempotent while the fix is resolving.
+- tapOn:
+    id: "location-allow"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "location-allow"
+    optional: true
+
+# The permission prompt, and the two platforms need OPPOSITE answers.
+#
+# utils/dismiss-system-dialogs.yaml ends on `tapOn: "Don.t Allow"`, which is
+# right on iOS: the prompt it is written for is App Tracking Transparency, and
+# declining tracking is what the suite wants. On Android that same tap lands on
+# the FOREGROUND LOCATION dialog's decline button. `updateUserLocation` then
+# throws `UpdateLocationError.PermissionNotGranted`, the screen never routes to
+# the deck, and the user row keeps NULL coordinates — which is exactly what
+# happened on the first Android run of this segment: dog "Ares" created, gender
+# MALE, latitude NULL, stranded on AskForLocation.
+#
+# `adb install -g` grants the manifest permissions, so the dialog usually does
+# not appear at all; `optional` covers both. There is no ATT prompt on Android,
+# so nothing is lost by not running the shared util there.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: "While using the app|Only this time|Allow|ALLOW"
+          optional: true
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow: ../utils/dismiss-system-dialogs.yaml
+
+# The assertion flow 20 never made. Reaching the deck is the whole point of
+# onboarding, and it is downstream of the coordinates actually being written:
+# `AskForLocation` routes here on success. checks/50-grand-journey.sh reads the
+# latitude column to prove the write, not just the navigation.
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 30000
+- takeScreenshot: 50-07-deck-reached

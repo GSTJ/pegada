@@ -171,10 +171,15 @@ export class SuggestionService {
           WHEN "User"."latitude" IS NULL OR "User"."longitude" IS NULL OR "MainUser"."latitude" IS NULL OR "MainUser"."longitude" IS NULL THEN NULL
           ELSE ST_DistanceSphere(ST_MakePoint("User"."longitude", "User"."latitude"), ST_MakePoint("MainUser"."longitude", "MainUser"."latitude")) / 1000
           END AS distance,
+        /* Premium buys priority over the people who liked YOU — the
+           "responderId" filter is what scopes it to this deck. Without it the
+           subquery selected every requester in the table, so one premium dog
+           who had liked anyone at all sorted to the top of everyone's stack. */
         CASE
           WHEN "User"."plan" = ${PlanType.PREMIUM}::"PlanType" AND "Dog"."id" IN (
             SELECT "requesterId" FROM "Interest"
-            WHERE "swipeType" IN (${SwipeType.INTERESTED}::"SwipeType", ${SwipeType.MAYBE}::"SwipeType")
+            WHERE "responderId" = ${dog.id}
+            AND "swipeType" IN (${SwipeType.INTERESTED}::"SwipeType", ${SwipeType.MAYBE}::"SwipeType")
             AND "deletedAt" IS NULL
           ) THEN 1
           ELSE 0

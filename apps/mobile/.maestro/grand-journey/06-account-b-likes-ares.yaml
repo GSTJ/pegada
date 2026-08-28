@@ -1,0 +1,74 @@
+appId: ${APP_ID}
+name: grand journey 06 - account B finds Ares and likes him first
+tags:
+  - util
+---
+# Segment 6. B applies the same colour preference A did, which resolves B's
+# deck to exactly one card, and likes it.
+- runFlow: ../utils/prefer-black-coats.yaml
+- tapOn:
+    id: "tab-swipe"
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# One card, and it is A's dog.
+#
+# B is FEMALE, so the deck is MALE dogs; of those, Rex is the only seeded one
+# and he is GOLDEN, so the colour filter drops him. Ares has no colour and is
+# the only thing left. This is the first time in this suite that a card has
+# been identified by WHICH dog it is rather than by "a card is present".
+- assertVisible:
+    id: "swipe-card"
+- assertVisible: ".*Ares.*"
+- takeScreenshot: 50-20-b-sees-ares
+
+# Open the profile behind the card before swiping on it — the distance chip
+# renders here, and on this card it has a real number to render because
+# segment 05 gave B the same coordinates A got.
+- tapOn:
+    id: "swipe-card-open-profile"
+- extendedWaitUntil:
+    visible:
+      id: "dog-profile-name"
+    timeout: 10000
+- assertVisible: ".*Ares.*"
+- takeScreenshot: 50-21-b-reads-ares-profile
+- tapOn:
+    id: "dog-profile-close"
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 8000
+
+# The like that starts the match, and the like that fires the first push.
+#
+# `SwipeService.swipeDog` finds no reciprocal Interest yet — A has never seen
+# B, because B did not exist when A last held the phone — so it takes the
+# `!hasMutualInterest` branch and calls `sendLikeNotification(responderId)`,
+# addressed to A. That is a server-side event with no UI whatsoever; the only
+# reason it is observable at all is the invalid push token
+# scripts/pre/50-reset-journey-accounts.sh seeded on A's row, which
+# `Expo.isExpoPushToken` rejects and `UserService.blacklistPushToken` then
+# blanks. checks/50-grand-journey.sh reads that column.
+#
+# `canSendNotifications` also requires the REQUESTER to have an approved image
+# and no rejected one, which is why B's photo upload in segment 05 is not
+# decoration.
+- tapOn:
+    id: "swipe-like"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# No match yet. The mutual half has not happened — A has not seen B at all —
+# so a match screen here would mean `checkForMutualInterest` matched something
+# it should not have.
+- assertNotVisible:
+    id: "new-match-screen"
+- takeScreenshot: 50-22-b-liked-ares
+
+# And the deck is empty again: the only dog in it has been swiped, and
+# `getPotentialMatches` excludes anything this dog already has an INTERESTED
+# row against.
+- assertNotVisible:
+    id: "swipe-card"
+- takeScreenshot: 50-23-b-deck-spent

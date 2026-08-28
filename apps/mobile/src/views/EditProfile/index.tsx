@@ -381,17 +381,13 @@ const EditProfile = () => {
               render={({ field: { onChange, value } }) => (
                 <RadioButtons
                   title={t("editProfile.gender")}
-                  data={[t("editProfile.male"), t("editProfile.female")]}
-                  value={
-                    value === "MALE"
-                      ? t("editProfile.male")
-                      : t("editProfile.female")
-                  }
-                  onChange={(value) => {
-                    onChange(
-                      value === t("editProfile.male") ? "MALE" : "FEMALE",
-                    );
-                  }}
+                  itemTestIDPrefix="edit-profile-gender-item-"
+                  data={[
+                    { id: "MALE", name: t("editProfile.male") },
+                    { id: "FEMALE", name: t("editProfile.female") },
+                  ]}
+                  value={value}
+                  onChange={onChange}
                 />
               )}
             />

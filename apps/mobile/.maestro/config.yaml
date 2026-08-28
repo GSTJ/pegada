@@ -63,6 +63,13 @@ executionOrder:
     # every screen that renders her, so it sits down here with the other two
     # fixture-heavy flows. `seed-before-test.sh` drops the extra photos again.
     - 45-dog-profile-photo-edges
+    # 50 is the two-account journey. It runs late because it is the longest
+    # flow in the suite by a wide margin and because it is the only one that
+    # creates its own accounts — journey-a / journey-b, reset by
+    # scripts/pre/50-reset-journey-accounts.sh — so it shares no state with
+    # anything above it and cannot be disturbed by, or disturb, the seeded
+    # fixture the other flows read.
+    - 50-grand-journey
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before

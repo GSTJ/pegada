@@ -292,6 +292,49 @@ describe("SuggestionService", () => {
       expect(afterLikesPotentialMatches[0]!.id).toEqual(premiumDog.id);
     });
 
+    test("a premium dog that liked someone else does not jump the queue", async () => {
+      const [
+        { dog },
+        { dog: nearDog },
+        { dog: premiumStranger },
+        { dog: bystander },
+      ] = await Promise.all([
+        generateFakeUserWithDog(
+          { gender: Gender.MALE },
+          { longitude: 0, latitude: 0 },
+        ),
+        generateFakeUserWithDog(
+          { gender: Gender.FEMALE },
+          { plan: PlanType.FREE, longitude: 0, latitude: 0 }, // Co-located
+        ),
+        generateFakeUserWithDog(
+          { gender: Gender.FEMALE },
+          { plan: PlanType.PREMIUM, longitude: 1, latitude: 1 }, // Further away
+        ),
+        // Not in `dog`'s deck at all — same gender as the swiper.
+        generateFakeUserWithDog(
+          { gender: Gender.MALE },
+          { longitude: 5, latitude: 5 },
+        ),
+      ]);
+
+      // The premium dog liked SOMEONE ELSE. Being premium buys priority over
+      // the people who liked you, not over everyone's deck everywhere.
+      await SwipeService.createOrUpdateInterest(
+        premiumStranger.id,
+        bystander.id,
+        SwipeType.INTERESTED,
+      );
+
+      const potentialMatches = await SuggestionService.getPotentialMatches(
+        dog,
+        LIMIT,
+        [],
+      );
+
+      expect(potentialMatches[0]!.id).toEqual(nearDog.id);
+    });
+
     describe("Preferences", () => {
       test("gender", async () => {
         const [{ dog }] = await Promise.all([

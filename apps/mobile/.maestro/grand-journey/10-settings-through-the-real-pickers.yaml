@@ -1,0 +1,146 @@
+appId: ${APP_ID}
+name: grand journey 10 - the settings sheets, driven rather than avoided
+tags:
+  - util
+---
+# Segment 10. The two settings pickers, driven through the actual
+# `@gorhom/bottom-sheet` sheets.
+#
+# This exists because the suite currently asserts around them.
+# 23-preferences-journey.yaml, 23b-lang-theme-persistence.yaml and 40 all carry
+# the same note, and REWRITE-PLAN.md states it outright: opening one of these
+# sheets "crashes the XCUITest driver", so flow 23 drops picker coverage
+# entirely and flow 40 gates its only real assertions to Android.
+#
+# Nothing crashed. The sheet was hiding its own contents: `@gorhom/bottom-sheet`
+# defaults `accessible` to true on the sheet container, which on iOS collapses
+# the whole subtree into one element announcing "Bottom Sheet". VoiceOver got
+# the same nothing XCUITest did. Fixed one commit up; these are the assertions
+# it buys.
+- tapOn:
+    id: "chat-back"
+- waitForAnimationToEnd:
+    timeout: 8000
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow: ../utils/dismiss-app-review.yaml
+- assertVisible:
+    id: "profile-screen"
+
+# --- Theme: every row addressable, and the current one identifiable ---------
+#
+# OPENED AND CLOSED, NOT SWITCHED, and the omission is deliberate.
+#
+# Selecting a theme here crashes the app — natively, in unistyles, not in
+# JavaScript:
+#
+#   EXC_CRASH (SIGABRT)
+#   ___BUG_IN_CLIENT_OF_LIBMALLOC_POINTER_BEING_FREED_WAS_NOT_ALLOCATED
+#   margelo::nitro::unistyles::shadow::ShadowTreeManager::updateShadowTree(jsi::Runtime&)
+#   HybridStyleSheet::applyDependencyChanges(...)
+#   HybridStyleSheet::onPlatformDependenciesChange(...)
+#
+# A double free in the shadow-tree commit that services a theme dependency
+# change. It reproduced 2 runs out of 2 at this exact step of the full journey,
+# and 0 out of 3 when the same taps are driven from a short session — login,
+# messages, chat, back, profile, switch — so it needs the accumulated tree of a
+# long session, which is why no existing flow has ever hit it.
+#
+# It is NOT caused by the accessibility fix that made this sheet reachable.
+# A/B on the same device, same deep navigation state, same Automatic -> Dark
+# transition, one variable changed: the pre-fix bundle survives it (verified,
+# Theme read "Dark" afterwards and the app stayed up), and the post-fix bundle
+# survives it too when the row is tapped by point instead of by id. Both
+# bundles crash only inside the full journey. The fix exposed the control; the
+# defect underneath it is unistyles' and predates this branch.
+#
+# Left un-driven rather than quarantined behind a `retry`, and NOT moved to an
+# early segment where the session is short enough that it happens not to fire —
+# that would be a test passing for the wrong reason, which is the objection
+# 41-otp-digits-only-keypad.yaml raises about its own un-asserted half.
+#
+# What IS asserted is the half the accessibility fix was about: all three
+# options exist, carry stable ids, and report which one is active.
+- tapOn:
+    id: "profile-open-theme"
+- extendedWaitUntil:
+    visible:
+      id: "theme-item-dark"
+    timeout: 10000
+- assertVisible:
+    id: "theme-item-light"
+# `PickerSheet` names a null id "any", which is the only reason the
+# "Automatic" option is addressable at all.
+- assertVisible:
+    id: "theme-item-any"
+    selected: true
+- assertVisible:
+    id: "theme-item-dark"
+    selected: false
+- takeScreenshot: 50-35-theme-sheet-open
+
+# The sheet's own dismiss control, which is an icon-only Pressable that
+# announces nothing until it is given a label — it has one now, and this is
+# what selects it.
+- tapOn:
+    text: "Close"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertNotVisible:
+    id: "theme-item-dark"
+- assertVisible:
+    id: "profile-screen"
+- takeScreenshot: 50-36-theme-sheet-dismissed
+
+# --- Language: switched for real -------------------------------------------
+# i18n's language change does not touch unistyles' shadow tree, so this half
+# has none of the problem above.
+#
+# Asserted as `.*Theme.*` rather than `Theme`: a settings row is ONE
+# accessibility element carrying its title and its current value together, so
+# this node's text is "Theme, Automatic" and Maestro matches a text selector
+# against the whole string. That is also what makes the row a good witness for
+# a language switch — both halves of it are translated.
+- assertVisible: ".*Theme.*"
+- tapOn:
+    id: "profile-open-language"
+- extendedWaitUntil:
+    visible:
+      id: "language-item-pt-BR"
+    timeout: 10000
+- assertVisible:
+    id: "language-item-en-US"
+    selected: true
+- tapOn:
+    id: "language-item-pt-BR"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# The app is now in Portuguese, and the proof is the screen's own copy rather
+# than the picker's: `profile.theme` is "Theme" in en and "Tema" in pt-BR.
+- assertVisible: ".*Tema.*"
+- assertNotVisible: ".*Theme.*"
+- takeScreenshot: 50-37-portuguese
+
+# Restored, and not optional. utils/logout.yaml anchors on the English
+# confirmation copy of the native alert, and this segment is the last thing the
+# journey does — leaving the device in Portuguese would break the NEXT run at
+# its first logout, since `clearState` only helps a run that gets as far as
+# launching.
+- tapOn:
+    id: "profile-open-language"
+- extendedWaitUntil:
+    visible:
+      id: "language-item-en-US"
+    timeout: 10000
+- assertVisible:
+    id: "language-item-pt-BR"
+    selected: true
+- tapOn:
+    id: "language-item-en-US"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: ".*Theme.*"
+- takeScreenshot: 50-38-english-restored

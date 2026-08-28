@@ -1,0 +1,75 @@
+appId: ${APP_ID}
+name: util - set the deck's colour preference to BLACK
+tags:
+  - util
+---
+# How the grand journey makes a shared, mutable fixture deterministic without
+# touching the fixture.
+#
+# The deck's ORDER cannot be relied on. `SuggestionService.getPotentialMatches`
+# ends on
+#
+#   ORDER BY priority DESC, <distance bucket> ASC
+#
+# and there is no tiebreaker below that. The first bucket is "< 10 km", the
+# seeded dogs all sit within a few hundred metres of each other in San
+# Francisco, and `scripts/run-flow.sh` pins the simulator's GPS to San
+# Francisco too — so every dog in the database lands in bucket 0 and their
+# relative order is whatever Postgres feels like returning. A journey that
+# needs to like ONE specific dog cannot swipe on "the top card".
+#
+# The deck's CONTENT can be relied on, and this is the lever:
+#
+#   ("Dog"."color" = <preferredColor> OR "Dog"."color" IS NULL)
+#
+# Every dog the maestro seed creates is GOLDEN, and so is every stray left in
+# the dev database by earlier runs. The two dogs the journey creates through
+# the UI have no colour at all — CreateProfile does not ask for one, and this
+# is why segment 01 deliberately leaves it unset. Preferring BLACK therefore
+# resolves the deck to exactly "dogs of the opposite gender that this journey
+# created", regardless of what else is in the database, how far away it is, or
+# what order the planner returns it in.
+#
+# It also exercises the real bottom-sheet picker rather than routing around
+# it. 23-preferences-journey.yaml drops all picker coverage on the grounds
+# that "@gorhom/bottom-sheet crashes the XCUITest driver"; that note predates
+# d7f55e7, which gave the sheet rows addressable ids, and the tours open and
+# dismiss these sheets at this branch tip without incident.
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow: dismiss-app-review.yaml
+- tapOn:
+    id: "profile-open-preferences"
+- extendedWaitUntil:
+    visible:
+      id: "preferences-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "preferences-color-picker"
+- extendedWaitUntil:
+    visible:
+      id: "preferences-color-item-BLACK"
+    timeout: 10000
+- tapOn:
+    id: "preferences-color-item-BLACK"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Every other preference is left at its default on purpose, and each default
+# means "no filter" by the time it reaches SQL:
+#   * distance defaults to MAX_FILTER_DISTANCE, which Preferences maps to
+#     `undefined`, so no ST_DistanceSphere condition is emitted at all;
+#   * the age range's minimum is 0 — falsy — and its maximum is likewise
+#     dropped at the ceiling, so `#buildPreferenceConditions` skips age;
+#   * size and breed stay unset.
+# Colour is the only condition added, which is what makes the isolation exact
+# rather than approximate.
+- tapOn:
+    id: "preferences-save"
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 15000

@@ -21,9 +21,23 @@ jest.mock<Record<string, unknown>>("./styles", () => ({
     captured.push(props);
     return null;
   },
+  // `useVariants` has to RETURN the stylesheet, and that is not a detail of
+  // the mock — it is the calling convention the unistyles babel plugin
+  // rewrites this component into. The plugin turns
+  //
+  //   styles.useVariants({ selected });   ...   style={styles.selectItem}
+  //
+  // into
+  //
+  //   const s = styles.useVariants({ selected });   ...   style={s.selectItem}
+  //
+  // so a `useVariants` that returns undefined makes every render throw on
+  // `undefined.selectItem`. With `jest.fn()` and no implementation, all three
+  // assertions below died in `renderRow` before reaching an `expect` — this
+  // file has never actually checked anything it claims to.
   styles: {
     selectItem: {},
-    useVariants: jest.fn(),
+    useVariants: jest.fn(() => ({ selectItem: {} })),
   },
 }));
 

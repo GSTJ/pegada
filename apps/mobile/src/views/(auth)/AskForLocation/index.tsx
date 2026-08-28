@@ -2,7 +2,6 @@ import { useState } from "react";
 import * as React from "react";
 import { Alert, Linking, ScrollView, View } from "react-native";
 
-import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 
 import { useTranslation } from "react-i18next";
@@ -11,7 +10,6 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { Text } from "@/components/text";
-import { getTrcpContext } from "@/contexts/trcp-context";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 
@@ -23,66 +21,10 @@ import {
   Title,
   styles,
 } from "./styles";
-
-enum UpdateLocationError {
-  PermissionNotGranted = "Location permission not granted",
-}
-
-const getApproximatedPosition = async () => {
-  const lastKnownPosition = await Location.getLastKnownPositionAsync({
-    maxAge: 1000 * 60 * 60 * 24 * 2, // 2 days
-  });
-
-  if (lastKnownPosition) return lastKnownPosition.coords;
-
-  const currentPostion = await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.Low,
-  });
-
-  return currentPostion.coords;
-};
-
-export const updateUserLocation = async (newLocation?: {
-  longitude: number;
-  latitude: number;
-}) => {
-  const { status } = await Location.requestForegroundPermissionsAsync();
-
-  if (status !== "granted") {
-    throw new Error(UpdateLocationError.PermissionNotGranted);
-  }
-
-  const position = newLocation ?? (await getApproximatedPosition());
-
-  const geocode = await Location.reverseGeocodeAsync({
-    latitude: position.latitude,
-    longitude: position.longitude,
-  });
-
-  const location = {
-    latitude: position.latitude,
-    longitude: position.longitude,
-    city: geocode[0]?.city ?? null,
-    state: geocode[0]?.region ?? null,
-    country: geocode[0]?.country ?? null,
-  };
-
-  const newUserData =
-    await getTrcpContext().client.user.update.mutate(location);
-
-  getTrcpContext().myDog.get.setData(undefined, (oldDogData) => {
-    if (!oldDogData) return undefined;
-    return {
-      ...oldDogData,
-      user: {
-        ...newUserData,
-        ...location,
-      },
-    };
-  });
-
-  return newUserData;
-};
+import {
+  updateUserLocation,
+  UpdateLocationError,
+} from "./update-user-location";
 
 const AskForLocation: React.FC = () => {
   const insets = useSafeAreaInsets();

@@ -17,7 +17,7 @@ import { api } from "@/contexts/trpc-provider";
 import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
 
-import { updateUserLocation } from "../(auth)/AskForLocation";
+import { updateUserLocation } from "../(auth)/AskForLocation/update-user-location";
 import { Marker } from "./components/Marker";
 import { Submit } from "./components/Submit";
 import { MapView, styles } from "./styles";

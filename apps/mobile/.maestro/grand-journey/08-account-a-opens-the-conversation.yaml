@@ -1,0 +1,51 @@
+appId: ${APP_ID}
+name: grand journey 08 - account A sends the first message of the match
+tags:
+  - util
+---
+# Segment 8. A takes the match screen's own CTA into the conversation it
+# created and writes the first message.
+#
+# `handleSendMessage` awaits an interstitial before navigating; the Maestro
+# build suppresses interstitials outright (`isMaestroE2EBuild` in
+# services/advertisement/interstitial.ts), so this resolves immediately rather
+# than on the blind 20s budget 22-new-match-journey.yaml has to allow.
+- tapOn:
+    id: "new-match-send"
+- extendedWaitUntil:
+    visible:
+      id: "chat-screen"
+    timeout: 20000
+- assertVisible:
+    id: "chat-input"
+- takeScreenshot: 50-28-a-in-chat
+
+# An empty conversation. Both dogs were created minutes ago and this match was
+# created seconds ago, so there is nothing to render — which is worth asserting
+# because the chat screen is keyed by matchId and a leak from the seeded
+# Rex/Bella conversation would show up right here.
+- assertNotVisible:
+    id: "chat-message-self"
+- assertNotVisible:
+    id: "chat-message-other"
+
+- tapOn:
+    id: "chat-input"
+- waitForAnimationToEnd
+- inputText: "Ares here. Park at six?"
+- waitForAnimationToEnd
+- takeScreenshot: 50-29-a-composed
+
+# The composer has no send button — `Send` submits on the keyboard's return
+# key (`returnKeyType: send`, `onSubmitEditing`), so Enter is the affordance.
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: "chat-message-self"
+    timeout: 15000
+- assertVisible: ".*Park at six.*"
+- takeScreenshot: 50-30-a-sent
+# Sent, not merely rendered. `Message` paints an optimistic bubble the instant
+# the input is submitted and only swaps its Feedback status once the mutation
+# answers, so a bubble on screen is not by itself proof the server took it.
+# checks/50-grand-journey.sh reads the Message row and its sender.

@@ -1,0 +1,64 @@
+appId: ${APP_ID}
+name: grand journey 07 - account A likes back and the match fires live
+tags:
+  - util
+---
+# Segment 7. The centrepiece: a mutual match between two accounts that were
+# both created through the UI in this run, with the match produced live by the
+# server rather than seeded.
+#
+# 22-new-match-journey.yaml gets to a match screen, but from a fixture — the
+# maestro seed writes an Interest row from MatchMe to Rex before the app ever
+# starts, and the flow supplies the second half. Nothing has ever driven both
+# halves. The difference matters because everything between the two halves is
+# what goes untested otherwise: that a like from a real session persists, that
+# the second account's deck can find the first, and that
+# `checkForMutualInterest` pairs two rows neither of which was hand-written.
+- runFlow: ../utils/logout.yaml
+- takeScreenshot: 50-24-b-logged-out
+
+# Back to A. journey-a@pegada.app is a STICKY magic email, listed in
+# APPLE_MAGIC_EMAIL rather than matched by APPLE_MAGIC_EMAIL_REGEX, and this
+# login is the reason. The regex path calls `purgeUserByEmail` on every
+# successful login — a transaction that deletes the user's Messages,
+# Interests, Matches, Images, Dog and User row. Logging back in as A on that
+# path would delete A, delete Ares, and delete the Interest B just created,
+# and the journey would sign in to an empty account instead of a pending
+# match. The clean slate this run needs comes from
+# scripts/pre/50-reset-journey-accounts.sh instead, once, before the app
+# starts.
+- runFlow: ../utils/login-journey-a.yaml
+# A has a dog, so the auth router goes straight to the deck rather than to
+# CreateProfile — which also confirms the account survived B's session intact.
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 30000
+- takeScreenshot: 50-25-a-back-on-deck
+
+# A's colour preference was saved against A's dog in segment 03 and is still
+# there, so A's deck resolves to the one FEMALE dog with no colour: B's.
+- assertVisible:
+    id: "swipe-card"
+- assertVisible: ".*Bianca.*"
+- takeScreenshot: 50-26-a-sees-bianca
+
+# The reciprocal like. `SwipeService.swipeDog` finds B's Interest row from
+# segment 06, takes the `hasMutualInterest` branch, and calls
+# `MatchService.createMatch(requester = Ares, responder = Bianca)`.
+#
+# Two things follow, one visible and one not. The visible one is the match
+# screen below. The invisible one is the second push: `createMatch` notifies
+# `match.responder.user`, which is B — a different recipient from segment 06's
+# notification, which is why the two accounts carry DIFFERENT sentinel tokens.
+# `blacklistPushToken` matches on the token VALUE (`updateMany where:
+# { pushToken }`), so one shared sentinel would have been blanked by the first
+# flip and proved nothing about the second.
+- tapOn:
+    id: "swipe-like"
+- extendedWaitUntil:
+    visible:
+      id: "new-match-screen"
+    timeout: 20000
+- assertVisible: ".*Bianca.*"
+- takeScreenshot: 50-27-MATCH
