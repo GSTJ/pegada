@@ -120,7 +120,8 @@
     {
       "file": "apps/mobile/src/components/FeedbackCard/styles.tsx",
       "pristine": "apps/mobile/src/components/FeedbackCard/styles.ts",
-      "$comment": "`AbsolutePosition` is why `MainCard/styles.tsx` still exports the `absoluteFill` fragment: the ledger loads the pristine module from git but resolves its imports against the working tree, so deleting the fragment would drop five declarations from ground truth and fail this unit.",
+      "$comment": "`AbsolutePosition` gets five of its declarations from a fragment the pristine `MainCard/styles.ts` exported, so that module has to be read from git too — otherwise ground truth comes half from before the migration and half from the working tree, and the working-tree half proves nothing.",
+      "pristineDeps": ["apps/mobile/src/components/MainCard/styles.tsx"],
       "definitionsDetail": [
         {
           "name": "Container",

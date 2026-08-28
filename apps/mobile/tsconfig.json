@@ -6,27 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "plugins": [
-      {
-        "name": "@styled/typescript-styled-plugin",
-        "lint": {
-          "validProperties": [
-            "shadow-color",
-            "shadow-opacity",
-            "shadow-offset",
-            "shadow-radius",
-            "padding-horizontal",
-            "padding-vertical",
-            "margin-vertical",
-            "margin-horizontal",
-            "tint-color",
-            "aspect-ratio",
-            "elevation"
-          ]
-        }
-      }
-    ]
+    }
   },
   "include": [
     "**/*.ts",

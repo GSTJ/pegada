@@ -22,8 +22,8 @@ export default extendConfig(expo, {
     // Two additions, both cases where the namespace *is* the documented API:
     // every `expo-*` module exports only named functions and the SDK docs are
     // written as `import * as Notifications from "expo-notifications"`, and a
-    // `styles.ts` next to a component is this repo's styled-components
-    // convention — `S.Container` is how you tell a styled node from a real one.
+    // a `styles.ts` module next to a component is this repo's convention —
+    // `S.Container` is how you tell a styled node from a real one.
     "import/no-namespace": [
       "error",
       { ignore: ["react", "expo-*", "**/styles"] },

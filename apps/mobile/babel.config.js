@@ -8,7 +8,6 @@ module.exports = (api) => {
       // StyleSheet.create calls before react-compiler (pulled in by
       // babel-preset-expo) rewrites the components around them.
       ["react-native-unistyles/plugin", { root: "src" }],
-      "babel-plugin-styled-components",
       "react-native-reanimated/plugin", // NOTE: this plugin MUST be last
     ],
   };

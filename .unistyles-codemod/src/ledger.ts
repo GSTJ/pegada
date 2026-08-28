@@ -90,9 +90,29 @@ export interface ParityReport {
 /** Caps the prop matrix; no definition in this app comes close. */
 const MAX_COMBOS = 64;
 
+export interface ParityUnit {
+  file: string;
+  definitionsDetail?: DefinitionInfo[];
+  /**
+   * Other modules whose PRISTINE source the ground-truth side has to import.
+   *
+   * Only the module under test is overridden by default, so its imports resolve
+   * against the working tree — which is fine while an import contributes
+   * nothing to the styles, and wrong the moment one does. `FeedbackCard` gets
+   * five declarations from a fragment `MainCard/styles` used to export, so
+   * without this its ground truth would be read half from before the migration
+   * and half from after it, and the migrated half could be changed freely
+   * without the ledger noticing.
+   *
+   * Paths are the unit's own (post-migration) paths; the caller's `pristine`
+   * already knows how to map a renamed file back to where git keeps it.
+   */
+  pristineDeps?: string[];
+}
+
 export function checkParity(
   repoRoot: string,
-  units: { file: string; definitionsDetail?: DefinitionInfo[] }[],
+  units: ParityUnit[],
   pristine: (file: string) => string,
 ): ParityReport {
   const themes = loadThemes(repoRoot);
@@ -100,7 +120,9 @@ export function checkParity(
 
   for (const unit of units) {
     if (!unit.definitionsDetail || unit.definitionsDetail.length === 0) continue;
-    modules.push(checkModule(repoRoot, unit.file, unit.definitionsDetail, themes, pristine));
+    modules.push(
+      checkModule(repoRoot, unit.file, unit.definitionsDetail, unit.pristineDeps ?? [], themes, pristine),
+    );
   }
 
   const checks = modules.flatMap((module) => module.checks);
@@ -131,6 +153,7 @@ function checkModule(
   repoRoot: string,
   file: string,
   definitions: DefinitionInfo[],
+  pristineDeps: string[],
   themes: Record<string, unknown>,
   pristine: (file: string) => string,
 ): ParityModule {
@@ -145,10 +168,19 @@ function checkModule(
     // pristine module may keep a styled component module-local, and the emitted
     // one keeps `styles` module-local when nothing outside imports it; neither
     // should put a definition beyond the ledger's reach.
-    before = new Loader({
-      repoRoot,
-      overrides: new Map([[absolute, exportEverything(absolute, pristine(file))]]),
-    }).load(absolute);
+    //
+    // The declared pristine dependencies go in unprocessed: they are imported,
+    // not sampled, so only their real exports matter. Keying them by the unit's
+    // own path is what makes the Loader prefer them over the file on disk, even
+    // when the migration renamed `styles.ts` to `styles.tsx`.
+    const pristineOverrides = new Map([
+      [absolute, exportEverything(absolute, pristine(file))],
+      ...pristineDeps.map(
+        (dependency) => [path.join(repoRoot, dependency), pristine(dependency)] as const,
+      ),
+    ]);
+
+    before = new Loader({ repoRoot, overrides: pristineOverrides }).load(absolute);
 
     after = new Loader({
       repoRoot,

@@ -18,8 +18,8 @@ import { UnknownErrorComponent } from "@/components/NetworkBoundary";
 const ThemedGradient = withUnistyles(LinearGradient);
 
 /**
- * `UnknownErrorComponent` hands its props to a styled-components ScrollView,
- * which the babel plugin never sees, so the sheet has to arrive resolved.
+ * `UnknownErrorComponent` hands its props to a ScrollView the babel plugin
+ * never sees, so the sheet has to arrive resolved.
  */
 const ThemedUnknownError = withUnistyles(UnknownErrorComponent);
 

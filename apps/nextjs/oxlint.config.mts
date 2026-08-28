@@ -10,7 +10,7 @@ import next from "magic-oxlint-config/next";
  *
  * This is the only config in the repo that loads the `magic` jsPlugin.
  * `magic/no-manual-classname` is a Tailwind rule and Tailwind stops at this
- * app — the mobile app styles with styled-components and `packages/*` has no
+ * app — the mobile app styles with Unistyles and `packages/*` has no
  * JSX at all, so loading the plugin there would cost startup time to lint
  * nothing.
  */

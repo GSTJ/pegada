@@ -11,8 +11,8 @@ import { ButtonText, Container } from "./styles";
 /**
  * `Pressable`'s style callback is gone from the public type: composing it with
  * the sheet needs a plain style, and the callback never worked here anyway —
- * styled-components handed it to `PressableArea` inside an array, where the
- * function was never called.
+ * the pre-migration wrapper handed it to `PressableArea` inside an array,
+ * where the function was never called.
  */
 export type ButtonProps = {
   children: string;

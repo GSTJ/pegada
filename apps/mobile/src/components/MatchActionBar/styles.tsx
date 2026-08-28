@@ -39,7 +39,7 @@ const ThemedImage = withUnistyles(Image);
  * picks `ThinkingEmoji` at runtime and renders it by value.
  *
  * The `.attrs` defaults were static objects, so they still beat the caller:
- * they sit after the spread, exactly where styled-components put them.
+ * they sit after the spread, exactly where `.attrs` used to put them.
  */
 export const Container = ({ style, ...props }: AnimatedProps<ViewProps>) => (
   <Animated.View

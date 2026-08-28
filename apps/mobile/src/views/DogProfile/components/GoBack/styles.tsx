@@ -31,7 +31,7 @@ type ContainerProps = { style?: StyleProp<ViewStyle> } & Omit<
 /**
  * Stays a component: `index.tsx` types its own props off `typeof Container`.
  * `hitSlop` was a static `.attrs`, so it still sits after the spread and beats
- * the caller, exactly as styled-components had it.
+ * the caller, exactly as `.attrs` used to have it.
  */
 export const Container = ({ style, ...props }: ContainerProps) => (
   <ThemedPressableArea

@@ -65,7 +65,7 @@ export const DisconnectedIllustration = ({
 
 /**
  * The `.attrs` also set `delay: 2000`, which Lottie has no such prop for —
- * styled-components let the extra attr through and the view dropped it. It is
+ * the pre-migration `.attrs` let it through and the view dropped it. It is
  * gone rather than carried over as a lie.
  */
 export const ErrorIllustration = ({ style, ...props }: IllustrationProps) => (

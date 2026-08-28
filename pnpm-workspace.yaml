@@ -5,8 +5,8 @@ packages:
 # Everything below used to live in package.json under the "pnpm" key and in
 # .npmrc. pnpm 11 stopped reading either for these settings — it warns
 # "The pnpm field in package.json is no longer read by pnpm" and then installs
-# without the patches and overrides, which is how an unpatched
-# styled-components ends up in a release build.
+# without the patches and overrides, which is how an unpatched image-size ends
+# up in a release build.
 nodeLinker: hoisted
 dedupeDirectDeps: true
 
@@ -22,11 +22,11 @@ supportedArchitectures:
 patchedDependencies:
   image-size@1.2.1: patches/image-size@1.2.1.patch
   react-native-draggable-grid@2.2.1: patches/react-native-draggable-grid@2.2.1.patch
-  styled-components@6.1.11: patches/styled-components@6.1.11.patch
   redux-saga@1.3.0: patches/redux-saga@1.3.0.patch
   minimatch@3.1.5: patches/minimatch@3.1.5.patch
   minimatch@9.0.9: patches/minimatch@9.0.9.patch
   expo-modules-core@55.0.25: patches/expo-modules-core@55.0.25.patch
+  react-native-unistyles@3.3.0: patches/react-native-unistyles@3.3.0.patch
 
 overrides:
   "@react-native-async-storage/async-storage": 2.2.0

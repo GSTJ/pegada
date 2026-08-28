@@ -102,8 +102,27 @@ for patch in "${patches[@]}"; do
   echo "[patches] applied ${patch##*/}"
 done
 
+# The last stage that writes to apps/mobile. It comes after the patches because
+# most of what it edits does not exist until they have run: `MainCard/styles.tsx`
+# and `FeedbackCard/styles.tsx` are renames `12-main-card` and `33-feedback-card`
+# perform. It comes before the format below so the one pass covers it too.
+#
+# Everything from here on is a gate, so this is where the tree stops changing.
+echo "==> cleanup (drop styled-components)"
+node "$here/bin/cleanup.mjs"
+
 echo "==> format (patched tree)"
 npx oxfmt apps/mobile/src apps/mobile/index.js apps/mobile/babel.config.js >/dev/null
+
+# The ledger is the last thing in the repo that runs styled-components, and the
+# cleanup stage above just took it out of the app. It is a dependency of THIS
+# directory now (npm, its own node_modules, never the app's lockfile), so the
+# gate below has something to replay. A missing install would otherwise surface
+# as every module coming back "unverifiable", which reads like a codemod bug.
+if [[ ! -d "$here/node_modules/styled-components" ]]; then
+  echo "==> codemod deps (styled-components, for the ledger)"
+  npm --prefix "$here" ci --silent
+fi
 
 # The gate. Replays styled-components' own pipeline over the pristine sources
 # and deep-compares it against the emitted sheets, per theme and per prop

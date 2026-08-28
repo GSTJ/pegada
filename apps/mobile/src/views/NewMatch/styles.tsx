@@ -33,8 +33,8 @@ type RotatedImageProps = AnimatedProps<LocalImageProps>;
  * and throws. Inside a ref callback that lands on the nearest error boundary,
  * which is why the card stack rendered as the bare heart-eyes fallback.
  *
- * So the sheet travels down `style`, first in the array, exactly as
- * styled-components delivered it. The one thing the shadow registration bought
+ * So the sheet travels down `style`, first in the array, exactly as the
+ * pre-migration wrapper delivered it. The one thing the shadow registration bought
  * was re-resolving the sheet on a theme switch without a render; `useUnistyles`
  * buys the same thing back with one — reading a theme property subscribes this
  * component, and the next render re-reads `styles`, which Unistyles rebuilds

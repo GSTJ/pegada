@@ -2,7 +2,7 @@
   "name": "unistyles-codemod",
   "private": true,
   "type": "module",
-  "description": "One-shot styled-components -> react-native-unistyles@3 transform for apps/mobile. Not part of the pnpm workspace on purpose: it installs its own node_modules with npm so it can never perturb the app's lockfile.",
+  "description": "One-shot styled-components -> react-native-unistyles@3 transform for apps/mobile. Not part of the pnpm workspace on purpose: it installs its own node_modules with npm so it can never perturb the app's lockfile. styled-components is a dependency HERE rather than in the app because the parity ledger still replays its pipeline to compute ground truth, and the app itself no longer ships it.",
   "scripts": {
     "analyze": "tsx src/cli.ts analyze",
     "transform": "tsx src/cli.ts transform",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "css-to-react-native": "3.2.0",
+    "styled-components": "6.1.11",
     "ts-morph": "28.0.0",
     "tsx": "4.20.6"
   }
