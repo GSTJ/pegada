@@ -36,4 +36,10 @@ DATABASE_URL="$DATABASE_URL" pnpm -F @pegada/database maestro:seed >/dev/null 2>
 psql "$DATABASE_URL" -q -c \
   "DELETE FROM \"Message\" WHERE content LIKE 'chatux message %';" >/dev/null 2>&1 || true
 
+# Same story for flow 45's extra photos on Nina: they change the pagination
+# dots on every screen that renders her, and `pre/45-seed-gallery.sh` puts them
+# back for the one flow that wants them.
+psql "$DATABASE_URL" -q -c \
+  "DELETE FROM \"Image\" WHERE id LIKE 'chatux-gallery-%';" >/dev/null 2>&1 || true
+
 echo "seeded"

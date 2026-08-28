@@ -1,0 +1,9 @@
+appId: ${APP_ID}
+tags: [util]
+---
+# The left (previous) Pressable. See card-tap-forward.yaml.
+- repeat:
+    times: 10
+    commands:
+      - tapOn:
+          point: "25%, 25%"

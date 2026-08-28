@@ -59,6 +59,10 @@ executionOrder:
     # itself, so it needs the same "after everything that reads the seeded
     # conversations" slot.
     - 44-chat-keyboard-anchor
+    # 45 needs Nina to have four photos, which changes the pagination dots on
+    # every screen that renders her, so it sits down here with the other two
+    # fixture-heavy flows. `seed-before-test.sh` drops the extra photos again.
+    - 45-dog-profile-photo-edges
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before
