@@ -128,6 +128,9 @@
   },
   "jest": {
     "clearMocks": true,
+    "globals": {
+      "__DEV__": true
+    },
     "moduleNameMapper": {
       "\\.(png|jpe?g|gif|webp|svg|ttf|otf|woff2?|mp4|lottie)$": "<rootDir>/jest/asset-stub.js",
       "^@/(.*)$": "<rootDir>/src/$1"
