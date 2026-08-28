@@ -150,7 +150,16 @@ export class AuthenticationService {
       create: { email, code, codeExpiresAt: expiresAt },
     });
 
-    await enqueue(TOPICS.MAIL, { email, code, language: this.language });
+    // `fallbackInline` because this is the one job a user is actively waiting
+    // on: the code row is already written, so a failed publish means a login
+    // that cannot be completed. Sending from the request thread costs latency
+    // and buys the user their code. See enqueue.ts for why the queue hop is
+    // the fragile part.
+    await enqueue(
+      TOPICS.MAIL,
+      { email, code, language: this.language },
+      { fallbackInline: true },
+    );
   }
 
   static async checkVerification({
