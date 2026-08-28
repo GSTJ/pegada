@@ -1,9 +1,0 @@
-{
-  "pages": {
-    "/api/trpc/[trpc]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/trpc/[trpc]/route.js"
-    ]
-  }
-}
