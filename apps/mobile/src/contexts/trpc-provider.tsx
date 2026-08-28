@@ -34,6 +34,33 @@ type ResponseJSON = {
   };
 };
 
+/**
+ * Ceiling on a single HTTP attempt.
+ *
+ * There was no timeout at all before this: a connection that opened and then
+ * stalled left the mutation `isPending` forever, with no error, no toast and
+ * no way out but killing the app. The value has to clear a genuinely cold
+ * path — a Vercel function that has to boot, a Prisma engine that has to
+ * initialise, and a database that may have to wake from autosuspend — which
+ * is seconds, not hundreds of milliseconds. Retries are layered on top (see
+ * services/transient-retry.ts), so this is per attempt, not per user action.
+ */
+export const REQUEST_TIMEOUT_MS = 15_000;
+
+const fetchWithTimeout = async (url: string, options: RequestInit) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  // tRPC passes its own signal for query cancellation; honour both.
+  options.signal?.addEventListener("abort", () => controller.abort());
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 export const trpcQueryClient = api.createClient({
   links: [
     httpBatchLink({
@@ -56,7 +83,10 @@ export const trpcQueryClient = api.createClient({
         return Object.fromEntries(headers);
       },
       fetch: async (url, options): Promise<Response> => {
-        const res = await fetch(url as string, options as RequestInit);
+        const res = await fetchWithTimeout(
+          url as string,
+          options as RequestInit,
+        );
 
         // The API base URL must resolve directly to the tRPC handler with NO
         // redirect. `pegada.app` 308-redirects to `www.pegada.app`, and RN's
@@ -87,11 +117,18 @@ export const trpcQueryClient = api.createClient({
           }
         }
 
-        return {
-          ...res,
-          // Already decoded here
-          json: () => Promise.resolve(responsesJSON),
-        };
+        // Rebuilt rather than spread: `status`, `ok` and `headers` live on
+        // Response.prototype, so `{ ...res }` copied none of them and every
+        // response reached the link as an object whose status was
+        // `undefined`. The retry policy in services/transient-retry.ts needs
+        // a real status to tell a 5xx worth retrying from a 4xx that is final.
+        const body = JSON.stringify(responsesJSON);
+
+        return new Response(body, {
+          status: res.status,
+          statusText: res.statusText,
+          headers: { "content-type": "application/json" },
+        });
       },
     }),
   ],

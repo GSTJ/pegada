@@ -23,6 +23,10 @@ import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
 import { getInitialRouteName } from "@/services/get-initial-route-name";
 import { StorageKeys, storeData } from "@/services/storage";
+import {
+  shouldRetryTransient,
+  transientRetryDelayMs,
+} from "@/services/transient-retry";
 import { useDidMountEffect } from "@/services/utils";
 
 import { Underline } from "../SignIn/components/HeroText";
@@ -53,6 +57,11 @@ const OneTimeCode = () => {
   const insetTop = Math.max(15 + insets.top, 50);
 
   const loginMutation = api.authentication.login.useMutation({
+    // Same policy as the email step. INVALID_OTP_CODE carries an `error_code`
+    // and is never retried, so a code the server already consumed is reported
+    // once rather than re-submitted.
+    retry: shouldRetryTransient,
+    retryDelay: transientRetryDelayMs,
     onSuccess: async (data) => {
       try {
         // The last code cell is still focused, and nothing on the screen this
