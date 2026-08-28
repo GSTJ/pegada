@@ -25,9 +25,20 @@
  */
 const cache = new Map();
 
+/**
+ * The one render function every stubbed primitive shares. It lives out here
+ * rather than inside `passthrough` because it captures nothing from it —
+ * re-declaring it per name built an identical closure on every cache miss
+ * for no reason (unicorn/consistent-function-scoping).
+ */
+const renderChildren = ({ children }) => children ?? null;
+
 const passthrough = (name) => {
   if (!cache.has(name)) {
-    const Component = ({ children }) => children ?? null;
+    // `.bind` is what gives each name its own function object to hang a
+    // displayName on. A shared `renderChildren` would have one displayName
+    // for all of them, which makes every failing snapshot read the same.
+    const Component = renderChildren.bind(null);
     Component.displayName = `UnistylesNative(${name})`;
     cache.set(name, Component);
   }
