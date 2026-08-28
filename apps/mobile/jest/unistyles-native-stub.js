@@ -22,7 +22,16 @@
  * this keeps the styling layer out of a test about behaviour. Components are
  * memoised per name so repeated access is referentially stable, which React
  * requires to avoid remounting on every render.
+ *
+ * apps/mobile/tsconfig.json includes every .js file in the app, so this one is
+ * typechecked like any other. Hence the JSDoc: without it `noImplicitAny`
+ * rejects the destructured props and the `name` parameter.
+ *
+ * @typedef {{ children?: unknown }} PassthroughProps
+ * @typedef {((props: PassthroughProps) => unknown) & { displayName?: string }} PassthroughComponent
  */
+
+/** @type {Map<string, PassthroughComponent>} */
 const cache = new Map();
 
 /**
@@ -30,14 +39,18 @@ const cache = new Map();
  * rather than inside `passthrough` because it captures nothing from it —
  * re-declaring it per name built an identical closure on every cache miss
  * for no reason (unicorn/consistent-function-scoping).
+ *
+ * @param {PassthroughProps} props
  */
 const renderChildren = ({ children }) => children ?? null;
 
+/** @param {string} name */
 const passthrough = (name) => {
   if (!cache.has(name)) {
     // `.bind` is what gives each name its own function object to hang a
     // displayName on. A shared `renderChildren` would have one displayName
     // for all of them, which makes every failing snapshot read the same.
+    /** @type {PassthroughComponent} */
     const Component = renderChildren.bind(null);
     Component.displayName = `UnistylesNative(${name})`;
     cache.set(name, Component);
