@@ -80,7 +80,22 @@ jest.mock<Record<string, unknown>>("./styles", () => ({
   AddRemoveContainer: (props: CapturedProps) => capture(props),
   FadedDog: () => null,
   MaestroSkipPressable: (props: CapturedProps) => capture(props),
-  styles: { useVariants: jest.fn() },
+  // `useVariants` has to RETURN the stylesheet: the unistyles babel plugin
+  // rewrites `styles.useVariants({...}); ... style={styles.x}` into
+  // `const s = styles.useVariants({...}); ... style={s.x}`, so a mock that
+  // returns undefined makes every render throw on `undefined.x`.
+  styles: {
+    useVariants: jest.fn(() => ({
+      addRemoveContainer: {},
+      animatedOverlay: {},
+      debugImageStatusContainer: {},
+      fadedDog: {},
+      maestroSkipPressable: {},
+      userPicture: {},
+      userPictureContainer: {},
+      userPictureContent: {},
+    })),
+  },
   UserPicture: () => null,
 }));
 
