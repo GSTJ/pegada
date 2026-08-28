@@ -218,6 +218,13 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
     ? handleMaestroPlaceholderUpload
     : handleAdd;
 
+  // 1-based: "Add photo 1" is the first slot. `index` is optional, and a grid
+  // without one has a single unnumbered cell.
+  const photoLabel = (key: "addPhoto" | "removePhoto") =>
+    t(`profilePhotos.${key}`, {
+      replace: { position: typeof index === "number" ? index + 1 : "" },
+    }).trim();
+
   return (
     <View style={styles.userPictureContainer}>
       <View style={styles.userPictureContent}>
@@ -241,6 +248,16 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
             testID={
               typeof index === "number" ? `add-photo-${index}` : undefined
             }
+            // A Pressable with only an SVG inside it has nothing to announce
+            // and, on iOS, nothing to be: the whole photo cell was a blank
+            // region to VoiceOver. It is also why maestro's XCUITest driver
+            // could not see this node or the skip pill and every flow had to
+            // reach the grid through `add-photo-button-N`
+            // (.unistyles-migration/baseline-report.md, "What changed to get
+            // here").
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={photoLabel("addPhoto")}
             onPress={handleAdd}
             // Takes up the whole component. When the Maestro skip pill is
             // shown, retract the bottom slop so it can't swallow taps meant
@@ -282,10 +299,29 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
                 ? `maestro-skip-photo-${index}`
                 : "maestro-skip-photo"
             }
+            // Not translated: this affordance only exists in the E2E build.
+            // It is `accessible` for the same reason as the rest — that is
+            // what puts a node in the iOS accessibility tree, which is the
+            // tree maestro's iOS driver reads.
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Skip photo"
             onPress={handleMaestroPlaceholderUpload}
           >
-            <Text color="white" fontSize="xxs" fontWeight="bold">
-              MAESTRO_E2E_SKIP_PHOTO
+            {/*
+              One line, always. "MAESTRO_E2E_SKIP_PHOTO" is 22 characters in a
+              cell a third of the screen wide: it wrapped mid-word and the cell
+              clipped the second line off. The testID, which is what Android
+              flows actually select on, is unchanged.
+            */}
+            <Text
+              color="white"
+              fontSize="xxs"
+              fontWeight="bold"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              SKIP PHOTO
             </Text>
           </MaestroSkipPressable>
         ) : null}
@@ -297,6 +333,11 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
             ? photoActionTestID(index, hasPicture)
             : undefined
         }
+        // The same glyph does both jobs and rotates between them, so the
+        // label has to say which one it is doing right now.
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={photoLabel(hasPicture ? "removePhoto" : "addPhoto")}
         disabled={isLoading}
         onPress={hasPicture ? handleDelete : handleEmptySlotPress}
       >

@@ -1,0 +1,67 @@
+appId: ${APP_ID}
+name: Keyboard - the chat composer must stay on screen while typing
+tags:
+  - regression
+---
+# REGRESSION GUARD - Android tour finding #2 (MAJOR).
+#
+# Raising the keyboard in a conversation hid the composer entirely: the caret
+# was in the field, the IME was up, and every typed character landed somewhere
+# no one could see. The tour recorded the whole message being typed blind and
+# only appearing once it had been sent.
+#
+# Same root cause as flow 36 — `KeyboardAvoidingView` does nothing on Android —
+# but a different symptom, because `Send` is not in the scroll flow at all:
+# it is `position: absolute; bottom: 0` inside the screen container. On iOS the
+# KeyboardAvoidingView's padding shrinks that container so `bottom: 0` rides up
+# with the keyboard; on Android the container kept its full height, so
+# `bottom: 0` stayed pinned to the bottom of the display, under the IME.
+#
+# The assertions are platform-agnostic for the reason flow 36 documents: under
+# the Android IME the composer is not merely covered, it is gone from the
+# accessibility tree. checks/37-*.mjs adds the Android-only measurement.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: utils/dismiss-app-review.yaml
+- tapOn:
+    text: "Bella"
+- waitForAnimationToEnd:
+    timeout: 10000
+- assertVisible:
+    id: "chat-screen"
+- takeScreenshot: 37-01-chat-keyboard-down
+# Pre-condition: with the keyboard DOWN the composer is plainly there. If a
+# future layout moves it, this fails loudly instead of the flow quietly
+# testing nothing.
+- assertVisible:
+    id: "chat-input"
+
+- tapOn:
+    id: "chat-input"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 37-02-chat-composer-focused
+- assertVisible:
+    id: "chat-input"
+
+# Type before the final assertions: `waitForAnimationToEnd` returns while the
+# keyboard is still sliding in, and the layout has to be settled for them to
+# mean anything. Nothing is sent, so the draft does not survive the flow.
+- inputText: "typing where I can see it"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 37-03-chat-typed-keyboard-up
+- assertVisible:
+    id: "chat-input"
+- assertVisible:
+    text: "typing where I can see it"

@@ -1,0 +1,68 @@
+appId: ${APP_ID}
+name: Edit profile - saving a dog whose photos predate the storage allowlist
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #2 (MAJOR).
+#
+# Saving the seeded dog returned 400 and toasted "Unable to save profile
+# information". Nothing about the edit was wrong: the *unchanged* image URLs
+# the client echoes back failed `dogInputSchema`'s storage-origin allowlist,
+# which #143 added. The seed's photos live on placedog.net; a real user hits
+# exactly the same wall for every photo stored before a storage migration
+# (s3 -> R2) or before the allowlist itself existed.
+#
+# The fix grandfathers URLs that are already persisted on the caller's own
+# dog. New URLs still have to be on a configured origin, so nothing about the
+# SSRF property the allowlist buys changes.
+#
+# Flow 24 covers the same mutation as part of a much longer journey; this one
+# is the minimal repro, and its post-check (checks/31-*.sh) is what proves the
+# write actually landed rather than the screen merely closing.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    id: "profile-open-edit"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "edit-profile-name"
+- takeScreenshot: 31-01-edit-profile
+
+# The seeded dog keeps its seeded photos - that is the whole point. Only the
+# name changes, so a 400 can only come from the images the client echoes back.
+- tapOn:
+    id: "edit-profile-name"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Cancel"
+    optional: true
+- eraseText: 60
+- inputText: "Rex-${Date.now()}"
+- waitForAnimationToEnd
+- takeScreenshot: 31-02-name-typed
+
+- tapOn:
+    id: "edit-profile-save"
+- waitForAnimationToEnd:
+    timeout: 12000
+- takeScreenshot: 31-03-after-save
+
+# On success the mutation pops the screen; on the 400 it stays put and shows
+# the error toast. Assert both directions so a hung screen and a wrong-toast
+# success are told apart.
+- assertNotVisible: "Unable to save profile information"
+- assertNotVisible:
+    id: "edit-profile-save"
+- assertVisible:
+    id: "profile-screen"

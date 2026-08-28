@@ -48,6 +48,9 @@ const DEBUG_IMAGE_STATUS_CONTAINER_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.7)";
 const ANIMATED_OVERLAY_BACKGROUND_COLOR = "#00000050";
 const ADD_REMOVE_CONTAINER_BORDER_COLOR = "black";
 
+/** Diameter of the `+` / `x` button anchored to the cell's bottom-right. */
+const ADD_REMOVE_SIZE = 30;
+
 export const styles = StyleSheet.create((theme) => ({
   debugImageStatusContainer: {
     justifyContent: "center",
@@ -105,8 +108,8 @@ export const styles = StyleSheet.create((theme) => ({
     borderTopRightRadius: theme.radii.round,
     borderBottomRightRadius: theme.radii.round,
     borderBottomLeftRadius: theme.radii.round,
-    width: 30,
-    height: 30,
+    width: ADD_REMOVE_SIZE,
+    height: ADD_REMOVE_SIZE,
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
@@ -153,7 +156,11 @@ export const styles = StyleSheet.create((theme) => ({
     position: "absolute",
     bottom: 0,
     left: 0,
-    right: 0,
+    // Stop short of the `+` button. It is 30pt wide, anchored to the bottom
+    // right of the cell's *outer* container, and the container's 6pt padding
+    // means it reaches 24pt into this content box — where it used to be drawn
+    // straight on top of the label.
+    right: ADD_REMOVE_SIZE - 6 + 2,
     // Must win hit-testing over the sibling FadedDog PressableArea and its
     // generous hitSlop — without this, taps on the pill open the regular
     // image-picker dialog instead (verified on iPhone 17 Pro Max sim).

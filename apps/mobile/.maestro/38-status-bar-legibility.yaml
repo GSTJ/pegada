@@ -1,0 +1,67 @@
+appId: ${APP_ID}
+name: Status bar - icons must stay legible after visiting a dark screen
+tags:
+  - regression
+---
+# REGRESSION GUARD - Android tour finding #3 (MAJOR).
+#
+# The Profile tab and the dog profile ask for light (white) status-bar icons,
+# because both are topped by a full-bleed photo. Leaving them latched the white
+# icons on: every light screen afterwards — Messages, Preferences, Edit
+# profile, the location map, the upgrade wall, the force-update screen — showed
+# a completely blank status bar. No clock, no battery, no signal. The tour's
+# `SB-05-messages-after-profile.png` is a white strip.
+#
+# Root cause: `expo-status-bar` is React Native's `StatusBar`, which keeps a
+# stack of mounted entries and, when one unmounts, falls back to its own
+# `_defaultProps.barStyle`, which is `"default"`. On iOS "default" means "let
+# the system decide" and resolves correctly. On Android, RN's StatusBarModule
+# maps anything that is not exactly `"dark-content"` to
+# `setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)` — i.e. it CLEARS
+# the light-status-bar appearance, giving white icons. Nothing in the app was
+# sitting at the bottom of that stack to fall back to, so the last screen to
+# express an opinion won for the rest of the session.
+#
+# The measurement is in checks/38-*.mjs: it reads the real frame buffer and
+# requires dark pixels in the status-bar strip. Android only — on iOS
+# "default" is the correct answer and the finding does not reproduce.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Baseline: a light screen that has never seen a dark one.
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: utils/dismiss-app-review.yaml
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 38-01-messages-before-profile
+
+# The dark screen. Profile is topped by the user's photo and asks for light
+# icons while it is focused.
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: utils/dismiss-app-review.yaml
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 38-02-profile-tab
+
+# Back to the light screen. This is the state under test, and the one the
+# post-check samples.
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    text: "Bella"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 38-03-messages-after-profile

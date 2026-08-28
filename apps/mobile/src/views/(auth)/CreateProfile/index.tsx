@@ -3,7 +3,7 @@ import type { Picture } from "@/components/ProfileImageUploader/utils";
 import type { DogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 
 import { useState } from "react";
-import { Platform, KeyboardAvoidingView, View, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -24,7 +24,11 @@ import { RadioButtons } from "@/components/RadioButtons";
 import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
-import { useDelayedHeaderHeight } from "@/hooks/use-delayed-header-height";
+import {
+  ScrollIntoViewProvider,
+  useKeyboardAwareScroll,
+  useKeyboardOverlap,
+} from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
@@ -45,8 +49,6 @@ const CreateProfile = () => {
     defaultValues: DEFAULT_VALUES,
     resolver: zodResolver(dogQuickClientSchema),
   });
-
-  const headerHeight = useDelayedHeaderHeight();
 
   const router = useRouter();
 
@@ -101,131 +103,159 @@ const CreateProfile = () => {
 
   const { theme } = useUnistyles();
 
-  const { scrollViewProps } = useBottomActionStyle();
+  const { scrollViewProps, height: bottomActionHeight } =
+    useBottomActionStyle();
+
+  // The pinned Create Profile bar is painted over the scroll area, so a
+  // focused field has to clear the bar, not just the keyboard.
+  const { containerProps, scrollProps, requestScrollIntoView } =
+    useKeyboardAwareScroll({ bottomInset: bottomActionHeight });
+
+  // Shrinks this screen to the part the keyboard leaves visible, which is
+  // what makes the measurement above meaningful: `useKeyboardAwareScroll`
+  // measures the container's on-screen rect, and without this the container
+  // still reaches the bottom of the display on Android.
+  const keyboardOverlap = useKeyboardOverlap();
 
   return (
-    <KeyboardAvoidingView
-      keyboardVerticalOffset={headerHeight}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={componentsStyles.keyboardScreen}
+    /*
+      Not a KeyboardAvoidingView: `behavior` has to be left undefined on
+      Android, where the component then does nothing at all, so every field
+      below the IME's top edge stayed there. `useKeyboardOverlap` computes the
+      padding the component would have computed on iOS, on both platforms —
+      and it needs no `keyboardVerticalOffset`, because it measures the
+      keyboard against the window rather than against this view's own frame.
+    */
+    <View
+      style={[
+        componentsStyles.keyboardScreen,
+        { paddingBottom: keyboardOverlap },
+      ]}
     >
-      <View style={componentsStyles.fill}>
-        <ScrollView
-          {...scrollViewProps}
-          contentContainerStyle={{
-            padding: theme.spacing[4],
-            paddingBottom:
-              theme.spacing[4] +
-              scrollViewProps.contentContainerStyle.paddingBottom,
-          }}
-          scrollEnabled={gesturesEnabled}
-          keyboardShouldPersistTaps="handled"
-          style={styles.container}
-        >
-          <Controller
-            name="images"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value }, fieldState }) => (
-              <>
-                <Text fontWeight="bold" fontSize="lg">
-                  {t("createProfile.profilePictures")}
-                </Text>
-                <PhotoHint fontSize="xs" style={styles.photoHint}>
-                  {t("createProfile.minimumOnePhoto")}
-                </PhotoHint>
-                <ProfileImagesUploader
-                  setGesturesEnabled={setGesturesEnabled}
-                  value={value as Picture[]}
-                  onChange={(
-                    cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
-                  ) => {
-                    // This getValues is needed to ensure the update happens
-                    // correctly even when adding images fast.
-                    onChange(cb(getValues("images") as Picture[]));
-                  }}
-                  error={fieldState.error?.message}
-                />
-                <DragHint
-                  fontSize="xs"
-                  fontWeight="medium"
-                  style={styles.dragHint}
-                >
-                  {t("createProfile.clickAndHold")}
-                </DragHint>
-              </>
-            )}
-          />
-          <Controller
-            name="name"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                testID="profile-name"
-                title={t("createProfile.dogName")}
-                placeholder={t("createProfile.howToCallDog")}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                maxLength={50}
-                error={fieldState.error?.message}
-                autoCorrect={false}
-              />
-            )}
-          />
-          <Controller
-            name="bio"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <MultilineInput
-                title={t("createProfile.bio")}
-                placeholder={t("createProfile.tellSomethingCool")}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                maxLength={500}
-                multiline
-                optional
-                error={fieldState.error?.message}
-                style={styles.multilineInput}
-              />
-            )}
-          />
-          <Controller
-            name="gender"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, value } }) => (
-              <RadioButtons
-                title={t("completeProfile.gender")}
-                data={[t("completeProfile.male"), t("completeProfile.female")]}
-                value={
-                  value === "MALE"
-                    ? t("completeProfile.male")
-                    : t("completeProfile.female")
-                }
-                onChange={(value) => {
-                  onChange(
-                    value === t("completeProfile.male") ? "MALE" : "FEMALE",
-                  );
-                }}
-              />
-            )}
-          />
-        </ScrollView>
-        <BottomAction.Container>
-          <Button
-            loading={dogCreateMutation.isPending}
-            onPress={() => saveUser()}
-            testID="profile-submit"
+      <ScrollIntoViewProvider value={requestScrollIntoView}>
+        <View {...containerProps} style={componentsStyles.fill}>
+          <ScrollView
+            {...scrollViewProps}
+            {...scrollProps}
+            contentContainerStyle={{
+              padding: theme.spacing[4],
+              paddingBottom:
+                theme.spacing[4] +
+                scrollViewProps.contentContainerStyle.paddingBottom,
+            }}
+            scrollEnabled={gesturesEnabled}
+            keyboardShouldPersistTaps="handled"
+            style={styles.container}
           >
-            {t("createProfile.createProfile")}
-          </Button>
-        </BottomAction.Container>
-      </View>
-    </KeyboardAvoidingView>
+            <Controller
+              name="images"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value }, fieldState }) => (
+                <>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {t("createProfile.profilePictures")}
+                  </Text>
+                  <PhotoHint fontSize="xs" style={styles.photoHint}>
+                    {t("createProfile.minimumOnePhoto")}
+                  </PhotoHint>
+                  <ProfileImagesUploader
+                    setGesturesEnabled={setGesturesEnabled}
+                    value={value as Picture[]}
+                    onChange={(
+                      cb: Parameters<ProfileImagesUploaderProps["onChange"]>[0],
+                    ) => {
+                      // This getValues is needed to ensure the update happens
+                      // correctly even when adding images fast.
+                      onChange(cb(getValues("images") as Picture[]));
+                    }}
+                    error={fieldState.error?.message}
+                  />
+                  <DragHint
+                    fontSize="xs"
+                    fontWeight="medium"
+                    style={styles.dragHint}
+                  >
+                    {t("createProfile.clickAndHold")}
+                  </DragHint>
+                </>
+              )}
+            />
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                <Input
+                  testID="profile-name"
+                  title={t("createProfile.dogName")}
+                  placeholder={t("createProfile.howToCallDog")}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  maxLength={50}
+                  error={fieldState.error?.message}
+                  autoCorrect={false}
+                />
+              )}
+            />
+            <Controller
+              name="bio"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                <MultilineInput
+                  testID="profile-bio"
+                  title={t("createProfile.bio")}
+                  placeholder={t("createProfile.tellSomethingCool")}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  maxLength={500}
+                  multiline
+                  optional
+                  error={fieldState.error?.message}
+                  style={styles.multilineInput}
+                />
+              )}
+            />
+            <Controller
+              name="gender"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { onChange, value } }) => (
+                <RadioButtons
+                  title={t("completeProfile.gender")}
+                  data={[
+                    t("completeProfile.male"),
+                    t("completeProfile.female"),
+                  ]}
+                  value={
+                    value === "MALE"
+                      ? t("completeProfile.male")
+                      : t("completeProfile.female")
+                  }
+                  onChange={(value) => {
+                    onChange(
+                      value === t("completeProfile.male") ? "MALE" : "FEMALE",
+                    );
+                  }}
+                />
+              )}
+            />
+          </ScrollView>
+          <BottomAction.Container>
+            <Button
+              loading={dogCreateMutation.isPending}
+              onPress={() => saveUser()}
+              testID="profile-submit"
+            >
+              {t("createProfile.createProfile")}
+            </Button>
+          </BottomAction.Container>
+        </View>
+      </ScrollIntoViewProvider>
+    </View>
   );
 };
 

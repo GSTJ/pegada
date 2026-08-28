@@ -1,11 +1,6 @@
 import type { MessageProps } from "./hooks/use-chat-pagination";
 
-import {
-  ActivityIndicator,
-  Platform,
-  KeyboardAvoidingView,
-  ImageBackground,
-} from "react-native";
+import { ActivityIndicator, ImageBackground, View } from "react-native";
 
 import { useLocalSearchParams } from "expo-router";
 
@@ -15,6 +10,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
+import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 
 import { HEADER_HEIGHT } from "./components/Header";
@@ -122,11 +118,18 @@ const Chat = () => {
   // back on dark than on light to read as the same weight.
   const patternOpacity = theme.dark ? 0.06 : 0.03;
 
+  // The composer is `position: absolute; bottom: 0` inside the background
+  // below, so the only thing that lifts it off the keyboard is this container
+  // getting shorter. `KeyboardAvoidingView` did that on iOS and nothing at all
+  // on Android, where `behavior` has to be left undefined — so the composer
+  // stayed pinned to the bottom of the display, under the IME, and everything
+  // typed into it was invisible.
+  const keyboardOverlap = useKeyboardOverlap();
+
   return (
-    <KeyboardAvoidingView
+    <View
       testID="chat-screen"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
+      style={[styles.container, { paddingBottom: keyboardOverlap }]}
     >
       <ImageBackground
         source={
@@ -144,7 +147,7 @@ const Chat = () => {
         <Send />
         <Header />
       </ImageBackground>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

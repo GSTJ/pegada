@@ -1,0 +1,101 @@
+appId: ${APP_ID}
+name: Preferences - a picker sheet must own the back press and take its keyboard with it
+tags:
+  - regression
+---
+# REGRESSION GUARD - Android tour finding #5 (MINOR), both halves.
+#
+#   a) One press of the system Back button dismissed the breed-picker sheet
+#      AND the Preferences screen underneath it, dropping the user back on
+#      Profile. Two screens for one gesture.
+#   b) Dismissing the sheet while its search field was focused left the
+#      keyboard up over Preferences with nothing focused to type into — the
+#      tour's `BUG-11-preferences-orphan-keyboard-after-sheet-dismiss.png`.
+#
+# Both are Android-only by construction: iOS has no system Back button, and
+# the tour did not reproduce the orphaned keyboard there. The sheet steps are
+# therefore gated to Android, and NOT only because of the platform: the
+# @gorhom/bottom-sheet modal disconnects the iOS 26 XCUITest driver mid-flow
+# (see 23-preferences-journey.yaml, which drops picker interaction entirely
+# for the same reason). On iOS this flow asserts that Preferences still opens
+# and stays open, which is the part that is meaningful there.
+#
+# The keyboard half is measured by checks/40-*.mjs against
+# `dumpsys input_method`'s `mInputShown`: "no keyboard is up" is not a
+# statement the selector language can make, and the orphaned keyboard has no
+# focused field to assert the absence of.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: utils/dismiss-app-review.yaml
+- tapOn:
+    id: "profile-open-preferences"
+- waitForAnimationToEnd:
+    timeout: 10000
+- assertVisible:
+    id: "preferences-screen"
+- takeScreenshot: 40-01-preferences
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # --- (a) one Back press, one dismissal --------------------------------
+      - tapOn:
+          id: "preferences-breed-picker"
+      - waitForAnimationToEnd:
+          timeout: 6000
+      - assertVisible: "Search"
+      - takeScreenshot: 40-02-breed-sheet-open
+      - pressKey: back
+      - waitForAnimationToEnd:
+          timeout: 6000
+      - takeScreenshot: 40-03-after-single-back
+      - assertNotVisible: "Search"
+      # The screen underneath has to have survived the same press.
+      - assertVisible:
+          id: "preferences-screen"
+      - assertVisible:
+          id: "preferences-save"
+
+      # --- (b) the sheet takes its keyboard with it -------------------------
+      - tapOn:
+          id: "preferences-breed-picker"
+      - waitForAnimationToEnd:
+          timeout: 6000
+      - tapOn:
+          text: "Search"
+      - waitForAnimationToEnd:
+          timeout: 4000
+      - inputText: "Lab"
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - takeScreenshot: 40-04-breed-search-typed
+      # Swipe the sheet away rather than pressing Back: with the keyboard up
+      # the first Back press belongs to the IME, so it would not exercise the
+      # dismissal path at all.
+      - swipe:
+          start: "50%, 32%"
+          end: "50%, 95%"
+          duration: 600
+      - waitForAnimationToEnd:
+          timeout: 6000
+      - takeScreenshot: 40-05-after-sheet-dismiss
+      - assertNotVisible: "Search"
+      - assertVisible:
+          id: "preferences-screen"
+      - assertVisible:
+          id: "preferences-save"
+
+- assertVisible:
+    id: "preferences-screen"
+- takeScreenshot: 40-06-preferences-still-here

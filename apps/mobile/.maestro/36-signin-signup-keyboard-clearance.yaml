@@ -1,0 +1,103 @@
+appId: ${APP_ID}
+name: Keyboard - no login or signup field may sit behind the soft keyboard
+tags:
+  - regression
+---
+# REGRESSION GUARD - Android tour finding #1 (BLOCKER).
+#
+# Sign-in autofocuses its email field (`EmailInput` has `autoFocus`), so the
+# soft keyboard is already up on the first frame of a cold launch. On Android
+# that left the heading, the field AND the Continue button below the IME's top
+# edge: the screen was unusable and the app could not be signed into at all.
+# The same mechanism hid CreateProfile's fields once the keyboard came up,
+# which is why this flow keeps going one screen past the fix.
+#
+# Root cause is one line of platform behaviour. The app is edge-to-edge
+# (`react-native-edge-to-edge`), and from Android 15 that makes
+# `android:windowSoftInputMode="adjustResize"` a no-op: the window keeps its
+# full height and the IME arrives as an inset the app has to consume itself.
+# Every one of these screens was leaning on `KeyboardAvoidingView` with
+# `behavior={Platform.OS === "ios" ? "padding" : undefined}`, i.e. nothing at
+# all on Android. Measured on the emulator with the keyboard up: the app
+# window's frame is still [0,0][1080,2400] while the ime InsetsSource covers
+# [0,1517][1080,2400].
+#
+# WHY THE ASSERTIONS READ THE SAME ON BOTH PLATFORMS: a view under the Android
+# IME is not merely invisible, it is absent from the accessibility tree, so
+# `assertVisible` fails outright — that is the signal the tour used. `above:`
+# compares top edges and holds on iOS too. Neither names a coordinate or a
+# keyboard. The Android-only geometry (by how many pixels the Continue button
+# clears the IME) is asserted by checks/36-*.mjs, which no-ops on iOS.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: utils/dismiss-system-dialogs.yaml
+- takeScreenshot: 36-01-signin-cold-launch
+
+# The whole form, in reading order, while the autofocus keyboard is up.
+- assertVisible:
+    id: "signin-email"
+- assertVisible:
+    id: "signin-submit"
+- assertVisible: ".*6-digit code.*"
+- assertVisible:
+    id: "signin-email"
+    above:
+      id: "signin-submit"
+
+# And it has to be usable, not merely present: typed text has to land
+# somewhere the user can see.
+- tapOn:
+    id: "signin-email"
+- waitForAnimationToEnd:
+    timeout: 3000
+- eraseText: 50
+- inputText: "maestro-fresh@pegada.app"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: 36-02-signin-typed
+- assertVisible:
+    text: "maestro-fresh@pegada.app"
+    above:
+      id: "signin-submit"
+
+# Hand the field back empty. `login-fresh` taps it and erases 50 characters
+# before typing, and on Android a tap into a non-empty field puts the caret
+# where the finger landed — `eraseText` then deletes only what is BEHIND the
+# caret and the address typed next is spliced into the middle of the old one.
+# One run produced `maestro-fresh@pegada.appada.app`, which falls outside the
+# API's magic-email regex, so the OTP screen never came up. The caret is at the
+# end right now, so this clears the field outright.
+- eraseText: 50
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# --- signup ---------------------------------------------------------------
+# Same guarantee one screen further in. login-fresh re-types the same address
+# (the API's `^maestro-fresh.*@pegada\.app$` bypass purges the user first, so
+# the auth router always lands on CreateProfile) and enters the OTP.
+- runFlow: utils/login-fresh.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- assertVisible:
+    id: "profile-name"
+- takeScreenshot: 36-03-create-profile
+
+- tapOn:
+    id: "profile-name"
+- waitForAnimationToEnd:
+    timeout: 4000
+- inputText: "Rex"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 36-04-create-profile-name-typed
+- assertVisible:
+    id: "profile-name"
+    above:
+      id: "profile-submit"
+- assertVisible:
+    text: "Rex"
+    above:
+      id: "profile-submit"

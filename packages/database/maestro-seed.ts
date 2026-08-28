@@ -27,6 +27,7 @@
  * re-runs upsert existing rows rather than duplicating them.
  *
  *   pnpm -F @pegada/database tsx maestro-seed.ts            # seed all
+ *   pnpm -F @pegada/database tsx maestro-seed.ts reset-match
  *   pnpm -F @pegada/database tsx maestro-seed.ts seed-delete-me
  *   pnpm -F @pegada/database tsx maestro-seed.ts purge-delete-me
  *   pnpm -F @pegada/database tsx maestro-seed.ts check-delete-me
@@ -46,6 +47,14 @@ const SF = { lat: 37.7749, lon: -122.4194 };
 const GOLDEN_ID = "u8y4cc4hrg3fzy9lxwn3rrdd";
 
 export const DELETE_ME_EMAIL = "delete-me@pegada.app";
+
+/** The long-lived returning user every non-destructive flow logs in as. */
+const MAGIC_EMAIL = "test@pegada.app";
+/** MatchMe's owner. Premium, so MatchMe sorts to the top of Rex's deck. */
+const MATCHME_EMAIL = "test+matchme@pegada.app";
+/** Rex's canonical bio. Named because the reset has to restore it, not only
+ * the create has to set it. */
+const REX_BIO = "Friendly Rex looking for playmates in SF.";
 
 const yearsAgo = (n: number) => {
   const d = new Date();
@@ -71,7 +80,7 @@ const ensureBreed = async () => {
 
 const ensureMagicUserWithRex = async () => {
   const magic = await prisma.user.upsert({
-    where: { email: "test@pegada.app" },
+    where: { email: MAGIC_EMAIL },
     update: {
       city: "San Francisco",
       state: "CA",
@@ -80,7 +89,7 @@ const ensureMagicUserWithRex = async () => {
       longitude: SF.lon,
     },
     create: {
-      email: "test@pegada.app",
+      email: MAGIC_EMAIL,
       city: "San Francisco",
       state: "CA",
       country: "USA",
@@ -114,6 +123,17 @@ const ensureMagicUserWithRex = async () => {
       where: { id: rex.id },
       data: {
         name: "Rex",
+        // `bio` and `preferredSize` are here because the flows and the tour
+        // WRITE them — tour chunk 08 types into Bio and picks size Medium,
+        // flow 24 edits both — and the pixel matrix compares the next
+        // capture against a baseline taken before any of that. Leaving them
+        // out is what produced the DATA rows in
+        // .unistyles-migration/verify-r1/MATRIX-GATE.md: 05-profile off by
+        // one line of bio, 06-preferences off by one row's value, and half
+        // of 07-edit-profile. A field a test can change belongs in the
+        // reset.
+        bio: REX_BIO,
+        preferredSize: null,
         preferredMinAge: 1,
         preferredMaxAge: 15,
         preferredMaxDistance: 50,
@@ -130,7 +150,7 @@ const ensureMagicUserWithRex = async () => {
         weight: 30,
         breedId: GOLDEN_ID,
         birthDate: yearsAgo(3),
-        bio: "Friendly Rex looking for playmates in SF.",
+        bio: REX_BIO,
         preferredMinAge: 1,
         preferredMaxAge: 15,
         preferredMaxDistance: 50,
@@ -268,7 +288,7 @@ const ensureMatchMeWithPreLike = async (rexId: string) => {
   // sets are co-located in SF (~0km) so they otherwise tie on distance,
   // and Postgres makes no guarantee about tie ordering.
   const matchMeUser = await prisma.user.upsert({
-    where: { email: "test+matchme@pegada.app" },
+    where: { email: MATCHME_EMAIL },
     update: {
       city: "San Francisco",
       state: "CA",
@@ -278,7 +298,7 @@ const ensureMatchMeWithPreLike = async (rexId: string) => {
       plan: PlanType.PREMIUM,
     },
     create: {
-      email: "test+matchme@pegada.app",
+      email: MATCHME_EMAIL,
       city: "San Francisco",
       state: "CA",
       country: "USA",
@@ -313,47 +333,85 @@ const ensureMatchMeWithPreLike = async (rexId: string) => {
     });
   }
 
-  // Tear down any state from a previous run so the swipe stack and match
-  // creation behave deterministically.
-  await prisma.message.deleteMany({
-    where: {
-      match: {
-        OR: [
-          { requesterId: rexId, responderId: matchMe.id },
-          { requesterId: matchMe.id, responderId: rexId },
-        ],
-      },
-    },
-  });
-  await prisma.match.deleteMany({
-    where: {
-      OR: [
-        { requesterId: rexId, responderId: matchMe.id },
-        { requesterId: matchMe.id, responderId: rexId },
-      ],
-    },
-  });
-  await prisma.interest.deleteMany({
-    where: {
-      OR: [
-        { requesterId: rexId, responderId: matchMe.id },
-        { requesterId: matchMe.id, responderId: rexId },
-      ],
-    },
+  // Additive only. The teardown that used to live here — deleting every
+  // Match, Message and Interest between Rex and MatchMe — moved to
+  // `resetMatchMePreLike` below, because it ran on EVERY flow's pre-test hook
+  // and the dev Postgres is shared. Mid-capture, a concurrent flow's seed
+  // hard-deleted the match a tour had just created: `message.send` started
+  // answering 500 `Invalid matchId or senderId`, the chat rendered empty,
+  // MatchMe disappeared from the Messages list and edit-profile values
+  // reverted between chunks. It reads exactly like a chat regression and
+  // cost an hour to attribute (.unistyles-migration/tour-android/MANIFEST.md,
+  // "Environment trap").
+  //
+  // So the pre-like is created only when there is nothing to preserve.
+  const existingPreLike = await prisma.interest.findFirst({
+    where: { requesterId: matchMe.id, responderId: rexId },
   });
 
-  // The one-sided like: MatchMe → Rex. When Rex swipes INTERESTED on
-  // MatchMe, SwipeService.checkForMutualInterest finds THIS row and creates
-  // the real match.
+  const preLike =
+    existingPreLike ??
+    // The one-sided like: MatchMe → Rex. When Rex swipes INTERESTED on
+    // MatchMe, SwipeService.checkForMutualInterest finds THIS row and creates
+    // the real match.
+    (await prisma.interest.create({
+      data: {
+        requesterId: matchMe.id,
+        responderId: rexId,
+        swipeType: "INTERESTED",
+      },
+    }));
+
+  return { matchMeUser, matchMe, preLike };
+};
+
+/**
+ * Put MatchMe back on Rex's swipe deck, destructively.
+ *
+ * Flow 22 needs to CREATE the Rex↔MatchMe match itself — its post-check
+ * counts the row — so anything a previous run left behind has to go. That is
+ * a real requirement and it is why this code exists; what it is not is
+ * something every other flow should do on its way past. Run it from flow 22's
+ * own pre-hook (`.maestro/scripts/pre/22-*.sh`), never from the shared seed.
+ *
+ * Narrow on purpose: only rows between these two dogs, nothing else.
+ */
+export const resetMatchMePreLike = async () => {
+  const rex = await prisma.dog.findFirst({
+    where: { user: { email: MAGIC_EMAIL }, deletedAt: null },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const matchMe = await prisma.dog.findFirst({
+    where: { user: { email: MATCHME_EMAIL }, name: "MatchMe", deletedAt: null },
+  });
+
+  if (!rex || !matchMe) {
+    throw new Error(
+      "resetMatchMePreLike: Rex or MatchMe is missing — run `maestro:seed` first",
+    );
+  }
+
+  const between = {
+    OR: [
+      { requesterId: rex.id, responderId: matchMe.id },
+      { requesterId: matchMe.id, responderId: rex.id },
+    ],
+  };
+
+  await prisma.message.deleteMany({ where: { match: between } });
+  await prisma.match.deleteMany({ where: between });
+  await prisma.interest.deleteMany({ where: between });
+
   const preLike = await prisma.interest.create({
     data: {
       requesterId: matchMe.id,
-      responderId: rexId,
+      responderId: rex.id,
       swipeType: "INTERESTED",
     },
   });
 
-  return { matchMeUser, matchMe, preLike };
+  return { rex, matchMe, preLike };
 };
 
 /**
@@ -622,6 +680,11 @@ if (isMain) {
   const run = async () => {
     if (command === "seed") {
       await seedMain();
+    } else if (command === "reset-match") {
+      const { rex, matchMe } = await resetMatchMePreLike();
+      console.log(
+        `[maestro-seed] reset the ${rex.name}<->${matchMe.name} match and re-created the pre-like`,
+      );
     } else if (command === "seed-delete-me") {
       await seedDeleteMeUser();
       console.log(`[maestro-seed] seeded ${DELETE_ME_EMAIL}`);
@@ -634,7 +697,7 @@ if (isMain) {
       if (exists) process.exit(1);
     } else {
       console.error(
-        `[maestro-seed] unknown command "${command}" — use seed|seed-delete-me|purge-delete-me|check-delete-me`,
+        `[maestro-seed] unknown command "${command}" — use seed|reset-match|seed-delete-me|purge-delete-me|check-delete-me`,
       );
       process.exit(1);
     }

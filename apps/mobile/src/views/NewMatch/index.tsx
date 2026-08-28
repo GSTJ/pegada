@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import * as React from "react";
 import { BackHandler, ScrollView, View } from "react-native";
 
@@ -53,13 +53,19 @@ const NewMatch: React.FC = () => {
 
     await safeLoadAndShow();
 
-    router.push({
+    // `replace`, not `push`. This screen is a one-shot celebration: the swipe
+    // saga pushes it the moment the API answers a like with `{ match }`, and
+    // taking a CTA spends it. Pushing the chat on top left it in the stack, so
+    // `chat-back` re-entered the confetti for a match the user had already
+    // acknowledged — and the only way out of THAT was "Keep swiping", i.e. two
+    // back presses to leave a conversation.
+    router.replace({
       pathname: `${SceneName.Chat}/[matchId]`,
       params: { dogId: matchDogId, matchId },
     });
   };
 
-  const handleSkip = async () => {
+  const handleSkip = useCallback(async () => {
     analytics.track({
       event_type: "New Match",
       event_properties: {
@@ -70,21 +76,33 @@ const NewMatch: React.FC = () => {
     await safeLoadAndShow();
 
     router.back();
-  };
+  }, [router, safeLoadAndShow]);
 
-  useFocusEffect(() => {
-    // Assume 'skip' if the user presses the back button
-    // This is pertinent to Android devices only.
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        void handleSkip();
-        return false;
-      },
-    );
+  // Assume 'skip' if the user presses the back button.
+  // This is pertinent to Android devices only.
+  //
+  // Stable callback, not an inline closure: `useFocusEffect` re-runs whenever
+  // the effect identity changes, so an inline one tears the listener down and
+  // re-adds it on every render of the screen.
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          void handleSkip();
 
-    return () => subscription.remove();
-  });
+          // Consumed. `handleSkip` owns the pop, and it only gets to do it
+          // once the interstitial closes — returning false let the press fall
+          // through to the navigator, which popped immediately, so the
+          // deferred `router.back()` then popped a SECOND screen out from
+          // under the tab the user had returned to.
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [handleSkip]),
+  );
 
   // Pairs with the confetti Lottie — celebrates the match as the screen appears.
   useEffect(() => {

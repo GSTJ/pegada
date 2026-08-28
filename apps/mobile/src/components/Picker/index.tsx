@@ -1,10 +1,17 @@
+import type { Item } from "./types";
 import type { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
 
 import type { ListRenderItemInfo } from "react-native";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import * as React from "react";
-import { Pressable, useWindowDimensions, View } from "react-native";
+import {
+  BackHandler,
+  Keyboard,
+  Pressable,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
 import { BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
@@ -15,12 +22,10 @@ import { renderCustomBackdrop } from "@/components/custom-backdrop";
 import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
 
-import { CloseIcon, SearchInput, SelectItem, styles } from "./styles";
+import { PickerSelectItem } from "./select-item";
+import { CloseIcon, SearchInput, styles } from "./styles";
 
-export type Item = {
-  id: string | null;
-  name: string;
-};
+export type { Item };
 
 export type InputPickerProps<T extends Item> = {
   title: string;
@@ -44,34 +49,6 @@ export type InputPickerProps<T extends Item> = {
 
 const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 
-const PickerSelectItem = <T extends Item>({
-  item,
-  value,
-  onChange,
-  onClose,
-  testID,
-}: {
-  item: T;
-  value: T | undefined;
-  onChange: (value: T) => void;
-  onClose: () => void;
-  testID?: string;
-}) => {
-  styles.useVariants({ selected: value?.id === item.id });
-  return (
-    <SelectItem
-      testID={testID}
-      onPress={() => {
-        onChange?.(item);
-        onClose();
-      }}
-      style={styles.selectItem}
-    >
-      <Text>{item.name}</Text>
-    </SelectItem>
-  );
-};
-
 const UnForwardedPickerSheet = <T extends Item>(
   props: InputPickerProps<T>,
   ref: React.ForwardedRef<BottomSheetModal>,
@@ -84,11 +61,42 @@ const UnForwardedPickerSheet = <T extends Item>(
 
   const pickerSheetRef = ref as React.MutableRefObject<BottomSheetModal>;
 
-  const onClose = () => {
+  const onClose = useCallback(() => {
     pickerSheetRef.current.close();
-  };
+  }, [pickerSheetRef]);
 
   const [filter, setFilter] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Android's system Back has to be consumed while the sheet is up.
+  // @gorhom/bottom-sheet registers none of its own — there is not a single
+  // `BackHandler` in the package — so the press fell through to the navigator,
+  // which popped the screen underneath. One press, two dismissals: the sheet
+  // went because its host unmounted, not because it handled anything.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        onClose();
+        return true;
+      },
+    );
+
+    return () => subscription.remove();
+  }, [isOpen, onClose]);
+
+  // The search field lives inside the sheet, so dismissing the sheet unmounts
+  // it — and an unmounted TextInput never blurs. That left the keyboard up
+  // over a screen with nothing focused to type into. `keyboardBlurBehavior`
+  // covers the sheet's own close animation; this covers the rest, including a
+  // swipe-down that outruns it.
+  const onDismiss = useCallback(() => {
+    Keyboard.dismiss();
+    setIsOpen(false);
+    setFilter("");
+  }, []);
 
   const {
     title,
@@ -153,6 +161,9 @@ const UnForwardedPickerSheet = <T extends Item>(
     <BottomSheetModal
       android_keyboardInputMode="adjustResize" // Fixes the keyboard extra padding on Android
       ref={pickerSheetRef}
+      onChange={(index) => setIsOpen(index >= 0)}
+      onDismiss={onDismiss}
+      keyboardBlurBehavior="restore"
       snapPoints={snapPoints}
       enableDynamicSizing={enableDynamicSizing}
       maxDynamicContentSize={screenHeight * 0.9}
@@ -167,7 +178,15 @@ const UnForwardedPickerSheet = <T extends Item>(
         <Text fontSize="lg" fontWeight="medium">
           {title}
         </Text>
-        <Pressable hitSlop={hitSlop} onPress={onClose}>
+        {/* An icon-only Pressable announces nothing: the SVG carries no
+            label and the Pressable has none of its own, so VoiceOver reads
+            the sheet's only dismiss control as an unlabelled button. */}
+        <Pressable
+          hitSlop={hitSlop}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t("pickerSheet.close")}
+        >
           <CloseIcon style={styles.closeIcon} />
         </Pressable>
       </View>

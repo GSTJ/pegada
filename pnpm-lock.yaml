@@ -538,6 +538,9 @@ importers:
       '@prisma/client':
         specifier: ^5.17.0
         version: 5.17.0(prisma@5.17.0)
+      '@smithy/node-http-handler':
+        specifier: ^4.7.3
+        version: 4.7.3
       '@tensorflow/tfjs':
         specifier: ^4.22.0
         version: 4.22.0(seedrandom@3.0.5)

@@ -99,18 +99,45 @@ fi
 export APP_ID="${APP_ID:-app.pegada}"
 export APP_SCHEME="${APP_SCHEME:-pegada}"
 
-# 3b. Pin the simulator's GPS to San Francisco — the maestro seed places
+# 3b. Name the device, don't let anything downstream infer it.
+#
+# This wrapper is the iOS one. Its Android counterpart already exports
+# MAESTRO_PLATFORM/MAESTRO_DEVICE_ID, and post-checks now refuse to measure
+# anything when the environment could describe either platform — which it can,
+# because the harness env sets SIM_UDID and ANDROID_SERIAL together. Declaring
+# them here keeps `maestro test`, `simctl` and the post-check pointed at one
+# device instead of three independent guesses at "booted".
+export MAESTRO_PLATFORM="${MAESTRO_PLATFORM:-ios}"
+
+if [[ -z "${MAESTRO_DEVICE_ID:-}" ]] && command -v xcrun >/dev/null 2>&1; then
+  BOOTED=$(xcrun simctl list devices booted --json 2>/dev/null \
+    | grep -o '"udid" : "[^"]*"' | sed 's/.*: "//;s/"//' || true)
+  if [[ "$(printf '%s\n' "$BOOTED" | grep -c .)" == "1" ]]; then
+    export MAESTRO_DEVICE_ID="$BOOTED"
+  fi
+fi
+export SIM_UDID="${SIM_UDID:-${MAESTRO_DEVICE_ID:-}}"
+
+MAESTRO_DEVICE_ARGS=()
+if [[ -n "${MAESTRO_DEVICE_ID:-}" ]]; then
+  MAESTRO_DEVICE_ARGS=(--device "$MAESTRO_DEVICE_ID")
+  echo "==> device: $MAESTRO_DEVICE_ID (ios)"
+fi
+
+# 3c. Pin the simulator's GPS to San Francisco — the maestro seed places
 # all deck dogs near SF, and without a simulated location
 # `getCurrentPositionAsync` never resolves, so flow 20's AskForLocation
 # screen hangs forever even with the permission pre-granted.
 if command -v xcrun >/dev/null 2>&1; then
-  xcrun simctl location booted set 37.7749,-122.4194 2>/dev/null || true
+  xcrun simctl location "${MAESTRO_DEVICE_ID:-booted}" set 37.7749,-122.4194 \
+    2>/dev/null || true
 fi
 
 echo ""
 echo "==> maestro test $FLOW_PATH"
 set +e
-maestro test -e APP_ID="$APP_ID" -e APP_SCHEME="$APP_SCHEME" "$FLOW_PATH" "$@"
+maestro "${MAESTRO_DEVICE_ARGS[@]}" test \
+  -e APP_ID="$APP_ID" -e APP_SCHEME="$APP_SCHEME" "$FLOW_PATH" "$@"
 MAESTRO_RC=$?
 set -e
 

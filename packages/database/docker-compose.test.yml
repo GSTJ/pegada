@@ -37,3 +37,50 @@ services:
       SRH_MODE: env
       SRH_TOKEN: example_token
       SRH_CONNECTION_STRING: "redis://redis:6379" # Using `redis` hostname
+
+  # The test environment's S3 stand-in. The dev compose has had one for a
+  # while; this file had postgres, redis and redis-serverless and no object
+  # store at all, so anything under test that presigns, uploads or moves an
+  # image between key prefixes had nothing to talk to.
+  #
+  # Port 9004 on the host: 9002 is the dev environment's MinIO and both are
+  # routinely up at the same time.
+  minio:
+    container_name: pegada-minio-test
+    image: minio/minio:latest
+    command: server /data
+    restart: always
+    environment:
+      MINIO_ROOT_USER: pegada-dev
+      MINIO_ROOT_PASSWORD: pegada-dev-secret
+    ports:
+      - "9004:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/live"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 3s
+
+  # Same one-shot provisioner as the dev compose, and for the same reason:
+  # `minio server` creates no buckets, and a presign into a bucket that does
+  # not exist succeeds — it is the PUT that comes back 404 NoSuchBucket, long
+  # after anything is watching. See docker-compose.yml for the full story.
+  # No container_name, same as the dev compose: the clean-slate verifier runs
+  # this file under a throwaway project name and a fixed one would collide.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      BUCKET: "${AWS_S3_BUCKET_NAME:-pegada-dev}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        mc alias set pegada http://minio:9000 pegada-dev pegada-dev-secret
+        mc mb --ignore-existing "pegada/$${BUCKET}"
+        mc anonymous set download "pegada/$${BUCKET}"
+        echo "minio-init: bucket $${BUCKET} ready"

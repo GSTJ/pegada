@@ -10,6 +10,9 @@
 
 # next.js
 /.next/
+# Per-port dev build directories (see next.config.mjs: two `next dev` servers
+# out of one checkout corrupt each other's chunk cache when they share one).
+/.next-*/
 /out/
 
 # production

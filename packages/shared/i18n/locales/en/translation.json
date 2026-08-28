@@ -201,6 +201,7 @@
     "resendCode": "Resend the code"
   },
   "pickerSheet": {
+    "close": "Close",
     "search": "Search"
   },
   "preferences": {
@@ -215,6 +216,10 @@
     "title": "Preferences",
     "updateError": "An error occurred while updating your preferences.",
     "years": "0-{{maxYears}}+ years"
+  },
+  "profilePhotos": {
+    "addPhoto": "Add photo {{position}}",
+    "removePhoto": "Remove photo {{position}}"
   },
   "quickActions": {
     "matches": "Matches",

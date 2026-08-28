@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "pnpm -F @pegada/database build && next build",
     "start": "next start",
+    "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {

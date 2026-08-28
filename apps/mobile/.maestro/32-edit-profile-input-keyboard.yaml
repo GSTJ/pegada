@@ -1,0 +1,156 @@
+appId: ${APP_ID}
+name: Keyboard - a focused single-line input must clear the pinned bottom bar
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #3 (MINOR).
+#
+# With the keyboard up, the focused single-line input came to rest with its
+# bottom edge sliced off by the bottom-action bar painted over the scroll
+# area. Same root cause as flow 30: the platform's own scroll-into-view either
+# does not run (it measured the pre-shrink frame) or runs without knowing
+# anything about a bar that is absolutely positioned over the scroll view.
+#
+# `above:` compares top edges, so on iOS it cannot catch this one: UIKit does
+# scroll a single-line field clear of the *keyboard*, it just knows nothing
+# about the bar drawn over the scroll view, so the field's top is always above
+# the button and only its bottom is lost. The gate is therefore
+# checks/32-*.sh, which reads real bounds out of `maestro hierarchy` and
+# asserts the field's bottom edge clears the bar. The flow's job is to leave
+# the screen parked in exactly that state, which is why the last thing it does
+# is focus the Name field.
+#
+# The assertions inline below are the cheap ones: reachable, focusable,
+# typable, and not left somewhere off-viewport.
+#
+# The keyboard is deliberately never raised before the Weight scroll: a swipe
+# with the IME up starts inside the keyboard window on Android and does
+# nothing, and `hideKeyboard` taps into the view on iOS screens with no
+# standard dismiss action (it landed on a photo cell's `+` during the tour).
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    id: "profile-open-edit"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "edit-profile-name"
+- takeScreenshot: 32-01-edit-profile
+
+# Scroll to the row BELOW Weight, not to Weight itself. `scrollUntilVisible`
+# stops as soon as its target is inside the *screen*, and the bottom-action bar
+# is painted over the last ~110pt of it — so stopping on Weight leaves Weight
+# underneath the bar, and the tap that follows lands on Save Profile and leaves
+# the screen. Stopping on the breed picker parks Weight one row higher: clear
+# of the bar with the keyboard down, and squarely behind the keyboard once it
+# comes up, which is the state under test.
+#
+# Android needs `centerElement` on top of that. The rows are taller there
+# relative to the screen, so "breed is inside the screen" still leaves Weight's
+# CENTRE 8px above the Save bar's top edge — `above:` passes (it compares top
+# edges) but the tap lands on the bar's padding, focuses nothing, and the
+# `eraseText`/`inputText` that follow are silently no-ops against an unfocused
+# field. Centring breed is the same intent stated in a way that does not depend
+# on row heights: it parks Weight a whole row clear of the bar.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "edit-profile-breed"
+          direction: DOWN
+          timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "edit-profile-breed"
+          direction: DOWN
+          centerElement: true
+          timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 32-02-weight-in-view
+# Pre-condition: with the keyboard still down, Weight is genuinely reachable.
+# If a future layout parks it somewhere else, this fails loudly instead of the
+# flow quietly testing nothing.
+- assertVisible:
+    id: "edit-profile-weight"
+    above:
+      id: "edit-profile-save"
+
+- tapOn:
+    id: "edit-profile-weight"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 32-03-weight-focused
+- assertVisible:
+    id: "edit-profile-weight"
+    above:
+      id: "edit-profile-save"
+
+# And it has to still be usable, not merely present in the tree. Erase first:
+# the seeded dog already weighs 30, and Maestro matches an element's text in
+# full, so typing into a non-empty field would leave "303" (maxLength 3).
+- eraseText: 4
+- inputText: "31"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: 32-04-weight-typed
+- assertVisible:
+    text: "31"
+    above:
+      id: "edit-profile-save"
+
+# Re-enter the screen for the Name case rather than tapping upwards through a
+# scrolled list with the keyboard up - that taps an off-viewport centre.
+#
+# The keyboard has to go first on Android. `utils/back.yaml` presses the system
+# Back key there, and Android's first Back always goes to the IME: it closed
+# the keypad and left the flow still on EditProfile, so the `profile-open-edit`
+# tap below had nothing to hit. iOS taps a chevron and is unaffected, so this
+# is scoped rather than pushed into the shared util, where it would change what
+# "go back one screen" means for every other flow.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+      - waitForAnimationToEnd:
+          timeout: 2000
+- runFlow: utils/back.yaml
+- waitForAnimationToEnd:
+    timeout: 6000
+- tapOn:
+    id: "profile-open-edit"
+- waitForAnimationToEnd:
+    timeout: 8000
+- tapOn:
+    id: "edit-profile-name"
+- waitForAnimationToEnd:
+    timeout: 3000
+# Type: a tap alone put the caret in the field but left the keyboard down on a
+# second visit to the screen, and the post-check needs the keyboard up - that
+# is the whole state under test. Nothing is saved, so the extra character does
+# not survive the flow.
+- inputText: "!"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: 32-05-name-focused
+- assertVisible:
+    id: "edit-profile-name"
+    above:
+      id: "edit-profile-save"

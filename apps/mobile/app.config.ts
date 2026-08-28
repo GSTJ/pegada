@@ -213,6 +213,12 @@ const config: ExpoConfig = {
     // a forced dark theme boots with a dark splash instead of blinking
     // white->dark on light-mode devices. See withInitialThemeOverride.js.
     "./plugins/with-initial-theme-override",
+    // Android blocks cleartext HTTP from API 28 on and expo prebuild emits no
+    // `usesCleartextTraffic`, so a Release build pointed at a local
+    // http:// API cannot reach it -- with no error, just dead requests. The
+    // plugin turns it on only when EXPO_PUBLIC_API_URL is http and the env is
+    // not production. See withCleartextTraffic.js.
+    "./plugins/with-cleartext-traffic",
     // Sourcemap upload for Release native builds only (see
     // posthogSourcemapsEnabled above) -- omitted entirely from the plugins
     // list otherwise, so a plain local build never has the upload step in

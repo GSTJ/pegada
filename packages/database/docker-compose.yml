@@ -49,3 +49,41 @@ services:
       MINIO_ROOT_PASSWORD: pegada-dev-secret
     ports:
       - "9002:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/live"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 3s
+
+  # Creates the bucket the API expects, because `minio server` does not.
+  #
+  # Without this a fresh clone gets a running S3 with nothing in it, and the
+  # upload path fails in the worst possible way: `image.signedUpload` mints a
+  # presigned PUT and answers 200, the device's PUT then 404s NoSuchBucket,
+  # and nothing on either side treats that as an error. The photo silently
+  # never attaches, so "Create Profile" is a no-op and onboarding dead-ends on
+  # a screen with no message on it. It cost a full capture round to diagnose
+  # (.unistyles-migration/baseline-report.md, "What changed to get here").
+  #
+  # `mc anonymous set download` matches how the app reads images back: the API
+  # hands the client a plain bucket URL, not a presigned GET.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    # One-shot. `always` would put it in a crash loop the moment it succeeds.
+    restart: "no"
+    environment:
+      # Same default as packages/api's AWS_S3_BUCKET_NAME, overridable so a
+      # checkout pointed at a differently-named bucket still self-provisions.
+      BUCKET: "${AWS_S3_BUCKET_NAME:-pegada-dev}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        mc alias set pegada http://minio:9000 pegada-dev pegada-dev-secret
+        mc mb --ignore-existing "pegada/$${BUCKET}"
+        mc anonymous set download "pegada/$${BUCKET}"
+        echo "minio-init: bucket $${BUCKET} ready"

@@ -1,5 +1,8 @@
 import { DogService } from "../services/dog-service";
-import { dogInputSchema } from "../shared/dog-input-schema";
+import {
+  assertDogImageOriginsAllowed,
+  dogUpdateInputSchema,
+} from "../shared/dog-input-schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const myDogRouter = createTRPCRouter({
@@ -14,9 +17,17 @@ export const myDogRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure
-    .input(dogInputSchema.partial())
+    .input(dogUpdateInputSchema)
     .mutation(async ({ ctx, input }) => {
       const dog = await DogService.getDogByUserId(ctx.session.user.id);
+
+      // Deferred out of the input schema because it needs the dog's own stored
+      // URLs — see the comment on `dogUpdateInputSchema`.
+      assertDogImageOriginsAllowed(
+        input.images,
+        await DogService.getImageUrls(dog.id),
+      );
+
       const updatedDog = await DogService.updateDog(dog.id, input);
       return updatedDog;
     }),

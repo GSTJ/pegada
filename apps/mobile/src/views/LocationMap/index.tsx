@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Platform, View } from "react-native";
 
 import { useRouter } from "expo-router";
@@ -21,6 +21,13 @@ import { updateUserLocation } from "../(auth)/AskForLocation";
 import { Marker } from "./components/Marker";
 import { Submit } from "./components/Submit";
 import { MapView, styles } from "./styles";
+
+/**
+ * How long the camera has to stay quiet before the screen is treated as
+ * settled. Long enough not to fight a fling, short enough that nobody is left
+ * looking at a screen with no primary action.
+ */
+const SETTLE_AFTER_QUIET_MS = 700;
 
 const LocationMap = () => {
   const mapRef = useRef(null);
@@ -64,6 +71,49 @@ const LocationMap = () => {
   // This is a workaround to prevent that
   const [touchStarted, setTouchStarted] = useState(false);
   const dragging = useSharedValue(0);
+
+  // Mirrors `dragging` for the things that are mounted/unmounted rather than
+  // animated — the "Are you here?" callout. It used to key off `touchStarted`,
+  // which is a latch, so the callout disappeared on the first pan for good.
+  const [isDragging, setIsDragging] = useState(false);
+
+  const settleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearSettleTimeout = () => {
+    if (!settleTimeout.current) return;
+    clearTimeout(settleTimeout.current);
+    settleTimeout.current = null;
+  };
+
+  /** Back to rest: pin tinted, callout up, Confirm Location reachable. */
+  const settle = useCallback(() => {
+    clearSettleTimeout();
+    setIsDragging(false);
+    dragging.value = withTiming(0, {
+      easing: Easing.out(Easing.ease),
+      duration: 350,
+    });
+  }, [dragging]);
+
+  const beginDrag = useCallback(() => {
+    setIsDragging(true);
+    dragging.value = withTiming(1, {
+      easing: Easing.in(Easing.ease),
+      duration: 200,
+    });
+
+    // Settling used to depend entirely on `onRegionChangeComplete`, which
+    // Android emits from GoogleMap's `onCameraIdle`. When that did not arrive,
+    // `dragging` stayed at 1 forever: the Confirm button faded to nothing, the
+    // callout was gone and the pin kept its dark drag colour — ten seconds
+    // after the finger came off, and for the rest of the screen's life. A
+    // quiet period is not a race with the real event; whichever lands first
+    // wins and the other is a no-op.
+    clearSettleTimeout();
+    settleTimeout.current = setTimeout(settle, SETTLE_AFTER_QUIET_MS);
+  }, [dragging, settle]);
+
+  useEffect(() => clearSettleTimeout, []);
 
   const { height: buttomActionHeight } = useBottomActionStyle();
   const headerHeight = useHeaderHeight();
@@ -109,10 +159,7 @@ const LocationMap = () => {
         onTouchStart={() => setTouchStarted(true)}
         onRegionChange={() => {
           if (!touchStarted) return;
-          dragging.value = withTiming(1, {
-            easing: Easing.in(Easing.ease),
-            duration: 200,
-          });
+          beginDrag();
         }}
         onRegionChangeComplete={(newLocation: {
           latitude: number;
@@ -123,13 +170,10 @@ const LocationMap = () => {
             longitude: newLocation.longitude,
           });
 
-          dragging.value = withTiming(0, {
-            easing: Easing.out(Easing.ease),
-            duration: 350,
-          });
+          settle();
         }}
       />
-      <Marker touchStarted={touchStarted} dragging={dragging} />
+      <Marker isDragging={isDragging} dragging={dragging} />
       <Submit
         loading={userMutation.isPending}
         onPress={() => userMutation.mutate()}

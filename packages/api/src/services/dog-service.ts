@@ -12,6 +12,7 @@ import { enqueue } from "../queue/enqueue";
 import { TOPICS } from "../queue/topics";
 import { transformDistanceBetweenUserAndDog } from "../shared/dog-distance";
 import { deleteImageFromS3 } from "../shared/file-upload";
+import { isAllowedImageUrl } from "../shared/image-url";
 import { ImageService } from "./image-service";
 
 type DogImagesWithId = (DogServerSchema["images"][number] & { id: string })[];
@@ -144,8 +145,14 @@ export class DogService {
     >;
 
     await Promise.all([
-      // If database operations are successful, delete from S3
-      ...imagesToDelete.map((image) => deleteImageFromS3(image.url)),
+      // If database operations are successful, delete from S3. Images stored
+      // before the current storage origins were configured (a retired S3
+      // bucket, a dev fixture) have nothing of ours behind them, and asking
+      // the storage layer to route them throws — which would reject this
+      // Promise.all *after* the transaction had already committed.
+      ...imagesToDelete
+        .filter((image) => isAllowedImageUrl(image.url))
+        .map((image) => deleteImageFromS3(image.url)),
 
       // Classify images, create blurhashes and update image status
       ...(updatedDog?.images ?? []).flatMap((image) =>
@@ -209,6 +216,19 @@ export class DogService {
     });
 
     return dog;
+  }
+
+  /**
+   * The image URLs currently stored for a dog. Used by `myDog.update` to tell
+   * a URL the caller invented from one the dog already has.
+   */
+  static async getImageUrls(dogId: string) {
+    const images = await prisma.image.findMany({
+      where: { dogId },
+      select: { url: true },
+    });
+
+    return new Set(images.map((image) => image.url));
   }
 
   static async getDogByUserId(userId: string) {

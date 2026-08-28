@@ -1,0 +1,31 @@
+appId: ${APP_ID}
+name: Photo grid - the E2E skip affordance must fit its cell
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #6 (COSMETIC).
+#
+# The MAESTRO_E2E_SKIP_PHOTO pill wrapped mid-word ("MAESTRO_E2E_SKIP_P /
+# HOTO"), the second line was clipped by the photo cell, and the pink `+`
+# button sat on top of the label. It is an E2E-only affordance, but it is the
+# affordance every Android flow taps, and a control that is half off its own
+# cell with a button over it is exactly the sort of thing that starts
+# swallowing taps.
+#
+# iOS never exposes the pill to the accessibility tree —
+# react-native-draggable-grid wraps every cell in a pan responder that hides
+# the whole subtree, which is why `add-photo-button-{i}` is the only usable
+# handle on this screen. So the flow just parks on CreateProfile with all six
+# slots empty and checks/35-*.sh measures the cell.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-fresh.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- assertVisible:
+    id: "profile-name"
+- assertVisible:
+    id: "add-photo-button-0"
+- takeScreenshot: 35-01-photo-grid

@@ -1,0 +1,53 @@
+appId: ${APP_ID}
+name: OTP - the "Resend the code" rule must underline, not strike through
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #4 (COSMETIC).
+#
+# The pink rule behind "Resend the code" ran through the bottom of the glyphs
+# instead of under them. `Underline` pins a 4pt bar at `bottom: 2` of a box
+# that is only as tall as the text, and Gilroy's descender leaves ~3.5pt below
+# the baseline at 18pt - so the bar has nowhere to go but across the letters.
+#
+# There is no accessibility-tree assertion for "these pixels are below those
+# pixels", so the flow parks on the OTP screen and checks/33-*.sh measures the
+# frame buffer: every pixel of the rule has to sit below every pixel of the
+# glyphs. That statement is resolution- and platform-independent.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/dismiss-system-dialogs.yaml
+- tapOn:
+    id: "signin-email"
+- waitForAnimationToEnd
+- eraseText: 50
+- inputText: "maestro-fresh@pegada.app"
+- tapOn:
+    id: "signin-submit"
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: utils/dismiss-system-dialogs.yaml
+- waitForAnimationToEnd
+# The numeric keypad's accessory pill is the reliable "we are on the OTP
+# screen" tell on iOS - see utils/login-fresh.yaml. Android has no such pill;
+# `maestro hierarchy` does include the IME window there, and Gboard's action
+# key happens to be labelled "Next" too, so the assertion passed for a reason
+# that has nothing to do with this app. Wait on the first code cell instead.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Next"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "otp-digit-0"
+          timeout: 15000
+- assertVisible:
+    id: "otp-resend"
+- takeScreenshot: 33-01-otp-resend

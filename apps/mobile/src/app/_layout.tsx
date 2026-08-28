@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 
 import "@/config";
 import { router, SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
-import { StyleSheet, withUnistyles } from "react-native-unistyles";
+import {
+  StyleSheet,
+  useUnistyles,
+  withUnistyles,
+} from "react-native-unistyles";
 import { Provider } from "react-redux";
 
 import { NetworkBoundary } from "@/components/NetworkBoundary";
@@ -25,6 +30,31 @@ import { SceneName } from "@/types/scene-name";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);
+/**
+ * The bottom of React Native's status-bar props stack.
+ *
+ * Screens topped by a full-bleed photo (Profile, dog profile, new match) push
+ * `style="light"` on top of this. When they unmount, RN pops their entry and
+ * falls back to whatever is left — and with nothing underneath, that is its
+ * own `_defaultProps.barStyle`, which is `"default"`. On iOS "default" means
+ * "let UIKit decide" and resolves correctly. On Android, RN's StatusBarModule
+ * maps anything that is not exactly `"dark-content"` to
+ * `setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)` — it CLEARS the
+ * light-status-bar appearance, i.e. white icons. So one visit to the Profile
+ * tab left every light screen after it with an entirely blank status bar: no
+ * clock, no battery, no signal.
+ *
+ * Mounted once, above the router, so there is always an entry to fall back to.
+ * `style` is resolved off the app's own theme rather than `"auto"`, which
+ * follows the *system* colour scheme and would be wrong the moment the user
+ * forces light or dark in Preferences.
+ */
+const ThemedStatusBar = () => {
+  const { theme } = useUnistyles();
+
+  return <StatusBar style={theme.dark ? "light" : "dark"} />;
+};
+
 const App = () => {
   const { initialRouteName } = useProtectedRoute();
   const [themeReady, setThemeReady] = useState(false);
@@ -73,6 +103,13 @@ const App = () => {
     <TRPCProvider>
       <ThemeProvider>
         <BottomSheetModalProvider>
+          {/*
+            Ahead of the router, so its entry sits at the BOTTOM of React
+            Native's status-bar props stack and a screen that pops its own
+            `style="light"` falls back to the theme instead of to RN's
+            `"default"`.
+          */}
+          <ThemedStatusBar />
           <NetworkBoundary>
             <Provider store={store}>
               <Stack screenOptions={{ headerShown: false }}>

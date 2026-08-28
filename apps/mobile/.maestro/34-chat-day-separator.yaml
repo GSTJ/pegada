@@ -1,0 +1,67 @@
+appId: ${APP_ID}
+name: Chat - the day separator must not carry a stray abbreviation dot
+tags:
+  - regression
+---
+# REGRESSION GUARD - iOS tour finding #5 (COSMETIC).
+#
+# The separator above an older day's messages rendered "Fri., 31 Jul". The
+# date-fns pattern was "EEE., d MMM" and `.` is a literal in a date-fns
+# pattern, not an escape - so an abbreviated weekday got a period bolted on in
+# front of the comma. In pt-BR it was worse: that locale's own abbreviation
+# already ends in a period, so it read "sex.., 31 de jul".
+#
+# scripts/pre/34-backdate-chat.sh back-dates the seeded Rex<->Bella
+# conversation so the separator lands on the this-year-but-not-this-week
+# branch deterministically; freshly seeded messages are 30 minutes old and
+# would render "Today".
+#
+# The gate is the NEGATIVE assertion - it is true for every locale and every
+# date. The positive one pins the en-US shape. `views/Chat/components/NextDay`
+# also has a unit test that fixes the format for a frozen clock.
+#
+# BOTH assertions are scoped to `id: chat-day-separator`, and the conversation
+# is opened BY NAME. The two used to be "row 0" and a bare regex, and together
+# they made this flow assert nothing:
+#
+#   * Row 0 is whatever conversation is on top, ordered by last message. Flow
+#     22 sends MatchMe a message and runs immediately before this one in
+#     config.yaml's own order, so row 0 is the chat this flow did NOT back-date
+#     — it read "Today" and had no separator to inspect.
+#   * The bare regex still passed on iOS anyway. A stack keeps the screen
+#     underneath in the accessibility tree there, and the Messages list's own
+#     rows carry dates in the same "Mon, 13 Jul" shape. So the assertion was
+#     satisfied by the list behind the chat while the chat showed "Today" —
+#     green on iOS, red on Android, correct on neither.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "messages-screen"
+- runFlow: utils/dismiss-app-review.yaml
+# By name: this is the conversation scripts/pre/34-backdate-chat.sh back-dates.
+- tapOn:
+    text: "Bella"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "chat-screen"
+- takeScreenshot: 34-01-chat-day-separator
+
+- assertVisible:
+    id: "chat-day-separator"
+- assertNotVisible:
+    id: "chat-day-separator"
+    text: ".*[A-Z][a-z]{2}\\., [0-9]{1,2} .*"
+- assertVisible:
+    id: "chat-day-separator"
+    text: ".*[A-Z][a-z]{2}, [0-9]{1,2} [A-Z][a-z]{2}.*"

@@ -10,7 +10,7 @@ export const Underline: React.FC<{
 }> = ({ children }) => (
   <View style={styles.underlineContainer}>
     <View style={styles.line} />
-    {children}
+    <View style={styles.underlineText}>{children}</View>
   </View>
 );
 

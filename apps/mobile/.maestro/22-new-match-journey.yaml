@@ -79,19 +79,21 @@ tags:
 # it showed a SwipeDog2 profile (post-tap on the swipe card's personal
 - tapOn:
     id: "new-match-send"
-# === CRITICAL: AdMob interstitial blocks navigation ===
-# NewMatch.handleSendMessage calls `await safeLoadAndShow()` BEFORE
-# router.push(chat) — see views/NewMatch/index.tsx + services/advertise-
-# ment/interstitial.ts. The ad is a full-screen Google interstitial
-# (TestIds.INTERSTITIAL in __DEV__, real id otherwise). It can take
-# several seconds to load + show + close. During that window every
-# downstream tap lands on the ad UI instead of the chat.
+# NewMatch.handleSendMessage awaits `safeLoadAndShow()` before
+# router.replace(chat). In a Maestro build that call is a no-op —
+# createForAdRequestTracked returns an inert interstitial when
+# isMaestroE2EBuild() holds, because a full-screen Google interstitial eats
+# every downstream tap for as long as it is up and it appears on a schedule
+# AdMob owns, not one a flow can wait for. This step used to be a blind 20s
+# budget for that window.
 #
-# We wait a generous 20s for the ad to complete and the chat to mount.
-# The ad will auto-close once shown; if it never shows (e.g. no net /
-# RevenueCat marked premium), the wait is benign.
-- waitForAnimationToEnd:
-    timeout: 20000
+# So assert the destination instead of sleeping through the uncertainty: if
+# the ad ever comes back, this fails here rather than by taking the next tap
+# somewhere unexpected.
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
+    timeout: 10000
 - takeScreenshot: 22-04-on-chat-screen
 
 # --- 4. Type a unique message and send via keyboard -----------------------
@@ -151,25 +153,32 @@ tags:
     timeout: 5000
 - takeScreenshot: 22-06-chat-after-send
 
-# --- 5. Back to NewMatch, then over to Messages list ----------------------
-# /swipe → /new-match → /chat/[matchId], so chat.back() returns to
-# /new-match (NOT directly to the messages list — verified by the
-# screenshot below matching the 22-03 hash). testID="chat-back" is
+# --- 5. Back out of the chat, then over to the Messages list --------------
+# NewMatch is a one-shot interstitial and "Send a message" spends it, so it
+# `replace`s itself with the chat rather than pushing on top. The stack at
+# this point is /swipe → /chat/[matchId] and one back press lands on the
+# deck.
+#
+# This used to read /swipe → /new-match → /chat/[matchId]: backing out of the
+# conversation re-entered the confetti for a match already acknowledged, and
+# the flow had to tap "Keep swiping" a second time to escape. The two
+# assertions below are what pins the shape of the stack — a regression to
+# `push` makes `new-match-screen` visible again and fails here rather than
+# quietly costing every user an extra back press.
 - tapOn:
     id: "chat-back"
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: 22-07-back-on-new-match
-- tapOn:
-    id: "new-match-skip"
-- waitForAnimationToEnd:
-    timeout: 5000
-- takeScreenshot: 22-08-back-on-swipe
+- assertNotVisible:
+    id: "new-match-screen"
+- assertVisible:
+    id: "swipe-screen"
+- takeScreenshot: 22-07-back-on-swipe
 - tapOn:
     id: "tab-messages"
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: 22-09-on-messages-list
+- takeScreenshot: 22-08-on-messages-list
 #   (a) the new Match row exists between Rex and MatchMe, AND
 #   (b) the Message row with prefix "MATCH22_" exists and JOINs to that
 #       Match.

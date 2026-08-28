@@ -9,9 +9,10 @@
     "ios": "expo run:ios",
     "eject": "expo eject",
     "test": "jest --runInBand",
+    "test:checks": "node --test .maestro/checks/lib/*.test.mjs",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
-    "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
+    "setup:secret:files": "bash ./scripts/setup-secret-files.sh",
     "preinstall": "pnpm setup:secret:files",
     "sourcemaps:upload:ota": "../../scripts/upload-posthog-sourcemaps-ota.sh"
   },
@@ -128,6 +129,7 @@
   "jest": {
     "clearMocks": true,
     "moduleNameMapper": {
+      "\\.(png|jpe?g|gif|webp|svg|ttf|otf|woff2?|mp4|lottie)$": "<rootDir>/jest/asset-stub.js",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
   },
