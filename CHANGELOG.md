@@ -2,6 +2,19 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.6.0 (2026-08-27)
+
+### Fixes
+
+- **mobile:** keyboard handling and every bug the migration QA found ([#149](https://github.com/GSTJ/pegada/pull/149)) ([`1c5d682`](https://github.com/GSTJ/pegada/commit/1c5d682f10bb10b2a46d4eb358642fa68611b770))
+
+### Refactors
+
+- **mobile:** drop styled-components now that unistyles owns styling ([#148](https://github.com/GSTJ/pegada/pull/148)) ([`7cbf73e`](https://github.com/GSTJ/pegada/commit/7cbf73e6c421a3ee2083a5df21116edc85737d04))
+- **mobile:** migrate styling from styled-components to unistyles ([#145](https://github.com/GSTJ/pegada/pull/145)) ([`3cce8b3`](https://github.com/GSTJ/pegada/commit/3cce8b30d6a14759fe78c3cca61b9bc2609b2b64))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.5.1...v1.6.0)
+
 ## v1.5.1 (2026-08-26)
 
 ### Fixes
