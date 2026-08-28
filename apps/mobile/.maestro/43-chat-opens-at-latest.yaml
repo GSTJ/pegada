@@ -1,0 +1,114 @@
+appId: ${APP_ID}
+name: Chat - opening a conversation must land on the newest message
+tags:
+  - regression
+---
+# REGRESSION GUARD - reported bug #1: a conversation SOMETIMES opens scrolled
+# to the top of the loaded page instead of the bottom, so the newest message
+# is off screen and you have to fling down to find out what was said.
+#
+# "Sometimes" is the whole point. FlashList v2 dropped `inverted`, so
+# `views/Chat` renders top-down with the newest row last and nothing asked it
+# to start at the end. What put it at the end when it did was
+# `maintainVisibleContentPosition.autoscrollToBottomThreshold` firing as the
+# rows measured and the content grew past the estimate — a race between the
+# first committed layout and the real one. Win it and the chat looks correct;
+# lose it and it opens on the middle of the history.
+#
+# Which is why this flow opens the conversation TWICE. The first open is cold:
+# react-query has one page, the list is short enough that offset 0 is inside
+# the autoscroll threshold, and the heuristic drags it to the end — it looks
+# fine. The second open is the one a real user does all day, and by then the
+# cache holds every page that was paginated in, so the list mounts 40 rows
+# tall, offset 0 is nowhere near the threshold, nothing fires, and the chat
+# opens on the OLDEST message. Measured on the pre-fix build: 12 of 12 warm
+# opens landed on row 1 (.unistyles-migration/chat-ux-fixes/probe-chat-open.mjs).
+#
+# scripts/pre/43-seed-long-chat.sh fills the Rex<->Nina match (which the normal
+# maestro seed leaves empty) with 40 messages, so the first page alone is
+# taller than the viewport and "did it land at the end" is answerable at all.
+# On the 3-message Rex<->Bella thread every message is on screen either way and
+# this flow would assert nothing.
+#
+# The YAML gets the app to the parked state; the geometry is
+# checks/43-chat-opens-at-latest.mjs, because "visible" here means "its rect is
+# above the composer", and `assertVisible` does not do occlusion — a bubble
+# painted underneath the composer is still in the accessibility tree with a
+# rect, and would satisfy it.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "messages-screen"
+- runFlow: utils/dismiss-app-review.yaml
+# By name: the fixture conversation is Rex<->Nina, and row order depends on
+# which thread was last written to.
+- tapOn:
+    text: "Nina"
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "chat-screen"
+- takeScreenshot: 43-01-first-open
+
+# Page the history in, so the second open mounts a list that is already 40
+# rows tall rather than one 20-row page. This is what a user does by reading
+# the conversation; the flow does it with three swipes.
+- swipe:
+    direction: DOWN
+    duration: 400
+- swipe:
+    direction: DOWN
+    duration: 400
+- swipe:
+    direction: DOWN
+    duration: 400
+- waitForAnimationToEnd:
+    timeout: 6000
+
+- tapOn:
+    id: "chat-back"
+# The first tap after a screen settles is sometimes eaten — flow 19 documents
+# the same thing on the Messages list. A second optional tap is a no-op once we
+# have already left, and without it this flow fails on the assertion below
+# roughly one run in ten for a reason that has nothing to do with the chat.
+- tapOn:
+    id: "chat-back"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "messages-screen"
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# The open under test.
+- tapOn:
+    text: "Nina"
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "chat-screen"
+- takeScreenshot: 43-02-reopened
+
+# Cheap first gate so a broken fixture reads as a broken fixture: the newest
+# row has to be in the tree at all. The check decides whether it is on screen.
+- assertVisible:
+    text: ".*chatux message 40.*"

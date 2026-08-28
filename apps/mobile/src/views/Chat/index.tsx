@@ -15,6 +15,7 @@ import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 
 import { HEADER_HEIGHT } from "./components/Header";
 import { SEND_HEIGHT } from "./components/Send";
+import { useChatListAnchor } from "./hooks/use-chat-list-anchor";
 import { useChatPagination } from "./hooks/use-chat-pagination";
 import { CenteredText, CenteredView, styles } from "./styles";
 
@@ -44,6 +45,8 @@ const ChatMessageList = () => {
   const { theme } = useUnistyles();
 
   const { messages, hasNextPage, loadMore } = useChatPagination();
+
+  const { listRef, listProps } = useChatListAnchor<MessageProps>();
 
   const insets = useKeyboardAwareSafeAreaInsets();
 
@@ -94,6 +97,8 @@ const ChatMessageList = () => {
   // Older messages are at the top, so the loading spinner goes in the
   // header and pagination triggers via onStartReached.
   const flashListProps = {
+    ...listProps,
+    ref: listRef,
     contentContainerStyle,
     data: messages,
     keyExtractor,
@@ -102,7 +107,27 @@ const ChatMessageList = () => {
     renderItem,
     onStartReached: loadMore,
     onStartReachedThreshold: 0.5,
-    maintainVisibleContentPosition: { autoscrollToBottomThreshold: 0.2 },
+    // `startRenderingFromBottom` is what actually opens the conversation on
+    // the newest message. Without it the list mounts at offset 0 — the OLDEST
+    // message — and the only thing that ever moved it was
+    // `autoscrollToBottomThreshold` happening to fire as rows measured and the
+    // content grew past FlashList's estimate. That works on a cold open, where
+    // react-query holds one 20-row page and offset 0 is close enough to the
+    // end to be inside the threshold. Re-enter the same conversation and the
+    // cache holds every page that was paginated in, the list mounts full
+    // height, offset 0 is nowhere near the threshold, nothing fires, and the
+    // chat opens on the first message ever sent. Measured before this line
+    // existed: 12 of 12 warm opens landed on row 1 of 40.
+    //
+    // It sets `initialScrollIndex` to the last row, so the position is decided
+    // by the layout manager on the first committed layout instead of by which
+    // side of a growth heuristic the render happened to land on. The threshold
+    // stays: it is what keeps the view pinned when a NEW message arrives while
+    // you are already at the bottom.
+    maintainVisibleContentPosition: {
+      autoscrollToBottomThreshold: 0.2,
+      startRenderingFromBottom: true,
+    },
   };
 
   return (

@@ -49,6 +49,12 @@ executionOrder:
     # the keyboard already up never sees `keyboardDidShow`, so it never
     # consumed the IME inset at all.
     - 42-otp-resend-keyboard-clearance
+    # 43 guards the chat opening on the newest message. It runs after every
+    # flow that reads the seeded conversations, because its pre-script fills
+    # the Rex<->Nina match with 40 messages and that puts Nina at the top of
+    # the Messages list — the row flow 12 taps by coordinate. The fixture is
+    # dropped again by scripts/seed-before-test.sh at the head of every run.
+    - 43-chat-opens-at-latest
     - 26-logout-journey
     # 27 MUST run last — it hard-deletes the delete-me@pegada.app row. The
     # row is re-seeded by `pnpm -F @pegada/database maestro:seed` before
