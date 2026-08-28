@@ -1,4 +1,6 @@
-import { isAfter, isBefore, parse } from "date-fns";
+import { isAfter } from "date-fns/isAfter";
+import { isBefore } from "date-fns/isBefore";
+import { parse } from "date-fns/parse";
 import { t } from "i18next";
 import { z } from "zod";
 

@@ -1,15 +1,14 @@
 import { View } from "react-native";
 
 import { Language } from "@pegada/shared/i18n/types/types";
-import {
-  format,
-  isSameDay,
-  isThisWeek,
-  isThisYear,
-  isToday,
-  isYesterday,
-} from "date-fns";
-import { enUS, pt } from "date-fns/locale";
+import { format } from "date-fns/format";
+import { isSameDay } from "date-fns/isSameDay";
+import { isThisWeek } from "date-fns/isThisWeek";
+import { isThisYear } from "date-fns/isThisYear";
+import { isToday } from "date-fns/isToday";
+import { isYesterday } from "date-fns/isYesterday";
+import { enUS } from "date-fns/locale/en-US";
+import { pt } from "date-fns/locale/pt";
 
 import i18n from "@/i18n";
 

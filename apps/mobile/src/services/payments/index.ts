@@ -8,7 +8,7 @@ import { Alert, Platform } from "react-native";
 
 import * as Device from "expo-device";
 
-import { get } from "lodash";
+import get from "lodash/get";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 import { getTrcpContext } from "@/contexts/trcp-context";

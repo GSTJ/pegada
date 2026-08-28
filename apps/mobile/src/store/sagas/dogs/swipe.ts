@@ -4,7 +4,7 @@ import type { ActionType } from "typesafe-actions";
 import { router } from "expo-router";
 
 import { LikeLimitReachedError } from "@pegada/shared/errors/errors";
-import { isBefore } from "date-fns";
+import { isBefore } from "date-fns/isBefore";
 import { all, call, fork, put, select, takeLatest } from "redux-saga/effects";
 
 import { showLikeLimitReached } from "@/components/LikeLimitReached";
