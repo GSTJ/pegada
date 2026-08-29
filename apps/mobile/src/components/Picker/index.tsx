@@ -17,6 +17,9 @@ import { useTranslation } from "react-i18next";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
 import Animated, {
+  Easing,
+  FadeInDown,
+  FadeOutDown,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -65,6 +68,13 @@ const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 const DISMISS_DISTANCE = 80;
 const DISMISS_VELOCITY = 800;
 
+// Emil's strong ease-out curve (animations.dev) — the built-in ease-in-out
+// that Reanimated's Fade presets default to delays the moment the sheet
+// starts moving, which is the moment the user is watching.
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 const PickerSheetContent = <T extends Item>(props: InputPickerProps<T>) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
@@ -96,6 +106,7 @@ const PickerSheetContent = <T extends Item>(props: InputPickerProps<T>) => {
     : props.data;
 
   const translateY = useSharedValue(0);
+  const closeButtonScale = useSharedValue(1);
 
   const handleDrag = Gesture.Pan()
     .onUpdate((event) => {
@@ -107,13 +118,33 @@ const PickerSheetContent = <T extends Item>(props: InputPickerProps<T>) => {
         event.velocityY > DISMISS_VELOCITY;
 
       if (shouldDismiss) {
-        translateY.value = withTiming(screenHeight, {}, () =>
-          runOnJS(handleClose)(),
+        // Spring, not a fixed-duration timing: it carries the flick's
+        // velocity through, so a fast swipe dismisses faster than a slow
+        // drag that just crossed the threshold. Mirrors magic-modal's own
+        // swipe-to-dismiss spring. Clamped so it can't overshoot back
+        // on-screen once released.
+        translateY.value = withSpring(
+          screenHeight,
+          { velocity: event.velocityY, overshootClamping: true },
+          (finished) => {
+            if (finished) runOnJS(handleClose)();
+          },
         );
       } else {
-        translateY.value = withSpring(0, { stiffness: 200, damping: 25 });
+        // Carry the release velocity into the spring-back too — otherwise a
+        // drag that is still moving when the finger lifts snaps to a dead
+        // stop before reversing, instead of continuing smoothly.
+        translateY.value = withSpring(0, {
+          velocity: event.velocityY,
+          stiffness: 200,
+          damping: 25,
+        });
       }
     });
+
+  const closeButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: closeButtonScale.value }],
+  }));
 
   const sheetAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -155,14 +186,27 @@ const PickerSheetContent = <T extends Item>(props: InputPickerProps<T>) => {
           </Text>
           {/* An icon-only Pressable announces nothing on its own; the label
               and role give VoiceOver something to read for the close control. */}
-          <Pressable
+          <AnimatedPressable
             hitSlop={hitSlop}
             onPress={handleClose}
+            onPressIn={() => {
+              closeButtonScale.value = withTiming(0.97, {
+                duration: 120,
+                easing: EASE_OUT,
+              });
+            }}
+            onPressOut={() => {
+              closeButtonScale.value = withTiming(1, {
+                duration: 120,
+                easing: EASE_OUT,
+              });
+            }}
             accessibilityRole="button"
             accessibilityLabel={t("pickerSheet.close")}
+            style={closeButtonStyle}
           >
             <CloseIcon style={styles.closeIcon} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
         {searchable ? (
           <View style={styles.searchContainer}>
@@ -210,6 +254,12 @@ const UnForwardedPickerSheet = <T extends Item>(
             // our own handle-scoped gesture inside PickerSheetContent instead.
             swipeDirection: undefined,
             style: { justifyContent: "flex-end" },
+            // Default Fade{In,Out}Down eases with Reanimated's built-in
+            // ease-in-out, which delays the exact moment the user is
+            // watching. Same transform+opacity animation, just re-timed with
+            // Emil's ease-out curve and kept under 280ms.
+            entering: FadeInDown.duration(220).easing(EASE_OUT),
+            exiting: FadeOutDown.duration(200).easing(EASE_OUT),
           },
         );
         modalIDRef.current = modalID;
