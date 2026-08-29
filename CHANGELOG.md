@@ -2,6 +2,31 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.6.1 (2026-08-29)
+
+### Features
+
+- **mobile:** add bidirectional dog profile hero transition ([#158](https://github.com/GSTJ/pegada/pull/158)) ([`eed957d`](https://github.com/GSTJ/pegada/commit/eed957d3dc264b4dc8f1eaaed75e82b1634b4e63))
+- **mobile:** like-limit Live Activity, Siri shortcuts and a Control Center button ([#157](https://github.com/GSTJ/pegada/pull/157)) ([`d3fbd25`](https://github.com/GSTJ/pegada/commit/d3fbd256ee754ea82ee6f96702bad965e2857cd4))
+
+### Fixes
+
+- survive the cold-start login path and keep production warm ([#151](https://github.com/GSTJ/pegada/pull/151)) ([`d416c15`](https://github.com/GSTJ/pegada/commit/d416c1515e55ec7ac6f139fc6b9d520bf8c1f065))
+- **mobile:** magic-modal bottom sheets, stop drag gestures popping the screen ([#156](https://github.com/GSTJ/pegada/pull/156)) ([`d23f938`](https://github.com/GSTJ/pegada/commit/d23f93851aae8075e86324b3d1337234a7191ccc))
+- **mobile:** apply Automatic theme live, no restart needed ([#159](https://github.com/GSTJ/pegada/pull/159)) ([`09ae20a`](https://github.com/GSTJ/pegada/commit/09ae20ad8c0528cfe426762cbabeecb1d91bf5be))
+- **mobile:** stop unistyles committing shadow updates for freed nodes ([#155](https://github.com/GSTJ/pegada/pull/155)) ([`5633e71`](https://github.com/GSTJ/pegada/commit/5633e7195053e8796b1f618828d16b5e2bd06d94))
+- **mobile:** chat opens at the latest message, keyboard keeps your place, carousel edge bounce stops going black ([#152](https://github.com/GSTJ/pegada/pull/152)) ([`b20e902`](https://github.com/GSTJ/pegada/commit/b20e9026f44ab89b184cf2fca10c02a68af13f4b))
+
+### Performance
+
+- **mobile,web,db:** measured size, startup and polish pass ([#153](https://github.com/GSTJ/pegada/pull/153)) ([`70f8a3a`](https://github.com/GSTJ/pegada/commit/70f8a3a26fcaa5255d530c587d2941f20e2a4187))
+
+### Other
+
+- **mobile:** Slider and photo reorder on gesture-handler, kill swipe-back races ([#160](https://github.com/GSTJ/pegada/pull/160)) ([`fb27b15`](https://github.com/GSTJ/pegada/commit/fb27b15a63363639044789373bacdceb0391a1c3))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.6.0...v1.6.1)
+
 ## v1.6.0 (2026-08-27)
 
 ### Fixes
