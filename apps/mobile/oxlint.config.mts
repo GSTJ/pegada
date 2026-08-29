@@ -42,6 +42,12 @@ export default extendConfig(expo, {
     // react-native-gesture-handler ships its own scrollables for use *inside*
     // gesture-handler containers. Importing them anywhere else silently loses
     // the platform behaviour of the react-native originals.
+    //
+    // The two barrels are here for size, not correctness: Metro does not
+    // tree-shake, so `import { format } from "date-fns"` ships all 824 of its
+    // modules (2.0 MB) and `import { get } from "lodash"` ships the single
+    // 563 KB `lodash.js`. The deep specifiers (`date-fns/format`,
+    // `lodash/get`) resolve to one module each.
     "no-restricted-imports": [
       "error",
       {
@@ -51,6 +57,21 @@ export default extendConfig(expo, {
             importNames: ["ScrollView", "FlatList", "SectionList"],
             message:
               "Import ScrollView/FlatList/SectionList from react-native instead.",
+          },
+          {
+            name: "date-fns",
+            message:
+              'Deep-import instead: `import { format } from "date-fns/format"`. The barrel ships all 824 modules.',
+          },
+          {
+            name: "date-fns/locale",
+            message:
+              'Deep-import instead: `import { pt } from "date-fns/locale/pt"`. The barrel ships every locale.',
+          },
+          {
+            name: "lodash",
+            message:
+              'Deep-import instead: `import get from "lodash/get"`. The barrel is one 563 KB module.',
           },
         ],
       },

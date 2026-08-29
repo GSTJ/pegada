@@ -9,7 +9,8 @@ import {
   InvalidOTPCodeError,
   OTPRequiredError,
 } from "@pegada/shared/errors/errors";
-import { format, set } from "date-fns";
+import { format } from "date-fns/format";
+import { set } from "date-fns/set";
 import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

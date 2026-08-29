@@ -1,5 +1,7 @@
 import type { BreedSlug } from "@pegada/shared/i18n/i18n";
 
+import { preload } from "react-dom";
+
 import { notFound } from "next/navigation";
 
 import prisma from "@pegada/database";
@@ -30,6 +32,21 @@ const DogProfile = async ({ params }: DogProfileProps) => {
 
   const [firstImage] = dog.images;
   const dogImage = firstImage?.url;
+
+  // This photo is the page: it is the LCP element on every /dog/[id] view, and
+  // it is a CSS `background-image`, which the browser's preload scanner cannot
+  // see. It is only discovered after the stylesheet has been fetched and the
+  // rule has matched, so the request starts late no matter how fast the HTML
+  // is. `preload` emits a hoisted `<link rel="preload" as="image">` in <head>,
+  // which puts the fetch in the very first round of requests.
+  //
+  // Deliberately not `next/image`: this URL is on the media CDN and
+  // `images.remotePatterns` is not configured, so switching would mean routing
+  // user photos through the optimiser — a bigger change than an LCP fix needs.
+  if (dogImage) {
+    preload(dogImage, { as: "image", fetchPriority: "high" });
+  }
+
   // oxlint-disable-next-line react-perf/jsx-no-new-object-as-prop -- server component: this renders once per request, there is no re-render to memoise against
   const dogImageStyle = { backgroundImage: `url(${dogImage})` };
 

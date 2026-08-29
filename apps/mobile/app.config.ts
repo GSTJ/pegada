@@ -232,19 +232,26 @@ const config: ExpoConfig = {
   android: {
     playStoreUrl: "https://play.google.com/store/apps/details?id=app.pegada",
     permissions: ["com.google.android.gms.permission.AD_ID"],
+    // Android 12 replaced the full-screen splash with an icon window, and
+    // prebuild CONTAINs whatever it is given into a 200 dp square before
+    // centring it on the 288 dp canvas. Feeding it the full-screen
+    // `splash-android*.png` compositions (1724x3728 at @4x) left the wordmark
+    // at 54 dp. These are the same artwork cropped tight to the wordmark by
+    // scripts/generate-android-splash-icon.sh, which reads the full-screen
+    // files and leaves them in place as the source.
     splash: {
-      mdpi: "./src/assets/images/splash-android.png",
-      hdpi: "./src/assets/images/splash-android@1.5x.png",
-      xhdpi: "./src/assets/images/splash-android@2x.png",
-      xxhdpi: "./src/assets/images/splash-android@3x.png",
-      xxxhdpi: "./src/assets/images/splash-android@4x.png",
+      mdpi: "./src/assets/images/splash-android-icon.png",
+      hdpi: "./src/assets/images/splash-android-icon@1.5x.png",
+      xhdpi: "./src/assets/images/splash-android-icon@2x.png",
+      xxhdpi: "./src/assets/images/splash-android-icon@3x.png",
+      xxxhdpi: "./src/assets/images/splash-android-icon@4x.png",
       backgroundColor: "#FFFFFF",
       dark: {
-        mdpi: "./src/assets/images/splash-android.png",
-        hdpi: "./src/assets/images/splash-android@1.5x.png",
-        xhdpi: "./src/assets/images/splash-android@2x.png",
-        xxhdpi: "./src/assets/images/splash-android@3x.png",
-        xxxhdpi: "./src/assets/images/splash-android@4x.png",
+        mdpi: "./src/assets/images/splash-android-icon.png",
+        hdpi: "./src/assets/images/splash-android-icon@1.5x.png",
+        xhdpi: "./src/assets/images/splash-android-icon@2x.png",
+        xxhdpi: "./src/assets/images/splash-android-icon@3x.png",
+        xxxhdpi: "./src/assets/images/splash-android-icon@4x.png",
         backgroundColor: "#000000",
       },
     },

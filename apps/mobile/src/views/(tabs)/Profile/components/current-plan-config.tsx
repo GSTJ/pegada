@@ -3,7 +3,7 @@ import { Linking, Platform, View } from "react-native";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 
-import { format } from "date-fns";
+import { format } from "date-fns/format";
 import { useTranslation } from "react-i18next";
 import {
   StyleSheet,

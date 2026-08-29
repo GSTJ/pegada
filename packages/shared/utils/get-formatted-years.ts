@@ -1,4 +1,5 @@
-import { differenceInMonths, differenceInYears } from "date-fns";
+import { differenceInMonths } from "date-fns/differenceInMonths";
+import { differenceInYears } from "date-fns/differenceInYears";
 import { t } from "i18next";
 
 import { Language } from "../i18n/types/types";

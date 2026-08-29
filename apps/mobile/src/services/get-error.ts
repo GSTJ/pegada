@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import get from "lodash/get";
 
 type GenericClass = new (...args: never[]) => unknown;
 

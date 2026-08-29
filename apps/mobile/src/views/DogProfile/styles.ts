@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import Color from "color";
-import { clamp } from "lodash";
+import clamp from "lodash/clamp";
 import {
   StyleSheet as UnistylesStyleSheet,
   withUnistyles,

@@ -1,10 +1,10 @@
 import type { ImagePickerAsset } from "expo-image-picker";
 
-import mime from "react-native-mime-types";
+import { lookupImageMimeType } from "./image-mime-types";
 
 const getMimeTypeFromUri = (uri: string) => {
   const fileName = uri?.slice(uri.lastIndexOf("/") + 1);
-  const mimeByFileName = mime.lookup(fileName);
+  const mimeByFileName = lookupImageMimeType(fileName);
   if (mimeByFileName) {
     return mimeByFileName;
   }
@@ -14,14 +14,14 @@ const getMimeTypeFromUri = (uri: string) => {
 
 const getMimeTypeFromAsset = (file: ImagePickerAsset) => {
   if (file.uri) {
-    const mimeByUri = mime.lookup(file.uri);
+    const mimeByUri = lookupImageMimeType(file.uri);
     if (mimeByUri) {
       return mimeByUri;
     }
   }
 
   if (file.fileName) {
-    const mimeByFileName = mime.lookup(file.fileName);
+    const mimeByFileName = lookupImageMimeType(file.fileName);
     if (mimeByFileName) {
       return mimeByFileName;
     }
