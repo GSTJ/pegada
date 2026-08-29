@@ -29,9 +29,9 @@ import {
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
-// Short enough to preserve the direct-manipulation feel while giving the
-// photo and shared controls time to read as one continuous object.
-const MORPH_DURATION = 320;
+// Emil bar: UI motion stays under 300ms. 280ms is the ceiling that still
+// reads as one continuous object instead of feeling clipped.
+const MORPH_DURATION = 280;
 
 const frameStyle = (frame: HeroFrame) => ({
   x: frame.x,
@@ -91,6 +91,15 @@ export const HeroTransitionOverlay = () => {
   }, [heroId, from, actionFrom]);
 
   // Morph to the destination frame once it's measured, then clear.
+  //
+  // width/height/borderRadius are genuine layout props, not transform/opacity
+  // -- normally a GPU-only violation. This is the one case that justifies it:
+  // the card photo and profile photo have different aspect ratios and corner
+  // radii, so a true shared-element morph has to interpolate size, not just
+  // position. Every value below animates via withTiming from whatever the
+  // shared value currently holds (never a fresh mount value), so a new hero
+  // starting mid-flight (see the snap effect above, which cancels these same
+  // animations) always retargets from the current frame instead of jumping.
   useEffect(() => {
     if (!from || !to || !sharedElementsReady) return;
     const t = frameStyle(to);
