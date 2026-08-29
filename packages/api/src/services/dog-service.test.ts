@@ -3,6 +3,15 @@ import { Gender } from "@prisma/client";
 
 import { DogService } from "./dog-service";
 
+// `enqueue` pulls in `errors.ts` -> `observability.ts` -> the ESM-only
+// `magic-observability/node`, which jest can't parse. Same mock
+// `enqueue.test.ts` uses to keep that chain out of suites that don't test it.
+jest.mock("../errors/errors", () => ({
+  sendError: jest.fn(),
+  logDebug: () => undefined,
+  errorDebug: () => undefined,
+}));
+
 afterAll(async () => {
   await prisma.$disconnect();
 });
