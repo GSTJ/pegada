@@ -1,0 +1,8 @@
+appId: ${APP_ID}
+tags: [util]
+---
+# One step forward through the carousel.
+- tapOn:
+    point: "75%, 25%"
+- waitForAnimationToEnd:
+    timeout: 3000

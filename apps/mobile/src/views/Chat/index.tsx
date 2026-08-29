@@ -15,6 +15,7 @@ import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 
 import { HEADER_HEIGHT } from "./components/Header";
 import { SEND_HEIGHT } from "./components/Send";
+import { useChatListAnchor } from "./hooks/use-chat-list-anchor";
 import { useChatPagination } from "./hooks/use-chat-pagination";
 import { CenteredText, CenteredView, styles } from "./styles";
 
@@ -39,13 +40,27 @@ const keyExtractor = (message: MessageProps) => String(message.id);
 // which remounts the empty state each time a message arrives.
 const ListEmptyComponent = () => <Empty />;
 
-const ChatMessageList = () => {
+const ChatMessageList = ({ keyboardOverlap }: { keyboardOverlap: number }) => {
   const { dogId } = useLocalSearchParams();
   const { theme } = useUnistyles();
 
   const { messages, hasNextPage, loadMore } = useChatPagination();
 
   const insets = useKeyboardAwareSafeAreaInsets();
+
+  // The strip along the bottom of the screen the conversation cannot use —
+  // `screenHeight - composerTop`. All three terms move together and not by the
+  // same amount: the keyboard takes `keyboardOverlap` from the container, and
+  // the composer gives back the bottom safe-area inset at the same time
+  // (`useKeyboardAwareSafeAreaInsets` drops it while the IME is up, because
+  // the home indicator is drawn over the keyboard). Anchoring on the sum is
+  // what keeps a row's distance to the composer's top edge fixed; anchoring on
+  // the keyboard alone slides the whole thread up by that inset — 34pt of
+  // drift on this device, harmless but visible.
+  const occludedBottom = keyboardOverlap + SEND_HEIGHT + insets.bottom;
+
+  const { listRef, listProps } =
+    useChatListAnchor<MessageProps>(occludedBottom);
 
   const MessageLoader = hasNextPage ? (
     <ActivityIndicator color={theme.colors.text} />
@@ -94,6 +109,8 @@ const ChatMessageList = () => {
   // Older messages are at the top, so the loading spinner goes in the
   // header and pagination triggers via onStartReached.
   const flashListProps = {
+    ...listProps,
+    ref: listRef,
     contentContainerStyle,
     data: messages,
     keyExtractor,
@@ -102,7 +119,27 @@ const ChatMessageList = () => {
     renderItem,
     onStartReached: loadMore,
     onStartReachedThreshold: 0.5,
-    maintainVisibleContentPosition: { autoscrollToBottomThreshold: 0.2 },
+    // `startRenderingFromBottom` is what actually opens the conversation on
+    // the newest message. Without it the list mounts at offset 0 — the OLDEST
+    // message — and the only thing that ever moved it was
+    // `autoscrollToBottomThreshold` happening to fire as rows measured and the
+    // content grew past FlashList's estimate. That works on a cold open, where
+    // react-query holds one 20-row page and offset 0 is close enough to the
+    // end to be inside the threshold. Re-enter the same conversation and the
+    // cache holds every page that was paginated in, the list mounts full
+    // height, offset 0 is nowhere near the threshold, nothing fires, and the
+    // chat opens on the first message ever sent. Measured before this line
+    // existed: 12 of 12 warm opens landed on row 1 of 40.
+    //
+    // It sets `initialScrollIndex` to the last row, so the position is decided
+    // by the layout manager on the first committed layout instead of by which
+    // side of a growth heuristic the render happened to land on. The threshold
+    // stays: it is what keeps the view pinned when a NEW message arrives while
+    // you are already at the bottom.
+    maintainVisibleContentPosition: {
+      autoscrollToBottomThreshold: 0.2,
+      startRenderingFromBottom: true,
+    },
   };
 
   return (
@@ -124,6 +161,13 @@ const Chat = () => {
   // on Android, where `behavior` has to be left undefined — so the composer
   // stayed pinned to the bottom of the display, under the IME, and everything
   // typed into it was invisible.
+  //
+  // The list needs the same number: shrinking the container takes the height
+  // off the BOTTOM of its viewport, which is the edge the reader is on, so it
+  // has to move its offset by the same amount to stay on the same message.
+  // Read once and passed down rather than read again inside the list — the
+  // hook drives `LayoutAnimation` from its listener, and two subscriptions
+  // would configure the next animation twice.
   const keyboardOverlap = useKeyboardOverlap();
 
   return (
@@ -142,7 +186,7 @@ const Chat = () => {
         style={styles.background} // Tiling pattern
       >
         <NetworkBoundary>
-          <ChatMessageList />
+          <ChatMessageList keyboardOverlap={keyboardOverlap} />
         </NetworkBoundary>
         <Send />
         <Header />
