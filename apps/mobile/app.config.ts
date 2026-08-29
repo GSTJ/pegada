@@ -4,7 +4,15 @@ import type { ExpoConfig } from "expo/config";
 // etc.), also used verbatim by the `locales` map below. Reused here to
 // seed Android's base values/strings.xml via withDefaultLocaleStrings,
 // see that plugin's file for why this is needed.
-const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+const enNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+// The platform-specific sections (`ios` carries Localizable.strings entries
+// for the App Intents, handled natively by Expo's locales support) must NOT
+// leak into Android's strings.xml -- "ios" isn't a valid string resource.
+const {
+  ios: _iosNativeStrings,
+  android: _androidNativeStrings,
+  ...defaultLocaleNativeStrings
+} = enNativeStrings;
 
 // The posthog-react-native/expo config plugin wires a sourcemap-upload step
 // into the generated Xcode "Bundle React Native code and images" build phase
@@ -231,6 +239,11 @@ const config: ExpoConfig = {
     // list otherwise, so a plain local build never has the upload step in
     // its generated Xcode/Gradle project.
     ...posthogSourcemapPlugins,
+    // Compiles plugins/app-intents/PegadaAppIntents.swift into the MAIN app
+    // target (App Shortcuts phrases only register from the app bundle) and
+    // generates the per-locale AppShortcuts.strings Siri needs. See
+    // with-app-intents.js.
+    "./plugins/with-app-intents",
   ],
   androidStatusBar: {
     barStyle: "dark-content",
