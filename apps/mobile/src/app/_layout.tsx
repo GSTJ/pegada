@@ -14,6 +14,7 @@ import {
 } from "react-native-unistyles";
 import { Provider } from "react-redux";
 
+import { HeroTransitionOverlay } from "@/components/HeroTransition";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { storedThemePromise, ThemeProvider } from "@/contexts/theme-provider";
 import { TRPCProvider } from "@/contexts/trpc-provider";
@@ -119,6 +120,8 @@ const App = () => {
             </Provider>
             <MagicModalPortal />
           </NetworkBoundary>
+          {/* Above the navigator so shared profile elements paint over both screens. */}
+          <HeroTransitionOverlay />
         </>
       </ThemeProvider>
     </TRPCProvider>
