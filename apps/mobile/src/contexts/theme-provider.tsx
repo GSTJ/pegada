@@ -55,11 +55,10 @@ export const storedThemePromise: Promise<ActiveTheme> = getData(
 // which is what made the boot blink white for users who forced dark mode on
 // a light-mode device.
 export const persistNativeThemeOverride = (theme: ActiveTheme) => {
-  const value = theme ?? "system";
   if (Platform.OS === "ios") {
-    Settings.set({ pegadaThemeOverride: value });
+    Settings.set({ pegadaThemeOverride: theme ?? "system" });
   } else {
-    PegadaThemeOverride?.set(value);
+    PegadaThemeOverride?.set(theme ?? "system");
   }
 };
 

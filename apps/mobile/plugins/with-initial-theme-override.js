@@ -54,9 +54,7 @@ const {
 
 const withInitialThemeOverride = (config) => {
   config = withAppDelegate(config, (modConfig) => {
-    modConfig.modResults.contents = applyIOSThemeOverride(
-      modConfig.modResults,
-    );
+    modConfig.modResults.contents = applyIOSThemeOverride(modConfig.modResults);
     return modConfig;
   });
 

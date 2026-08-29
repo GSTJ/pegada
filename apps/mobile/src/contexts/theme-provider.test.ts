@@ -2,7 +2,16 @@ import type { ActiveTheme } from "./theme-provider";
 
 import { Appearance, Platform, Settings } from "react-native";
 
+import PegadaThemeOverride from "../../modules/pegada-theme-override";
 import { applyStoredTheme, persistNativeThemeOverride } from "./theme-provider";
+
+jest.mock<Record<string, unknown>>(
+  "../../modules/pegada-theme-override",
+  () => ({
+    __esModule: true,
+    default: { set: jest.fn() },
+  }),
+);
 
 jest.mock<Record<string, unknown>>("react-native", () => ({
   Appearance: { setColorScheme: jest.fn() },
@@ -38,6 +47,7 @@ jest.mock<Record<string, unknown>>("@/services/storage", () => ({
 }));
 
 const appearance = jest.mocked(Appearance);
+const nativeThemeOverride = jest.mocked(PegadaThemeOverride!);
 const settings = jest.mocked(Settings);
 
 const DARK = "dark" as ActiveTheme;
@@ -60,11 +70,13 @@ test("still forces and persists an explicit dark/light choice", () => {
 });
 
 test("skips UserDefaults on Android", () => {
+  nativeThemeOverride.set.mockClear();
   settings.set.mockClear();
   Platform.OS = "android";
 
   persistNativeThemeOverride(LIGHT);
 
+  expect(nativeThemeOverride.set).toHaveBeenCalledWith("light");
   expect(settings.set).not.toHaveBeenCalled();
   Platform.OS = "ios";
 });
