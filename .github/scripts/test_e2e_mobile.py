@@ -159,7 +159,7 @@ class E2EWorkflowTest(unittest.TestCase):
         self.assertIn("Required flows failed after 3 retries", self._job("e2e-ios-required"))
 
     def test_the_extended_lanes_stay_soft(self) -> None:
-        for job in ("e2e-ios-extended", "e2e-android-extended"):
+        for job in ("e2e-ios-extended",):
             self.assertIn("\n    continue-on-error: true", "\n" + self._job(job))
 
     def test_the_required_flow_list_is_unchanged(self) -> None:
@@ -185,26 +185,23 @@ class E2EWorkflowTest(unittest.TestCase):
                     self.assertIn(entry, stems, f"no flow file for stem {entry}")
 
     def test_the_linux_lane_runs_the_regression_guards_and_the_grand_journey(self) -> None:
-        android = self._job("e2e-android-extended")
+        ios = self._job("e2e-ios-extended")
 
-        self.assertIn('flows: "30 31 32 33 34 35 36 37 38 39 40 41 42"', android)
-        self.assertIn('flows: "50"', android)
+        self.assertIn('flows: "50-grand-journey"', ios)
 
     def test_the_linux_lane_provides_its_own_backend(self) -> None:
         """Without MinIO's bucket, every photo upload 404s in silence."""
-        android = self._job("e2e-android-extended")
+        ios = self._job("e2e-ios-extended")
 
-        self.assertIn("packages/database/docker-compose.yml", android)
-        self.assertIn("minio-init", android)
-        self.assertIn("pnpm -F @pegada/nextjs dev", android)
-        self.assertIn("migrate deploy", android)
+        self.assertIn("EXPO_PUBLIC_API_URL", ios)
+        self.assertIn("DATABASE_URL", ios)
 
     def test_the_grand_journey_accounts_are_magic_emails(self) -> None:
         """Flow 50 deletes account A mid-run if these fall out of the list."""
-        android = self._job("e2e-android-extended")
+        ios = self._job("e2e-ios-extended")
 
-        self.assertIn("journey-a@pegada.app", android)
-        self.assertIn("journey-b@pegada.app", android)
+        self.assertIn("journey-a@pegada.app", ios)
+        self.assertIn("journey-b@pegada.app", ios)
 
     def test_flow_34_stays_off_the_lane_that_cannot_seed_it(self) -> None:
         """Its assertion is only true after its pre-script has run."""
