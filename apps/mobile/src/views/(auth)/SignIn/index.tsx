@@ -15,6 +15,10 @@ import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-
 import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
+import {
+  shouldRetryTransient,
+  transientRetryDelayMs,
+} from "@/services/transient-retry";
 import { SceneName } from "@/types/scene-name";
 
 import EmailInput from "./components/EmailInput";
@@ -59,6 +63,11 @@ const InsertEmail = () => {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const loginMutation = api.authentication.login.useMutation({
+    // The first request of a cold deployment is the one that fails, and
+    // mutations do not retry by default. See services/transient-retry.ts for
+    // why this is safe to retry and why OTP_REQUIRED never is.
+    retry: shouldRetryTransient,
+    retryDelay: transientRetryDelayMs,
     onError: (error) => {
       // Resend code
       if (getError(error, OTPRequiredError)) {
