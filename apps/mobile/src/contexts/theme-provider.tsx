@@ -49,9 +49,19 @@ export const storedThemePromise: Promise<ActiveTheme> = getData(
 // start (see plugins/withInitialThemeOverride.js). Without this the native
 // splash always follows the system appearance, which is what made the boot
 // blink white for users who forced dark mode on a light-mode device.
-const persistNativeThemeOverride = (theme: ActiveTheme) => {
+export const persistNativeThemeOverride = (theme: ActiveTheme) => {
   if (Platform.OS !== "ios") return;
   Settings.set({ pegadaThemeOverride: theme ?? "system" });
+};
+
+// Forces Appearance to match the stored choice, including Automatic
+// (`theme === null`). Appearance.setColorScheme keeps forcing whatever was
+// last set until called with null, so skipping the call for Automatic left a
+// forced light/dark from a previous session stuck — including on the mount
+// path, which used to only call this for a non-null theme.
+export const applyStoredTheme = (theme: ActiveTheme) => {
+  Appearance.setColorScheme(theme as ColorSchemeName);
+  persistNativeThemeOverride(theme);
 };
 
 const ThemeContext = React.createContext<{
@@ -83,15 +93,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
 
   // Apply the stored theme on component mount
   useEffect(() => {
-    const applyStoredTheme = async () => {
+    const initTheme = async () => {
       const storedTheme = await storedThemePromise;
-      if (storedTheme)
-        Appearance.setColorScheme(storedTheme as ColorSchemeName);
-      persistNativeThemeOverride(storedTheme);
+      applyStoredTheme(storedTheme);
       setActiveTheme(storedTheme);
     };
 
-    applyStoredTheme().catch(sendError);
+    initTheme().catch(sendError);
   }, []);
 
   // The user's explicit choice wins; the system scheme is only a fallback.
@@ -159,13 +167,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
   }, [colors, dark]);
 
   const handleActiveThemeChange = (theme: ActiveTheme) => {
-    // Picking "Automatic" (theme === null) must release the override, not
-    // just skip setting a new one — Appearance.setColorScheme keeps forcing
-    // whatever was last set until called with null, so useColorScheme() kept
-    // reporting the old forced value and the app only picked up the real
-    // system scheme after a full restart reset the native override.
-    Appearance.setColorScheme(theme as ColorSchemeName);
-    persistNativeThemeOverride(theme);
+    applyStoredTheme(theme);
     setActiveTheme(theme);
 
     if (!theme) return deleteData(StorageKeys.Theme);
