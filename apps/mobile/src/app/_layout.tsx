@@ -15,6 +15,7 @@ import {
 } from "react-native-unistyles";
 import { Provider } from "react-redux";
 
+import { HeroTransitionOverlay } from "@/components/HeroTransition";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { storedThemePromise, ThemeProvider } from "@/contexts/theme-provider";
 import { TRPCProvider } from "@/contexts/trpc-provider";
@@ -102,25 +103,29 @@ const App = () => {
   const tree = (
     <TRPCProvider>
       <ThemeProvider>
-        <BottomSheetModalProvider>
-          {/*
-            Ahead of the router, so its entry sits at the BOTTOM of React
-            Native's status-bar props stack and a screen that pops its own
-            `style="light"` falls back to the theme instead of to RN's
-            `"default"`.
-          */}
-          <ThemedStatusBar />
-          <NetworkBoundary>
-            <Provider store={store}>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="(app)" />
-                <Stack.Screen name="(auth)" />
-              </Stack>
-            </Provider>
-            <MagicModalPortal />
-          </NetworkBoundary>
-        </BottomSheetModalProvider>
+        <>
+          <BottomSheetModalProvider>
+            {/*
+              Ahead of the router, so its entry sits at the BOTTOM of React
+              Native's status-bar props stack and a screen that pops its own
+              `style="light"` falls back to the theme instead of to RN's
+              `"default"`.
+            */}
+            <ThemedStatusBar />
+            <NetworkBoundary>
+              <Provider store={store}>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="(app)" />
+                  <Stack.Screen name="(auth)" />
+                </Stack>
+              </Provider>
+              <MagicModalPortal />
+            </NetworkBoundary>
+          </BottomSheetModalProvider>
+          {/* Above the navigator so shared profile elements paint over both screens. */}
+          <HeroTransitionOverlay />
+        </>
       </ThemeProvider>
     </TRPCProvider>
   );
