@@ -24,7 +24,11 @@ const AppLayout = () => {
           backgroundColor: theme.colors.background,
         },
 
-        headerBlurEffect: "prominent",
+        // "prominent" follows the OS appearance rather than `theme.dark` —
+        // when the app is forced to (or stuck on) one theme while the
+        // system runs the other, the header glass renders in the wrong
+        // theme's color. "dark"/"light" are the legacy, non-adaptive styles.
+        headerBlurEffect: theme.dark ? "dark" : "light",
 
         headerStyle: {
           // BlurEffect doesn't work on Android, so opacity is not necessary
