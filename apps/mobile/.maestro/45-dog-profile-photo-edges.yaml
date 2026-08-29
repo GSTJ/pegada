@@ -1,0 +1,63 @@
+appId: ${APP_ID}
+name: Dog profile - paging past the last photo must not black out the card
+tags:
+  - regression
+---
+# REGRESSION GUARD - reported bug #3: tapping forward on the LAST photo of a
+# dog profile warps the card and half of it renders black.
+#
+# `components/MainCard` covers the photo with two invisible Pressables. Tapping
+# forward on the last photo (or back on the first) has no photo to go to, so it
+# ran a spring on `rotateY` under a `perspective` of 100 to say so. A
+# non-affine transform on a layer that also has `overflow: hidden` makes Core
+# Animation composite it offscreen, and on iOS 26 half of it came back empty —
+# the DogProfile's black backdrop showing through, photo and pagination dots
+# and distance pill all gone, for the ~330ms the spring ran.
+#
+# It was never reachable from this suite: `maestro-seed.ts` gives every dog
+# exactly one image, and with one image there is no carousel and no boundary.
+# `scripts/pre/45-seed-gallery.sh` gives Nina four.
+#
+# The flow parks on Nina's profile at photo 1. checks/45-*.mjs does the rest,
+# because catching this needs frames sampled WHILE the spring is running, and
+# a Maestro `takeScreenshot` only ever lands before or after it.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "messages-screen"
+- runFlow: utils/dismiss-app-review.yaml
+
+# Reached through the UI rather than `pegada://profile/<id>`: the deep link
+# needs the dog's id, and iOS puts an "Open in Pegada?" confirmation in front
+# of it that has nothing to do with what is under test.
+- tapOn:
+    text: "Nina"
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# The chat header's dog name opens that dog's profile.
+- tapOn:
+    text: "Nina"
+- extendedWaitUntil:
+    visible:
+      id: "dog-profile-name"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 6000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 45-01-photo-1-of-4

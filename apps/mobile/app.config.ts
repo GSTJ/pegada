@@ -4,7 +4,15 @@ import type { ExpoConfig } from "expo/config";
 // etc.), also used verbatim by the `locales` map below. Reused here to
 // seed Android's base values/strings.xml via withDefaultLocaleStrings,
 // see that plugin's file for why this is needed.
-const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+const enNativeStrings = require("@pegada/shared/i18n/locales/en/native.json");
+// The platform-specific sections (`ios` carries Localizable.strings entries
+// for the App Intents, handled natively by Expo's locales support) must NOT
+// leak into Android's strings.xml -- "ios" isn't a valid string resource.
+const {
+  ios: _iosNativeStrings,
+  android: _androidNativeStrings,
+  ...defaultLocaleNativeStrings
+} = enNativeStrings;
 
 // The posthog-react-native/expo config plugin wires a sourcemap-upload step
 // into the generated Xcode "Bundle React Native code and images" build phase
@@ -60,6 +68,13 @@ const config: ExpoConfig = {
     tsconfigPaths: true,
   },
   plugins: [
+    // Generates the shared `targets/pegada-widgets` WidgetKit extension
+    // target (home-screen widgets, Live Activities, Control Center controls)
+    // at prebuild time. iOS allows one widget extension per app, so every
+    // widget-family feature registers in PegadaWidgetsBundle.swift instead
+    // of adding a target. Team ID comes from EAS credentials at build time;
+    // local sim builds don't sign.
+    "@bacons/apple-targets",
     "expo-secure-store",
     "expo-notifications",
     "expo-localization",
@@ -224,6 +239,11 @@ const config: ExpoConfig = {
     // list otherwise, so a plain local build never has the upload step in
     // its generated Xcode/Gradle project.
     ...posthogSourcemapPlugins,
+    // Compiles plugins/app-intents/PegadaAppIntents.swift into the MAIN app
+    // target (App Shortcuts phrases only register from the app bundle) and
+    // generates the per-locale AppShortcuts.strings Siri needs. See
+    // with-app-intents.js.
+    "./plugins/with-app-intents",
   ],
   androidStatusBar: {
     barStyle: "dark-content",
@@ -232,19 +252,26 @@ const config: ExpoConfig = {
   android: {
     playStoreUrl: "https://play.google.com/store/apps/details?id=app.pegada",
     permissions: ["com.google.android.gms.permission.AD_ID"],
+    // Android 12 replaced the full-screen splash with an icon window, and
+    // prebuild CONTAINs whatever it is given into a 200 dp square before
+    // centring it on the 288 dp canvas. Feeding it the full-screen
+    // `splash-android*.png` compositions (1724x3728 at @4x) left the wordmark
+    // at 54 dp. These are the same artwork cropped tight to the wordmark by
+    // scripts/generate-android-splash-icon.sh, which reads the full-screen
+    // files and leaves them in place as the source.
     splash: {
-      mdpi: "./src/assets/images/splash-android.png",
-      hdpi: "./src/assets/images/splash-android@1.5x.png",
-      xhdpi: "./src/assets/images/splash-android@2x.png",
-      xxhdpi: "./src/assets/images/splash-android@3x.png",
-      xxxhdpi: "./src/assets/images/splash-android@4x.png",
+      mdpi: "./src/assets/images/splash-android-icon.png",
+      hdpi: "./src/assets/images/splash-android-icon@1.5x.png",
+      xhdpi: "./src/assets/images/splash-android-icon@2x.png",
+      xxhdpi: "./src/assets/images/splash-android-icon@3x.png",
+      xxxhdpi: "./src/assets/images/splash-android-icon@4x.png",
       backgroundColor: "#FFFFFF",
       dark: {
-        mdpi: "./src/assets/images/splash-android.png",
-        hdpi: "./src/assets/images/splash-android@1.5x.png",
-        xhdpi: "./src/assets/images/splash-android@2x.png",
-        xxhdpi: "./src/assets/images/splash-android@3x.png",
-        xxxhdpi: "./src/assets/images/splash-android@4x.png",
+        mdpi: "./src/assets/images/splash-android-icon.png",
+        hdpi: "./src/assets/images/splash-android-icon@1.5x.png",
+        xhdpi: "./src/assets/images/splash-android-icon@2x.png",
+        xxhdpi: "./src/assets/images/splash-android-icon@3x.png",
+        xxxhdpi: "./src/assets/images/splash-android-icon@4x.png",
         backgroundColor: "#000000",
       },
     },
@@ -280,6 +307,7 @@ const config: ExpoConfig = {
     appStoreUrl: "https://apps.apple.com/app/id6450865592",
     infoPlist: {
       CFBundleAllowMixedLocalizations: true,
+      NSSupportsLiveActivities: true,
     },
     splash: {
       backgroundColor: "#FFFFFF",

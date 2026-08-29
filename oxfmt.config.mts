@@ -28,6 +28,10 @@ const config = {
     "patches/**",
     "apps/mobile/google-services.json",
     "apps/mobile/GoogleService-Info.plist",
+    // Xcode asset catalogs. @bacons/apple-targets writes these from the
+    // `colors` map in expo-target.config.js and Xcode rewrites them on edit,
+    // so the JSON inside is theirs to shape, not ours.
+    "**/*.xcassets/**",
     "packages/database/prisma/migrations/**",
     // The one-shot styled-components -> unistyles codemod. It lives outside the
     // pnpm workspace with its own npm install, and every `apply.sh` run

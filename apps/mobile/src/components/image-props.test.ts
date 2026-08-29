@@ -26,6 +26,7 @@ test("moves an API blurhash onto the placeholder and keeps the source clean", ()
     contentFit: "contain",
     placeholderContentFit: "contain",
     cachePolicy: "memory-disk",
+    transition: 180,
   });
 });
 
@@ -38,6 +39,7 @@ test("defaults the blurhash fit to cover when the caller sets no contentFit", ()
     contentFit: undefined,
     placeholderContentFit: "cover",
     cachePolicy: "memory-disk",
+    transition: 200,
   });
 });
 
@@ -57,6 +59,7 @@ test("leaves a caller-provided placeholder and cache policy alone", () => {
     contentFit: undefined,
     placeholderContentFit: "scale-down",
     cachePolicy: "disk",
+    transition: 200,
   });
 });
 
@@ -73,21 +76,24 @@ test("treats an explicit null placeholder and cache policy as opting out", () =>
     contentFit: undefined,
     placeholderContentFit: undefined,
     cachePolicy: null,
+    transition: 200,
   });
 });
 
-test.each([42, "https://images.pegada.app/static.webp", null] as const)(
-  "passes a %p source straight through",
-  (source) => {
-    expect(resolveImagePresentationProps({ source })).toStrictEqual({
-      source,
-      placeholder: undefined,
-      contentFit: undefined,
-      placeholderContentFit: undefined,
-      cachePolicy: "memory-disk",
-    });
-  },
-);
+test.each([
+  [42, undefined],
+  ["https://images.pegada.app/static.webp", 200],
+  [null, undefined],
+] as const)("passes a %p source straight through", (source, transition) => {
+  expect(resolveImagePresentationProps({ source })).toStrictEqual({
+    source,
+    placeholder: undefined,
+    contentFit: undefined,
+    placeholderContentFit: undefined,
+    cachePolicy: "memory-disk",
+    transition,
+  });
+});
 
 test("passes a responsive source array straight through", () => {
   const source = [
@@ -101,5 +107,48 @@ test("passes a responsive source array straight through", () => {
     contentFit: undefined,
     placeholderContentFit: undefined,
     cachePolicy: "memory-disk",
+    transition: 200,
+  });
+});
+
+describe("default crossfade", () => {
+  it("gives a network photo the 200 ms default", () => {
+    expect(resolveImagePresentationProps({ source: { uri } }).transition).toBe(
+      200,
+    );
+    expect(
+      resolveImagePresentationProps({ source: { uri, blurhash } }).transition,
+    ).toBe(200);
+  });
+
+  it("leaves bundled and local sources with no transition at all", () => {
+    // require("...") resolves to a number; a picked photo is file://.
+    expect(
+      resolveImagePresentationProps({ source: 42 }).transition,
+    ).toBeUndefined();
+    expect(
+      resolveImagePresentationProps({ source: { uri: "file:///picked.jpg" } })
+        .transition,
+    ).toBeUndefined();
+    expect(
+      resolveImagePresentationProps({ source: undefined }).transition,
+    ).toBeUndefined();
+  });
+
+  it("never overrides a caller's own transition, including 0", () => {
+    expect(
+      resolveImagePresentationProps({ source: { uri }, transition: 0 })
+        .transition,
+    ).toBe(0);
+    expect(
+      resolveImagePresentationProps({ source: { uri }, transition: null })
+        .transition,
+    ).toBeNull();
+    expect(
+      resolveImagePresentationProps({
+        source: { uri },
+        transition: { duration: 400, effect: "cross-dissolve" },
+      }).transition,
+    ).toStrictEqual({ duration: 400, effect: "cross-dissolve" });
   });
 });

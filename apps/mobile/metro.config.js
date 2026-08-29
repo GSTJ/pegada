@@ -48,6 +48,29 @@ config.resolver.nodeModulesPaths = [
 // 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
 config.resolver.disableHierarchicalLookup = true;
 
+// 4. Cut expo-router's NativeTabs -> expo-symbols -> Material Symbols chain.
+//
+// expo-router imports expo-symbols from `native-tabs/NativeTabTrigger`, and on
+// Android expo-symbols imports `@expo-google-fonts/material-symbols`, whose
+// index re-exports all seven weights. That put 6.78 MB of TTFs (3.19 MB
+// compressed, 5.4 % of the APK download) into `res/raw/` and 108.9 KB of
+// `symbols.json` into the JS bundle — for an API this app never calls. See the
+// stub for the full reasoning and for what breaks if NativeTabs is adopted.
+const expoSymbolsStub = path.resolve(
+  projectRoot,
+  "metro/stubs/expo-symbols.js",
+);
+const defaultResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === "expo-symbols") {
+    return { type: "sourceFile", filePath: expoSymbolsStub };
+  }
+
+  return defaultResolveRequest
+    ? defaultResolveRequest(context, moduleName, platform)
+    : context.resolveRequest(context, moduleName, platform);
+};
+
 const { FileStore } = require("metro-cache");
 config.cacheStores = [
   // Ensure the cache isn't shared between projects

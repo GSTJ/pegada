@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { dogClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { format } from "date-fns";
+import { format } from "date-fns/format";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";

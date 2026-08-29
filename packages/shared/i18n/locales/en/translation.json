@@ -7,6 +7,12 @@
     "winFreeTrial": "Win a Free Trial",
     "getPremium": "Discover Premium"
   },
+  "liveStatus": {
+    "title": "Likes recharging",
+    "body": "Your free likes come back when the timer ends",
+    "ready": "Likes are back!",
+    "channelName": "Like limit countdown"
+  },
   "appReview": {
     "areYouLikingTheAppModal": {
       "description": "We would love to know your opinion!",

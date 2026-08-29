@@ -4,7 +4,6 @@ import "@/config";
 import { router, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
@@ -104,25 +103,23 @@ const App = () => {
     <TRPCProvider>
       <ThemeProvider>
         <>
-          <BottomSheetModalProvider>
-            {/*
-              Ahead of the router, so its entry sits at the BOTTOM of React
-              Native's status-bar props stack and a screen that pops its own
-              `style="light"` falls back to the theme instead of to RN's
-              `"default"`.
-            */}
-            <ThemedStatusBar />
-            <NetworkBoundary>
-              <Provider store={store}>
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="index" />
-                  <Stack.Screen name="(app)" />
-                  <Stack.Screen name="(auth)" />
-                </Stack>
-              </Provider>
-              <MagicModalPortal />
-            </NetworkBoundary>
-          </BottomSheetModalProvider>
+          {/*
+            Ahead of the router, so its entry sits at the BOTTOM of React
+            Native's status-bar props stack and a screen that pops its own
+            `style="light"` falls back to the theme instead of to RN's
+            `"default"`.
+          */}
+          <ThemedStatusBar />
+          <NetworkBoundary>
+            <Provider store={store}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(app)" />
+                <Stack.Screen name="(auth)" />
+              </Stack>
+            </Provider>
+            <MagicModalPortal />
+          </NetworkBoundary>
           {/* Above the navigator so shared profile elements paint over both screens. */}
           <HeroTransitionOverlay />
         </>

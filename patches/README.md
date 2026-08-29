@@ -23,6 +23,47 @@ release that depends on brace-expansion 5.
 
 # react-native-unistyles Patch (3.3.0)
 
+Two unrelated things, one file because pnpm patches a package, not a defect.
+
+## 1. A shadow-tree commit that frees nodes React already destroyed
+
+Selecting a theme deep into a session aborted the process:
+
+    EXC_CRASH (SIGABRT)
+    ___BUG_IN_CLIENT_OF_LIBMALLOC_POINTER_BEING_FREED_WAS_NOT_ALLOCATED
+    std::unique_ptr<folly::dynamic>::operator=
+    margelo::nitro::unistyles::shadow::ShadowTreeManager::updateShadowTree
+    HybridStyleSheet::applyDependencyChanges
+    HybridStyleSheet::onPlatformDependenciesChange
+
+`ShadowTrafficController` keys its pending updates on raw
+`const ShadowNodeFamily*`, and `updateShadowTree` writes through every one of
+them — `const_cast`, then assign `nativeProps_DEPRECATED`, which frees whatever
+`unique_ptr` it finds at that address. Two things let a key outlive its family:
+
+* Nothing drains the map. `getUpdates()` handed out a reference and only
+  `restore()` empties it — and `restore()` has no callers anywhere in the
+  package. A family that received one update stayed a key for the rest of the
+  process, and every later commit walked it again.
+* Not every unmount reaches `unlink`. `ShadowRegistry.remove` routes a node
+  unmounting inside a suspended boundary to `suspend` instead, and this app
+  puts every screen under a `Suspense` (`NetworkBoundary`, `useSuspenseQuery`).
+  A subtree deleted while its boundary was showing a fallback never reported
+  its death at all.
+
+So the map accumulates addresses of families Fabric has freed, and the first
+theme change after enough of them writes through one. A short session has too
+few; the crash needs a long one, which is why it only ever showed up in the
+grand journey.
+
+The patch drains the map on commit, skips families the registry no longer
+tracks or has parked in suspension, and drops a suspended family's pending
+update at the moment it suspends. It is upstream PR #1191, which fixes issue
+[#1179](https://github.com/jpudysz/react-native-unistyles/issues/1179) and is
+closed unmerged for want of a reproduction. Drop it when a release carries it.
+
+## 2. A transform-origin parser that only exists on react-native's main
+
 `cxx/converters/TransformOriginConverter.cpp` calls
 `facebook::react::parseUnprocessedTransformOriginString`, which exists only on
 react-native's `main` branch. No published release declares it, including the

@@ -24,6 +24,7 @@ export const Image = forwardRef<
       contentFit,
       placeholderContentFit,
       cachePolicy,
+      transition,
       ...props
     },
     ref,
@@ -34,6 +35,7 @@ export const Image = forwardRef<
       contentFit,
       placeholderContentFit,
       cachePolicy,
+      transition,
     });
 
     return <ExpoImage ref={ref} {...props} {...presentationProps} />;

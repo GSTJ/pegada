@@ -45,6 +45,7 @@ export const readHierarchy = ({ device = resolveDevice() } = {}) => {
   const tree = JSON.parse(raw.slice(raw.indexOf("{")));
 
   const byTestId = new Map();
+  const nodes = [];
   let screen = null;
 
   const walk = (node) => {
@@ -60,6 +61,25 @@ export const readHierarchy = ({ device = resolveDevice() } = {}) => {
     }
     if (bounds && attributes["resource-id"]) {
       byTestId.set(attributes["resource-id"], bounds);
+    }
+    // Flat list of everything that has a rect. `byTestId` cannot answer "where
+    // is the message that reads X": every bubble in the chat carries the same
+    // testID (`chat-message-self` / `chat-message-other`), so the map keeps
+    // one of forty. Checks that need a specific row match on its text.
+    if (bounds) {
+      nodes.push({
+        bounds,
+        testId: attributes["resource-id"] ?? null,
+        // iOS puts a node's label in `accessibilityText` and leaves `text`
+        // empty; Android fills `text`. A check that read only one of them
+        // found nothing on the other platform.
+        text:
+          attributes.accessibilityText ||
+          attributes.text ||
+          attributes.title ||
+          attributes.value ||
+          "",
+      });
     }
 
     for (const child of node.children ?? []) walk(child);
@@ -84,5 +104,5 @@ export const readHierarchy = ({ device = resolveDevice() } = {}) => {
     }
   }
 
-  return { byTestId, screen: screen ?? { width: 0, height: 0 } };
+  return { byTestId, nodes, screen: screen ?? { width: 0, height: 0 } };
 };

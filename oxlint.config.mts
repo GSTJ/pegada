@@ -33,6 +33,34 @@ export default extendConfig(base, {
     // only ways to satisfy the rule are deleting the note or rewording it to
     // dodge the keyword, and both are worse than leaving the marker greppable.
     "no-warning-comments": "off",
+
+    // `packages/shared` is bundled into the mobile app by Metro, which does
+    // not tree-shake: one `import { isBefore } from "date-fns"` in here drags
+    // all 824 date-fns modules (2.0 MB) into the app bundle. Deep specifiers
+    // (`date-fns/isBefore`) resolve to one module. Restated in
+    // apps/mobile/oxlint.config.mts, which replaces this file for the app.
+    "no-restricted-imports": [
+      "error",
+      {
+        paths: [
+          {
+            name: "date-fns",
+            message:
+              'Deep-import instead: `import { format } from "date-fns/format"`. The barrel ships all 824 modules.',
+          },
+          {
+            name: "date-fns/locale",
+            message:
+              'Deep-import instead: `import { pt } from "date-fns/locale/pt"`. The barrel ships every locale.',
+          },
+          {
+            name: "lodash",
+            message:
+              'Deep-import instead: `import get from "lodash/get"`. The barrel is one 563 KB module.',
+          },
+        ],
+      },
+    ],
   },
 
   overrides: [

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { differenceInSeconds } from "date-fns";
+import { differenceInSeconds } from "date-fns/differenceInSeconds";
 
 export type LikeLimitReachedProps = {
   likeLimitResetAt: Date;

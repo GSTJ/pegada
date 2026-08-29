@@ -33,3 +33,120 @@ index 27437fbd2d92bbe26acfc1151bd44573cad4006c..46fb94ba8875ee83fa11a809a2d9697e
  
  namespace margelo::nitro::unistyles::converters {
  
+diff --git a/cxx/core/UnistylesRegistry.cpp b/cxx/core/UnistylesRegistry.cpp
+index 7960fd72c580a526ed52cba3d1fc7505cb45c7e0..ef83f71f1b7271d716d45705dd57423cf93b7121 100644
+--- a/cxx/core/UnistylesRegistry.cpp
++++ b/cxx/core/UnistylesRegistry.cpp
+@@ -122,6 +122,10 @@ void core::UnistylesRegistry::suspendShadowNode(const ShadowNodeFamily* shadowNo
+     this->trafficController.withLock([this, shadowNodeFamily](){
+         if (this->_shadowRegistry.contains(shadowNodeFamily)) {
+             this->_suspendedFamilies.insert(shadowNodeFamily);
++            // A pending update must not survive the suspension. Suspension is
++            // where a family stops being reachable by `unlink`, so anything
++            // still queued for it is the last thing that will ever name it.
++            this->trafficController.removeShadowNode(shadowNodeFamily);
+         }
+     });
+ }
+@@ -130,6 +134,10 @@ bool core::UnistylesRegistry::isSuspended(const ShadowNodeFamily* family) const
+     return _suspendedFamilies.count(family) > 0;
+ }
+ 
++bool core::UnistylesRegistry::isActiveUnistylesFamily(const ShadowNodeFamily* family) const noexcept {
++    return _shadowRegistry.count(family) > 0 && _suspendedFamilies.count(family) == 0;
++}
++
+ std::shared_ptr<core::StyleSheet> core::UnistylesRegistry::addStyleSheet(jsi::Runtime& rt, core::StyleSheetType type, jsi::Object&& rawValue) {
+     int tag = _nextStyleSheetTag.fetch_add(1);
+ 
+@@ -145,6 +153,14 @@ core::DependencyMap core::UnistylesRegistry::buildDependencyMap(std::vector<Unis
+     std::unordered_set<UnistyleDependency> uniqueDependencies(deps.begin(), deps.end());
+ 
+     for (const auto& [family, unistyles] : this->_shadowRegistry) {
++        // Suspended families keep their registry entry so a re-link can reuse
++        // it, but they must not be queued for a commit: the tree they belong to
++        // may already be gone. Without this the filter in ShadowTreeManager
++        // would drop them one by one on every dependency change, forever.
++        if (this->_suspendedFamilies.count(family) > 0) {
++            continue;
++        }
++
+         bool hasAnyOfDependencies = false;
+ 
+         // Check if any dependency matches
+diff --git a/cxx/core/UnistylesRegistry.h b/cxx/core/UnistylesRegistry.h
+index f501232918f26154836965dc3130dd6c119e3365..509aa8bad94de455afac6856dc3b0e504188a6a9 100644
+--- a/cxx/core/UnistylesRegistry.h
++++ b/cxx/core/UnistylesRegistry.h
+@@ -44,6 +44,9 @@ struct UnistylesRegistry: public StyleSheetRegistry {
+     void unlinkShadowNodeWithUnistyles(const ShadowNodeFamily*);
+     void suspendShadowNode(const ShadowNodeFamily*);
+     bool isSuspended(const ShadowNodeFamily*) const noexcept;
++    // Linked, and not parked in suspension. Read it under the traffic
++    // controller's lock — link/unlink/suspend all mutate what it reads.
++    bool isActiveUnistylesFamily(const ShadowNodeFamily*) const noexcept;
+     std::shared_ptr<core::StyleSheet> addStyleSheet(jsi::Runtime& rt, core::StyleSheetType type, jsi::Object&& rawValue);
+     DependencyMap buildDependencyMap(std::vector<UnistyleDependency>& deps);
+     void shadowLeafUpdateFromUnistyle(jsi::Runtime& rt, Unistyle::Shared unistyle, jsi::Value& maybePressableId);
+diff --git a/cxx/shadowTree/ShadowTrafficController.h b/cxx/shadowTree/ShadowTrafficController.h
+index aafbecedd3a209c25dcb6055acad19bf377cb2f3..95c43d82586105eadaf9d60a3e084efad7d15560 100644
+--- a/cxx/shadowTree/ShadowTrafficController.h
++++ b/cxx/shadowTree/ShadowTrafficController.h
+@@ -20,9 +20,21 @@ struct ShadowTrafficController {
+         this->_canCommit = true;
+     }
+ 
+-    inline shadow::ShadowLeafUpdates& getUpdates() {
++    // Drains the pending updates instead of lending them out.
++    //
++    // `getUpdates()` returned a reference and nothing ever cleared
++    // `_unistylesUpdates` — `restore()` is the only thing that empties it and
++    // it has no callers anywhere in this package. So every family that ever
++    // received an update stayed a key in this map for the lifetime of the
++    // process, and every later commit walked it again. An update is for one
++    // commit; hand it over and forget it.
++    inline shadow::ShadowLeafUpdates takeUpdates() {
+         // call it only within withLock!
+-        return _unistylesUpdates;
++        auto updates = std::move(_unistylesUpdates);
++
++        _unistylesUpdates = {};
++
++        return updates;
+     }
+ 
+     inline void setUpdates(shadow::ShadowLeafUpdates& newUpdates) {
+diff --git a/cxx/shadowTree/ShadowTreeManager.cpp b/cxx/shadowTree/ShadowTreeManager.cpp
+index 01026dc5751b00473ae878804cdae1b283fdbc57..02addd76c18f69dedaa21ec34067d4534afa9a58 100644
+--- a/cxx/shadowTree/ShadowTreeManager.cpp
++++ b/cxx/shadowTree/ShadowTreeManager.cpp
+@@ -10,7 +10,28 @@ void shadow::ShadowTreeManager::updateShadowTree(jsi::Runtime& rt) {
+     auto& registry = core::UnistylesRegistry::get();
+ 
+     registry.trafficController.withLock([&](){
+-        auto updates = registry.trafficController.getUpdates();
++        auto updates = registry.trafficController.takeUpdates();
++
++        if (updates.empty()) {
++            return;
++        }
++
++        // Every branch below writes through `family` — `const_cast` to a
++        // `ShadowNodeFamily*` and assign its `nativeProps_DEPRECATED`, which
++        // frees whatever `unique_ptr` it finds there. The map keys are raw
++        // pointers, and a family that unmounted while its Suspense boundary
++        // was showing a fallback never reaches `unlink`: `ShadowRegistry.remove`
++        // routes it to `suspend` instead, so its key outlives the family
++        // Fabric has already destroyed. Writing through it frees a pointer read
++        // out of freed memory — SIGABRT, "pointer being freed was not
++        // allocated". Commit only for families this registry still tracks.
++        for (auto it = updates.begin(); it != updates.end();) {
++            if (!registry.isActiveUnistylesFamily(it->first)) {
++                it = updates.erase(it);
++            } else {
++                ++it;
++            }
++        }
+ 
+         if (updates.empty()) {
+             return;

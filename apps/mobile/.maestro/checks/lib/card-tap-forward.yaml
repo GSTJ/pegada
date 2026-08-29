@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+tags: [util]
+---
+# Driven by checks/45-dog-profile-photo-edges.mjs. `MainCard` covers the photo
+# with two invisible Pressables and neither carries a testID, so this has to be
+# a point: 75% of the width is inside the right (next) one, 25% of the height
+# is above the pagination dots and below the status bar.
+#
+# Repeated, because the check samples the screen WHILE the spring runs and one
+# ~330ms window is not something a ~0.5s screenshot can be aimed at.
+- repeat:
+    times: 10
+    commands:
+      - tapOn:
+          point: "75%, 25%"

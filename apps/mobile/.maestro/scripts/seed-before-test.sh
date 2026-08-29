@@ -23,4 +23,23 @@ DATABASE_URL="${DATABASE_URL:-postgresql://tony:hawk@localhost:3356/pegada}"
 
 cd "$REPO_ROOT"
 DATABASE_URL="$DATABASE_URL" pnpm -F @pegada/database maestro:seed >/dev/null 2>&1
+
+# Drop the long-conversation fixture flows 43 and 44 seed into the otherwise
+# empty Rex<->Nina match. `maestro:seed` is idempotent by not re-creating rows
+# that exist, so without this those 40 messages survive their flow and every
+# later run starts with Nina at the top of the Messages list — which is the row
+# flow 12 taps by coordinate and flow 19 taps as `messages-chat-row`.
+#
+# Here rather than at the end of the two checks: a flow that fails never
+# reaches its check, and the fixture has to be gone for the NEXT flow either
+# way. `pre/43-seed-long-chat.sh` runs after this, so 43 and 44 still get it.
+psql "$DATABASE_URL" -q -c \
+  "DELETE FROM \"Message\" WHERE content LIKE 'chatux message %';" >/dev/null 2>&1 || true
+
+# Same story for flow 45's extra photos on Nina: they change the pagination
+# dots on every screen that renders her, and `pre/45-seed-gallery.sh` puts them
+# back for the one flow that wants them.
+psql "$DATABASE_URL" -q -c \
+  "DELETE FROM \"Image\" WHERE id LIKE 'chatux-gallery-%';" >/dev/null 2>&1 || true
+
 echo "seeded"

@@ -1,0 +1,59 @@
+appId: ${APP_ID}
+name: Keyboard - raising the composer must not take your place in the thread
+tags:
+  - regression
+---
+# REGRESSION GUARD - reported bug #2: opening the keyboard in a conversation
+# loses your reading context. The composer itself rides up correctly (that is
+# flow 37, and it still passes) — what does not is the list behind it. The
+# screen container shrinks by the keyboard's height, so the list's viewport
+# loses its bottom N points while its scroll offset stays put: the top of the
+# window is anchored and everything you were reading at the bottom slides in
+# behind the composer. Tap the field to reply to the message you are looking
+# at and that message is the first thing to disappear.
+#
+# The wanted behaviour is WhatsApp's: the content shifts up with the keyboard,
+# so the last row you could read is still the last row you can read, and
+# dismissing the keyboard puts it back.
+#
+# This flow only parks the screen. Everything after that is
+# checks/44-chat-keyboard-anchor.mjs, which raises and lowers the keyboard
+# itself and compares hierarchy reads either side — a before/after is the only
+# honest way to state "the row you were on is still on screen", and Maestro
+# runs a check after a flow rather than inside one.
+#
+# Same fixture as flow 43 (scripts/pre/44-seed-long-chat.sh): 40 messages in
+# the otherwise-empty Rex<->Nina match, so there is a history to lose your
+# place in.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "messages-screen"
+- runFlow: utils/dismiss-app-review.yaml
+- tapOn:
+    text: "Nina"
+- extendedWaitUntil:
+    visible:
+      id: "chat-input"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "chat-screen"
+- takeScreenshot: 44-01-parked-keyboard-down
+
+# Pre-condition, same spirit as flow 37's: with the keyboard down the composer
+# is plainly there. If a future layout moves it, this fails loudly instead of
+# the check quietly measuring the wrong node.
+- assertVisible:
+    id: "chat-input"

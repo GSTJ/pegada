@@ -1,0 +1,13 @@
+appId: ${APP_ID}
+name: util - focus the chat composer and let the keyboard settle
+tags:
+  - util
+---
+# Driven by checks/44-chat-keyboard-anchor.mjs between two hierarchy reads.
+# `util` is in config.yaml's excludeTags, so this never runs as a flow.
+#
+# No launchApp: it acts on whatever the previous step left on screen.
+- tapOn:
+    id: "chat-input"
+- waitForAnimationToEnd:
+    timeout: 5000

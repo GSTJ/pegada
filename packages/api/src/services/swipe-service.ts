@@ -5,7 +5,8 @@ import prisma from "@pegada/database";
 import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
 import { LikeLimitReachedError } from "@pegada/shared/errors/errors";
 import { PlanType } from "@prisma/client";
-import { addDays, setHours } from "date-fns";
+import { addDays } from "date-fns/addDays";
+import { setHours } from "date-fns/setHours";
 
 import { sendError } from "../errors/errors";
 import MatchService from "./match-service";
