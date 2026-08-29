@@ -101,6 +101,12 @@ const positionToValue = (
   step: number,
 ) => {
   "worklet";
+  // Visual ends must map to the real min / expanded max even when `step`
+  // does not divide (max - min) — e.g. distance min=1 max=301 step=5.
+  // Without this, the last notch (infinity) is unreachable and the thumb
+  // sits short of the right cap.
+  if (sliderLength <= 0 || position <= 0) return min;
+  if (position >= sliderLength) return max;
   const raw = min + (position / sliderLength) * (max - min);
   const snapped = Math.round(raw / step) * step;
   return clamp(snapped, min, max);

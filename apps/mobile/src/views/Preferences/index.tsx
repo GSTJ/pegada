@@ -78,7 +78,7 @@ const Preferences: React.FC = () => {
     defaultValues: {
       preferredColor: undefined,
       preferredSize: undefined,
-      preferredMaxDistance: [MAX_FILTER_DISTANCE],
+      preferredMaxDistance: [MAX_FILTER_DISTANCE + 1],
       preferredBreedId: undefined,
       preferredAgeRange: [0, MAX_FILTER_AGE],
     },
@@ -156,7 +156,7 @@ const Preferences: React.FC = () => {
     setValue("preferredColor", dog.preferredColor);
     setValue("preferredSize", dog.preferredSize);
     setValue("preferredMaxDistance", [
-      dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE,
+      dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE + 1,
     ]);
     setValue("preferredAgeRange", [
       dog.preferredMinAge ?? 0,
