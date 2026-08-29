@@ -1,18 +1,30 @@
-import type {
-  LabelProps,
-  MultiSliderProps,
-} from "@ptomasroos/react-native-multi-slider";
+import type { SharedValue } from "react-native-reanimated";
 
+import { useEffect, useRef } from "react";
 import * as React from "react";
 import { View } from "react-native";
 
-import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
 
-import { WIDTH, styles } from "./styles";
+import { MARKER_SIZE, WIDTH, styles } from "./styles";
+
+// Crisp, no-bounce settle for values that change programmatically (filters
+// syncing from elsewhere) — a spring retargets smoothly if a value change
+// arrives mid-animation, unlike a restarting keyframe/timing animation.
+const SETTLE_SPRING = { duration: 220, dampingRatio: 1 } as const;
+// Snappier, slightly springy press feedback confirming the marker was grabbed.
+const PRESS_SPRING = { duration: 150, dampingRatio: 0.9 } as const;
+const PRESS_SCALE = 0.97;
 
 type TitleProps = {
   title: string;
@@ -64,34 +76,254 @@ const markerHitSlop = {
   right: 15,
 };
 
-const CustomMarker = () => (
-  <View hitSlop={markerHitSlop} style={styles.marker} />
-);
+const clamp = (value: number, min: number, max: number) => {
+  "worklet";
+  return Math.min(max, Math.max(min, value));
+};
 
-/**
- * Hoisted out of `Root` so it keeps its identity between renders — a component
- * declared during render remounts its subtree every time the parent updates.
- * `max` comes in as a prop instead of a closure variable.
- */
-const CustomLabels = ({ max, ...label }: LabelProps & { max: number }) => {
-  const oneMarkerValue =
-    Number(label.oneMarkerValue) >= max ? "∞" : label.oneMarkerValue;
-  const twoMarkerValue =
-    Number(label.twoMarkerValue) >= max ? "∞" : label.twoMarkerValue;
+const valueToPosition = (
+  value: number,
+  min: number,
+  max: number,
+  sliderLength: number,
+) => {
+  "worklet";
+  if (max === min) return 0;
+  // A value outside [min, max] — e.g. data saved before MAX_FILTER_AGE was
+  // tightened — must not push the marker off the visible track.
+  return clamp(((value - min) / (max - min)) * sliderLength, 0, sliderLength);
+};
+
+const positionToValue = (
+  position: number,
+  min: number,
+  max: number,
+  sliderLength: number,
+  step: number,
+) => {
+  "worklet";
+  const raw = min + (position / sliderLength) * (max - min);
+  const snapped = Math.round(raw / step) * step;
+  return clamp(snapped, min, max);
+};
+
+const labelText = (value: number, max: number) =>
+  value >= max ? "∞" : String(value);
+
+type MarkerProps = {
+  position: SharedValue<number>;
+  min: number;
+  max: number;
+  sliderLength: number;
+  step: number;
+  lowerBound: SharedValue<number> | number;
+  upperBound: SharedValue<number> | number;
+  onDragStart: () => void;
+  onDragUpdate: (value: number) => void;
+  onDragFinish: (value: number) => void;
+};
+
+const Marker = ({
+  position,
+  min,
+  max,
+  sliderLength,
+  step,
+  lowerBound,
+  upperBound,
+  onDragStart,
+  onDragUpdate,
+  onDragFinish,
+}: MarkerProps) => {
+  const setSwipeBackEnabled = useDisableSwipeBack();
+  const startPosition = useSharedValue(0);
+  const isActive = useSharedValue(false);
+
+  const gesture = Gesture.Pan()
+    .onTouchesDown(() => {
+      "worklet";
+      // Disabled the instant a finger lands on the marker, before any
+      // movement is even measured — the stack's own swipe-back recognizer
+      // races on movement too, and waiting for a drag threshold to fire
+      // first is exactly what let it win sometimes.
+      runOnJS(setSwipeBackEnabled)(false);
+      startPosition.value = position.value;
+      isActive.value = true;
+    })
+    .onStart(() => {
+      "worklet";
+      runOnJS(onDragStart)();
+    })
+    .onUpdate((event) => {
+      "worklet";
+      const lower =
+        typeof lowerBound === "number" ? lowerBound : lowerBound.value;
+      const upper =
+        typeof upperBound === "number" ? upperBound : upperBound.value;
+      const rawPosition = clamp(
+        startPosition.value + event.translationX,
+        lower,
+        upper,
+      );
+      const value = positionToValue(rawPosition, min, max, sliderLength, step);
+      position.value = valueToPosition(value, min, max, sliderLength);
+      runOnJS(onDragUpdate)(value);
+    })
+    .onFinalize(() => {
+      "worklet";
+      const value = positionToValue(
+        position.value,
+        min,
+        max,
+        sliderLength,
+        step,
+      );
+      isActive.value = false;
+      runOnJS(setSwipeBackEnabled)(true);
+      runOnJS(onDragFinish)(value);
+    });
+
+  const markerStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: position.value - MARKER_SIZE / 2 },
+      // Optically centers the ring on the track — matches the 2.3pt border
+      // eating slightly into the marker's own bounding box.
+      { translateY: 1 },
+      {
+        scale: withSpring(isActive.value ? PRESS_SCALE : 1, PRESS_SPRING),
+      },
+    ],
+  }));
 
   return (
-    <>
-      {Number(label.oneMarkerValue) >= 0 && (
-        <CustomLabel left={label.oneMarkerLeftPosition}>
-          {oneMarkerValue}
-        </CustomLabel>
-      )}
-      {Number(label.twoMarkerValue) >= 0 && (
-        <CustomLabel left={label.twoMarkerLeftPosition}>
-          {twoMarkerValue}
-        </CustomLabel>
-      )}
-    </>
+    <GestureDetector gesture={gesture}>
+      <Animated.View
+        hitSlop={markerHitSlop}
+        style={[styles.marker, styles.markerPositioner, markerStyle]}
+      />
+    </GestureDetector>
+  );
+};
+
+export type MultiSliderProps = {
+  values: number[];
+  min?: number;
+  max?: number;
+  step?: number;
+  sliderLength?: number;
+  onValuesChange?: (values: number[]) => void;
+  onValuesChangeStart?: () => void;
+  onValuesChangeFinish?: (values: number[]) => void;
+};
+
+const CustomSlider = ({
+  values,
+  min = 0,
+  max = 0,
+  step = 1,
+  sliderLength = 0,
+  onValuesChange,
+  onValuesChangeStart,
+  onValuesChangeFinish,
+}: MultiSliderProps) => {
+  const hasSecondMarker = values.length > 1;
+
+  const positionA = useSharedValue(
+    valueToPosition(values[0] ?? min, min, max, sliderLength),
+  );
+  const positionB = useSharedValue(
+    valueToPosition(values[1] ?? min, min, max, sliderLength),
+  );
+
+  const isDraggingRef = useRef(false);
+  const currentValuesRef = useRef(values);
+  currentValuesRef.current = values;
+
+  useEffect(() => {
+    if (isDraggingRef.current) return;
+    positionA.value = withSpring(
+      valueToPosition(values[0] ?? min, min, max, sliderLength),
+      SETTLE_SPRING,
+    );
+    if (hasSecondMarker) {
+      positionB.value = withSpring(
+        valueToPosition(values[1] ?? min, min, max, sliderLength),
+        SETTLE_SPRING,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values[0], values[1], min, max, sliderLength]);
+
+  const handleDragStart = () => {
+    isDraggingRef.current = true;
+    onValuesChangeStart?.();
+  };
+
+  const handleChangeA = (value: number) => {
+    const next = hasSecondMarker
+      ? [value, currentValuesRef.current[1] ?? value]
+      : [value];
+    onValuesChange?.(next);
+  };
+
+  const handleChangeB = (value: number) => {
+    const next = [currentValuesRef.current[0] ?? min, value];
+    onValuesChange?.(next);
+  };
+
+  const handleFinishA = (value: number) => {
+    isDraggingRef.current = false;
+    const next = hasSecondMarker
+      ? [value, currentValuesRef.current[1] ?? value]
+      : [value];
+    onValuesChangeFinish?.(next);
+  };
+
+  const handleFinishB = (value: number) => {
+    isDraggingRef.current = false;
+    const next = [currentValuesRef.current[0] ?? min, value];
+    onValuesChangeFinish?.(next);
+  };
+
+  const trackAnimatedStyle = useAnimatedStyle(() => {
+    const left = hasSecondMarker ? positionA.value : 0;
+    const width = hasSecondMarker
+      ? positionB.value - positionA.value
+      : positionA.value;
+    return { left, width };
+  });
+
+  return (
+    <View style={[styles.sliderContainer, { width: sliderLength }]}>
+      <View style={styles.trackLine} />
+      <Animated.View style={[styles.sliderSelected, trackAnimatedStyle]} />
+      <Marker
+        position={positionA}
+        min={min}
+        max={max}
+        sliderLength={sliderLength}
+        step={step}
+        lowerBound={0}
+        upperBound={hasSecondMarker ? positionB : sliderLength}
+        onDragStart={handleDragStart}
+        onDragUpdate={handleChangeA}
+        onDragFinish={handleFinishA}
+      />
+      {hasSecondMarker ? (
+        <Marker
+          position={positionB}
+          min={min}
+          max={max}
+          sliderLength={sliderLength}
+          step={step}
+          lowerBound={positionA}
+          upperBound={sliderLength}
+          onDragStart={handleDragStart}
+          onDragUpdate={handleChangeB}
+          onDragFinish={handleFinishB}
+        />
+      ) : null}
+    </View>
   );
 };
 
@@ -103,6 +335,9 @@ export const Root = (props: MultiSliderProps) => {
   // gets claimed by the OS navigation gesture (iOS interactive pop / Android
   // system back) instead of the slider, sending the user back a screen. Inset
   // the track on both platforms so no marker sits in that edge gesture zone.
+  // The marker's own gesture also disables that stack gesture for the
+  // duration of the drag (see Marker above) — this inset is a second,
+  // independent line of defense at the exact edge.
   const sliderLength = (props?.sliderLength ?? 0) - theme.spacing[7] * 2;
 
   // The edge inset above only softens the conflict — a drag that starts
@@ -120,10 +355,10 @@ export const Root = (props: MultiSliderProps) => {
   };
 
   const max = props.max ?? 0;
-  const renderCustomLabels = React.useCallback(
-    (label: LabelProps) => <CustomLabels {...label} max={max} />,
-    [max],
-  );
+  // One notch past the nominal max represents "no limit" — CustomLabel/label
+  // text renders it as "∞" (see labelText). The slider's own range extends
+  // to match so that notch is reachable.
+  const expandedMax = props.max ? props.max + 1 : max;
 
   const hasSecondMarker = (props.values?.length ?? 0) > 1;
 
@@ -143,13 +378,6 @@ export const Root = (props: MultiSliderProps) => {
     alignItems: "center",
   } as const;
 
-  const trackStyle = {
-    backgroundColor: theme.colors.border,
-    height: stroke,
-  };
-  const selectedStyle = {
-    backgroundColor: theme.colors.primary,
-  };
   return (
     <View style={style}>
       <View
@@ -162,19 +390,55 @@ export const Root = (props: MultiSliderProps) => {
           },
         ]}
       />
-      <MultiSlider
-        enableLabel
-        customLabel={renderCustomLabels}
-        customMarker={CustomMarker}
-        trackStyle={trackStyle}
-        selectedStyle={selectedStyle}
+      <SliderWithLabels
         {...props}
         onValuesChangeStart={handleDragStart}
         onValuesChangeFinish={handleDragFinish}
-        max={props.max ? props.max + 1 : props.max}
+        max={expandedMax}
         sliderLength={sliderLength}
       />
       <View style={safeBorderStyle} />
+    </View>
+  );
+};
+
+/**
+ * Wraps `CustomSlider` to render the value bubble(s) above each marker,
+ * outside the track's own clipping so the bubble's shadow isn't cut off.
+ */
+const SliderWithLabels = (props: MultiSliderProps) => {
+  const { min = 0, max = 0, sliderLength = 0, values } = props;
+  const hasSecondMarker = values.length > 1;
+
+  const [displayValues, setDisplayValues] = React.useState(values);
+
+  useEffect(() => {
+    setDisplayValues(values);
+  }, [values]);
+
+  return (
+    <View>
+      <CustomSlider
+        {...props}
+        onValuesChange={(next) => {
+          setDisplayValues(next);
+          props.onValuesChange?.(next);
+        }}
+      />
+      {displayValues[0] !== undefined && (
+        <CustomLabel
+          left={valueToPosition(displayValues[0], min, max, sliderLength)}
+        >
+          {labelText(displayValues[0], max)}
+        </CustomLabel>
+      )}
+      {hasSecondMarker && displayValues[1] !== undefined && (
+        <CustomLabel
+          left={valueToPosition(displayValues[1], min, max, sliderLength)}
+        >
+          {labelText(displayValues[1], max)}
+        </CustomLabel>
+      )}
     </View>
   );
 };
