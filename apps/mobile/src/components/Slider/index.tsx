@@ -10,6 +10,7 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
+import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
 
 import { WIDTH, styles } from "./styles";
 
@@ -96,12 +97,27 @@ const CustomLabels = ({ max, ...label }: LabelProps & { max: number }) => {
 
 export const Root = (props: MultiSliderProps) => {
   const { theme } = useUnistyles();
+  const setSwipeBackEnabled = useDisableSwipeBack();
 
   // When the slider reaches the edge of the screen, a horizontal drag there
   // gets claimed by the OS navigation gesture (iOS interactive pop / Android
   // system back) instead of the slider, sending the user back a screen. Inset
   // the track on both platforms so no marker sits in that edge gesture zone.
   const sliderLength = (props?.sliderLength ?? 0) - theme.spacing[7] * 2;
+
+  // The edge inset above only softens the conflict — a drag that starts
+  // mid-track and moves the finger toward either edge still races the
+  // screen's swipe-back gesture. Turn the stack's gesture off for as long
+  // as a drag is in progress so the slider always wins.
+  const handleDragStart = () => {
+    setSwipeBackEnabled(false);
+    props.onValuesChangeStart?.();
+  };
+
+  const handleDragFinish = (values: number[]) => {
+    setSwipeBackEnabled(true);
+    props.onValuesChangeFinish?.(values);
+  };
 
   const max = props.max ?? 0;
   const renderCustomLabels = React.useCallback(
@@ -153,6 +169,8 @@ export const Root = (props: MultiSliderProps) => {
         trackStyle={trackStyle}
         selectedStyle={selectedStyle}
         {...props}
+        onValuesChangeStart={handleDragStart}
+        onValuesChangeFinish={handleDragFinish}
         max={props.max ? props.max + 1 : props.max}
         sliderLength={sliderLength}
       />

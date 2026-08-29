@@ -79,6 +79,11 @@ const AppLayout = () => {
           headerShown: true,
           animation: "default",
           presentation: "modal",
+          // A modal's swipe-to-dismiss is a drag gesture same as the map's
+          // own pan — panning the map toward the bottom of the screen could
+          // otherwise get read as "dismiss". The header back button already
+          // covers leaving the screen, so losing the swipe costs nothing.
+          gestureEnabled: false,
         }}
       />
       <Stack.Screen

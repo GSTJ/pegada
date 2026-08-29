@@ -1,5 +1,5 @@
+import type { PickerSheetRef } from "@/components/Picker";
 import type { ActiveTheme } from "@/contexts/theme-provider";
-import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import { useRef } from "react";
 
@@ -36,7 +36,7 @@ export const ThemeConfig = () => {
 
   const value = data.find((item) => item.id === activeTheme);
 
-  const pickerSheetRef = useRef<BottomSheetModal>(null);
+  const pickerSheetRef = useRef<PickerSheetRef>(null);
 
   return (
     <Config.Root

@@ -9,8 +9,8 @@ import { SelectItem, styles } from "./styles";
 /**
  * One row of a picker sheet.
  *
- * Its own file so it can be tested without dragging in @gorhom/bottom-sheet
- * and the rest of the sheet's module graph.
+ * Its own file so it can be tested without dragging in the rest of the
+ * sheet's module graph (gesture-handler, reanimated, magic-modal).
  */
 export const PickerSelectItem = <T extends Item>({
   item,

@@ -1,10 +1,34 @@
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { TextInput } from "react-native";
+
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
 import Close from "@/assets/images/Close.svg";
 import { PressableArea } from "@/components/pressable-area";
 
 export const styles = StyleSheet.create((theme) => ({
+  sheet: {
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
+    borderWidth: theme.stroke.sm,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    overflow: "hidden",
+  },
+  handleContainer: {
+    alignItems: "center",
+    paddingTop: theme.spacing[2],
+    paddingBottom: theme.spacing[2],
+  },
+  handleBar: {
+    width: theme.spacing[9],
+    height: 4,
+    borderRadius: theme.radii.round,
+    backgroundColor: theme.colors.text,
+    opacity: 0.3,
+  },
+  list: {
+    flexShrink: 1,
+  },
   titleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -73,7 +97,7 @@ export const styles = StyleSheet.create((theme) => ({
 
 export const SelectItem = withUnistyles(PressableArea);
 
-export const SearchInput = withUnistyles(BottomSheetTextInput, (theme) => ({
+export const SearchInput = withUnistyles(TextInput, (theme) => ({
   placeholderTextColor: theme.colors.placeholder,
 }));
 
