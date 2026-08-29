@@ -1,5 +1,3 @@
-import { get } from "lodash";
-
 /**
  * How many times a transient failure is retried after the first attempt.
  *
@@ -33,9 +31,17 @@ export const shouldRetryTransient = (
 ): boolean => {
   if (failureCount >= TRANSIENT_RETRY_ATTEMPTS) return false;
 
-  if (get(error, "data.error.error_code")) return false;
+  const data =
+    error && typeof error === "object" && "data" in error
+      ? (
+          error as {
+            data?: { httpStatus?: unknown; error?: { error_code?: unknown } };
+          }
+        ).data
+      : undefined;
+  if (data?.error?.error_code) return false;
 
-  const httpStatus = get(error, "data.httpStatus");
+  const httpStatus = data?.httpStatus;
 
   if (typeof httpStatus === "number") return httpStatus >= 500;
 
