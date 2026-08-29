@@ -9,7 +9,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from "react-native-reanimated";
 import { useUnistyles } from "react-native-unistyles";
 
@@ -17,6 +17,14 @@ import { Text } from "@/components/text";
 import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
 
 import { MARKER_SIZE, WIDTH, styles } from "./styles";
+
+// Crisp, no-bounce settle for values that change programmatically (filters
+// syncing from elsewhere) — a spring retargets smoothly if a value change
+// arrives mid-animation, unlike a restarting keyframe/timing animation.
+const SETTLE_SPRING = { duration: 220, dampingRatio: 1 } as const;
+// Snappier, slightly springy press feedback confirming the marker was grabbed.
+const PRESS_SPRING = { duration: 150, dampingRatio: 0.9 } as const;
+const PRESS_SCALE = 0.97;
 
 type TitleProps = {
   title: string;
@@ -129,6 +137,7 @@ const Marker = ({
 }: MarkerProps) => {
   const setSwipeBackEnabled = useDisableSwipeBack();
   const startPosition = useSharedValue(0);
+  const isActive = useSharedValue(false);
 
   const gesture = Gesture.Pan()
     .onTouchesDown(() => {
@@ -139,6 +148,7 @@ const Marker = ({
       // first is exactly what let it win sometimes.
       runOnJS(setSwipeBackEnabled)(false);
       startPosition.value = position.value;
+      isActive.value = true;
     })
     .onStart(() => {
       "worklet";
@@ -168,6 +178,7 @@ const Marker = ({
         sliderLength,
         step,
       );
+      isActive.value = false;
       runOnJS(setSwipeBackEnabled)(true);
       runOnJS(onDragFinish)(value);
     });
@@ -178,6 +189,9 @@ const Marker = ({
       // Optically centers the ring on the track — matches the 2.3pt border
       // eating slightly into the marker's own bounding box.
       { translateY: 1 },
+      {
+        scale: withSpring(isActive.value ? PRESS_SCALE : 1, PRESS_SPRING),
+      },
     ],
   }));
 
@@ -227,12 +241,14 @@ const CustomSlider = ({
 
   useEffect(() => {
     if (isDraggingRef.current) return;
-    positionA.value = withTiming(
+    positionA.value = withSpring(
       valueToPosition(values[0] ?? min, min, max, sliderLength),
+      SETTLE_SPRING,
     );
     if (hasSecondMarker) {
-      positionB.value = withTiming(
+      positionB.value = withSpring(
         valueToPosition(values[1] ?? min, min, max, sliderLength),
+        SETTLE_SPRING,
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

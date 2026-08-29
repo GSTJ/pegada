@@ -10,10 +10,16 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
 
 import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
+
+// A photo settling into its new slot, or getting picked up — both should
+// feel alive rather than mechanical, and retarget smoothly if a second drag
+// starts before the first settle finishes.
+const SLOT_SPRING = { duration: 260, dampingRatio: 0.8 } as const;
+const LIFT_SPRING = { duration: 200, dampingRatio: 0.7 } as const;
+const LIFT_SCALE = 1.05;
 
 export type DraggableItem = {
   id: string;
@@ -72,8 +78,11 @@ const DraggableGridItem = <T extends DraggableItem>({
   // elsewhere in the grid — only the coordinates change, not by a gesture on
   // this cell.
   useEffect(() => {
-    restX.value = withTiming((index % numColumns) * cellWidth);
-    restY.value = withTiming(Math.floor(index / numColumns) * cellHeight);
+    restX.value = withSpring((index % numColumns) * cellWidth, SLOT_SPRING);
+    restY.value = withSpring(
+      Math.floor(index / numColumns) * cellHeight,
+      SLOT_SPRING,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, numColumns, cellWidth, cellHeight]);
 
@@ -118,8 +127,8 @@ const DraggableGridItem = <T extends DraggableItem>({
     })
     .onFinalize(() => {
       "worklet";
-      dragX.value = withSpring(0);
-      dragY.value = withSpring(0);
+      dragX.value = withSpring(0, SLOT_SPRING);
+      dragY.value = withSpring(0, SLOT_SPRING);
     });
 
   const composedGesture = Gesture.Simultaneous(longPress, pan);
@@ -133,7 +142,7 @@ const DraggableGridItem = <T extends DraggableItem>({
     transform: [
       { translateX: dragX.value },
       { translateY: dragY.value },
-      { scale: withTiming(isActive.value ? 1.05 : 1) },
+      { scale: withSpring(isActive.value ? LIFT_SCALE : 1, LIFT_SPRING) },
     ],
     zIndex: isActive.value ? 10 : 0,
     elevation: isActive.value ? 10 : 0,
