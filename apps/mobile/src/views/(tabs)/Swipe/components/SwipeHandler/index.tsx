@@ -20,7 +20,7 @@ import { useDidMountEffect } from "@/services/utils";
 import { Actions } from "@/store/reducers";
 import { getCurrentCardId } from "@/store/selectors";
 
-import { useSwipeGesture } from "./hooks/use-swipe-gesture";
+import { SNAP_BACK_SPRING, useSwipeGesture } from "./hooks/use-swipe-gesture";
 
 const ROTATION_DEG = 8;
 
@@ -73,8 +73,8 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
 
   useDidMountEffect(() => {
     if (isFirstCard) {
-      translation.x.value = withSpring(0, { stiffness: 50 });
-      translation.y.value = withSpring(0, { stiffness: 50 });
+      translation.x.value = withSpring(0, SNAP_BACK_SPRING);
+      translation.y.value = withSpring(0, SNAP_BACK_SPRING);
     }
   }, [isFirstCard]);
 

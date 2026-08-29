@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import {
   runOnJS,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -16,6 +17,10 @@ import {
 
 import { ACTION_OFFSET, ACTION_VELOCITY, CARD } from "@/constants";
 import { haptics } from "@/services/haptics";
+
+// A cancelled drag is a system response, not a user gesture, so it should
+// snap back near-instantly rather than ease in like the deliberate throws.
+export const SNAP_BACK_SPRING = { duration: 150, dampingRatio: 0.9 } as const;
 
 export type Translation = {
   x: SharedValue<number>;
@@ -106,6 +111,7 @@ type UseSwipeGestureProps = {
 
 export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
   const [enabled, setEnabled] = useState(true);
+  const reduceMotion = useReducedMotion();
 
   const translation: Translation = {
     x: useSharedValue(0),
@@ -174,8 +180,14 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
         return gotoDirection(swipeType);
       }
 
-      translation.x.value = withSpring(0, { stiffness: 50 });
-      translation.y.value = withSpring(0, { stiffness: 50 });
+      if (reduceMotion) {
+        translation.x.value = 0;
+        translation.y.value = 0;
+        return;
+      }
+
+      translation.x.value = withSpring(0, SNAP_BACK_SPRING);
+      translation.y.value = withSpring(0, SNAP_BACK_SPRING);
     });
 
   return [translation, gestureHandler, gotoDirection, enabled] as const;
