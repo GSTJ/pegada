@@ -1,0 +1,25 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'app.pegada.livestatus'
+version = '1.0.0'
+
+android {
+  namespace "app.pegada.livestatus"
+  // The Live Updates APIs (Notification.Builder#setRequestPromotedOngoing,
+  // VERSION_CODES_FULL.BAKLAVA_1) only exist in the Android 16 minor SDK
+  // release (36.1), not in the base API 36 android.jar. Gradle auto-installs
+  // platforms;android-36.1, so this works locally and on EAS. Runtime use is
+  // gated on SDK_INT_FULL in PegadaLiveStatusModule.
+  compileSdk 36
+  compileSdkMinor 1
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}

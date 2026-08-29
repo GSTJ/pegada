@@ -59,3 +59,12 @@ google-services.json
 # EAS-generated local credentials (contains cert passwords) — never commit
 credentials.json
 credentials/
+
+# Local Expo modules (modules/*) are handwritten native source, not CNG
+# output -- re-include them from the **/*/ios and **/*/android rules above,
+# but keep their gradle build output ignored.
+!modules/*/ios/
+!modules/*/ios/**
+!modules/*/android/
+!modules/*/android/**
+modules/*/android/build/
