@@ -6,8 +6,7 @@ import type {
 import * as React from "react";
 import { View } from "react-native";
 
-import { DraggableGrid } from "react-native-draggable-grid";
-
+import { DraggableGrid } from "@/components/DraggableGrid";
 import { deleteItem, sortByUrl } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/text";
 import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";

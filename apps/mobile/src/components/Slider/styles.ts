@@ -3,6 +3,8 @@ import { StyleSheet } from "react-native-unistyles";
 export const WIDTH = 36;
 const HEIGHT = 24;
 const TRIANGLE_SIZE = 4;
+export const MARKER_SIZE = 20;
+export const TRACK_STROKE = 3;
 
 export const styles = StyleSheet.create((theme) => ({
   titleContainer: {
@@ -12,7 +14,11 @@ export const styles = StyleSheet.create((theme) => ({
   },
   labelContainer: {
     position: "absolute",
-    top: HEIGHT + 20,
+    // Anchored from the bottom of the slider's own container (which is
+    // exactly MARKER_SIZE tall — see sliderContainer below) rather than from
+    // the top, so the label sits just above the track regardless of
+    // whatever content happens to sit above this slider in the screen.
+    bottom: MARKER_SIZE + 20,
     width: WIDTH,
     height: HEIGHT,
     alignItems: "center",
@@ -38,8 +44,8 @@ export const styles = StyleSheet.create((theme) => ({
     transform: [{ rotate: "45deg" }],
   },
   marker: {
-    height: 20,
-    width: 20,
+    height: MARKER_SIZE,
+    width: MARKER_SIZE,
     borderTopLeftRadius: theme.radii.round,
     borderTopRightRadius: theme.radii.round,
     borderBottomRightRadius: theme.radii.round,
@@ -47,6 +53,29 @@ export const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.background,
     borderWidth: 2.3,
     borderColor: theme.colors.primary,
-    transform: [{ translateY: 1 }],
+  },
+  markerPositioner: {
+    position: "absolute",
+    top: 0,
+  },
+  sliderContainer: {
+    height: MARKER_SIZE,
+    justifyContent: "center",
+  },
+  trackLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: (MARKER_SIZE - TRACK_STROKE) / 2,
+    height: TRACK_STROKE,
+    borderRadius: theme.radii.round,
+    backgroundColor: theme.colors.border,
+  },
+  sliderSelected: {
+    position: "absolute",
+    top: (MARKER_SIZE - TRACK_STROKE) / 2,
+    height: TRACK_STROKE,
+    borderRadius: theme.radii.round,
+    backgroundColor: theme.colors.primary,
   },
 }));

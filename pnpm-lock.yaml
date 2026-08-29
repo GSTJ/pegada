@@ -39,7 +39,6 @@ patchedDependencies:
   image-size@1.2.1: ecb4ccea31a12b16c8163e69e670834fcb60833c146f1669821a0dd9aca8f9e1
   minimatch@3.1.5: 476a0494e59e628ca5f44098245651424dd99db4757bc172a9e7bf6c4fe9daf1
   minimatch@9.0.9: 291dd2efac7e5cd6b31364c2548f9e97e74ae39487476509acbf3218cea1b813
-  react-native-draggable-grid@2.2.1: b76c67d70eda667cbfa38d0a069bf76d77375bb01a3b87e60be4ff809a0877a2
   react-native-unistyles@3.3.0: cab49f4b32b6fef06b845fbc74a08cbac6a4d1f5e908a1f9ff0c97b8844f1f6a
   redux-saga@1.3.0: 8c7f7d64fa347d148c073162a8afd0e421c019bb94193fd3f29bccc3024e9a66
 
@@ -95,9 +94,6 @@ importers:
       '@pegada/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@ptomasroos/react-native-multi-slider':
-        specifier: ^2.2.2
-        version: 2.2.2(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
       '@react-native-anywhere/polyfill-base64':
         specifier: 0.0.1-alpha.0
         version: 0.0.1-alpha.0
@@ -275,9 +271,6 @@ importers:
       react-native:
         specifier: 0.83.6
         version: 0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1)
-      react-native-draggable-grid:
-        specifier: ^2.2.1
-        version: 2.2.1(patch_hash=b76c67d70eda667cbfa38d0a069bf76d77375bb01a3b87e60be4ff809a0877a2)(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
       react-native-edge-to-edge:
         specifier: 1.8.1
         version: 1.8.1(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
@@ -2487,12 +2480,6 @@ packages:
 
   '@prisma/get-platform@5.17.0':
     resolution: {integrity: sha512-UlDgbRozCP1rfJ5Tlkf3Cnftb6srGrEQ4Nm3og+1Se2gWmCZ0hmPIi+tQikGDUVLlvOWx3Gyi9LzgRP+HTXV9w==}
-
-  '@ptomasroos/react-native-multi-slider@2.2.2':
-    resolution: {integrity: sha512-HWyCnRD3Z3SbHK2FLWYmBBqd1B4iXipeKv1+AK0FoY/CElEDTEixHE8hN60TsqxalPrznn798LE2Q4tHuCiyaA==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
 
   '@radix-ui/primitive@1.1.3':
     resolution: {integrity: sha512-JTF99U/6XIjCBo0wqkU5sK10glYe27MRRsfwoiq5zzOEZLHU3A3KCMa5X/azekYRCJ0HlwI0crAXS/5dEHTzDg==}
@@ -6713,12 +6700,6 @@ packages:
   react-is@19.2.6:
     resolution: {integrity: sha512-XjBR15BhXuylgWGuslhDKqlSayuqvqBX91BP8pauG8kd1zY8kotkNWbXksTCNRarse4kuGbe2kIY05ARtwNIvw==}
 
-  react-native-draggable-grid@2.2.1:
-    resolution: {integrity: sha512-/nYSaHvu3JOBLbgGzzo3bG0z0rnnjINTnTAhjhpd9YCmlbQW8D+S0WT8CNc/9y7ys+DcoBgblgO4VBwohN/NwQ==}
-    peerDependencies:
-      react: ^16 || ^17 || ^18
-      react-native: '*'
-
   react-native-edge-to-edge@1.8.1:
     resolution: {integrity: sha512-bhvsKqeX9PGkY9wBUk9vni/tJNJdKtLPbs/j3e/3CdV4JmUWfTXYYoL+4Hc8Wmej+5eJxkc8KOFa454ruFWBCA==}
     peerDependencies:
@@ -9944,11 +9925,6 @@ snapshots:
   '@prisma/get-platform@5.17.0':
     dependencies:
       '@prisma/debug': 5.17.0
-
-  '@ptomasroos/react-native-multi-slider@2.2.2(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)':
-    dependencies:
-      react: 19.2.0
-      react-native: 0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1)
 
   '@radix-ui/primitive@1.1.3': {}
 
@@ -15057,11 +15033,6 @@ snapshots:
   react-is@18.3.1: {}
 
   react-is@19.2.6: {}
-
-  react-native-draggable-grid@2.2.1(patch_hash=b76c67d70eda667cbfa38d0a069bf76d77375bb01a3b87e60be4ff809a0877a2)(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0):
-    dependencies:
-      react: 19.2.0
-      react-native: 0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1)
 
   react-native-edge-to-edge@1.8.1(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0):
     dependencies:
