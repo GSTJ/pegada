@@ -69,11 +69,16 @@ const Preferences: React.FC = () => {
     throw new Error("Dog not found");
   }
 
-  const { control, handleSubmit, setValue } = useForm<Preference>({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { isDirty },
+  } = useForm<Preference>({
     defaultValues: {
       preferredColor: undefined,
       preferredSize: undefined,
-      preferredMaxDistance: [MAX_FILTER_DISTANCE],
+      preferredMaxDistance: [MAX_FILTER_DISTANCE + 1],
       preferredBreedId: undefined,
       preferredAgeRange: [0, MAX_FILTER_AGE],
     },
@@ -141,16 +146,23 @@ const Preferences: React.FC = () => {
   });
 
   useEffect(() => {
+    // `dog` refetches (app resume, focus, another screen touching the same
+    // query) and gets a new reference whether or not anything actually
+    // changed. Once the user has touched a field, that refetch must not
+    // clobber their in-progress edit with the still-saved server value —
+    // only hydrate the pristine form.
+    if (isDirty) return;
     setValue("preferredBreedId", dog.preferredBreedId);
     setValue("preferredColor", dog.preferredColor);
     setValue("preferredSize", dog.preferredSize);
     setValue("preferredMaxDistance", [
-      dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE,
+      dog.preferredMaxDistance ?? MAX_FILTER_DISTANCE + 1,
     ]);
     setValue("preferredAgeRange", [
       dog.preferredMinAge ?? 0,
       dog.preferredMaxAge ?? MAX_FILTER_AGE + 1,
     ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dog, setValue]);
 
   const headerHeight = useHeaderHeight();
@@ -273,7 +285,7 @@ const Preferences: React.FC = () => {
               <Slider.Root
                 values={value}
                 sliderLength={width - theme.spacing[4] * 2}
-                min={0}
+                min={1}
                 max={MAX_FILTER_DISTANCE}
                 step={5}
                 onValuesChange={onChange}

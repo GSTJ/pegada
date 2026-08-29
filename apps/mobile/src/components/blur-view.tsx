@@ -22,9 +22,18 @@ const ContainerComponent = (
 /** Only the styles are themed here; the blur props are constants. */
 const Container = withUnistyles(ContainerComponent);
 
-/** The former `.attrs(getProps)`: the tint/intensity pair the theme decides. */
+/**
+ * The former `.attrs(getProps)`: the tint/intensity pair the theme decides.
+ *
+ * `tint` is pinned to the legacy "light"/"dark" values rather than
+ * "prominent" or any "system*" tint on purpose — those follow the OS
+ * appearance (`UITraitCollection`), not `theme.dark`. When the app is forced
+ * to (or stuck on) one theme while the system runs the other — the whole
+ * point of `theme.dark` existing — a system-following tint renders glass in
+ * the wrong theme's color even though every other themed color is correct.
+ */
 const ThemedContainer = withUnistyles(ContainerComponent, (theme) => ({
-  tint: "prominent" as const,
+  tint: theme.dark ? ("dark" as const) : ("light" as const),
   intensity: theme.dark ? 70 : 40,
 }));
 

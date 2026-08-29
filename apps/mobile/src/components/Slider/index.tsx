@@ -11,7 +11,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@/components/text";
 import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
@@ -102,6 +101,12 @@ const positionToValue = (
   step: number,
 ) => {
   "worklet";
+  // Visual ends must map to the real min / expanded max even when `step`
+  // does not divide (max - min) — e.g. distance min=1 max=301 step=5.
+  // Without this, the last notch (infinity) is unreachable and the thumb
+  // sits short of the right cap.
+  if (sliderLength <= 0 || position <= 0) return min;
+  if (position >= sliderLength) return max;
   const raw = min + (position / sliderLength) * (max - min);
   const snapped = Math.round(raw / step) * step;
   return clamp(snapped, min, max);
@@ -216,6 +221,22 @@ export type MultiSliderProps = {
   onValuesChangeFinish?: (values: number[]) => void;
 };
 
+type LastEmittedRef = React.RefObject<number[] | null>;
+
+/**
+ * True when `values` isn't this slider's own echo AND we've already emitted
+ * at least one local change — i.e. a parent re-render (a stale hydrate, a
+ * refetch) is trying to clobber an in-progress edit rather than reflect it.
+ */
+const isStaleExternalReset = (
+  lastEmittedRef: LastEmittedRef,
+  values: number[],
+) => {
+  const last = lastEmittedRef.current;
+  if (last === null) return false;
+  return last[0] !== values[0] || last[1] !== values[1];
+};
+
 const CustomSlider = ({
   values,
   min = 0,
@@ -225,7 +246,8 @@ const CustomSlider = ({
   onValuesChange,
   onValuesChangeStart,
   onValuesChangeFinish,
-}: MultiSliderProps) => {
+  lastEmittedRef,
+}: MultiSliderProps & { lastEmittedRef: LastEmittedRef }) => {
   const hasSecondMarker = values.length > 1;
 
   const positionA = useSharedValue(
@@ -241,6 +263,7 @@ const CustomSlider = ({
 
   useEffect(() => {
     if (isDraggingRef.current) return;
+    if (isStaleExternalReset(lastEmittedRef, values)) return;
     positionA.value = withSpring(
       valueToPosition(values[0] ?? min, min, max, sliderLength),
       SETTLE_SPRING,
@@ -328,22 +351,12 @@ const CustomSlider = ({
 };
 
 export const Root = (props: MultiSliderProps) => {
-  const { theme } = useUnistyles();
   const setSwipeBackEnabled = useDisableSwipeBack();
 
-  // When the slider reaches the edge of the screen, a horizontal drag there
-  // gets claimed by the OS navigation gesture (iOS interactive pop / Android
-  // system back) instead of the slider, sending the user back a screen. Inset
-  // the track on both platforms so no marker sits in that edge gesture zone.
-  // The marker's own gesture also disables that stack gesture for the
-  // duration of the drag (see Marker above) — this inset is a second,
-  // independent line of defense at the exact edge.
-  const sliderLength = (props?.sliderLength ?? 0) - theme.spacing[7] * 2;
-
-  // The edge inset above only softens the conflict — a drag that starts
-  // mid-track and moves the finger toward either edge still races the
-  // screen's swipe-back gesture. Turn the stack's gesture off for as long
-  // as a drag is in progress so the slider always wins.
+  // A drag that starts mid-track and moves the finger toward either edge
+  // still races the screen's own swipe-back gesture. Marker's own
+  // onTouchesDown (see above) already disables it the instant a finger lands
+  // on a marker; this keeps it off for the full duration of the drag too.
   const handleDragStart = () => {
     setSwipeBackEnabled(false);
     props.onValuesChangeStart?.();
@@ -360,50 +373,18 @@ export const Root = (props: MultiSliderProps) => {
   // to match so that notch is reachable.
   const expandedMax = props.max ? props.max + 1 : max;
 
-  const hasSecondMarker = (props.values?.length ?? 0) > 1;
-
-  const stroke = 3;
-
-  const safeBorderStyle = {
-    height: stroke,
-    width: theme.spacing[7],
-    backgroundColor: theme.colors.border,
-    zIndex: -1,
-    borderTopRightRadius: theme.radii.md,
-    borderBottomRightRadius: theme.radii.md,
-  };
-
-  const style = {
-    flexDirection: "row",
-    alignItems: "center",
-  } as const;
-
   return (
-    <View style={style}>
-      <View
-        style={[
-          safeBorderStyle,
-          {
-            backgroundColor: hasSecondMarker
-              ? theme.colors.border
-              : theme.colors.primary,
-          },
-        ]}
-      />
-      <SliderWithLabels
-        {...props}
-        onValuesChangeStart={handleDragStart}
-        onValuesChangeFinish={handleDragFinish}
-        max={expandedMax}
-        sliderLength={sliderLength}
-      />
-      <View style={safeBorderStyle} />
-    </View>
+    <SliderWithLabels
+      {...props}
+      onValuesChangeStart={handleDragStart}
+      onValuesChangeFinish={handleDragFinish}
+      max={expandedMax}
+    />
   );
 };
 
 /**
- * Wraps `CustomSlider` to render the value bubble(s) above each marker,
+ * Wraps `CustomSlider` to render the value bubble(s) below each marker,
  * outside the track's own clipping so the bubble's shadow isn't cut off.
  */
 const SliderWithLabels = (props: MultiSliderProps) => {
@@ -412,15 +393,24 @@ const SliderWithLabels = (props: MultiSliderProps) => {
 
   const [displayValues, setDisplayValues] = React.useState(values);
 
+  // Shared with CustomSlider below so both the bubble text and the marker
+  // position agree on whether an incoming `values` update is this slider's
+  // own echo or a stale reset trying to clobber an in-progress edit.
+  const lastEmittedRef = useRef<number[] | null>(null);
+
   useEffect(() => {
+    if (isStaleExternalReset(lastEmittedRef, values)) return;
     setDisplayValues(values);
-  }, [values]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values[0], values[1]]);
 
   return (
-    <View>
+    <View style={styles.sliderWrapper}>
       <CustomSlider
         {...props}
+        lastEmittedRef={lastEmittedRef}
         onValuesChange={(next) => {
+          lastEmittedRef.current = next;
           setDisplayValues(next);
           props.onValuesChange?.(next);
         }}
