@@ -159,7 +159,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({
   }, [colors, dark]);
 
   const handleActiveThemeChange = (theme: ActiveTheme) => {
-    if (theme) Appearance.setColorScheme(theme as ColorSchemeName);
+    // Picking "Automatic" (theme === null) must release the override, not
+    // just skip setting a new one — Appearance.setColorScheme keeps forcing
+    // whatever was last set until called with null, so useColorScheme() kept
+    // reporting the old forced value and the app only picked up the real
+    // system scheme after a full restart reset the native override.
+    Appearance.setColorScheme(theme as ColorSchemeName);
     persistNativeThemeOverride(theme);
     setActiveTheme(theme);
 
