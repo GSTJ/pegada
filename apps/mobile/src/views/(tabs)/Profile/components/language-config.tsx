@@ -1,4 +1,4 @@
-import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import type { PickerSheetRef } from "@/components/Picker";
 
 import { useRef } from "react";
 
@@ -38,7 +38,7 @@ export const LanguageConfig = () => {
     name: LANGUAGES[Language.Default],
   };
 
-  const pickerSheetRef = useRef<BottomSheetModal>(null);
+  const pickerSheetRef = useRef<PickerSheetRef>(null);
 
   return (
     <Config.Root

@@ -1,24 +1,30 @@
 import type { Item } from "./types";
-import type { BottomSheetFlatListProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetScrollable/types";
-
 import type { ListRenderItemInfo } from "react-native";
 
-import { useCallback, useEffect, useState } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
 import * as React from "react";
 import {
-  BackHandler,
-  Keyboard,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   useWindowDimensions,
   View,
 } from "react-native";
 
-import { BottomSheetFlatList, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useTranslation } from "react-i18next";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { magicModal, useMagicModal } from "react-native-magic-modal";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 
-import { renderCustomBackdrop } from "@/components/custom-backdrop";
 import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
 
@@ -36,7 +42,6 @@ export type InputPickerProps<T extends Item> = {
   onChange: (value: T) => void;
   optional?: boolean;
   searchable?: boolean;
-  snapPoints?: string[];
   data: T[];
   testID?: string;
   /**
@@ -45,81 +50,43 @@ export type InputPickerProps<T extends Item> = {
    * reliably tap a known option (e.g. language/theme switches).
    */
   itemTestIDPrefix?: string;
-} & Partial<Omit<BottomSheetFlatListProps<T>, "ref">>;
+};
+
+export type PickerSheetRef = {
+  present: () => void;
+  close: () => void;
+};
 
 const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 
-const UnForwardedPickerSheet = <T extends Item>(
-  props: InputPickerProps<T>,
-  ref: React.ForwardedRef<BottomSheetModal>,
-) => {
+// A drag past this far, or a fast enough flick, dismisses the sheet.
+// Otherwise it springs back under the finger.
+const DISMISS_DISTANCE = 80;
+const DISMISS_VELOCITY = 800;
+
+const PickerSheetContent = <T extends Item>(props: InputPickerProps<T>) => {
   const { t } = useTranslation();
-
   const { theme } = useUnistyles();
-
   const insets = useSafeAreaInsets();
-
-  const pickerSheetRef = ref as React.MutableRefObject<BottomSheetModal>;
-
-  const onClose = useCallback(() => {
-    pickerSheetRef.current.close();
-  }, [pickerSheetRef]);
-
-  const [filter, setFilter] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Android's system Back has to be consumed while the sheet is up.
-  // @gorhom/bottom-sheet registers none of its own — there is not a single
-  // `BackHandler` in the package — so the press fell through to the navigator,
-  // which popped the screen underneath. One press, two dismissals: the sheet
-  // went because its host unmounted, not because it handled anything.
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        onClose();
-        return true;
-      },
-    );
-
-    return () => subscription.remove();
-  }, [isOpen, onClose]);
-
-  // The search field lives inside the sheet, so dismissing the sheet unmounts
-  // it — and an unmounted TextInput never blurs. That left the keyboard up
-  // over a screen with nothing focused to type into. `keyboardBlurBehavior`
-  // covers the sheet's own close animation; this covers the rest, including a
-  // swipe-down that outruns it.
-  const onDismiss = useCallback(() => {
-    Keyboard.dismiss();
-    setIsOpen(false);
-    setFilter("");
-  }, []);
+  const { height: screenHeight } = useWindowDimensions();
+  const { hide } = useMagicModal();
+  const handleClose = () => hide();
 
   const {
     title,
-    placeholder: _placeholder,
     value,
+    onChange,
+    searchable,
+    itemTestIDPrefix,
+    placeholder: _placeholder,
     error: _error,
     loading: _loading,
-    onChange,
     optional: _optional,
-    searchable,
-    snapPoints,
-    itemTestIDPrefix,
     testID: _testID,
     ...flatlistProps
   } = props;
 
-  // When no snapPoints are given, let the sheet size to its content (v5
-  // dynamic sizing) so short lists like language/theme aren't clipped by a
-  // fixed fraction of the screen. Searchable/long lists still pass explicit
-  // snapPoints for a tall scrollable sheet. Cap dynamic height so a big list
-  // can't grow past the screen.
-  const enableDynamicSizing = !snapPoints;
-  const { height: screenHeight } = useWindowDimensions();
+  const [filter, setFilter] = useState("");
 
   const data = filter
     ? props.data.filter((item) =>
@@ -127,21 +94,29 @@ const UnForwardedPickerSheet = <T extends Item>(
       )
     : props.data;
 
-  const backgroundStyle = {
-    backgroundColor: theme.colors.background,
-    borderColor: theme.colors.border,
-    borderWidth: theme.stroke.sm,
-  };
-  const handleIndicatorStyle = {
-    backgroundColor: theme.colors.text,
-  };
-  const handleStyle = {
-    borderTopLeftRadius: theme.radii.md,
-    borderTopRightRadius: theme.radii.md,
-  };
-  const contentContainerStyle = {
-    paddingBottom: insets.bottom,
-  };
+  const translateY = useSharedValue(0);
+
+  const handleDrag = Gesture.Pan()
+    .onUpdate((event) => {
+      translateY.value = Math.max(0, event.translationY);
+    })
+    .onEnd((event) => {
+      const shouldDismiss =
+        translateY.value > DISMISS_DISTANCE ||
+        event.velocityY > DISMISS_VELOCITY;
+
+      if (shouldDismiss) {
+        translateY.value = withTiming(screenHeight, {}, () =>
+          runOnJS(handleClose)(),
+        );
+      } else {
+        translateY.value = withSpring(0, { stiffness: 200, damping: 25 });
+      }
+    });
+
+  const sheetAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   const keyExtractor = (item: T) => `${title}${item.id}`;
 
@@ -150,7 +125,7 @@ const UnForwardedPickerSheet = <T extends Item>(
       item={item}
       value={value}
       onChange={onChange}
-      onClose={onClose}
+      onClose={handleClose}
       testID={
         itemTestIDPrefix ? `${itemTestIDPrefix}${item.id ?? "any"}` : undefined
       }
@@ -158,68 +133,105 @@ const UnForwardedPickerSheet = <T extends Item>(
   );
 
   return (
-    <BottomSheetModal
-      android_keyboardInputMode="adjustResize" // Fixes the keyboard extra padding on Android
-      ref={pickerSheetRef}
-      onChange={(index) => setIsOpen(index >= 0)}
-      onDismiss={onDismiss}
-      keyboardBlurBehavior="restore"
-      snapPoints={snapPoints}
-      enableDynamicSizing={enableDynamicSizing}
-      maxDynamicContentSize={screenHeight * 0.9}
-      enableDismissOnClose
-      keyboardBehavior="interactive"
-      backgroundStyle={backgroundStyle}
-      handleIndicatorStyle={handleIndicatorStyle}
-      handleStyle={handleStyle}
-      backdropComponent={renderCustomBackdrop}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={styles.titleContainer}>
-        <Text fontSize="lg" fontWeight="medium">
-          {title}
-        </Text>
-        {/* An icon-only Pressable announces nothing: the SVG carries no
-            label and the Pressable has none of its own, so VoiceOver reads
-            the sheet's only dismiss control as an unlabelled button. */}
-        <Pressable
-          hitSlop={hitSlop}
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel={t("pickerSheet.close")}
-        >
-          <CloseIcon style={styles.closeIcon} />
-        </Pressable>
-      </View>
-      {searchable ? (
-        <View style={styles.searchContainer}>
-          <SearchInput
-            placeholder={t("pickerSheet.search")}
-            value={filter}
-            onChangeText={setFilter}
-            style={styles.searchInput}
-          />
+      <Animated.View
+        style={[
+          styles.sheet,
+          { maxHeight: screenHeight * 0.9 },
+          sheetAnimatedStyle,
+        ]}
+      >
+        <GestureDetector gesture={handleDrag}>
+          <View style={styles.handleContainer}>
+            <View style={styles.handleBar} />
+          </View>
+        </GestureDetector>
+        <View style={styles.titleContainer}>
+          <Text fontSize="lg" fontWeight="medium">
+            {title}
+          </Text>
+          {/* An icon-only Pressable announces nothing on its own; the label
+              and role give VoiceOver something to read for the close control. */}
+          <Pressable
+            hitSlop={hitSlop}
+            onPress={handleClose}
+            accessibilityRole="button"
+            accessibilityLabel={t("pickerSheet.close")}
+          >
+            <CloseIcon style={styles.closeIcon} />
+          </Pressable>
         </View>
-      ) : null}
-      <BottomSheetFlatList
-        keyExtractor={keyExtractor}
-        contentContainerStyle={contentContainerStyle}
-        keyboardShouldPersistTaps="handled"
-        renderItem={renderItem}
-        {...flatlistProps}
-        data={data}
-      />
-    </BottomSheetModal>
+        {searchable ? (
+          <View style={styles.searchContainer}>
+            <SearchInput
+              placeholder={t("pickerSheet.search")}
+              value={filter}
+              onChangeText={setFilter}
+              style={styles.searchInput}
+            />
+          </View>
+        ) : null}
+        <FlatList
+          style={styles.list}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={{
+            paddingBottom: insets.bottom || theme.spacing[4],
+          }}
+          keyboardShouldPersistTaps="handled"
+          renderItem={renderItem}
+          {...flatlistProps}
+          data={data}
+        />
+      </Animated.View>
+    </KeyboardAvoidingView>
   );
+};
+
+const UnForwardedPickerSheet = <T extends Item>(
+  props: InputPickerProps<T>,
+  ref: React.ForwardedRef<PickerSheetRef>,
+) => {
+  const modalIDRef = useRef<string | undefined>(undefined);
+  const propsRef = useRef(props);
+  propsRef.current = props;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      present: () => {
+        const { modalID } = magicModal.show(
+          () => <PickerSheetContent {...propsRef.current} />,
+          {
+            // The library's own whole-content swipe would fight the list's
+            // scroll and the search input's touches — dismissal is handled by
+            // our own handle-scoped gesture inside PickerSheetContent instead.
+            swipeDirection: undefined,
+            style: { justifyContent: "flex-end" },
+          },
+        );
+        modalIDRef.current = modalID;
+      },
+      close: () => {
+        if (!modalIDRef.current) return;
+        magicModal.hide(undefined, { modalID: modalIDRef.current });
+      },
+    }),
+    [],
+  );
+
+  return null;
 };
 
 export const PickerSheet = React.forwardRef(UnForwardedPickerSheet) as <
   T extends Item,
 >(
-  props: InputPickerProps<T> & { ref?: React.Ref<BottomSheetModal> },
+  props: InputPickerProps<T> & { ref?: React.Ref<PickerSheetRef> },
 ) => React.ReactElement;
 
 export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
-  const pickerSheetRef = React.useRef<BottomSheetModal>(null);
+  const pickerSheetRef = React.useRef<PickerSheetRef>(null);
 
   return (
     <View style={styles.container}>
@@ -241,13 +253,7 @@ export const InputPicker = <T extends Item>(props: InputPickerProps<T>) => {
           optional={props.optional}
         />
       </Pressable>
-      {/* Long/searchable lists (breeds, sizes, colors) keep a tall fixed sheet;
-          direct PickerSheet users without snapPoints get content-fit sizing. */}
-      <PickerSheet
-        snapPoints={["70%", "93%"]}
-        {...props}
-        ref={pickerSheetRef}
-      />
+      <PickerSheet {...props} ref={pickerSheetRef} />
     </View>
   );
 };

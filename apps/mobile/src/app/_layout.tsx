@@ -4,7 +4,6 @@ import "@/config";
 import { router, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
@@ -102,7 +101,7 @@ const App = () => {
   const tree = (
     <TRPCProvider>
       <ThemeProvider>
-        <BottomSheetModalProvider>
+        <>
           {/*
             Ahead of the router, so its entry sits at the BOTTOM of React
             Native's status-bar props stack and a screen that pops its own
@@ -120,7 +119,7 @@ const App = () => {
             </Provider>
             <MagicModalPortal />
           </NetworkBoundary>
-        </BottomSheetModalProvider>
+        </>
       </ThemeProvider>
     </TRPCProvider>
   );

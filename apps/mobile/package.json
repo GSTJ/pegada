@@ -19,7 +19,6 @@
   "dependencies": {
     "@expo/config-types": "^55.0.5",
     "@expo/metro-runtime": "~55.0.11",
-    "@gorhom/bottom-sheet": "^5.2.14",
     "@hookform/resolvers": "^3.9.0",
     "@pegada/shared": "workspace:*",
     "@ptomasroos/react-native-multi-slider": "^2.2.2",
