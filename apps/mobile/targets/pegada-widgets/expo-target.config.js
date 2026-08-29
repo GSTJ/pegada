@@ -18,7 +18,7 @@ module.exports = {
   // `.` prefix appends to the main app's bundle id -> app.pegada.widgets
   bundleIdentifier: ".widgets",
   deploymentTarget: "16.2",
-  frameworks: ["SwiftUI", "WidgetKit", "ActivityKit", "AppIntents"],
+  frameworks: ["SwiftUI", "WidgetKit", "ActivityKit"],
   colors: {
     $accent: "#EE61A1",
     $widgetBackground: { color: "#FFFFFF", darkColor: "#16151A" },
