@@ -1,0 +1,19 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'app.pegada.thememoverride'
+version = '1.0.0'
+
+android {
+  namespace "app.pegada.thememoverride"
+  compileSdk 36
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}

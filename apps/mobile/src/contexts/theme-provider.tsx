@@ -30,6 +30,8 @@ import {
   Theme,
 } from "@/services/storage";
 
+import PegadaThemeOverride from "../../modules/pegada-theme-override";
+
 export type ActiveTheme = StorageDataTypes[StorageKeys.Theme] | null;
 
 // Kicked off at import time so the stored theme override is resolved as
@@ -44,14 +46,20 @@ export const storedThemePromise: Promise<ActiveTheme> = getData(
   return null;
 });
 
-// Mirrors the forced theme into iOS UserDefaults so the native layer can
-// apply it to the window BEFORE the splash screen renders on the next cold
-// start (see plugins/withInitialThemeOverride.js). Without this the native
-// splash always follows the system appearance, which is what made the boot
-// blink white for users who forced dark mode on a light-mode device.
+// Mirrors the forced theme into a native store the OS can read before the
+// splash screen renders on the next cold start (see
+// plugins/with-initial-theme-override.js): iOS UserDefaults via RN's
+// `Settings` API, Android SharedPreferences via the local
+// pegada-theme-override module (RN's `Settings` has no Android backing).
+// Without this the native splash always follows the system appearance,
+// which is what made the boot blink white for users who forced dark mode on
+// a light-mode device.
 export const persistNativeThemeOverride = (theme: ActiveTheme) => {
-  if (Platform.OS !== "ios") return;
-  Settings.set({ pegadaThemeOverride: theme ?? "system" });
+  if (Platform.OS === "ios") {
+    Settings.set({ pegadaThemeOverride: theme ?? "system" });
+  } else {
+    PegadaThemeOverride?.set(theme ?? "system");
+  }
 };
 
 // Forces Appearance to match the stored choice, including Automatic
