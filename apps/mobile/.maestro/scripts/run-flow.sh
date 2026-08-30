@@ -109,7 +109,8 @@ export APP_SCHEME="${APP_SCHEME:-pegada}"
 # device instead of three independent guesses at "booted".
 export MAESTRO_PLATFORM="${MAESTRO_PLATFORM:-ios}"
 
-if [[ -z "${MAESTRO_DEVICE_ID:-}" ]] && command -v xcrun >/dev/null 2>&1; then
+if [[ -z "${MAESTRO_DEVICE_ID:-}" && "$MAESTRO_PLATFORM" == "ios" ]] \
+  && command -v xcrun >/dev/null 2>&1; then
   BOOTED=$(xcrun simctl list devices booted --json 2>/dev/null \
     | grep -o '"udid" : "[^"]*"' | sed 's/.*: "//;s/"//' || true)
   if [[ "$(printf '%s\n' "$BOOTED" | grep -c .)" == "1" ]]; then
@@ -121,14 +122,30 @@ export SIM_UDID="${SIM_UDID:-${MAESTRO_DEVICE_ID:-}}"
 MAESTRO_DEVICE_ARGS=()
 if [[ -n "${MAESTRO_DEVICE_ID:-}" ]]; then
   MAESTRO_DEVICE_ARGS=(--device "$MAESTRO_DEVICE_ID")
-  echo "==> device: $MAESTRO_DEVICE_ID (ios)"
+  # Report the platform we are actually on. This said "(ios)" unconditionally,
+  # which was true of every caller until flow 50 ran on an emulator.
+  echo "==> device: $MAESTRO_DEVICE_ID ($MAESTRO_PLATFORM)"
 fi
 
-# 3c. Pin the simulator's GPS to San Francisco — the maestro seed places
-# all deck dogs near SF, and without a simulated location
-# `getCurrentPositionAsync` never resolves, so flow 20's AskForLocation
-# screen hangs forever even with the permission pre-granted.
-if command -v xcrun >/dev/null 2>&1; then
+# 3c. Pin the device's GPS to San Francisco — the maestro seed places all deck
+# dogs near SF, and without a simulated location `getCurrentPositionAsync`
+# never resolves, so AskForLocation hangs forever even with the permission
+# pre-granted.
+#
+# The Android half also opens the port forwards the app needs, because there is
+# nowhere else for them to live: EXPO_PUBLIC_API_URL is baked into the bundle
+# as `http://localhost:<PORT>/api`, so the device's own localhost has to be the
+# host's, and the same goes for MinIO on 9002 or every photo upload fails. On
+# iOS the simulator shares the host's network stack and none of this is needed.
+if [[ "$MAESTRO_PLATFORM" == "android" ]]; then
+  ANDROID_TARGET_ARGS=()
+  [[ -n "${MAESTRO_DEVICE_ID:-}" ]] && ANDROID_TARGET_ARGS=(-s "$MAESTRO_DEVICE_ID")
+  if command -v adb >/dev/null 2>&1; then
+    adb "${ANDROID_TARGET_ARGS[@]}" reverse "tcp:${PORT:-3010}" "tcp:${PORT:-3010}" >/dev/null 2>&1 || true
+    adb "${ANDROID_TARGET_ARGS[@]}" reverse tcp:9002 tcp:9002 >/dev/null 2>&1 || true
+    adb "${ANDROID_TARGET_ARGS[@]}" emu geo fix -122.4194 37.7749 >/dev/null 2>&1 || true
+  fi
+elif command -v xcrun >/dev/null 2>&1; then
   xcrun simctl location "${MAESTRO_DEVICE_ID:-booted}" set 37.7749,-122.4194 \
     2>/dev/null || true
 fi

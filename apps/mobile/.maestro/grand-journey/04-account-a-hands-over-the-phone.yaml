@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+name: grand journey 04 - account A logs out
+tags:
+  - util
+---
+# Segment 4. The account switch the suite has never covered.
+#
+# 26-logout-journey.yaml logs out and stops there; nothing in the tree has
+# ever logged back IN as a different user, let alone returned to the first one
+# with its data intact. The next four segments do all three, on one device,
+# which is the only way a mutual match between two real accounts can be driven
+# from the UI at all.
+#
+# NO `launchApp` here, deliberately. Tearing the process down between accounts
+# would make this a sequence of unrelated single-account flows and would hide
+# exactly the bug an account switch is prone to: state belonging to the
+# previous user surviving into the next session. `services/logout.ts` clears
+# the Keychain token, the redux store and the react-query cache; segment 05
+# lands on CreateProfile for a brand-new account immediately afterwards, in
+# the same process, which is what proves it.
+- runFlow: ../utils/logout.yaml
+- takeScreenshot: 50-15-logged-out

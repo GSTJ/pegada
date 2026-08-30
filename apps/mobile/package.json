@@ -126,8 +126,12 @@
   },
   "jest": {
     "clearMocks": true,
+    "globals": {
+      "__DEV__": true
+    },
     "moduleNameMapper": {
       "\\.(png|jpe?g|gif|webp|svg|ttf|otf|woff2?|mp4|lottie)$": "<rootDir>/jest/asset-stub.js",
+      "^react-native-unistyles/components/native/.*$": "<rootDir>/jest/unistyles-native-stub.js",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
   },

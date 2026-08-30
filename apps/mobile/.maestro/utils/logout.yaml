@@ -1,0 +1,58 @@
+appId: ${APP_ID}
+name: util - log the current account out from Profile
+tags:
+  - util
+---
+# Shared by the grand journey, which logs out three times: A hands the device
+# to B, B hands it back to A, and A hands it back to B again.
+#
+# 26-logout-journey.yaml walks the same rows but proves the outcome with
+# screenshots only. Its stated reason —
+#
+#   "no native assertion is reliable here — RN tree is empty and the only
+#    system element present is the QWERTY keyboard"
+#
+# is stale. That flow already taps `profile-logout` BY ID, which it could not
+# do if the RN tree were empty, and the tours reach `signin-email` by id on
+# both platforms at this branch tip. So this util asserts, and the journey
+# gets a real failure instead of a screenshot to squint at when a logout
+# silently leaves the session behind.
+- tapOn:
+    id: "tab-profile"
+- waitForAnimationToEnd:
+    timeout: 5000
+# The app-review modal fires off myDog.get on the profile/messages tabs and
+# eats the next tap when it wins the race.
+- runFlow: dismiss-app-review.yaml
+- assertVisible:
+    id: "profile-screen"
+
+# Logout sits at the bottom of the settings list, under the legal links.
+# `scrollUntilVisible` rather than a fixed-distance swipe: the list grows a
+# row for premium accounts, so a hardcoded swipe lands somewhere different
+# depending on who is logged in.
+- scrollUntilVisible:
+    element:
+      id: "profile-logout"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: "profile-logout"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Native Alert. Two elements carry the text "Logout" — the alert title and the
+# destructive button — so the confirmation copy is the unique anchor and
+# `index: 1` picks the button rather than the title.
+- assertVisible: "Are you sure you want to logout\\?"
+- tapOn:
+    text: "Logout"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# The assertion flow 26 declined to make.
+- extendedWaitUntil:
+    visible:
+      id: "signin-email"
+    timeout: 20000

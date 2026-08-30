@@ -27,7 +27,19 @@ const languagesPickerData = Object.entries(LANGUAGES).map(([id, name]) => ({
 export const LanguageConfig = () => {
   const { t, i18n } = useTranslation();
 
-  const currentLanguage = i18n.language;
+  // `resolvedLanguage`, not `language`. The latter is the raw device tag
+  // expo-localization reported, and only two tags on earth match this list
+  // exactly. A phone set to English in Brazil reports `en-BR`; `en-GB`,
+  // `en-CA` and `en-AU` are the same shape and are a great many real users.
+  // For all of them the lookup below missed, the fallback invented an option
+  // whose id no row in the sheet carries, and the picker showed NOTHING
+  // selected while the app was plainly running in English — the subtitle read
+  // "English" only because the fallback hardcodes the default language's name.
+  //
+  // `resolvedLanguage` is the tag i18next actually loaded resources for after
+  // applying `fallbackLng`, so it is by definition one of the two we ship, and
+  // it is the row the user is actually reading the app in.
+  const currentLanguage = i18n.resolvedLanguage ?? i18n.language;
 
   const { theme } = useUnistyles();
 

@@ -1,0 +1,83 @@
+appId: ${APP_ID}
+name: util - login as grand-journey account A (journey-a@pegada.app)
+tags:
+  - util
+---
+# Account A of the grand journey (50-grand-journey.yaml). Everything here is
+# utils/login-returning.yaml with one address changed; the address is what
+# matters, so read this comment rather than diffing the steps.
+#
+# journey-a@pegada.app must be listed in APPLE_MAGIC_EMAIL, NOT matched by
+# APPLE_MAGIC_EMAIL_REGEX. The regex path (`maestro-fresh*`) hard-purges the
+# user on EVERY successful login — see `purgeUserByEmail` in
+# packages/api/src/services/authentication-service.ts. The grand journey logs
+# back in as A after creating account B, so the regex path would delete A, A's
+# dog, and the match the journey just created, mid-run. A sticky magic email
+# has no such teardown; the run's clean slate comes from
+# scripts/pre/50-reset-journey-accounts.sh instead, once, up front.
+#
+#   export APPLE_MAGIC_EMAIL='test@pegada.app,delete-me@pegada.app,journey-a@pegada.app,journey-b@pegada.app'
+#
+# The address is hardcoded because `${VAR}` in `inputText:` resolves to the
+# literal string "undefined" when a flow is reached through `runFlow:` — the
+# same reason every other login util in this directory hardcodes its own.
+- runFlow: dismiss-system-dialogs.yaml
+- tapOn:
+    id: "signin-email"
+- waitForAnimationToEnd
+# A stray keystroke from the tap landing on the keyboard would produce
+# `vjourney-a@pegada.app`, which is NOT in APPLE_MAGIC_EMAIL: the API rotates a
+# random code into the DB for it and rejects 424242 on the next screen.
+- eraseText: 50
+- waitForAnimationToEnd
+- inputText: "journey-a@pegada.app"
+- tapOn:
+    id: "signin-submit"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: dismiss-system-dialogs.yaml
+- waitForAnimationToEnd
+# Proof the OTP screen actually swapped in. iOS shows a "Next" accessory over
+# the numeric keypad; Android's IME action is an unlabelled arrow, so there the
+# equivalent anchor is the first OTP cell.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Next"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "otp-digit-0"
+          timeout: 15000
+- tapOn:
+    id: "otp-digit-0"
+- waitForAnimationToEnd
+# Per-digit entry: a single `inputText: "424242"` outruns React's commit phase
+# and leaves cells half filled. 25ms is the driver round-trip floor.
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "4"
+- waitForAnimationToEnd:
+    timeout: 25
+- inputText: "2"
+- waitForAnimationToEnd:
+    timeout: 25000
+- runFlow: dismiss-system-dialogs.yaml
+- tapOn:
+    text: "Allow"
+    optional: true
+- waitForAnimationToEnd

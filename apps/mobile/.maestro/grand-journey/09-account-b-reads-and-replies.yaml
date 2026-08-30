@@ -1,0 +1,75 @@
+appId: ${APP_ID}
+name: grand journey 09 - account B reads A's message and replies
+tags:
+  - util
+---
+# Segment 9. The other end of the conversation, from the account that did not
+# write it — the only way to prove a message crossed accounts rather than just
+# rendering back into the sender's own cache.
+#
+# Chat is a pushed route, not a tab, so its own back affordance is the way out;
+# the tab bar the logout util starts from is not on screen until we leave.
+- tapOn:
+    id: "chat-back"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: ../utils/logout.yaml
+
+- runFlow: ../utils/login-journey-b.yaml
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 30000
+- takeScreenshot: 50-31-b-back-in
+
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 8000
+- runFlow: ../utils/dismiss-app-review.yaml
+- assertVisible:
+    id: "messages-screen"
+
+# Segment 02 asserted this same screen was EMPTY for account A. It is not empty
+# for B, and the row is the match this run produced.
+- extendedWaitUntil:
+    visible:
+      id: "messages-chat-row"
+    timeout: 15000
+- assertVisible: ".*Ares.*"
+- takeScreenshot: 50-32-b-has-a-conversation
+
+- tapOn:
+    id: "messages-chat-row"
+- extendedWaitUntil:
+    visible:
+      id: "chat-screen"
+    timeout: 15000
+
+# A's message, on B's device, in the INCOMING bubble. `Message` picks its
+# testID from `self`, so `chat-message-other` here and `chat-message-self` in
+# segment 08 are the same row seen from the two ends of the match.
+- extendedWaitUntil:
+    visible:
+      id: "chat-message-other"
+    timeout: 15000
+- assertVisible: ".*Park at six.*"
+- assertNotVisible:
+    id: "chat-message-self"
+- takeScreenshot: 50-33-b-reads-ares
+
+- tapOn:
+    id: "chat-input"
+- waitForAnimationToEnd
+- inputText: "Bianca here. Six works."
+- waitForAnimationToEnd
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: "chat-message-self"
+    timeout: 15000
+- assertVisible: ".*Six works.*"
+# Both directions on screen at once: the conversation, not just a message.
+- assertVisible:
+    id: "chat-message-other"
+- takeScreenshot: 50-34-conversation-both-ways

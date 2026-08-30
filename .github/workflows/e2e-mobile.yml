@@ -755,7 +755,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 20
     env:
-      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
+      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app,delete-me@pegada.app,journey-a@pegada.app,journey-b@pegada.app' }}
       APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
 
     steps:
@@ -1390,10 +1390,14 @@ jobs:
           # pre/post scripts, disjoint from the other two shards' rows.
           - name: delete
             flows: "27-delete-account-journey"
+          # grand: two fresh accounts through a live mutual match.
+          - name: grand
+            flows: "50-grand-journey"
     env:
-      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app' }}
+      APPLE_MAGIC_EMAIL: ${{ secrets.APPLE_MAGIC_EMAIL || 'test@pegada.app,delete-me@pegada.app,journey-a@pegada.app,journey-b@pegada.app' }}
       APPLE_MAGIC_CODE: ${{ secrets.APPLE_MAGIC_CODE || '424242' }}
       EXPO_PUBLIC_API_URL: ${{ secrets.EXPO_PUBLIC_API_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout

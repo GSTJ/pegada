@@ -1,0 +1,31 @@
+appId: ${APP_ID}
+name: grand journey 03 - account A narrows its deck to the journey
+tags:
+  - util
+---
+# Segment 3. A sets one preference — coat colour BLACK — through the real
+# bottom-sheet picker. utils/prefer-black-coats.yaml explains why this
+# particular preference is the one that makes the rest of the journey
+# deterministic; the short version is that every seeded dog is GOLDEN and the
+# two dogs this journey creates have no colour, so "prefer BLACK" means
+# "show me only the dogs this journey made".
+- runFlow: ../utils/prefer-black-coats.yaml
+- takeScreenshot: 50-13-preferences-saved
+
+# The deck is now empty, and that is the assertion.
+#
+# Account B does not exist yet, so there is no FEMALE dog left anywhere in the
+# database with a NULL colour. An empty deck here is what proves the filter
+# actually reached SQL — if the preference had silently failed to save, the
+# eight seeded GOLDEN females from segment 02 would still be sitting there and
+# segment 07 would later like whichever one the planner happened to return
+# instead of B.
+- tapOn:
+    id: "tab-swipe"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertVisible:
+    id: "swipe-screen"
+- assertNotVisible:
+    id: "swipe-card"
+- takeScreenshot: 50-14-deck-emptied-by-preference

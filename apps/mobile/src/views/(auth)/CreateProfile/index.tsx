@@ -226,20 +226,13 @@ const CreateProfile = () => {
               render={({ field: { onChange, value } }) => (
                 <RadioButtons
                   title={t("completeProfile.gender")}
+                  itemTestIDPrefix="gender-item-"
                   data={[
-                    t("completeProfile.male"),
-                    t("completeProfile.female"),
+                    { id: "MALE", name: t("completeProfile.male") },
+                    { id: "FEMALE", name: t("completeProfile.female") },
                   ]}
-                  value={
-                    value === "MALE"
-                      ? t("completeProfile.male")
-                      : t("completeProfile.female")
-                  }
-                  onChange={(value) => {
-                    onChange(
-                      value === t("completeProfile.male") ? "MALE" : "FEMALE",
-                    );
-                  }}
+                  value={value}
+                  onChange={onChange}
                 />
               )}
             />

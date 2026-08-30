@@ -1,0 +1,60 @@
+appId: ${APP_ID}
+name: grand journey 02 - account A works the deck it just earned
+tags:
+  - util
+---
+# Segment 2. The first thing a real new user does: look at a card, open the
+# profile behind it, pass on one dog, like another.
+#
+# Both swipes land on seeded SF dogs (Bella / MatchMe / SwipeDog1-6). None of
+# them can produce a match here: MatchMe's pre-like points at Rex, and the
+# SwipeDog pool is seeded with no reciprocal interest at all. The
+# `assertNotVisible: new-match-screen` below is what holds that invariant —
+# a match this early would mean the deck served a dog it should not have, and
+# would leave account A with a match the post-check does not expect.
+- assertVisible:
+    id: "swipe-screen"
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 50-08-first-card
+
+# The card's own affordance for "tell me more", not a deep link.
+- tapOn:
+    id: "swipe-card-open-profile"
+- extendedWaitUntil:
+    visible:
+      id: "dog-profile-name"
+    timeout: 10000
+- takeScreenshot: 50-09-dog-profile
+- tapOn:
+    id: "dog-profile-close"
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 8000
+
+- tapOn:
+    id: "swipe-dislike"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: 50-10-after-pass
+
+- tapOn:
+    id: "swipe-like"
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertNotVisible:
+    id: "new-match-screen"
+- takeScreenshot: 50-11-after-like
+
+# Messages, still empty for this account. The app-review modal fires on this
+# tab once `myDog.get` resolves and has eaten the tap after it in every run
+# that did not suppress it, so it is dismissed reactively here.
+- tapOn:
+    id: "tab-messages"
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow: ../utils/dismiss-app-review.yaml
+- assertVisible:
+    id: "messages-screen"
+- takeScreenshot: 50-12-messages-empty

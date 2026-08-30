@@ -1,0 +1,83 @@
+appId: ${APP_ID}
+name: 50 - grand journey - two accounts, one device, a live mutual match
+tags:
+  - journey
+  - regression
+---
+# The grand journey. Two accounts created through the UI on one device, taken
+# through a mutual match, a conversation in both directions, and the settings
+# that surround it — in one process, without a relaunch between accounts.
+#
+# WHY IT IS ONE FLOW AND TEN FILES
+#
+# Every segment depends on the state the previous one left in the database and
+# on the screen. They are split for reading and for recording, not because
+# they are independent; `runFlow` keeps them in one Maestro session so the
+# app's process, its Keychain and its caches carry across the account
+# switches, which is the point.
+#
+# WHAT IT COVERS THAT NOTHING ELSE DOES
+#
+#   * A LIVE mutual match (segments 05-07). 22-new-match-journey.yaml reaches
+#     a match screen, but its first half is a seeded Interest row. Here both
+#     halves are swipes, by two accounts that did not exist when the run
+#     started.
+#   * A FEMALE dog created through the UI (05). The deck filter is strictly
+#     opposite-gender, so a two-account journey was not expressible until
+#     `RadioButtons` got addressable options — the control could previously
+#     only be hit by matching its translated label.
+#   * An ACCOUNT SWITCH (04, 07, 09). 26-logout-journey.yaml logs out and
+#     stops; nothing has ever logged back in as someone else, and nothing has
+#     ever returned to the first account to find its data intact.
+#   * PUSH NOTIFICATIONS, at the only layer a simulator can observe them.
+#     See checks/50-grand-journey.sh — the short version is that a simulator
+#     is never `Device.isDevice`, so no user created through the app ever has
+#     a push token, so every `if (pushToken)` guard in the services
+#     short-circuits and the notification path is never entered at all. The
+#     pre-script seeds a deliberately invalid token per account; entering the
+#     path blanks it. Two events, two recipients, two columns.
+#   * A NEW ACCOUNT REACHING THE DECK (01). 20-account-creation-journey.yaml
+#     ends on a bare screenshot and its post-check counts rows without reading
+#     a column, which is how an account with NULL coordinates went unnoticed.
+#   * The SETTINGS SHEETS (10), which three existing flows route around on a
+#     rationale that no longer holds.
+#
+# DETERMINISM
+#
+# The journey never swipes "the top card". `getPotentialMatches` orders by
+# `priority DESC, <distance bucket> ASC` with no tiebreaker below that, and
+# run-flow.sh pins the simulator to San Francisco where the whole fixture
+# lives — so every dog falls in one bucket and their order is the planner's
+# business. Instead, segments 03 and 06 set a colour preference that resolves
+# each deck to exactly the dogs this run created. See
+# utils/prefer-black-coats.yaml.
+#
+# SETUP
+#
+#   scripts/pre/50-reset-journey-accounts.sh    (run automatically by
+#   checks/50-grand-journey.sh                   scripts/run-flow.sh 50)
+#
+# journey-a@pegada.app and journey-b@pegada.app must be in APPLE_MAGIC_EMAIL
+# and must NOT be matched by APPLE_MAGIC_EMAIL_REGEX. The regex path purges
+# the user on every login, which would delete account A — and the match — in
+# the middle of segment 07.
+#
+#   export APPLE_MAGIC_EMAIL='test@pegada.app,delete-me@pegada.app,journey-a@pegada.app,journey-b@pegada.app'
+
+# Account A: sign up, work the deck, narrow it, hand the phone over.
+- runFlow: grand-journey/01-account-a-signup.yaml
+- runFlow: grand-journey/02-account-a-first-look.yaml
+- runFlow: grand-journey/03-account-a-narrows-the-deck.yaml
+- runFlow: grand-journey/04-account-a-hands-over-the-phone.yaml
+
+# Account B: sign up FEMALE, find Ares, like him first.
+- runFlow: grand-journey/05-account-b-signup.yaml
+- runFlow: grand-journey/06-account-b-likes-ares.yaml
+
+# Back to A: like back, match, write.
+- runFlow: grand-journey/07-account-a-likes-back-and-matches.yaml
+- runFlow: grand-journey/08-account-a-opens-the-conversation.yaml
+
+# Back to B: read it, answer it, then the settings sheets.
+- runFlow: grand-journey/09-account-b-reads-and-replies.yaml
+- runFlow: grand-journey/10-settings-through-the-real-pickers.yaml

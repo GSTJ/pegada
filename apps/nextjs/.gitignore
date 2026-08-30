@@ -37,3 +37,4 @@ pnpm-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .next-*/
+.env*

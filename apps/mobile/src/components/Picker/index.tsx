@@ -75,7 +75,9 @@ const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const PickerSheetContent = <T extends Item>(props: InputPickerProps<T>) => {
+export const PickerSheetContent = <T extends Item>(
+  props: InputPickerProps<T>,
+) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const insets = useSafeAreaInsets();

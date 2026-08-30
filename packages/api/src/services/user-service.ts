@@ -3,6 +3,7 @@ import type { User } from "@prisma/client";
 import prisma from "@pegada/database";
 
 import { deleteImageFromS3 } from "../shared/file-upload";
+import { isAllowedImageUrl } from "../shared/image-url";
 
 export class UserService {
   /**
@@ -33,7 +34,21 @@ export class UserService {
     // Delete public objects before their database references disappear. A
     // failed storage deletion leaves the account intact so the request can be
     // retried without losing track of personal data that still needs removal.
-    await Promise.all(imageUrls.map((url) => deleteImageFromS3(url)));
+    //
+    // Photos on an origin this deployment is not configured for are skipped
+    // rather than attempted. They are not ours to delete — a retired bucket, a
+    // seeded fixture, anything from before the R2 move — and `storageForUrl`
+    // refuses to route them, so asking would throw and leave the account
+    // permanently undeletable. Guideline 5.1.1(v) requires the opposite, and
+    // refusing buys nothing: there is no object of ours behind that URL to
+    // keep. `DogService.updateDog` filters its deletions the same way.
+    await Promise.all(
+      // Not point-free: `isAllowedImageUrl`'s second parameter is the origin
+      // set, and `filter` would hand it the array index.
+      imageUrls
+        .filter((url) => isAllowedImageUrl(url))
+        .map((url) => deleteImageFromS3(url)),
+    );
 
     await prisma.$transaction(async (tx) => {
       if (dogIds.length > 0) {
