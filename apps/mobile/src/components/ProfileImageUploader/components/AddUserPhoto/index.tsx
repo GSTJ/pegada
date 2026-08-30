@@ -3,7 +3,7 @@ import type {
   ProfileImageUploadStage,
 } from "@/components/ProfileImageUploader/utils";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, View } from "react-native";
 
@@ -12,6 +12,7 @@ import { magicToast } from "react-native-magic-toast";
 import Animated, {
   FadeOut,
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 import { useUnistyles } from "react-native-unistyles";
@@ -70,12 +71,15 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
   const { theme } = useUnistyles();
 
   const hasPicture = Boolean(localPicture || picture.url);
+  const rotation = useSharedValue(hasPicture ? 45 : 0);
 
-  const style = useAnimatedStyle(() => {
-    "worklet";
-    const rotation = withSpring(hasPicture ? `45deg` : `0deg`);
-    return { transform: [{ rotateZ: rotation }] };
-  });
+  useEffect(() => {
+    rotation.value = withSpring(hasPicture ? 45 : 0);
+  }, [hasPicture, rotation]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotateZ: `${rotation.value}deg` }],
+  }));
 
   const handleDelete = () => {
     setLocalPicture("");
