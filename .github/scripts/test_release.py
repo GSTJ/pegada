@@ -146,6 +146,14 @@ class ChangelogTest(GitRepositoryTest):
         self.assertIn("### Breaking changes", changelog)
         self.assertIn("Existing sessions need to sign in again.", changelog)
 
+    def test_release_text_uses_plain_dashes(self) -> None:
+        self.commit("fix: keep release notes readable \u2014 even from commit titles")
+
+        changelog = self.changelog("--all", "--upcoming", "v1.1.0")
+
+        self.assertNotIn("\u2014", changelog)
+        self.assertIn("readable, even", changelog)
+
 
 class TagReleaseTest(GitRepositoryTest):
     def setUp(self) -> None:

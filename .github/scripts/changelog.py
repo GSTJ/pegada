@@ -319,7 +319,14 @@ def main() -> int:
             blocks.append(section(args.repo, previous, tag, heading_level=2))
         text = "\n".join(blocks)
 
-    text = text.rstrip("\n") + "\n"
+    text = (
+        text.replace(" \u2014 ", ", ")
+        .replace(" \u2013 ", " - ")
+        .replace("\u2014", ",")
+        .replace("\u2013", "-")
+        .rstrip("\n")
+        + "\n"
+    )
 
     if args.output:
         args.output.write_text(text)
