@@ -73,11 +73,17 @@ const DraggableGridItem = <T extends DraggableItem>({
   const dragX = useSharedValue(0);
   const dragY = useSharedValue(0);
   const isActive = useSharedValue(false);
+  const liftScale = useSharedValue(1);
+  // Worklets close over `index` at gesture-creation time; mirroring it into a
+  // shared value keeps onEnd reading the current slot even if a native
+  // touch event is still in flight when a reorder shifts this item's index.
+  const currentIndex = useSharedValue(index);
 
   // Slots stay put while an item settles into a new position after a drop
   // elsewhere in the grid — only the coordinates change, not by a gesture on
   // this cell.
   useEffect(() => {
+    currentIndex.value = index;
     restX.value = withSpring((index % numColumns) * cellWidth, SLOT_SPRING);
     restY.value = withSpring(
       Math.floor(index / numColumns) * cellHeight,
@@ -95,11 +101,16 @@ const DraggableGridItem = <T extends DraggableItem>({
     .onStart(() => {
       "worklet";
       isActive.value = true;
+      liftScale.value = withSpring(LIFT_SCALE, LIFT_SPRING);
       runOnJS(onDragStart)();
     })
     .onFinalize(() => {
       "worklet";
+      // A tap that never reaches the long-press threshold still finalizes —
+      // only fire onDragEnd (and unwind the lift) if a drag actually started.
+      if (!isActive.value) return;
       isActive.value = false;
+      liftScale.value = withSpring(1, LIFT_SPRING);
       runOnJS(onDragEnd)();
     });
 
@@ -123,7 +134,7 @@ const DraggableGridItem = <T extends DraggableItem>({
       const col = clamp(Math.round(currentX / cellWidth), 0, numColumns - 1);
       const row = Math.max(0, Math.round(currentY / cellHeight));
       const hoverIndex = clamp(row * numColumns + col, 0, total - 1);
-      runOnJS(onReorder)(index, hoverIndex);
+      runOnJS(onReorder)(currentIndex.value, hoverIndex);
     })
     .onFinalize(() => {
       "worklet";
@@ -142,7 +153,7 @@ const DraggableGridItem = <T extends DraggableItem>({
     transform: [
       { translateX: dragX.value },
       { translateY: dragY.value },
-      { scale: withSpring(isActive.value ? LIFT_SCALE : 1, LIFT_SPRING) },
+      { scale: liftScale.value },
     ],
     zIndex: isActive.value ? 10 : 0,
     elevation: isActive.value ? 10 : 0,
@@ -188,15 +199,29 @@ export const DraggableGrid = <T extends DraggableItem>({
   };
 
   const handleReorder = (fromIndex: number, toIndex: number) => {
-    if (toIndex === fromIndex || items[toIndex]?.disabledReSorted) return;
+    let reordered: T[] | null = null;
 
-    const next = [...items];
-    const [moved] = next.splice(fromIndex, 1);
-    if (!moved) return;
-    next.splice(toIndex, 0, moved);
+    setItems((prev) => {
+      const inRange = (i: number) => i >= 0 && i < prev.length;
+      if (
+        toIndex === fromIndex ||
+        !inRange(fromIndex) ||
+        !inRange(toIndex) ||
+        prev[toIndex]?.disabledReSorted
+      ) {
+        return prev;
+      }
 
-    setItems(next);
-    onDragRelease?.(next);
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      if (!moved) return prev;
+      next.splice(toIndex, 0, moved);
+
+      reordered = next;
+      return next;
+    });
+
+    if (reordered) onDragRelease?.(reordered);
   };
 
   const handleLayout = (event: LayoutChangeEvent) => {
