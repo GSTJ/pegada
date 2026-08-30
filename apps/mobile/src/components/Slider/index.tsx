@@ -142,7 +142,7 @@ const Marker = ({
 }: MarkerProps) => {
   const setSwipeBackEnabled = useDisableSwipeBack();
   const startPosition = useSharedValue(0);
-  const isActive = useSharedValue(false);
+  const pressScale = useSharedValue(1);
 
   const gesture = Gesture.Pan()
     .onTouchesDown(() => {
@@ -153,7 +153,7 @@ const Marker = ({
       // first is exactly what let it win sometimes.
       runOnJS(setSwipeBackEnabled)(false);
       startPosition.value = position.value;
-      isActive.value = true;
+      pressScale.value = withSpring(PRESS_SCALE, PRESS_SPRING);
     })
     .onStart(() => {
       "worklet";
@@ -183,7 +183,7 @@ const Marker = ({
         sliderLength,
         step,
       );
-      isActive.value = false;
+      pressScale.value = withSpring(1, PRESS_SPRING);
       runOnJS(setSwipeBackEnabled)(true);
       runOnJS(onDragFinish)(value);
     });
@@ -194,9 +194,7 @@ const Marker = ({
       // Optically centers the ring on the track — matches the 2.3pt border
       // eating slightly into the marker's own bounding box.
       { translateY: 1 },
-      {
-        scale: withSpring(isActive.value ? PRESS_SCALE : 1, PRESS_SPRING),
-      },
+      { scale: pressScale.value },
     ],
   }));
 
