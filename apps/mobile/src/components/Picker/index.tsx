@@ -2,16 +2,9 @@ import type { Item } from "./types";
 
 import type { ListRenderItemInfo } from "react-native";
 
-import { useImperativeHandle, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import * as React from "react";
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { FlatList, Pressable, useWindowDimensions, View } from "react-native";
 
 import { useTranslation } from "react-i18next";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -31,6 +24,8 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
+import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
+import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 
 import { PickerSelectItem } from "./select-item";
 import { CloseIcon, SearchInput, styles } from "./styles";
@@ -82,8 +77,15 @@ export const PickerSheetContent = <T extends Item>(
   const { theme } = useUnistyles();
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
+  const keyboardOverlap = useKeyboardOverlap();
   const { hide } = useMagicModal();
   const handleClose = () => hide();
+  const setSwipeBackEnabled = useDisableSwipeBack();
+
+  useEffect(() => {
+    setSwipeBackEnabled(false);
+    return () => setSwipeBackEnabled(true);
+  }, [setSwipeBackEnabled]);
 
   const {
     title,
@@ -152,6 +154,11 @@ export const PickerSheetContent = <T extends Item>(
     transform: [{ translateY: translateY.value }],
   }));
 
+  const maxSheetHeight = Math.min(
+    screenHeight * 0.9,
+    Math.max(0, screenHeight - keyboardOverlap - insets.top),
+  );
+
   const keyExtractor = (item: T) => `${title}${item.id}`;
 
   const renderItem = ({ item }: ListRenderItemInfo<T>) => (
@@ -167,49 +174,49 @@ export const PickerSheetContent = <T extends Item>(
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <View style={[styles.keyboardAvoider, { paddingBottom: keyboardOverlap }]}>
       <Animated.View
         style={[
           styles.sheet,
-          { maxHeight: screenHeight * 0.9 },
+          { maxHeight: maxSheetHeight },
           sheetAnimatedStyle,
         ]}
       >
         <GestureDetector gesture={handleDrag}>
-          <View style={styles.handleContainer}>
-            <View style={styles.handleBar} />
+          <View style={styles.dismissArea}>
+            <View style={styles.handleContainer}>
+              <View style={styles.handleBar} />
+            </View>
+            <View style={styles.titleContainer}>
+              <Text fontSize="lg" fontWeight="medium">
+                {title}
+              </Text>
+              {/* An icon-only Pressable announces nothing on its own; the label
+                  and role give VoiceOver something to read for the close control. */}
+              <AnimatedPressable
+                hitSlop={hitSlop}
+                onPress={handleClose}
+                onPressIn={() => {
+                  closeButtonScale.value = withTiming(0.97, {
+                    duration: 120,
+                    easing: EASE_OUT,
+                  });
+                }}
+                onPressOut={() => {
+                  closeButtonScale.value = withTiming(1, {
+                    duration: 120,
+                    easing: EASE_OUT,
+                  });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={t("pickerSheet.close")}
+                style={closeButtonStyle}
+              >
+                <CloseIcon style={styles.closeIcon} />
+              </AnimatedPressable>
+            </View>
           </View>
         </GestureDetector>
-        <View style={styles.titleContainer}>
-          <Text fontSize="lg" fontWeight="medium">
-            {title}
-          </Text>
-          {/* An icon-only Pressable announces nothing on its own; the label
-              and role give VoiceOver something to read for the close control. */}
-          <AnimatedPressable
-            hitSlop={hitSlop}
-            onPress={handleClose}
-            onPressIn={() => {
-              closeButtonScale.value = withTiming(0.97, {
-                duration: 120,
-                easing: EASE_OUT,
-              });
-            }}
-            onPressOut={() => {
-              closeButtonScale.value = withTiming(1, {
-                duration: 120,
-                easing: EASE_OUT,
-              });
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={t("pickerSheet.close")}
-            style={closeButtonStyle}
-          >
-            <CloseIcon style={styles.closeIcon} />
-          </AnimatedPressable>
-        </View>
         {searchable ? (
           <View style={styles.searchContainer}>
             <SearchInput
@@ -232,7 +239,7 @@ export const PickerSheetContent = <T extends Item>(
           data={data}
         />
       </Animated.View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

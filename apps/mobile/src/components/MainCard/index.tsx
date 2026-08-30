@@ -1,6 +1,6 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import * as React from "react";
 import { Pressable, View } from "react-native";
 
@@ -13,49 +13,21 @@ import {
   withSequence,
   withSpring,
 } from "react-native-reanimated";
-import { useUnistyles } from "react-native-unistyles";
 
-import {
-  createHeroNavigationWatchdog,
-  setHeroTarget,
-  startHero,
-  useHeroState,
-  useHeroVisibility,
-} from "@/components/HeroTransition/store";
 import { PressableArea } from "@/components/pressable-area";
 import { getTrcpContext } from "@/contexts/trcp-context";
+import { haptics } from "@/services/haptics";
 import { SceneName } from "@/types/scene-name";
 
 import Distance from "./components/Distance";
 import Pagination from "./components/Pagination";
 import PersonalInfo from "./components/PersonalInfo";
-import { Container, Picture, PhotoAnchor, Scrim, styles } from "./styles";
+import { Container, Picture, Scrim, styles } from "./styles";
 
-const springConfig = { mass: 0.2 };
+const EDGE_TILT = 0.8;
+const EDGE_SPRING = { duration: 240, dampingRatio: 0.9 } as const;
 
 const START_IMAGE_INDEX = 0;
-
-/**
- * How far the card slides when there is no photo that way, in dp.
- *
- * This used to be a `rotateY` of half a degree under a `perspective` of 100,
- * and it rendered as a black rectangle over half the card. A non-affine
- * transform on a layer that also has `overflow: hidden` forces Core Animation
- * to composite it offscreen, and on iOS 26 one half of the card came back
- * empty for the ~330ms the spring ran — the DogProfile's black backdrop
- * showing through, photo, pagination dots and distance pill all gone.
- * Measured across 40 screenshots taken during the gesture: 6 of them had
- * 49.7% of the card as pure #000000, split by a dead-straight vertical seam
- * down the middle.
- *
- * The seam is the tell. The half that DID draw was not rotated at all — no
- * keystone, no skew — so the 3D warp was never visible in the first place.
- * Half a degree of rotateY on a 393dp card is a sub-pixel effect; all it ever
- * did was buy the compositing bug. A translate is affine, needs no offscreen
- * pass, and is the rubber-band every list on the platform uses to say "this is
- * the end".
- */
-const EDGE_NUDGE = 10;
 
 // oxlint-disable-next-line typescript/consistent-type-definitions -- `Container` is a reanimated Animated.View, whose props carry a string index signature. `interface … extends` keeps the members below at their declared types; the `{…} & Props` intersection the rule wants intersects each of them with the index signature's `any` and silently widens all three to `any`.
 export interface VisitingCardProps extends React.ComponentProps<
@@ -75,80 +47,33 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
   const { images = [] } = dog;
   const [currentImage, setCurrentImage] = useState(startImageIndex);
   const router = useRouter();
-  const { theme } = useUnistyles();
   const reduceMotion = useReducedMotion();
 
-  const nudge = useSharedValue(0);
-
-  // When rendered inside DogProfile (no personal info), this card is the hero
-  // *destination*; on the swipe deck it's the *source*.
-  const isHeroDestination = !shouldShowPersonalInfo;
-  const heroRole = isHeroDestination ? "destination" : "source";
-  const photoAnchorRef = useRef<View>(null);
-  const hero = useHeroState();
-  const hidePhoto = useHeroVisibility(dog.id, heroRole);
-  const hideChrome = hidePhoto && Boolean(hero.chrome);
+  const tilt = useSharedValue(0);
 
   const currentPhoto = images[currentImage];
 
   const openUserProfile = () => {
-    const navigate = (heroTransition?: string) => {
-      router.push({
-        pathname: `${SceneName.Profile}/[id]`,
-        params: {
-          id: dog.id,
-          currentImageIndex: currentImage,
-          heroTransition,
-        },
-      });
-    };
-
-    // Reduced motion skips the manual morph entirely and falls back to the
-    // stack's own (non-hero) screen transition.
-    if (reduceMotion) return navigate();
-
-    // The swipe response already contains the complete DogProfile payload.
-    // Refresh the exact query key at the interaction boundary so an entry
-    // that has aged out of React Query never suspends between the card and
-    // the hero destination.
+    // Keep the pushed screen warm so the native transition never lands on a
+    // loading fallback between the card and its profile.
     getTrcpContext().dog.get.setData({ id: dog.id }, dog);
-
-    const finishNavigation = createHeroNavigationWatchdog(navigate);
-
-    // Kick off the manual hero morph: freeze the tapped photo into a flying
-    // overlay measured at its on-screen frame, then navigate. The destination
-    // card reports its frame on mount (see onDestinationLayout) and the
-    // overlay animates between the two. See @/components/HeroTransition/store.
-    photoAnchorRef.current?.measureInWindow((x, y, width, height) => {
-      if (width > 0 && height > 0 && currentPhoto?.url) {
-        finishNavigation(() => {
-          startHero({
-            id: dog.id,
-            source: { uri: currentPhoto.url, blurhash: currentPhoto.blurhash },
-            from: { x, y, width, height, borderRadius: theme.radii.lg },
-            chrome: { dog, pages: images.length, currentPage: currentImage },
-          });
-        });
-        return;
-      }
-      finishNavigation();
+    router.push({
+      pathname: `${SceneName.Profile}/[id]`,
+      params: {
+        id: dog.id,
+        currentImageIndex: currentImage,
+      },
     });
   };
 
-  const onDestinationLayout = useCallback(() => {
-    if (!isHeroDestination) return;
-    // Defer to the next frame so native layout has settled before we measure.
-    requestAnimationFrame(() => {
-      photoAnchorRef.current?.measureInWindow((x, y, width, height) => {
-        if (width > 0 && height > 0) {
-          setHeroTarget({
-            id: dog.id,
-            to: { x, y, width, height, borderRadius: 0 },
-          });
-        }
-      });
-    });
-  }, [dog.id, isHeroDestination]);
+  const showPhotoEdge = (degrees: number) => {
+    haptics.selection();
+    if (reduceMotion) return;
+    tilt.value = withSequence(
+      withSpring(degrees, EDGE_SPRING),
+      withSpring(0, EDGE_SPRING),
+    );
+  };
 
   const gotoPreviousImage = () => {
     // If there is only one image, open the user profile for now.
@@ -157,12 +82,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
 
     if (currentImage !== 0) return setCurrentImage((index) => index - 1);
 
-    // Already on the first photo: slide right, towards the edge the reader is
-    // trying to reach.
-    nudge.value = withSequence(
-      withSpring(EDGE_NUDGE, springConfig),
-      withSpring(0, springConfig),
-    );
+    showPhotoEdge(-EDGE_TILT);
   };
 
   const gotoNextImage = () => {
@@ -173,36 +93,23 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
     if (currentImage + 1 < images.length) {
       return setCurrentImage((index) => index + 1);
     }
-    // Already on the last photo.
-    nudge.value = withSequence(
-      withSpring(-EDGE_NUDGE, springConfig),
-      withSpring(0, springConfig),
-    );
+    showPhotoEdge(EDGE_TILT);
   };
 
   const transform = useAnimatedStyle(() => {
     "worklet";
-    return { transform: [{ translateX: nudge.value }] };
+    return { transform: [{ rotateZ: `${tilt.value}deg` }] };
   });
 
   return (
     <Container testID="swipe-card" {...props} style={[props.style, transform]}>
-      <PhotoAnchor
-        ref={photoAnchorRef}
-        onLayout={onDestinationLayout}
-        // While the hero overlay covers this element, hide the real photo so
-        // only the overlay copy is visible (no double image). It reappears
-        // once the morph clears (see useHeroVisibility).
-        style={hidePhoto ? styles.hidden : undefined}
-      >
-        <Picture
-          source={{
-            uri: currentPhoto?.url,
-            blurhash: currentPhoto?.blurhash ?? undefined,
-          }}
-          key={currentPhoto?.id}
-        />
-      </PhotoAnchor>
+      <Picture
+        source={{
+          uri: currentPhoto?.url,
+          blurhash: currentPhoto?.blurhash ?? undefined,
+        }}
+        key={currentPhoto?.id}
+      />
       <Scrim
         style={styles.scrim}
         colors={[
@@ -212,7 +119,7 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
           "rgba(0, 0, 0, 0)",
         ]}
       />
-      <View style={[styles.upperPart, hideChrome ? styles.hidden : undefined]}>
+      <View style={styles.upperPart}>
         <Distance dog={dog} />
         <Pagination pages={images.length} currentPage={currentImage} />
         <View style={styles.carouselContainer}>

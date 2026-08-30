@@ -21,9 +21,14 @@ import * as React from "react";
 type CapturedProps = Record<string, unknown> & {
   children?: React.ReactNode;
   accessible?: unknown;
+  style?: unknown;
 };
 
-const capturedElements: { tag: string; accessible: unknown }[] = [];
+const capturedElements: {
+  tag: string;
+  accessible: unknown;
+  style?: unknown;
+}[] = [];
 const capturedFlatListProps: CapturedProps[] = [];
 
 jest.mock<Record<string, unknown>>("react-native", () => ({
@@ -31,18 +36,14 @@ jest.mock<Record<string, unknown>>("react-native", () => ({
     capturedFlatListProps.push(props);
     return null;
   },
-  KeyboardAvoidingView: ({ children, accessible }: CapturedProps) => {
-    capturedElements.push({ tag: "KeyboardAvoidingView", accessible });
-    return children ?? null;
-  },
   Platform: { OS: "ios" },
-  Pressable: ({ children, accessible }: CapturedProps) => {
-    capturedElements.push({ tag: "Pressable", accessible });
+  Pressable: ({ children, accessible, style }: CapturedProps) => {
+    capturedElements.push({ tag: "Pressable", accessible, style });
     return children ?? null;
   },
   useWindowDimensions: () => ({ width: 440, height: 956 }),
-  View: ({ children, accessible }: CapturedProps) => {
-    capturedElements.push({ tag: "View", accessible });
+  View: ({ children, accessible, style }: CapturedProps) => {
+    capturedElements.push({ tag: "View", accessible, style });
     return children ?? null;
   },
 }));
@@ -62,8 +63,8 @@ jest.mock<Record<string, unknown>>("react-native-reanimated", () => {
   return {
     __esModule: true,
     default: {
-      View: ({ children, accessible }: CapturedProps) => {
-        capturedElements.push({ tag: "Animated.View", accessible });
+      View: ({ children, accessible, style }: CapturedProps) => {
+        capturedElements.push({ tag: "Animated.View", accessible, style });
         return children ?? null;
       },
       createAnimatedComponent: (Component: unknown) => Component,
@@ -114,6 +115,14 @@ jest.mock<Record<string, unknown>>("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
+jest.mock<Record<string, unknown>>("@/hooks/use-disable-swipe-back", () => ({
+  useDisableSwipeBack: () => jest.fn(),
+}));
+
+jest.mock<Record<string, unknown>>("@/hooks/use-keyboard-aware-scroll", () => ({
+  useKeyboardOverlap: () => 300,
+}));
+
 // The sheet reads a handful of theme tokens purely to build style objects it
 // never asserts on. A recursive stand-in answers any token path so the test
 // does not have to track the design system. Built inside the factory because
@@ -161,5 +170,14 @@ describe("a picker sheet", () => {
     renderSheet();
 
     expect(capturedFlatListProps[0]?.data).toStrictEqual(OPTIONS);
+  });
+
+  it("keeps the sheet above the keyboard", () => {
+    renderSheet();
+
+    const sheet = capturedElements.find((el) => el.tag === "Animated.View");
+    const style = sheet?.style as unknown[];
+
+    expect(style).toContainEqual({ maxHeight: 656 });
   });
 });

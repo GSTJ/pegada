@@ -1,6 +1,6 @@
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import * as React from "react";
 import {
   ActivityIndicator,
@@ -11,12 +11,7 @@ import {
   ScrollView,
 } from "react-native";
 
-import {
-  router,
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-} from "expo-router";
+import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { Header, HeaderBackButton } from "@react-navigation/elements";
@@ -26,7 +21,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 import { useDispatch, useSelector } from "react-redux";
 
-import { startReverseHero } from "@/components/HeroTransition/store";
 import MainCard from "@/components/MainCard";
 import { MatchActionBar } from "@/components/MatchActionBar";
 import {
@@ -135,20 +129,13 @@ const useSwipeHandler = (id: string) => {
   const dispatch = useDispatch();
 
   return (swipeType: Swipe) => {
-    const commitSwipe = () => {
-      if (id === currentCardId && swipeHandlerRef.current) {
-        return swipeHandlerRef.current.gotoDirection(swipeType);
-      }
-
-      dispatch(Actions.dogs.swipe.request({ id, swipeType }));
-    };
-
-    // Reverses this dog's hero photo back onto its swipe card first, if one
-    // is in flight to reverse (no-op otherwise -- e.g. reduced motion, or a
-    // profile opened without a hero at all).
-    const reversing = startReverseHero(id, commitSwipe);
     router.back();
-    if (!reversing) commitSwipe();
+
+    if (id === currentCardId && swipeHandlerRef.current) {
+      return swipeHandlerRef.current.gotoDirection(swipeType);
+    }
+
+    dispatch(Actions.dogs.swipe.request({ id, swipeType }));
   };
 };
 
@@ -156,12 +143,10 @@ const DogProfile = () => {
   const {
     id,
     currentImageIndex = 0,
-    heroTransition,
     matchId,
   } = useLocalSearchParams<{
     id: string;
     currentImageIndex?: string;
-    heroTransition?: string;
     matchId?: string;
   }>();
 
@@ -171,21 +156,6 @@ const DogProfile = () => {
   const insets = useSafeAreaInsets();
   const topInset = useCustomTopInset();
   const router = useRouter();
-  const navigation = useNavigation();
-  const completingHeroRemoval = useRef(false);
-
-  useEffect(() => {
-    if (heroTransition !== "1") return;
-    return navigation.addListener("beforeRemove", (event) => {
-      if (completingHeroRemoval.current) return;
-
-      const reversing = startReverseHero(id as string, () => {
-        completingHeroRemoval.current = true;
-        navigation.dispatch(event.data.action);
-      });
-      if (reversing) event.preventDefault();
-    });
-  }, [heroTransition, id, navigation]);
 
   const { theme } = useUnistyles();
 
@@ -346,8 +316,6 @@ const DogProfile = () => {
             ]}
           />
           <MatchActionBar
-            sharedDogId={id as string}
-            sharedRole="destination"
             style={{ bottom: topInset }}
             onNope={() => swipeHandler(Swipe.Dislike)}
             onYep={() => swipeHandler(Swipe.Like)}
