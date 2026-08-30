@@ -2,6 +2,29 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.6.2 (2026-08-30)
+
+### Fixes
+
+- **mobile:** mark photo grid clamp as worklet ([#174](https://github.com/GSTJ/pegada/pull/174)) ([`b89c975`](https://github.com/GSTJ/pegada/commit/b89c9750401af71ce7d96ec2155b68f19b54cb8f))
+- **mobile:** drive photo action rotation from state change ([#173](https://github.com/GSTJ/pegada/pull/173)) ([`cf8c7d9`](https://github.com/GSTJ/pegada/commit/cf8c7d975ca15ea0b13f5af42f5121eba42ea04f))
+- **mobile:** restore gestures after every photo drag ([#172](https://github.com/GSTJ/pegada/pull/172)) ([`9bf8679`](https://github.com/GSTJ/pegada/commit/9bf8679d5552818efd5c106f020f9faad4922ca0))
+- **mobile:** drive slider press spring from gesture ([#171](https://github.com/GSTJ/pegada/pull/171)) ([`f64051f`](https://github.com/GSTJ/pegada/commit/f64051f9daf29b5aab8a69e1fda65a0b1c18cea5))
+- **mobile:** keep slider labels inside screen edges ([#170](https://github.com/GSTJ/pegada/pull/170)) ([`f42c48e`](https://github.com/GSTJ/pegada/commit/f42c48e8d87920485c4b98689e528ef22254db60))
+- **mobile:** clear unlimited preference limits ([#169](https://github.com/GSTJ/pegada/pull/169)) ([`190c264`](https://github.com/GSTJ/pegada/commit/190c264cf61645fd98d7a2f5fb4160d30d75cc1d))
+- **mobile:** Android splash follows in-app theme on boot ([#163](https://github.com/GSTJ/pegada/pull/163)) ([`3e3a6cd`](https://github.com/GSTJ/pegada/commit/3e3a6cd33c12ad773e89ed025f6a0f7fdbabf7bd))
+- **mobile:** drop Siri shortcuts and Control Center ([#164](https://github.com/GSTJ/pegada/pull/164)) ([`5a07447`](https://github.com/GSTJ/pegada/commit/5a074476608c58d5fde456e3a4b9f9e4ae2eda45))
+- **mobile:** stop DraggableGrid crash and stale reorders in photo grid ([#168](https://github.com/GSTJ/pegada/pull/168)) ([`58e396b`](https://github.com/GSTJ/pegada/commit/58e396bc77448aef3fafd0ae8f1a64ddcd67192c))
+- **mobile:** Automatic follows system dark on iOS ([#166](https://github.com/GSTJ/pegada/pull/166)) ([`247cfa1`](https://github.com/GSTJ/pegada/commit/247cfa1cd8874797b93b4dab5cb54c451fa6212f))
+- **mobile:** slider value bubbles below the track, thumbs reach the ends ([#167](https://github.com/GSTJ/pegada/pull/167)) ([`85f77ae`](https://github.com/GSTJ/pegada/commit/85f77ae76d3e45643e1db99fc4b47a76bbfedc03))
+- **mobile:** snap swipe cards back faster when the drag is short ([#165](https://github.com/GSTJ/pegada/pull/165)) ([`cd979fc`](https://github.com/GSTJ/pegada/commit/cd979fc5cd6e86b2e769caa05bb2224c92d756d2))
+
+### Tests
+
+- **mobile:** the grand journey, two accounts to a live match, recorded and DB-proven on both platforms ([#154](https://github.com/GSTJ/pegada/pull/154)) ([`12b5ff1`](https://github.com/GSTJ/pegada/commit/12b5ff180f468bc5394c25992408d79b76e646bb))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.6.1...v1.6.2)
+
 ## v1.6.1 (2026-08-29)
 
 ### Features
@@ -152,7 +175,7 @@ Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm
 - **mobile:** add Liquid Glass to translucent overlays ([#78](https://github.com/GSTJ/pegada/pull/78)) ([`49fbcb3`](https://github.com/GSTJ/pegada/commit/49fbcb3778d0d545de60f944c6d868db83c46722))
 - **mobile:** haptic feedback across swipe, match and purchase flows ([#74](https://github.com/GSTJ/pegada/pull/74)) ([`8b43721`](https://github.com/GSTJ/pegada/commit/8b43721a319c00e4b91b685f37f5759efd3b59d1))
 - **legal:** add child-safety (CSAE) clause to Terms of Use ([#73](https://github.com/GSTJ/pegada/pull/73)) ([`56ccd98`](https://github.com/GSTJ/pegada/commit/56ccd98857c6f60542ec46e13a13a2be567db0bb))
-- **mobile:** 1.4.0 release — GHA build pipeline, PostHog OTA env ([#63](https://github.com/GSTJ/pegada/pull/63)) ([`06149a2`](https://github.com/GSTJ/pegada/commit/06149a2f1e7c3df106ba3cadeb738eb64b594865))
+- **mobile:** 1.4.0 release, GHA build pipeline, PostHog OTA env ([#63](https://github.com/GSTJ/pegada/pull/63)) ([`06149a2`](https://github.com/GSTJ/pegada/commit/06149a2f1e7c3df106ba3cadeb738eb64b594865))
 
 ### Fixes
 
@@ -191,7 +214,7 @@ Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm
 
 - generate the changelog, tag and GitHub release from conventional commits ([#102](https://github.com/GSTJ/pegada/pull/102)) ([`bc1f957`](https://github.com/GSTJ/pegada/commit/bc1f957963fb76e72c837754c310c9c6d5dcd4f1))
 - run the test suite on branch pushes ([#99](https://github.com/GSTJ/pegada/pull/99)) ([`b843736`](https://github.com/GSTJ/pegada/commit/b84373634c6a236760e3dec7dbb476643f1b8960))
-- **mobile:** fix release submit jobs — install deps, pin iOS ascAppId ([#65](https://github.com/GSTJ/pegada/pull/65)) ([`2bebb4b`](https://github.com/GSTJ/pegada/commit/2bebb4b1590523993b9f5e53ba5ac3cfb394d4b5))
+- **mobile:** fix release submit jobs, install deps, pin iOS ascAppId ([#65](https://github.com/GSTJ/pegada/pull/65)) ([`2bebb4b`](https://github.com/GSTJ/pegada/commit/2bebb4b1590523993b9f5e53ba5ac3cfb394d4b5))
 
 ### Chores
 
@@ -212,9 +235,9 @@ Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm
 
 ### Features
 
-- dual-path image uploads — R2 for new clients, S3 legacy for shipped binaries ([#58](https://github.com/GSTJ/pegada/pull/58)) ([`818730c`](https://github.com/GSTJ/pegada/commit/818730c906c698c5ad28a2b163f8719fd8295e65))
+- dual-path image uploads, R2 for new clients, S3 legacy for shipped binaries ([#58](https://github.com/GSTJ/pegada/pull/58)) ([`818730c`](https://github.com/GSTJ/pegada/commit/818730c906c698c5ad28a2b163f8719fd8295e65))
 - **database:** Neon pooled/direct URL split ([#57](https://github.com/GSTJ/pegada/pull/57)) ([`3aaf1b7`](https://github.com/GSTJ/pegada/commit/3aaf1b7abadda84864cdd419d19edafd8913d6f7))
-- vendor consolidation — Cloudflare mail, Vercel Queues, PostHog, Next 15/React 19 ([#56](https://github.com/GSTJ/pegada/pull/56)) ([`5f6012d`](https://github.com/GSTJ/pegada/commit/5f6012d49655f636aa63ccb186b603987141ed0a))
+- vendor consolidation, Cloudflare mail, Vercel Queues, PostHog, Next 15/React 19 ([#56](https://github.com/GSTJ/pegada/pull/56)) ([`5f6012d`](https://github.com/GSTJ/pegada/commit/5f6012d49655f636aa63ccb186b603987141ed0a))
 - **mobile:** MAESTRO_E2E placeholder photo affordance for iOS 26 picker (#44) ([#46](https://github.com/GSTJ/pegada/pull/46)) ([`c34548b`](https://github.com/GSTJ/pegada/commit/c34548b69870e207452405ae2ea09dd557997466))
 
 ### Fixes
@@ -222,7 +245,7 @@ Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm
 - **vercel:** drop apps/nextjs prefix from function path keys ([#61](https://github.com/GSTJ/pegada/pull/61)) ([`11c4dca`](https://github.com/GSTJ/pegada/commit/11c4dca46c4d3f69699816b7a346f5f7a76f5b39))
 - **vercel:** register queue triggers from repo-root vercel.json ([#60](https://github.com/GSTJ/pegada/pull/60)) ([`4806326`](https://github.com/GSTJ/pegada/commit/4806326f74559ef41d457179c2d5dfc2cea76a9c))
 - **mobile:** Hermes import.meta transform ([#59](https://github.com/GSTJ/pegada/pull/59)) ([`6057600`](https://github.com/GSTJ/pegada/commit/6057600e83cd2dca147796a705d319bcb89031cf))
-- **ci:** make the e2e hard gate real — Release builds + the app/test fixes it flushed out ([#54](https://github.com/GSTJ/pegada/pull/54)) ([`365c8ce`](https://github.com/GSTJ/pegada/commit/365c8ce2f20761d72cad2ab8a22fadc1341446e4))
+- **ci:** make the e2e hard gate real, Release builds + the app/test fixes it flushed out ([#54](https://github.com/GSTJ/pegada/pull/54)) ([`365c8ce`](https://github.com/GSTJ/pegada/commit/365c8ce2f20761d72cad2ab8a22fadc1341446e4))
 - **test:** logout flow taps "Logout" (one word) to match i18n string ([#39](https://github.com/GSTJ/pegada/pull/39)) ([`eb19284`](https://github.com/GSTJ/pegada/commit/eb192841eb53ed0b3c1bb88ccfb1e953fea7e6ab))
 - **mobile:** ToS/Privacy URLs + StoreKit sim config + upgrade wall close hit area ([#37](https://github.com/GSTJ/pegada/pull/37)) ([`2cba6e5`](https://github.com/GSTJ/pegada/commit/2cba6e5eb90bc702f132424ac58fce5972867ffb))
 - **mobile:** photo upload fails on iOS 26 Release build ([#36](https://github.com/GSTJ/pegada/pull/36)) ([`a076df4`](https://github.com/GSTJ/pegada/commit/a076df48f004d44bb816630f2883d1bead86297d))
