@@ -118,11 +118,11 @@ const Preferences: React.FC = () => {
 
     body.preferredMaxDistance = normalizePreferenceLimit(
       body.preferredMaxDistance,
-      MAX_FILTER_DISTANCE,
+      MAX_FILTER_DISTANCE + 1,
     );
     body.preferredMaxAge = normalizePreferenceLimit(
       body.preferredMaxAge,
-      MAX_FILTER_AGE,
+      MAX_FILTER_AGE + 1,
     );
 
     // if the values are the same as dog, don't update
