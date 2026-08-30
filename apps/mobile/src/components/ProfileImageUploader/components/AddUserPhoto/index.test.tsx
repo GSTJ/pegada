@@ -39,6 +39,7 @@ jest.mock<Record<string, unknown>>("react-native-reanimated", () => ({
   default: { View: ({ children }: { children?: React.ReactNode }) => children },
   FadeOut: { duration: () => ({}) },
   useAnimatedStyle: () => ({}),
+  useSharedValue: (value: unknown) => ({ value }),
   withSpring: (value: unknown) => value,
 }));
 
