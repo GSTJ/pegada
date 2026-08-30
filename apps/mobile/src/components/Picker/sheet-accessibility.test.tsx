@@ -1,54 +1,86 @@
 import * as React from "react";
 
 /**
- * The defect: every option inside a picker sheet is invisible to the
- * accessibility tree, and so is the screen behind it.
+ * The defect this guards: every option inside a picker sheet must stay
+ * reachable by VoiceOver — nothing in the sheet's own tree may set
+ * `accessible={true}` on a container, because that collapses everything
+ * beneath it (title, close button, every row) into one announcement.
  *
- * `@gorhom/bottom-sheet` applies `accessible` to the sheet's own container
- * view, and its default is `true` (`DEFAULT_ACCESSIBLE` in
- * components/bottomSheet/constants). On iOS, `accessible={true}` means "this
- * view IS the accessibility element" — UIKit stops descending, so the title,
- * the close button and every row underneath collapse into a single element
- * that announces "Bottom Sheet" and nothing else. VoiceOver cannot reach a
- * single option in the theme, language, size, colour or breed pickers.
+ * That used to happen for free: `@gorhom/bottom-sheet`'s `BottomSheetModal`
+ * defaulted its container to `accessible={true}` (`DEFAULT_ACCESSIBLE`), and
+ * the original fix passed `accessible={false}` explicitly to opt out.
  *
- * Captured from a live iPhone 17 Pro Max (iOS 26) with the colour sheet open
- * and fully painted — the whole app, sheet contents included, reduced to:
- *
- *   'Pegada'
- *     'Bottom sheet handle'
- *     'Bottom Sheet'
- *     'Bottom Sheet'
- *
- * This is also the truth behind the note that three Maestro flows carry —
- * 23-preferences-journey, 23b-lang-theme-persistence, 40, and REWRITE-PLAN.md
- * — that opening one of these sheets "crashes the XCUITest driver". Nothing
- * crashes. The sheet renders perfectly and hides its own contents, and
- * XCUITest reports what VoiceOver would get.
+ * The picker has since migrated onto `react-native-magic-modal`
+ * (Picker/index.tsx) — gorhom is gone, and magic-modal's own wrapper views
+ * never set `accessible` at all, so that specific default no longer exists.
+ * What remains worth guarding is the sheet's OWN render tree: nothing in it
+ * should reintroduce the same collapse by adding `accessible={true}` to one
+ * of its containers.
  */
 
 type CapturedProps = Record<string, unknown> & {
   children?: React.ReactNode;
+  accessible?: unknown;
 };
 
-const capturedModalProps: CapturedProps[] = [];
+const capturedElements: { tag: string; accessible: unknown }[] = [];
+const capturedFlatListProps: CapturedProps[] = [];
 
-jest.mock<Record<string, unknown>>("@gorhom/bottom-sheet", () => ({
-  BottomSheetModal: (props: CapturedProps) => {
-    capturedModalProps.push(props);
+jest.mock<Record<string, unknown>>("react-native", () => ({
+  FlatList: (props: CapturedProps) => {
+    capturedFlatListProps.push(props);
     return null;
   },
-  BottomSheetFlatList: () => null,
+  KeyboardAvoidingView: ({ children, accessible }: CapturedProps) => {
+    capturedElements.push({ tag: "KeyboardAvoidingView", accessible });
+    return children ?? null;
+  },
+  Platform: { OS: "ios" },
+  Pressable: ({ children, accessible }: CapturedProps) => {
+    capturedElements.push({ tag: "Pressable", accessible });
+    return children ?? null;
+  },
+  useWindowDimensions: () => ({ width: 440, height: 956 }),
+  View: ({ children, accessible }: CapturedProps) => {
+    capturedElements.push({ tag: "View", accessible });
+    return children ?? null;
+  },
 }));
 
-// `react-native` ships untransformed Flow, and nothing here needs it to be
-// real — the assertion is about the props this component hands the sheet.
-jest.mock<Record<string, unknown>>("react-native", () => ({
-  BackHandler: { addEventListener: () => ({ remove: () => undefined }) },
-  Keyboard: { dismiss: () => undefined },
-  Pressable: ({ children }: { children?: React.ReactNode }) => children,
-  View: ({ children }: { children?: React.ReactNode }) => children,
-  useWindowDimensions: () => ({ width: 440, height: 956 }),
+jest.mock<Record<string, unknown>>("react-native-gesture-handler", () => {
+  const gesture = { onUpdate: () => gesture, onEnd: () => gesture };
+
+  return {
+    Gesture: { Pan: () => gesture },
+    GestureDetector: ({ children }: CapturedProps) => children ?? null,
+  };
+});
+
+jest.mock<Record<string, unknown>>("react-native-reanimated", () => {
+  const chainable = { duration: () => chainable, easing: () => chainable };
+
+  return {
+    __esModule: true,
+    default: {
+      View: ({ children, accessible }: CapturedProps) => {
+        capturedElements.push({ tag: "Animated.View", accessible });
+        return children ?? null;
+      },
+      createAnimatedComponent: (Component: unknown) => Component,
+    },
+    Easing: { bezier: () => (t: number) => t },
+    FadeInDown: chainable,
+    FadeOutDown: chainable,
+    runOnJS: (fn: unknown) => fn,
+    useAnimatedStyle: () => ({}),
+    useSharedValue: (initial: unknown) => ({ value: initial }),
+    withSpring: (value: unknown) => value,
+    withTiming: (value: unknown) => value,
+  };
+});
+
+jest.mock<Record<string, unknown>>("react-native-magic-modal", () => ({
+  useMagicModal: () => ({ hide: jest.fn() }),
 }));
 
 jest.mock<Record<string, unknown>>("./styles", () => ({
@@ -64,10 +96,6 @@ jest.mock<Record<string, unknown>>("./styles", () => ({
 
 jest.mock<Record<string, unknown>>("./select-item", () => ({
   PickerSelectItem: () => null,
-}));
-
-jest.mock<Record<string, unknown>>("@/components/custom-backdrop", () => ({
-  renderCustomBackdrop: () => null,
 }));
 
 jest.mock<Record<string, unknown>>("@/components/Input", () => ({
@@ -98,7 +126,7 @@ jest.mock<Record<string, unknown>>("react-native-unistyles", () => {
 
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { PickerSheet } from "./index";
+import { PickerSheetContent } from "./index";
 
 const OPTIONS = [
   { id: "BLACK", name: "Black" },
@@ -106,10 +134,11 @@ const OPTIONS = [
 ];
 
 const renderSheet = () => {
-  capturedModalProps.length = 0;
+  capturedElements.length = 0;
+  capturedFlatListProps.length = 0;
 
   renderToStaticMarkup(
-    <PickerSheet
+    <PickerSheetContent
       title="Color"
       placeholder="Any color"
       value={undefined}
@@ -118,25 +147,19 @@ const renderSheet = () => {
       itemTestIDPrefix="preferences-color-item-"
     />,
   );
-
-  return capturedModalProps[0]!;
 };
 
 describe("a picker sheet", () => {
   it("does not collapse its contents into a single accessibility element", () => {
-    const props = renderSheet();
+    renderSheet();
 
-    // The whole fix. `false` is not the same as leaving it unset: the library
-    // substitutes its own `true` for `undefined`, so the prop has to be
-    // passed explicitly to turn the behaviour off.
-    expect(props.accessible).toBe(false);
+    const collapsed = capturedElements.filter((el) => el.accessible === true);
+    expect(collapsed).toStrictEqual([]);
   });
 
   it("still renders its options underneath", () => {
-    const props = renderSheet();
+    renderSheet();
 
-    // Guards the obvious over-correction — dropping the container's
-    // accessibility by removing the subtree instead of by exposing it.
-    expect(props.children).toBeTruthy();
+    expect(capturedFlatListProps[0]?.data).toStrictEqual(OPTIONS);
   });
 });
