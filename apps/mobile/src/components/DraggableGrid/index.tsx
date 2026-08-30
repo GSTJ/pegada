@@ -37,8 +37,10 @@ export type DraggableGridProps<T extends DraggableItem> = {
   renderItem: (item: T) => React.ReactNode;
 };
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, value));
+const clamp = (value: number, min: number, max: number) => {
+  "worklet";
+  return Math.min(max, Math.max(min, value));
+};
 
 // Long enough that an ordinary tap or scroll never gets mistaken for the
 // start of a drag; short enough that intentionally holding a photo feels
