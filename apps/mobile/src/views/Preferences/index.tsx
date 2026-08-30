@@ -30,6 +30,7 @@ import { sendError } from "@/services/error-tracking";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
+import { normalizePreferenceLimit } from "./preference-limit";
 import { styles } from "./styles";
 
 const { width } = Dimensions.get("window");
@@ -115,18 +116,14 @@ const Preferences: React.FC = () => {
       preferredMaxAge: data.preferredAgeRange[1],
     };
 
-    // Unlimited
-    if (
-      body.preferredMaxDistance &&
-      body.preferredMaxDistance >= MAX_FILTER_DISTANCE
-    ) {
-      body.preferredMaxDistance = undefined;
-    }
-
-    // Unlimited
-    if (body.preferredMaxAge && body.preferredMaxAge >= MAX_FILTER_AGE) {
-      body.preferredMaxAge = undefined;
-    }
+    body.preferredMaxDistance = normalizePreferenceLimit(
+      body.preferredMaxDistance,
+      MAX_FILTER_DISTANCE,
+    );
+    body.preferredMaxAge = normalizePreferenceLimit(
+      body.preferredMaxAge,
+      MAX_FILTER_AGE,
+    );
 
     // if the values are the same as dog, don't update
     if (
