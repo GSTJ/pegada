@@ -33,6 +33,7 @@ export type DraggableGridProps<T extends DraggableItem> = {
   itemHeight: number;
   style?: StyleProp<ViewStyle>;
   onDragStart?: () => void;
+  onDragEnd?: () => void;
   onDragRelease?: (newData: T[]) => void;
   renderItem: (item: T) => React.ReactNode;
 };
@@ -172,6 +173,7 @@ export const DraggableGrid = <T extends DraggableItem>({
   itemHeight,
   style,
   onDragStart,
+  onDragEnd,
   onDragRelease,
   renderItem,
 }: DraggableGridProps<T>) => {
@@ -196,6 +198,7 @@ export const DraggableGrid = <T extends DraggableItem>({
   const handleDragEnd = () => {
     isDraggingRef.current = false;
     setSwipeBackEnabled(true);
+    onDragEnd?.();
   };
 
   const handleReorder = (fromIndex: number, toIndex: number) => {

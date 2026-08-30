@@ -9,7 +9,6 @@ import { View } from "react-native";
 import { DraggableGrid } from "@/components/DraggableGrid";
 import { deleteItem, sortByUrl } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/text";
-import { useDisableSwipeBack } from "@/hooks/use-disable-swipe-back";
 
 import { AddUserPhoto } from "./components/AddUserPhoto";
 import {
@@ -82,20 +81,15 @@ export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
 
   const draggableGridStyle = { zIndex: 20 };
 
-  const setSwipeBackEnabled = useDisableSwipeBack();
-
-  // Reordering is a drag, same as the grid's own internal pan responder —
-  // and, same as a Slider drag, an independent recognizer from the stack's
-  // native swipe-back gesture. Without this, dragging a photo toward the
-  // screen's left edge pops the screen instead of reordering.
   const onDragStart = () => {
-    setSwipeBackEnabled(false);
     setGesturesEnabled(false);
   };
 
-  const onDragRelease = (newImages: GenericPictures) => {
-    setSwipeBackEnabled(true);
+  const onDragEnd = () => {
     setGesturesEnabled(true);
+  };
+
+  const onDragRelease = (newImages: GenericPictures) => {
     onChange(() => newImages);
   };
 
@@ -120,6 +114,7 @@ export const ProfileImagesUploader: React.FC<ProfileImagesUploaderProps> = ({
         itemHeight={dogPictureHeight}
         style={draggableGridStyle}
         onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
         onDragRelease={onDragRelease}
         renderItem={renderItem}
       />
