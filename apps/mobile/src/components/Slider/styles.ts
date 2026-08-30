@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native-unistyles";
 
-export const WIDTH = 36;
+export const WIDTH = 32;
 const HEIGHT = 24;
 const TRIANGLE_SIZE = 4;
 export const MARKER_SIZE = 20;
