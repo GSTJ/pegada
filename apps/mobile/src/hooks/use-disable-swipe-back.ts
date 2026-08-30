@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import { useNavigation } from "expo-router";
 
 /**
@@ -10,12 +12,15 @@ import { useNavigation } from "expo-router";
 export const useDisableSwipeBack = () => {
   const navigation = useNavigation();
 
-  return (gestureEnabled: boolean) => {
-    // Routed through a variable: `setOptions` isn't typed with
-    // `gestureEnabled` here since `useNavigation()` doesn't know it's on a
-    // native-stack screen, and an inline object literal would fail
-    // TypeScript's excess-property check against that looser type.
-    const options: { gestureEnabled: boolean } = { gestureEnabled };
-    navigation.setOptions(options);
-  };
+  return useCallback(
+    (gestureEnabled: boolean) => {
+      // Routed through a variable: `setOptions` isn't typed with
+      // `gestureEnabled` here since `useNavigation()` doesn't know it's on a
+      // native-stack screen, and an inline object literal would fail
+      // TypeScript's excess-property check against that looser type.
+      const options: { gestureEnabled: boolean } = { gestureEnabled };
+      navigation.setOptions(options);
+    },
+    [navigation],
+  );
 };

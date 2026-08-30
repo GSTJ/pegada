@@ -1,10 +1,37 @@
 import { Platform } from "react-native";
 
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 
 import Color from "color";
 import { useTranslation } from "react-i18next";
 import { useUnistyles } from "react-native-unistyles";
+
+import Close from "@/assets/images/Close.svg";
+import { PressableArea } from "@/components/pressable-area";
+
+const locationCloseButtonStyle = {
+  width: 44,
+  height: 44,
+  alignItems: "center",
+  justifyContent: "center",
+} as const;
+
+const LocationCloseButton = () => {
+  const { t } = useTranslation();
+  const { theme } = useUnistyles();
+
+  return (
+    <PressableArea
+      testID="location-map-close"
+      accessibilityRole="button"
+      accessibilityLabel={t("pickerSheet.close")}
+      onPress={() => router.back()}
+      style={locationCloseButtonStyle}
+    >
+      <Close width={14} height={14} fill={theme.colors.text} />
+    </PressableArea>
+  );
+};
 
 const AppLayout = () => {
   const { theme } = useUnistyles();
@@ -60,21 +87,7 @@ const AppLayout = () => {
           animation: "default",
         }}
       />
-      <Stack.Screen
-        name="profile/[id]"
-        options={({ route }) => ({
-          // The photo overlay drives the forward transition from Swipe/Chat.
-          // Running the stack fade at the same time doubles up the whole
-          // screen behind it. The same route-level opt-out lets the shared
-          // elements reverse cleanly on Back without a competing stack
-          // animation.
-          animation:
-            (route.params as { heroTransition?: string } | undefined)
-              ?.heroTransition === "1"
-              ? "none"
-              : "fade",
-        })}
-      />
+      <Stack.Screen name="profile/[id]" options={{ animation: "default" }} />
       <Stack.Screen
         name="preferences"
         options={{
@@ -95,6 +108,7 @@ const AppLayout = () => {
         options={{
           headerTitle: t("locationMap.title"),
           headerShown: true,
+          headerLeft: LocationCloseButton,
           animation: "default",
           presentation: "modal",
           // A modal's swipe-to-dismiss is a drag gesture same as the map's

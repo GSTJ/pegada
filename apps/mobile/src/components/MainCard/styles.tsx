@@ -1,10 +1,7 @@
 import type { LocalImageProps } from "@/components/image";
 import type { AnimatedProps } from "react-native-reanimated";
 
-import type { Ref } from "react";
-import type { View, ViewProps } from "react-native";
-
-import { forwardRef } from "react";
+import type { ViewProps } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -45,19 +42,6 @@ export const Picture = ({ style, ...props }: LocalImageProps) => (
   <ThemedImage {...props} style={[styles.picture, style]} />
 );
 
-/**
- * Stable (never remounted) wrapper around the photo. `Picture` itself remounts
- * (via its `key`) whenever the visible photo index changes, so keeping the
- * measure anchor on this always-mounted outer view gives the manual hero
- * transition (@/components/HeroTransition) a stable frame to measure.
- */
-export const PhotoAnchor = forwardRef(
-  ({ style, ...props }: AnimatedProps<ViewProps>, ref: Ref<View>) => (
-    <Animated.View ref={ref} {...props} style={[styles.photoAnchor, style]} />
-  ),
-);
-PhotoAnchor.displayName = "PhotoAnchor";
-
 /** Full-bleed gradient that darkens the top of the card. */
 export const Scrim = withUnistyles(LinearGradient);
 
@@ -72,13 +56,6 @@ export const styles = StyleSheet.create((theme) => ({
     flexShrink: 1,
     flexBasis: 0,
     ...absoluteFill,
-  },
-  photoAnchor: {
-    flex: 1,
-    ...absoluteFill,
-  },
-  hidden: {
-    opacity: 0,
   },
   upperPart: {
     flexGrow: 1,

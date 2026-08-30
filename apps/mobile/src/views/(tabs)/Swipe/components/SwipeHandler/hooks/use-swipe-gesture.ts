@@ -18,9 +18,9 @@ import {
 import { ACTION_OFFSET, ACTION_VELOCITY, CARD } from "@/constants";
 import { haptics } from "@/services/haptics";
 
-// A cancelled drag is a system response, not a user gesture, so it should
-// snap back near-instantly rather than ease in like the deliberate throws.
-export const SNAP_BACK_SPRING = { duration: 150, dampingRatio: 0.9 } as const;
+// Fast enough to feel responsive, with enough travel time to read as the card
+// returning under its own spring. Successful throws keep their timing below.
+export const SNAP_BACK_SPRING = { duration: 230, dampingRatio: 0.9 } as const;
 
 export type Translation = {
   x: SharedValue<number>;

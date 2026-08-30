@@ -6,6 +6,10 @@ import Close from "@/assets/images/Close.svg";
 import { PressableArea } from "@/components/pressable-area";
 
 export const styles = StyleSheet.create((theme) => ({
+  keyboardAvoider: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
   sheet: {
     backgroundColor: theme.colors.background,
     borderColor: theme.colors.border,
@@ -18,6 +22,9 @@ export const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     paddingTop: theme.spacing[2],
     paddingBottom: theme.spacing[2],
+  },
+  dismissArea: {
+    minHeight: 44,
   },
   handleBar: {
     width: theme.spacing[9],

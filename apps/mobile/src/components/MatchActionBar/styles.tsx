@@ -1,16 +1,12 @@
 import type { LocalImageProps } from "@/components/image";
 import type { AnimatedProps } from "react-native-reanimated";
 
-import type { Ref } from "react";
 import type {
   PressableProps,
   StyleProp,
-  View,
   ViewProps,
   ViewStyle,
 } from "react-native";
-
-import { forwardRef } from "react";
 
 import Color from "color";
 import Animated from "react-native-reanimated";
@@ -45,32 +41,17 @@ const ThemedImage = withUnistyles(Image);
  * The `.attrs` defaults were static objects, so they still beat the caller:
  * they sit after the spread, exactly where `.attrs` used to put them.
  */
-type ContainerProps = AnimatedProps<ViewProps> & {
-  /** hides the bar (used while the hero overlay flies its own copy over it). */
-  $hidden?: boolean;
-  /** the hero overlay's own copy: laid out in place rather than pinned to the deck's bottom edge. */
-  $inline?: boolean;
-};
-
-export const Container = forwardRef(
-  ({ style, $hidden, $inline, ...props }: ContainerProps, ref: Ref<View>) => {
-    styles.useVariants({ hidden: Boolean($hidden), inline: Boolean($inline) });
-
-    return (
-      <Animated.View
-        ref={ref}
-        {...props}
-        // box-none keeps the bar itself non-blocking so the card below stays
-        // pannable in the gaps, but lifts the bar above the card visually so
-        // each ActionItem reliably wins taps over the card's PersonalInfo
-        // pressable that sits underneath.
-        pointerEvents={$hidden ? "none" : "box-none"}
-        style={[styles.container, style]}
-      />
-    );
-  },
+export const Container = ({ style, ...props }: AnimatedProps<ViewProps>) => (
+  <Animated.View
+    {...props}
+    // box-none keeps the bar itself non-blocking so the card below stays
+    // pannable in the gaps, but lifts the bar above the card visually so
+    // each ActionItem reliably wins taps over the card's PersonalInfo
+    // pressable that sits underneath.
+    pointerEvents="box-none"
+    style={[styles.container, style]}
+  />
 );
-Container.displayName = "Container";
 
 /** `Pressable` also accepts a style callback; composing needs a plain style. */
 type ActionItemProps = { style?: StyleProp<ViewStyle> } & Omit<
@@ -126,10 +107,6 @@ const styles = StyleSheet.create((theme) => ({
     paddingLeft: theme.spacing[2],
     zIndex: 10,
     elevation: 10,
-    variants: {
-      hidden: { true: { opacity: 0 } },
-      inline: { true: { position: "relative", bottom: 0 } },
-    },
   },
   actionItem: {
     paddingTop: theme.spacing[2.5],

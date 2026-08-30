@@ -35,8 +35,6 @@ const MatchActionBarWrapper = () => {
 
   return (
     <MatchActionBar
-      sharedDogId={currentCard}
-      sharedRole="source"
       onNope={() => swipeHandlerRef.current?.gotoDirection(Swipe.Dislike)}
       onYep={() => swipeHandlerRef.current?.gotoDirection(Swipe.Like)}
       onMaybe={() => swipeHandlerRef.current?.gotoDirection(Swipe.Maybe)}
