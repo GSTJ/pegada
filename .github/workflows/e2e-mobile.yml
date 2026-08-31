@@ -253,6 +253,7 @@ on:
       - "packages/**"
       - ".github/workflows/e2e-mobile.yml"
       - ".github/scripts/maestro-*.py"
+      - ".github/scripts/install-maestro.sh"
       - ".github/scripts/quarantine-lint.py"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -261,6 +262,7 @@ on:
       - "packages/**"
       - ".github/workflows/e2e-mobile.yml"
       - ".github/scripts/maestro-*.py"
+      - ".github/scripts/install-maestro.sh"
       - ".github/scripts/quarantine-lint.py"
   workflow_dispatch:
   schedule:
@@ -299,7 +301,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Lint quarantine file
         run: |
           python3 .github/scripts/quarantine-lint.py \
@@ -369,13 +371,13 @@ jobs:
           xcodebuild -version
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -384,7 +386,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Java 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
@@ -394,17 +396,18 @@ jobs:
       # verify whichever .app we produced (swapped or freshly built)
       # actually boots before we upload it.
       - name: Cache Maestro
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: ~/.maestro
+          path: ${{ runner.temp }}/maestro
           key: maestro-${{ runner.os }}-2.6.0
 
       - name: Install Maestro
         run: |
-          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          MAESTRO_DIR="$RUNNER_TEMP/maestro"
+          if [ ! -x "$MAESTRO_DIR/bin/maestro" ]; then
+            .github/scripts/install-maestro.sh "$MAESTRO_DIR"
           fi
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          echo "$MAESTRO_DIR/bin" >> "$GITHUB_PATH"
 
       # @expo/fingerprint hashes exactly the native-affecting inputs
       # (config plugins' resolved output, native module versions, native
@@ -416,7 +419,7 @@ jobs:
         working-directory: apps/mobile
         run: |
           set -euo pipefail
-          npx --yes @expo/fingerprint fingerprint:generate --platform ios \
+          pnpm exec fingerprint fingerprint:generate --platform ios \
             > "$RUNNER_TEMP/fingerprint-required.json"
           FP=$(python3 -c "import json;print(json.load(open('$RUNNER_TEMP/fingerprint-required.json'))['hash'])")
           echo "FINGERPRINT=$FP" >> "$GITHUB_ENV"
@@ -436,7 +439,7 @@ jobs:
       # stage the .app between app-cache/ and the products dir as needed.
       - name: Cache built .app (fingerprint-keyed)
         id: app-cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/app-cache
           key: ${{ runner.os }}-app-required-${{ env.FINGERPRINT }}
@@ -491,7 +494,7 @@ jobs:
       # hit.
       - name: Cache Xcode DerivedData (fallback)
         if: steps.app-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/ios/build
           key: ${{ runner.os }}-xcode-deriveddata-required-${{ env.FINGERPRINT }}
@@ -504,7 +507,7 @@ jobs:
       # to compile the swapped-in JS to bytecode; on a miss, pod install
       # needs it for its own cache.
       - name: Cache CocoaPods
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
@@ -737,7 +740,7 @@ jobs:
           fi
 
       - name: Upload .app artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.vars.outputs.app-artifact }}
           path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator/*.app
@@ -760,23 +763,24 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Cache Maestro
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: ~/.maestro
+          path: ${{ runner.temp }}/maestro
           key: maestro-${{ runner.os }}-2.6.0
 
       - name: Install Maestro
         run: |
-          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          MAESTRO_DIR="$RUNNER_TEMP/maestro"
+          if [ ! -x "$MAESTRO_DIR/bin/maestro" ]; then
+            .github/scripts/install-maestro.sh "$MAESTRO_DIR"
           fi
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          echo "$MAESTRO_DIR/bin" >> "$GITHUB_PATH"
 
       - name: Download built .app
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: ${{ needs.build-ios-required.outputs.app-artifact }}
           path: app-download
@@ -928,7 +932,7 @@ jobs:
 
       - name: Upload required Maestro artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: maestro-results-required
           path: |
@@ -964,7 +968,7 @@ jobs:
 
       - name: Upload crash diagnostics
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: crash-diagnostics-required
           path: crash-diagnostics/
@@ -972,7 +976,7 @@ jobs:
 
       - name: Upload simulator log on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: simulator-log-required
           path: simulator-required.logarchive
@@ -1053,15 +1057,15 @@ jobs:
 
       - name: Checkout
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup pnpm
         if: steps.preflight.outputs.skip != 'true'
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -1072,7 +1076,7 @@ jobs:
 
       - name: Setup Java 17
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
@@ -1082,7 +1086,7 @@ jobs:
         working-directory: apps/mobile
         run: |
           set -euo pipefail
-          npx --yes @expo/fingerprint fingerprint:generate --platform ios \
+          pnpm exec fingerprint fingerprint:generate --platform ios \
             > "$RUNNER_TEMP/fingerprint-extended.json"
           FP=$(python3 -c "import json;print(json.load(open('$RUNNER_TEMP/fingerprint-extended.json'))['hash'])")
           echo "FINGERPRINT=$FP" >> "$GITHUB_ENV"
@@ -1093,7 +1097,7 @@ jobs:
       - name: Cache built .app (fingerprint-keyed)
         if: steps.preflight.outputs.skip != 'true'
         id: app-cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/app-cache
           key: ${{ runner.os }}-app-extended-${{ env.FINGERPRINT }}
@@ -1136,7 +1140,7 @@ jobs:
       # happens post-job. See the required build's cache comments.
       - name: Cache Xcode DerivedData (fallback)
         if: steps.preflight.outputs.skip != 'true' && steps.app-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/ios/build
           key: ${{ runner.os }}-xcode-deriveddata-extended-${{ env.FINGERPRINT }}
@@ -1146,7 +1150,7 @@ jobs:
 
       - name: Cache CocoaPods
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
@@ -1276,18 +1280,19 @@ jobs:
       # every extended shard downloads and depends on it.
       - name: Cache Maestro
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: ~/.maestro
+          path: ${{ runner.temp }}/maestro
           key: maestro-${{ runner.os }}-2.6.0
 
       - name: Install Maestro
         if: steps.preflight.outputs.skip != 'true'
         run: |
-          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          MAESTRO_DIR="$RUNNER_TEMP/maestro"
+          if [ ! -x "$MAESTRO_DIR/bin/maestro" ]; then
+            .github/scripts/install-maestro.sh "$MAESTRO_DIR"
           fi
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          echo "$MAESTRO_DIR/bin" >> "$GITHUB_PATH"
 
       # Raised driver-startup timeout + warm-up invocations for the same
       # reason as the required build's verify step: the first maestro use
@@ -1348,7 +1353,7 @@ jobs:
 
       - name: Upload .app artifact
         if: steps.preflight.outputs.skip != 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.vars.outputs.app-artifact }}
           path: apps/mobile/ios/build/Build/Products/Release-iphonesimulator/*.app
@@ -1401,13 +1406,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -1416,20 +1421,21 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Maestro
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: ~/.maestro
+          path: ${{ runner.temp }}/maestro
           key: maestro-${{ runner.os }}-2.6.0
 
       - name: Install Maestro
         run: |
-          if [ ! -x "$HOME/.maestro/bin/maestro" ]; then
-            curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=2.6.0 bash
+          MAESTRO_DIR="$RUNNER_TEMP/maestro"
+          if [ ! -x "$MAESTRO_DIR/bin/maestro" ]; then
+            .github/scripts/install-maestro.sh "$MAESTRO_DIR"
           fi
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          echo "$MAESTRO_DIR/bin" >> "$GITHUB_PATH"
 
       - name: Download built .app
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: ${{ needs.build-ios-extended.outputs.app-artifact }}
           path: app-download
@@ -1527,7 +1533,7 @@ jobs:
 
       - name: Upload extended Maestro artifacts (${{ matrix.shard.name }})
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: maestro-results-extended-${{ matrix.shard.name }}
           path: |
@@ -1544,7 +1550,7 @@ jobs:
 
       - name: Upload simulator log on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: simulator-log-extended-${{ matrix.shard.name }}
           path: simulator-extended-${{ matrix.shard.name }}.logarchive
@@ -1567,7 +1573,7 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Compute pass rate per flow
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
