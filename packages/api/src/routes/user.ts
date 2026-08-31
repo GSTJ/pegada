@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 import { UserService } from "../services/user-service";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import {
+  authenticatedProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "../trpc";
 
 export const userSchema = z.object({
   city: z.string().optional().nullable(),
@@ -25,7 +29,7 @@ export const userRouter = createTRPCRouter({
    * Hard-delete the current user's account and every dependent record.
    * Required for App Store compliance (Guideline 5.1.1(v)).
    */
-  deleteMe: protectedProcedure.mutation(async ({ ctx }) => {
+  deleteMe: authenticatedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     await UserService.deleteAccount(userId);
     return { ok: true };

@@ -1,18 +1,35 @@
 import type { DogService } from "./dog-service";
 import type { Language } from "@pegada/shared/i18n/types/types";
+import type { Prisma } from "@prisma/client";
 
 import prisma from "@pegada/database";
 import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
-import { LikeLimitReachedError } from "@pegada/shared/errors/errors";
+import {
+  AccountBlockedError,
+  DogUnavailableError,
+  LikeLimitReachedError,
+} from "@pegada/shared/errors/errors";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { PlanType } from "@prisma/client";
 import { addDays } from "date-fns/addDays";
-import { setHours } from "date-fns/setHours";
+import { subDays } from "date-fns/subDays";
 
 import { sendError } from "../errors/errors";
 import MatchService from "./match-service";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
-import { UserService } from "./user-service";
+
+type InterestDatabase = Pick<Prisma.TransactionClient, "interest">;
+type QuotaDatabase = Pick<Prisma.TransactionClient, "interest" | "user">;
+
+const lockTransaction = async (db: Prisma.TransactionClient, key: string) => {
+  await db.$queryRaw`
+    SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))::text
+  `;
+};
+
+const swipePairKey = (firstDogId: string, secondDogId: string) =>
+  [firstDogId, secondDogId].sort().join(":");
 
 export class SwipeService {
   language?: Language;
@@ -24,7 +41,12 @@ export class SwipeService {
   async sendLikeNotification(dogId: string) {
     try {
       const dog = await prisma.dog.findFirst({
-        where: { id: dogId, deletedAt: null },
+        where: {
+          id: dogId,
+          banned: false,
+          deletedAt: null,
+          user: { deletedAt: null },
+        },
         include: { user: true },
       });
 
@@ -47,24 +69,29 @@ export class SwipeService {
 
   async getRemainingDailyLikes({
     userId,
-    dogId,
+    db = prisma,
   }: {
     userId: string;
-    dogId: string;
+    db?: QuotaDatabase;
   }) {
-    const userPlan = await UserService.getSubscriptionType(userId);
+    const user = await db.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { plan: true },
+    });
+
+    if (!user) throw new AccountBlockedError();
 
     // Only apply daily swipe limit to free users
-    if (userPlan !== PlanType.FREE) return { remainingSwipes: Infinity };
+    if (user.plan !== PlanType.FREE) return { remainingSwipes: Infinity };
 
-    const today = setHours(new Date(), 0);
-    const dailyLikeCount = await prisma.interest.findMany({
+    const windowStart = subDays(new Date(), 1);
+    const dailyLikeCount = await db.interest.findMany({
       where: {
-        requesterId: dogId,
-        updatedAt: { gte: today },
-        deletedAt: null,
-        swipeType: { notIn: ["NOT_INTERESTED"] },
+        requester: { userId },
+        lastPositiveAt: { gte: windowStart },
       },
+      orderBy: { lastPositiveAt: "desc" },
+      select: { lastPositiveAt: true },
       take: FREE_DAILY_SWIPE_LIMIT,
     });
 
@@ -74,11 +101,11 @@ export class SwipeService {
 
     // If the user has reached their daily swipe limit, return the time at which the limit will reset
     const oldestLike = dailyLikeCount.at(-1);
-    if (!oldestLike) return { remainingSwipes };
+    if (!oldestLike?.lastPositiveAt) return { remainingSwipes };
 
     return {
       remainingSwipes,
-      likeLimitResetAt: addDays(oldestLike.updatedAt, 1),
+      likeLimitResetAt: addDays(oldestLike.lastPositiveAt, 1),
     };
   }
 
@@ -95,104 +122,187 @@ export class SwipeService {
     swipeType: "NOT_INTERESTED" | "MAYBE" | "INTERESTED";
     userId: string;
   }) {
-    let remainingDailyLikes;
+    if (responderId === requester.id) throw new DogUnavailableError();
 
-    if (swipeType !== "NOT_INTERESTED") {
-      remainingDailyLikes = await this.getRemainingDailyLikes({
-        userId,
-        dogId: requester.id,
-      });
-
-      if (remainingDailyLikes.likeLimitResetAt) {
-        throw new LikeLimitReachedError({
-          likeLimitResetAt: remainingDailyLikes.likeLimitResetAt,
-        });
-      }
-    }
-
-    const { interest, previousStatus } =
-      await SwipeService.createOrUpdateInterest(
-        requester.id,
-        responderId,
-        swipeType,
-      );
-
-    if (swipeType === "NOT_INTERESTED") {
-      if (previousStatus) {
-        const existingMatch = await prisma.match.findFirst({
-          where: {
-            deletedAt: null,
-            OR: [
-              { requesterId: requester.id, responderId },
-              // Inverted match
-              { requesterId: responderId, responderId: requester.id },
-            ],
-          },
-        });
-
-        if (existingMatch) {
-          await prisma.match.update({
-            where: { id: existingMatch.id },
-            data: { deletedAt: new Date() },
-          });
-        }
-      }
-
-      if (!remainingDailyLikes) {
-        return { interest };
-      }
-
-      return { interest, remainingDailyLikes };
-    }
-
-    const hasMutualInterest = await SwipeService.checkForMutualInterest(
-      responderId,
-      requester.id,
-    );
-
-    // Needs to have at least one approved image and no rejected images to be able to send notifications
     const isRequesterShadowbanned = requester.images.some(
       (image) => image.status === "REJECTED",
     );
-
     const requesterHasImages = requester.images.some(
       (image) => image.status === "APPROVED",
     );
-
     const canSendNotifications = !isRequesterShadowbanned && requesterHasImages;
+    const matchService = new MatchService({ language: this.language });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        await lockTransaction(tx, `swipe-user:${userId}`);
+        await lockTransaction(
+          tx,
+          `swipe-pair:${swipePairKey(requester.id, responderId)}`,
+        );
 
-    if (!hasMutualInterest) {
-      if (canSendNotifications) {
-        await this.sendLikeNotification(responderId);
-      }
-      return { interest };
+        const activeRequester = await tx.dog.findFirst({
+          where: {
+            id: requester.id,
+            userId,
+            banned: false,
+            deletedAt: null,
+            user: { deletedAt: null },
+          },
+          select: { id: true },
+        });
+
+        if (!activeRequester) throw new AccountBlockedError();
+
+        const responder = await tx.dog.findFirst({
+          where: {
+            id: responderId,
+            banned: false,
+            deletedAt: null,
+            user: { deletedAt: null },
+            images: {
+              some: { status: IMAGE_STATUS.APPROVED },
+              none: { status: IMAGE_STATUS.REJECTED },
+            },
+          },
+          select: { id: true },
+        });
+
+        if (!responder) throw new DogUnavailableError();
+
+        if (swipeType !== "NOT_INTERESTED") {
+          const alreadyCounted = await tx.interest.findUnique({
+            where: {
+              requesterId_responderId: {
+                requesterId: requester.id,
+                responderId,
+              },
+              lastPositiveAt: { gte: subDays(new Date(), 1) },
+            },
+            select: { id: true },
+          });
+
+          if (!alreadyCounted) {
+            const remainingDailyLikes = await this.getRemainingDailyLikes({
+              userId,
+              db: tx,
+            });
+
+            if (remainingDailyLikes.likeLimitResetAt) {
+              throw new LikeLimitReachedError({
+                likeLimitResetAt: remainingDailyLikes.likeLimitResetAt,
+              });
+            }
+          }
+        }
+
+        const { interest } = await SwipeService.createOrUpdateInterest(
+          requester.id,
+          responderId,
+          swipeType,
+          tx,
+        );
+
+        if (swipeType === "NOT_INTERESTED") {
+          await tx.match.updateMany({
+            where: {
+              deletedAt: null,
+              OR: [
+                { requesterId: requester.id, responderId },
+                { requesterId: responderId, responderId: requester.id },
+              ],
+            },
+            data: { deletedAt: new Date() },
+          });
+
+          return {
+            interest,
+            match: null,
+            matchNotification: null,
+            sendLikeNotification: false,
+          };
+        }
+
+        const hasMutualInterest = await SwipeService.checkForMutualInterest(
+          responderId,
+          requester.id,
+          tx,
+        );
+
+        if (!hasMutualInterest) {
+          return {
+            interest,
+            match: null,
+            matchNotification: null,
+            sendLikeNotification: canSendNotifications,
+          };
+        }
+
+        const { match, notification } = await matchService.createMatch(
+          requester.id,
+          responderId,
+          tx,
+        );
+
+        return {
+          interest,
+          match,
+          matchNotification: notification,
+          sendLikeNotification: false,
+        };
+      },
+      { timeout: 10_000 },
+    );
+
+    if (result.matchNotification) {
+      await matchService.sendMatchNotification(result.matchNotification);
+    } else if (result.sendLikeNotification) {
+      await this.sendLikeNotification(responderId);
     }
 
-    const matchService = new MatchService({ language: this.language });
-    const match = await matchService.createMatch(requester.id, responderId);
-
-    return { interest, match };
+    return result.match
+      ? { interest: result.interest, match: result.match }
+      : { interest: result.interest };
   }
 
   static async createOrUpdateInterest(
     requesterId: string,
     responderId: string,
     swipeType: "INTERESTED" | "MAYBE" | "NOT_INTERESTED",
+    db: InterestDatabase = prisma,
   ) {
-    const existingInterest = await prisma.interest.findFirst({
-      where: { requesterId, responderId, deletedAt: null },
+    const existingInterest = await db.interest.findUnique({
+      where: {
+        requesterId_responderId: { requesterId, responderId },
+      },
     });
 
-    const previousStatus = existingInterest ? existingInterest.swipeType : "";
+    const previousStatus = existingInterest?.swipeType ?? "";
+    const recentPositiveAt =
+      existingInterest?.lastPositiveAt &&
+      existingInterest.lastPositiveAt >= subDays(new Date(), 1)
+        ? existingInterest.lastPositiveAt
+        : null;
+    const lastPositiveAt =
+      swipeType === "NOT_INTERESTED"
+        ? existingInterest?.lastPositiveAt
+        : (recentPositiveAt ?? new Date());
 
-    const interest = existingInterest
-      ? await prisma.interest.update({
-          where: { id: existingInterest.id },
-          data: { swipeType },
-        })
-      : await prisma.interest.create({
-          data: { requesterId, responderId, swipeType },
-        });
+    const interest = await db.interest.upsert({
+      where: {
+        requesterId_responderId: { requesterId, responderId },
+      },
+      create: {
+        requesterId,
+        responderId,
+        swipeType,
+        lastPositiveAt,
+      },
+      update: {
+        swipeType,
+        deletedAt: null,
+        lastPositiveAt,
+      },
+    });
 
     return { interest, previousStatus };
   }
@@ -200,8 +310,9 @@ export class SwipeService {
   static async checkForMutualInterest(
     requesterId: string,
     responderId: string,
+    db: InterestDatabase = prisma,
   ) {
-    const mutualInterest = await prisma.interest.findFirst({
+    const mutualInterest = await db.interest.findFirst({
       where: {
         requesterId,
         responderId,

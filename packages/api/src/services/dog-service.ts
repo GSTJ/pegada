@@ -1,6 +1,7 @@
 import type { DogServerSchema } from "@pegada/shared/schemas/dog-schema";
 
 import prisma from "@pegada/database";
+import { DogUnavailableError } from "@pegada/shared/errors/errors";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import {
@@ -182,7 +183,9 @@ export class DogService {
     const dog = await prisma.dog.findFirst({
       where: {
         id,
+        banned: false,
         deletedAt: null,
+        user: { deletedAt: null },
         // Users must have at least one approved image.
         // Shadowban users with rejected images.
         images: {
@@ -194,7 +197,7 @@ export class DogService {
     });
 
     if (!dog) {
-      throw new Error("Dog not found");
+      throw new DogUnavailableError();
     }
 
     return transformDistanceBetweenUserAndDog(dog, user);
@@ -211,7 +214,7 @@ export class DogService {
 
   static async getFullDogByUserId(userId: string) {
     const dog = await prisma.dog.findFirst({
-      where: { userId, deletedAt: null },
+      where: { userId, banned: false, deletedAt: null },
       select: serverOnlyFullDogSelect,
     });
 
@@ -233,7 +236,7 @@ export class DogService {
 
   static async getDogByUserId(userId: string) {
     const dog = await prisma.dog.findFirstOrThrow({
-      where: { userId, deletedAt: null },
+      where: { userId, banned: false, deletedAt: null },
     });
 
     return dog;
