@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import prisma from "@pegada/database";
 import { Namespace } from "@pegada/shared/i18n/types/types";
+import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { getFormattedYears } from "@pegada/shared/utils/get-formatted-years";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
@@ -17,11 +18,34 @@ type DogProfileProps = {
   }>;
 };
 
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 const DogProfile = async ({ params }: DogProfileProps) => {
   const { id } = await params;
   const dog = await prisma.dog.findFirst({
-    where: { id, deletedAt: null },
-    include: { images: true, breed: true },
+    where: {
+      id,
+      banned: false,
+      deletedAt: null,
+      images: {
+        some: { status: IMAGE_STATUS.APPROVED },
+        none: { status: IMAGE_STATUS.REJECTED },
+      },
+    },
+    select: {
+      name: true,
+      bio: true,
+      birthDate: true,
+      breed: { select: { name: true, slug: true } },
+      images: {
+        where: { status: IMAGE_STATUS.APPROVED },
+        orderBy: { position: "asc" },
+        take: 1,
+        select: { url: true },
+      },
+    },
   });
 
   const lng = getSafeLocale();

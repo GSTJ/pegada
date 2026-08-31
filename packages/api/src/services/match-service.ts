@@ -25,6 +25,7 @@ class MatchService {
           { requesterId: responderId, responderId: requesterId },
         ],
       },
+      select: { id: true },
     });
 
     if (existingMatch) {
@@ -37,10 +38,15 @@ class MatchService {
         requesterId,
         responderId,
       },
-      include: {
+      select: {
+        id: true,
+        requesterId: true,
         responder: {
-          include: {
-            user: true,
+          select: {
+            name: true,
+            user: {
+              select: { pushToken: true },
+            },
           },
         },
       },
@@ -62,7 +68,10 @@ class MatchService {
       });
     }
 
-    return match;
+    // `responder.user` exists only to address the notification. Returning the
+    // Prisma result here used to serialize the complete User row through
+    // `swipe.swipe`, including email, location, push token and active OTP.
+    return { id: match.id };
   }
 
   static async getMatchesForDog(dogId: string) {
