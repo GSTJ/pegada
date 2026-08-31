@@ -1,6 +1,8 @@
 import prisma from "@pegada/database";
 import { Gender } from "@prisma/client";
 
+import { config } from "../shared/config";
+import { deleteImageFromS3 } from "../shared/file-upload";
 import { DogService } from "./dog-service";
 
 // `enqueue` pulls in `errors.ts` -> `observability.ts` -> the ESM-only
@@ -12,11 +14,25 @@ jest.mock("../errors/errors", () => ({
   errorDebug: () => undefined,
 }));
 
+jest.mock("../shared/file-upload", () => {
+  const actual = jest.requireActual<typeof import("../shared/file-upload")>(
+    "../shared/file-upload",
+  );
+
+  return {
+    ...actual,
+    deleteImageFromS3: jest.fn(async () => undefined),
+  };
+});
+
+const deleteStoredImage = jest.mocked(deleteImageFromS3);
+
 afterAll(async () => {
   await prisma.$disconnect();
 });
 
 beforeEach(async () => {
+  await prisma.uploadGrant.deleteMany();
   await prisma.message.deleteMany();
   await prisma.match.deleteMany();
   await prisma.interest.deleteMany();
@@ -64,5 +80,22 @@ describe("DogService.updateDog", () => {
     await expect(
       prisma.image.findUniqueOrThrow({ where: { id: otherImage.id } }),
     ).resolves.toMatchObject({ position: 0 });
+  });
+});
+
+describe("DogService.deleteDog", () => {
+  it("deletes the public object before removing its database row", async () => {
+    const storedUrl = `https://${config.AWS_S3_BUCKET_NAME}.s3.${config.AWS_REGION}.amazonaws.com/dogs/delete.webp`;
+    const dog = await seedDog("delete-image-owner@pegada.app", storedUrl);
+
+    await DogService.deleteDog(dog.id);
+
+    expect(deleteStoredImage).toHaveBeenCalledWith(storedUrl);
+    await expect(
+      prisma.image.count({ where: { dogId: dog.id } }),
+    ).resolves.toBe(0);
+    await expect(
+      prisma.dog.findUniqueOrThrow({ where: { id: dog.id } }),
+    ).resolves.toMatchObject({ deletedAt: expect.any(Date) });
   });
 });

@@ -1,6 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
+    "src/app/api/queues/cleanup-upload/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "cleanup-upload",
+          "retryAfterSeconds": 60
+        }
+      ]
+    },
     "src/app/api/queues/mail/route.ts": {
       "experimentalTriggers": [
         {

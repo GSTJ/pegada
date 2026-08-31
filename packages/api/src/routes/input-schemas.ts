@@ -1,4 +1,10 @@
+import { MAX_IMAGE_BYTES } from "@pegada/shared/constants/constants";
 import { z } from "zod";
+
+export const signedUploadInputSchema = z.object({
+  contentLength: z.number().int().min(1).max(MAX_IMAGE_BYTES),
+  contentType: z.literal("image/webp"),
+});
 
 export const messageListInputSchema = z.object({
   matchId: z.string().uuid(),

@@ -167,6 +167,23 @@ model Image {
   @@index([dogId, status])
 }
 
+model UploadGrant {
+  id String @id @default(cuid())
+
+  userId       String
+  temporaryUrl String @unique
+  permanentUrl String?
+
+  expiresAt DateTime
+  consumedAt DateTime?
+  cleanedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([expiresAt, consumedAt])
+}
+
 model Breed {
   id            String @id(map: "idx_57659_PRIMARY") @default(uuid())
   name          String @unique(map: "breed_name_key")

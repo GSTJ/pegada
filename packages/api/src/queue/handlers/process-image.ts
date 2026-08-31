@@ -1,5 +1,6 @@
 import type { IProcessImageJobData } from "../topics";
 
+import { MAX_IMAGE_BYTES } from "@pegada/shared/constants/constants";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import { sendError } from "../../errors/errors";
@@ -7,7 +8,7 @@ import { ImageProcessingService } from "../../services/image-processing-service"
 import { ImageService } from "../../services/image-service";
 import { assertAllowedImageUrl } from "../../shared/image-url";
 
-export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export { MAX_IMAGE_BYTES };
 const MAX_REDIRECTS = 5;
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 

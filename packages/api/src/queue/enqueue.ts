@@ -30,6 +30,8 @@ const INLINE_HANDLERS: {
     import("./handlers/push").then((m) => m.handleSendPushNotification),
   [TOPICS.CHECK_PUSH_RECEIPTS]: () =>
     import("./handlers/push").then((m) => m.handleCheckPushReceipts),
+  [TOPICS.CLEANUP_UPLOAD]: () =>
+    import("./handlers/upload").then((m) => m.handleCleanupUpload),
 };
 
 const isVercelQueueAvailable = () =>

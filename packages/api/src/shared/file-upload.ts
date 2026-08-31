@@ -203,20 +203,39 @@ export const deleteImageFromS3 = async (url: string) => {
   await storageClient.send(command);
 };
 
+const planImageMove = (url: string, folder: string) => {
+  const storage = storageForUrl(url);
+  const oldKey = keyFromUrl(url, storage.bucket);
+
+  assertTemporaryUploadKey(oldKey);
+
+  const fileName = oldKey.split("/").at(-1) as string;
+  const newKey = `${folder}/${fileName}`;
+
+  return {
+    ...storage,
+    oldKey,
+    newKey,
+    publicUrl: storage.urlForKey(newKey),
+  };
+};
+
+export const getMovedImageUrl = (url: string, folder: string) =>
+  planImageMove(url, folder).publicUrl;
+
 // Move image to another folder in S3, receives the url of the image and the new folder name and returns the new url
 export const moveImageToFolder = async (url: string, folder: string) => {
   // Routed by URL host: images uploaded through the legacy path live on
   // S3/MinIO, images from the new path live on R2. Copies never cross
   // providers — temp and permanent folders are in the same bucket.
-  const { client: storageClient, bucket, isR2, urlForKey } = storageForUrl(url);
-
-  const oldKey = keyFromUrl(url, bucket);
-
-  // Ahead of the copy and the delete below, both of which act on this key.
-  assertTemporaryUploadKey(oldKey);
-
-  const fileName = oldKey.split("/").at(-1);
-  const newKey = `${folder}/${fileName}`;
+  const {
+    client: storageClient,
+    bucket,
+    isR2,
+    oldKey,
+    newKey,
+    publicUrl,
+  } = planImageMove(url, folder);
 
   const command = new CopyObjectCommand({
     Bucket: bucket,
@@ -238,5 +257,5 @@ export const moveImageToFolder = async (url: string, folder: string) => {
   // Rebuilt from the storage's own base URL rather than patched out of the
   // caller's string, so nothing about the incoming URL other than the file
   // name reaches the database.
-  return urlForKey(newKey);
+  return publicUrl;
 };

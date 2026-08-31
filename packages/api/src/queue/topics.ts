@@ -8,6 +8,7 @@ export const TOPICS = {
   PROCESS_IMAGE: "process-image",
   SEND_PUSH: "send-push",
   CHECK_PUSH_RECEIPTS: "check-push-receipts",
+  CLEANUP_UPLOAD: "cleanup-upload",
 } as const;
 
 export type Topic = (typeof TOPICS)[keyof typeof TOPICS];
@@ -26,9 +27,15 @@ export type ICheckPushNotificationReceiptsJobData = {
   receipts?: { id: string; pushToken: string }[];
 };
 
+export type ICleanupUploadJobData = {
+  grantId: string;
+  phase: "object" | "record";
+};
+
 export type TopicPayloads = {
   [TOPICS.MAIL]: IMailJobData;
   [TOPICS.PROCESS_IMAGE]: IProcessImageJobData;
   [TOPICS.SEND_PUSH]: ISendNotificationJobData;
   [TOPICS.CHECK_PUSH_RECEIPTS]: ICheckPushNotificationReceiptsJobData;
+  [TOPICS.CLEANUP_UPLOAD]: ICleanupUploadJobData;
 };

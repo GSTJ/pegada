@@ -1,6 +1,9 @@
+import { MAX_IMAGE_BYTES } from "@pegada/shared/constants/constants";
+
 import {
   messageListInputSchema,
   messageSendInputSchema,
+  signedUploadInputSchema,
   swipeQueryInputSchema,
 } from "./input-schemas";
 
@@ -53,6 +56,29 @@ describe("swipe input limits", () => {
     expect(
       swipeQueryInputSchema.safeParse({
         notIn: Array.from({ length: 501 }, () => dogId),
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("upload input limits", () => {
+  it("accepts only bounded WEBP uploads", () => {
+    expect(
+      signedUploadInputSchema.safeParse({
+        contentLength: MAX_IMAGE_BYTES,
+        contentType: "image/webp",
+      }).success,
+    ).toBe(true);
+    expect(
+      signedUploadInputSchema.safeParse({
+        contentLength: MAX_IMAGE_BYTES + 1,
+        contentType: "image/webp",
+      }).success,
+    ).toBe(false);
+    expect(
+      signedUploadInputSchema.safeParse({
+        contentLength: 1024,
+        contentType: "text/html",
       }).success,
     ).toBe(false);
   });

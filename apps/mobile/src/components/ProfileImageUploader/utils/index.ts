@@ -243,10 +243,9 @@ export class ProfileImageUploadError extends Error {
  * the Maestro placeholder skip affordance (`shouldOfferMaestroPlaceholder`).
  *
  * Steps:
- *   1. presign — request an upload descriptor from the API: method, url,
- *      headers to send, and the object's canonical public URL
- *   2. compress — re-encode to WEBP @ 0.8 quality (expensive, kept after the
- *      caller has already shown optimistic visual feedback)
+ *   1. compress — re-encode to WEBP @ 0.8 quality
+ *   2. presign — send the exact byte length and request an upload descriptor:
+ *      method, url, headers, and the object's canonical public URL
  *   3. upload — send the bytes exactly as the descriptor says, via
  *      expo-file-system's BINARY_CONTENT mode
  *   4. finalize — return the descriptor's `publicUrl`
@@ -264,9 +263,29 @@ export const uploadProfileImage = async (
   localUri: string,
   onProgress?: (stage: ProfileImageUploadStage) => void,
 ): Promise<string> => {
+  onProgress?.("compress");
+  const compressedImage = await compressImage(localUri).catch((error) => {
+    throw new ProfileImageUploadError("compress", "compressImage failed", {
+      cause: error,
+    });
+  });
+  const compressedImageInfo = await getInfoAsync(compressedImage.uri);
+  if (
+    !compressedImageInfo.exists ||
+    typeof compressedImageInfo.size !== "number"
+  ) {
+    throw new ProfileImageUploadError(
+      "compress",
+      "Compressed photo size is unavailable",
+    );
+  }
+
   onProgress?.("presign");
   const upload = await getTrcpContext()
-    .image.signedUpload.fetch()
+    .image.signedUpload.fetch({
+      contentLength: compressedImageInfo.size,
+      contentType: "image/webp",
+    })
     .catch((error) => {
       throw new ProfileImageUploadError(
         "presign",
@@ -274,13 +293,6 @@ export const uploadProfileImage = async (
         { cause: error },
       );
     });
-
-  onProgress?.("compress");
-  const compressedImage = await compressImage(localUri).catch((error) => {
-    throw new ProfileImageUploadError("compress", "compressImage failed", {
-      cause: error,
-    });
-  });
 
   onProgress?.("upload");
   const response = await uploadAsync(upload.url, compressedImage.uri, {

@@ -33,8 +33,7 @@ jest.mock("../shared/file-upload", () => {
 
 const deleteStoredImage = jest.mocked(deleteImageFromS3);
 
-/** .env.test leaves R2 and AWS_S3_ENDPOINT unset, so this is the one origin
- * this service is configured to operate on. */
+/** The legacy virtual-hosted S3 origin remains allowed in the test config. */
 const BUCKET_URL = `https://${config.AWS_S3_BUCKET_NAME}.s3.${config.AWS_REGION}.amazonaws.com`;
 const STORED_PHOTO = `${BUCKET_URL}/dogs/luna.webp`;
 
@@ -43,6 +42,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
+  await prisma.uploadGrant.deleteMany();
   await prisma.message.deleteMany();
   await prisma.match.deleteMany();
   await prisma.interest.deleteMany();
@@ -74,6 +74,29 @@ test("removes stored photos before deleting an account", async () => {
   await expect(
     prisma.user.findUnique({ where: { id: user.id } }),
   ).resolves.toBeNull();
+});
+
+test("removes outstanding upload objects and grants with the account", async () => {
+  const user = await seedAccount();
+  const temporaryUrl = `${BUCKET_URL}/dogs-temporary/pending.webp`;
+  const permanentUrl = `${BUCKET_URL}/dogs/orphaned.webp`;
+  await prisma.uploadGrant.create({
+    data: {
+      userId: user.id,
+      temporaryUrl,
+      permanentUrl,
+      expiresAt: new Date(Date.now() + 60_000),
+      consumedAt: new Date(),
+    },
+  });
+
+  await UserService.deleteAccount(user.id);
+
+  expect(deleteStoredImage).toHaveBeenCalledWith(temporaryUrl);
+  expect(deleteStoredImage).toHaveBeenCalledWith(permanentUrl);
+  await expect(
+    prisma.uploadGrant.count({ where: { userId: user.id } }),
+  ).resolves.toBe(0);
 });
 
 test("keeps the account when a stored photo cannot be removed", async () => {
