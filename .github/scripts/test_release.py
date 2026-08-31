@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -12,7 +13,11 @@ from pathlib import Path
 SCRIPTS = Path(__file__).resolve().parent
 CHANGELOG_SCRIPT = SCRIPTS / "changelog.py"
 TAG_SCRIPT = SCRIPTS.parents[1] / "scripts" / "tag-release.sh"
+VERIFY_SCRIPT = SCRIPTS / "verify-release-ref.py"
+INSTALL_MAESTRO_SCRIPT = SCRIPTS / "install-maestro.sh"
 MOBILE_DEPLOY_WORKFLOW = SCRIPTS.parents[1] / ".github" / "workflows" / "deploy-mobile.yml"
+RELEASE_WORKFLOW = SCRIPTS.parents[1] / ".github" / "workflows" / "release-mobile.yml"
+WORKFLOWS = SCRIPTS.parents[1] / ".github" / "workflows"
 
 
 class MobileDeployWorkflowTest(unittest.TestCase):
@@ -24,6 +29,45 @@ class MobileDeployWorkflowTest(unittest.TestCase):
         self.assertIn('- "pnpm-lock.yaml"', workflow)
         self.assertNotIn('- "apps/shared/**"', workflow)
         self.assertNotIn('- ".github/scripts/**"', workflow)
+
+
+class WorkflowSupplyChainTest(unittest.TestCase):
+    def test_every_external_action_is_pinned_to_a_commit(self) -> None:
+        for workflow in WORKFLOWS.glob("*.yml"):
+            for line in workflow.read_text().splitlines():
+                match = re.search(r"\buses:\s*([^\s#]+)", line)
+                if not match or match.group(1).startswith("./"):
+                    continue
+                self.assertRegex(
+                    match.group(1),
+                    r"@[0-9a-f]{40}$",
+                    f"mutable action in {workflow.name}: {line.strip()}",
+                )
+
+    def test_release_tools_do_not_float_or_pipe_remote_code_to_a_shell(self) -> None:
+        workflow_text = "\n".join(
+            workflow.read_text() for workflow in WORKFLOWS.glob("*.yml")
+        )
+
+        self.assertNotIn("eas-version: latest", workflow_text)
+        self.assertNotIn("npx --yes", workflow_text)
+        for line in workflow_text.splitlines():
+            if "run: pnpm install" in line:
+                self.assertIn("--frozen-lockfile", line)
+        self.assertNotRegex(workflow_text, r"curl[^\n]*\|[^\n]*(?:bash|sh)")
+        self.assertIn("eas-version: 23.1.0", workflow_text)
+        self.assertIn(
+            "80185105a5d7e227e3b3fbcf225f45b312508ea676a9fc8e1b1aa1cac8b9ff6e",
+            INSTALL_MAESTRO_SCRIPT.read_text(),
+        )
+
+    def test_secret_bearing_release_jobs_need_authorization_and_production(self) -> None:
+        workflow = RELEASE_WORKFLOW.read_text()
+
+        self.assertIn("authorize-release:", workflow)
+        self.assertIn("verify-release-ref.py", workflow)
+        self.assertEqual(workflow.count("needs: authorize-release"), 3)
+        self.assertEqual(workflow.count("environment: production"), 4)
 
 
 class GitRepositoryTest(unittest.TestCase):
@@ -162,6 +206,7 @@ class TagReleaseTest(GitRepositoryTest):
         (self.repo / "scripts").mkdir()
         (self.repo / "apps" / "mobile").mkdir(parents=True)
         shutil.copy(CHANGELOG_SCRIPT, self.repo / ".github" / "scripts" / "changelog.py")
+        shutil.copy(VERIFY_SCRIPT, self.repo / ".github" / "scripts" / "verify-release-ref.py")
         shutil.copy(TAG_SCRIPT, self.repo / "scripts" / "tag-release.sh")
         (self.repo / "apps" / "mobile" / "app.config.ts").write_text(
             'const config = { version: "1.1.0", };\n'
@@ -182,23 +227,46 @@ class TagReleaseTest(GitRepositoryTest):
         self.git("push", "-u", "origin", "main")
         self.git("push", "origin", "v1.0.0")
 
-    def test_tag_is_blocked_until_the_generated_changelog_is_merged(self) -> None:
+    def prepare_valid_release(self) -> None:
         self.commit("fix(release): keep changelog inside the tag")
         self.git("push", "origin", "main")
 
         first = self.command("./scripts/tag-release.sh", "v1.1.0", check=False)
-
         self.assertEqual(first.returncode, 1)
-        self.assertIn("Prepared CHANGELOG.md for v1.1.0", first.stdout)
-        self.assertEqual(self.git("tag", "--list", "v1.1.0"), "")
 
         self.git("add", "CHANGELOG.md")
         self.git("commit", "-m", "docs(release): prepare v1.1.0 changelog")
         self.git("push", "origin", "main")
+        self.command("./scripts/tag-release.sh", "v1.1.0")
 
-        second = self.command("./scripts/tag-release.sh", "v1.1.0")
+    def verify_release(
+        self,
+        *,
+        event: str,
+        ref: str,
+        submit: str = "false",
+        sha: str | None = None,
+        check: bool = True,
+    ) -> subprocess.CompletedProcess[str]:
+        return self.command(
+            sys.executable,
+            str(self.repo / ".github" / "scripts" / "verify-release-ref.py"),
+            "--event",
+            event,
+            "--ref",
+            ref,
+            "--sha",
+            sha or self.git("rev-parse", "HEAD"),
+            "--submit",
+            submit,
+            "--repo",
+            "GSTJ/pegada",
+            check=check,
+        )
 
-        self.assertIn("Tagged and pushed v1.1.0", second.stdout)
+    def test_tag_is_blocked_until_the_generated_changelog_is_merged(self) -> None:
+        self.prepare_valid_release()
+
         remote_target = self.git(
             "ls-remote", "--tags", "origin", "refs/tags/v1.1.0^{}"
         ).split()[0]
@@ -210,6 +278,56 @@ class TagReleaseTest(GitRepositoryTest):
             (self.repo / "CHANGELOG.md").read_text(),
             self.changelog("--all", "--repo", "GSTJ/pegada"),
         )
+
+    def test_valid_tag_passes_release_authorization(self) -> None:
+        self.prepare_valid_release()
+
+        result = self.verify_release(
+            event="push", ref="refs/tags/v1.1.0", check=False
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Authorized release tag v1.1.0", result.stdout)
+
+    def test_off_main_tag_is_rejected(self) -> None:
+        self.git("switch", "-c", "untrusted-release")
+        self.commit("fix: off-main release")
+        self.git("tag", "-a", "v1.1.0", "-m", "v1.1.0")
+
+        result = self.verify_release(
+            event="push", ref="refs/tags/v1.1.0", check=False
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("is not part of origin/main", result.stderr)
+
+    def test_lightweight_release_tag_is_rejected(self) -> None:
+        self.git("tag", "v1.1.0")
+
+        result = self.verify_release(
+            event="push", ref="refs/tags/v1.1.0", check=False
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("must be annotated", result.stderr)
+
+    def test_store_submission_requires_a_release_tag(self) -> None:
+        result = self.verify_release(
+            event="workflow_dispatch",
+            ref="refs/heads/main",
+            submit="true",
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("store submission requires", result.stderr)
+
+    def test_manual_main_build_without_submission_is_allowed(self) -> None:
+        result = self.verify_release(
+            event="workflow_dispatch", ref="refs/heads/main"
+        )
+
+        self.assertIn("Authorized manual build from main", result.stdout)
 
 
 if __name__ == "__main__":

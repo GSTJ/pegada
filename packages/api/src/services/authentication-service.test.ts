@@ -51,22 +51,27 @@ describe("AuthenticationService.checkVerification", () => {
     ).resolves.toMatchObject({ code: null, codeExpiresAt: null });
   });
 
-  it("lets only one concurrent request consume an OTP", async () => {
+  it("lets only one concurrent request consume each issued OTP", async () => {
     const user = await seedCode();
-    const verify = () =>
-      AuthenticationService.checkVerification({
-        email: user.email,
-        code: "123456",
+    for (let attempt = 0; attempt < 25; attempt += 1) {
+      const code = attempt.toString().padStart(6, "0");
+      // oxlint-disable-next-line no-await-in-loop -- Each code must be issued before its two consumption requests race.
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { code, codeExpiresAt: new Date(Date.now() + 60_000) },
       });
+      const verify = () =>
+        AuthenticationService.checkVerification({ email: user.email, code });
 
-    const results = await Promise.allSettled([verify(), verify()]);
+      // oxlint-disable-next-line no-await-in-loop -- Attempts are sequential so one code cannot interfere with the next.
+      const results = await Promise.allSettled([verify(), verify()]);
+      const statuses = results.map(({ status }) => status).sort();
 
-    expect(results.filter(({ status }) => status === "fulfilled")).toHaveLength(
-      1,
-    );
-    expect(results.filter(({ status }) => status === "rejected")).toHaveLength(
-      1,
-    );
+      expect({ attempt, statuses }).toEqual({
+        attempt,
+        statuses: ["fulfilled", "rejected"],
+      });
+    }
   });
 });
 

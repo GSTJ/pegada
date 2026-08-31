@@ -85,6 +85,33 @@ env:
   EXPO_NO_TELEMETRY: 1
 
 jobs:
+  authorize-release:
+    name: Verify release ref
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout full release history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Verify main ancestry, tag, and changelog
+        env:
+          RELEASE_EVENT: ${{ github.event_name }}
+          RELEASE_REF: ${{ github.ref }}
+          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_SUBMIT: ${{ inputs.submit }}
+        run: |
+          set -euo pipefail
+          git fetch --force origin main:refs/remotes/origin/main
+          python3 .github/scripts/verify-release-ref.py \
+            --event "$RELEASE_EVENT" \
+            --ref "$RELEASE_REF" \
+            --sha "$RELEASE_SHA" \
+            --submit "$RELEASE_SUBMIT" \
+            --repo "$GITHUB_REPOSITORY"
+
   # -------------------------------------------------------------------------
   # GitHub release + changelog. Deliberately has NO `needs:` on the build
   # jobs: the notes describe what's in the tag, which is knowable the second
@@ -101,6 +128,7 @@ jobs:
   # -------------------------------------------------------------------------
   github-release:
     name: GitHub release (notes + changelog)
+    needs: authorize-release
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -110,7 +138,7 @@ jobs:
       # Full history and every tag: the generator diffs this tag against the
       # previous one, which a shallow clone doesn't have.
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -174,48 +202,25 @@ jobs:
               "${FLAGS[@]}"
           fi
 
-      # Reports, never writes. The "Main" ruleset requires every change to
-      # `main` to arrive through a squash-merged pull request, so a bot pushing
-      # a changelog commit straight to the branch gets rejected with GH013 (it
-      # did, on v1.5.0-rc1's first run) and takes the whole job red AFTER the
-      # release was already published. Opening the PR from here instead doesn't
-      # work either: a pull request created with GITHUB_TOKEN does not trigger
-      # workflows, so its required checks would never report and the PR could
-      # never merge.
-      #
-      # `./scripts/tag-release.sh` regenerates CHANGELOG.md locally while
-      # cutting the tag, so the file is normally already committed by the time
-      # this runs. This step exists to catch the case where someone tagged
-      # without it, and it stays green either way; the release itself does not
-      # depend on the file.
-      - name: Check CHANGELOG.md is current
+      # The authorization job already checks this before the release or build
+      # jobs can start. Keep the check beside the publishing step too, so a
+      # later workflow edit cannot quietly split the release body and file.
+      - name: Confirm CHANGELOG.md is current
         run: |
           set -euo pipefail
           python3 .github/scripts/changelog.py \
             --all --repo "$GITHUB_REPOSITORY" --output CHANGELOG.md
-
-          if git diff --quiet -- CHANGELOG.md; then
-            echo "CHANGELOG.md is current." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          {
-            echo "### CHANGELOG.md is stale"
-            echo
-            echo "Run \`pnpm changelog\` on \`main\` and open a PR with the result."
-            echo
-            echo '```diff'
-            git --no-pager diff -- CHANGELOG.md
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          git diff --exit-code -- CHANGELOG.md
 
   # -------------------------------------------------------------------------
   # iOS: local EAS build on a macOS runner, production profile.
   # -------------------------------------------------------------------------
   build-ios:
     name: Build iOS (production, local)
+    needs: authorize-release
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios' }}
     runs-on: macos-latest
+    environment: production
     timeout-minutes: 60
     outputs:
       ipa-artifact: ${{ steps.vars.outputs.ipa-artifact }}
@@ -241,7 +246,7 @@ jobs:
           xcodebuild -version
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # `eas build --local` stages the project into an isolated working
       # copy (packages/eas-cli/src/vcs/local.ts's makeShallowCopyAsync)
@@ -295,10 +300,10 @@ jobs:
           GOOGLE_SERVICE_INFO_PLIST_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -307,7 +312,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Java 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
@@ -316,16 +321,16 @@ jobs:
       # its own `pod install` internally during prebuild, this cache just
       # gives that step a warm CocoaPods cache to pull from.
       - name: Cache CocoaPods
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: apps/mobile/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pods-
 
       - name: Setup EAS CLI
-        uses: expo/expo-github-action@v9
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: latest
+          eas-version: 23.1.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: EAS build (iOS, production, local)
@@ -339,7 +344,7 @@ jobs:
             --output "$RUNNER_TEMP/Pegada.ipa"
 
       - name: Upload .ipa artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.vars.outputs.ipa-artifact }}
           path: ${{ runner.temp }}/Pegada.ipa
@@ -350,8 +355,10 @@ jobs:
   # -------------------------------------------------------------------------
   build-android:
     name: Build Android (production, local)
+    needs: authorize-release
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android' }}
     runs-on: ubuntu-latest
+    environment: production
     # A cold-cache first run on a 4-core hosted runner (no ~/.gradle to
     # restore, eas build --local doing its own prebuild on top of
     # gradlew bundleRelease) plausibly exceeds 60 minutes; this isn't
@@ -365,7 +372,7 @@ jobs:
         run: echo "aab-artifact=android-production-aab" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # See the long comment on the matching iOS step: `eas build --local`
       # stages an isolated copy of the project that excludes anything
@@ -402,10 +409,10 @@ jobs:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -414,7 +421,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Java 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "17"
@@ -431,7 +438,7 @@ jobs:
       # warm cache behind for the next attempt, timeout or not.
       - name: Restore Gradle cache
         id: gradle-cache-restore
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.gradle/caches
@@ -440,9 +447,9 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-
 
       - name: Setup EAS CLI
-        uses: expo/expo-github-action@v9
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: latest
+          eas-version: 23.1.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       # Root cause of the rc6 hang: the Gradle DAEMON hit its default
@@ -510,7 +517,7 @@ jobs:
       # cache hit (nothing changed, re-saving would be wasted work).
       - name: Save Gradle cache
         if: always() && steps.gradle-cache-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.gradle/caches
@@ -518,7 +525,7 @@ jobs:
           key: ${{ steps.gradle-cache-restore.outputs.cache-primary-key }}
 
       - name: Upload .aab artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.vars.outputs.aab-artifact }}
           path: ${{ runner.temp }}/pegada.aab
@@ -535,13 +542,14 @@ jobs:
     needs: build-ios
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.submit == true && (inputs.platform == 'all' || inputs.platform == 'ios') }}
     runs-on: ubuntu-latest
+    environment: production
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Download .ipa artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: ${{ needs.build-ios.outputs.ipa-artifact }}
           path: artifact
@@ -550,10 +558,10 @@ jobs:
       # `expo` package -- without an install it dies with "Cannot find
       # package 'expo'" before ever talking to the store.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -562,9 +570,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup EAS CLI
-        uses: expo/expo-github-action@v9
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: latest
+          eas-version: 23.1.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: EAS submit (iOS)
@@ -580,13 +588,14 @@ jobs:
     needs: build-android
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.submit == true && (inputs.platform == 'all' || inputs.platform == 'android') }}
     runs-on: ubuntu-latest
+    environment: production
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Download .aab artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: ${{ needs.build-android.outputs.aab-artifact }}
           path: artifact
@@ -594,10 +603,10 @@ jobs:
       # Same as submit-ios: `eas submit` needs node_modules to evaluate the
       # Expo config before it can talk to the store.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
           cache: pnpm
@@ -606,9 +615,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup EAS CLI
-        uses: expo/expo-github-action@v9
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: latest
+          eas-version: 23.1.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: EAS submit (Android)

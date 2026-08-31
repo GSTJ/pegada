@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: 🏗 Setup Repo
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: 🏗 Setup PNPM
-        uses: pnpm/action-setup@v6.0.9
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: 🏗 Get PNPM store directory
         id: pnpm-cache
@@ -35,7 +35,7 @@ jobs:
           echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: 🏗 Setup PNPM cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -43,12 +43,12 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: 🏗 Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22.x
 
       - name: "📦 Cache Node Modules"
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         id: cache-node-modules
         with:
           path: node_modules
@@ -57,11 +57,11 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: 📦 Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       # Only done as we are running Typecheck before publishing
       - name: 🏗 Setup Turborepo Cache
-        uses: rharkor/caching-for-turbo@v2.5.0
+        uses: rharkor/caching-for-turbo@75f8ebf4a43d2c60b23bc2a27082cfea94ffdad9 # v2.5.0
 
       # That shouldn't be necessary if we are running before merging PR's,
       # but as commits to main are not protected yet and sometimes happen,
@@ -70,9 +70,9 @@ jobs:
         run: pnpm run typecheck
 
       - name: 🏗 Setup EAS
-        uses: expo/expo-github-action@v9
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: latest
+          eas-version: 23.1.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       # `--environment production` pulls EXPO_PUBLIC_* from the EAS env store
