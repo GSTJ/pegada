@@ -9,7 +9,10 @@
 import type { NextRequest } from "next/server";
 
 import { prisma } from "@pegada/database";
-import { IntentionalError } from "@pegada/shared/errors/errors";
+import {
+  AccountBlockedError,
+  IntentionalError,
+} from "@pegada/shared/errors/errors";
 import { Language } from "@pegada/shared/i18n/types/types";
 import { RequestHeaders } from "@pegada/shared/types/types";
 import { initTRPC, TRPCError } from "@trpc/server";
@@ -153,6 +156,34 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
+const enforceUserIsActive = t.middleware(async ({ ctx, next }) => {
+  const userId = ctx.session?.user?.id;
+  if (!userId) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  const account = await ctx.db.user.findFirst({
+    where: { id: userId, deletedAt: null },
+    select: {
+      dogs: {
+        where: { banned: true, deletedAt: null },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  });
+
+  if (!account) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  if (account.dogs.length > 0) {
+    throw new AccountBlockedError();
+  }
+
+  return next();
+});
+
 /**
  * Protected (authed) procedure
  *
@@ -162,4 +193,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const authenticatedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure =
+  authenticatedProcedure.use(enforceUserIsActive);

@@ -186,19 +186,18 @@ model Interest {
 
   swipeType SwipeType
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  lastPositiveAt DateTime?
 
   matchId String? @unique(map: "interest_matchid_key")
   match   Match?  @relation(fields: [matchId], references: [id])
 
   @@index([responderId], map: "interest_responderid_idx")
   @@index([requesterId], map: "interest_requesterid_idx")
-  // "exclude dogs you have already swiped" filters on both columns at once,
-  // once per candidate dog. `requesterId` alone matches every dog the viewer
-  // ever swiped and then filters.
-  @@index([requesterId, responderId])
+  @@unique([requesterId, responderId], map: "interest_requester_responder_key")
+  @@index([requesterId, lastPositiveAt])
   @@index([updatedAt])
   @@index([deletedAt])
   @@index([swipeType])

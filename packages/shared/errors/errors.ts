@@ -60,3 +60,33 @@ export class LikeLimitReachedError extends IntentionalError {
     this.likeLimitResetAt = likeLimitResetAt;
   }
 }
+
+export class AccountBlockedError extends IntentionalError {
+  static message = "This account is blocked.";
+  static error_code = "ACCOUNT_BLOCKED";
+  error_code = AccountBlockedError.error_code;
+
+  constructor() {
+    super({
+      code: "FORBIDDEN",
+      message: AccountBlockedError.message,
+    });
+
+    this.name = "AccountBlockedError";
+  }
+}
+
+export class DogUnavailableError extends IntentionalError {
+  static message = "This profile is unavailable.";
+  static error_code = "DOG_UNAVAILABLE";
+  error_code = DogUnavailableError.error_code;
+
+  constructor() {
+    super({
+      code: "NOT_FOUND",
+      message: DogUnavailableError.message,
+    });
+
+    this.name = "DogUnavailableError";
+  }
+}

@@ -1,4 +1,5 @@
 import type { Language } from "@pegada/shared/i18n/types/types";
+import type { Prisma } from "@prisma/client";
 
 import prisma from "@pegada/database";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
@@ -16,8 +17,12 @@ class MatchService {
     this.language = props.language;
   }
 
-  async createMatch(requesterId: string, responderId: string) {
-    const existingMatch = await prisma.match.findFirst({
+  async createMatch(
+    requesterId: string,
+    responderId: string,
+    db: Pick<Prisma.TransactionClient, "match">,
+  ) {
+    const existingMatches = await db.match.findMany({
       where: {
         deletedAt: null,
         OR: [
@@ -25,15 +30,24 @@ class MatchService {
           { requesterId: responderId, responderId: requesterId },
         ],
       },
+      orderBy: { createdAt: "asc" },
       select: { id: true },
     });
 
+    const [existingMatch, ...duplicates] = existingMatches;
     if (existingMatch) {
-      sendError("Match already exists");
-      return existingMatch;
+      if (duplicates.length > 0) {
+        await db.match.updateMany({
+          where: { id: { in: duplicates.map(({ id }) => id) } },
+          data: { deletedAt: new Date() },
+        });
+        sendError("Duplicate active matches were closed");
+      }
+
+      return { match: existingMatch, notification: null };
     }
 
-    const match = await prisma.match.create({
+    const match = await db.match.create({
       data: {
         requesterId,
         responderId,
@@ -52,26 +66,38 @@ class MatchService {
       },
     });
 
-    if (match.responder.user.pushToken) {
-      await PushNotificationService.enqueuePushNotification({
-        to: match.responder.user.pushToken,
-        title: TranslationService.translate("server:notification.match.title", {
-          lng: this.language,
-          replace: { name: match.responder.name },
-        }),
-        body: TranslationService.translate("server:notification.match.body", {
-          lng: this.language,
-        }),
-        data: {
-          url: `match/${match.id}/${match.requesterId}`,
-        },
-      });
-    }
+    const notification = match.responder.user.pushToken
+      ? {
+          to: match.responder.user.pushToken,
+          title: TranslationService.translate(
+            "server:notification.match.title",
+            {
+              lng: this.language,
+              replace: { name: match.responder.name },
+            },
+          ),
+          body: TranslationService.translate("server:notification.match.body", {
+            lng: this.language,
+          }),
+          data: {
+            url: `match/${match.id}/${match.requesterId}`,
+          },
+        }
+      : null;
 
-    // `responder.user` exists only to address the notification. Returning the
-    // Prisma result here used to serialize the complete User row through
-    // `swipe.swipe`, including email, location, push token and active OTP.
-    return { id: match.id };
+    return { match: { id: match.id }, notification };
+  }
+
+  async sendMatchNotification(
+    notification: NonNullable<
+      Awaited<ReturnType<MatchService["createMatch"]>>["notification"]
+    >,
+  ) {
+    try {
+      await PushNotificationService.enqueuePushNotification(notification);
+    } catch (error) {
+      sendError(error);
+    }
   }
 
   static async getMatchesForDog(dogId: string) {

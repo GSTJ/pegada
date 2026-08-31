@@ -193,8 +193,12 @@ export class SuggestionService {
       WHERE TRUE
       /* Exclude dogs already loaded on the client. */
       ${notInCondition}
+      /* Never return the viewer's own dog. */
+      AND "Dog"."id" <> ${dog.id}
       /* Exclude dogs that have been deleted */
       AND "Dog"."deletedAt" IS NULL
+      AND "Dog"."banned" = false
+      AND "User"."deletedAt" IS NULL
       /* Exclude dogs with any rejected images and no approved images. Shadowban */
       AND (
         EXISTS (
