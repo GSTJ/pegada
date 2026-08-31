@@ -90,3 +90,33 @@ export class DogUnavailableError extends IntentionalError {
     this.name = "DogUnavailableError";
   }
 }
+
+export class UploadLimitReachedError extends IntentionalError {
+  static message = "Too many photo uploads. Try again later.";
+  static error_code = "UPLOAD_LIMIT_REACHED";
+  error_code = UploadLimitReachedError.error_code;
+
+  constructor() {
+    super({
+      code: "TOO_MANY_REQUESTS",
+      message: UploadLimitReachedError.message,
+    });
+
+    this.name = "UploadLimitReachedError";
+  }
+}
+
+export class InvalidUploadGrantError extends IntentionalError {
+  static message = "This photo upload has expired. Try uploading it again.";
+  static error_code = "INVALID_UPLOAD_GRANT";
+  error_code = InvalidUploadGrantError.error_code;
+
+  constructor() {
+    super({
+      code: "BAD_REQUEST",
+      message: InvalidUploadGrantError.message,
+    });
+
+    this.name = "InvalidUploadGrantError";
+  }
+}

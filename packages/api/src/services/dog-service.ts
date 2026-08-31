@@ -78,8 +78,10 @@ export class DogService {
     }
 
     const nonEmptyImages = dogInput.images.filter((image) => image.url);
-    const images =
-      await ImageService.makeTemporaryImagesPermanent(nonEmptyImages);
+    const images = await ImageService.makeTemporaryImagesPermanent(
+      nonEmptyImages,
+      dogInput.userId,
+    );
 
     const dog = await prisma.dog.create({
       data: {
@@ -103,6 +105,10 @@ export class DogService {
   }
 
   static async updateDog(id: string, dogInput: Partial<DogServerSchema>) {
+    const dog = await prisma.dog.findUniqueOrThrow({
+      where: { id },
+      select: { userId: true },
+    });
     const existingImages = dogInput.images
       ? await prisma.image.findMany({ where: { dogId: id } })
       : [];
@@ -111,7 +117,10 @@ export class DogService {
       this.#classifyImages(existingImages, dogInput.images ?? []);
 
     const imagesToCreatePermanent =
-      await ImageService.makeTemporaryImagesPermanent(imagesToCreate);
+      await ImageService.makeTemporaryImagesPermanent(
+        imagesToCreate,
+        dog.userId,
+      );
 
     const dogTransaction = await prisma.$transaction([
       ...imagesToUpdate.map((image) =>
@@ -243,6 +252,17 @@ export class DogService {
   }
 
   static async deleteDog(id: string) {
+    const imageUrls = await prisma.image.findMany({
+      where: { dogId: id },
+      select: { url: true },
+    });
+
+    await Promise.all(
+      imageUrls
+        .filter(({ url }) => isAllowedImageUrl(url))
+        .map(({ url }) => deleteImageFromS3(url)),
+    );
+
     // Cascade soft-delete
     await prisma.$transaction([
       prisma.dog.update({

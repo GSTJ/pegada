@@ -17,19 +17,29 @@ export class UserService {
    * A storage failure leaves the account row in place so deletion can be
    * retried.
    *
-   * Order: messages → matches → interests → images → dogs → user.
+   * Order: messages → matches → interests → images → dogs → upload grants → user.
    * Messages and matches reference dogs; interests reference dogs and
    * matches; images reference dogs; dogs reference the user.
    */
   static async deleteAccount(userId: string) {
-    const dogs = await prisma.dog.findMany({
-      where: { userId },
-      select: { id: true, images: { select: { url: true } } },
-    });
+    const [dogs, uploadGrants] = await Promise.all([
+      prisma.dog.findMany({
+        where: { userId },
+        select: { id: true, images: { select: { url: true } } },
+      }),
+      prisma.uploadGrant.findMany({
+        where: { userId },
+        select: { temporaryUrl: true, permanentUrl: true },
+      }),
+    ]);
     const dogIds = dogs.map((d) => d.id);
-    const imageUrls = dogs.flatMap((dog) =>
-      dog.images.map((image) => image.url),
-    );
+    const imageUrls = new Set([
+      ...dogs.flatMap((dog) => dog.images.map((image) => image.url)),
+      ...uploadGrants.flatMap(({ temporaryUrl, permanentUrl }) => [
+        temporaryUrl,
+        ...(permanentUrl ? [permanentUrl] : []),
+      ]),
+    ]);
 
     // Delete public objects before their database references disappear. A
     // failed storage deletion leaves the account intact so the request can be
@@ -45,7 +55,7 @@ export class UserService {
     await Promise.all(
       // Not point-free: `isAllowedImageUrl`'s second parameter is the origin
       // set, and `filter` would hand it the array index.
-      imageUrls
+      [...imageUrls]
         .filter((url) => isAllowedImageUrl(url))
         .map((url) => deleteImageFromS3(url)),
     );
@@ -77,6 +87,7 @@ export class UserService {
         await tx.dog.deleteMany({ where: { id: { in: dogIds } } });
       }
 
+      await tx.uploadGrant.deleteMany({ where: { userId } });
       await tx.user.delete({ where: { id: userId } });
     });
   }
