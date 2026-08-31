@@ -55,7 +55,12 @@ const CompleteProfile = () => {
     onSuccess: (data) => {
       analytics.track({
         event_type: "Complete Dog Profile",
-        event_properties: data ?? {},
+        event_properties: {
+          has_birth_date: Boolean(data?.birthDate),
+          has_breed: Boolean(data?.breed),
+          has_color: Boolean(data?.color),
+          has_size: Boolean(data?.size),
+        },
       });
       getTrcpContext().myDog.get.setData(undefined, data);
       router.replace(SceneName.AskForLocation);

@@ -19,9 +19,7 @@ export class PushNotificationService {
       }
 
       if (!Expo.isExpoPushToken(pushToken)) {
-        const error = new Error(
-          `Push token ${pushToken} is not a valid Expo push token`,
-        );
+        const error = new Error("Stored push token is not a valid Expo token");
 
         await UserService.blacklistPushToken(pushToken);
 

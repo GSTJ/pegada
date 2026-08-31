@@ -65,11 +65,17 @@ class MessageService {
         receiverId: otherDogId,
         matchId,
       },
-      include: {
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        deletedAt: true,
+        senderId: true,
+        receiverId: true,
+        matchId: true,
         sender: {
           select: {
             name: true,
-            images: true,
           },
         },
         receiver: {
@@ -105,7 +111,10 @@ class MessageService {
       });
     }
 
-    return newMessage;
+    // Relations are selected only for the notification above. Returning them
+    // exposed the recipient's Expo token and every sender image to the client.
+    const { receiver: _receiver, sender: _sender, ...message } = newMessage;
+    return message;
   }
 
   /**

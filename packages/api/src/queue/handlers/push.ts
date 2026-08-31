@@ -23,7 +23,7 @@ const expo = new Expo({
 
 const handlePushError = async (errorMessage: string, pushToken: string) => {
   const newError = new Error(
-    `There was an error sending a notification: ${errorMessage}. Push Token: ${pushToken}.`,
+    `There was an error sending a notification: ${errorMessage}.`,
   );
 
   if (errorMessage === "DeviceNotRegistered") {
@@ -111,7 +111,9 @@ export const handleCheckPushReceipts = async ({
   if (nonProcessedReceipts.length === 0) return;
 
   sendError(
-    `Some push notifications weren't processed. Receipts: ${JSON.stringify(nonProcessedReceipts)}`,
+    `Some push notifications weren't processed. Receipt IDs: ${JSON.stringify(
+      nonProcessedReceipts.map(({ id }) => id),
+    )}`,
   );
 
   await enqueue(
