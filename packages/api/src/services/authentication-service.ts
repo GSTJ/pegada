@@ -189,18 +189,21 @@ export class AuthenticationService {
       return true;
     }
 
-    // Match and clear in one write so a successful OTP cannot be replayed,
-    // including by two requests that arrive at the same time.
-    const consumed = await prisma.user.updateMany({
-      where: {
-        email,
-        code,
-        codeExpiresAt: { gte: new Date() },
-      },
-      data: { code: null, codeExpiresAt: null },
-    });
+    // Prisma 5 splits updateMany into a matching SELECT followed by an UPDATE
+    // by ID. Keep the OTP predicate on the write so PostgreSQL rechecks it
+    // after taking the row lock when two requests arrive together.
+    const consumed = await prisma.$executeRaw`
+      UPDATE "User"
+      SET
+        "code" = NULL,
+        "codeExpiresAt" = NULL,
+        "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "email" = ${email}
+        AND "code" = ${code}
+        AND "codeExpiresAt" >= CURRENT_TIMESTAMP
+    `;
 
-    if (consumed.count !== 1) throw new InvalidOTPCodeError();
+    if (consumed !== 1) throw new InvalidOTPCodeError();
 
     return true;
   }
