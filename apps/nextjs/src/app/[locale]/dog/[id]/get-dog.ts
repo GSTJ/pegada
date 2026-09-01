@@ -10,9 +10,10 @@ import { getFormattedYears } from "@pegada/shared/utils/get-formatted-years";
 import { t } from "@/lib/translate";
 
 /**
- * Shared by the page's `generateMetadata`, the page body, and
- * `opengraph-image.tsx` — all three render for the same request, and
- * `cache()` collapses them into a single Prisma query instead of three.
+ * Shared by the page's `generateMetadata` and the page body: both render
+ * within the same request, so `cache()` collapses them into a single Prisma
+ * query instead of two. `opengraph-image.tsx` is fetched by scrapers as its
+ * own separate HTTP request, so it makes its own query regardless.
  */
 export const getDog = cache((id: string) => {
   return prisma.dog.findFirst({
@@ -64,7 +65,7 @@ export const getDogPronoun = (dog: Dog) =>
 /** "Golden Retriever • 2 anos" — skips whichever half is missing. */
 export const getDogTagline = (dog: Dog, lng: string) => {
   const breedName = dog.breed
-    ? t(dog.breed.slug as BreedSlug, { ns: Namespace.Breed })
+    ? t(dog.breed.slug as BreedSlug, { ns: Namespace.Breed, lng })
     : undefined;
   const age = dog.birthDate
     ? getFormattedYears({ birthDate: dog.birthDate, lng })
@@ -75,7 +76,7 @@ export const getDogTagline = (dog: Dog, lng: string) => {
 
 /** Meta description: tagline + bio, then a fixed CTA-ish suffix. */
 export const getDogDescription = (dog: Dog, lng: string) => {
-  const suffix = t("dog.metadata.descriptionSuffix", { name: dog.name });
+  const suffix = t("dog.metadata.descriptionSuffix", { name: dog.name, lng });
   const lead = [getDogTagline(dog, lng), dog.bio]
     .filter(Boolean)
     .join(" — ")

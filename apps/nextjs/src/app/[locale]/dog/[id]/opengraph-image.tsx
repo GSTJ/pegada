@@ -8,6 +8,11 @@ import { t } from "@/lib/translate";
 
 import { getDog, getDogImage, getDogTagline } from "./get-dog";
 
+// Explicit, not the segment default: this route reads the Gilroy font files
+// off disk (`node:fs/promises`, `process.cwd()`) and queries the dog via
+// Prisma, both Node-only, so it needs the Node runtime rather than Edge.
+export const runtime = "nodejs";
+
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -204,23 +209,28 @@ const Image = async ({ params }: Props) => {
     return buildFallbackImage();
   }
 
-  const lng = getSafeLocale();
   const dogImage = getDogImage(dog);
+
+  // `getDog`'s `where` already requires an approved image, so this is
+  // belt and braces rather than a case that fires in practice.
+  if (!dogImage) {
+    return buildFallbackImage();
+  }
+
+  const lng = getSafeLocale();
   const tagline = getDogTagline(dog, lng);
 
   return new ImageResponse(
     <div style={containerStyle}>
       <div style={photoFrameStyle}>
-        {dogImage ? (
-          // oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image
-          <img
-            src={dogImage}
-            width={440}
-            height={502}
-            alt=""
-            style={photoImgStyle}
-          />
-        ) : null}
+        {/* oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image */}
+        <img
+          src={dogImage}
+          width={440}
+          height={502}
+          alt=""
+          style={photoImgStyle}
+        />
       </div>
 
       <div style={detailsStyle}>

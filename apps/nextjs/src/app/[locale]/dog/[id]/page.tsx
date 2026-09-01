@@ -121,7 +121,7 @@ const DogProfile = async ({ params }: DogProfileProps) => {
               // oxlint-disable-next-line nextjs/no-img-element -- see comment above; deliberately not next/image
               <img
                 src={dogImage}
-                alt=""
+                alt={dog.name}
                 fetchPriority="high"
                 decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
