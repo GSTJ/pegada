@@ -32,12 +32,12 @@ export const getFormattedYears = ({
   if (ageInYears !== 0 && months !== 0) {
     return `${
       ageInYears === 1
-        ? t("dateFormatting.year", { replace: { unit: ageInYears } })
-        : t("dateFormatting.years", { replace: { unit: ageInYears } })
-    } ${t("dateFormatting.and")} ${
+        ? t("dateFormatting.year", { replace: { unit: ageInYears }, lng })
+        : t("dateFormatting.years", { replace: { unit: ageInYears }, lng })
+    } ${t("dateFormatting.and", { lng })} ${
       months === 1
-        ? t("dateFormatting.month", { replace: { unit: months } })
-        : t("dateFormatting.months", { replace: { unit: months } })
+        ? t("dateFormatting.month", { replace: { unit: months }, lng })
+        : t("dateFormatting.months", { replace: { unit: months }, lng })
     }`;
   }
 };

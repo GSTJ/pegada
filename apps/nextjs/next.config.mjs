@@ -44,6 +44,23 @@ const nextConfig = {
     // use 75 for the lazy-loaded screenshot gallery.
     qualities: [75, 90],
   },
+
+  // `opengraph-image.tsx` reads Gilroy TTFs from `packages/shared` (outside
+  // this app's directory) and `public/logo.svg` off disk at module scope.
+  // Next's default output file tracing only follows files it can see through
+  // static imports/requires, and these are read with `node:fs` at a path
+  // built from `process.cwd()`, so the standalone/serverless bundle Vercel
+  // deploys would otherwise ship without them and 500 at runtime even though
+  // `next dev` (which runs from the full repo checkout) never surfaces it.
+  // Keys are globs matched against the route; values are globs relative to
+  // this file's directory (`apps/nextjs`, the project root `next build` and
+  // Vercel's build both use).
+  outputFileTracingIncludes: {
+    "/\\[locale\\]/dog/\\[id\\]/opengraph-image": [
+      "../../packages/shared/themes/fonts/Gilroy-*.ttf",
+      "./public/logo.svg",
+    ],
+  },
   // Queue consumers import native/dynamic-require packages that webpack
   // can't statically analyse — resolve them at runtime instead.
   serverExternalPackages: [
