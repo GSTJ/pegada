@@ -6,10 +6,12 @@ import { sendError } from "@/services/error-tracking";
 
 import {
   getInitialNotification,
+  getInitialNotificationKind,
   setInitialNotification,
 } from "./handlers/initial-notification";
 import {
   customNotificationHandler,
+  getNotificationKind,
   getNotificationUrl,
 } from "./handlers/notification";
 
@@ -21,7 +23,7 @@ export const processLinks = () => {
     // promise was never the failure mode here; a thrown "Invalid notification
     // url" was, and `.catch` never saw it.
     try {
-      customNotificationHandler(initialNotification);
+      customNotificationHandler(initialNotification, getInitialNotificationKind());
     } catch (error) {
       sendError(error);
     }
@@ -34,7 +36,7 @@ export const processLinks = () => {
     Notifications.addNotificationResponseReceivedListener((response) => {
       const url = getNotificationUrl(response);
       try {
-        customNotificationHandler(url);
+        customNotificationHandler(url, getNotificationKind(response));
       } catch (error) {
         sendError(error);
       }
@@ -53,8 +55,10 @@ export const useGetInitialNotifications = () => {
     Notifications.getLastNotificationResponseAsync()
       .then((response) => {
         if (!response) return;
-        const url = getNotificationUrl(response);
-        setInitialNotification(url);
+        setInitialNotification(
+          getNotificationUrl(response),
+          getNotificationKind(response),
+        );
         return undefined;
       })
       .catch(sendError);
@@ -62,8 +66,10 @@ export const useGetInitialNotifications = () => {
     // When the app is already running, and the user clicks on a notification
     const notificationSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const url = getNotificationUrl(response);
-        setInitialNotification(url);
+        setInitialNotification(
+          getNotificationUrl(response),
+          getNotificationKind(response),
+        );
       });
 
     return () => {
