@@ -73,7 +73,7 @@ const DogProfile = async ({ params }: DogProfileProps) => {
   const dogImageStyle = { backgroundImage: `url(${dogImage})` };
 
   return (
-    <div className="pt-8 pb-12 space-y-8 flex flex-1 flex-col px-4 items-center min-h-screen">
+    <div className="pt-8 md:pt-6 pb-12 space-y-8 md:space-y-4 flex flex-1 flex-col px-4 items-center min-h-screen">
       {/* oxlint-disable-next-line nextjs/no-img-element -- A static SVG needs no next/image pipeline. */}
       <img
         src="/logo.svg"
@@ -82,7 +82,15 @@ const DogProfile = async ({ params }: DogProfileProps) => {
         className="h-12 select-none"
       />
 
-      <div className="relative rounded-lg border border-border flex flex-col overflow-hidden w-full max-w-xl aspect-[4/5]">
+      {/*
+       * `aspect-[4/5]` is what makes this a tall hero on mobile, where it's
+       * the only thing above the fold. On a laptop viewport that same ratio
+       * pushes the CTA below the fold, so `md:h-[46vh]` gives it a fixed,
+       * shorter height there instead (dropping the aspect ratio so it
+       * doesn't fight that height) — width still comes from `w-full
+       * max-w-xl`, so the card just reads a little wider/shorter.
+       */}
+      <div className="relative rounded-lg border border-border flex flex-col overflow-hidden w-full max-w-xl aspect-[4/5] md:aspect-auto md:h-[46vh]">
         <div style={dogImageStyle} className="flex flex-1 bg-cover bg-center">
           {Boolean(dog.breed?.name) && (
             <div className="border border-border/70 rounded-md p-2 py-1 m-4 bg-background/50 backdrop-blur ml-auto mb-auto font-semibold">
@@ -101,15 +109,15 @@ const DogProfile = async ({ params }: DogProfileProps) => {
         </div>
       </div>
 
-      <div className="w-full max-w-xl bg-secondary rounded-lg border border-border/70 flex flex-col items-center gap-4 p-8 text-center">
-        <h2 className="text-3xl font-extrabold text-text">
+      <div className="w-full max-w-xl bg-secondary rounded-lg border border-border/70 flex flex-col items-center gap-4 md:gap-3 p-8 md:p-6 text-center">
+        <h2 className="text-3xl md:text-2xl font-extrabold text-text">
           {t("dog.cta.title")}
         </h2>
         <p className="text-subtitle">{t("dog.cta.description")}</p>
         {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
         <a
           href="/store"
-          className="bg-primary text-white font-semibold rounded-full px-8 py-4 hover:scale-105 transition-transform duration-200 ease-in-out"
+          className="bg-primary text-white font-semibold rounded-full px-8 py-4 md:px-6 md:py-3 hover:scale-105 transition-transform duration-200 ease-in-out"
         >
           {t("dog.cta.button")}
         </a>
