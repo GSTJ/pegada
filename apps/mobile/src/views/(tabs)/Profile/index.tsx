@@ -39,6 +39,7 @@ import { LocationConfig } from "./components/location-config";
 import { ThemeConfig } from "./components/theme-config";
 import UserDogProfileHeader, {
   useDogProfileHeight,
+  WrappedProfileShareButton,
 } from "./components/UserDogProfileHeader";
 import { settingsScroll, styles } from "./styles";
 import { deleteAccount } from "./utils/delete-account";
@@ -282,6 +283,7 @@ const Profile = () => {
           </View>
         </Animated.ScrollView>
       </View>
+      <WrappedProfileShareButton />
     </View>
   );
 };

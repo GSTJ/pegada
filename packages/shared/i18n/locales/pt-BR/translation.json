@@ -117,6 +117,14 @@
     "unmatch": "Desfazer Match",
     "yes": "Sim"
   },
+  "dogShare": {
+    "copyLink": "Copiar link",
+    "linkCopied": "Link copiado!",
+    "shareLink": "Compartilhar link",
+    "shareStory": "Compartilhar no story",
+    "storyFailedFallback": "Não deu pra criar a imagem do story. Vamos mandar o link.",
+    "storyUnavailable": "Esse aparelho não deixa compartilhar imagem. Vamos mandar o link."
+  },
   "editProfile": {
     "bio": "Bio",
     "bioPlaceholder": "Conte alguma coisa legal sobre vocês.",

@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Share,
   View,
   ScrollView,
 } from "react-native";
@@ -21,13 +20,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 import { useDispatch, useSelector } from "react-redux";
 
+import { showDogShareOptions } from "@/components/DogShareOptions";
 import MainCard from "@/components/MainCard";
 import { MatchActionBar } from "@/components/MatchActionBar";
 import {
   NetworkBoundary,
   UnknownErrorComponent,
 } from "@/components/NetworkBoundary";
-import { APP_SHARE_LINK_BASE } from "@/constants";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
 import { sendError } from "@/services/error-tracking";
@@ -49,30 +48,13 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
 
   const [firstName] = dog.name.split(" ");
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: i18n.t("dogProfile.shareLink", {
-          link: `${APP_SHARE_LINK_BASE}/dog/${dog.id}`,
-        }),
-      });
-    } catch {
-      Alert.alert(
-        i18n.t("dogProfile.sharingNotAvailableTitle"),
-        i18n.t("dogProfile.sharingNotAvailableMessage", {
-          name: dog.name,
-        }),
-      );
-    }
-  };
-
   return (
     <S.ShareButton
       style={styles.shareButton}
       hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
     >
       <S.ActionLabel
-        onPress={handleShare}
+        onPress={() => showDogShareOptions(dog)}
         fontWeight="bold"
         color="primary"
         style={styles.actionLabel}

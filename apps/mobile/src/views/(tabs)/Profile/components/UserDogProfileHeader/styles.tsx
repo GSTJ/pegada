@@ -58,12 +58,34 @@ export const ProfileUnknownError: IErrorBoundary = () => (
   <ThemedUnknownError style={styles.profileUnknownError} />
 );
 
-const styles = StyleSheet.create((theme) => ({
+export const styles = StyleSheet.create((theme) => ({
   headerCard: {
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
     borderBottomLeftRadius: 0,
+  },
+  shareButton: {
+    position: "absolute",
+    right: theme.spacing[4],
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+    overflow: "hidden",
+    zIndex: 2,
+  },
+  shareButtonGlass: {
+    borderTopLeftRadius: theme.radii.round,
+    borderTopRightRadius: theme.radii.round,
+    borderBottomRightRadius: theme.radii.round,
+    borderBottomLeftRadius: theme.radii.round,
+  },
+  shareButtonContent: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   shade: {
     marginTop: "auto",

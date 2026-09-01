@@ -117,6 +117,14 @@
     "unmatch": "Unmatch",
     "yes": "Yes"
   },
+  "dogShare": {
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied!",
+    "shareLink": "Share link",
+    "shareStory": "Share to story",
+    "storyFailedFallback": "Couldn't create the story image. Sharing the link instead.",
+    "storyUnavailable": "Image sharing isn't available on this device. Sharing the link instead."
+  },
   "editProfile": {
     "bio": "Bio",
     "bioPlaceholder": "Tell us something cool about you and your dog.",
