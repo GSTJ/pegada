@@ -2,7 +2,7 @@ import type { ShareableDog } from "./types";
 
 import type { ComponentRef, ComponentType } from "react";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as React from "react";
 import { ActivityIndicator, View, useWindowDimensions } from "react-native";
 
@@ -88,6 +88,20 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
   const photoReadyRef = useRef(!dog.images[0]?.url);
   const photoWaitersRef = useRef<(() => void)[]>([]);
 
+  // `hide()` fires well before `shareDogStory` resolves — it runs right
+  // after the capture, while `Sharing.shareAsync` still has to wait on
+  // whatever the user does with the native share sheet, which can take far
+  // longer than the modal's own 200ms exit animation. By the time that
+  // promise settles the sheet has almost certainly already unmounted, so
+  // `handleShareStory`'s `finally` block needs this guard before touching
+  // `isSharingStory` state.
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const [firstName] = dog.name.split(" ");
   const link = getDogShareLink(dog.id);
 
@@ -161,7 +175,7 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
         },
       });
     } finally {
-      setIsSharingStory(false);
+      if (isMountedRef.current) setIsSharingStory(false);
     }
   };
 
