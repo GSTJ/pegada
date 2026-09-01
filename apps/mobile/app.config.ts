@@ -278,11 +278,19 @@ const config: ExpoConfig = {
       {
         action: "VIEW",
         autoVerify: true,
+        // A wildcard host ("*.pegada.app") makes Android's autoVerify
+        // handshake against /.well-known/assetlinks.json unreliable, so the
+        // hosts that actually serve that file are listed explicitly instead.
         data: [
           {
             scheme: "https",
-            host: "*.pegada.app",
-            pathPrefix: "/",
+            host: "pegada.app",
+            pathPrefix: "/dog",
+          },
+          {
+            scheme: "https",
+            host: "www.pegada.app",
+            pathPrefix: "/dog",
           },
         ],
         category: ["BROWSABLE", "DEFAULT"],

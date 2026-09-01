@@ -1,5 +1,5 @@
 import {
-  ANDROID_SHA256_CERT_FINGERPRINT,
+  ANDROID_SHA256_CERT_FINGERPRINTS,
   APP_BUNDLE_ID,
 } from "@/lib/app-links";
 
@@ -22,7 +22,7 @@ const body = [
     target: {
       namespace: "android_app",
       package_name: APP_BUNDLE_ID,
-      sha256_cert_fingerprints: [ANDROID_SHA256_CERT_FINGERPRINT],
+      sha256_cert_fingerprints: [...ANDROID_SHA256_CERT_FINGERPRINTS],
     },
   },
 ];
@@ -31,7 +31,7 @@ export const GET = () =>
   Response.json(body, {
     headers: {
       "Content-Type": "application/json",
-      // Rarely changes, but `ANDROID_SHA256_CERT_FINGERPRINT` is still a
+      // Rarely changes, but `ANDROID_SHA256_CERT_FINGERPRINTS` is still a
       // placeholder here, so `immutable` would be a lie — a long max-age is
       // enough.
       "Cache-Control": "public, max-age=86400",

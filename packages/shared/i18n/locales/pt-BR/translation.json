@@ -165,7 +165,7 @@
     "insertEmail": "Insira seu <1>email</1>",
     "loginError": "Ocorreu um erro ao fazer login.",
     "pendingDogProfileBanner": {
-      "body": "Entra ou cria sua conta e a gente te leva direto pra lá.",
+      "body": "Entre ou crie sua conta e nós te levamos direto para lá.",
       "title": "Você abriu o perfil de um dog."
     },
     "validEmail": "Insira um email válido"
