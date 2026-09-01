@@ -1,0 +1,58 @@
+appId: ${APP_ID}
+name: Deep link while logged out — banner, then hand off to the dog profile after sign in
+tags:
+  - smoke
+  - regression
+---
+# Product ask (Gabriel): opening a shared `pegada://dog/<id>` link while
+# logged out must not look like the app "did nothing" — a banner has to
+# say the profile is waiting, then sign-in has to actually land there.
+#
+# 1. Cold-launch logged out, open the deep link (app/dog/[id].tsx stashes
+#    the id in the pending-dog-profile store without navigating anywhere).
+# 2. The auth redirect in _layout.tsx then replaces to SignIn — assert the
+#    banner (PendingDogProfileBanner, testID signin-pending-dog-profile).
+# 3. Sign in as the returning magic user. usePendingDogProfile only fires
+#    once the auth router's initialRouteName reaches Swipe (see
+#    _layout.tsx), so login-returning.yaml is used rather than login.yaml —
+#    it is the util documented to land on swipe, not CreateProfile.
+# 4. Assert the dog profile screen — DOG_ID is resolved by
+#    scripts/pre/46-resolve-dog-id.sh to Bella's id (test+bella@pegada.app,
+#    matched with Rex, so test@pegada.app's session can always read her via
+#    dog.get) and forwarded here as `-e DOG_ID=...` by run-flow.sh.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+# `dog/[id].tsx` renders nothing and never navigates itself — the id is only
+# picked up by the pending-dog-profile store, and root `_layout.tsx`'s own
+# auth-redirect effect is what puts SignIn on screen. That effect only
+# REPLACES the current route with SignIn on its very first run, right after
+# `_layout` mounts; once it has already run once (e.g. because the app was
+# left sitting on SignIn from the `launchApp` above), a later deep link
+# instead gets PUSHED on top as a new, still-invisible screen, and nothing
+# ever pops it — a real, acknowledged limit documented in dog/[id].tsx's own
+# comment. `stopApp` here forces the NEXT step to be a genuine cold launch
+# straight into the link, so dog/[id] is the app's first and only route and
+# the redirect's REPLACE actually swaps it for SignIn.
+- stopApp
+- waitForAnimationToEnd
+- openLink: "pegada://dog/${DOG_ID}"
+- waitForAnimationToEnd
+# iOS asks to confirm opening a custom-scheme link from outside the app
+# (e.g. Safari, or Maestro's own openLink) — not something a real shared
+# link from Messages/WhatsApp prompts for, but simctl-driven opens always
+# do. `optional` because a warm relaunch of the same scheme sometimes skips
+# the system dialog entirely.
+- tapOn:
+    text: "Open"
+    optional: true
+- waitForAnimationToEnd
+- assertVisible:
+    id: "signin-pending-dog-profile"
+- takeScreenshot: 46-banner-on-signin
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 15000
+- assertVisible:
+    id: "dog-profile-name"
+- takeScreenshot: 46-after-login-profile

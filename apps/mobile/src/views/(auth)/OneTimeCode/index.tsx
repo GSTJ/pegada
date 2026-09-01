@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { PendingDogProfileBanner } from "@/components/PendingDogProfileBanner";
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
 import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
@@ -181,6 +182,8 @@ const OneTimeCode = () => {
         ]}
       >
         <GoBack onPress={() => router.back()} />
+
+        <PendingDogProfileBanner />
 
         <View style={styles.content}>
           <View style={styles.topColumn}>

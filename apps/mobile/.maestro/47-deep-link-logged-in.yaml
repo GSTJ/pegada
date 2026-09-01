@@ -1,0 +1,28 @@
+appId: ${APP_ID}
+name: Deep link while already logged in — opens straight to the dog profile
+tags:
+  - smoke
+  - regression
+---
+# Companion to 46-deep-link-sign-in-handoff.yaml: the "warm" half of the
+# same feature. A returning, already-authenticated user is already sitting
+# on Swipe (initialRouteName is already Swipe, so usePendingDogProfile's
+# gate is already open — see services/linking/index.ts) when the link
+# arrives, so it should push the profile immediately, no banner involved.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- waitForAnimationToEnd:
+    timeout: 8000
+- openLink: "pegada://dog/${DOG_ID}"
+- waitForAnimationToEnd
+# See 46-deep-link-sign-in-handoff.yaml for why this confirmation is here.
+- tapOn:
+    text: "Open"
+    optional: true
+- waitForAnimationToEnd
+- assertVisible:
+    id: "dog-profile-name"
+- takeScreenshot: 47-warm-link-profile
