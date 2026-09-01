@@ -28,6 +28,11 @@ import { styles } from "./styles";
  * is concerned: "the user was told their link is waiting". Reported once per
  * id so the raw event count means what it reads like, not only the unique
  * user count a PostHog funnel would collapse it to anyway.
+ *
+ * Cleared as soon as nothing is pending, so the sentinel only ever spans one
+ * hand off. Keeping the id past that point would silently swallow the event
+ * for the second hand off of the SAME dog in one session (open a link, log
+ * in, log out, open it again), which is a real sequence and a real banner.
  */
 let lastReportedId: string | undefined;
 
@@ -37,7 +42,12 @@ export const PendingDogProfileBanner = () => {
   const { theme } = useUnistyles();
 
   useEffect(() => {
-    if (!pendingDogProfileId || pendingDogProfileId === lastReportedId) return;
+    if (!pendingDogProfileId) {
+      lastReportedId = undefined;
+      return;
+    }
+
+    if (pendingDogProfileId === lastReportedId) return;
 
     lastReportedId = pendingDogProfileId;
     analytics.track({ event_type: "Dog Link Sign In Banner Shown" });

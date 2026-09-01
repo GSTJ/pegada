@@ -51,6 +51,13 @@ const DogLink = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   useEffect(() => {
+    // `useLocalSearchParams` is typed as if the param is always there, but a
+    // malformed link (`pegada://dog/`) and the render before expo-router has
+    // parsed the URL both hand back `undefined`. Passing that straight
+    // through would clear a pending id that a previous link had just set,
+    // and would file a funnel event for a link that names no dog.
+    if (!id) return;
+
     setPendingDogProfile(id);
     trackLinkOpened().catch(sendError);
   }, [id]);

@@ -113,6 +113,16 @@ test("reports itself once per pending id, across both screens that render it", (
   expect(track).toHaveBeenCalledTimes(2);
 });
 
+// Open a link, log in, log out, open the same link again: the banner is shown
+// a second time, so it has to be reported a second time.
+test("reports the same id again after the pending link was consumed", () => {
+  render("dog-track-3");
+  render(undefined);
+  render("dog-track-3");
+
+  expect(track).toHaveBeenCalledTimes(2);
+});
+
 test("shows the title before the body, matching the bold-first-sentence copy", () => {
   const html = render("dog-1");
 
