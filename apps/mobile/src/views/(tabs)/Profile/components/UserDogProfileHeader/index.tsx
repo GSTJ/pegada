@@ -1,6 +1,9 @@
+import type { ViewStyle } from "react-native";
+
 import { ActivityIndicator, useWindowDimensions, View } from "react-native";
 
 import { useTranslation } from "react-i18next";
+import Animated, { type AnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 
@@ -164,8 +167,23 @@ export default WrappedUserDogProfileHeader;
  * result down as a prop — react-query dedupes by query key, so this shares
  * the cache with `UserDogProfileHeader`'s own call instead of firing a
  * second request.
+ *
+ * `animatedStyle` comes from `Profile/index.tsx`, which knows the same
+ * `scrollY` the header's own `imgStyle`/`overlayStyle` are driven by. It is
+ * applied to this element directly, rather than to a wrapping `Animated.View`
+ * placed around `WrappedProfileShareButton`: a wrapper would have no
+ * non-absolute children to size itself against, so it would collapse to
+ * 0x0 and `styles.shareButton`'s `right`/`top` offsets would resolve against
+ * that empty box instead of the screen. Animating this element in place
+ * keeps its existing absolute-positioning context intact.
  */
-const ProfileShareButton = () => {
+const AnimatedPressableArea = Animated.createAnimatedComponent(PressableArea);
+
+const ProfileShareButton = ({
+  animatedStyle,
+}: {
+  animatedStyle?: AnimatedStyle<ViewStyle>;
+}) => {
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
     refetchOnMount: false,
   });
@@ -177,28 +195,41 @@ const ProfileShareButton = () => {
   if (!dog) return null;
 
   return (
-    <PressableArea
+    <AnimatedPressableArea
       testID="profile-dog-share"
       accessible
       accessibilityRole="button"
       accessibilityLabel={t("dogProfile.shareProfile", { name: dog.name })}
       hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
       onPress={() => showDogShareOptions(dog)}
-      style={[styles.shareButton, { top: insets.top + theme.spacing[3] }]}
+      style={[
+        styles.shareButton,
+        { top: insets.top + theme.spacing[3] },
+        animatedStyle,
+      ]}
     >
       <Glassmorphism style={styles.shareButtonGlass}>
         <View style={styles.shareButtonContent}>
-          <ShareIcon width={18} height={18} fill={theme.colors.primary} />
+          <ShareIcon
+            width={18}
+            height={18}
+            fill={theme.colors.text}
+            style={styles.shareButtonIcon}
+          />
         </View>
       </Glassmorphism>
-    </PressableArea>
+    </AnimatedPressableArea>
   );
 };
 
 const NullFallback = () => null;
 
-export const WrappedProfileShareButton = () => (
+export const WrappedProfileShareButton = ({
+  animatedStyle,
+}: {
+  animatedStyle?: AnimatedStyle<ViewStyle>;
+}) => (
   <NetworkBoundary errorFallback={NullFallback} suspenseFallback={null}>
-    <ProfileShareButton />
+    <ProfileShareButton animatedStyle={animatedStyle} />
   </NetworkBoundary>
 );

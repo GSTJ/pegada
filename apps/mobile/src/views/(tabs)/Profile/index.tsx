@@ -111,14 +111,55 @@ const Profile = () => {
 
   const marginTop = insets.top + 5;
 
+  const dogProfileHeight = useDogProfileHeight();
+
+  // The photo header is never actually removed from the tree — it is a fixed
+  // background layer that the settings ScrollView's own opaque content
+  // scrolls up and over. It reads as "hidden" once that opaque content has
+  // scrolled past the header's full height, i.e. once `scrollY` has covered
+  // the same distance as the ScrollView's `paddingTop` below
+  // (`dogProfileHeight - marginTop`). The share button lives outside the
+  // header's `imgStyle`/`overlayStyle` tree (see the comment on
+  // `ProfileShareButton`), so it needs its own opacity tied to that same
+  // distance to disappear in step with the photo instead of floating over
+  // the settings list forever.
+  //
+  // The button is rendered as the LAST sibling in this screen's tree (see
+  // `WrappedProfileShareButton`'s own comment), which is what lets it paint
+  // on top of the settings ScrollView while the photo is still visible —
+  // but that same stacking means a fully faded (`opacity: 0`) button is
+  // still the topmost node over whatever settings row now occupies that
+  // corner, and a `Pressable` captures touches for its whole frame
+  // regardless of opacity. `pointerEvents` has to fade out in lockstep with
+  // `opacity` — not just at the end of the animation — so the button stops
+  // intercepting taps before it visually disappears rather than only after.
+  // Folded into this same worklet (rather than a separate
+  // `useAnimatedProps`) because `pointerEvents` is a plain `ViewStyle` key
+  // here, and `useAnimatedStyle` is the pattern already used everywhere
+  // else in this codebase for scroll-driven values.
+  const shareButtonStyle = useAnimatedStyle(() => {
+    "worklet";
+    const hidePoint = Math.max(
+      dogProfileHeight - marginTop,
+      TRANSITION_POINT + 1,
+    );
+
+    const opacity = interpolate(
+      scrollY.value,
+      [0, hidePoint],
+      [1, 0],
+      Extrapolation.CLAMP,
+    );
+
+    return { opacity, pointerEvents: opacity < 0.5 ? "none" : "auto" };
+  });
+
   const isFocused = useIsFocused();
 
   useFocusEffect(() => {
     // Hint to the user that there is more content to scroll
     scrollRef.current?.flashScrollIndicators();
   });
-
-  const dogProfileHeight = useDogProfileHeight();
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -283,7 +324,7 @@ const Profile = () => {
           </View>
         </Animated.ScrollView>
       </View>
-      <WrappedProfileShareButton />
+      <WrappedProfileShareButton animatedStyle={shareButtonStyle} />
     </View>
   );
 };

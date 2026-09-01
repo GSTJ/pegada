@@ -87,6 +87,12 @@ export const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  // The share glyph's ink is denser on its right half (two nodes vs. one),
+  // so centring the icon geometrically still reads as off-centre. A small
+  // leftward nudge corrects for that optical imbalance.
+  shareButtonIcon: {
+    transform: [{ translateX: -1 }],
+  },
   shade: {
     marginTop: "auto",
   },

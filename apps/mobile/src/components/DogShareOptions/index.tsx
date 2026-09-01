@@ -4,25 +4,13 @@ import type { ComponentRef, ComponentType } from "react";
 
 import { useRef, useState } from "react";
 import * as React from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  PixelRatio,
-  Share,
-  View,
-  useWindowDimensions,
-} from "react-native";
-
-import * as Clipboard from "expo-clipboard";
-import * as Sharing from "expo-sharing";
+import { ActivityIndicator, View, useWindowDimensions } from "react-native";
 
 import { useTranslation } from "react-i18next";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
-import { magicToast } from "react-native-magic-toast";
 import { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
-import { captureRef } from "react-native-view-shot";
 
 import Copy from "@/assets/images/Copy.svg";
 import ShareIcon from "@/assets/images/Share.svg";
@@ -30,22 +18,19 @@ import Story from "@/assets/images/Story.svg";
 import Divider from "@/components/divider";
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
-import { APP_SHARE_LINK_BASE } from "@/constants";
-import { sendError } from "@/services/error-tracking";
 
-import { DogStoryCard } from "./story-card";
 import {
-  CARD_HEIGHT,
-  CARD_WIDTH,
-  EXPORT_PNG_HEIGHT,
-  EXPORT_PNG_WIDTH,
-} from "./story-card-styles";
+  buildDogShareLinkMessage,
+  copyDogLink,
+  getDogShareLink,
+  shareDogLink,
+  shareDogStory,
+} from "./share-actions";
+import { DogStoryCard } from "./story-card";
+import { CARD_HEIGHT, CARD_WIDTH } from "./story-card-styles";
 import { styles } from "./styles";
 
 type SvgIconProps = { width: number; height: number; fill: string };
-
-const getDogShareLink = (dogId: string) =>
-  `${APP_SHARE_LINK_BASE}/dog/${dogId}`;
 
 const ShareOptionRow = ({
   icon: Icon,
@@ -80,9 +65,9 @@ const ShareOptionRow = ({
       style={styles.row}
     >
       <View style={styles.rowIcon}>
-        <Icon width={20} height={20} fill={theme.colors.primary} />
+        <Icon width={22} height={22} fill={theme.colors.text} />
       </View>
-      <Text fontWeight="medium" style={styles.rowLabel}>
+      <Text fontWeight="medium" fontSize="sm" style={styles.rowLabel}>
         {label}
       </Text>
       {loading ? <ActivityIndicator color={theme.colors.primary} /> : null}
@@ -140,79 +125,41 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
       });
     });
 
-  const shareLinkFallback = async () => {
-    try {
-      await Share.share({ message: t("dogProfile.shareLink", { link }) });
-    } catch (error) {
-      sendError(error);
-      Alert.alert(
-        t("dogProfile.sharingNotAvailableTitle"),
-        t("dogProfile.sharingNotAvailableMessage", { name: dog.name }),
-      );
-    }
+  const shareLinkMessage = buildDogShareLinkMessage(t, link);
+  const sharingNotAvailableCopy = {
+    title: t("dogProfile.sharingNotAvailableTitle"),
+    message: t("dogProfile.sharingNotAvailableMessage", { name: dog.name }),
   };
 
   const handleShareLink = () => {
     hide();
-    void shareLinkFallback();
+    void shareDogLink(shareLinkMessage, sharingNotAvailableCopy);
   };
 
   const handleCopyLink = () => {
     hide();
-    void (async () => {
-      await Clipboard.setStringAsync(link);
-      magicToast.success(t("dogShare.linkCopied"), 1500);
-    })();
+    void copyDogLink(link, {
+      success: t("dogShare.linkCopied"),
+      failure: t("dogShare.copyLinkFailed"),
+    });
   };
 
   const handleShareStory = async () => {
     setIsSharingStory(true);
 
     try {
-      const available = await Sharing.isAvailableAsync();
-
-      if (!available) {
-        magicToast.alert(t("dogShare.storyUnavailable"));
-        hide();
-        await shareLinkFallback();
-        return;
-      }
-
-      await waitForPhoto();
-
-      if (!storyCardRef.current) {
-        throw new Error("Story card was not mounted for capture");
-      }
-
-      // `captureRef`'s `width`/`height` are in points, and iOS multiplies
-      // them by the device's pixel ratio when rasterizing — passing the
-      // target pixel size straight through would produce a PNG `scale`
-      // times too large (3240x5760 at 12.7 MB on a 3x device instead of the
-      // intended 1080x1920). Dividing by the ratio here lands on the exact
-      // pixel size on any device.
-      const scale = PixelRatio.get();
-      const uri = await captureRef(storyCardRef, {
-        width: EXPORT_PNG_WIDTH / scale,
-        height: EXPORT_PNG_HEIGHT / scale,
-        format: "png",
-        quality: 1,
-        result: "tmpfile",
-      });
-
-      const fileUri = uri.startsWith("file://") ? uri : `file://${uri}`;
-
-      hide();
-
-      await Sharing.shareAsync(fileUri, {
-        mimeType: "image/png",
-        UTI: "public.png",
+      await shareDogStory({
+        storyCardRef,
+        waitForPhoto,
+        hide,
         dialogTitle: t("dogProfile.shareProfile", { name: firstName }),
+        shareLinkMessage,
+        copy: {
+          storyUnavailable: t("dogShare.storyUnavailable"),
+          storyFailedFallback: t("dogShare.storyFailedFallback"),
+          sharingNotAvailable: sharingNotAvailableCopy,
+        },
       });
-    } catch (error) {
-      sendError(error);
-      magicToast.alert(t("dogShare.storyFailedFallback"));
-      hide();
-      await shareLinkFallback();
     } finally {
       setIsSharingStory(false);
     }
@@ -223,12 +170,10 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
       style={[styles.overlay, { paddingBottom: insets.bottom || undefined }]}
     >
       <View style={styles.sheet}>
-        <Text
-          fontWeight="semibold"
-          fontSize="sm"
-          color="subtitle"
-          style={styles.title}
-        >
+        <View style={styles.handleContainer}>
+          <View style={styles.handleBar} />
+        </View>
+        <Text fontWeight="medium" fontSize="lg" style={styles.title}>
           {t("dogProfile.shareProfile", { name: firstName })}
         </Text>
         <Divider style={styles.titleDivider} />
@@ -268,7 +213,9 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
         onPress={hide}
         style={styles.cancelButton}
       >
-        <Text fontWeight="bold">{t("dogProfile.cancel")}</Text>
+        <Text fontWeight="bold" fontSize="lg">
+          {t("dogProfile.cancel")}
+        </Text>
       </PressableArea>
 
       {/* Offscreen capture target. Mounted for as long as this sheet is, so

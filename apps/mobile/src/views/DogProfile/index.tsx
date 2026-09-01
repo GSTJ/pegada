@@ -54,6 +54,7 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
       hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
     >
       <S.ActionLabel
+        testID="dog-profile-share"
         onPress={() => showDogShareOptions(dog)}
         fontWeight="bold"
         color="primary"
