@@ -243,6 +243,21 @@ describe("shareDogStory", () => {
     expect(capture).not.toHaveBeenCalled();
   });
 
+  it("falls back to the link share and reports the error when Sharing.isAvailableAsync rejects", async () => {
+    const error = new Error("sharing module unavailable");
+    isAvailableAsync.mockRejectedValue(error);
+    share.mockResolvedValue({ action: "sharedAction" });
+    const params = baseParams();
+
+    await shareDogStory(params);
+
+    expect(trackedError).toHaveBeenCalledWith(error);
+    expect(toastAlert).toHaveBeenCalledWith("Image sharing isn't available");
+    expect(params.hide).toHaveBeenCalledTimes(1);
+    expect(share).toHaveBeenCalledWith({ message: "check out Rex" });
+    expect(capture).not.toHaveBeenCalled();
+  });
+
   it("falls back to the link share and reports the error when captureRef rejects", async () => {
     isAvailableAsync.mockResolvedValue(true);
     const error = new Error("capture failed");

@@ -307,14 +307,16 @@ export const PolaroidFrame = ({
         fallbackIconSize={Math.round(width * 0.26)}
         style={photoStyle}
       />
-      <Text
-        numberOfLines={1}
-        ellipsizeMode="tail"
-        fontWeight="black"
-        style={primitiveStyles.polaroidCaption}
-      >
-        {caption}
-      </Text>
+      {caption ? (
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          fontWeight="black"
+          style={primitiveStyles.polaroidCaption}
+        >
+          {caption}
+        </Text>
+      ) : null}
     </View>
   );
 };

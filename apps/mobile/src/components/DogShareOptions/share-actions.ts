@@ -108,11 +108,12 @@ export type ShareDogStoryCopy = {
  * can't share files at all, the photo never finished loading in time, the
  * capture failed, or the ref was never mounted.
  *
- * Mirrors `handleShareStory`'s original control flow exactly: the
- * `Sharing.isAvailableAsync` check short-circuits BEFORE the try block (it
- * is a normal early return, not a thrown error), while a missing ref is a
- * thrown error INSIDE the try block, so it takes the same catch path as a
- * rejected capture or a rejected `Sharing.shareAsync` call.
+ * A rejected `Sharing.isAvailableAsync` counts as "can't share files":
+ * it is reported through `sendError` and then takes the same
+ * short-circuit as a `false` result, so a broken native module still ends
+ * up sharing the link instead of throwing out of this function. A missing
+ * ref is a thrown error INSIDE the try block, so it takes the same catch
+ * path as a rejected capture or a rejected `Sharing.shareAsync` call.
  */
 export const shareDogStory = async (params: {
   storyCardRef: RefObject<ComponentRef<typeof View> | null>;
@@ -131,7 +132,13 @@ export const shareDogStory = async (params: {
     copy,
   } = params;
 
-  const available = await Sharing.isAvailableAsync();
+  let available = false;
+
+  try {
+    available = await Sharing.isAvailableAsync();
+  } catch (error) {
+    sendError(error);
+  }
 
   if (!available) {
     magicToast.alert(copy.storyUnavailable);
