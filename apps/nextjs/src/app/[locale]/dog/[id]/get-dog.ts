@@ -29,6 +29,7 @@ export const getDog = cache((id: string) => {
       name: true,
       bio: true,
       birthDate: true,
+      gender: true,
       breed: { select: { name: true, slug: true } },
       images: {
         where: { status: IMAGE_STATUS.APPROVED },
@@ -43,6 +44,22 @@ export const getDog = cache((id: string) => {
 export type Dog = NonNullable<Awaited<ReturnType<typeof getDog>>>;
 
 export const getDogImage = (dog: Dog) => dog.images[0]?.url;
+
+/**
+ * pt-BR needs a gendered article ("O Rex" / "A Bella") that English has no
+ * use for. `gender` is a required column, not inferred from the name, so
+ * this is safe to key off directly.
+ */
+export const getDogArticle = (dog: Dog) =>
+  dog.gender === "FEMALE" ? "A" : "O";
+
+/**
+ * pt-BR "quem cuida dela" / "quem cuida dele" needs a gendered object
+ * pronoun that English has no use for. Keyed off the required `gender`
+ * column, same as `getDogArticle`.
+ */
+export const getDogPronoun = (dog: Dog) =>
+  dog.gender === "FEMALE" ? "dela" : "dele";
 
 /** "Golden Retriever • 2 anos" — skips whichever half is missing. */
 export const getDogTagline = (dog: Dog, lng: string) => {

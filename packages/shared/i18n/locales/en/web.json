@@ -79,10 +79,14 @@
       "title": "{{name}} | Pegada",
       "descriptionSuffix": "Meet {{name}} and other dogs near you on Pegada."
     },
+    "hero": {
+      "invite": "{{name}} wants to make friends",
+      "nextStep": "Download the app to chat with the person who looks after them."
+    },
     "cta": {
-      "title": "Get Pegada",
-      "description": "Find friends for your dog nearby.",
-      "button": "Download the app"
+      "button": "Get Pegada",
+      "reassurance": "It's free and takes less than a minute.",
+      "mobileContext": "A new friend is waiting."
     },
     "og": {
       "tag": "meet them on Pegada"
