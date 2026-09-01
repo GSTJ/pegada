@@ -45,10 +45,11 @@ const FONTS_DIR = join(
 
 const LOGO_PATH = join(process.cwd(), "public", "logo.svg");
 
-const [gilroyMedium, gilroySemiBold, gilroyExtraBold, logoSvg] =
+const [gilroyMedium, gilroySemiBold, gilroyBold, gilroyExtraBold, logoSvg] =
   await Promise.all([
     readFile(join(FONTS_DIR, "Gilroy-Medium.ttf")),
     readFile(join(FONTS_DIR, "Gilroy-SemiBold.ttf")),
+    readFile(join(FONTS_DIR, "Gilroy-Bold.ttf")),
     readFile(join(FONTS_DIR, "Gilroy-ExtraBold.ttf")),
     readFile(LOGO_PATH, "utf8"),
   ]);
@@ -63,6 +64,7 @@ const LOGO_DATA_URI = `data:image/svg+xml;base64,${logoBase64}`;
 const OG_FONTS = [
   { name: "Gilroy", data: gilroyMedium, weight: 500, style: "normal" },
   { name: "Gilroy", data: gilroySemiBold, weight: 600, style: "normal" },
+  { name: "Gilroy", data: gilroyBold, weight: 700, style: "normal" },
   { name: "Gilroy", data: gilroyExtraBold, weight: 800, style: "normal" },
 ] satisfies NonNullable<
   ConstructorParameters<typeof ImageResponse>[1]
@@ -160,15 +162,20 @@ const taglineStyle = {
 
 const fallbackTaglineStyle = { ...taglineStyle, fontSize: 30 } as const;
 
+// Matches the app's primary button (`apps/mobile/src/components/button`:
+// flat `theme.colors.primary` fill, white text, Gilroy Bold) rather than a
+// bespoke badge, per Gabriel's review note. Padding/height are scaled up
+// from the button's own 68px-tall, 16px-padded footprint to read as a real
+// button at this canvas's size instead of a small pill.
 const tagStyle = {
   display: "flex",
   marginTop: 12,
-  padding: "16px 30px",
+  padding: "20px 40px",
   borderRadius: 9999,
-  background: `linear-gradient(135deg, #FF81BD 0%, ${COLORS.primary} 100%)`,
+  background: COLORS.primary,
   color: COLORS.background,
-  fontSize: 26,
-  fontWeight: 600,
+  fontSize: 28,
+  fontWeight: 700,
   fontFamily: "Gilroy",
   alignSelf: "flex-start",
 } as const;
