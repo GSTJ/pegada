@@ -219,6 +219,12 @@ const DogShareSheetContent = ({
           sharingNotAvailable: sharingNotAvailableCopy,
         },
         tracking,
+        // The sheet keeps its swipe-to-dismiss gesture while the capture
+        // runs, so "unmounted and it wasn't us who closed it" is exactly a
+        // user dismissal. `hasHiddenRef` is what tells the two apart: the
+        // happy path calls `hide()` itself right before handing off to the
+        // native share sheet, and that unmount must not read as a cancel.
+        isCancelled: () => !isMountedRef.current && !hasHiddenRef.current,
       });
     } finally {
       if (isMountedRef.current) setIsSharingStory(false);

@@ -172,6 +172,15 @@ export type ShareDogStoryCopy = {
  * up sharing the link instead of throwing out of this function. A missing
  * ref is a thrown error INSIDE the try block, so it takes the same catch
  * path as a rejected capture or a rejected `Sharing.shareAsync` call.
+ *
+ * `isCancelled` covers the one window where the user can walk away
+ * mid-flight: the sheet keeps its swipe-to-dismiss gesture while
+ * `waitForPhoto` is running, and a dismissal there unmounts the offscreen
+ * card the capture needs. Without the check that surfaces as a "card was
+ * not mounted" error report, a toast, and then the fallback link share
+ * opening the native sheet on top of a screen the user just went back to.
+ * When it returns true this bails out quietly instead: no error, no toast,
+ * no fallback, tracked as a cancel.
  */
 export const shareDogStory = async (params: {
   storyCardRef: RefObject<ComponentRef<typeof View> | null>;
@@ -181,6 +190,7 @@ export const shareDogStory = async (params: {
   shareLinkMessage: string;
   copy: ShareDogStoryCopy;
   tracking?: ShareTracking;
+  isCancelled?: () => boolean;
 }) => {
   const {
     storyCardRef,
@@ -190,7 +200,14 @@ export const shareDogStory = async (params: {
     shareLinkMessage,
     copy,
     tracking,
+    isCancelled,
   } = params;
+
+  const cancelled = () => {
+    if (!isCancelled?.()) return false;
+    if (tracking) trackDogShare("cancel", tracking);
+    return true;
+  };
 
   // Both fallbacks share the plain link, so they keep `option: "story"`
   // and only flip `fallback`. That way "how many story shares completed"
@@ -220,6 +237,8 @@ export const shareDogStory = async (params: {
   try {
     await waitForPhoto();
 
+    if (cancelled()) return;
+
     if (!storyCardRef.current) {
       throw new Error("Story card was not mounted for capture");
     }
@@ -241,6 +260,8 @@ export const shareDogStory = async (params: {
     // is observable.
     if (tracking) trackDogShare("success", tracking);
   } catch (error) {
+    if (cancelled()) return;
+
     sendError(error);
     magicToast.alert(copy.storyFailedFallback);
     hide();

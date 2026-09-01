@@ -362,6 +362,49 @@ describe("shareDogStory", () => {
     expect(shareAsync).not.toHaveBeenCalled();
   });
 
+  it("bails out quietly when the sheet is dismissed while waiting for the photo", async () => {
+    isAvailableAsync.mockResolvedValue(true);
+    const params = {
+      ...baseParams(),
+      // The sheet's offscreen card goes with it, so the ref is empty by the
+      // time the wait resolves — the exact state a swipe-down leaves behind.
+      storyCardRef: { current: null },
+      isCancelled: () => true,
+    };
+
+    await shareDogStory(params);
+
+    expect(capture).not.toHaveBeenCalled();
+    expect(share).not.toHaveBeenCalled();
+    expect(trackedError).not.toHaveBeenCalled();
+    expect(toastAlert).not.toHaveBeenCalled();
+    expect(params.hide).not.toHaveBeenCalled();
+  });
+
+  it("tracks the dismissal as a cancel rather than an error", async () => {
+    isAvailableAsync.mockResolvedValue(true);
+
+    await shareDogStory({
+      ...baseParams(),
+      isCancelled: () => true,
+      tracking: { ...tracking, option: "story" },
+    });
+
+    expect(track).toHaveBeenCalledWith(
+      shareEvent("cancel", { option: "story" }),
+    );
+  });
+
+  it("still shares when isCancelled stays false", async () => {
+    isAvailableAsync.mockResolvedValue(true);
+    capture.mockResolvedValue("file:///tmp/story.png");
+    shareAsync.mockResolvedValue();
+
+    await shareDogStory({ ...baseParams(), isCancelled: () => false });
+
+    expect(shareAsync).toHaveBeenCalled();
+  });
+
   it("tracks a story success when shareAsync resolves", async () => {
     isAvailableAsync.mockResolvedValue(true);
     capture.mockResolvedValue("file:///tmp/story.png");
