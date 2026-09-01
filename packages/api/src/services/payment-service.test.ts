@@ -17,11 +17,27 @@ jest.mock("./user-service", () => ({
   },
 }));
 
-import type { Event, EventType } from "../types/revenuecat";
+import type {
+  Event,
+  EventCancellation,
+  EventExpiration,
+  EventTransfer,
+  SubscriptionLifecycleEvent,
+} from "../types/revenuecat";
 
 import PaymentService from "./payment-service";
 
-const EVERY_EVENT_TYPE: EventType[] = [
+/**
+ * The `type` values the handler can actually be called with.
+ *
+ * Narrower than the exported `EventType`, which also lists `SUBSCRIBER_ALIAS`
+ * — a type the `Event` union has no member for, so no payload of that type can
+ * be constructed. Derived from `Event` rather than written out so a new webhook
+ * member is a compile error here rather than a silently untested branch.
+ */
+type HandledEventType = Event["type"];
+
+const EVERY_EVENT_TYPE: HandledEventType[] = [
   "TEST",
   "INITIAL_PURCHASE",
   "RENEWAL",
@@ -33,13 +49,27 @@ const EVERY_EVENT_TYPE: EventType[] = [
   "BILLING_ISSUE",
   "PRODUCT_CHANGE",
   "TRANSFER",
-  "SUBSCRIBER_ALIAS",
 ];
+
+/**
+ * One payload shape holding every field any member of the union can carry.
+ *
+ * RevenueCat sends a single JSON body and the union splits it by `type`, so no
+ * member allows both `product_id` and `transferred_to`. A fixture builder has
+ * to sit above that split; keeping the fields typed means a renamed field on
+ * the real types still breaks this file.
+ */
+type EventFixture = Omit<Partial<SubscriptionLifecycleEvent>, "type"> &
+  Partial<Pick<EventCancellation, "cancel_reason">> &
+  Partial<Pick<EventExpiration, "expiration_reason">> &
+  Partial<Pick<EventTransfer, "transferred_from" | "transferred_to">> & {
+    type: HandledEventType;
+  };
 
 const EXPIRES_AT_MS = Date.UTC(2026, 0, 1);
 const EXPIRES_AT_ISO = new Date(EXPIRES_AT_MS).toISOString();
 
-const buildEvent = (overrides: Partial<Event> & { type: EventType }) =>
+const buildEvent = (overrides: EventFixture) =>
   ({
     id: "event-1",
     app_id: "app-1",
@@ -55,7 +85,7 @@ const buildEvent = (overrides: Partial<Event> & { type: EventType }) =>
     transferred_from: [],
     transferred_to: [],
     ...overrides,
-  }) as Event;
+  }) as unknown as Event;
 
 const service = new PaymentService();
 
@@ -65,7 +95,7 @@ beforeEach(() => {
 
 describe("PaymentService.handleRevenueCatEvent", () => {
   it("captures a Subscription Event for every type RevenueCat can send", () => {
-    // Nine of these twelve change no plan, and those are exactly the ones that
+    // Most of these change no plan at all, and those are exactly the ones that
     // answer "why did they leave" — so the capture sits before the switch.
     for (const type of EVERY_EVENT_TYPE) {
       void service.handleRevenueCatEvent({ event: buildEvent({ type }) });
@@ -105,13 +135,13 @@ describe("PaymentService.handleRevenueCatEvent", () => {
       event: buildEvent({
         type: "CANCELLATION",
         cancel_reason: "UNSUBSCRIBE",
-      } as Partial<Event> & { type: EventType }),
+      }),
     });
     service.handleRevenueCatEvent({
       event: buildEvent({
         type: "EXPIRATION",
         expiration_reason: "BILLING_ERROR",
-      } as Partial<Event> & { type: EventType }),
+      }),
     });
 
     const reasons = mockCaptureEvent.mock.calls.map(
@@ -173,7 +203,7 @@ describe("PaymentService.handleRevenueCatEvent", () => {
         event: buildEvent({
           type: "INITIAL_PURCHASE",
           entitlement_ids: ["premium"],
-        } as Partial<Event> & { type: EventType }),
+        }),
       });
 
       expect(mockUpdateUserById).toHaveBeenCalledWith("user-1", {
