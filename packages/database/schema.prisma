@@ -66,6 +66,7 @@ model User {
 
   // Push notifications
   pushToken String?
+  newDogsAlertRequestedAt DateTime?
 
   // Metadata
   createdAt DateTime  @default(now())
@@ -320,4 +321,21 @@ model Message {
   @@index([receiverId], map: "message_receiverid_idx")
   @@index([senderId], map: "message_senderid_idx")
   @@index([matchId], map: "message_matchid_idx")
+}
+
+/// One row per re-engagement push the cron enqueued.
+///
+/// `dedupeKey` is the whole point: the cron runs every hour and re-selects the
+/// same candidates until they act, so the unique index is what turns "this user
+/// is eligible" into "this user has not been told yet". `userId` is a plain
+/// column rather than a relation on purpose, so the table can be read and
+/// pruned without widening `User`.
+model NotificationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  dedupeKey String   @unique
+  sentAt    DateTime @default(now())
+
+  @@index([userId, sentAt])
 }
