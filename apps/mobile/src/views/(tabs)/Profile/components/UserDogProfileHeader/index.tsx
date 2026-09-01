@@ -201,7 +201,7 @@ const ProfileShareButton = ({
       accessibilityRole="button"
       accessibilityLabel={t("dogProfile.shareProfile", { name: dog.name })}
       hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-      onPress={() => showDogShareOptions(dog)}
+      onPress={() => showDogShareOptions(dog, "own_profile")}
       style={[
         styles.shareButton,
         { top: insets.top + theme.spacing[3] },

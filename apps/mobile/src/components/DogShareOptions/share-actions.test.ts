@@ -15,7 +15,7 @@ import type { View } from "react-native";
 jest.mock<Record<string, unknown>>("react-native", () => ({
   Alert: { alert: jest.fn() },
   PixelRatio: { get: jest.fn(() => 3) },
-  Share: { share: jest.fn() },
+  Share: { share: jest.fn(), dismissedAction: "dismissedAction" },
 }));
 
 jest.mock<Record<string, unknown>>("expo-clipboard", () => ({
@@ -37,6 +37,10 @@ jest.mock<Record<string, unknown>>("react-native-view-shot", () => ({
 
 jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
   sendError: jest.fn(),
+}));
+
+jest.mock<Record<string, unknown>>("@/services/analytics", () => ({
+  analytics: { track: jest.fn() },
 }));
 
 // `@/constants` reads `Dimensions.get("screen")` at module load — mocked
@@ -64,6 +68,7 @@ import * as Sharing from "expo-sharing";
 import { magicToast } from "react-native-magic-toast";
 import { captureRef } from "react-native-view-shot";
 
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 
 import {
@@ -73,6 +78,7 @@ import {
   getDogShareLink,
   shareDogLink,
   shareDogStory,
+  type ShareTracking,
 } from "./share-actions";
 
 const share = jest.mocked(Share.share);
@@ -85,9 +91,39 @@ const toastSuccess = jest.mocked(magicToast.success);
 const toastAlert = jest.mocked(magicToast.alert);
 const capture = jest.mocked(captureRef);
 const trackedError = jest.mocked(sendError);
+const track = jest.mocked(analytics.track);
 
 const fakeRef = (): RefObject<ComponentRef<typeof View> | null> => ({
   current: {} as ComponentRef<typeof View>,
+});
+
+const tracking: ShareTracking = {
+  source: "own_profile",
+  dogId: "dog-1",
+  option: "link",
+};
+
+/** The exact `Dog Share` payload a given stage should produce, so a test
+ * asserts on the whole event rather than a subset that would still pass if
+ * `dog_id` or `source` silently went missing. */
+const shareEvent = (
+  type: string,
+  overrides: Partial<{
+    source: string;
+    dog_id: string;
+    option: string | null;
+    fallback: boolean;
+  }> = {},
+) => ({
+  event_type: "Dog Share",
+  event_properties: {
+    type,
+    source: "own_profile",
+    dog_id: "dog-1",
+    option: "link",
+    fallback: false,
+    ...overrides,
+  },
 });
 
 // `clearMocks: true` in the jest config (apps/mobile/package.json) already
@@ -172,6 +208,34 @@ describe("copyDogLink", () => {
     expect(toastAlert).toHaveBeenCalledWith("Couldn't copy");
     expect(toastSuccess).not.toHaveBeenCalled();
   });
+
+  it("tracks a success and an error against the copy_link option", async () => {
+    const copyTracking: ShareTracking = { ...tracking, option: "copy_link" };
+    setStringAsync.mockResolvedValue(true);
+
+    await copyDogLink("https://www.pegada.app/dog/abc", copy, copyTracking);
+
+    expect(track).toHaveBeenCalledWith(
+      shareEvent("success", { option: "copy_link" }),
+    );
+
+    track.mockClear();
+    setStringAsync.mockRejectedValue(new Error("clipboard unavailable"));
+
+    await copyDogLink("https://www.pegada.app/dog/abc", copy, copyTracking);
+
+    expect(track).toHaveBeenCalledWith(
+      shareEvent("error", { option: "copy_link" }),
+    );
+  });
+
+  it("skips analytics entirely when no tracking context is passed", async () => {
+    setStringAsync.mockResolvedValue(true);
+
+    await copyDogLink("https://www.pegada.app/dog/abc", copy);
+
+    expect(track).not.toHaveBeenCalled();
+  });
 });
 
 describe("shareDogLink", () => {
@@ -194,6 +258,30 @@ describe("shareDogLink", () => {
 
     expect(trackedError).toHaveBeenCalledWith(error);
     expect(alert).toHaveBeenCalledWith("Oops", "Try again later");
+  });
+
+  it("tracks a success when the user goes through with the native sheet", async () => {
+    share.mockResolvedValue({ action: "sharedAction" });
+
+    await shareDogLink("check out Rex", unavailableCopy, tracking);
+
+    expect(track).toHaveBeenCalledWith(shareEvent("success"));
+  });
+
+  it("tracks a cancel when the native sheet is dismissed", async () => {
+    share.mockResolvedValue({ action: "dismissedAction" });
+
+    await shareDogLink("check out Rex", unavailableCopy, tracking);
+
+    expect(track).toHaveBeenCalledWith(shareEvent("cancel"));
+  });
+
+  it("tracks an error when Share.share rejects", async () => {
+    share.mockRejectedValue(new Error("no share targets"));
+
+    await shareDogLink("check out Rex", unavailableCopy, tracking);
+
+    expect(track).toHaveBeenCalledWith(shareEvent("error"));
   });
 });
 
@@ -272,5 +360,37 @@ describe("shareDogStory", () => {
     expect(params.hide).toHaveBeenCalledTimes(1);
     expect(share).toHaveBeenCalledWith({ message: "check out Rex" });
     expect(shareAsync).not.toHaveBeenCalled();
+  });
+
+  it("tracks a story success when shareAsync resolves", async () => {
+    isAvailableAsync.mockResolvedValue(true);
+    capture.mockResolvedValue("file:///tmp/story.png");
+    shareAsync.mockResolvedValue();
+
+    await shareDogStory({
+      ...baseParams(),
+      tracking: { ...tracking, option: "story" },
+    });
+
+    expect(track).toHaveBeenCalledWith(
+      shareEvent("success", { option: "story" }),
+    );
+  });
+
+  it("flags the fallback link share so it is not read as a story share", async () => {
+    isAvailableAsync.mockResolvedValue(false);
+    share.mockResolvedValue({ action: "sharedAction" });
+
+    await shareDogStory({
+      ...baseParams(),
+      tracking: { ...tracking, option: "story" },
+    });
+
+    expect(track).toHaveBeenCalledWith(
+      shareEvent("success", { option: "story", fallback: true }),
+    );
+    expect(track).not.toHaveBeenCalledWith(
+      shareEvent("success", { option: "story" }),
+    );
   });
 });

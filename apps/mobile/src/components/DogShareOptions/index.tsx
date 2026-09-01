@@ -25,6 +25,9 @@ import {
   getDogShareLink,
   shareDogLink,
   shareDogStory,
+  trackDogShare,
+  type ShareOption,
+  type ShareSource,
 } from "./share-actions";
 import { DogStoryCard, STORY_SETTLE_TIMEOUT_MS } from "./story-card";
 import { CARD_HEIGHT, CARD_WIDTH } from "./story-card-styles";
@@ -80,7 +83,13 @@ const ShareOptionRow = ({
   );
 };
 
-const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
+const DogShareSheetContent = ({
+  dog,
+  source,
+}: {
+  dog: ShareableDog;
+  source: ShareSource;
+}) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -101,14 +110,33 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
   // `handleShareStory`'s `finally` block needs this guard before touching
   // `isSharingStory` state.
   const isMountedRef = useRef(true);
+
+  // Set by every row handler so the unmount cleanup can tell "opened the
+  // sheet and backed out" from "opened it and picked something". Backing
+  // out covers the Cancel pill, the backdrop and the swipe-down gesture in
+  // one place, since all three end at the same unmount.
+  const pickedOptionRef = useRef(false);
+
   useEffect(() => {
+    // The denominator for every rate below: how many times the sheet was
+    // opened at all. Fires once per mount, not once per render.
+    trackDogShare("open", { source, dogId: dog.id });
+
     return () => {
       isMountedRef.current = false;
+      if (!pickedOptionRef.current) {
+        trackDogShare("cancel", { source, dogId: dog.id });
+      }
     };
-  }, []);
+  }, [source, dog.id]);
 
   const [firstName] = dog.name.split(" ");
   const link = getDogShareLink(dog.id);
+
+  const trackingFor = (option: ShareOption) => {
+    pickedOptionRef.current = true;
+    return { source, dogId: dog.id, option };
+  };
 
   const hide = () => {
     if (hasHiddenRef.current) return;
@@ -153,19 +181,29 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
   };
 
   const handleShareLink = () => {
+    const tracking = trackingFor("link");
+    trackDogShare("select", tracking);
     hide();
-    void shareDogLink(shareLinkMessage, sharingNotAvailableCopy);
+    void shareDogLink(shareLinkMessage, sharingNotAvailableCopy, tracking);
   };
 
   const handleCopyLink = () => {
+    const tracking = trackingFor("copy_link");
+    trackDogShare("select", tracking);
     hide();
-    void copyDogLink(link, {
-      success: t("dogShare.linkCopied"),
-      failure: t("dogShare.copyLinkFailed"),
-    });
+    void copyDogLink(
+      link,
+      {
+        success: t("dogShare.linkCopied"),
+        failure: t("dogShare.copyLinkFailed"),
+      },
+      tracking,
+    );
   };
 
   const handleShareStory = async () => {
+    const tracking = trackingFor("story");
+    trackDogShare("select", tracking);
     setIsSharingStory(true);
 
     try {
@@ -180,6 +218,7 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
           storyFailedFallback: t("dogShare.storyFailedFallback"),
           sharingNotAvailable: sharingNotAvailableCopy,
         },
+        tracking,
       });
     } finally {
       if (isMountedRef.current) setIsSharingStory(false);
@@ -264,9 +303,11 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
  * Opens the three-option share sheet — share link, copy link, share story —
  * for the given dog. The single entry point both the own-profile header and
  * other dogs' profile use, so the behaviour is identical in both places.
+ * `source` only exists to split the analytics funnel by entry point; it
+ * changes nothing about what the sheet renders or does.
  */
-export const showDogShareOptions = (dog: ShareableDog) =>
-  magicModal.show(() => <DogShareSheetContent dog={dog} />, {
+export const showDogShareOptions = (dog: ShareableDog, source: ShareSource) =>
+  magicModal.show(() => <DogShareSheetContent dog={dog} source={source} />, {
     style: { justifyContent: "flex-end" },
     swipeDirection: "down",
     entering: FadeInDown.duration(220),

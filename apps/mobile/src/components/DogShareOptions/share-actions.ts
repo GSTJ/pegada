@@ -11,6 +11,7 @@ import { magicToast } from "react-native-magic-toast";
 import { captureRef } from "react-native-view-shot";
 
 import { APP_SHARE_LINK_BASE } from "@/constants";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 
 import { EXPORT_PNG_HEIGHT, EXPORT_PNG_WIDTH } from "./story-card-styles";
@@ -27,6 +28,47 @@ import { EXPORT_PNG_HEIGHT, EXPORT_PNG_WIDTH } from "./story-card-styles";
  * straight through to these.
  */
 
+/** Which screen the sheet was opened from, so the two entry points can be
+ * compared without splitting the funnel across two event names. */
+export type ShareSource = "own_profile" | "dog_profile";
+
+/** Which row of the sheet the user picked. `null` on the sheet-level
+ * events (opened, dismissed) where no row has been chosen yet. */
+export type ShareOption = "link" | "copy_link" | "story";
+
+export type ShareTracking = {
+  source: ShareSource;
+  dogId: string;
+  option: ShareOption;
+  /** True when this link share is the story row's fallback rather than the
+   * "Share link" row, so the readout can tell a deliberate link share from
+   * a story that could not be produced. */
+  fallback?: boolean;
+};
+
+/**
+ * Every share funnel event goes out under one `Dog Share` name with a
+ * `type` stage property, matching how `Upgrade` is instrumented in
+ * `views/UpgradeWall`. One event name keeps the whole funnel (open,
+ * select, success, cancel, error) readable as a single PostHog insight
+ * broken down by `type` and `option` instead of five separate events that
+ * have to be stitched together.
+ */
+export const trackDogShare = (
+  stage: "open" | "select" | "success" | "cancel" | "error",
+  tracking: Omit<ShareTracking, "option"> & { option?: ShareOption },
+) =>
+  analytics.track({
+    event_type: "Dog Share",
+    event_properties: {
+      type: stage,
+      source: tracking.source,
+      dog_id: tracking.dogId,
+      option: tracking.option ?? null,
+      fallback: Boolean(tracking.fallback),
+    },
+  });
+
 export const getDogShareLink = (dogId: string) =>
   `${APP_SHARE_LINK_BASE}/dog/${dogId}`;
 
@@ -42,15 +84,28 @@ export const buildDogShareLinkMessage = (t: TFunction, link: string) =>
  * `Sharing.isAvailableAsync` says the device can't share files) — the one
  * thing every path can always fall back to, since `Share.share` has none
  * of `Sharing.shareAsync`'s device-capability precondition.
+ *
+ * `Share.share` resolves with `dismissedAction` when the user backs out of
+ * the native sheet, which is the only cancel signal any of the three rows
+ * gets, so it is tracked as `type: "cancel"` rather than a success.
  */
 export const shareDogLink = async (
   message: string,
   unavailableCopy: { title: string; message: string },
+  tracking?: ShareTracking,
 ) => {
   try {
-    await Share.share({ message });
+    const result = await Share.share({ message });
+
+    if (tracking) {
+      trackDogShare(
+        result.action === Share.dismissedAction ? "cancel" : "success",
+        tracking,
+      );
+    }
   } catch (error) {
     sendError(error);
+    if (tracking) trackDogShare("error", tracking);
     Alert.alert(unavailableCopy.title, unavailableCopy.message);
   }
 };
@@ -60,12 +115,15 @@ export const shareDogLink = async (
 export const copyDogLink = async (
   link: string,
   copy: { success: string; failure: string },
+  tracking?: ShareTracking,
 ) => {
   try {
     await Clipboard.setStringAsync(link);
     magicToast.success(copy.success, 1500);
+    if (tracking) trackDogShare("success", tracking);
   } catch (error) {
     sendError(error);
+    if (tracking) trackDogShare("error", tracking);
     magicToast.alert(copy.failure);
   }
 };
@@ -122,6 +180,7 @@ export const shareDogStory = async (params: {
   dialogTitle: string;
   shareLinkMessage: string;
   copy: ShareDogStoryCopy;
+  tracking?: ShareTracking;
 }) => {
   const {
     storyCardRef,
@@ -130,7 +189,14 @@ export const shareDogStory = async (params: {
     dialogTitle,
     shareLinkMessage,
     copy,
+    tracking,
   } = params;
+
+  // Both fallbacks share the plain link, so they keep `option: "story"`
+  // and only flip `fallback`. That way "how many story shares completed"
+  // and "how many degraded to a link" are the same insight split by one
+  // property rather than two unrelated event shapes.
+  const fallbackTracking = tracking && { ...tracking, fallback: true };
 
   let available = false;
 
@@ -143,7 +209,11 @@ export const shareDogStory = async (params: {
   if (!available) {
     magicToast.alert(copy.storyUnavailable);
     hide();
-    await shareDogLink(shareLinkMessage, copy.sharingNotAvailable);
+    await shareDogLink(
+      shareLinkMessage,
+      copy.sharingNotAvailable,
+      fallbackTracking,
+    );
     return;
   }
 
@@ -164,10 +234,20 @@ export const shareDogStory = async (params: {
       UTI: "public.png",
       dialogTitle,
     });
+
+    // `Sharing.shareAsync` resolves the same way whether the user posted
+    // the story or dismissed the sheet, so this is "handed off to the OS",
+    // not "definitely posted". The link rows are the only place a cancel
+    // is observable.
+    if (tracking) trackDogShare("success", tracking);
   } catch (error) {
     sendError(error);
     magicToast.alert(copy.storyFailedFallback);
     hide();
-    await shareDogLink(shareLinkMessage, copy.sharingNotAvailable);
+    await shareDogLink(
+      shareLinkMessage,
+      copy.sharingNotAvailable,
+      fallbackTracking,
+    );
   }
 };

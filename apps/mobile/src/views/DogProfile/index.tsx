@@ -55,7 +55,7 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
     >
       <S.ActionLabel
         testID="dog-profile-share"
-        onPress={() => showDogShareOptions(dog)}
+        onPress={() => showDogShareOptions(dog, "dog_profile")}
         fontWeight="bold"
         color="primary"
         style={styles.actionLabel}
