@@ -31,8 +31,8 @@ export const GET = () =>
   Response.json(body, {
     headers: {
       "Content-Type": "application/json",
-      // Rarely changes, but `ANDROID_SHA256_CERT_FINGERPRINTS` is still a
-      // placeholder here, so `immutable` would be a lie — a long max-age is
+      // Rarely changes, but a rotated or added signing key would need this
+      // to pick it up without waiting out `immutable`, so a long max-age is
       // enough.
       "Cache-Control": "public, max-age=86400",
     },

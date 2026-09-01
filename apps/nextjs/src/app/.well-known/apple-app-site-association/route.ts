@@ -47,9 +47,8 @@ export const GET = () =>
       // Apple's own crawler ignores Content-Type, but browsers and other
       // tooling that inspect this URL expect JSON, and the spec calls for it.
       "Content-Type": "application/json",
-      // Rarely changes, but the Android side of universal links still ships
-      // a placeholder fingerprint (see assetlinks.json/route.ts), so
-      // `immutable` would be premature here too — a long max-age is enough.
+      // Rarely changes, but not worth the risk of `immutable` breaking a
+      // future rotation, so a long max-age is enough.
       "Cache-Control": "public, max-age=86400",
     },
   });

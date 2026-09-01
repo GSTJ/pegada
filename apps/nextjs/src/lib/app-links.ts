@@ -8,17 +8,19 @@
  * removed from `appleTeamId` there in favor of an EAS build secret).
  *
  * Android SHA256 fingerprint(s) are different: they live in EAS credentials,
- * not in this repo, and can't be guessed — a wrong value silently fails
- * verification instead of erroring, so a placeholder that obviously needs
- * replacing beats a plausible-looking one. `eas credentials` → Android →
- * select the `app.pegada` app → "Keystore" → prints "SHA256 Fingerprint"
- * for the release-signing keystore.
+ * not in this repo. The entry below is the EAS upload key (`eas credentials`
+ * -> Android -> select the `app.pegada` app -> "Keystore" -> "SHA256
+ * Fingerprint"). If Google Play App Signing is on for this app, Play
+ * re-signs the uploaded bundle with its own app signing key before
+ * distributing it, and that key's fingerprint (Play Console -> Setup -> App
+ * integrity -> App signing key certificate) must be appended here too, or
+ * devices that installed from Play will fail verification.
  */
 export const APPLE_TEAM_ID = "23DRM684H8";
 
-// Will hold both the Play app-signing certificate and the EAS upload key
-// fingerprints once they're pulled from EAS credentials.
-export const ANDROID_SHA256_CERT_FINGERPRINTS = ["REPLACE_WITH_ANDROID_SHA256"];
+export const ANDROID_SHA256_CERT_FINGERPRINTS = [
+  "36:51:99:FC:45:EF:55:03:38:23:04:05:C5:B6:C9:F1:C9:39:69:10:9D:64:8D:4D:DC:C3:01:E4:70:E1:9A:8B",
+];
 
 export const APP_BUNDLE_ID = "app.pegada";
 
