@@ -16,6 +16,9 @@ export const Cta = () => {
         <StoreButton
           href="https://apps.apple.com/br/app/pegada/id6450865592"
           target="_blank"
+          page="landing"
+          placement="hero"
+          store="app_store"
         >
           <StoreButton.Icon
             width={20}
@@ -28,6 +31,9 @@ export const Cta = () => {
         <StoreButton
           href="https://play.google.com/store/apps/details?id=app.pegada"
           target="_blank"
+          page="landing"
+          placement="hero"
+          store="play_store"
         >
           <StoreButton.Icon
             width={24}

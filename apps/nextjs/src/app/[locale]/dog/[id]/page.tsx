@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
+import { DownloadCta } from "@/components/download-cta";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
@@ -182,13 +183,17 @@ const DogProfile = async ({ params }: DogProfileProps) => {
           </h2>
           <p className="text-lg font-light text-subtitle">{nextStep}</p>
           <div className="mt-2 flex flex-col items-start gap-3">
-            {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
-            <a
+            {/* /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to, which is why `store` is reported as "auto" rather than a named store. */}
+            <DownloadCta
               href="/store"
+              page="dog_share"
+              placement="desktop_copy"
+              store="auto"
+              dogId={id}
               className="rounded-full bg-primary px-8 py-4 font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               {ctaButton}
-            </a>
+            </DownloadCta>
             <p className="text-sm font-light text-subtitle/80">
               {t("dog.cta.reassurance")}
             </p>
@@ -201,13 +206,16 @@ const DogProfile = async ({ params }: DogProfileProps) => {
         <p className="flex-1 truncate text-sm font-medium text-text">
           {mobileContext}
         </p>
-        {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
-        <a
+        <DownloadCta
           href="/store"
+          page="dog_share"
+          placement="mobile_sticky_bar"
+          store="auto"
+          dogId={id}
           className="shrink-0 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
           {ctaButton}
-        </a>
+        </DownloadCta>
       </div>
     </div>
   );
