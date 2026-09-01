@@ -109,12 +109,10 @@ type Props = {
 /** Branded card with no dog-specific data, for a missing/removed profile. */
 const buildFallbackImage = () =>
   new ImageResponse(
-    (
-      <div style={fallbackContainerStyle}>
-        <div style={fallbackWordmarkStyle}>Pegada</div>
-        <div style={fallbackTaglineStyle}>{t("home.title")}</div>
-      </div>
-    ),
+    <div style={fallbackContainerStyle}>
+      <div style={fallbackWordmarkStyle}>Pegada</div>
+      <div style={fallbackTaglineStyle}>{t("home.title")}</div>
+    </div>,
     size,
   );
 
@@ -131,29 +129,27 @@ const Image = async ({ params }: Props) => {
   const tagline = getDogTagline(dog, lng);
 
   return new ImageResponse(
-    (
-      <div style={containerStyle}>
-        <div style={photoFrameStyle}>
-          {dogImage ? (
-            // oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image
-            <img
-              src={dogImage}
-              width={440}
-              height={502}
-              alt=""
-              style={photoImgStyle}
-            />
-          ) : null}
-        </div>
-
-        <div style={detailsStyle}>
-          <div style={wordmarkStyle}>Pegada</div>
-          <div style={nameStyle}>{dog.name}</div>
-          {tagline ? <div style={taglineStyle}>{tagline}</div> : null}
-          <div style={tagStyle}>{t("dog.og.tag")}</div>
-        </div>
+    <div style={containerStyle}>
+      <div style={photoFrameStyle}>
+        {dogImage ? (
+          // oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image
+          <img
+            src={dogImage}
+            width={440}
+            height={502}
+            alt=""
+            style={photoImgStyle}
+          />
+        ) : null}
       </div>
-    ),
+
+      <div style={detailsStyle}>
+        <div style={wordmarkStyle}>Pegada</div>
+        <div style={nameStyle}>{dog.name}</div>
+        {tagline ? <div style={taglineStyle}>{tagline}</div> : null}
+        <div style={tagStyle}>{t("dog.og.tag")}</div>
+      </div>
+    </div>,
     size,
   );
 };
