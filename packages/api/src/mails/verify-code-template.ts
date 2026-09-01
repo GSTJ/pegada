@@ -45,7 +45,7 @@ export const VERIFY_CODE_TEMPLATE = `<html lang="{{language}}">
   <body>
     <div class="email-container">
       <div class="logo">
-        <img src="https://pegava.s3.sa-east-1.amazonaws.com/static/Logo.png" width="40" alt="" />
+        <img src="https://www.pegada.app/email-logo.png" width="40" alt="" />
       </div>
       <h2>{{translate "verifyCode.verificationCode"}}</h2>
       <p>{{translate "verifyCode.yourCodeIs"}}:</p>
