@@ -24,14 +24,15 @@ jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
   sendError: jest.fn(),
 }));
 
-// The real `usePendingDogProfileId` is `useSyncExternalStore` without a
-// `getServerSnapshot` argument — fine on React Native, but
-// `react-dom/server`'s renderer refuses to run it without one ("Missing
-// getServerSnapshot, which is required for server-rendered content").
-// pending-dog-profile.test.ts already covers that hook and its store in
-// isolation; here the pending id is just an input to usePendingDogProfile,
-// so it is driven directly through this mock rather than through a second
-// SSR-hostile subscription.
+jest.mock<Record<string, unknown>>("@/services/analytics", () => ({
+  analytics: { track: jest.fn() },
+}));
+
+// pending-dog-profile.test.ts already covers that store and its hook in
+// isolation. Here the pending id is only an input to usePendingDogProfile,
+// so it is driven directly through this mock: `renderToStaticMarkup` has no
+// commit phase, so a real subscription would never notify between renders
+// and the "id changed while already enabled" case could not be expressed.
 let mockPendingDogProfileId: string | undefined;
 
 jest.mock<Record<string, unknown>>("./handlers/pending-dog-profile", () => ({
@@ -55,9 +56,12 @@ jest.mock<Record<string, unknown>>("react", () => {
   };
 });
 
+import { analytics } from "@/services/analytics";
+
 import { usePendingDogProfile } from ".";
 
 const push = jest.mocked(router.push);
+const track = jest.mocked(analytics.track);
 
 const Harness = ({ enabled }: { enabled: boolean }) => {
   usePendingDogProfile(enabled);
@@ -69,6 +73,7 @@ const render = (enabled: boolean) =>
 
 afterEach(() => {
   mockPendingDogProfileId = undefined;
+  track.mockClear();
 });
 
 test("does not navigate while disabled, even with a pending id", () => {
@@ -103,6 +108,20 @@ test("does not push again on a re-render with nothing new pending", () => {
   render(true);
 
   expect(push).not.toHaveBeenCalled();
+});
+
+test("tracks the profile as reached, once, only when it actually pushes", () => {
+  mockPendingDogProfileId = "dog-1";
+
+  render(false);
+  expect(track).not.toHaveBeenCalled();
+
+  render(true);
+
+  expect(track).toHaveBeenCalledTimes(1);
+  expect(track).toHaveBeenCalledWith({
+    event_type: "Dog Link Profile Opened",
+  });
 });
 
 test("pushes again for a second id that arrives while already enabled", () => {

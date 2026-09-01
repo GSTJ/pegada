@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { View } from "react-native";
 
 import { useTranslation } from "react-i18next";
@@ -5,6 +6,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import Dog from "@/assets/images/Dog.svg";
 import { Text } from "@/components/text";
+import { analytics } from "@/services/analytics";
 import { usePendingDogProfileId } from "@/services/linking/handlers/pending-dog-profile";
 
 import { styles } from "./styles";
@@ -20,10 +22,26 @@ import { styles } from "./styles";
  * pending id itself is consumed (by `usePendingDogProfile` in
  * services/linking/index.ts, once the user reaches Swipe after login).
  */
+/**
+ * The banner mounts twice per sign in (SignIn, then OneTimeCode) for the
+ * same pending id, and both mounts are the same moment as far as the funnel
+ * is concerned: "the user was told their link is waiting". Reported once per
+ * id so the raw event count means what it reads like, not only the unique
+ * user count a PostHog funnel would collapse it to anyway.
+ */
+let lastReportedId: string | undefined;
+
 export const PendingDogProfileBanner = () => {
   const pendingDogProfileId = usePendingDogProfileId();
   const { t } = useTranslation();
   const { theme } = useUnistyles();
+
+  useEffect(() => {
+    if (!pendingDogProfileId || pendingDogProfileId === lastReportedId) return;
+
+    lastReportedId = pendingDogProfileId;
+    analytics.track({ event_type: "Dog Link Sign In Banner Shown" });
+  }, [pendingDogProfileId]);
 
   if (!pendingDogProfileId) return null;
 

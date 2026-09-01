@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 
@@ -102,6 +103,10 @@ export const usePendingDogProfile = (enabled: boolean) => {
     if (!enabled || !pendingDogProfileId) return;
 
     setPendingDogProfile(undefined);
+    // Last step of the funnel started by "Dog Link Opened": the shared
+    // profile is actually on screen. Everything between the two steps (sign
+    // in, onboarding, create profile) shows up as the drop off.
+    analytics.track({ event_type: "Dog Link Profile Opened" });
     router.push({
       pathname: `${SceneName.Profile}/[id]`,
       params: { id: pendingDogProfileId },

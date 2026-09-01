@@ -42,6 +42,22 @@ jest.mock<Record<string, unknown>>("@/components/text", () => ({
   Text: ({ children }: { children?: React.ReactNode }) => children,
 }));
 
+jest.mock<Record<string, unknown>>("@/services/analytics", () => ({
+  analytics: { track: jest.fn() },
+}));
+
+// The banner reports itself from a `useEffect`, and `renderToStaticMarkup`
+// has no commit phase, so the real one never fires. Running the callback
+// inline is how the other tests in this package stub effect-shaped hooks
+// (see services/linking/index.test.ts).
+jest.mock<Record<string, unknown>>("react", () => {
+  const actual = jest.requireActual("react") as typeof React;
+  return {
+    ...actual,
+    useEffect: (effect: () => void) => effect(),
+  };
+});
+
 let mockPendingDogProfileId: string | undefined;
 
 jest.mock<Record<string, unknown>>(
@@ -51,7 +67,11 @@ jest.mock<Record<string, unknown>>(
   }),
 );
 
+import { analytics } from "@/services/analytics";
+
 import { PendingDogProfileBanner } from ".";
+
+const track = jest.mocked(analytics.track);
 
 const render = (pendingId: string | undefined) => {
   capturedViewProps.length = 0;
@@ -59,17 +79,38 @@ const render = (pendingId: string | undefined) => {
   return renderToStaticMarkup(React.createElement(PendingDogProfileBanner));
 };
 
+afterEach(() => {
+  track.mockClear();
+});
+
 test("renders nothing when there is no pending dog profile", () => {
   const html = render(undefined);
 
   expect(html).toBe("");
   expect(capturedViewProps).toHaveLength(0);
+  expect(track).not.toHaveBeenCalled();
 });
 
 test("renders the banner, keyed by its stable testID, when a dog id is pending", () => {
   render("dog-1");
 
   expect(capturedViewProps[0]?.testID).toBe("signin-pending-dog-profile");
+});
+
+// SignIn and OneTimeCode both render this banner for one pending id, so the
+// naive "track on mount" would double count every sign in hand off.
+test("reports itself once per pending id, across both screens that render it", () => {
+  render("dog-track-1");
+  render("dog-track-1");
+
+  expect(track).toHaveBeenCalledTimes(1);
+  expect(track).toHaveBeenCalledWith({
+    event_type: "Dog Link Sign In Banner Shown",
+  });
+
+  render("dog-track-2");
+
+  expect(track).toHaveBeenCalledTimes(2);
 });
 
 test("shows the title before the body, matching the bold-first-sentence copy", () => {
