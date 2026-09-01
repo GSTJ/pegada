@@ -16,6 +16,7 @@ import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
+import { usePendingDogProfileId } from "@/services/linking/handlers/pending-dog-profile";
 import { LOGIN_PLATFORM, usePendingReferral } from "@/services/referral";
 import {
   shouldRetryTransient,
@@ -60,6 +61,12 @@ const InsertEmail = () => {
 
   const router = useRouter();
   const { t } = useTranslation();
+
+  // Set by a `/dog/<id>` deep link the user hit while logged out (see
+  // app/dog/[id].tsx). Only used to decide whether to show the line below —
+  // the actual navigation to that profile happens after login, from
+  // usePendingDogProfile in services/linking/index.ts.
+  const pendingDogProfileId = usePendingDogProfileId();
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -174,6 +181,14 @@ const InsertEmail = () => {
             <Description style={styles.description}>
               {t("insertEmail.accountCode")}
             </Description>
+            {pendingDogProfileId ? (
+              <Description
+                testID="signin-pending-dog-profile"
+                style={styles.pendingDogProfile}
+              >
+                {t("insertEmail.pendingDogProfile")}
+              </Description>
+            ) : null}
             <EmailInput
               enablesReturnKeyAutomatically
               returnKeyType="send"

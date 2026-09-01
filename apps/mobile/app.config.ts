@@ -42,7 +42,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.6.2",
+  version: "1.7.1",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -274,20 +274,20 @@ const config: ExpoConfig = {
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
-    // intentFilters: [
-    //   {
-    //     action: 'VIEW',
-    //     autoVerify: true,
-    //     data: [
-    //       {
-    //         scheme: 'https',
-    //         host: '*.pegada.app',
-    //         pathPrefix: '/',
-    //       },
-    //     ],
-    //     category: ['BROWSABLE', 'DEFAULT'],
-    //   },
-    // ],
+    intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: "*.pegada.app",
+            pathPrefix: "/",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
   },
   userInterfaceStyle: "automatic",
   locales: {
@@ -322,10 +322,7 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
-    // associatedDomains: [
-    //   'applinks:pegada.app',
-    //   'applinks:www.pegada.app',
-    // ],
+    associatedDomains: ["applinks:pegada.app", "applinks:www.pegada.app"],
   },
   extra: {
     oneSignalAppId: "",

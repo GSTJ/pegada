@@ -53,6 +53,10 @@ export const styles = StyleSheet.create((theme) => ({
   description: {
     color: theme.colors.text,
   },
+  pendingDogProfile: {
+    color: theme.colors.text,
+    marginTop: theme.spacing[2],
+  },
 }));
 
 export const Container = withUnistyles(SafeAreaView);
