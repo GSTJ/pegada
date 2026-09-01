@@ -26,5 +26,11 @@ const subscribe = (listener: () => void) => {
   };
 };
 
+// The third argument is the server snapshot. Nothing here is server
+// rendered on device, but React throws "Missing getServerSnapshot" the
+// moment this hook runs under any server renderer, which is exactly what
+// the tests in this package use (`react-dom/server`). Reading the same
+// module-local binding keeps runtime behaviour identical and makes the
+// hook safe to render anywhere.
 export const usePendingDogProfileId = () =>
-  useSyncExternalStore(subscribe, getPendingDogProfile);
+  useSyncExternalStore(subscribe, getPendingDogProfile, getPendingDogProfile);

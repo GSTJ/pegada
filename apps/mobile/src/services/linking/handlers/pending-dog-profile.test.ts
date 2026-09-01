@@ -13,6 +13,12 @@ import { renderToStaticMarkup } from "react-dom/server";
  */
 let capturedSubscribe: ((listener: () => void) => () => void) | undefined;
 
+// Flipped by the one test that needs the genuine `useSyncExternalStore`
+// (see "renders under a server renderer"), which is the only way to prove
+// the `getServerSnapshot` argument is actually there: the stub below would
+// happily ignore a missing one.
+let mockUseRealSyncExternalStore = false;
+
 jest.mock<Record<string, unknown>>("react", () => {
   const actual = jest.requireActual("react") as typeof React;
   return {
@@ -20,8 +26,16 @@ jest.mock<Record<string, unknown>>("react", () => {
     useSyncExternalStore: (
       subscribe: (listener: () => void) => () => void,
       getSnapshot: () => unknown,
+      getServerSnapshot?: () => unknown,
     ) => {
       capturedSubscribe = subscribe;
+      if (mockUseRealSyncExternalStore) {
+        return actual.useSyncExternalStore(
+          subscribe,
+          getSnapshot as () => never,
+          getServerSnapshot as (() => never) | undefined,
+        );
+      }
       return getSnapshot();
     },
   };
@@ -43,6 +57,7 @@ const render = () => renderToStaticMarkup(React.createElement(Harness));
 afterEach(() => {
   setPendingDogProfile(undefined);
   capturedSubscribe = undefined;
+  mockUseRealSyncExternalStore = false;
 });
 
 test("has no pending id by default", () => {
@@ -71,6 +86,17 @@ test("usePendingDogProfileId reflects the current value at render time", () => {
 
 test("usePendingDogProfileId is undefined when nothing is pending", () => {
   expect(render()).toContain("none");
+});
+
+// React throws "Missing getServerSnapshot, which is required for
+// server-rendered content" if the hook is rendered on the server without a
+// third argument. Nothing ships server rendered here, but every renderer
+// this package has is a server one, so the hook has to survive it.
+test("renders under a server renderer, reading the same value", () => {
+  mockUseRealSyncExternalStore = true;
+  setPendingDogProfile("dog-ssr");
+
+  expect(render()).toContain("dog-ssr");
 });
 
 test("notifies every subscriber when the id changes, stops after unsubscribe", () => {

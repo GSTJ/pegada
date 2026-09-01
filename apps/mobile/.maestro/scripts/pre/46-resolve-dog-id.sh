@@ -25,8 +25,12 @@
 set -euo pipefail
 
 API_URL="${EXPO_PUBLIC_API_URL:-http://localhost:3010/api}"
-MAGIC_EMAIL="${APPLE_MAGIC_EMAIL%%,*}"
-MAGIC_EMAIL="${MAGIC_EMAIL:-test@pegada.app}"
+# APPLE_MAGIC_EMAIL is a comma separated list and is often unset on a dev
+# machine. Default it before trimming: under `set -u` a suffix expansion on
+# an unset name is an error, so `${APPLE_MAGIC_EMAIL%%,*}` would abort the
+# hook instead of falling through to test@pegada.app.
+MAGIC_EMAIL="${APPLE_MAGIC_EMAIL:-test@pegada.app}"
+MAGIC_EMAIL="${MAGIC_EMAIL%%,*}"
 MAGIC_CODE="${APPLE_MAGIC_CODE:-424242}"
 CACHE_FILE="${TMPDIR:-/tmp}/pegada-maestro-dog-id"
 

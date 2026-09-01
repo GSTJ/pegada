@@ -1694,19 +1694,30 @@ jobs:
         if: matrix.shard.name == 'core'
         run: |
           set -euo pipefail
-          MAGIC_EMAIL="${APPLE_MAGIC_EMAIL%%,*}"
+          # Default before trimming the comma separated list: `set -u` makes
+          # a suffix expansion on an unset name an error, and the job-level
+          # fallback for this env can be dropped or emptied independently.
+          MAGIC_EMAIL="${APPLE_MAGIC_EMAIL:-test@pegada.app}"
+          MAGIC_EMAIL="${MAGIC_EMAIL%%,*}"
           TOKEN=$(curl -sf -X POST "$EXPO_PUBLIC_API_URL/trpc/authentication.login?batch=1" \
             -H "Content-Type: application/json" \
             -d "{\"0\":{\"json\":{\"email\":\"$MAGIC_EMAIL\",\"code\":\"$APPLE_MAGIC_CODE\"}}}" \
             | jq -r '.[0].result.data.json.token // empty')
+          # Flows 46/47 are in this shard, so a missing id is not recoverable
+          # later: the flows would open `pegada://dog/` and fail on a screen
+          # assertion instead. Fail here, where the cause is in the message.
           if [ -z "$TOKEN" ]; then
-            echo "::warning::could not log in as $MAGIC_EMAIL to resolve a dog id; 46/47 will fail if they run"
-            exit 0
+            echo "::error::could not log in as $MAGIC_EMAIL at $EXPO_PUBLIC_API_URL to resolve a dog id for flows 46/47"
+            exit 1
           fi
           MATCH_INPUT='%7B%220%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%7D'
           DOG_ID=$(curl -sf "$EXPO_PUBLIC_API_URL/trpc/match.getAll?batch=1&input=$MATCH_INPUT" \
             -H "Authorization: Bearer $TOKEN" \
             | jq -r '[.[0].result.data.json[] | select(.dog.name == "Bella")][0].dog.id // empty')
+          if [ -z "$DOG_ID" ]; then
+            echo "::error::logged in as $MAGIC_EMAIL but match.getAll returned no dog named Bella; the staging seed needs a maestro-seed.ts run"
+            exit 1
+          fi
           echo "DOG_ID=$DOG_ID" >> "$GITHUB_ENV"
 
       - name: Run extended Maestro flows (${{ matrix.shard.name }})
