@@ -1,5 +1,6 @@
 import type { MessageProps } from "./hooks/use-chat-pagination";
 
+import { useEffect } from "react";
 import { ActivityIndicator, ImageBackground, View } from "react-native";
 
 import { useLocalSearchParams } from "expo-router";
@@ -11,6 +12,7 @@ import { useUnistyles } from "react-native-unistyles";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
 import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
+import { analytics } from "@/services/analytics";
 import { Header, Message, NextDay, Send } from "@/views/Chat/components";
 
 import { HEADER_HEIGHT } from "./components/Header";
@@ -150,6 +152,16 @@ const ChatMessageList = ({ keyboardOverlap }: { keyboardOverlap: number }) => {
 
 const Chat = () => {
   const { theme } = useUnistyles();
+  const { matchId } = useLocalSearchParams();
+
+  // Chat activation is the metric this feeds: how many matches ever get opened,
+  // and how many of those ever get a message.
+  useEffect(() => {
+    analytics.track({
+      event_type: "Chat Opened",
+      event_properties: { match_id: String(matchId) },
+    });
+  }, [matchId]);
 
   // The tiled background is a texture, not a surface: it has to sit further
   // back on dark than on light to read as the same weight.

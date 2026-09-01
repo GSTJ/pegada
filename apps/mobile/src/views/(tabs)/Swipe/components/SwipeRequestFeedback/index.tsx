@@ -1,5 +1,6 @@
 import type { RootReducer } from "@/store/reducers";
 
+import { useEffect } from "react";
 import { View } from "react-native";
 
 import { router } from "expo-router";
@@ -15,6 +16,7 @@ import {
   useIsOffline,
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
+import { analytics } from "@/services/analytics";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
@@ -42,6 +44,13 @@ export const EmptyComponent = () => {
 
 const EmptyState = () => {
   const { t } = useTranslation();
+
+  // The deck running dry is the reason people stop opening the app, and today
+  // nothing records how often it happens. Mount-only: this state re-renders on
+  // every theme and locale change, and each of those is not a new empty deck.
+  useEffect(() => {
+    analytics.track({ event_type: "Empty Deck Shown" });
+  }, []);
 
   return (
     <Content>

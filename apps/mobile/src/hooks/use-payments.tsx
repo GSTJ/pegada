@@ -59,7 +59,7 @@ export const useCustomerPlan = () => {
   const customerPlan = data ? payments.getPlan(data) : undefined;
 
   useEffect(() => {
-    void identifyUser({ extra: { user_plan: customerPlan?.userPlan } });
+    void identifyUser({ plan: customerPlan?.userPlan });
   }, [customerPlan?.userPlan]);
 
   return {

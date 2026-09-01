@@ -1,6 +1,7 @@
 import * as Location from "expo-location";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 
 export enum UpdateLocationError {
@@ -58,6 +59,14 @@ export const updateUserLocation = async (newLocation?: {
   latitude: number;
 }) => {
   const { status } = await Location.requestForegroundPermissionsAsync();
+
+  // Fired on every answer, including the silent "already granted" one the OS
+  // returns without prompting — otherwise the onboarding funnel loses everyone
+  // who granted location on a previous install.
+  analytics.track({
+    event_type: "Location Permission",
+    event_properties: { status: status === "granted" ? "granted" : "denied" },
+  });
 
   if (status !== "granted") {
     throw new Error(UpdateLocationError.PermissionNotGranted);

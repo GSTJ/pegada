@@ -5,6 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 import { v4 as uuidV4 } from "uuid";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { queryClient } from "@/services/query-client";
 
@@ -117,6 +118,16 @@ export const useSendMessage = () => {
       confirmMessage(tempId, {
         ...newMessage,
         newMessage: true,
+      });
+
+      // After the mutation resolves, so an optimistic bubble that never lands
+      // is not counted as a message. The server captures its own copy.
+      analytics.track({
+        event_type: "Message Sent",
+        event_properties: {
+          has_text: content.trim().length > 0,
+          match_id: String(matchId),
+        },
       });
     } catch (error) {
       sendError(error);

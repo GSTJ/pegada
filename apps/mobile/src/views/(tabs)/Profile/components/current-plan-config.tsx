@@ -38,7 +38,10 @@ export const CurrentPlanConfig = () => {
     }
 
     if (userPlan === UserPlan.Free) {
-      return router.push(SceneName.UpgradeWall);
+      return router.push({
+        pathname: SceneName.UpgradeWall,
+        params: { trigger: "profile_plan" },
+      });
     }
 
     if (Platform.OS === "android") {

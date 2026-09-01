@@ -1,5 +1,6 @@
 import type { Swipe } from "./hooks/use-swipe-gesture";
 import type { SwipeDog } from "@/store/reducers/dogs/swipe";
+import type { SwipeKind, SwipeSource } from "@pegada/shared/analytics/events";
 
 import { useEffect } from "react";
 import * as React from "react";
@@ -16,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import FeedbackCard from "@/components/FeedbackCard";
 import { ACTION_OFFSET } from "@/constants";
+import { analytics } from "@/services/analytics";
 import { useDidMountEffect } from "@/services/utils";
 import { Actions } from "@/store/reducers";
 import { getCurrentCardId } from "@/store/selectors";
@@ -23,6 +25,17 @@ import { getCurrentCardId } from "@/store/selectors";
 import { SNAP_BACK_SPRING, useSwipeGesture } from "./hooks/use-swipe-gesture";
 
 const ROTATION_DEG = 8;
+
+/**
+ * The store speaks in the API's enum, the funnel speaks in the product's words.
+ * Translating here keeps "Swipe" readable in PostHog without renaming anything
+ * the swipe mutation depends on.
+ */
+const SWIPE_KIND: Record<Swipe, SwipeKind> = {
+  INTERESTED: "like",
+  MAYBE: "maybe",
+  NOT_INTERESTED: "pass",
+};
 
 type SwipeHandlerProps = {
   card: SwipeDog;
@@ -40,7 +53,18 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
 
   const isFirstCard = card.id === currentCardId;
 
-  const onSwipeComplete = (swipeType: Swipe) => {
+  // Every swipe in the app lands here, gesture or button, which is what makes
+  // one event per swipe possible without counting a card twice.
+  const onSwipeComplete = (swipeType: Swipe, source: SwipeSource) => {
+    analytics.track({
+      event_type: "Swipe",
+      event_properties: {
+        dog_id: card.id,
+        source,
+        swipe_type: SWIPE_KIND[swipeType],
+      },
+    });
+
     dispatch(Actions.dogs.swipe.request({ id: card.id, swipeType }));
   };
 
@@ -56,7 +80,7 @@ const SwipeHandler: React.FC<SwipeHandlerProps> = ({ card }) => {
     (swipeType: Swipe) => {
       "worklet";
 
-      gotoDirection(swipeType, { duration: 500 });
+      gotoDirection(swipeType, { duration: 500 }, "button");
     },
     [gotoDirection],
   );

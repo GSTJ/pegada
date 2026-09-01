@@ -46,6 +46,19 @@ type Preference = {
   "preferredBreedId" | "preferredColor" | "preferredSize"
 >;
 
+/**
+ * The fields the save comparison already walked, named once so the diff sent to
+ * analytics and the "did anything change" check can never disagree.
+ */
+const PREFERENCE_FIELDS = [
+  "preferredBreedId",
+  "preferredColor",
+  "preferredSize",
+  "preferredMaxDistance",
+  "preferredMinAge",
+  "preferredMaxAge",
+] as const;
+
 const schema = z
   .object({
     preferredColor: z.string().nullable().optional(),
@@ -91,9 +104,6 @@ const Preferences: React.FC = () => {
   const dispatch = useDispatch();
 
   const myDogUpdateMutation = api.myDog.update.useMutation({
-    onMutate: () => {
-      analytics.track({ event_type: "Save Preferences Pressed" });
-    },
     onSuccess: (data) => {
       dispatch(Actions.dogs.list.refetch());
       getTrcpContext().myDog.get.setData(undefined, data);
@@ -125,15 +135,24 @@ const Preferences: React.FC = () => {
       MAX_FILTER_AGE + 1,
     );
 
+    // Old and new sit side by side here, so the diff costs a comparison that
+    // was already being made. An empty deck after a filter change is the
+    // single most common way this app goes quiet, and until now nothing said
+    // which filter did it.
+    const changes = Object.fromEntries(
+      PREFERENCE_FIELDS.filter((field) => dog[field] !== body[field]).map(
+        (field) => [field, { from: dog[field], to: body[field] }],
+      ),
+    );
+    const changedFields = Object.keys(changes);
+
     // if the values are the same as dog, don't update
-    if (
-      dog.preferredBreedId !== body.preferredBreedId ||
-      dog.preferredColor !== body.preferredColor ||
-      dog.preferredSize !== body.preferredSize ||
-      dog.preferredMaxDistance !== body.preferredMaxDistance ||
-      dog.preferredMinAge !== body.preferredMinAge ||
-      dog.preferredMaxAge !== body.preferredMaxAge
-    ) {
+    if (changedFields.length > 0) {
+      analytics.track({
+        event_type: "Save Preferences Pressed",
+        event_properties: { changed_fields: changedFields, changes },
+      });
+
       await myDogUpdateMutation.mutateAsync(body);
     } else {
       // Optimistic update

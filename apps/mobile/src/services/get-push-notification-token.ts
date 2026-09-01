@@ -8,6 +8,8 @@ import { LightTheme } from "@pegada/shared/themes/themes";
 import Color from "color";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
+import { analytics } from "@/services/analytics";
+import { getLoggedUserID } from "@/services/get-logged-user-id";
 
 Notifications.setNotificationHandler({
   handleNotification: () =>
@@ -24,6 +26,15 @@ export enum NotificationTokenError {
   Denied = "Push notifications denied",
 }
 
+/**
+ * Records the standing permission state on the person, so "matched but never
+ * messaged" can be split by whether the app was ever allowed to tell them.
+ */
+const setPushPermissionPersonProperty = async (status: string) => {
+  const userId = await getLoggedUserID();
+  analytics.setPersonProperties(userId, { push_permission_status: status });
+};
+
 export const getPushNotificationToken = async () => {
   if (!Device.isDevice) return;
 
@@ -39,8 +50,24 @@ export const getPushNotificationToken = async () => {
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
   // Makes sure the user has accepted push notifications permissions
-  if (existingStatus !== "granted") {
+  if (existingStatus === "granted") {
+    await setPushPermissionPersonProperty(existingStatus);
+  } else {
     const { status: newStatus } = await Notifications.requestPermissionsAsync();
+
+    // Only the answer to a prompt we actually showed is an event. An already
+    // granted permission fires nothing — it would land on every cold start and
+    // drown the one moment the user made a decision. The standing state lives
+    // on the person record instead, set in both branches.
+    analytics.track({
+      event_type: "Push Permission",
+      event_properties: {
+        status: newStatus === "granted" ? "granted" : "denied",
+      },
+    });
+
+    await setPushPermissionPersonProperty(newStatus);
+
     if (newStatus !== "granted") {
       throw new Error(NotificationTokenError.Denied);
     }

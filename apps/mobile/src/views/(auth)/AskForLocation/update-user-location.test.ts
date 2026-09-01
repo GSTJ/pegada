@@ -19,6 +19,7 @@ const mockGetLastKnownPositionAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
 const mockReverseGeocodeAsync = jest.fn();
 const mockSendError = jest.fn();
+const mockTrack = jest.fn();
 
 jest.mock<Record<string, unknown>>("expo-location", () => ({
   Accuracy: { Low: 2 },
@@ -39,6 +40,12 @@ jest.mock<Record<string, unknown>>("@/contexts/trcp-context", () => ({
 
 jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
   sendError: (error: unknown) => mockSendError(error) as unknown,
+}));
+
+// Stubbed rather than exercised: the real module reaches PostHog through
+// `expo-updates`, which this suite has no reason to load.
+jest.mock<Record<string, unknown>>("@/services/analytics", () => ({
+  analytics: { track: (event: unknown) => mockTrack(event) as unknown },
 }));
 
 import { updateUserLocation } from "./update-user-location";
@@ -106,6 +113,12 @@ describe("updateUserLocation", () => {
       "Location permission not granted",
     );
     expect(mockMutate).not.toHaveBeenCalled();
+    // The refusal is the interesting half of the onboarding funnel, so it has
+    // to be recorded before the throw walks away with it.
+    expect(mockTrack).toHaveBeenCalledWith({
+      event_type: "Location Permission",
+      event_properties: { status: "denied" },
+    });
   });
 
   it("prefers a caller-supplied position over the device's", async () => {

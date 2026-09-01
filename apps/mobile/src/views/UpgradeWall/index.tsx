@@ -1,11 +1,12 @@
+import type { PaywallTrigger } from "@pegada/shared/analytics/events";
 import type { PurchasesPackage } from "react-native-purchases";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import { Alert, Platform, ScrollView, View } from "react-native";
 
 import { isDevice } from "expo-device";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -66,11 +67,32 @@ const useTranslatedTrialDuration = (
   }
 };
 
+const isPaywallTrigger = (value: unknown): value is PaywallTrigger =>
+  value === "like_limit" ||
+  value === "profile_plan" ||
+  value === "swipe_back" ||
+  value === "other";
+
 const UpgradeWall: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { theme } = useUnistyles();
   const router = useRouter();
   const { t } = useTranslation();
+
+  // Every caller passes its own reason (see the three `router.push` sites), so
+  // conversion can be read per entry point rather than as one blended number.
+  // "other" covers a route opened by anything that forgot to say.
+  const { trigger } = useLocalSearchParams();
+  const paywallTrigger: PaywallTrigger = isPaywallTrigger(trigger)
+    ? trigger
+    : "other";
+
+  useEffect(() => {
+    analytics.track({
+      event_type: "Paywall Viewed",
+      event_properties: { trigger: paywallTrigger },
+    });
+  }, [paywallTrigger]);
 
   const [selectedOffering, setSelectedOffering] = useState<
     PurchasesPackage | null | undefined
