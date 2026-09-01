@@ -81,12 +81,12 @@
     },
     "hero": {
       "invite": "{{article}} {{name}} quer fazer amigos",
-      "nextStep": "Baixa o app e fala com quem cuida {{pronoun}}."
+      "nextStep": "Curte {{article}} {{name}} e fala com quem cuida {{pronoun}}."
     },
     "cta": {
-      "button": "Baixar o Pegada",
-      "reassurance": "É de graça e leva menos de um minuto.",
-      "mobileContext": "Um novo amigo te espera."
+      "button": "Curtir {{article}} {{name}}",
+      "reassurance": "Você vai precisar do app. É de graça e leva um minuto.",
+      "mobileContext": "{{pronoun}} quer fazer amigos."
     },
     "og": {
       "tag": "Conheça no Pegada"

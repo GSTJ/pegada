@@ -55,12 +55,37 @@ export const getDogArticle = (dog: Dog) =>
   dog.gender === "FEMALE" ? "A" : "O";
 
 /**
- * pt-BR "quem cuida dela" / "quem cuida dele" needs a gendered object
- * pronoun that English has no use for. Keyed off the required `gender`
- * column, same as `getDogArticle`.
+ * Same article as `getDogArticle`, lowercased for mid-sentence use ("Curtir
+ * a Bella") where the sentence-initial capital would be wrong.
  */
-export const getDogPronoun = (dog: Dog) =>
-  dog.gender === "FEMALE" ? "dela" : "dele";
+export const getDogArticleLowercase = (dog: Dog) =>
+  getDogArticle(dog).toLowerCase();
+
+/**
+ * "quem cuida dela" / "quem cuida dele" (pt-BR) and "looks after her" /
+ * "looks after him" (English) both need a gendered object pronoun, keyed
+ * off the required `gender` column.
+ */
+export const getDogPronoun = (dog: Dog, lng: string) => {
+  const isPtBr = lng.toLowerCase().startsWith("pt");
+
+  if (isPtBr) return dog.gender === "FEMALE" ? "dela" : "dele";
+
+  return dog.gender === "FEMALE" ? "her" : "him";
+};
+
+/**
+ * "Ela quer fazer amigos" / "Ele quer fazer amigos" (pt-BR) and "She wants"
+ * / "He wants" (English): a sentence-initial subject pronoun, so it comes
+ * back capitalized. Keyed off the required `gender` column.
+ */
+export const getDogSubjectPronoun = (dog: Dog, lng: string) => {
+  const isPtBr = lng.toLowerCase().startsWith("pt");
+
+  if (isPtBr) return dog.gender === "FEMALE" ? "Ela" : "Ele";
+
+  return dog.gender === "FEMALE" ? "She" : "He";
+};
 
 /** "Golden Retriever • 2 anos" — skips whichever half is missing. */
 export const getDogTagline = (dog: Dog, lng: string) => {

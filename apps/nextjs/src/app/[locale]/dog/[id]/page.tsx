@@ -14,9 +14,11 @@ import { gilroy } from "./fonts";
 import {
   getDog,
   getDogArticle,
+  getDogArticleLowercase,
   getDogDescription,
   getDogImage,
   getDogPronoun,
+  getDogSubjectPronoun,
   getDogTagline,
 } from "./get-dog";
 
@@ -66,7 +68,18 @@ const DogProfile = async ({ params }: DogProfileProps) => {
     name: dog.name,
     article: getDogArticle(dog),
   });
-  const nextStep = t("dog.hero.nextStep", { pronoun: getDogPronoun(dog) });
+  const nextStep = t("dog.hero.nextStep", {
+    name: dog.name,
+    article: getDogArticleLowercase(dog),
+    pronoun: getDogPronoun(dog, lng),
+  });
+  const ctaButton = t("dog.cta.button", {
+    name: dog.name,
+    article: getDogArticleLowercase(dog),
+  });
+  const mobileContext = t("dog.cta.mobileContext", {
+    pronoun: getDogSubjectPronoun(dog, lng),
+  });
 
   return (
     <div
@@ -174,7 +187,7 @@ const DogProfile = async ({ params }: DogProfileProps) => {
               href="/store"
               className="rounded-full bg-primary px-8 py-4 font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
-              {t("dog.cta.button")}
+              {ctaButton}
             </a>
             <p className="text-sm font-light text-subtitle/80">
               {t("dog.cta.reassurance")}
@@ -186,14 +199,14 @@ const DogProfile = async ({ params }: DogProfileProps) => {
       {/* Mobile sticky CTA bar. `main`'s bottom padding above reserves room for it so it never covers the card. */}
       <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 border-t border-border bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_30px_-15px_rgba(15,23,42,0.2)] backdrop-blur md:hidden">
         <p className="flex-1 truncate text-sm font-medium text-text">
-          {t("dog.cta.mobileContext")}
+          {mobileContext}
         </p>
         {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
         <a
           href="/store"
           className="shrink-0 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
-          {t("dog.cta.button")}
+          {ctaButton}
         </a>
       </div>
     </div>

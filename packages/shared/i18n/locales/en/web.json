@@ -81,12 +81,12 @@
     },
     "hero": {
       "invite": "{{name}} wants to make friends",
-      "nextStep": "Download the app to chat with the person who looks after them."
+      "nextStep": "Like {{name}} and chat with the person who looks after {{pronoun}}."
     },
     "cta": {
-      "button": "Get Pegada",
-      "reassurance": "It's free and takes less than a minute.",
-      "mobileContext": "A new friend is waiting."
+      "button": "Like {{name}}",
+      "reassurance": "You'll need the app. It's free and takes a minute.",
+      "mobileContext": "{{pronoun}} wants to make friends."
     },
     "og": {
       "tag": "Meet them on Pegada"
