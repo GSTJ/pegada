@@ -74,6 +74,20 @@
       }
     }
   },
+  "dog": {
+    "metadata": {
+      "title": "{{name}} | Pegada",
+      "descriptionSuffix": "Meet {{name}} and other dogs near you on Pegada."
+    },
+    "cta": {
+      "title": "Get Pegada",
+      "description": "Find friends for your dog nearby.",
+      "button": "Download the app"
+    },
+    "og": {
+      "tag": "meet them on Pegada"
+    }
+  },
   "privacyPolicy": {
     "metadata": {
       "title": "Pegada | Privacy Policy"

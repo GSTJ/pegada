@@ -75,6 +75,20 @@
       }
     }
   },
+  "dog": {
+    "metadata": {
+      "title": "{{name}} | Pegada",
+      "descriptionSuffix": "Conheça {{name}} e outros cachorros perto de você no Pegada."
+    },
+    "cta": {
+      "title": "Baixe o Pegada",
+      "description": "Faça amigos pro seu cachorro perto de casa.",
+      "button": "Baixar o app"
+    },
+    "og": {
+      "tag": "conheça no Pegada"
+    }
+  },
   "privacyPolicy": {
     "metadata": {
       "title": "Pegada | Política de Privacidade"

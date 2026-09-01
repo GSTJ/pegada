@@ -1,16 +1,17 @@
 import type { BreedSlug } from "@pegada/shared/i18n/i18n";
+import type { Metadata } from "next";
 
 import { preload } from "react-dom";
 
 import { notFound } from "next/navigation";
 
-import prisma from "@pegada/database";
 import { Namespace } from "@pegada/shared/i18n/types/types";
-import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { getFormattedYears } from "@pegada/shared/utils/get-formatted-years";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
+
+import { getDog, getDogDescription, getDogImage } from "./get-dog";
 
 type DogProfileProps = {
   params: Promise<{
@@ -18,44 +19,41 @@ type DogProfileProps = {
   }>;
 };
 
-export const metadata = {
-  robots: { index: false, follow: false },
+export const generateMetadata = async ({
+  params,
+}: DogProfileProps): Promise<Metadata> => {
+  const { id } = await params;
+  const dog = await getDog(id);
+
+  // Never indexed either way — this is a share card, not a landing page —
+  // but a missing dog still needs a title/description that isn't "undefined".
+  if (!dog) {
+    return { robots: { index: false, follow: false } };
+  }
+
+  const lng = getSafeLocale();
+  const title = t("dog.metadata.title", { name: dog.name });
+  const description = getDogDescription(dog, lng);
+
+  return {
+    title,
+    description,
+    robots: { index: false, follow: false },
+    openGraph: { title, description, type: "profile" },
+    twitter: { card: "summary_large_image" },
+  };
 };
 
 const DogProfile = async ({ params }: DogProfileProps) => {
   const { id } = await params;
-  const dog = await prisma.dog.findFirst({
-    where: {
-      id,
-      banned: false,
-      deletedAt: null,
-      images: {
-        some: { status: IMAGE_STATUS.APPROVED },
-        none: { status: IMAGE_STATUS.REJECTED },
-      },
-    },
-    select: {
-      name: true,
-      bio: true,
-      birthDate: true,
-      breed: { select: { name: true, slug: true } },
-      images: {
-        where: { status: IMAGE_STATUS.APPROVED },
-        orderBy: { position: "asc" },
-        take: 1,
-        select: { url: true },
-      },
-    },
-  });
-
+  const dog = await getDog(id);
   const lng = getSafeLocale();
 
   if (!dog) {
     return notFound();
   }
 
-  const [firstImage] = dog.images;
-  const dogImage = firstImage?.url;
+  const dogImage = getDogImage(dog);
 
   // This photo is the page: it is the LCP element on every /dog/[id] view, and
   // it is a CSS `background-image`, which the browser's preload scanner cannot
@@ -75,7 +73,7 @@ const DogProfile = async ({ params }: DogProfileProps) => {
   const dogImageStyle = { backgroundImage: `url(${dogImage})` };
 
   return (
-    <div className="pt-8 space-y-8 flex flex-1 flex-col px-4 items-center pb-4 h-[100vh]">
+    <div className="pt-8 pb-12 space-y-8 flex flex-1 flex-col px-4 items-center min-h-screen">
       {/* oxlint-disable-next-line nextjs/no-img-element -- A static SVG needs no next/image pipeline. */}
       <img
         src="/logo.svg"
@@ -84,7 +82,7 @@ const DogProfile = async ({ params }: DogProfileProps) => {
         className="h-12 select-none"
       />
 
-      <div className="relative rounded-lg border border-border flex flex-col overflow-hidden flex-1 w-full max-w-xl">
+      <div className="relative rounded-lg border border-border flex flex-col overflow-hidden w-full max-w-xl aspect-[4/5]">
         <div style={dogImageStyle} className="flex flex-1 bg-cover bg-center">
           {Boolean(dog.breed?.name) && (
             <div className="border border-border/70 rounded-md p-2 py-1 m-4 bg-background/50 backdrop-blur ml-auto mb-auto font-semibold">
@@ -101,6 +99,20 @@ const DogProfile = async ({ params }: DogProfileProps) => {
           </p>
           <p>{dog.bio}</p>
         </div>
+      </div>
+
+      <div className="w-full max-w-xl bg-secondary rounded-lg border border-border/70 flex flex-col items-center gap-4 p-8 text-center">
+        <h2 className="text-3xl font-extrabold text-text">
+          {t("dog.cta.title")}
+        </h2>
+        <p className="text-subtitle">{t("dog.cta.description")}</p>
+        {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
+        <a
+          href="/store"
+          className="bg-primary text-white font-semibold rounded-full px-8 py-4 hover:scale-105 transition-transform duration-200 ease-in-out"
+        >
+          {t("dog.cta.button")}
+        </a>
       </div>
     </div>
   );
