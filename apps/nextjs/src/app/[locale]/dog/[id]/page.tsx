@@ -41,7 +41,7 @@ export const generateMetadata = async ({
   }
 
   const lng = getSafeLocale();
-  const title = t("dog.metadata.title", { name: dog.name });
+  const title = t("dog.metadata.title", { name: dog.name, lng });
   const description = getDogDescription(dog, lng);
 
   return {
