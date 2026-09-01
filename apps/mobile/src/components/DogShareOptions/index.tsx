@@ -26,9 +26,14 @@ import {
   shareDogLink,
   shareDogStory,
 } from "./share-actions";
-import { DogStoryCard } from "./story-card";
+import { DogStoryCard, STORY_SETTLE_TIMEOUT_MS } from "./story-card";
 import { CARD_HEIGHT, CARD_WIDTH } from "./story-card-styles";
 import { styles } from "./styles";
+
+// Margin on top of the card's own settle timeout so this wait can never
+// time out before `onPhotoSettled` has had a chance to fire — otherwise a
+// slow network would make the capture race a card that hasn't given up yet.
+const PHOTO_WAIT_MARGIN_MS = 500;
 
 type SvgIconProps = { width: number; height: number; fill: string };
 
@@ -118,7 +123,9 @@ const DogShareSheetContent = ({ dog }: { dog: ShareableDog }) => {
     photoWaitersRef.current = [];
   };
 
-  const waitForPhoto = (timeoutMs = 3000) =>
+  const waitForPhoto = (
+    timeoutMs = STORY_SETTLE_TIMEOUT_MS + PHOTO_WAIT_MARGIN_MS,
+  ) =>
     new Promise<void>((resolve) => {
       if (photoReadyRef.current) {
         resolve();

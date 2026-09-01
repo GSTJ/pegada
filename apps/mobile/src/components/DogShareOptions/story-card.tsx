@@ -24,8 +24,11 @@ import {
 } from "./story/variants";
 
 /** How long to wait for photos before capturing anyway — a slow network
- * shouldn't hang the share sheet forever. */
-const SETTLE_TIMEOUT_MS = 4000;
+ * shouldn't hang the share sheet forever. Exported so `index.tsx`'s
+ * `waitForPhoto` can wait at least this long before giving up itself; it
+ * would be pointless for the sheet to abandon the wait before the card's
+ * own timeout has even had a chance to fire `onPhotoSettled`. */
+export const STORY_SETTLE_TIMEOUT_MS = 4000;
 
 type DogStoryCardProps = {
   dog: ShareableDog;
@@ -41,8 +44,8 @@ type DogStoryCardProps = {
    * loaded, failed, or (for a dog with fewer photos than the variant
    * wants) never had a URL to begin with — so the sheet knows when it is
    * safe to capture instead of racing a still-loading network image. Also
-   * fires after `SETTLE_TIMEOUT_MS` regardless, so a slow network can't
-   * hang the share sheet forever.
+   * fires after `STORY_SETTLE_TIMEOUT_MS` regardless, so a slow network
+   * can't hang the share sheet forever.
    */
   onPhotoSettled?: () => void;
 };
@@ -104,7 +107,7 @@ export const DogStoryCard = forwardRef<
   }, [dog.id, variant]);
 
   useEffect(() => {
-    const timer = setTimeout(fireSettled, SETTLE_TIMEOUT_MS);
+    const timer = setTimeout(fireSettled, STORY_SETTLE_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [fireSettled]);
 
