@@ -5,12 +5,13 @@ import type { ShareableDog } from "../types";
 export type StoryPhoto = ShareableDog["images"][number];
 
 /**
- * Props every story variant receives. `images` is always exactly as long as
- * that variant declared it needs via `maxPhotos` in `../variants.ts` — see
- * `buildImageSlots` in `../story-card.tsx` — with `undefined` standing in
- * for a slot the dog doesn't have a photo for, so a variant can always map
- * over it and let `PhotoOrFallback` render the branded placeholder for the
- * gaps instead of branching on length itself.
+ * Props every story variant receives. `images` is built in `../story-card.tsx`
+ * as `Math.max(1, Math.min(dog.images.length, maxPhotos))` slots — at most
+ * the variant's `maxPhotos` (`../variants.ts`), never zero even for a dog
+ * with no photos — with `undefined` standing in for a slot the dog doesn't
+ * have a photo for, so a variant can always map over it and let
+ * `PhotoOrFallback` render the branded placeholder for the gaps instead of
+ * branching on length itself.
  */
 export type StoryVariantProps = {
   dog: ShareableDog;
