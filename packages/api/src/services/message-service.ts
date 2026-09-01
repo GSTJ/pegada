@@ -1,7 +1,9 @@
 import type { Language } from "@pegada/shared/i18n/types/types";
 
 import prisma from "@pegada/database";
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 
+import { captureEvent } from "../shared/analytics";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
 
@@ -76,6 +78,8 @@ class MessageService {
         sender: {
           select: {
             name: true,
+            // Message.senderId is a Dog id; PostHog needs the person behind it.
+            user: { select: { id: true } },
           },
         },
         receiver: {
@@ -90,6 +94,14 @@ class MessageService {
           },
         },
       },
+    });
+
+    // The server's own copy of the app's "Message Sent". The app's can be lost
+    // to a killed process between the mutation resolving and the event
+    // flushing; this one cannot, which is what makes chat activation countable.
+    captureEvent(newMessage.sender.user.id, ANALYTICS_EVENTS.MESSAGE_SENT, {
+      match_id: matchId,
+      message_type: "text",
     });
 
     const otherDog = newMessage.receiver;

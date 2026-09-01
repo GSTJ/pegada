@@ -2,10 +2,12 @@ import type { Language } from "@pegada/shared/i18n/types/types";
 import type { Prisma } from "@prisma/client";
 
 import prisma from "@pegada/database";
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 
 import { dogSelect } from "../dtos/dog-dto";
 import { sendError } from "../errors/errors";
+import { captureEvent, secondsBetween } from "../shared/analytics";
 import { transformDistanceBetweenUserAndDog } from "../shared/dog-distance";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
@@ -44,7 +46,7 @@ class MatchService {
         sendError("Duplicate active matches were closed");
       }
 
-      return { match: existingMatch, notification: null };
+      return { match: existingMatch, notification: null, created: false };
     }
 
     const match = await db.match.create({
@@ -85,7 +87,54 @@ class MatchService {
         }
       : null;
 
-    return { match: { id: match.id }, notification };
+    // `created` tells a first match apart from the caller re-finding one that
+    // already existed. Both return a match; only one of them is an event.
+    return { match: { id: match.id }, notification, created: true };
+  }
+
+  /**
+   * Records a new match against both people, one capture each.
+   *
+   * PostHog attributes an event to a single person, and a match belongs to two.
+   * Sent twice, from each side's point of view, so "matched" is a step both
+   * users' funnels can contain — a single event would make the responder look
+   * like someone who never matched.
+   *
+   * `seconds_since_signup` is what turns this into a cohort answer: how long a
+   * new user waits for their first match is the number that decides whether
+   * they come back.
+   */
+  static async captureMatchCreated({
+    matchId,
+    requesterDogId,
+    responderDogId,
+  }: {
+    matchId: string;
+    requesterDogId: string;
+    responderDogId: string;
+  }) {
+    try {
+      const dogs = await prisma.dog.findMany({
+        where: { id: { in: [requesterDogId, responderDogId] } },
+        select: { id: true, user: { select: { id: true, createdAt: true } } },
+      });
+
+      const now = new Date();
+
+      const pairs = dogs
+        .map((dog) => ({ dog, other: dogs.find(({ id }) => id !== dog.id) }))
+        .filter((pair) => Boolean(pair.other));
+
+      for (const { dog, other } of pairs) {
+        captureEvent(dog.user.id, ANALYTICS_EVENTS.MATCH_CREATED, {
+          match_id: matchId,
+          other_user_id: other?.user.id ?? "",
+          seconds_since_signup: secondsBetween(dog.user.createdAt, now),
+        });
+      }
+    } catch (error) {
+      sendError(error);
+    }
   }
 
   async sendMatchNotification(

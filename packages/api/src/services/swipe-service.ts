@@ -217,6 +217,7 @@ export class SwipeService {
           return {
             interest,
             match: null,
+            matchCreated: false,
             matchNotification: null,
             sendLikeNotification: false,
           };
@@ -232,12 +233,13 @@ export class SwipeService {
           return {
             interest,
             match: null,
+            matchCreated: false,
             matchNotification: null,
             sendLikeNotification: canSendNotifications,
           };
         }
 
-        const { match, notification } = await matchService.createMatch(
+        const { match, notification, created } = await matchService.createMatch(
           requester.id,
           responderId,
           tx,
@@ -246,12 +248,24 @@ export class SwipeService {
         return {
           interest,
           match,
+          matchCreated: created,
           matchNotification: notification,
           sendLikeNotification: false,
         };
       },
       { timeout: 10_000 },
     );
+
+    // After the commit and outside the transaction: the extra lookup this needs
+    // must not hold the advisory locks open, and a telemetry problem must not
+    // roll back a match. `void` because the swipe response does not wait on it.
+    if (result.matchCreated && result.match) {
+      void MatchService.captureMatchCreated({
+        matchId: result.match.id,
+        requesterDogId: requester.id,
+        responderDogId: responderId,
+      });
+    }
 
     if (result.matchNotification) {
       await matchService.sendMatchNotification(result.matchNotification);
