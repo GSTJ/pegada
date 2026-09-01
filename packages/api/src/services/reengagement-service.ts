@@ -67,7 +67,7 @@ const MAX_PUSHES_PER_RUN = 200;
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-type Candidate = {
+export type Candidate = {
   kind: ReengagementKind;
   userId: string;
   pushToken: string;

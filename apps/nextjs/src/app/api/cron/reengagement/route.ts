@@ -9,6 +9,13 @@ import { isAuthorizedCronRequest } from "@pegada/api/shared/cron-auth";
  * local time window, since 18:00 happens at twelve different UTC hours across
  * the timezones the app has users in. The service decides who is actually due.
  */
+/**
+ * Each send is a database write plus a queue publish, and the run does them in
+ * sequence so the per-user daily cap cannot be raced. At the cap of 200 pushes
+ * that is comfortably inside a minute and nowhere near the default budget.
+ */
+export const maxDuration = 60;
+
 export const GET = async (request: NextRequest) => {
   if (!isAuthorizedCronRequest(request.headers.get("authorization"))) {
     return new Response(null, { status: 401 });
