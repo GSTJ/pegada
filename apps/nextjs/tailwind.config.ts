@@ -11,6 +11,7 @@ module.exports = {
     fontFamily: {
       epilogue: "var(--font-epilogue)",
       atkinson: "var(--font-atkinson)",
+      gilroy: "var(--font-gilroy)",
     },
     colors: {
       ...DefaultTheme.colors,

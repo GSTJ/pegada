@@ -8,7 +8,9 @@ import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
+import { cn } from "@/lib/utils";
 
+import { gilroy } from "./fonts";
 import {
   getDog,
   getDogArticle,
@@ -67,7 +69,12 @@ const DogProfile = async ({ params }: DogProfileProps) => {
   const nextStep = t("dog.hero.nextStep", { pronoun: getDogPronoun(dog) });
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#FFF9FB]">
+    <div
+      className={cn(
+        gilroy.variable,
+        "relative flex min-h-screen flex-col overflow-hidden bg-[#FFF9FB] font-gilroy",
+      )}
+    >
       {/*
        * The only decoration on the page: a soft echo of the brand gradient
        * (see public/logo.svg) blooming behind the card. Everything else here
@@ -127,8 +134,16 @@ const DogProfile = async ({ params }: DogProfileProps) => {
             )}
 
             {Boolean(dog.breed?.name) && (
-              <div className="absolute right-4 top-4 rounded-full bg-black/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur">
-                {t(`${dog.breed?.slug as BreedSlug}`, { ns: Namespace.Breed })}
+              // Mirrors the app's own breed tag (`breed-tag.tsx` +
+              // `Glassmorphism`): a frosted, bordered pill, not an uppercase
+              // dark badge — same casing, same md radius, same light glass
+              // tint the app uses over photos.
+              <div className="absolute right-4 top-4 flex h-8 items-center rounded-xl border border-white/30 bg-white/20 px-3 leading-none text-white backdrop-blur-md">
+                <span className="text-sm font-medium">
+                  {t(`${dog.breed?.slug as BreedSlug}`, {
+                    ns: Namespace.Breed,
+                  })}
+                </span>
               </div>
             )}
 
