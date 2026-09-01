@@ -105,6 +105,13 @@ export class UserService {
     });
   }
 
+  /**
+   * Returns the Prisma promise rather than awaiting it, because
+   * `payment-service` hands the result straight to `$transaction`, which only
+   * accepts `PrismaPromise`. The row it resolves to is the whole user record,
+   * so anything returning it to a client has to narrow it first. See
+   * `userRouter.update`.
+   */
   static updateUserById(
     id: string,
     data: Partial<Omit<User, "email" | "id" | "createdAt">>,
