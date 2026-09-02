@@ -48,7 +48,7 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^10.5.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.1.0",
     "@types/semver": "^7.7.1",
