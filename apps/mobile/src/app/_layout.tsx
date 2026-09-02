@@ -24,6 +24,7 @@ import { sendError } from "@/services/error-tracking";
 import { useGetInitialNotifications } from "@/services/linking";
 import { getExpoPostHog } from "@/services/observability";
 import { useQuickActions } from "@/services/quick-actions";
+import { useCaptureReferral } from "@/services/referral";
 import { store } from "@/store";
 import { SceneName } from "@/types/scene-name";
 
@@ -75,6 +76,10 @@ const App = () => {
 
   useTrackScreens();
   useGetInitialNotifications();
+  // Ahead of the auth gate on purpose: the link that carries a referral is
+  // usually opened by someone with no account, and the referral has to be on
+  // disk before they reach the sign in screen.
+  useCaptureReferral();
   // Wait for authentication and onboarding before following a shortcut.
   useQuickActions(initialRouteName === SceneName.Swipe);
 

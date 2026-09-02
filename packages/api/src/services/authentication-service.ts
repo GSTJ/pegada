@@ -11,6 +11,13 @@ import {
 import { enqueue } from "../queue/enqueue";
 import { TOPICS } from "../queue/topics";
 import { config, isMagicEmail } from "../shared/config";
+import {
+  attributionColumns,
+  attributionForNewAccount,
+  trackSignupAttributed,
+  type ReferralInput,
+  type ReferralPlatform,
+} from "./referral-attribution";
 
 /**
  * Compile `APPLE_MAGIC_EMAIL_REGEX` once at module load. Re-thrown invalid
@@ -88,9 +95,19 @@ export class AuthenticationService {
     this.language = props.language;
   }
 
-  async login({ email, code }: { email: string; code?: string }) {
+  async login({
+    email,
+    code,
+    referral,
+    platform,
+  }: {
+    email: string;
+    code?: string;
+    referral?: ReferralInput;
+    platform?: ReferralPlatform;
+  }) {
     if (!code) {
-      await this.sendVerification(email);
+      await this.sendVerification(email, { referral, platform });
       throw new OTPRequiredError();
     }
 
@@ -110,13 +127,24 @@ export class AuthenticationService {
       await purgeUserByEmail(email);
     }
 
+    // Reached only when the email has no row yet, which for a real address
+    // means the OTP was issued by a magic bypass rather than by
+    // `sendVerification`'s upsert below. Both entry points attribute the same
+    // way so it does not matter which one got there first.
+    const attribution = await attributionForNewAccount({ email, referral });
+
     const user = await prisma.user.upsert({
       where: { email },
       update: { deletedAt: null },
       create: {
         email,
+        ...(attribution ? attributionColumns(attribution) : {}),
       },
     });
+
+    if (attribution) {
+      trackSignupAttributed({ userId: user.id, attribution, platform });
+    }
 
     return user;
   }
@@ -125,7 +153,16 @@ export class AuthenticationService {
     return randomInt(0, 1_000_000).toString().padStart(6, "0");
   }
 
-  async sendVerification(email: string) {
+  /**
+   * `referral` is threaded through here rather than only into `login` because
+   * this is where a new account's row is actually born: asking for a code
+   * upserts the User, so by the time the code comes back the row exists and
+   * the create-only attribution columns would never be written.
+   */
+  async sendVerification(
+    email: string,
+    options?: { referral?: ReferralInput; platform?: ReferralPlatform },
+  ) {
     // Magic emails bypass real OTP delivery. APPLE_MAGIC_EMAIL accepts a
     // comma-separated list (see config.ts) so destructive E2E flows can use
     // a dedicated disposable account without nuking the primary review user.
@@ -144,11 +181,29 @@ export class AuthenticationService {
     const oneHour = 60 * 60 * 1000;
     const expiresAt = new Date(Date.now() + oneHour);
 
-    await prisma.user.upsert({
+    const attribution = await attributionForNewAccount({
+      email,
+      referral: options?.referral,
+    });
+
+    const user = await prisma.user.upsert({
       where: { email },
       update: { code, codeExpiresAt: expiresAt },
-      create: { email, code, codeExpiresAt: expiresAt },
+      create: {
+        email,
+        code,
+        codeExpiresAt: expiresAt,
+        ...(attribution ? attributionColumns(attribution) : {}),
+      },
     });
+
+    if (attribution) {
+      trackSignupAttributed({
+        userId: user.id,
+        attribution,
+        platform: options?.platform,
+      });
+    }
 
     // `fallbackInline` because this is the one job a user is actively waiting
     // on: the code row is already written, so a failed publish means a login

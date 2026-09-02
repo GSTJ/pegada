@@ -78,6 +78,21 @@ const nextConfig = {
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+
+  /**
+   * `/store` is a route handler, and the middleware's matcher excludes it from
+   * next-intl, so it never gets a locale prefix. A visitor who copies
+   * `/pt-br/store` out of somewhere would otherwise get a 404 on the one link
+   * that is printed in an Instagram bio. Query strings are preserved by
+   * default, which is what keeps `?ref=` alive across the hop.
+   */
+  redirects: () => [
+    {
+      source: "/:locale(en-us|pt-br)/store",
+      destination: "/store",
+      permanent: false,
+    },
+  ],
 };
 
 const withMDX = createMDX({
