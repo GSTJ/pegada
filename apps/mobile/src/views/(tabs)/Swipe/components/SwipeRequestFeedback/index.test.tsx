@@ -28,6 +28,7 @@ type RequestState = {
 let mockRequest: RequestState = { loading: false, error: false, data: [] };
 let mockLastCardId: string | undefined;
 let mockOffline = false;
+let mockAlertRequestedAt: Date | undefined;
 
 // The two buttons this screen already owned both talk to the API, and the
 // real client reaches `expo-constants`, which ships untransformed ESM.
@@ -37,7 +38,12 @@ jest.mock<Record<string, unknown>>("@/contexts/trpc-provider", () => ({
       requestNewDogsAlert: {
         useMutation: () => ({ mutateAsync: () => Promise.resolve() }),
       },
-      me: { useQuery: () => ({ data: undefined, isPending: false }) },
+      me: {
+        useQuery: () => ({
+          data: { newDogsAlertRequestedAt: mockAlertRequestedAt },
+          isPending: false,
+        }),
+      },
     },
   },
 }));
@@ -66,10 +72,13 @@ jest.mock<Record<string, unknown>>("./styles", () => {
   return {
     styles: {
       container: {},
+      scroll: {},
       emptyAnimation: {},
       logoLoading: {},
       title: {},
       description: {},
+      notifyDone: {},
+      notifyDoneText: {},
     },
     Container: passthrough("div"),
     Content: passthrough("div"),
@@ -77,6 +86,8 @@ jest.mock<Record<string, unknown>>("./styles", () => {
     LogoLoading: passthrough("div"),
     Title: passthrough("span"),
     Description: passthrough("span"),
+    DoneCheck: () => createElement("svg", null),
+    DoneLabel: passthrough("span"),
   };
 });
 
@@ -184,6 +195,21 @@ beforeEach(() => {
   mockRequest = { loading: false, error: false, data: [] };
   mockLastCardId = undefined;
   mockOffline = false;
+  mockAlertRequestedAt = undefined;
+});
+
+test("drops the button chrome once the notify opt-in has been taken", () => {
+  mockAlertRequestedAt = new Date();
+
+  const html = renderToStaticMarkup(<SwipeRequestFeedback deckIsEmpty />);
+  const done = "swipeRequestFeedback.notifyNewDogsDone";
+
+  // A disabled button paints its label at half opacity, which put this at
+  // 1.7:1 on the light background with nothing saying why it would not
+  // respond. There is nothing to press any more, so it is not a button.
+  expect(html).toContain(done);
+  expect(html).not.toContain(`<button type="button">${done}`);
+  expect(html).not.toContain("swipeRequestFeedback.notifyNewDogsButton");
 });
 
 test("renders the share prompt when the deck came back with nobody on it", () => {

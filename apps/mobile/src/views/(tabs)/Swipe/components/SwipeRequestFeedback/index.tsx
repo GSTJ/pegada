@@ -41,6 +41,8 @@ import {
 } from "./new-dogs-alert";
 import {
   Description,
+  DoneCheck,
+  DoneLabel,
   EmptyAnimation,
   LogoLoading,
   Title,
@@ -133,19 +135,36 @@ const NotifyNewDogsButton = () => {
     }
   };
 
+  // Once the opt-in is taken there is nothing left to press, so it stops being
+  // a button. It used to stay one and go disabled, which paints the whole
+  // control at half opacity: pale pink on white, 1.7:1, and no sign of why it
+  // would not respond. A check and a full contrast label say the same thing
+  // and read as an answer rather than a dead control.
+  if (requested) {
+    return (
+      <View style={styles.notifyDone}>
+        <DoneCheck width={16} height={15} />
+        <DoneLabel
+          fontSize="lg"
+          fontWeight="bold"
+          style={styles.notifyDoneText}
+        >
+          {t("swipeRequestFeedback.notifyNewDogsDone")}
+        </DoneLabel>
+      </View>
+    );
+  }
+
   return (
     <Button
       // On a fresh install the answer is only on the server, so the button
       // stays out of reach until it arrives. Offering it in that window lets
       // someone who already opted in tap a second time.
-      disabled={requested || me.isPending}
+      disabled={me.isPending}
       loading={loading}
       onPress={() => void handlePress()}
-      variant={requested ? "outline" : "default"}
     >
-      {requested
-        ? t("swipeRequestFeedback.notifyNewDogsDone")
-        : t("swipeRequestFeedback.notifyNewDogsButton")}
+      {t("swipeRequestFeedback.notifyNewDogsButton")}
     </Button>
   );
 };
@@ -188,46 +207,51 @@ const EmptyState = () => {
   const { t } = useTranslation();
 
   return (
-    <Content>
-      <View>
-        <LogoLoading
-          style={styles.logoLoading}
-          autoPlay
-          source={require("@/assets/animations/loadingLogo.json")}
-          speed={0.5}
-        />
-        <Animated.View entering={FadeInDown} exiting={FadeOutDown}>
-          <Title fontWeight="bold" style={styles.title}>
-            {t("swipeRequestFeedback.emptyTitle")}
-          </Title>
-          <Description fontSize="xs" style={styles.description}>
-            {t("swipeRequestFeedback.emptyDescription")}
-          </Description>
-          <View style={styles.actions}>
-            <NotifyNewDogsButton />
-            <InviteFriendButton />
-            {/*
-              Sits below the two actions rather than above them: those two are
-              what this screen was built to offer, and the share ask is the
-              third thing to try, not the headline. The card owns the gap
-              between itself and the preferences link below.
+    // The column runs past the fold on a short phone, and the last thing in it
+    // is the preferences button the copy points at. Scrolling is the safety
+    // net: `Content` still centres the column whenever it fits.
+    <Container style={styles.scroll}>
+      <Content>
+        <View>
+          <LogoLoading
+            style={styles.logoLoading}
+            autoPlay
+            source={require("@/assets/animations/loadingLogo.json")}
+            speed={0.5}
+          />
+          <Animated.View entering={FadeInDown} exiting={FadeOutDown}>
+            <Title fontWeight="bold" style={styles.title}>
+              {t("swipeRequestFeedback.emptyTitle")}
+            </Title>
+            <Description fontSize="xs" style={styles.description}>
+              {t("swipeRequestFeedback.emptyDescription")}
+            </Description>
+            <View style={styles.actions}>
+              <NotifyNewDogsButton />
+              <InviteFriendButton />
+              {/*
+                Sits below the two actions rather than above them: those two are
+                what this screen was built to offer, and the share ask is the
+                third thing to try, not the headline. The card owns the gap
+                between itself and the preferences link below.
 
-              No render gate of its own. The whole component already returns
-              null unless the deck is empty, and the card waits for the dog
-              before it paints, so `Share Prompt Shown` cannot fire for a
-              prompt nobody saw.
-            */}
-            <SharePromptCard placement="empty_deck" />
-            <Button
-              onPress={() => router.push(SceneName.Preferences)}
-              variant="outline"
-            >
-              {t("swipeRequestFeedback.preferencesButton")}
-            </Button>
-          </View>
-        </Animated.View>
-      </View>
-    </Content>
+                No render gate of its own. The whole component already returns
+                null unless the deck is empty, and the card waits for the dog
+                before it paints, so `Share Prompt Shown` cannot fire for a
+                prompt nobody saw.
+              */}
+              <SharePromptCard placement="empty_deck" />
+              <Button
+                onPress={() => router.push(SceneName.Preferences)}
+                variant="outline"
+              >
+                {t("swipeRequestFeedback.preferencesButton")}
+              </Button>
+            </View>
+          </Animated.View>
+        </View>
+      </Content>
+    </Container>
   );
 };
 
