@@ -73,7 +73,18 @@ const FALLBACK_OFFSET_HOURS = -3;
 const FALLBACK_SEND_HOURS = new Set([18, 19]);
 
 /** One re-engagement push per user per rolling day. */
-const USER_COOLDOWN_HOURS = 24;
+/**
+ * One re-engagement push per user per day.
+ *
+ * 23 hours rather than 24, and strictly greater than rather than inclusive,
+ * because the job runs hourly and the cap is measured against the previous
+ * send. At exactly 24 a user nudged at 19:00 is still inside the window at
+ * 18:00 the next day, so their slot slides an hour later each time until it
+ * falls out of the evening entirely and they end up on every other day. The
+ * hour of slack absorbs that without ever allowing two sends in a calendar
+ * day, since the earliest either can land is 09:00 local.
+ */
+const USER_COOLDOWN_HOURS = 23;
 
 /** Bounds one invocation so a backlog cannot outrun the function budget. */
 const MAX_CANDIDATES_PER_QUERY = 500;
@@ -682,7 +693,7 @@ export class ReengagementService {
       where: {
         userId: { in: due.map(([userId]) => userId) },
         sentAt: {
-          gte: new Date(now.getTime() - USER_COOLDOWN_HOURS * HOUR_MS),
+          gt: new Date(now.getTime() - USER_COOLDOWN_HOURS * HOUR_MS),
         },
       },
       select: { userId: true },

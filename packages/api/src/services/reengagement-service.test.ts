@@ -535,6 +535,44 @@ describe("ReengagementService.run", () => {
     expect(requester.id).not.toBe(responder.id);
   });
 
+  it("does not let the daily cap drift out of the evening slot", async () => {
+    // 18:00 in Sao Paulo, the first of the two fallback hours.
+    const eveningSlot = new Date("2026-09-01T21:00:00.000Z");
+    const { requester } = await seedSilentMatch(25, eveningSlot);
+
+    // No coordinates, so this user only ever gets the evening slot.
+    await prisma.user.updateMany({
+      data: { latitude: null, longitude: null },
+    });
+
+    /** Nudged at yesterday's 19:00 slot, then run at today's 18:00 one. */
+    const runAfterPreviousNudge = async (hoursSince: number) => {
+      await prisma.notificationLog.deleteMany();
+      await prisma.notificationLog.create({
+        data: {
+          userId: requester.userId,
+          kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+          dedupeKey: `yesterday:${hoursSince}`,
+          sentAt: hoursBefore(eveningSlot, hoursSince),
+        },
+      });
+
+      return ReengagementService.run(eveningSlot);
+    };
+
+    // An hour earlier in the evening than yesterday's send is exactly the
+    // case a 24 hour window pushed into the following day.
+    const onTime = await runAfterPreviousNudge(23);
+
+    expect(onTime.skippedCooldown).toBe(0);
+    expect(onTime.sent).toBe(2);
+
+    // Well inside the same day, still held back.
+    const tooSoon = await runAfterPreviousNudge(2);
+
+    expect(tooSoon.skippedCooldown).toBe(1);
+  });
+
   it("falls through to the next kind once the cap expires", async () => {
     const { responder } = await seedSilentMatch(25);
 
