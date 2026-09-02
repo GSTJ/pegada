@@ -139,7 +139,15 @@ const MAX_COOLDOWN_HOURS = Math.max(...Object.values(KIND_COOLDOWN_HOURS));
 /** Set membership key for "this user has had this kind recently". */
 const kindKey = (userId: string, kind: string) => `${userId}:${kind}`;
 
-/** Bounds one invocation so a backlog cannot outrun the function budget. */
+/**
+ * Bounds one invocation so a backlog cannot outrun the function budget.
+ *
+ * Worth reading next to {@link SEND_WINDOW_HOURS}: a user is only eligible in
+ * two of the twenty four runs a day, and Brazil is one offset, so the whole
+ * base shares those two runs and the real daily ceiling is twice this number.
+ * The 200 the incident sent was this cap being hit, so a backlog does exist.
+ * Raise this before widening the window if the queue stops draining.
+ */
 const MAX_CANDIDATES_PER_QUERY = 500;
 const MAX_PUSHES_PER_RUN = 200;
 
