@@ -41,6 +41,13 @@ const LIKES_WAITING_HOURS = 24;
 /**
  * When a user has never swiped positively there is no anchor to count new dogs
  * from, so the count starts here instead.
+ *
+ * This doubles as how often that cohort may be nudged again. Every other user
+ * is rate limited by their own anchor moving, which needs them to do something;
+ * someone who has never swiped has nothing that moves, so without a period in
+ * the key they would be a one-time audience forever. A calendar-aligned bucket
+ * rather than a sliding window, because the dedupe key has to name the same
+ * period the already-sent filter is testing.
  */
 const NEW_DOGS_FALLBACK_WINDOW_DAYS = 30;
 
@@ -55,9 +62,15 @@ const UNLIMITED_DISTANCE_KM = 295;
 const QUIET_HOURS_START = 21;
 const QUIET_HOURS_END = 9;
 
-/** America/Sao_Paulo, for users whose coordinates we do not have. */
+/**
+ * America/Sao_Paulo, for users whose coordinates we do not have.
+ *
+ * Two hours rather than one because Vercel Cron is best effort: a single
+ * missed invocation would drop this whole cohort for the day. The dedupe key
+ * and the daily cap are what stop the second hour resending.
+ */
 const FALLBACK_OFFSET_HOURS = -3;
-const FALLBACK_SEND_HOUR = 18;
+const FALLBACK_SEND_HOURS = new Set([18, 19]);
 
 /** One re-engagement push per user per rolling day. */
 const USER_COOLDOWN_HOURS = 24;
@@ -121,7 +134,7 @@ export const localHourFromLongitude = (
  * Is now a decent moment to interrupt this user?
  *
  * With coordinates: any local hour outside 21:00 to 09:00. Without: only the
- * single 18:00 America/Sao_Paulo slot, because guessing a whole day of
+ * early evening America/Sao_Paulo slot, because guessing a whole day of
  * waking hours for someone whose location we do not know is how a retention
  * push becomes a 3am push.
  */
@@ -132,7 +145,7 @@ export const isWithinSendWindow = (
   const localHour = localHourFromLongitude(longitude, now);
 
   if (localHour === null) {
-    return hourInOffset(now, FALLBACK_OFFSET_HOURS) === FALLBACK_SEND_HOUR;
+    return FALLBACK_SEND_HOURS.has(hourInOffset(now, FALLBACK_OFFSET_HOURS));
   }
 
   return localHour >= QUIET_HOURS_END && localHour < QUIET_HOURS_START;
@@ -301,9 +314,18 @@ type NewDogsRow = {
 export const selectNewDogsNearbyCandidates = async (
   now: Date,
 ): Promise<Candidate[]> => {
+  // Sliding, so a user who has never swiped is always shown a full window of
+  // new dogs rather than an emptier and emptier one as a period runs out.
   const newDogsFloor = new Date(
     now.getTime() - NEW_DOGS_FALLBACK_WINDOW_DAYS * DAY_MS,
   );
+
+  // Quantised, and used only to decide whether that cohort has already been
+  // told this period. The dedupe key carries the same period number, so the
+  // key and the filter re-admit the user on exactly the same day.
+  const periodMs = NEW_DOGS_FALLBACK_WINDOW_DAYS * DAY_MS;
+  const period = Math.floor(now.getTime() / periodMs);
+  const periodStart = new Date(period * periodMs);
 
   const buckets = [
     {
@@ -401,7 +423,12 @@ export const selectNewDogsNearbyCandidates = async (
             AND "Interest"."responderId" = "Dog"."id"
           )
           AND (
+            /* Null and zero both mean "no preference" in SuggestionService,
+               where the filter is only applied when the value is truthy.
+               Reading zero as "within zero kilometres" here would silently
+               empty the count for anyone who has it. */
             "OwnDog"."preferredMaxDistance" IS NULL
+            OR "OwnDog"."preferredMaxDistance" <= 0
             OR "OwnDog"."preferredMaxDistance" >= ${UNLIMITED_DISTANCE_KM}
             OR "candidate"."latitude" IS NULL
             OR "candidate"."longitude" IS NULL
@@ -425,7 +452,7 @@ export const selectNewDogsNearbyCandidates = async (
           SELECT 1 FROM "NotificationLog"
           WHERE "NotificationLog"."userId" = "candidate"."userId"
           AND "NotificationLog"."kind" = ${REENGAGEMENT_KINDS.NEW_DOGS_NEARBY}
-          AND "NotificationLog"."sentAt" > COALESCE("candidate"."anchor", ${newDogsFloor})
+          AND "NotificationLog"."sentAt" > COALESCE("candidate"."anchor", ${periodStart})
         )
         /* Freshest lapsers first, for the same reason matches are ordered
            newest first. */
@@ -443,7 +470,7 @@ export const selectNewDogsNearbyCandidates = async (
       longitude: row.longitude,
       /* Keying on the anchor is what stops the nudge repeating: it only moves
          once the user swipes positively again or asks again. */
-      dedupeKey: `${REENGAGEMENT_KINDS.NEW_DOGS_NEARBY}:${row.userId}:${label}:${row.anchor?.toISOString() ?? "never"}`,
+      dedupeKey: `${REENGAGEMENT_KINDS.NEW_DOGS_NEARBY}:${row.userId}:${label}:${row.anchor?.toISOString() ?? `never:${period}`}`,
       title: translate("server:notification.reengagement.newDogsNearby.title", {
         amount: row.newDogs,
       }),
@@ -607,15 +634,44 @@ export class ReengagementService {
 
     if (candidates.length === 0) return summary;
 
-    // One push per user per run, before the cooldown is even consulted.
-    const perUser = new Map<string, Candidate>();
-    for (const candidate of candidates) {
-      if (!perUser.has(candidate.userId))
-        perUser.set(candidate.userId, candidate);
+    // A claimed key is not a candidate. Dropping those here rather than only
+    // discovering them inside #send is what lets a user whose best nudge was
+    // already sent fall through to the next one they qualify for, instead of
+    // spending their whole day on a key that can never fire again.
+    const claimed = await prisma.notificationLog.findMany({
+      where: {
+        dedupeKey: { in: candidates.map(({ dedupeKey }) => dedupeKey) },
+      },
+      select: { dedupeKey: true },
+    });
+
+    const claimedKeys = new Set(claimed.map(({ dedupeKey }) => dedupeKey));
+
+    const unclaimed = candidates.filter((candidate) => {
+      if (!claimedKeys.has(candidate.dedupeKey)) return true;
+      summary.skippedAlreadySent += 1;
+      return false;
+    });
+
+    // Priority order survives the grouping, so a user's queue runs best nudge
+    // first. Only one of them will actually go out.
+    const perUser = new Map<
+      string,
+      { longitude: number | null; queue: Candidate[] }
+    >();
+    for (const candidate of unclaimed) {
+      const existing = perUser.get(candidate.userId);
+
+      if (existing) existing.queue.push(candidate);
+      else
+        perUser.set(candidate.userId, {
+          longitude: candidate.longitude,
+          queue: [candidate],
+        });
     }
 
-    const due = [...perUser.values()].filter((candidate) => {
-      if (isWithinSendWindow(candidate.longitude, now)) return true;
+    const due = [...perUser.entries()].filter(([, { longitude }]) => {
+      if (isWithinSendWindow(longitude, now)) return true;
       summary.skippedQuietHours += 1;
       return false;
     });
@@ -624,7 +680,7 @@ export class ReengagementService {
 
     const cooledDown = await prisma.notificationLog.findMany({
       where: {
-        userId: { in: due.map(({ userId }) => userId) },
+        userId: { in: due.map(([userId]) => userId) },
         sentAt: {
           gte: new Date(now.getTime() - USER_COOLDOWN_HOURS * HOUR_MS),
         },
@@ -634,33 +690,59 @@ export class ReengagementService {
 
     const recentlyNudged = new Set(cooledDown.map(({ userId }) => userId));
 
-    for (const candidate of due) {
+    for (const [userId, { queue }] of due) {
       if (summary.sent >= MAX_PUSHES_PER_RUN) break;
 
-      // A token Expo will reject is a guaranteed dropped push. Counting it as
-      // sent would put it in the denominator of the open rate, which is the
-      // number this whole change exists to produce.
-      const isReachable = Expo.isExpoPushToken(candidate.pushToken);
-
-      if (recentlyNudged.has(candidate.userId)) {
+      if (recentlyNudged.has(userId)) {
         summary.skippedCooldown += 1;
-      } else if (isReachable) {
-        // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cooldown they enforce on each other.
-        const outcome = await ReengagementService.#send(candidate);
-
-        if (outcome === "already-sent") {
-          summary.skippedAlreadySent += 1;
-        } else {
-          recentlyNudged.add(candidate.userId);
-          summary.sent += 1;
-          summary.byKind[candidate.kind] += 1;
-        }
       } else {
-        summary.skippedUnreachable += 1;
+        // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cooldown they enforce on each other.
+        const sent = await ReengagementService.#sendFirstAvailable(
+          queue,
+          summary,
+        );
+
+        if (sent) recentlyNudged.add(userId);
       }
     }
 
     return summary;
+  }
+
+  /**
+   * Walk one user's queue until a nudge actually goes out.
+   *
+   * The queue is already free of keys claimed before the run started; this
+   * loop is what covers a key claimed *during* it, by another instance racing
+   * the same candidate.
+   */
+  static async #sendFirstAvailable(
+    queue: Candidate[],
+    summary: ReengagementRunSummary,
+  ): Promise<boolean> {
+    for (const candidate of queue) {
+      // A token Expo will reject is a guaranteed dropped push, and it is the
+      // same token for every candidate this user has, so there is nothing left
+      // to try. Counting it as sent would put it in the denominator of the
+      // open rate, which is the number this whole change exists to produce.
+      if (!Expo.isExpoPushToken(candidate.pushToken)) {
+        summary.skippedUnreachable += 1;
+        return false;
+      }
+
+      // oxlint-disable-next-line no-await-in-loop -- Sequential by design: the next candidate is only tried when this one turns out to be claimed.
+      const outcome = await ReengagementService.#send(candidate);
+
+      if (outcome === "sent") {
+        summary.sent += 1;
+        summary.byKind[candidate.kind] += 1;
+        return true;
+      }
+
+      summary.skippedAlreadySent += 1;
+    }
+
+    return false;
   }
 
   /**

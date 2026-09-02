@@ -123,10 +123,18 @@ describe("isWithinSendWindow", () => {
     expect(isWithinSendWindow(LONGITUDE, NIGHT)).toBe(false);
   });
 
-  it("falls back to the single 18:00 Sao Paulo slot without coordinates", () => {
-    // 18:00 in UTC-3.
+  it("falls back to the early evening Sao Paulo slot without coordinates", () => {
+    // 18:00 in UTC-3, and 19:00 so one missed cron run does not drop the
+    // whole cohort for the day.
     expect(isWithinSendWindow(null, new Date("2026-09-01T21:00:00.000Z"))).toBe(
       true,
+    );
+    expect(isWithinSendWindow(null, new Date("2026-09-01T22:00:00.000Z"))).toBe(
+      true,
+    );
+    // 20:00 in UTC-3, past the slot.
+    expect(isWithinSendWindow(null, new Date("2026-09-01T23:00:00.000Z"))).toBe(
+      false,
     );
     // 15:00 in UTC-3, fine for a located user but not for this one.
     expect(isWithinSendWindow(null, NOW)).toBe(false);
@@ -278,6 +286,59 @@ describe("selectNewDogsNearbyCandidates", () => {
     });
 
     await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toEqual([]);
+  });
+
+  it("reads a zero preferred distance as no preference, like the deck does", async () => {
+    const { dog } = await seedInactiveOwnerWithNewDogs(3);
+
+    await prisma.dog.update({
+      where: { id: dog.id },
+      data: { preferredMaxDistance: 0 },
+    });
+
+    await prisma.user.updateMany({
+      where: { pushToken: null },
+      data: { latitude: -23.55, longitude: -46.63 },
+    });
+
+    await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toHaveLength(1);
+  });
+
+  it("lets a user who never swiped be nudged again in the next period", async () => {
+    const { user } = await seedInactiveOwnerWithNewDogs(3);
+
+    // No positive swipe at all, so there is no anchor to rate limit them.
+    await prisma.interest.deleteMany({
+      where: { requester: { userId: user.id } },
+    });
+
+    const [candidate] = await selectNewDogsNearbyCandidates(NOW);
+
+    expect(candidate?.dedupeKey).toMatch(/:never:\d+$/);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: user.id,
+        kind: REENGAGEMENT_KINDS.NEW_DOGS_NEARBY,
+        dedupeKey: candidate?.dedupeKey ?? "",
+        sentAt: hoursAgo(1),
+      },
+    });
+
+    await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toEqual([]);
+
+    // A period later the key names a new period and the filter lets them back.
+    const nextPeriod = new Date(NOW.getTime() + 31 * 24 * 60 * 60 * 1000);
+
+    await prisma.dog.updateMany({
+      where: { userId: { not: user.id } },
+      data: { createdAt: hoursBefore(nextPeriod, 24) },
+    });
+
+    const later = await selectNewDogsNearbyCandidates(nextPeriod);
+
+    expect(later).toHaveLength(1);
+    expect(later[0]?.dedupeKey).not.toBe(candidate?.dedupeKey);
   });
 
   it("selects a user who asked to be told even though they are active", async () => {
@@ -436,8 +497,75 @@ describe("ReengagementService.run", () => {
     const second = await ReengagementService.run(NOW);
 
     expect(second.sent).toBe(0);
-    expect(second.skippedCooldown).toBe(2);
+    expect(second.skippedAlreadySent).toBe(2);
     expect(await prisma.notificationLog.count()).toBe(2);
+  });
+
+  it("holds a user to one push a day across different kinds", async () => {
+    const { requester, responder } = await seedSilentMatch(25);
+
+    // A waiting like for the same user, so there is a second kind queued.
+    const { dog: admirer } = await generateFakeUserWithDog(
+      { gender: "MALE" },
+      reachableUser({ pushToken: null }),
+    );
+    const like = await prisma.interest.create({
+      data: {
+        requesterId: admirer.id,
+        responderId: responder.id,
+        swipeType: "INTERESTED",
+        lastPositiveAt: hoursAgo(30),
+      },
+    });
+    await prisma.interest.update({
+      where: { id: like.id },
+      data: { createdAt: hoursAgo(30) },
+    });
+
+    expect((await ReengagementService.run(NOW)).sent).toBe(2);
+
+    // Two hours later the match keys are claimed but the like key is not, and
+    // the daily cap is what has to stop it.
+    const summary = await ReengagementService.run(
+      new Date(NOW.getTime() + 2 * 60 * 60 * 1000),
+    );
+
+    expect(summary.sent).toBe(0);
+    expect(summary.skippedCooldown).toBe(1);
+    expect(requester.id).not.toBe(responder.id);
+  });
+
+  it("falls through to the next kind once the cap expires", async () => {
+    const { responder } = await seedSilentMatch(25);
+
+    const { dog: admirer } = await generateFakeUserWithDog(
+      { gender: "MALE" },
+      reachableUser({ pushToken: null }),
+    );
+    const like = await prisma.interest.create({
+      data: {
+        requesterId: admirer.id,
+        responderId: responder.id,
+        swipeType: "INTERESTED",
+        lastPositiveAt: hoursAgo(30),
+      },
+    });
+    await prisma.interest.update({
+      where: { id: like.id },
+      data: { createdAt: hoursAgo(30) },
+    });
+
+    await ReengagementService.run(NOW);
+
+    // Age the log past the daily cap. The match nudge is still claimed, so a
+    // user whose best candidate is spent has to reach their next one rather
+    // than lose the day to it.
+    await prisma.notificationLog.updateMany({ data: { sentAt: hoursAgo(30) } });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary.sent).toBe(1);
+    expect(summary.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(1);
   });
 
   it("sends nothing during quiet hours", async () => {
