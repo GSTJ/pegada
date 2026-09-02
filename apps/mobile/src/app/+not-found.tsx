@@ -2,7 +2,7 @@ import { Redirect } from "expo-router";
 
 /**
  * Expo Router mounts nothing at all when a deep link names a path this app has
- * no route for — not even the root layout — so the native splash never hides
+ * no route for, not even the root layout, so the native splash never hides
  * and the app sits on the logo forever.
  *
  * That is the normal case for a share link, not an edge case: the dog card
