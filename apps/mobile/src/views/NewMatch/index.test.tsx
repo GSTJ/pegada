@@ -28,6 +28,15 @@ const mockRouter = {
 
 const mockSafeLoadAndShow = jest.fn(() => Promise.resolve());
 
+const mockShowSharePrompt = jest.fn();
+// Stands in for the storage-backed gate, which has its own suite. Here it
+// only has to prove the screen asks it on both exits and hands it the
+// prompt.
+const mockRunFirstMatchSharePrompt = jest.fn((show: () => void) => {
+  show();
+  return Promise.resolve(true);
+});
+
 jest.mock<Record<string, unknown>>("react-native", () => {
   const { createElement } = require("react") as typeof React;
 
@@ -140,6 +149,18 @@ jest.mock<Record<string, unknown>>("./confetti-animation", () => ({
   ConfettiAnimation: () => null,
 }));
 
+jest.mock<Record<string, unknown>>("@/components/SharePromptCard", () => ({
+  showSharePromptModal: () => mockShowSharePrompt(),
+}));
+
+jest.mock<Record<string, unknown>>(
+  "@/components/SharePromptCard/first-match-gate",
+  () => ({
+    runFirstMatchSharePrompt: (show: () => void) =>
+      mockRunFirstMatchSharePrompt(show),
+  }),
+);
+
 jest.mock<Record<string, unknown>>("./styles", () => ({
   Content: ({ children }: { children?: React.ReactNode }) => children,
   MatchCaption: ({ children }: { children?: React.ReactNode }) => children,
@@ -197,5 +218,35 @@ describe("NewMatch exits", () => {
     await Promise.resolve();
 
     expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * The share prompt is a one-shot ask, and the gate that makes it one lives in
+ * storage. What this screen owns is asking it on BOTH exits, and only after
+ * the celebration is gone.
+ */
+describe("first match share prompt", () => {
+  it("asks the gate after leaving for the chat", async () => {
+    render();
+
+    await mockHandlers.get("new-match-send")?.();
+
+    expect(mockShowSharePrompt).toHaveBeenCalledTimes(1);
+    expect(mockRouter.replace.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockShowSharePrompt.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("asks the gate after skipping too", async () => {
+    render();
+
+    await mockHandlers.get("new-match-skip")?.();
+
+    expect(mockRunFirstMatchSharePrompt).toHaveBeenCalledTimes(1);
+    expect(mockShowSharePrompt).toHaveBeenCalledTimes(1);
+    expect(mockRouter.back.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockShowSharePrompt.mock.invocationCallOrder[0]!,
+    );
   });
 });

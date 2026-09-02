@@ -13,9 +13,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 
 import Copy from "@/assets/images/Copy.svg";
+import Dog from "@/assets/images/Dog.svg";
+import Premium from "@/assets/images/Premium.svg";
 import ShareIcon from "@/assets/images/Share.svg";
 import Story from "@/assets/images/Story.svg";
 import Divider from "@/components/divider";
+import { FakeDoorRow } from "@/components/FakeDoor";
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 
@@ -268,6 +271,27 @@ const DogShareSheetContent = ({
           }}
           disabled={isSharingStory}
           loading={isSharingStory}
+        />
+        {/* Fake doors, last and marked "em breve": everything above this
+            divider works today, and the two below only measure whether they
+            are worth building. */}
+        <Divider style={styles.rowDivider} />
+        <FakeDoorRow
+          testID="fake-door-referral"
+          feature="referral_reward"
+          source="share_sheet"
+          icon={Premium}
+          label={t("fakeDoor.referralReward")}
+          disabled={isSharingStory}
+        />
+        <Divider style={styles.rowDivider} />
+        <FakeDoorRow
+          testID="fake-door-ai-video"
+          feature="ai_story_video"
+          source="share_sheet"
+          icon={Dog}
+          label={t("fakeDoor.aiStoryVideo", { name: firstName })}
+          disabled={isSharingStory}
         />
       </View>
       <PressableArea

@@ -10,6 +10,8 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
+import { showSharePromptModal } from "@/components/SharePromptCard";
+import { runFirstMatchSharePrompt } from "@/components/SharePromptCard/first-match-gate";
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
 import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
@@ -43,6 +45,18 @@ const NewMatch: React.FC = () => {
 
   const router = useRouter();
 
+  /**
+   * Asked after the screen is gone, not on top of it: the celebration owns
+   * this moment, and the ask only makes sense once the user has taken it in.
+   * The modal portal lives above the router, so it survives the navigation
+   * both exits do.
+   */
+  const promptFirstMatchShare = useCallback(() => {
+    void runFirstMatchSharePrompt(() => {
+      void showSharePromptModal();
+    });
+  }, []);
+
   const handleSendMessage = async () => {
     analytics.track({
       event_type: "New Match",
@@ -63,6 +77,8 @@ const NewMatch: React.FC = () => {
       pathname: `${SceneName.Chat}/[matchId]`,
       params: { dogId: matchDogId, matchId },
     });
+
+    promptFirstMatchShare();
   };
 
   const handleSkip = useCallback(async () => {
@@ -76,7 +92,9 @@ const NewMatch: React.FC = () => {
     await safeLoadAndShow();
 
     router.back();
-  }, [router, safeLoadAndShow]);
+
+    promptFirstMatchShare();
+  }, [router, safeLoadAndShow, promptFirstMatchShare]);
 
   // Assume 'skip' if the user presses the back button.
   // This is pertinent to Android devices only.
