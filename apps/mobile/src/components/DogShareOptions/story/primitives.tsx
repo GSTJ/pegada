@@ -314,6 +314,7 @@ export const MarkerSlab = ({
   padX,
   padY,
   border,
+  tracking = 0,
   fill,
   textStyle,
   children,
@@ -325,6 +326,9 @@ export const MarkerSlab = ({
   padX: number;
   padY: number;
   border: number;
+  /** The word's own `letterSpacing`, so the slab can take back the copy of
+   *  it that lands after the last letter. */
+  tracking?: number;
   fill: string;
   textStyle?: StyleProp<TextStyle>;
   children: string;
@@ -345,7 +349,19 @@ export const MarkerSlab = ({
     <Text
       numberOfLines={1}
       fontWeight="black"
-      style={[textStyle, { marginTop: padY - CAP_LINE * fontSize }]}
+      style={[
+        textStyle,
+        {
+          marginTop: padY - CAP_LINE * fontSize,
+          // iOS puts a letter space after the LAST letter as well as between
+          // them, so a run set at the concept's -6px tracking measures six
+          // pixels narrower than the ink it draws and the slab closed to
+          // within 11px of the final A against 25 on the other side. Giving
+          // that last space back to the box is what makes the two gaps the
+          // same padding either side of the word.
+          marginRight: -tracking,
+        },
+      ]}
     >
       {children}
     </Text>
@@ -526,7 +542,16 @@ export const BubbleTail = ({
   return (
     <View style={[style, { width: size, height: size }]}>
       <Svg width={size} height={size}>
-        <Polygon points={`0,0 ${size},0 0,${size}`} fill={INK} />
+        {/* The ink starts at the join, not at the top of the box: above that
+            line the tail is inside the bubble, where there is nothing for an
+            outline to divide. Drawing the full triangle and then covering its
+            upper stretch with a fill edge on the very same line left the two
+            antialiasing against each other, and the seam read as a grey
+            hairline running up off the tail and across the bubble's white. */}
+        <Polygon
+          points={`0,${joinAt} ${size - joinAt},${joinAt} 0,${size}`}
+          fill={INK}
+        />
         <Polygon
           points={[
             `${stroke},0`,

@@ -14,12 +14,18 @@ import { StyleSheet } from "react-native-unistyles";
 const GILROY_CAP_OFFSET_RATIO = 0.104;
 const capOffset = (fontSize: number) => -(fontSize * GILROY_CAP_OFFSET_RATIO);
 
-// Two lines of a `sm` label plus the row's own vertical padding — the
-// height every row already grows to the moment its label needs a second
-// line (measured on the referral row, see #244). Every row reserves this
-// height up front so a long label never makes its own row the odd one out;
-// the alternative was shortening the copy, which isn't this file's call.
-const TWO_LINE_ROW_MIN_HEIGHT = 71.33;
+// One line of a `sm` label plus the row's own vertical padding: the height
+// all five rows land on now that none of their labels wraps.
+//
+// #244 measured the referral row 31% taller than the other four because its
+// copy needed a second line. Of the two fixes that issue offered — reserve
+// two lines on every row, or shorten the copy — this takes the second: the
+// two "em breve" rows are the quiet ones at the bottom of the sheet, and
+// growing all five by a third to make room for a fake door's label would
+// have let the two options that do nothing set the height of the three that
+// work. `numberOfLines={2}` stays on both labels as a backstop, and this
+// floor keeps every row on the same line whatever a locale sends.
+const ROW_MIN_HEIGHT = 54.33;
 
 export const styles = StyleSheet.create((theme) => ({
   overlay: {
@@ -68,7 +74,7 @@ export const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing[3.5],
-    minHeight: TWO_LINE_ROW_MIN_HEIGHT,
+    minHeight: ROW_MIN_HEIGHT,
     paddingTop: theme.spacing[4],
     paddingRight: theme.spacing[4],
     paddingBottom: theme.spacing[4],

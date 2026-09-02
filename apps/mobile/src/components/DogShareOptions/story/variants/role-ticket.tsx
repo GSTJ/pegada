@@ -66,10 +66,11 @@ const CONTENT_WIDTH =
  * the stub carries no `border` of its own — a border would clip the circle a
  * keyline's width inside the edge and leave a flat chord instead of a half
  * circle.
+ *
+ * `top:940px` measures the bordered circle's own box from inside that
+ * keyline, so its centre is 940 plus its own 40px outer radius down from
+ * there, and the bite itself is the 68px circle inside the border: r = 34.
  */
-/** `top:940px` measures the bordered circle's own box from inside the stub's
- *  6px keyline, so its centre is 940 + 40 down from there and the bite the
- *  background shows through is the 68px circle inside that border: r = 34. */
 const NOTCH = { radius: px(34), centreY: px(6 + 940 + 40) };
 
 /** `.rail`: 84px tall, a 5px rule under it, 34px of gutter, 22px eyebrows. */
@@ -168,6 +169,7 @@ const CALL_TOP = px(1026);
  *  sized off the word rather than off a constant. */
 const CALL_CAP = CALL_SIZE * 0.7;
 const CALL_MARK_PAD_X = px(15);
+const CALL_TRACKING = px(-2);
 const CALL_MARK_PAD_Y = px(7);
 const CALL_MARK_TOP = CAP_LINE * CALL_SIZE - CALL_MARK_PAD_Y;
 
@@ -392,6 +394,7 @@ export const RoleTicketVariant = ({
               padX={CALL_MARK_PAD_X}
               padY={CALL_MARK_PAD_Y}
               border={0}
+              tracking={CALL_TRACKING}
               fill={TICKET.navy}
               textStyle={[styles.callText, styles.callMarkText]}
               style={styles.callMark}
@@ -651,7 +654,7 @@ const styles = StyleSheet.create(() => ({
   callText: {
     fontSize: CALL_SIZE,
     lineHeight: CALL_LINE,
-    letterSpacing: px(-2),
+    letterSpacing: CALL_TRACKING,
     color: INK,
     textTransform: "uppercase",
   },

@@ -7,10 +7,11 @@ import { StyleSheet } from "react-native-unistyles";
 const GILROY_CAP_OFFSET_RATIO = 0.104;
 const capOffset = (fontSize: number) => -(fontSize * GILROY_CAP_OFFSET_RATIO);
 
-// Matches `DogShareOptions/styles.ts`'s own `TWO_LINE_ROW_MIN_HEIGHT`: the
-// height the referral row already grows to the moment its label wraps (see
-// #244), reserved on every row so none of the five is the odd one out.
-const TWO_LINE_ROW_MIN_HEIGHT = 71.33;
+// Matches `DogShareOptions/styles.ts`'s own `ROW_MIN_HEIGHT`, and see there
+// for why the sheet's rows are one line tall rather than two: these two
+// fake doors sit at the bottom of that same list and have to measure the
+// same as the three real actions above them.
+const ROW_MIN_HEIGHT = 54.33;
 
 export const styles = StyleSheet.create((theme) => ({
   /**
@@ -22,7 +23,7 @@ export const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing[3.5],
-    minHeight: TWO_LINE_ROW_MIN_HEIGHT,
+    minHeight: ROW_MIN_HEIGHT,
     paddingTop: theme.spacing[4],
     paddingRight: theme.spacing[4],
     paddingBottom: theme.spacing[4],

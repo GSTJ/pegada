@@ -343,6 +343,7 @@ export const DmAbertaVariant = ({
           padX={MARKER_PAD_X}
           padY={MARKER_PAD_Y}
           border={MARKER_BORDER}
+          tracking={H1_TRACKING}
           fill={DM.edge}
           textStyle={styles.headlineText}
           style={styles.marker}
