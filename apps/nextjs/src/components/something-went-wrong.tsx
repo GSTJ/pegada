@@ -10,23 +10,23 @@
  */
 export const SomethingWentWrong = ({ reset }: { reset?: () => void }) => {
   return (
-    <section className="bg-white dark:bg-gray-900 min-h-screen flex items-center">
-      <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-        <div className="mx-auto max-w-screen-sm text-center gap-4">
-          <h1 className="text-7xl tracking-tight font-extrabold lg:text-9xl text-primary-600 dark:text-primary-500">
+    <section className="flex min-h-screen items-center bg-background">
+      <div className="mx-auto max-w-screen-xl px-4 py-8 lg:px-6 lg:py-16">
+        <div className="mx-auto flex max-w-screen-sm flex-col items-center gap-4 text-center">
+          <h1 className="text-7xl font-extrabold tracking-tight text-primary lg:text-9xl">
             500
           </h1>
-          <p className="mb-4 text-2xl tracking-tight font-bold text-gray-900 md:text-3xl">
+          <p className="text-2xl font-bold tracking-tight text-text md:text-3xl">
             Something went wrong
           </p>
-          <p className="text-lg font-light text-gray-500 dark:text-gray-400">
+          <p className="text-lg font-light text-subtitle">
             We encountered an error. Please try again later.
           </p>
           {reset ? (
             <button
               type="button"
               onClick={reset}
-              className="inline-flex text-white bg-primary hover:scale-105 transition-all focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900 my-4"
+              className="mt-2 inline-flex min-h-[44px] items-center rounded-full bg-primary px-8 py-4 font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               Try again
             </button>
