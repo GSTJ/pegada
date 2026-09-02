@@ -9,6 +9,7 @@ import { SceneName } from "@/types/scene-name";
 enum NotificationUrl {
   Match = "match/",
   Chat = "chat/",
+  Like = "like",
 }
 
 export const getNotificationUrl = (
@@ -35,6 +36,14 @@ const handleChatNotification = (matchId: string, dogId: string) => {
   });
 };
 
+/**
+ * A received like has no screen of its own: the dog that liked us stays hidden
+ * until we like them back, so the tap lands on the deck where that can happen.
+ */
+const handleLikeNotification = () => {
+  return router.push(SceneName.Swipe);
+};
+
 export const customNotificationHandler = (url?: string) => {
   if (!url) return;
 
@@ -58,6 +67,10 @@ export const customNotificationHandler = (url?: string) => {
     if (!matchId || !dogId) throw new Error("Invalid notification url");
 
     return handleMatchNotification(matchId, dogId);
+  }
+
+  if (url === NotificationUrl.Like) {
+    return handleLikeNotification();
   }
 
   if (url.startsWith(NotificationUrl.Chat)) {
