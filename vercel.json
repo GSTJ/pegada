@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/reengagement",
+      "schedule": "0 * * * *"
+    }
+  ],
   "functions": {
     "src/app/api/queues/cleanup-upload/route.ts": {
       "experimentalTriggers": [
