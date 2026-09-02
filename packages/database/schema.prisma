@@ -339,3 +339,33 @@ model NotificationLog {
 
   @@index([userId, sentAt])
 }
+
+/// One row per person who asked to be told when a feature we have not built
+/// yet opens. The landing page that collects them advertises the feature as if
+/// it existed, so this table is the whole result of the experiment: the share
+/// of visitors who leave an address is what decides whether the feature gets
+/// built at all.
+///
+/// `feature` is a plain string rather than an enum so the next fake door needs
+/// no migration, and the unique index is on the pair: one address can wait for
+/// two different features, but signing up twice for the same one is the same
+/// row. `ref` and the `utm*` columns are copied off the query string so a
+/// channel can be credited without joining anything.
+///
+/// No relation to `User`: most of these people do not have an account, and the
+/// ones who do should not be findable through this table.
+model FeatureInterestLead {
+  id          String   @id @default(cuid())
+  email       String
+  feature     String
+  locale      String
+  ref         String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@unique([email, feature])
+  @@index([feature, createdAt])
+}
