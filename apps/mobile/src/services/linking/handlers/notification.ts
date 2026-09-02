@@ -31,6 +31,18 @@ export const getNotificationKind = (
   return response.notification.request.content.data?.kind as string | undefined;
 };
 
+/**
+ * Identity of a tap, so the same one is never reported twice. Two listeners
+ * see every warm tap (one in `_layout.tsx`, one in `processLinks`) and
+ * `getLastNotificationResponseAsync` keeps handing the last one back, so
+ * "have I already handled this?" needs something stable to ask about.
+ */
+export const getNotificationId = (
+  response: Notifications.NotificationResponse,
+): string => {
+  return response.notification.request.identifier;
+};
+
 const handleUnknownNotification = (url: string) => {
   sendError(new Error(`Unknown notification: ${url}`));
 };
