@@ -47,6 +47,17 @@ const BUBBLE = {
 
 const TAIL_SIZE = 29.3;
 
+/**
+ * Display type is set with a line box roomy enough for an uppercase glyph
+ * plus its diacritic: a lineHeight under the font size clips the acute off
+ * "JÁ" the same way it clipped the circumflex off the ticket's "ROLÊ?". The
+ * concept's much tighter leading is restored by pulling the second line up
+ * with a negative margin, which moves the whole line box rather than
+ * cropping the glyphs inside it.
+ */
+const DM_DISPLAY_LINE = 37;
+const DM_DISPLAY_PULL = 33.5 - DM_DISPLAY_LINE;
+
 /** Deterministic per dog, so a capture retry never swaps the opener. */
 const OPENER_KEYS = [
   "dogShare.story.dmAberta.opener1",
@@ -103,19 +114,14 @@ export const DmAbertaVariant = ({
       </View>
 
       <View style={styles.headline}>
-        <Text
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          fontWeight="black"
-          style={styles.headlineText}
-        >
+        <Text numberOfLines={1} fontWeight="black" style={styles.headlineText}>
           {t("dogShare.story.dmAberta.headline1")}
         </Text>
         {/* The marker slab runs to within a few points of the card's right
             edge, as in the concept. It shrinks rather than clipping, so a
             longer word in another locale loses a couple of points of type
             instead of losing its own keyline off the frame. */}
-        <View style={styles.headlineRow}>
+        <View style={[styles.headlineRow, styles.headlineRowPull]}>
           <Text fontWeight="black" style={styles.headlineText}>
             {t("dogShare.story.dmAberta.headline2")}{" "}
           </Text>
@@ -206,7 +212,7 @@ export const DmAbertaVariant = ({
 
       <View style={styles.cta}>
         <Text numberOfLines={1} fontWeight="black" style={styles.ctaLine}>
-          {t("dogShare.story.footerCta")}
+          {t("dogShare.story.dmAberta.ctaLine1")}
         </Text>
         <View style={styles.ctaUnderlined}>
           <Text numberOfLines={1} fontWeight="black" style={styles.ctaLineMark}>
@@ -282,9 +288,10 @@ const styles = StyleSheet.create(() => ({
     zIndex: 4,
   },
   headlineRow: { flexDirection: "row", alignItems: "center" },
+  headlineRowPull: { marginTop: DM_DISPLAY_PULL },
   headlineText: {
     fontSize: 39.3,
-    lineHeight: 32.5,
+    lineHeight: DM_DISPLAY_LINE,
     letterSpacing: DISPLAY_TRACKING,
     color: INK,
     textTransform: "uppercase",
@@ -297,19 +304,23 @@ const styles = StyleSheet.create(() => ({
     borderWidth: 1.7,
     borderColor: INK,
     paddingHorizontal: 5.7,
-    paddingTop: 3.5,
-    paddingBottom: 1,
+    paddingVertical: 0,
     transform: [{ rotate: "-2deg" }],
   },
   scribble: {
     position: "absolute",
-    top: 200,
+    top: 202,
     right: 19.3,
-    maxWidth: 150,
+    width: 132,
     alignItems: "flex-end",
     transform: [{ rotate: "9deg" }],
   },
-  scribbleText: { fontSize: 10.3, color: INK },
+  scribbleText: {
+    width: "100%",
+    fontSize: 10.3,
+    textAlign: "right",
+    color: INK,
+  },
   scribbleRule: {
     width: 60,
     height: 1.6,
@@ -355,7 +366,7 @@ const styles = StyleSheet.create(() => ({
   },
   emptyName: {
     fontSize: 30,
-    lineHeight: 32,
+    lineHeight: 37.5,
     letterSpacing: DISPLAY_TRACKING,
     color: INK,
     textTransform: "uppercase",
@@ -384,7 +395,7 @@ const styles = StyleSheet.create(() => ({
     backgroundColor: DM.bubblePink,
     transform: [{ rotate: "-2deg" }],
   },
-  chatText: { fontSize: 8.7, lineHeight: 9.6, color: INK },
+  chatText: { fontSize: 8.7, lineHeight: 10.5, color: INK },
   chatTime: {
     marginTop: 3.3,
     fontSize: 4.6,
@@ -425,15 +436,16 @@ const styles = StyleSheet.create(() => ({
     color: INK,
   },
   cta: { position: "absolute", left: 20.7, top: 507, width: 270 },
-  ctaLine: { fontSize: 14, lineHeight: 15.5, letterSpacing: -0.5, color: INK },
+  ctaLine: { fontSize: 14, lineHeight: 17.5, letterSpacing: -0.5, color: INK },
   ctaUnderlined: {
     alignSelf: "flex-start",
+    marginTop: -2,
     borderBottomWidth: 2.3,
     borderBottomColor: INK,
   },
   ctaLineMark: {
     fontSize: 14,
-    lineHeight: 15.5,
+    lineHeight: 17.5,
     letterSpacing: -0.5,
     color: DM.ctaPink,
   },

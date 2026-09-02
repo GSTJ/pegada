@@ -30,6 +30,16 @@ import {
  * same scaling contract as `dm-aberta.tsx`.
  */
 
+/**
+ * Display type is set with a line box roomy enough for an uppercase glyph
+ * plus its diacritic — a lineHeight under the font size clips the circumflex
+ * clean off "ROLÊ?". The concept's much tighter leading is restored by
+ * pulling each line after the first up with a negative margin, which moves
+ * the whole line box rather than cropping the glyphs inside it.
+ */
+const TICKET_DISPLAY_LINE = 35;
+const TICKET_DISPLAY_PULL = 29.4 - TICKET_DISPLAY_LINE;
+
 /** The stub itself. Everything inside is positioned against this box. */
 const TICKET_BOX = {
   left: 23.3,
@@ -102,30 +112,23 @@ export const RoleTicketVariant = ({
             once — a two-`View` row would let the halves shrink independently
             and break the shared baseline. */}
         <View style={styles.title}>
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            fontWeight="black"
-            style={styles.titleText}
-          >
+          <Text numberOfLines={1} fontWeight="black" style={styles.titleText}>
             {t("dogShare.story.roleTicket.headline1")}
           </Text>
           <Text
             numberOfLines={1}
-            adjustsFontSizeToFit
             fontWeight="black"
-            style={styles.titleText}
+            style={[styles.titleText, styles.titleLinePull]}
           >
             {t("dogShare.story.roleTicket.headline2")}{" "}
-            <Text style={styles.titleAccent}>
+            <Text fontWeight="black" style={styles.titleAccent}>
               {t("dogShare.story.roleTicket.headline3")}
             </Text>
           </Text>
           <Text
             numberOfLines={1}
-            adjustsFontSizeToFit
             fontWeight="black"
-            style={styles.titleText}
+            style={[styles.titleText, styles.titleLinePull]}
           >
             {t("dogShare.story.roleTicket.headline4")}
           </Text>
@@ -217,12 +220,10 @@ export const RoleTicketVariant = ({
         </View>
 
         <View style={styles.call}>
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            fontWeight="black"
-            style={styles.callText}
-          >
+          {/* Wraps rather than auto-shrinking: a long name that shrank to
+              fit one line would end up set smaller than the boxed accent
+              directly under it, which reads as a mistake. */}
+          <Text numberOfLines={2} fontWeight="black" style={styles.callText}>
             {t("dogShare.story.roleTicket.call", { name })}
           </Text>
           <View style={styles.callMark}>
@@ -329,9 +330,10 @@ const styles = StyleSheet.create(() => ({
     textTransform: "uppercase",
   },
   title: { position: "absolute", left: PAD_LEFT, top: 38.7, width: 215 },
+  titleLinePull: { marginTop: TICKET_DISPLAY_PULL },
   titleText: {
     fontSize: 35,
-    lineHeight: 29.4,
+    lineHeight: TICKET_DISPLAY_LINE,
     letterSpacing: DISPLAY_TRACKING,
     color: INK,
     textTransform: "uppercase",
@@ -344,7 +346,7 @@ const styles = StyleSheet.create(() => ({
   // otherwise drop to the theme's default body size mid-headline.
   titleAccent: {
     fontSize: 35,
-    lineHeight: 29.4,
+    lineHeight: TICKET_DISPLAY_LINE,
     letterSpacing: DISPLAY_TRACKING,
     color: TICKET.stripePink,
     textShadowColor: INK,
@@ -357,7 +359,7 @@ const styles = StyleSheet.create(() => ({
     right: PAD_RIGHT,
     width: 63.3,
     fontSize: 6.7,
-    lineHeight: 7.6,
+    lineHeight: 8.7,
     letterSpacing: 0.4,
     color: INK,
     textTransform: "uppercase",
@@ -379,7 +381,7 @@ const styles = StyleSheet.create(() => ({
   },
   emptyName: {
     fontSize: 26,
-    lineHeight: 28,
+    lineHeight: 32.5,
     letterSpacing: DISPLAY_TRACKING,
     color: TICKET.cream,
     textTransform: "uppercase",
@@ -425,21 +427,21 @@ const styles = StyleSheet.create(() => ({
   metaValue: {
     marginTop: 2,
     fontSize: 10,
-    lineHeight: 12,
+    lineHeight: 12.5,
     letterSpacing: -0.2,
     color: INK,
   },
-  call: { position: "absolute", left: PAD_LEFT, top: 355, width: 175 },
+  call: { position: "absolute", left: PAD_LEFT, top: 350, width: 225 },
   callText: {
-    fontSize: 23,
-    lineHeight: 20.6,
+    fontSize: 20,
+    lineHeight: 20,
     letterSpacing: -0.7,
     color: INK,
     textTransform: "uppercase",
   },
   callMark: {
     alignSelf: "flex-start",
-    marginTop: 2,
+    marginTop: 0,
     backgroundColor: TICKET.navy,
     paddingHorizontal: 5,
     paddingTop: 3,
@@ -494,7 +496,7 @@ const styles = StyleSheet.create(() => ({
   stampBadgeText: {
     width: 33,
     fontSize: 6,
-    lineHeight: 6.8,
+    lineHeight: 7.5,
     textAlign: "center",
     color: TICKET.cream,
     textTransform: "uppercase",

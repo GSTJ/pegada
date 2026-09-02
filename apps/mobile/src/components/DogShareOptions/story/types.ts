@@ -18,11 +18,6 @@ export type StoryVariantProps = {
   dog: ShareableDog;
   plan: StoryPhotoPlan;
   name: string;
-  breedName?: string;
-  /** Localised, e.g. "3 anos" or "1 year and 2 months" — for prose. */
-  age?: string;
-  /** Whole years, e.g. `3` — for compact "Rex, 3" style headers. */
-  ageYears?: number;
   gender: string;
   /**
    * Call once per photo slot the variant renders (via `StoryImage`'s

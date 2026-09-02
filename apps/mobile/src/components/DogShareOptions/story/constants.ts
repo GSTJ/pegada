@@ -1,5 +1,3 @@
-import { CARD_HEIGHT } from "../story-card-styles";
-
 /**
  * Fixed palettes for the two story compositions. This PNG is a brand artifact
  * seen on Instagram, outside the app, so its colours never read from the
@@ -40,14 +38,13 @@ export const TICKET = {
  * Instagram stories reserve roughly the top and bottom 250px of a 1080x1920
  * frame for their own chrome (profile row up top, reply bar at the bottom).
  * The card is laid out at 360x640 (a 3x scale down from the exported PNG),
- * so that reserved band is ~83px here — every variant keeps meaningful text
- * and the brand mark inside `SAFE_TOP`..`SAFE_BOTTOM`. Only background
- * texture (the checker column, the dot field, the navy stock) bleeds past it
- * to the card's physical edges.
+ * so that reserved band is ~83pt here: both variants keep every piece of
+ * meaningful content between y=85 and y=555, and only background texture
+ * (the checker column, the dot field, the navy stock) bleeds past it to the
+ * card's physical edges. The offsets that honour this are the concept's own,
+ * divided by three, so they are written literally in each variant rather
+ * than derived from a token.
  */
-export const SAFE_TOP = 85;
-export const SAFE_BOTTOM = 555;
-export const SAFE_BOTTOM_INSET = CARD_HEIGHT - SAFE_BOTTOM;
 
 /** `Logo`'s natural aspect ratio (from its `534 635` viewBox), height/width. */
 export const PAW_ASPECT = 635 / 534;

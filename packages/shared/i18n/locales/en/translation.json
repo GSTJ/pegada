@@ -121,7 +121,6 @@
     "storyFailedFallback": "Couldn't create the story image. Sharing the link instead.",
     "storyUnavailable": "Image sharing isn't available on this device. Sharing the link instead.",
     "story": {
-      "footerCta": "make one for your dog too",
       "dmAberta": {
         "online": "online",
         "headline1": "DMs open",
@@ -134,6 +133,7 @@
         "replyMale": "i’m in. already by the door.",
         "replyFemale": "i’m in. already by the door.",
         "typing": "other dogs are typing...",
+        "ctaLine1": "make your dog’s profile",
         "ctaLine2": "and open the chat"
       },
       "roleTicket": {

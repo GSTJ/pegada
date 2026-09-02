@@ -268,11 +268,22 @@ export const DotField = ({
 );
 
 /**
- * The speech bubble's tail: a right triangle with the same hard black line
- * as the bubble on its two outer edges. Drawn in SVG because RN has no
- * `clip-path`, and a rotated square would need an overlapping cover strip to
- * hide the diagonal's inner half — which `captureRef` renders as a visible
- * seam.
+ * The speech bubble's tail: the bubble's own fill running down past its
+ * bottom-left corner to a point, with the bubble's left keyline carrying on
+ * down the outside of it.
+ *
+ * The concept draws this by clipping a bordered box to
+ * `polygon(0 0, 100% 0, 0 100%)`, which keeps the left border and throws the
+ * rest away — so the hypotenuse is unstroked and the tail's top edge simply
+ * covers the length of bubble border it hangs from. Reproduced here as two
+ * polygons rather than a stroke: stroking the triangle would draw a line
+ * along the hypotenuse the concept does not have, and centre half of that
+ * line outside the shape, which is what left a doubled diagonal and a jog
+ * where it met the bubble's bottom border.
+ *
+ * The caller positions this so its top edge overlaps the bubble's bottom
+ * border and its left edge lines up with the outside of the bubble's left
+ * border; the two then read as one continuous outline.
  */
 export const BubbleTail = ({
   size,
@@ -287,16 +298,15 @@ export const BubbleTail = ({
 }) => (
   <View style={[style, { width: size, height: size }]}>
     <Svg width={size} height={size}>
+      {/* The whole tail in ink... */}
+      <Polygon points={`0,0 ${size},0 0,${size}`} fill={INK} />
+      {/* ...then the fill laid back over everything but a `stroke`-wide band
+          down the left edge, which tapers to nothing at the tip exactly as
+          the concept's clipped border does. */}
       <Polygon
-        points={`0,0 ${size},0 0,${size}`}
+        points={`${stroke},0 ${size},0 ${stroke},${size - stroke}`}
         fill={fill}
-        stroke={INK}
-        strokeWidth={stroke * 2}
-        strokeLinejoin="miter"
       />
-      {/* The top edge sits flush against the bubble's own body, so it is
-          painted back over in the fill colour to hide the seam. */}
-      <Rect x={0} y={0} width={size} height={stroke} fill={fill} />
     </Svg>
   </View>
 );
