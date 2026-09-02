@@ -98,8 +98,11 @@ export type PermissionStatus = "denied" | "granted";
 /** Which row of the dog share sheet the user picked. */
 export type ShareOption = "copy_link" | "link" | "story";
 
-/** The two things the empty swipe deck offers besides the preferences link. */
-export type EmptyDeckAction = "invite_friend" | "notify_new_dogs";
+/** What the user picked on the empty swipe deck. */
+export type EmptyDeckAction =
+  | "invite_friend"
+  | "notify_new_dogs"
+  | "preferences";
 
 /**
  * The push answer as the empty deck sees it. Wider than

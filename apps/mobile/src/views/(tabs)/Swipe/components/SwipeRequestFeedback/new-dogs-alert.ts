@@ -8,6 +8,11 @@ import type { ShareAction } from "react-native";
 export enum EmptyDeckAction {
   NotifyNewDogs = "notify_new_dogs",
   InviteFriend = "invite_friend",
+  /**
+   * The body copy tells people to adjust their preferences and this is the
+   * only way there from here, so the funnel has to be able to count it.
+   */
+  Preferences = "preferences",
 }
 
 export enum PushPermission {

@@ -397,7 +397,7 @@
     "small": "Small"
   },
   "swipeRequestFeedback": {
-    "emptyDescription": "But hang tight! We've just launched and still have small user base.\n\nWe're working hard to ensure a space filled with doggos very soon 🐶\n\nTry adjusting your preferences or check back later! 😉",
+    "emptyDescription": "We just launched and there are still few dogs nearby 🐶\n\nAdjust your preferences or check back later 😉",
     "emptyTitle": "We couldn't find any more dogs!",
     "inviteFriendButton": "Invite a friend",
     "inviteFriendMessage": "Pegada is where my dog makes friends. Bring yours along:\n{{link}}",

@@ -16,7 +16,13 @@ const ThemedLottieView = withUnistyles(LottieView);
 /** Every one of these was a static `.attrs`, which beat the caller's prop. */
 type IllustrationProps = Omit<LottieViewProps, "source">;
 
-const CONTENT_CONTAINER_STYLE = { flex: 1 };
+/**
+ * `flexGrow` rather than `flex`, which pins the content to the viewport height
+ * and leaves nothing to scroll: the empty deck grew past one screen and its
+ * last button became unreachable. Growing still centres a short state and lets
+ * a tall one scroll.
+ */
+const CONTENT_CONTAINER_STYLE = { flexGrow: 1 };
 
 /**
  * This boundary can replace the whole navigation tree, so nothing themed
@@ -27,6 +33,7 @@ const CONTENT_CONTAINER_STYLE = { flex: 1 };
  */
 export const Container = ({ style, ...props }: ScrollViewProps) => (
   <ScrollView
+    bounces={false}
     {...props}
     contentContainerStyle={CONTENT_CONTAINER_STYLE}
     style={[styles.container, style]}

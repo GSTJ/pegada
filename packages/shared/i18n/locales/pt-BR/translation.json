@@ -397,7 +397,7 @@
     "small": "Pequeno"
   },
   "swipeRequestFeedback": {
-    "emptyDescription": "Mas calma! Acabamos de lançar e ainda temos poucos usuários.\n\nEstamos trabalhando para garantir um espaço cheio de doguinhos logo logo 🐶\n\nTente ajustar suas preferências ou volte mais tarde! 😉",
+    "emptyDescription": "Acabamos de lançar e ainda tem pouca gente por perto 🐶\n\nAjusta suas preferências ou volta mais tarde 😉",
     "emptyTitle": "Parece que os doguinhos acabaram!",
     "inviteFriendButton": "Convidar um amigo",
     "inviteFriendMessage": "O Pegada é onde meu cachorro faz amigos. Traz o seu também:\n{{link}}",
