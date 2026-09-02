@@ -17,6 +17,7 @@ export const ANALYTICS_EVENTS = {
   ADVERTISEMENT: "Advertisement",
   APP_REVIEW: "App Review",
   APP_REVIEW_REQUEST: "App Review Request",
+  APP_REVIEW_SKIPPED: "App Review Skipped",
   CHAT_OPENED: "Chat Opened",
   COMPLETE_DOG_PROFILE: "Complete Dog Profile",
   CREATE_DOG_PROFILE: "Create Dog Profile",
@@ -111,6 +112,31 @@ export type ReengagementPushKind =
   | "unanswered_match";
 
 /**
+ * The moment that produced a review prompt. The whole point of the review
+ * instrumentation: ratings per prompt only means something per trigger.
+ */
+export type ReviewTrigger = "first_match" | "messages_tab" | "second_message";
+
+/**
+ * Where a store rating sheet was reached from: the three prompts, plus the
+ * row in Settings that has always let people rate the app on purpose.
+ */
+export type ReviewSource = ReviewTrigger | "settings";
+
+/**
+ * Why a review prompt did not happen. Only the reasons a user who reached the
+ * trigger can hit are ever sent: a plain "not yet" is not a skip.
+ */
+export type ReviewSkipReason =
+  | "already_reviewed"
+  | "first_prompt_already_shown"
+  | "no_matches"
+  | "not_enough_messages"
+  | "not_first_match"
+  | "store_review_unavailable"
+  | "throttled";
+
+/**
  * Event name to property shape, for events sent from the app.
  *
  * `analytics.track` is typed against this, so an unknown name or a property
@@ -119,8 +145,12 @@ export type ReengagementPushKind =
  */
 export type MobileEventProperties = {
   [ANALYTICS_EVENTS.ADVERTISEMENT]: { action: string; type: string };
-  [ANALYTICS_EVENTS.APP_REVIEW]: undefined;
-  [ANALYTICS_EVENTS.APP_REVIEW_REQUEST]: undefined;
+  [ANALYTICS_EVENTS.APP_REVIEW]: { trigger: ReviewSource };
+  [ANALYTICS_EVENTS.APP_REVIEW_REQUEST]: { trigger: ReviewTrigger };
+  [ANALYTICS_EVENTS.APP_REVIEW_SKIPPED]: {
+    reason: ReviewSkipReason;
+    trigger: ReviewTrigger;
+  };
   [ANALYTICS_EVENTS.CHAT_OPENED]: { match_id: string };
   [ANALYTICS_EVENTS.COMPLETE_DOG_PROFILE]: {
     has_birth_date: boolean;
@@ -329,6 +359,7 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.ADVERTISEMENT,
   ANALYTICS_EVENTS.APP_REVIEW,
   ANALYTICS_EVENTS.APP_REVIEW_REQUEST,
+  ANALYTICS_EVENTS.APP_REVIEW_SKIPPED,
   ANALYTICS_EVENTS.CHAT_OPENED,
   ANALYTICS_EVENTS.COMPLETE_DOG_PROFILE,
   ANALYTICS_EVENTS.CREATE_DOG_PROFILE,
