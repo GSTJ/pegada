@@ -78,6 +78,8 @@ import {
   getDogShareLink,
   shareDogLink,
   shareDogStory,
+  trackDogShareCompleted,
+  trackDogShareTapped,
   type ShareTracking,
 } from "./share-actions";
 
@@ -103,25 +105,25 @@ const tracking: ShareTracking = {
   option: "link",
 };
 
-/** The exact `Dog Share` payload a given stage should produce, so a test
- * asserts on the whole event rather than a subset that would still pass if
- * `dog_id` or `source` silently went missing. */
+/** The exact `Share Completed` payload a given result should produce, so a
+ * test asserts on the whole event rather than a subset that would still pass
+ * if `dog_id` or `is_own_dog` silently went missing. */
 const shareEvent = (
-  type: string,
+  result: string,
   overrides: Partial<{
-    source: string;
     dog_id: string;
-    option: string | null;
     fallback: boolean;
+    is_own_dog: boolean;
+    option: string | null;
   }> = {},
 ) => ({
-  event_type: "Dog Share",
+  event_type: "Share Completed",
   event_properties: {
-    type,
-    source: "own_profile",
     dog_id: "dog-1",
-    option: "link",
     fallback: false,
+    is_own_dog: true,
+    option: "link",
+    result,
     ...overrides,
   },
 });
@@ -130,6 +132,45 @@ const shareEvent = (
 // resets every mock between tests.
 beforeEach(() => {
   pixelRatioGet.mockReturnValue(3);
+});
+
+describe("share funnel events", () => {
+  it("opens the funnel with Share Tapped and nothing else", () => {
+    trackDogShareTapped({ source: "own_profile", dogId: "dog-1" });
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith({
+      event_type: "Share Tapped",
+      event_properties: { dog_id: "dog-1", is_own_dog: true },
+    });
+  });
+
+  it("reports the entry point as is_own_dog rather than a second property", () => {
+    trackDogShareTapped({ source: "dog_profile", dogId: "dog-2" });
+
+    expect(track).toHaveBeenCalledWith({
+      event_type: "Share Tapped",
+      event_properties: { dog_id: "dog-2", is_own_dog: false },
+    });
+  });
+
+  it("closes the funnel with a null option when no row was picked", () => {
+    trackDogShareCompleted("dismissed", {
+      source: "dog_profile",
+      dogId: "dog-2",
+    });
+
+    expect(track).toHaveBeenCalledWith({
+      event_type: "Share Completed",
+      event_properties: {
+        dog_id: "dog-2",
+        fallback: false,
+        is_own_dog: false,
+        option: null,
+        result: "dismissed",
+      },
+    });
+  });
 });
 
 describe("getDogShareLink", () => {
@@ -216,7 +257,7 @@ describe("copyDogLink", () => {
     await copyDogLink("https://www.pegada.app/dog/abc", copy, copyTracking);
 
     expect(track).toHaveBeenCalledWith(
-      shareEvent("success", { option: "copy_link" }),
+      shareEvent("shared", { option: "copy_link" }),
     );
 
     track.mockClear();
@@ -260,20 +301,20 @@ describe("shareDogLink", () => {
     expect(alert).toHaveBeenCalledWith("Oops", "Try again later");
   });
 
-  it("tracks a success when the user goes through with the native sheet", async () => {
+  it("tracks a shared result when the user goes through with the native sheet", async () => {
     share.mockResolvedValue({ action: "sharedAction" });
 
     await shareDogLink("check out Rex", unavailableCopy, tracking);
 
-    expect(track).toHaveBeenCalledWith(shareEvent("success"));
+    expect(track).toHaveBeenCalledWith(shareEvent("shared"));
   });
 
-  it("tracks a cancel when the native sheet is dismissed", async () => {
+  it("tracks a dismissed result when the native sheet is dismissed", async () => {
     share.mockResolvedValue({ action: "dismissedAction" });
 
     await shareDogLink("check out Rex", unavailableCopy, tracking);
 
-    expect(track).toHaveBeenCalledWith(shareEvent("cancel"));
+    expect(track).toHaveBeenCalledWith(shareEvent("dismissed"));
   });
 
   it("tracks an error when Share.share rejects", async () => {
@@ -381,7 +422,7 @@ describe("shareDogStory", () => {
     expect(params.hide).not.toHaveBeenCalled();
   });
 
-  it("tracks the dismissal as a cancel rather than an error", async () => {
+  it("tracks the dismissal as dismissed rather than an error", async () => {
     isAvailableAsync.mockResolvedValue(true);
 
     await shareDogStory({
@@ -391,7 +432,7 @@ describe("shareDogStory", () => {
     });
 
     expect(track).toHaveBeenCalledWith(
-      shareEvent("cancel", { option: "story" }),
+      shareEvent("dismissed", { option: "story" }),
     );
   });
 
@@ -405,7 +446,7 @@ describe("shareDogStory", () => {
     expect(shareAsync).toHaveBeenCalled();
   });
 
-  it("tracks a story success when shareAsync resolves", async () => {
+  it("tracks a story share when shareAsync resolves", async () => {
     isAvailableAsync.mockResolvedValue(true);
     capture.mockResolvedValue("file:///tmp/story.png");
     shareAsync.mockResolvedValue();
@@ -416,7 +457,7 @@ describe("shareDogStory", () => {
     });
 
     expect(track).toHaveBeenCalledWith(
-      shareEvent("success", { option: "story" }),
+      shareEvent("shared", { option: "story" }),
     );
   });
 
@@ -430,10 +471,10 @@ describe("shareDogStory", () => {
     });
 
     expect(track).toHaveBeenCalledWith(
-      shareEvent("success", { option: "story", fallback: true }),
+      shareEvent("shared", { option: "story", fallback: true }),
     );
     expect(track).not.toHaveBeenCalledWith(
-      shareEvent("success", { option: "story" }),
+      shareEvent("shared", { option: "story" }),
     );
   });
 });

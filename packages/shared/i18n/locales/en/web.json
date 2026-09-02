@@ -74,6 +74,24 @@
       }
     }
   },
+  "dog": {
+    "metadata": {
+      "title": "{{name}} | Pegada",
+      "descriptionSuffix": "Meet {{name}} and other dogs near you on Pegada."
+    },
+    "hero": {
+      "invite": "{{name}} wants to make friends",
+      "nextStep": "Like {{name}} and chat with the person who looks after {{pronoun}}."
+    },
+    "cta": {
+      "button": "Like {{name}}",
+      "reassurance": "You'll need the app. It's free and takes a minute.",
+      "mobileContext": "{{pronoun}} wants to make friends."
+    },
+    "og": {
+      "tag": "Meet them on Pegada"
+    }
+  },
   "privacyPolicy": {
     "metadata": {
       "title": "Pegada | Privacy Policy"

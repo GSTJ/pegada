@@ -25,7 +25,8 @@ import {
   getDogShareLink,
   shareDogLink,
   shareDogStory,
-  trackDogShare,
+  trackDogShareCompleted,
+  trackDogShareTapped,
   type ShareOption,
   type ShareSource,
 } from "./share-actions";
@@ -120,12 +121,14 @@ const DogShareSheetContent = ({
   useEffect(() => {
     // The denominator for every rate below: how many times the sheet was
     // opened at all. Fires once per mount, not once per render.
-    trackDogShare("open", { source, dogId: dog.id });
+    trackDogShareTapped({ source, dogId: dog.id });
 
     return () => {
       isMountedRef.current = false;
+      // Closing without picking a row is still an ending, so it gets its own
+      // completion with no `option` rather than leaving the open unmatched.
       if (!pickedOptionRef.current) {
-        trackDogShare("cancel", { source, dogId: dog.id });
+        trackDogShareCompleted("dismissed", { source, dogId: dog.id });
       }
     };
   }, [source, dog.id]);
@@ -182,14 +185,12 @@ const DogShareSheetContent = ({
 
   const handleShareLink = () => {
     const tracking = trackingFor("link");
-    trackDogShare("select", tracking);
     hide();
     void shareDogLink(shareLinkMessage, sharingNotAvailableCopy, tracking);
   };
 
   const handleCopyLink = () => {
     const tracking = trackingFor("copy_link");
-    trackDogShare("select", tracking);
     hide();
     void copyDogLink(
       link,
@@ -203,7 +204,6 @@ const DogShareSheetContent = ({
 
   const handleShareStory = async () => {
     const tracking = trackingFor("story");
-    trackDogShare("select", tracking);
     setIsSharingStory(true);
 
     try {

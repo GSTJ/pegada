@@ -1,3 +1,4 @@
+import type { ShareOption } from "@pegada/shared/analytics/events";
 import type { TFunction } from "i18next";
 
 import type { ComponentRef, RefObject } from "react";
@@ -28,13 +29,13 @@ import { EXPORT_PNG_HEIGHT, EXPORT_PNG_WIDTH } from "./story-card-styles";
  * straight through to these.
  */
 
-/** Which screen the sheet was opened from, so the two entry points can be
- * compared without splitting the funnel across two event names. */
+/** Which screen the sheet was opened from. The app's own word for the fact
+ * the analytics catalogue records as `is_own_dog`. */
 export type ShareSource = "own_profile" | "dog_profile";
 
-/** Which row of the sheet the user picked. `null` on the sheet-level
- * events (opened, dismissed) where no row has been chosen yet. */
-export type ShareOption = "link" | "copy_link" | "story";
+/** Re-exported so the sheet can name a row without reaching past this module
+ * into the shared catalogue for one union. */
+export type { ShareOption };
 
 export type ShareTracking = {
   source: ShareSource;
@@ -47,25 +48,48 @@ export type ShareTracking = {
 };
 
 /**
- * Every share funnel event goes out under one `Dog Share` name with a
- * `type` stage property, matching how `Upgrade` is instrumented in
- * `views/UpgradeWall`. One event name keeps the whole funnel (open,
- * select, success, cancel, error) readable as a single PostHog insight
- * broken down by `type` and `option` instead of five separate events that
- * have to be stitched together.
+ * The two properties that identify a share regardless of how it ended.
+ *
+ * `source` and `is_own_dog` are the same fact said twice — the sheet only
+ * ever opens from a dog's profile or the user's own — so only the
+ * catalogued one goes on the wire.
  */
-export const trackDogShare = (
-  stage: "open" | "select" | "success" | "cancel" | "error",
+const shareIdentity = (tracking: Omit<ShareTracking, "option">) => ({
+  dog_id: tracking.dogId,
+  is_own_dog: tracking.source === "own_profile",
+});
+
+/**
+ * The top of the share funnel: the sheet was opened. Fires once per open,
+ * before any row has been picked, so it is the denominator every rate below
+ * is measured against.
+ */
+export const trackDogShareTapped = (tracking: Omit<ShareTracking, "option">) =>
+  analytics.track({
+    event_type: "Share Tapped",
+    event_properties: shareIdentity(tracking),
+  });
+
+/**
+ * The bottom of the funnel: the flow that open started has finished, however
+ * it finished. Exactly one of these follows every "Share Tapped".
+ *
+ * Which row was used and whether the story degraded to a link ride along as
+ * properties rather than as their own event names, so "story shares that
+ * completed" and "story shares that fell back" stay one insight split by
+ * `option` and `fallback` instead of a set of names to stitch together.
+ */
+export const trackDogShareCompleted = (
+  result: "dismissed" | "error" | "shared",
   tracking: Omit<ShareTracking, "option"> & { option?: ShareOption },
 ) =>
   analytics.track({
-    event_type: "Dog Share",
+    event_type: "Share Completed",
     event_properties: {
-      type: stage,
-      source: tracking.source,
-      dog_id: tracking.dogId,
-      option: tracking.option ?? null,
+      ...shareIdentity(tracking),
       fallback: Boolean(tracking.fallback),
+      option: tracking.option ?? null,
+      result,
     },
   });
 
@@ -87,7 +111,7 @@ export const buildDogShareLinkMessage = (t: TFunction, link: string) =>
  *
  * `Share.share` resolves with `dismissedAction` when the user backs out of
  * the native sheet, which is the only cancel signal any of the three rows
- * gets, so it is tracked as `type: "cancel"` rather than a success.
+ * gets, so it is tracked as `result: "dismissed"` rather than a success.
  */
 export const shareDogLink = async (
   message: string,
@@ -98,14 +122,14 @@ export const shareDogLink = async (
     const result = await Share.share({ message });
 
     if (tracking) {
-      trackDogShare(
-        result.action === Share.dismissedAction ? "cancel" : "success",
+      trackDogShareCompleted(
+        result.action === Share.dismissedAction ? "dismissed" : "shared",
         tracking,
       );
     }
   } catch (error) {
     sendError(error);
-    if (tracking) trackDogShare("error", tracking);
+    if (tracking) trackDogShareCompleted("error", tracking);
     Alert.alert(unavailableCopy.title, unavailableCopy.message);
   }
 };
@@ -120,10 +144,10 @@ export const copyDogLink = async (
   try {
     await Clipboard.setStringAsync(link);
     magicToast.success(copy.success, 1500);
-    if (tracking) trackDogShare("success", tracking);
+    if (tracking) trackDogShareCompleted("shared", tracking);
   } catch (error) {
     sendError(error);
-    if (tracking) trackDogShare("error", tracking);
+    if (tracking) trackDogShareCompleted("error", tracking);
     magicToast.alert(copy.failure);
   }
 };
@@ -205,7 +229,7 @@ export const shareDogStory = async (params: {
 
   const cancelled = () => {
     if (!isCancelled?.()) return false;
-    if (tracking) trackDogShare("cancel", tracking);
+    if (tracking) trackDogShareCompleted("dismissed", tracking);
     return true;
   };
 
@@ -258,7 +282,7 @@ export const shareDogStory = async (params: {
     // the story or dismissed the sheet, so this is "handed off to the OS",
     // not "definitely posted". The link rows are the only place a cancel
     // is observable.
-    if (tracking) trackDogShare("success", tracking);
+    if (tracking) trackDogShareCompleted("shared", tracking);
   } catch (error) {
     if (cancelled()) return;
 

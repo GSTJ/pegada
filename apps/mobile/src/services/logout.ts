@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { payments } from "@/services/payments";
 import { queryClient } from "@/services/query-client";
@@ -27,5 +28,12 @@ export const logout = async () => {
     queryClient.clear();
   } catch (error) {
     sendError(error);
+  } finally {
+    // In `finally` because `payments.logOut()` above throws when RevenueCat is
+    // already anonymous, which is a normal state to log out from — and a reset
+    // skipped there would leave the next person to sign in on this device
+    // inheriting the previous one's distinct id. Account deletion routes
+    // through here too, so one call covers both.
+    analytics.reset();
   }
 };
