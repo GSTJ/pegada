@@ -21,7 +21,6 @@ import { ZodError } from "zod";
 
 import { logDebug, sendError } from "./errors/errors";
 import { signAccessToken, type Session } from "./shared/auth-token";
-import { touchLastActiveAt } from "./shared/last-active";
 
 export { getSession, type Session } from "./shared/auth-token";
 
@@ -148,11 +147,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-
-  // Every authenticated request passes through here, which makes it the one
-  // place that sees "this account is in use" without a router knowing about
-  // it. Not awaited: see touchLastActiveAt.
-  touchLastActiveAt(ctx.db, ctx.session.user.id);
 
   return next({
     ctx: {

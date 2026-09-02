@@ -72,17 +72,11 @@ model User {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  /// Server-side only: last time an authenticated request arrived for this
-  /// user, throttled to one write per 10 minutes. Retention and dormancy
-  /// reporting read it; it is never returned to the client.
-  lastActiveAt DateTime?
-
   // Plan
   plan PlanType @default(FREE)
 
   @@index([latitude])
   @@index([longitude])
-  @@index([lastActiveAt])
 }
 
 model Dog {

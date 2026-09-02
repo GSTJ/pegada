@@ -21,15 +21,8 @@ export const userRouter = createTRPCRouter({
     .input(userSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const updatedUser = await UserService.updateUserById(userId, input);
-
-      // `lastActiveAt` is written by the authenticated middleware for
-      // retention reporting and has no meaning in the app, so it stops here
-      // rather than riding along in the one procedure that returns a whole
-      // user row. Prisma 5.17 has no top-level `omit`, hence the destructure.
-      const { lastActiveAt: _lastActiveAt, ...user } = updatedUser;
-
-      return user;
+      const updatedDog = await UserService.updateUserById(userId, input);
+      return updatedDog;
     }),
 
   /**
