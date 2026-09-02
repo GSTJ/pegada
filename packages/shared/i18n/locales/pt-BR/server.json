@@ -17,6 +17,10 @@
       "title": "🐶 {{name}} recebeu um like! 🩷",
       "body": "Vem procurar o pretendente misterioso 🕵️‍♂️"
     },
+    "photoRejected": {
+      "title": "Uma foto de {{name}} não foi aprovada",
+      "body": "Ela não segue nossas diretrizes da comunidade. Você pode adicionar outra no perfil"
+    },
     "reengagement": {
       "unansweredMatch": {
         "title": "🐶 {{name}} ainda está esperando",
