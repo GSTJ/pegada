@@ -121,7 +121,8 @@
   "dog": {
     "metadata": {
       "title": "{{name}} | Pegada",
-      "descriptionSuffix": "Conheça {{name}} e outros cachorros perto de você no Pegada."
+      "descriptionSuffix": "Conheça {{name}} e outros cachorros perto de você no Pegada.",
+      "ogImageAlt": "Uma foto de {{name}} em um card do Pegada, ao lado do nome, da raça e da idade."
     },
     "hero": {
       "invite": "{{article}} {{name}} quer fazer amigos",
