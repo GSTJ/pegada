@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import * as React from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
 
@@ -92,6 +93,16 @@ const AreYouLikingTheAppModal: React.FC<{ trigger: ReviewTrigger }> = ({
 }) => {
   const { t } = useTranslation();
   const { hide } = useMagicModal();
+
+  // Sent from the modal's own mount, which is the only place that can honestly
+  // claim the user was asked. Everything upstream is a decision that can still
+  // come to nothing.
+  useEffect(() => {
+    analytics.track({
+      event_type: "App Review Request",
+      event_properties: { trigger },
+    });
+  }, [trigger]);
 
   const openReviewModal = () => {
     analytics.track({
@@ -200,7 +211,7 @@ export const handleRequestAppReview = async ({
     if (!decision.allowed) {
       if (decision.blocked) {
         analytics.track({
-          event_type: "review_prompt_skipped",
+          event_type: "App Review Skipped",
           event_properties: { trigger, reason: decision.reason },
         });
       }
@@ -221,12 +232,9 @@ export const handleRequestAppReview = async ({
     // caller aimed at can be gone by the time they all answer.
     if (canStillAsk?.() === false) return;
 
-    analytics.track({
-      event_type: "review_prompt_requested",
-      event_properties: { trigger },
-    });
-
-    // Finally, we ask for a review
+    // Finally, we ask for a review. "App Review Request" rides the modal's own
+    // mount rather than this line, so the event and the question the user sees
+    // are the same moment.
     magicModal.show(() => <AreYouLikingTheAppModal trigger={trigger} />);
 
     // Recorded after the modal is up, never before. These two are what the

@@ -1,9 +1,10 @@
 /**
  * `app-review-policy.test.ts` pins the rules. This file pins the wiring around
  * them, which is where the trigger change can go wrong without any rule being
- * wrong: reading the right storage keys, emitting the two events the readout
- * depends on under exactly the right conditions, and leaving behind the
- * marker that stops trigger 2 from asking a user trigger 1 already asked.
+ * wrong: reading the right storage keys, handing the modal the trigger the
+ * readout is built on, reporting the users who were blocked, and leaving
+ * behind the marker that stops trigger 2 asking a user trigger 1 already
+ * asked.
  *
  * Every React Native flavoured import is stubbed, matching the other tests in
  * this package: there is no RN transform here, and nothing below renders.
@@ -108,6 +109,19 @@ const asyncStorage = jest.mocked(AsyncStorage);
 const track = jest.mocked(analytics.track);
 const show = jest.mocked(magicModal.show);
 
+/**
+ * The trigger the modal was handed. "App Review Request" is sent from the
+ * modal's own mount, which nothing here renders, so the assertion that the
+ * trigger survives the trip is made on the element instead.
+ */
+const shownTrigger = () => {
+  const render = show.mock.calls[0]?.[0] as
+    | (() => { props: { trigger?: string } })
+    | undefined;
+
+  return render?.().props.trigger;
+};
+
 /** Answers reads per key, so a test only names the keys it cares about. */
 const givenStorage = (values: Partial<Record<StorageKeys, string>>) => {
   asyncStorage.getItem.mockImplementation((key) =>
@@ -121,17 +135,14 @@ beforeEach(() => {
 });
 
 describe("the first match trigger", () => {
-  it("asks, records the ask, and names the trigger in the event", async () => {
+  it("asks, names the trigger, and records the ask", async () => {
     await handleRequestAppReview({
       trigger: ReviewTrigger.FirstMatch,
       matchCount: 1,
     });
 
     expect(show).toHaveBeenCalled();
-    expect(track).toHaveBeenCalledWith({
-      event_type: "review_prompt_requested",
-      event_properties: { trigger: ReviewTrigger.FirstMatch },
-    });
+    expect(shownTrigger()).toBe(ReviewTrigger.FirstMatch);
     // Without this marker the second-message trigger would ask the same user
     // again as soon as the month is up.
     expect(asyncStorage.setItem).toHaveBeenCalledWith(
@@ -209,7 +220,7 @@ describe("the first match trigger", () => {
 
     expect(show).not.toHaveBeenCalled();
     expect(track).toHaveBeenCalledWith({
-      event_type: "review_prompt_skipped",
+      event_type: "App Review Skipped",
       event_properties: {
         trigger: ReviewTrigger.FirstMatch,
         reason: "throttled",
@@ -227,7 +238,7 @@ describe("the first match trigger", () => {
 
     expect(show).not.toHaveBeenCalled();
     expect(track).toHaveBeenCalledWith({
-      event_type: "review_prompt_skipped",
+      event_type: "App Review Skipped",
       event_properties: {
         trigger: ReviewTrigger.FirstMatch,
         reason: "store_review_unavailable",
@@ -268,10 +279,7 @@ describe("the second message trigger", () => {
     await handleMessageSentAppReview();
 
     expect(show).toHaveBeenCalled();
-    expect(track).toHaveBeenCalledWith({
-      event_type: "review_prompt_requested",
-      event_properties: { trigger: ReviewTrigger.SecondMessage },
-    });
+    expect(shownTrigger()).toBe(ReviewTrigger.SecondMessage);
   });
 
   it("holds its peace when the match prompt already landed", async () => {

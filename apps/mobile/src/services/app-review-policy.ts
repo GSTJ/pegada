@@ -1,3 +1,8 @@
+import type {
+  ReviewSkipReason as ReviewSkipReasonValue,
+  ReviewTrigger as ReviewTriggerValue,
+} from "@pegada/shared/analytics/events";
+
 import { addMonths } from "date-fns/addMonths";
 import { isBefore } from "date-fns/isBefore";
 
@@ -13,31 +18,40 @@ import { isBefore } from "date-fns/isBefore";
  * rules can be read and tested without a renderer.
  */
 
-export enum ReviewTrigger {
-  /** The celebration screen, the first time this user ever matches. */
-  FirstMatch = "first_match",
-  /** The second message they send, when the match prompt never reached them. */
-  SecondMessage = "second_message",
-  /** The original trigger: the Messages tab with at least one match. */
-  MessagesTab = "messages_tab",
-}
+/**
+ * Named constants over the vocabulary the analytics catalogue owns, rather
+ * than enums of their own: the values travel as event properties, so the
+ * catalogue is where they have to be declared, and a second declaration here
+ * would be a copy to keep in step.
+ */
+export type ReviewTrigger = ReviewTriggerValue;
+export type ReviewSkipReason = ReviewSkipReasonValue;
 
-export enum ReviewSkipReason {
+export const ReviewTrigger = {
+  /** The celebration screen, the first time this user ever matches. */
+  FirstMatch: "first_match",
+  /** The second message they send, when the match prompt never reached them. */
+  SecondMessage: "second_message",
+  /** The original trigger: the Messages tab with at least one match. */
+  MessagesTab: "messages_tab",
+} as const satisfies Record<string, ReviewTrigger>;
+
+export const ReviewSkipReason = {
   /** They already went to the store. Never ask again. */
-  AlreadyReviewed = "already_reviewed",
+  AlreadyReviewed: "already_reviewed",
   /** Asked within the last month, whatever the trigger was. */
-  Throttled = "throttled",
+  Throttled: "throttled",
   /** TestFlight, web, or Android below 5.0. */
-  StoreReviewUnavailable = "store_review_unavailable",
+  StoreReviewUnavailable: "store_review_unavailable",
   /** Not their first match, so this is not the peak we are aiming at. */
-  NotFirstMatch = "not_first_match",
+  NotFirstMatch: "not_first_match",
   /** Trigger 2 exists only for the users trigger 1 could not reach. */
-  FirstPromptAlreadyShown = "first_prompt_already_shown",
+  FirstPromptAlreadyShown: "first_prompt_already_shown",
   /** Still on their first message. */
-  NotEnoughMessages = "not_enough_messages",
+  NotEnoughMessages: "not_enough_messages",
   /** The Messages tab with an empty list is nobody's happy moment. */
-  NoMatches = "no_matches",
-}
+  NoMatches: "no_matches",
+} as const satisfies Record<string, ReviewSkipReason>;
 
 /** The message trigger 2 waits for. */
 export const SECOND_MESSAGE_TRIGGER_COUNT = 2;
