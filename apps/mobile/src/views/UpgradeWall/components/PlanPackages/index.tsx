@@ -15,31 +15,7 @@ import { styles as planPackagesStyles } from "@/views/UpgradeWall/components/Pla
 
 import { PlanCard } from "./plan-card";
 
-const periodToDays = (period: string | null | undefined) => {
-  if (!period) return 0;
-
-  const match = period.match(/P(\d+)(D|W|M|Y)/);
-  if (!match) return 0;
-
-  const [, num, unit] = match;
-
-  if (!num || !unit) throw new Error("Invalid period format");
-
-  const numVal = Math.trunc(Number(num));
-
-  switch (unit) {
-    case "D":
-      return numVal;
-    case "W":
-      return numVal * 7;
-    case "M":
-      return numVal * 30; // Approximation
-    case "Y":
-      return numVal * 365; // Approximation
-    default:
-      return 0;
-  }
-};
+const MONTHS_IN_A_YEAR = 12;
 
 type OfferingsProps = {
   selectedPackage: PurchasesPackage | null | undefined;
@@ -67,56 +43,63 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   }, [isError, router, t]);
 
   const packageList = offeringsData
-    ? Object.values(offeringsData.availablePackages).sort(
+    ? [...offeringsData.availablePackages].sort(
         // Highest price first
         (a, b) => b.product.price - a.product.price,
       )
     : [];
 
-  const packageWithLessRelativeValue = offeringsData
-    ? Object.values(offeringsData.availablePackages).sort((a, b) => {
-        const relativeValueA =
-          a.product.price / periodToDays(a.product.subscriptionPeriod);
-        const relativeValueB =
-          b.product.price / periodToDays(b.product.subscriptionPeriod);
+  const annualPackage =
+    offeringsData?.annual ??
+    packageList.find((pkg) => pkg.packageType === "ANNUAL");
 
-        return relativeValueB - relativeValueA;
-      })[0]
-    : undefined;
+  const monthlyPackage =
+    offeringsData?.monthly ??
+    packageList.find((pkg) => pkg.packageType === "MONTHLY");
 
-  // `packageList` is rebuilt on every render, so depending on it would run
-  // this effect every render. The first package is the only part that matters.
-  const [defaultPackage] = packageList;
+  // Yearly first: preselect the annual package when the offering has one, and
+  // otherwise fall back to the most expensive package (the previous default).
+  // Both are stable references from the offerings query, so the effect below
+  // does not re-run on every render even though `packageList` is rebuilt.
+  const defaultPackage = annualPackage ?? packageList[0];
 
   useEffect(() => {
     if (defaultPackage && !selectedPackage) {
-      // Optionally set a default package, or leave it to user interaction
       setSelectedPackage(defaultPackage);
     }
   }, [defaultPackage, selectedPackage, setSelectedPackage]);
 
+  // What a year of the monthly plan would cost against the yearly price.
+  // Undefined when either plan is missing or the yearly plan is not cheaper,
+  // in which case no badge is shown.
+  const yearlySavingPercent = (() => {
+    if (!annualPackage || !monthlyPackage) return;
+
+    const twelveMonths = monthlyPackage.product.price * MONTHS_IN_A_YEAR;
+    if (twelveMonths <= 0) return;
+
+    const percent = Math.round(
+      ((twelveMonths - annualPackage.product.price) / twelveMonths) * 100,
+    );
+
+    return percent > 0 ? percent : undefined;
+  })();
+
   return (
     <View style={planPackagesStyles.container}>
-      {packageList?.map((planPackage) => {
-        // Get old price comparing with the package with less relative value / period * this package period
-        const oldPrice = packageWithLessRelativeValue
-          ? (packageWithLessRelativeValue.product.price /
-              periodToDays(
-                packageWithLessRelativeValue.product.subscriptionPeriod,
-              )) *
-            periodToDays(planPackage.product.subscriptionPeriod)
-          : undefined;
-
-        return (
-          <PlanCard
-            key={planPackage.identifier}
-            selected={selectedPackage?.identifier === planPackage.identifier}
-            onPress={() => setSelectedPackage(planPackage)}
-            planPackage={planPackage}
-            oldPrice={oldPrice}
-          />
-        );
-      })}
+      {packageList.map((planPackage) => (
+        <PlanCard
+          key={planPackage.identifier}
+          selected={selectedPackage?.identifier === planPackage.identifier}
+          onPress={() => setSelectedPackage(planPackage)}
+          planPackage={planPackage}
+          savingPercent={
+            planPackage.identifier === annualPackage?.identifier
+              ? yearlySavingPercent
+              : undefined
+          }
+        />
+      ))}
     </View>
   );
 };

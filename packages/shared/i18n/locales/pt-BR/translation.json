@@ -4,8 +4,7 @@
     "description": "Você curtiu <b>{{count}} cachorros</b> em <b>24h</b>. Espere ou vire <b>premium</b> para continuar deslizando.",
     "remaining": "restantes",
     "timeHours": "{{time}}h",
-    "winFreeTrial": "Ganhe um Teste Gratuito",
-    "getPremium": "Descubra o Premium"
+    "getPremium": "Assinar Premium"
   },
   "liveStatus": {
     "title": "Curtidas recarregando",
@@ -296,11 +295,12 @@
       "fetchingOfferings": "Ocorreu um erro ao buscar as ofertas."
     },
     "upgradeWall": {
-      "earnedFreeTrial": "Inicie o Teste Gratuito",
       "getPremium": "Obtenha o Premium",
-      "tryPremiumFree": "Experimente o Premium grátis por {{duration}}",
       "enjoyFullAccess": "Aproveite o acesso total a todos os recursos e turbine o seu doguinho",
-      "startFreeTrial": "Inicie o Teste Gratuito"
+      "subscribe": "Assinar Premium",
+      "price": "{{price}}, cancele quando quiser",
+      "priceMonthly": "{{price}} por mês, cancele quando quiser",
+      "priceYearly": "{{price}} por ano, cancele quando quiser"
     }
   },
   "networkBoundary": {

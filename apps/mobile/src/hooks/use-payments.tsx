@@ -1,4 +1,4 @@
-import type { CustomerInfo, PurchasesPackage } from "react-native-purchases";
+import type { CustomerInfo } from "react-native-purchases";
 
 import { useEffect } from "react";
 
@@ -19,19 +19,6 @@ const usePaymentsLogin = () => {
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
-};
-
-export const useEligibleForTrial = ({
-  offering,
-}: {
-  offering?: PurchasesPackage | null | undefined;
-} = {}) => {
-  const customerInfo = useCustomerInfo();
-
-  const hasIntroPrice = offering?.product.introPrice;
-  const hadPremium = customerInfo.data?.entitlements.all.premium;
-
-  return hasIntroPrice && !hadPremium;
 };
 
 export const useCustomerInfo = () => {

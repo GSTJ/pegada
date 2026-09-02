@@ -4,8 +4,7 @@
     "description": "You have liked <b>{{count}} dogs</b> in the last <b>24 hours</b>. Wait or become <b>premium</b> to keep swiping.",
     "remaining": "remaining",
     "timeHours": "{{time}}h",
-    "winFreeTrial": "Win a Free Trial",
-    "getPremium": "Discover Premium"
+    "getPremium": "Get Premium"
   },
   "liveStatus": {
     "title": "Likes recharging",
@@ -261,11 +260,12 @@
       "fetchingOfferings": "An error occurred while fetching the offerings."
     },
     "upgradeWall": {
-      "earnedFreeTrial": "You Earned a Free Trial",
       "getPremium": "Get Premium",
-      "tryPremiumFree": "Try Premium Free for {{duration}}",
       "enjoyFullAccess": "Enjoy full access to all features and supercharge your doggie",
-      "startFreeTrial": "Start Free Trial"
+      "subscribe": "Get Premium",
+      "price": "{{price}}, cancel anytime",
+      "priceMonthly": "{{price}} per month, cancel anytime",
+      "priceYearly": "{{price}} per year, cancel anytime"
     }
   },
   "links": {

@@ -40,14 +40,15 @@ type PlanCardProps = {
   selected: boolean;
   onPress: () => void;
   planPackage: PurchasesPackage;
-  oldPrice?: number;
+  /** Percent saved against paying monthly. Hidden when undefined. */
+  savingPercent?: number;
 };
 
 export const PlanCard: React.FC<PlanCardProps> = ({
   selected,
   onPress,
   planPackage: pkg,
-  oldPrice,
+  savingPercent,
 }) => {
   const { t } = useTranslation();
   const { product } = pkg;
@@ -79,9 +80,8 @@ export const PlanCard: React.FC<PlanCardProps> = ({
     }
   })();
 
-  const percentSaved = oldPrice
-    ? Math.floor(((oldPrice - currentPrice) / oldPrice) * 100)
-    : undefined;
+  // A single month already reads as "X/mo", so the total would just repeat it.
+  const showTotalPrice = !(periodUnit === "M" && periodValue === 1);
 
   const translatedPlanName = (() => {
     switch (identifier) {
@@ -114,23 +114,23 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             fontWeight="semibold"
             style={planPackagesStyles.price}
           >
-            {formatPrice(pricePerMonth, currencyCode)}/{t("plans.M")}{" "}
-            {percentSaved ? (
+            {`${formatPrice(pricePerMonth, currencyCode)}/${t("plans.M")}`}
+            {showTotalPrice ? (
               <Text color="subtitle" fontSize="md">
-                ({formattedCurrentPrice}/{t(`plans.${periodUnit}`)})
+                {` (${formattedCurrentPrice}/${t(`plans.${periodUnit}`)})`}
               </Text>
             ) : null}
           </Price>
         ) : null}
       </View>
-      {percentSaved ? (
+      {savingPercent ? (
         <View style={planPackagesStyles.percentContainer}>
           <PercentText
             fontSize="sm"
             fontWeight="semibold"
             style={planPackagesStyles.percentText}
           >
-            {t("plans.save", { percent: percentSaved })}
+            {t("plans.save", { percent: savingPercent })}
           </PercentText>
         </View>
       ) : null}
