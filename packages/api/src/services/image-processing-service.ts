@@ -9,14 +9,26 @@ import sharp from "sharp";
 import { config } from "../shared/config";
 import { FEATURES, FlagService } from "./flag-service";
 import { ImageModerationService } from "./image-moderation-service";
+import { ImageService } from "./image-service";
 
 export type ImageModerationOutcome = {
   /** What to write to `Image.status`. */
   status: ImageStatus;
-  /** Null when no call was made, which is the only case worth not charting. */
+  /**
+   * The verdict this run produced, or null when no call was made. Null covers
+   * both a photo nobody moderated and a redelivered job reusing a verdict that
+   * is already on the row, which is exactly the set of cases that must not be
+   * written, charted or pushed about a second time.
+   */
   result: ModerationResult | null;
   mode: ImageModerationMode;
 };
+
+/** Only `enforce` can turn a rejection into a status. */
+const statusFor = (mode: ImageModerationMode, verdict: string) =>
+  mode === "enforce" && verdict === "reject"
+    ? IMAGE_STATUS.REJECTED
+    : IMAGE_STATUS.APPROVED;
 
 export class ImageProcessingService {
   /**
@@ -28,13 +40,15 @@ export class ImageProcessingService {
    * PostHog flag, which is the runtime kill switch. Either one off means no
    * call, no cost, and the same APPROVED the old path produced.
    *
-   * Only `enforce` can reject. An `error` verdict approves in every mode: a
-   * provider outage must not be able to hold back everyone's photos at once.
+   * An `error` verdict approves in every mode: a provider outage must not be
+   * able to hold back everyone's photos at once.
    */
   static moderateImage = async ({
     arrayBuffer,
+    imageId,
   }: {
     arrayBuffer: ArrayBuffer;
+    imageId: string;
   }): Promise<ImageModerationOutcome> => {
     const mode = config.IMAGE_MODERATION_MODE;
     const skipped: ImageModerationOutcome = {
@@ -52,14 +66,24 @@ export class ImageProcessingService {
 
     if (!isModerationEnabled) return skipped;
 
+    // The queue delivers at least once, and the job can also be retried after
+    // the write that follows this call fails. A row that already carries a
+    // verdict has already been paid for, so the redelivery re-derives the
+    // status from it instead of buying a second opinion. The read only happens
+    // on jobs that would otherwise call a provider, so the `off` path is still
+    // a single query.
+    const stored = await ImageService.getStoredModerationVerdict(imageId);
+    if (stored?.moderationVerdict) {
+      return {
+        status: statusFor(mode, stored.moderationVerdict),
+        result: null,
+        mode,
+      };
+    }
+
     const result = await ImageModerationService.moderate(arrayBuffer);
 
-    const status =
-      mode === "enforce" && result.verdict === "reject"
-        ? IMAGE_STATUS.REJECTED
-        : IMAGE_STATUS.APPROVED;
-
-    return { status, result, mode };
+    return { status: statusFor(mode, result.verdict), result, mode };
   };
 
   static async createBlurhash({ arrayBuffer }: { arrayBuffer: ArrayBuffer }) {

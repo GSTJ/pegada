@@ -198,7 +198,6 @@ export class ImageModerationService {
    */
   static async moderate(
     image: ArrayBuffer | Buffer,
-    mediaType = OUTBOUND_MEDIA_TYPE,
   ): Promise<ModerationResult> {
     const setting = config.IMAGE_MODERATION_MODEL;
     const startedAt = Date.now();
@@ -237,7 +236,9 @@ export class ImageModerationService {
             role: "user",
             content: [
               { type: "text", text: USER_PROMPT },
-              { type: "file", mediaType, data },
+              // Always the type `prepareImage` re-encodes to, whatever the
+              // phone uploaded.
+              { type: "file", mediaType: OUTBOUND_MEDIA_TYPE, data },
             ],
           },
         ],

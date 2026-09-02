@@ -356,8 +356,8 @@ importers:
         specifier: ^11.1.1
         version: 11.1.1
       zod:
-        specifier: 3.23.8
-        version: 3.23.8
+        specifier: 3.25.76
+        version: 3.25.76
     devDependencies:
       '@babel/core':
         specifier: ^7.29.0
@@ -7826,9 +7826,6 @@ packages:
     peerDependencies:
       i18next: '>=21.3.0'
       zod: '>=3.17.0'
-
-  zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
@@ -16175,8 +16172,6 @@ snapshots:
     dependencies:
       i18next: 23.12.2
       zod: 3.25.76
-
-  zod@3.23.8: {}
 
   zod@3.25.76: {}
 

@@ -179,6 +179,7 @@ export const handleProcessImage = async (image: IProcessImageJobData) => {
 
   const moderation = await ImageProcessingService.moderateImage({
     arrayBuffer,
+    imageId: image.id,
   });
 
   let blurhash: string | undefined;

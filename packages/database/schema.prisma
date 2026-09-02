@@ -57,16 +57,16 @@ model User {
   dogs             Dog[]
   featureInterests FeatureInterest[]
   // Location
-  city             String?
-  state            String?
-  country          String?
-  latitude         Float?
-  longitude        Float?
-  code             String?
-  codeExpiresAt    DateTime?
+  city          String?
+  state         String?
+  country       String?
+  latitude      Float?
+  longitude     Float?
+  code          String?
+  codeExpiresAt DateTime?
 
   // Push notifications
-  pushToken               String?
+  pushToken String?
   newDogsAlertRequestedAt DateTime?
 
   // Metadata
@@ -80,7 +80,7 @@ model User {
   lastActiveAt DateTime?
 
   // Plan
-  plan         PlanType  @default(FREE)
+  plan PlanType @default(FREE)
   // Latest paid-through date reported by the store. `plan` stays the
   // entitlement source of truth; this is only for churn reporting.
   premiumUntil DateTime?
@@ -269,10 +269,10 @@ model UploadGrant {
   id String @id @default(cuid())
 
   userId       String
-  temporaryUrl String  @unique
+  temporaryUrl String @unique
   permanentUrl String?
 
-  expiresAt  DateTime
+  expiresAt DateTime
   consumedAt DateTime?
   cleanedAt  DateTime?
   createdAt  DateTime  @default(now())
@@ -328,9 +328,9 @@ model Interest {
   matchId String? @unique(map: "interest_matchid_key")
   match   Match?  @relation(fields: [matchId], references: [id])
 
-  @@unique([requesterId, responderId], map: "interest_requester_responder_key")
   @@index([responderId], map: "interest_responderid_idx")
   @@index([requesterId], map: "interest_requesterid_idx")
+  @@unique([requesterId, responderId], map: "interest_requester_responder_key")
   @@index([requesterId, lastPositiveAt])
   @@index([updatedAt])
   @@index([deletedAt])

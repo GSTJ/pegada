@@ -201,6 +201,19 @@ export class ImageService {
   }
 
   /**
+   * The verdict already on an image, if there is one.
+   *
+   * Read before the image job calls a provider so a redelivered job reuses what
+   * was already paid for.
+   */
+  static getStoredModerationVerdict(id: string) {
+    return prisma.image.findUnique({
+      where: { id },
+      select: { moderationVerdict: true },
+    });
+  }
+
+  /**
    * The dog and the person behind one image, for the image job.
    *
    * The job payload carries the image row as it was enqueued and nothing about

@@ -28,9 +28,18 @@ jest.mock("./image-moderation-service", () => ({
   },
 }));
 
+const getStoredModerationVerdict = jest.fn();
+jest.mock("./image-service", () => ({
+  ImageService: {
+    getStoredModerationVerdict: (...args: unknown[]) =>
+      getStoredModerationVerdict(...args),
+  },
+}));
+
 import { ImageProcessingService } from "./image-processing-service";
 
 const arrayBuffer = new ArrayBuffer(8);
+const imageId = "image-id";
 
 const verdict = (value: "approve" | "error" | "reject") => ({
   verdict: value,
@@ -47,13 +56,17 @@ const verdict = (value: "approve" | "error" | "reject") => ({
 beforeEach(() => {
   isFeatureEnabled.mockResolvedValue(true);
   moderate.mockResolvedValue(verdict("approve"));
+  getStoredModerationVerdict.mockResolvedValue({ moderationVerdict: null });
 });
 
 describe("ImageProcessingService.moderateImage", () => {
   it("calls nobody while the mode is off, whatever the flag says", async () => {
     config.IMAGE_MODERATION_MODE = "off";
 
-    const outcome = await ImageProcessingService.moderateImage({ arrayBuffer });
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
 
     expect(outcome).toEqual({ status: "APPROVED", result: null, mode: "off" });
     expect(moderate).not.toHaveBeenCalled();
@@ -64,7 +77,10 @@ describe("ImageProcessingService.moderateImage", () => {
     config.IMAGE_MODERATION_MODE = "enforce";
     isFeatureEnabled.mockResolvedValue(false);
 
-    const outcome = await ImageProcessingService.moderateImage({ arrayBuffer });
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
 
     expect(outcome).toEqual({
       status: "APPROVED",
@@ -77,7 +93,7 @@ describe("ImageProcessingService.moderateImage", () => {
   it("defaults the flag to off, so an unreachable PostHog spends nothing", async () => {
     config.IMAGE_MODERATION_MODE = "shadow";
 
-    await ImageProcessingService.moderateImage({ arrayBuffer });
+    await ImageProcessingService.moderateImage({ arrayBuffer, imageId });
 
     expect(isFeatureEnabled).toHaveBeenCalledWith({
       feature: "profanity_check",
@@ -89,7 +105,10 @@ describe("ImageProcessingService.moderateImage", () => {
     config.IMAGE_MODERATION_MODE = "shadow";
     moderate.mockResolvedValue(verdict("reject"));
 
-    const outcome = await ImageProcessingService.moderateImage({ arrayBuffer });
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
 
     expect(outcome.status).toBe("APPROVED");
     expect(outcome.result).toMatchObject({ verdict: "reject", reason: "gore" });
@@ -100,7 +119,10 @@ describe("ImageProcessingService.moderateImage", () => {
     config.IMAGE_MODERATION_MODE = "enforce";
     moderate.mockResolvedValue(verdict("reject"));
 
-    const outcome = await ImageProcessingService.moderateImage({ arrayBuffer });
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
 
     expect(outcome.status).toBe("REJECTED");
     expect(outcome.result?.verdict).toBe("reject");
@@ -110,7 +132,10 @@ describe("ImageProcessingService.moderateImage", () => {
     config.IMAGE_MODERATION_MODE = "enforce";
     moderate.mockResolvedValue(verdict("error"));
 
-    const outcome = await ImageProcessingService.moderateImage({ arrayBuffer });
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
 
     expect(outcome.status).toBe("APPROVED");
     expect(outcome.result?.verdict).toBe("error");
@@ -119,9 +144,40 @@ describe("ImageProcessingService.moderateImage", () => {
   it("publishes an approval in enforce", async () => {
     config.IMAGE_MODERATION_MODE = "enforce";
 
-    const outcome = await ImageProcessingService.moderateImage({ arrayBuffer });
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
 
     expect(outcome.status).toBe("APPROVED");
     expect(moderate).toHaveBeenCalledWith(arrayBuffer);
+  });
+
+  it("reuses a verdict the row already carries instead of paying twice", async () => {
+    config.IMAGE_MODERATION_MODE = "enforce";
+    getStoredModerationVerdict.mockResolvedValue({
+      moderationVerdict: "reject",
+    });
+
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
+
+    // The status still comes out REJECTED, so a redelivered job cannot quietly
+    // republish a photo that was already held back.
+    expect(outcome.status).toBe("REJECTED");
+    // Null keeps the caller from rewriting the columns, recounting the event or
+    // sending the owner a second push.
+    expect(outcome.result).toBeNull();
+    expect(moderate).not.toHaveBeenCalled();
+  });
+
+  it("does not look up a stored verdict when it would not call anyone", async () => {
+    config.IMAGE_MODERATION_MODE = "off";
+
+    await ImageProcessingService.moderateImage({ arrayBuffer, imageId });
+
+    expect(getStoredModerationVerdict).not.toHaveBeenCalled();
   });
 });
