@@ -113,7 +113,7 @@ const FakeDoorSheetContent = ({
         onPress={() => hide(undefined)}
         style={styles.closeButton}
       >
-        <Text fontWeight="bold" fontSize="lg">
+        <Text fontWeight="bold" fontSize="lg" style={styles.closeLabel}>
           {t("fakeDoor.close")}
         </Text>
       </PressableArea>
@@ -217,7 +217,12 @@ export const FakeDoorRow = ({
       <View style={styles.rowIcon}>
         <Icon width={22} height={22} fill={theme.colors.text} />
       </View>
-      <Text fontWeight="medium" fontSize="sm" style={styles.rowLabel}>
+      <Text
+        fontWeight="medium"
+        fontSize="sm"
+        numberOfLines={2}
+        style={styles.rowLabel}
+      >
         {label}
       </Text>
       <View style={styles.pill}>
