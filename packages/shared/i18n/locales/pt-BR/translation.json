@@ -173,6 +173,16 @@
     "title": "Editar perfil",
     "weight": "Peso (kg)"
   },
+  "fakeDoor": {
+    "aiStoryVideo": "Gerar vídeo do {{name}} com IA",
+    "close": "Fechar",
+    "comingSoon": "em breve",
+    "notifyMe": "Me avisa quando lançar",
+    "referralReward": "Convide um amigo e ganhe Premium",
+    "saveFailed": "Não deu pra salvar agora. Tenta de novo.",
+    "sheetBody": "Estamos preparando isso com carinho. Quer ser avisado quando lançar?",
+    "sheetTitle": "Em breve"
+  },
   "forceUpdate": {
     "button": "Atualizar",
     "description": "Uma nova versão do Pegada está disponível. Por favor, atualize para continuar usando o app.",
@@ -369,6 +379,14 @@
   "session": {
     "expired": "Sua sessão expirou.",
     "expiredMessage": "Faça login novamente para continuar."
+  },
+  "sharePrompt": {
+    "button": "Compartilhar",
+    "dismiss": "Agora não",
+    "subtitleFemale": "Mais gente por perto, mais amigos pra {{name}}",
+    "subtitleMale": "Mais gente por perto, mais amigos pro {{name}}",
+    "titleFemale": "Compartilhe a {{name}}",
+    "titleMale": "Compartilhe o {{name}}"
   },
   "sizes": {
     "extraSmall": "Extra Pequeno",

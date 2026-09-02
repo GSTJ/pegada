@@ -107,7 +107,7 @@ const tracking: ShareTracking = {
 
 /** The exact `Share Completed` payload a given result should produce, so a
  * test asserts on the whole event rather than a subset that would still pass
- * if `dog_id` or `is_own_dog` silently went missing. */
+ * if `dog_id`, `is_own_dog` or `source` silently went missing. */
 const shareEvent = (
   result: string,
   overrides: Partial<{
@@ -115,6 +115,7 @@ const shareEvent = (
     fallback: boolean;
     is_own_dog: boolean;
     option: string | null;
+    source: string;
   }> = {},
 ) => ({
   event_type: "Share Completed",
@@ -124,6 +125,7 @@ const shareEvent = (
     is_own_dog: true,
     option: "link",
     result,
+    source: "own_profile",
     ...overrides,
   },
 });
@@ -141,16 +143,37 @@ describe("share funnel events", () => {
     expect(track).toHaveBeenCalledTimes(1);
     expect(track).toHaveBeenCalledWith({
       event_type: "Share Tapped",
-      event_properties: { dog_id: "dog-1", is_own_dog: true },
+      event_properties: {
+        dog_id: "dog-1",
+        is_own_dog: true,
+        source: "own_profile",
+      },
     });
   });
 
-  it("reports the entry point as is_own_dog rather than a second property", () => {
+  it("keeps the entry point as its own property alongside is_own_dog", () => {
     trackDogShareTapped({ source: "dog_profile", dogId: "dog-2" });
 
     expect(track).toHaveBeenCalledWith({
       event_type: "Share Tapped",
-      event_properties: { dog_id: "dog-2", is_own_dog: false },
+      event_properties: {
+        dog_id: "dog-2",
+        is_own_dog: false,
+        source: "dog_profile",
+      },
+    });
+  });
+
+  it("counts a share prompt placement as the user's own dog", () => {
+    trackDogShareTapped({ source: "empty_deck", dogId: "dog-3" });
+
+    expect(track).toHaveBeenCalledWith({
+      event_type: "Share Tapped",
+      event_properties: {
+        dog_id: "dog-3",
+        is_own_dog: true,
+        source: "empty_deck",
+      },
     });
   });
 
@@ -168,6 +191,7 @@ describe("share funnel events", () => {
         is_own_dog: false,
         option: null,
         result: "dismissed",
+        source: "dog_profile",
       },
     });
   });

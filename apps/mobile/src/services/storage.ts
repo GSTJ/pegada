@@ -9,6 +9,7 @@ export enum StorageKeys {
   Language = "language",
   AppReviewRequestDate = "appReviewRequestDate",
   AppReviewStatus = "appReviewStatus",
+  FirstMatchSharePrompt = "firstMatchSharePrompt",
   NewDogsAlertRequested = "newDogsAlertRequested",
   AppReviewMatchPrompted = "appReviewMatchPrompted",
   AppReviewSentMessageCount = "appReviewSentMessageCount",
@@ -28,6 +29,7 @@ export type StorageDataTypes = {
   [StorageKeys.Language]: string;
   [StorageKeys.AppReviewRequestDate]: string;
   [StorageKeys.AppReviewStatus]: "completed";
+  [StorageKeys.FirstMatchSharePrompt]: "shown";
   [StorageKeys.NewDogsAlertRequested]: "requested";
   [StorageKeys.AppReviewMatchPrompted]: "true";
   [StorageKeys.AppReviewSentMessageCount]: string;

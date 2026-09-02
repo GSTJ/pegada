@@ -10,6 +10,8 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
+import { showSharePromptModal } from "@/components/SharePromptCard";
+import { runMatchSharePrompt } from "@/components/SharePromptCard/match-gate";
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
 import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
@@ -69,9 +71,32 @@ const NewMatch: React.FC = () => {
   const exitStartedRef = useRef(false);
   const reviewTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  // Set only when the review modal actually went up on this screen. The two
+  // prompts want the same moment, and the review wins it: the ratings gap is
+  // the larger measured problem, so the share ask takes the matches the
+  // review declines. In practice that is the first match for the review and
+  // the next one for the share, but the rule is the state of this screen
+  // rather than the match number, so a review that is throttled or
+  // unavailable hands its moment over instead of wasting it.
+  const reviewPromptShownRef = useRef(false);
+
   const cancelReviewPrompt = useCallback(() => {
     exitStartedRef.current = true;
     clearTimeout(reviewTimeoutRef.current);
+  }, []);
+
+  /**
+   * Asked after the screen is gone, not on top of it: the celebration owns
+   * this moment, and the ask only makes sense once the user has taken it in.
+   * The modal portal lives above the router, so it survives the navigation
+   * both exits do.
+   */
+  const promptMatchShare = useCallback(() => {
+    if (reviewPromptShownRef.current) return;
+
+    void runMatchSharePrompt(() => {
+      void showSharePromptModal();
+    });
   }, []);
 
   const handleSendMessage = useCallback(async () => {
@@ -96,7 +121,16 @@ const NewMatch: React.FC = () => {
       pathname: `${SceneName.Chat}/[matchId]`,
       params: { dogId: matchDogId, matchId },
     });
-  }, [cancelReviewPrompt, matchDogId, matchId, router, safeLoadAndShow]);
+
+    promptMatchShare();
+  }, [
+    cancelReviewPrompt,
+    matchDogId,
+    matchId,
+    promptMatchShare,
+    router,
+    safeLoadAndShow,
+  ]);
 
   const handleSkip = useCallback(async () => {
     cancelReviewPrompt();
@@ -111,7 +145,9 @@ const NewMatch: React.FC = () => {
     await safeLoadAndShow();
 
     router.back();
-  }, [cancelReviewPrompt, router, safeLoadAndShow]);
+
+    promptMatchShare();
+  }, [cancelReviewPrompt, promptMatchShare, router, safeLoadAndShow]);
 
   // Assume 'skip' if the user presses the back button.
   // This is pertinent to Android devices only.
@@ -175,7 +211,13 @@ const NewMatch: React.FC = () => {
         // and the API call in there. Everything the prompt costs, the month
         // long throttle included, is spent on this side of it.
         canStillAsk: () => !exitStartedRef.current,
-      }).catch(sendError);
+      })
+        .then((shown) => {
+          // Claims the moment only if the modal reached the screen. Every
+          // other outcome leaves it free for the share prompt on exit.
+          reviewPromptShownRef.current = shown;
+        })
+        .catch(sendError);
     }, REVIEW_PROMPT_DELAY_MS);
 
     reviewTimeoutRef.current = timeout;

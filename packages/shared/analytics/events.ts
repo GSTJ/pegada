@@ -33,6 +33,9 @@ export const ANALYTICS_EVENTS = {
   DOG_LINK_SIGN_IN_BANNER_SHOWN: "Dog Link Sign In Banner Shown",
   EMPTY_DECK_ACTION_TAPPED: "Empty Deck Action Tapped",
   EMPTY_DECK_SHOWN: "Empty Deck Shown",
+  FAKE_DOOR_NOTIFY_TOGGLED: "Fake Door Notify Toggled",
+  FAKE_DOOR_SHOWN: "Fake Door Shown",
+  FAKE_DOOR_TAPPED: "Fake Door Tapped",
   FEEDBACK: "Feedback",
   INVALID_OTP_TYPED: "User Typed Invalid OTP code",
   LIKE_LIMIT_REACHED: "Like Limit Reached",
@@ -59,6 +62,8 @@ export const ANALYTICS_EVENTS = {
   SAVE_PREFERENCES_PRESSED: "Save Preferences Pressed",
   SAVE_PROFILE_PRESSED: "Save Profile Pressed",
   SHARE_COMPLETED: "Share Completed",
+  SHARE_PROMPT_SHOWN: "Share Prompt Shown",
+  SHARE_PROMPT_TAPPED: "Share Prompt Tapped",
   SHARE_TAPPED: "Share Tapped",
   SIGN_IN_EMAIL_SUBMITTED: "Sign In Email Submitted",
   SIGNUP_ATTRIBUTED: "Signup Attributed",
@@ -148,6 +153,38 @@ export type ReviewSkipReason =
   | "throttled";
 
 /**
+ * Where the share prompt card was rendered: an empty deck (nobody left to
+ * swipe) or the first match. Doubles as the share sheet's `source`, so the
+ * prompt funnel and the share funnel join on one property instead of two
+ * vocabularies that have to be mapped onto each other in the readout.
+ */
+export type SharePromptPlacement = "empty_deck" | "first_match";
+
+/**
+ * Which entry point opened the dog share sheet.
+ *
+ * Kept alongside `is_own_dog` rather than folded into it: the two placements
+ * above share the user's own dog too, so `is_own_dog` on its own can no longer
+ * tell a prompted share from the profile button.
+ */
+export type ShareSource = SharePromptPlacement | "dog_profile" | "own_profile";
+
+/**
+ * A feature the app advertises before it exists, so demand can be measured
+ * before anything big gets built. Mirrors the zod enum in
+ * `packages/api/src/routes/feature-interest.ts`, which rejects any id it does
+ * not know.
+ */
+export type FakeDoorFeature = "ai_story_video" | "referral_reward";
+
+/**
+ * Which surface the fake door row was rendered on. Only the share sheet
+ * carries them today, and the property is still sent so a second surface can
+ * be added without splitting the funnel across event names.
+ */
+export type FakeDoorSource = "share_sheet";
+
+/**
  * Event name to property shape, for events sent from the app.
  *
  * `analytics.track` is typed against this, so an unknown name or a property
@@ -194,6 +231,22 @@ export type MobileEventProperties = {
     share_result?: ShareOutcome;
   };
   [ANALYTICS_EVENTS.EMPTY_DECK_SHOWN]: undefined;
+  [ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED]: {
+    feature: FakeDoorFeature;
+    /**
+     * False when the user changed their mind, so the waiting list can be
+     * netted off without stitching a second event name into the readout.
+     */
+    interested: boolean;
+  };
+  [ANALYTICS_EVENTS.FAKE_DOOR_SHOWN]: {
+    feature: FakeDoorFeature;
+    source: FakeDoorSource;
+  };
+  [ANALYTICS_EVENTS.FAKE_DOOR_TAPPED]: {
+    feature: FakeDoorFeature;
+    source: FakeDoorSource;
+  };
   [ANALYTICS_EVENTS.FEEDBACK]: { feedback: string };
   [ANALYTICS_EVENTS.INVALID_OTP_TYPED]: undefined;
   [ANALYTICS_EVENTS.LIKE_LIMIT_REACHED]: {
@@ -249,8 +302,21 @@ export type MobileEventProperties = {
     /** `null` when the sheet was closed without a row being picked. */
     option: ShareOption | null;
     result: "dismissed" | "error" | "shared";
+    source: ShareSource;
   };
-  [ANALYTICS_EVENTS.SHARE_TAPPED]: { dog_id: string; is_own_dog: boolean };
+  [ANALYTICS_EVENTS.SHARE_PROMPT_SHOWN]: {
+    dog_id: string;
+    placement: SharePromptPlacement;
+  };
+  [ANALYTICS_EVENTS.SHARE_PROMPT_TAPPED]: {
+    dog_id: string;
+    placement: SharePromptPlacement;
+  };
+  [ANALYTICS_EVENTS.SHARE_TAPPED]: {
+    dog_id: string;
+    is_own_dog: boolean;
+    source: ShareSource;
+  };
   [ANALYTICS_EVENTS.SIGN_IN_EMAIL_SUBMITTED]: undefined;
   [ANALYTICS_EVENTS.SKIP_COMPLETE_DOG_PROFILE]: undefined;
   [ANALYTICS_EVENTS.SWIPE]: {
@@ -456,6 +522,9 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN,
   ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED,
   ANALYTICS_EVENTS.EMPTY_DECK_SHOWN,
+  ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED,
+  ANALYTICS_EVENTS.FAKE_DOOR_SHOWN,
+  ANALYTICS_EVENTS.FAKE_DOOR_TAPPED,
   ANALYTICS_EVENTS.FEEDBACK,
   ANALYTICS_EVENTS.INVALID_OTP_TYPED,
   ANALYTICS_EVENTS.LIKE_LIMIT_REACHED,
@@ -480,6 +549,8 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.SAVE_PREFERENCES_PRESSED,
   ANALYTICS_EVENTS.SAVE_PROFILE_PRESSED,
   ANALYTICS_EVENTS.SHARE_COMPLETED,
+  ANALYTICS_EVENTS.SHARE_PROMPT_SHOWN,
+  ANALYTICS_EVENTS.SHARE_PROMPT_TAPPED,
   ANALYTICS_EVENTS.SHARE_TAPPED,
   ANALYTICS_EVENTS.SIGN_IN_EMAIL_SUBMITTED,
   ANALYTICS_EVENTS.SKIP_COMPLETE_DOG_PROFILE,

@@ -173,6 +173,16 @@
     "title": "Edit profile",
     "weight": "Weight (kg)"
   },
+  "fakeDoor": {
+    "aiStoryVideo": "Make an AI video of {{name}}",
+    "close": "Close",
+    "comingSoon": "coming soon",
+    "notifyMe": "Tell me when it launches",
+    "referralReward": "Invite a friend and get Premium",
+    "saveFailed": "Could not save that right now. Try again.",
+    "sheetBody": "We are putting this one together with care. Want a heads up when it launches?",
+    "sheetTitle": "Coming soon"
+  },
   "forceUpdate": {
     "button": "Update",
     "description": "A new version of Pegada is available. Please update to continue using the app.",
@@ -369,6 +379,14 @@
   "session": {
     "expired": "Your session has expired.",
     "expiredMessage": "Please login again to continue."
+  },
+  "sharePrompt": {
+    "button": "Share",
+    "dismiss": "Not now",
+    "subtitleFemale": "More people around here means more friends for {{name}}",
+    "subtitleMale": "More people around here means more friends for {{name}}",
+    "titleFemale": "Share {{name}}",
+    "titleMale": "Share {{name}}"
   },
   "sizes": {
     "extraSmall": "Extra Small",

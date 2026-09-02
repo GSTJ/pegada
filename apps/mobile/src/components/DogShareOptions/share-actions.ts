@@ -1,4 +1,4 @@
-import type { ShareOption } from "@pegada/shared/analytics/events";
+import type { ShareOption, ShareSource } from "@pegada/shared/analytics/events";
 import type { TFunction } from "i18next";
 
 import type { ComponentRef, RefObject } from "react";
@@ -29,13 +29,11 @@ import { EXPORT_PNG_HEIGHT, EXPORT_PNG_WIDTH } from "./story-card-styles";
  * straight through to these.
  */
 
-/** Which screen the sheet was opened from. The app's own word for the fact
- * the analytics catalogue records as `is_own_dog`. */
-export type ShareSource = "own_profile" | "dog_profile";
-
-/** Re-exported so the sheet can name a row without reaching past this module
- * into the shared catalogue for one union. */
-export type { ShareOption };
+/** Re-exported so the sheet can name a row or an entry point without reaching
+ * past this module into the shared catalogue for two unions. `ShareSource`
+ * includes the share prompt's placements, passed straight through so
+ * `Share Prompt Tapped` and `Share Tapped` join on one property. */
+export type { ShareOption, ShareSource };
 
 export type ShareTracking = {
   source: ShareSource;
@@ -48,15 +46,18 @@ export type ShareTracking = {
 };
 
 /**
- * The two properties that identify a share regardless of how it ended.
+ * The properties that identify a share regardless of how it ended.
  *
- * `source` and `is_own_dog` are the same fact said twice — the sheet only
- * ever opens from a dog's profile or the user's own — so only the
- * catalogued one goes on the wire.
+ * `source` is on the wire as well as `is_own_dog` because the two stopped
+ * being the same fact once the share prompt gained its own entry points: the
+ * empty deck and the first match both share the user's own dog, so
+ * `is_own_dog` alone can no longer tell them apart from the profile button.
+ * `dog_profile` is the only source that is somebody else's dog.
  */
 const shareIdentity = (tracking: Omit<ShareTracking, "option">) => ({
   dog_id: tracking.dogId,
-  is_own_dog: tracking.source === "own_profile",
+  is_own_dog: tracking.source !== "dog_profile",
+  source: tracking.source,
 });
 
 /**

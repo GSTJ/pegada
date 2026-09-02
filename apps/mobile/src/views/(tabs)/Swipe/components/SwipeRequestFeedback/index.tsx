@@ -18,6 +18,7 @@ import {
   useIsOffline,
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
+import { SharePromptCard } from "@/components/SharePromptCard";
 import { APP_SHARE_LINK_BASE } from "@/constants";
 import { api } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
@@ -205,6 +206,18 @@ const EmptyState = () => {
           <View style={styles.actions}>
             <NotifyNewDogsButton />
             <InviteFriendButton />
+            {/*
+              Sits below the two actions rather than above them: those two are
+              what this screen was built to offer, and the share ask is the
+              third thing to try, not the headline. The card owns the gap
+              between itself and the preferences link below.
+
+              No render gate of its own. The whole component already returns
+              null unless the deck is empty, and the card waits for the dog
+              before it paints, so `Share Prompt Shown` cannot fire for a
+              prompt nobody saw.
+            */}
+            <SharePromptCard placement="empty_deck" />
             <Button
               onPress={() => router.push(SceneName.Preferences)}
               variant="outline"

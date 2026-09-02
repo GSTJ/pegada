@@ -145,14 +145,35 @@ type ReviewAskOptions = {
   canStillAsk?: () => boolean;
 };
 
-const mockHandleRequestAppReview = jest.fn<Promise<void>, [ReviewAskOptions]>(
-  () => Promise.resolve(),
-);
+// Resolves whether the modal went up, which is what decides if the share
+// prompt gets the moment instead. Defaults to "did not ask".
+const mockHandleRequestAppReview = jest.fn<
+  Promise<boolean>,
+  [ReviewAskOptions]
+>(() => Promise.resolve(false));
 
 jest.mock<Record<string, unknown>>("@/services/app-review", () => ({
   handleRequestAppReview: (options: ReviewAskOptions) =>
     mockHandleRequestAppReview(options),
 }));
+
+const mockShowSharePrompt = jest.fn();
+
+const mockRunMatchSharePrompt = jest.fn((show: () => void) => {
+  show();
+  return Promise.resolve(true);
+});
+
+jest.mock<Record<string, unknown>>("@/components/SharePromptCard", () => ({
+  showSharePromptModal: () => mockShowSharePrompt(),
+}));
+
+jest.mock<Record<string, unknown>>(
+  "@/components/SharePromptCard/match-gate",
+  () => ({
+    runMatchSharePrompt: (show: () => void) => mockRunMatchSharePrompt(show),
+  }),
+);
 
 jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
   sendError: () => undefined,
@@ -209,6 +230,7 @@ const render = () => {
 
 beforeEach(() => {
   jest.useFakeTimers();
+  mockHandleRequestAppReview.mockResolvedValue(false);
 });
 
 afterEach(() => {
@@ -328,5 +350,55 @@ describe("the first match review ask", () => {
     jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS * 4);
 
     expect(mockHandleRequestAppReview).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The share prompt is a one-shot ask, and the gate that makes it one lives in
+ * storage. What this screen owns is asking it on BOTH exits, only after the
+ * celebration is gone, and only on the matches the review ask leaves alone.
+ */
+describe("the match share prompt", () => {
+  it("asks the gate after leaving for the chat", async () => {
+    render();
+
+    await mockHandlers.get("new-match-send")?.();
+
+    expect(mockShowSharePrompt).toHaveBeenCalledTimes(1);
+    expect(mockRouter.replace.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockShowSharePrompt.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("asks the gate after skipping too", async () => {
+    render();
+
+    await mockHandlers.get("new-match-skip")?.();
+
+    expect(mockRunMatchSharePrompt).toHaveBeenCalledTimes(1);
+    expect(mockShowSharePrompt).toHaveBeenCalledTimes(1);
+    expect(mockRouter.back.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockShowSharePrompt.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  // The whole point of handing the moment to one prompt at a time: a user who
+  // just answered the review must not be asked to share on the way out.
+  it("stays quiet on a match where the review ask went up", async () => {
+    mockHandleRequestAppReview.mockResolvedValue(true);
+
+    const cleanups = render();
+
+    jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS);
+    // Lets the review promise settle so the screen records that it asked.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    await mockHandlers.get("new-match-skip")?.();
+
+    expect(mockRunMatchSharePrompt).not.toHaveBeenCalled();
+    expect(mockShowSharePrompt).not.toHaveBeenCalled();
+
+    cleanups.forEach((cleanup) => cleanup?.());
   });
 });

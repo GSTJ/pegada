@@ -175,13 +175,21 @@ type RequestAppReviewOptions = {
  */
 let isAskInFlight = false;
 
+/**
+ * Resolves true only when the modal actually went up.
+ *
+ * Every gate below is a reason the ask never reached the user, and a caller
+ * that owns the same moment needs to tell "asked" from "decided not to ask"
+ * to know whether that moment is still free. `NewMatch` uses it to hand the
+ * moment to the share prompt on the matches where the review does not fire.
+ */
 export const handleRequestAppReview = async ({
   trigger,
   matchCount = 0,
   sentMessageCount = 0,
   canStillAsk,
 }: RequestAppReviewOptions) => {
-  if (isAskInFlight) return;
+  if (isAskInFlight) return false;
   isAskInFlight = true;
 
   try {
@@ -216,7 +224,7 @@ export const handleRequestAppReview = async ({
         });
       }
 
-      return;
+      return false;
     }
 
     // Prevent asking for a review in test accounts
@@ -224,13 +232,13 @@ export const handleRequestAppReview = async ({
     const isTestAccount = dog?.user.email.endsWith("@test.com");
     if (isTestAccount) {
       await storeData(StorageKeys.AppReviewStatus, "completed");
-      return;
+      return false;
     }
 
     // Last gate before the modal. Three storage reads, a native availability
     // check and an API round trip sit above this line, and the moment the
     // caller aimed at can be gone by the time they all answer.
-    if (canStillAsk?.() === false) return;
+    if (canStillAsk?.() === false) return false;
 
     // Finally, we ask for a review. "App Review Request" rides the modal's own
     // mount rather than this line, so the event and the question the user sees
@@ -246,6 +254,8 @@ export const handleRequestAppReview = async ({
     if (trigger === ReviewTrigger.FirstMatch) {
       await storeData(StorageKeys.AppReviewMatchPrompted, "true");
     }
+
+    return true;
   } finally {
     isAskInFlight = false;
   }
