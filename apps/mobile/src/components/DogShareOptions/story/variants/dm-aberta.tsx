@@ -13,11 +13,11 @@ import {
   BASELINE,
   CAP_LINE,
   DM,
+  GILROY_LINE,
   INK,
   WHITE,
   capTop,
   halfLeading,
-  lineBox,
   px,
 } from "../constants";
 import { pickByGender, pickByHash } from "../gender";
@@ -113,17 +113,24 @@ const MARKER_SLAB_TOP = H1_SIZE * CAP_LINE - px(11 + 16.4);
  * `rotate(-5deg)` — a shallow arc under the text, left-aligned with it and
  * tilted back four degrees off the text, not away from it.
  */
+const SCRIBBLE_TOP = px(612) + halfLeading(31);
 const SCRIBBLE = {
   right: px(58),
-  top: px(612) + halfLeading(31),
+  top: SCRIBBLE_TOP,
   size: px(31),
   maxWidth: px(922),
   ruleWidth: px(180),
   ruleHeight: px(22),
   ruleStroke: px(5),
-  /** The rule is a block under the text's line box, and iOS starts that box a
-   *  half-leading lower than CSS does, so it ends a half-leading lower too. */
-  ruleTop: -halfLeading(31),
+  /**
+   * Both the block's own height and the rule's place inside it are the
+   * concept's, not whatever iOS makes of the line above: `UIFont` reports a
+   * line box a few points shorter than the metrics say, so stacking the rule
+   * under the text would float it up by that much — and the block's height
+   * also decides where the 9-degree rotation pivots.
+   */
+  height: px(31 * GILROY_LINE + 22),
+  ruleTop: px(612 + 31 * GILROY_LINE) - SCRIBBLE_TOP,
 };
 
 /**
@@ -218,11 +225,15 @@ const ARROW_RIGHT = px(68);
 const CTA_BLOCK_TOP = CTA_LINE_ONE_TOP + CAP_LINE * CTA_SIZE;
 const CTA_BLOCK_BOTTOM = CTA_LINE_TWO_TOP + CTA_RULE_TOP + CTA_RULE_HEIGHT;
 const ARROW_TOP = (CTA_BLOCK_TOP + CTA_BLOCK_BOTTOM - ARROW_SIZE) / 2;
-/** Gilroy draws U+2192 between 50 and 650 units above the baseline, so its
- *  ink centre is `ARROW_INK_CENTRE` up; nudge the run by the difference and
- *  the glyph, not its line box, is what the circle is centred on. */
-const ARROW_NUDGE =
-  lineBox(ARROW_GLYPH) / 2 - (BASELINE - ARROW_INK_CENTRE) * ARROW_GLYPH;
+/**
+ * Gilroy draws U+2192 between 50 and 650 units above the baseline, so its ink
+ * centre is `ARROW_INK_CENTRE` up from there. The glyph is hung off this
+ * offset rather than centred by the flex box: `UIFont` reports a line box a
+ * few points shorter than Gilroy's own metrics, so centring the BOX leaves
+ * the ink a visible distance below the middle of the circle.
+ */
+const ARROW_GLYPH_TOP =
+  ARROW_SIZE / 2 - ARROW_BORDER - (BASELINE - ARROW_INK_CENTRE) * ARROW_GLYPH;
 
 /**
  * How wide the dog's name can be drawn in the no-photo panel.
@@ -459,11 +470,12 @@ const styles = StyleSheet.create(() => ({
     alignItems: "flex-start",
     backgroundColor: INK,
     paddingHorizontal: px(13),
-    // 9px over the run and 6px under it in the concept, redistributed by the
-    // half-leading a browser adds above a line box and iOS does not, so the
-    // badge keeps its 41px height with the word where the concept sets it.
+    // 9px of padding over the run in the concept, plus the half-leading a
+    // browser adds above a line box and iOS does not. The height is stated
+    // rather than left to the padding: `UIFont` reports a line box shorter
+    // than Gilroy's own metrics, so a padded box comes out a few pixels short.
     paddingTop: px(9) + halfLeading(17),
-    paddingBottom: px(6) - halfLeading(17),
+    height: px(41),
   },
   onlineDot: {
     width: ONLINE.dot,
@@ -530,12 +542,15 @@ const styles = StyleSheet.create(() => ({
     // does. The cap is a backstop for a name long enough to walk the line off
     // the left edge of the card, nothing a real name reaches.
     maxWidth: SCRIBBLE.maxWidth,
+    height: SCRIBBLE.height,
     alignItems: "flex-start",
     transform: [{ rotate: "9deg" }],
   },
   scribbleText: { fontSize: SCRIBBLE.size, color: INK },
   scribbleRule: {
-    marginTop: SCRIBBLE.ruleTop,
+    position: "absolute",
+    left: 0,
+    top: SCRIBBLE.ruleTop,
     transform: [{ rotate: "-5deg" }],
   },
   bubble: {
@@ -685,12 +700,14 @@ const styles = StyleSheet.create(() => ({
     borderWidth: ARROW_BORDER,
     borderColor: INK,
     backgroundColor: DM.lime,
-    alignItems: "center",
-    justifyContent: "center",
   },
   arrowGlyph: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: ARROW_GLYPH_TOP,
     fontSize: ARROW_GLYPH,
+    textAlign: "center",
     color: INK,
-    transform: [{ translateY: ARROW_NUDGE }],
   },
 }));

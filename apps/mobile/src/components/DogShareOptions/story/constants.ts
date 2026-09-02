@@ -47,7 +47,7 @@ export const TICKET = {
  * own chrome, so both variants keep every piece of meaningful content between
  * `px(255)` and `px(1665)` and let only background texture bleed past it.
  */
-export const CONCEPT_SCALE = 3;
+const CONCEPT_SCALE = 3;
 export const px = (concept: number) => concept / CONCEPT_SCALE;
 
 /**
@@ -58,17 +58,21 @@ export const px = (concept: number) => concept / CONCEPT_SCALE;
  *
  * They are here because iOS lays text out against them and a browser does
  * not. Both put the same glyphs in the same places relative to the BASELINE;
- * they disagree about where the baseline sits inside the box:
+ * they disagree about where that baseline sits inside the box:
  *
  * - CSS centres the font's content box (ascender + descender) inside the line
  *   box, so half the leading falls above the run and half below.
- * - TextKit hangs the run from the ascender and puts the whole line gap
- *   underneath. Below `GILROY_LINE * fontSize` it compresses the fragment
- *   instead and shaves the top off a capital, which is why nothing on the
- *   card is ever set tighter than `lineBox`.
+ * - TextKit hangs the run from the ascender and lets the leading fall
+ *   underneath, whatever `lineHeight` says — the line height decides how far
+ *   apart wrapped lines sit and how tall the box measures, not where the
+ *   first baseline lands. Set tighter than the font's own box, the
+ *   descenders spill rather than the caps being cropped, which is what lets
+ *   the few wrapped runs that must fit a fixed space keep the concept's
+ *   leading.
  *
  * So every offset lifted from a concept is converted through the CAP LINE,
- * the one landmark the two agree on.
+ * the one landmark the two agree on — and never through a box height, which
+ * `UIFont` reports a few points short of what these numbers predict.
  */
 const ASCENT = 1.1;
 const DESCENT = 0.192;
@@ -82,7 +86,8 @@ const CONTENT = ASCENT + DESCENT;
 /** The font's natural line box, as a multiple of the font size. */
 export const GILROY_LINE = CONTENT + LINE_GAP;
 
-/** `lineHeight` that can never crop a glyph, whatever the accent on it. */
+/** The box a run occupies with no `lineHeight` set, which is how the card
+ *  sets every line that stands on its own. */
 export const lineBox = (fontSize: number) => fontSize * GILROY_LINE;
 
 /** Cap line, baseline, and the centres of the cap band and the x-height band,
@@ -94,8 +99,8 @@ export const CAP_CENTRE = ASCENT - CAP_HEIGHT / 2;
 export const X_CENTRE = ASCENT - X_HEIGHT / 2;
 
 /**
- * `top` for a run set with `lineHeight: lineBox(px(conceptSize))` whose CAP
- * LINE has to land on `conceptCapY` in the concept's 1080x1920 grid.
+ * `top` for a run at `px(conceptSize)` whose CAP LINE has to land on
+ * `conceptCapY` in the concept's 1080x1920 grid.
  */
 export const capTop = (conceptCapY: number, conceptSize: number) =>
   px(conceptCapY - conceptSize * CAP_LINE);

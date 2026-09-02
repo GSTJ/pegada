@@ -111,10 +111,14 @@ const TAPE = {
   height: px(34),
 };
 
-/** `.meta`: the perforated field row, `top:908px`, 4px dashed rules. */
+/** `.meta`: the perforated field row, `top:908px`, 4px dashed rules. A
+ *  browser draws a 4px dashed border as an 8px dash over a 4px gap; the card
+ *  was drawing 21 over 15, which reads as a tear-off, not a perforation. */
 const META = {
   top: px(908),
   rule: px(4),
+  dash: px(8),
+  dashGap: px(4),
   padTop: px(22),
   padBottom: px(20),
   cellPad: px(22),
@@ -151,11 +155,12 @@ const MINI = {
 };
 
 /** `.cta`: the pink bar across the foot of the stub. */
+const CTA_CONCEPT_SIZE = 31;
 const CTA = {
   bottom: px(34),
   height: px(82),
   border: px(5),
-  size: px(31),
+  size: px(CTA_CONCEPT_SIZE),
   tracking: px(0.5),
   arrow: px(45),
   gap: px(16),
@@ -287,7 +292,12 @@ export const RoleTicketVariant = ({
         <View style={styles.tape} />
 
         <View style={styles.meta}>
-          <DashedRule width={CONTENT_WIDTH} thickness={META.rule} />
+          <DashedRule
+            width={CONTENT_WIDTH}
+            dash={META.dash}
+            gap={META.dashGap}
+            thickness={META.rule}
+          />
           <View style={styles.metaRow}>
             <View style={styles.metaCellOne}>
               <Text
@@ -339,7 +349,12 @@ export const RoleTicketVariant = ({
               </Text>
             </View>
           </View>
-          <DashedRule width={CONTENT_WIDTH} thickness={META.rule} />
+          <DashedRule
+            width={CONTENT_WIDTH}
+            dash={META.dash}
+            gap={META.dashGap}
+            thickness={META.rule}
+          />
         </View>
 
         <View style={styles.call}>
@@ -446,21 +461,26 @@ const styles = StyleSheet.create(() => ({
     borderBottomWidth: RAIL.border,
     borderBottomColor: INK,
     flexDirection: "row",
-    alignItems: "center",
+    // Hung off the top rather than centred: `UIFont` reports a line box a few
+    // points shorter than Gilroy's metrics say, so `align-items: center` puts
+    // the eyebrows somewhere only the device can predict. This is where the
+    // concept's own centring lands them, worked out from the numbers.
+    alignItems: "flex-start",
     justifyContent: "space-between",
     paddingHorizontal: RAIL.padX,
-    // Centring puts the LINE BOX in the middle of the rail; the concept
-    // centres it too, but a browser sets the type a half-leading lower inside
-    // that box than iOS does. Half of this padding is that half-leading.
-    paddingTop: 2 * halfLeading(22),
+    paddingTop: (RAIL.height - RAIL.border - lineBox(RAIL.size)) / 2,
   },
+  // The mark hangs off the top of the rail's line box and the words off their
+  // caps, which is a half-leading further down.
   railText: {
+    marginTop: halfLeading(22),
     fontSize: RAIL.size,
     letterSpacing: RAIL.tracking,
     color: INK,
     textTransform: "uppercase",
   },
   railSerial: {
+    marginTop: halfLeading(20),
     fontSize: RAIL.serial,
     letterSpacing: px(2),
     color: INK,
@@ -632,7 +652,9 @@ const styles = StyleSheet.create(() => ({
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "center",
-    paddingTop: (CTA.height - CTA.border * 2 - lineBox(CTA.size)) / 2,
+    paddingTop:
+      (CTA.height - CTA.border * 2 - lineBox(CTA.size)) / 2 +
+      halfLeading(CTA_CONCEPT_SIZE),
   },
   ctaText: {
     fontSize: CTA.size,
