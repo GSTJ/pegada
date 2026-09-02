@@ -19,6 +19,7 @@ import { Container, Content } from "@/components/NetworkBoundary/styles";
 import { SharePromptCard } from "@/components/SharePromptCard";
 import { analytics } from "@/services/analytics";
 import { Actions } from "@/store/reducers";
+import { getActiveCards } from "@/store/selectors";
 import { SceneName } from "@/types/scene-name";
 
 import {
@@ -44,15 +45,23 @@ export const EmptyComponent = () => {
 };
 
 /**
- * `isEmptyDeck` gates the share prompt for the same reason `Empty Deck Shown`
- * is gated on it below: this screen renders behind the deck on every visit to
- * the swipe tab, so mounting it says nothing about the deck being empty. The
- * copy above can afford to render early because the cards cover it, but a
- * prompt that fires `Share Prompt Shown` on mount would count every visit to
- * the tab as a prompt nobody could see, and the empty deck funnel it feeds
- * would read as a tap rate several times lower than the real one.
+ * The share prompt is gated because this screen renders behind the deck on
+ * every visit to the swipe tab, so mounting it says nothing about the deck
+ * having run out. The copy above can afford to render early since the cards
+ * cover it; a prompt cannot, because it fires `Share Prompt Shown` on mount
+ * and would count every visit to the tab as a prompt nobody could see,
+ * leaving the empty deck funnel reading several times below the real rate.
+ *
+ * The gate is "no card is on screen", not the `isEmptyDeck` that
+ * `Empty Deck Shown` uses below. They come apart on the commonest way of
+ * reaching this screen: swiping the last card keeps that dog in
+ * `request.data` on purpose, so swipe back has something to restore, and
+ * only drops it from the active cards. `isEmptyDeck` is therefore still
+ * false while the user is looking at the empty screen, which is a real
+ * under-count in `Empty Deck Shown` too, but that event predates this card
+ * and correcting it is a change to an already reported number.
  */
-const EmptyState = ({ isEmptyDeck }: { isEmptyDeck: boolean }) => {
+const EmptyState = ({ hasVisibleCards }: { hasVisibleCards: boolean }) => {
   const { t } = useTranslation();
 
   return (
@@ -71,7 +80,7 @@ const EmptyState = ({ isEmptyDeck }: { isEmptyDeck: boolean }) => {
           <Description fontSize="xs" style={styles.description}>
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
-          {isEmptyDeck ? <SharePromptCard placement="empty_deck" /> : null}
+          {hasVisibleCards ? null : <SharePromptCard placement="empty_deck" />}
           <Button
             onPress={() => router.push(SceneName.Preferences)}
             variant="outline"
@@ -87,6 +96,7 @@ const EmptyState = ({ isEmptyDeck }: { isEmptyDeck: boolean }) => {
 const SwipeRequestFeedback = () => {
   const offline = useIsOffline();
   const request = useSelector((state: RootReducer) => state.dogs.request);
+  const activeCards = useSelector(getActiveCards);
   const dispatch = useDispatch();
 
   // This component sits behind the deck on every render, so mounting says
@@ -129,7 +139,7 @@ const SwipeRequestFeedback = () => {
   if (offline) return <OfflineComponent reset={refetch} />;
   if (request.error) return <RequestErrorComponent reset={refetch} />;
 
-  return <EmptyState isEmptyDeck={isEmptyDeck} />;
+  return <EmptyState hasVisibleCards={activeCards.length > 0} />;
 };
 
 export default SwipeRequestFeedback;

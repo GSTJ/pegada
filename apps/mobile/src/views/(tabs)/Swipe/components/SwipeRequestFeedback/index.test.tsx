@@ -26,6 +26,7 @@ type RequestState = {
 };
 
 let mockRequest: RequestState = { loading: false, error: false, data: [] };
+let mockLastCardId: string | undefined;
 let mockOffline = false;
 
 jest.mock<Record<string, unknown>>("react-native", () => {
@@ -130,18 +131,37 @@ jest.mock<Record<string, unknown>>("react-native-reanimated", () => {
   };
 });
 
+// The real `getActiveCards` runs against this state, so the swipe-back rule
+// it encodes (the dog just swiped stays in `data` and only leaves the active
+// cards) is exercised here rather than restated.
 jest.mock<Record<string, unknown>>("react-redux", () => ({
   useDispatch: () => jest.fn(),
   useSelector: (selector: (state: unknown) => unknown) =>
-    selector({ dogs: { request: mockRequest } }),
+    selector({
+      dogs: { request: mockRequest, config: { lastCardId: mockLastCardId } },
+    }),
 }));
 
 beforeEach(() => {
   mockRequest = { loading: false, error: false, data: [] };
+  mockLastCardId = undefined;
   mockOffline = false;
 });
 
-test("renders the share prompt once the deck is genuinely empty", () => {
+test("renders the share prompt when the deck came back with nobody on it", () => {
+  const html = renderToStaticMarkup(<SwipeRequestFeedback />);
+
+  expect(html).toContain("share-prompt:empty_deck");
+});
+
+test("renders the share prompt after the last card is swiped away", () => {
+  // The swipe reducer keeps the dog just swiped in `data` so swipe back has
+  // something to restore, and only takes it out of the active cards. Gating
+  // on `data` alone would hide the prompt on the commonest way of reaching
+  // this screen.
+  mockRequest = { loading: false, error: false, data: [{ id: "dog-1" }] };
+  mockLastCardId = "dog-1";
+
   const html = renderToStaticMarkup(<SwipeRequestFeedback />);
 
   expect(html).toContain("share-prompt:empty_deck");
