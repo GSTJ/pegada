@@ -1,9 +1,21 @@
 import type {
+  CancellationExpirationReason,
+  Environment,
   Event,
   EventCancellation,
   EventExpiration,
+  EventType,
+  PeriodType,
+  StoreKind,
   SubscriptionLifecycleEvent,
 } from "../types/revenuecat";
+import type {
+  SubscriptionCancelReason,
+  SubscriptionEnvironment,
+  SubscriptionEventType,
+  SubscriptionPeriodType,
+  SubscriptionStore,
+} from "@pegada/shared/analytics/events";
 
 import prisma from "@pegada/database";
 import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
@@ -35,6 +47,30 @@ const getPlanByEntitlements = (entitlements: string[] | null) => {
   return PlanType.FREE;
 };
 /**
+ * Holds the catalogue's copy of the RevenueCat unions to the real ones.
+ *
+ * `@pegada/shared` cannot import from `@pegada/api` — it is the dependency, not
+ * the dependent — so the catalogue restates these types. This is the assertion
+ * that makes the copy safe: add a store or a cancellation reason to
+ * `types/revenuecat.ts` and this file stops compiling until the catalogue
+ * learns about it too. Types only, nothing at runtime.
+ */
+type AssertSame<A extends B, B> = A;
+
+export type AssertCatalogueMatchesRevenueCat = [
+  AssertSame<EventType, SubscriptionEventType>,
+  AssertSame<SubscriptionEventType, EventType>,
+  AssertSame<PeriodType, SubscriptionPeriodType>,
+  AssertSame<SubscriptionPeriodType, PeriodType>,
+  AssertSame<StoreKind, SubscriptionStore>,
+  AssertSame<SubscriptionStore, StoreKind>,
+  AssertSame<Environment, SubscriptionEnvironment>,
+  AssertSame<SubscriptionEnvironment, Environment>,
+  AssertSame<CancellationExpirationReason, SubscriptionCancelReason>,
+  AssertSame<SubscriptionCancelReason, CancellationExpirationReason>,
+];
+
+/**
  * Reads the fields a subscription event carries, when it carries them.
  *
  * TEST and TRANSFER have no product, price or period; the rest do. Widening the
@@ -53,7 +89,11 @@ const readSubscriptionFields = (event: Event) => {
   return {
     product_id: details.product_id ?? null,
     period_type: details.period_type ?? null,
-    price: details.price ?? null,
+    // RevenueCat's `price` is always USD, whatever `currency` says; the amount
+    // that actually matches `currency` is `price_in_purchased_currency`. Named
+    // apart so nobody sums the two into a revenue number that is neither.
+    price_usd: details.price ?? null,
+    price_in_purchased_currency: details.price_in_purchased_currency ?? null,
     currency: details.currency ?? null,
     expiration: details.expiration_at_ms
       ? new Date(details.expiration_at_ms).toISOString()

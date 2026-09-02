@@ -1,6 +1,6 @@
 import type { RootReducer } from "@/store/reducers";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { View } from "react-native";
 
 import { router } from "expo-router";
@@ -45,13 +45,6 @@ export const EmptyComponent = () => {
 const EmptyState = () => {
   const { t } = useTranslation();
 
-  // The deck running dry is the reason people stop opening the app, and today
-  // nothing records how often it happens. Mount-only: this state re-renders on
-  // every theme and locale change, and each of those is not a new empty deck.
-  useEffect(() => {
-    analytics.track({ event_type: "Empty Deck Shown" });
-  }, []);
-
   return (
     <Content>
       <View>
@@ -84,6 +77,28 @@ const SwipeRequestFeedback = () => {
   const offline = useIsOffline();
   const request = useSelector((state: RootReducer) => state.dogs.request);
   const dispatch = useDispatch();
+
+  // This component sits behind the deck on every render, so mounting says
+  // nothing about a deck being empty — it mounts mid-load, with cards, and on
+  // the error screen. The event belongs to the one state that is genuinely
+  // empty: the request settled, it did not fail, we are online, and nothing
+  // came back. The ref re-arms when cards arrive, so a later refetch that
+  // returns empty again is a second event while a re-render is not.
+  const isEmptyDeck =
+    !request.loading && !request.error && !offline && request.data.length === 0;
+  const hasReportedEmptyDeck = useRef(false);
+
+  useEffect(() => {
+    if (!isEmptyDeck) {
+      hasReportedEmptyDeck.current = false;
+      return;
+    }
+
+    if (hasReportedEmptyDeck.current) return;
+
+    hasReportedEmptyDeck.current = true;
+    analytics.track({ event_type: "Empty Deck Shown" });
+  }, [isEmptyDeck]);
 
   if (request.loading) {
     return (

@@ -144,13 +144,11 @@ const Preferences: React.FC = () => {
         (field) => [field, { from: dog[field], to: body[field] }],
       ),
     );
-    const changedFields = Object.keys(changes);
-
     // if the values are the same as dog, don't update
-    if (changedFields.length > 0) {
+    if (Object.keys(changes).length > 0) {
       analytics.track({
         event_type: "Save Preferences Pressed",
-        event_properties: { changed_fields: changedFields, changes },
+        event_properties: { changes },
       });
 
       await myDogUpdateMutation.mutateAsync(body);

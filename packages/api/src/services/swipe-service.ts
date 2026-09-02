@@ -217,7 +217,7 @@ export class SwipeService {
           return {
             interest,
             match: null,
-            matchCreated: false,
+            matchParticipants: null,
             matchNotification: null,
             sendLikeNotification: false,
           };
@@ -233,22 +233,19 @@ export class SwipeService {
           return {
             interest,
             match: null,
-            matchCreated: false,
+            matchParticipants: null,
             matchNotification: null,
             sendLikeNotification: canSendNotifications,
           };
         }
 
-        const { match, notification, created } = await matchService.createMatch(
-          requester.id,
-          responderId,
-          tx,
-        );
+        const { match, notification, created, participants } =
+          await matchService.createMatch(requester.id, responderId, tx);
 
         return {
           interest,
           match,
-          matchCreated: created,
+          matchParticipants: created ? participants : null,
           matchNotification: notification,
           sendLikeNotification: false,
         };
@@ -256,14 +253,14 @@ export class SwipeService {
       { timeout: 10_000 },
     );
 
-    // After the commit and outside the transaction: the extra lookup this needs
-    // must not hold the advisory locks open, and a telemetry problem must not
-    // roll back a match. `void` because the swipe response does not wait on it.
-    if (result.matchCreated && result.match) {
-      void MatchService.captureMatchCreated({
+    // After the commit, so a rolled-back transaction cannot report a match that
+    // does not exist. Synchronous and database-free — both users came back on
+    // the row `createMatch` wrote — so there is no promise left running into a
+    // serverless freeze, and `captureMatchCreated` swallows its own failures.
+    if (result.matchParticipants && result.match) {
+      MatchService.captureMatchCreated({
         matchId: result.match.id,
-        requesterDogId: requester.id,
-        responderDogId: responderId,
+        participants: result.matchParticipants,
       });
     }
 

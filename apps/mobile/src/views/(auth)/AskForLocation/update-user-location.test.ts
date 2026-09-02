@@ -14,6 +14,7 @@
 const mockMutate = jest.fn();
 const mockSetData = jest.fn();
 
+const mockGetForegroundPermissionsAsync = jest.fn();
 const mockRequestForegroundPermissionsAsync = jest.fn();
 const mockGetLastKnownPositionAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
@@ -23,6 +24,8 @@ const mockTrack = jest.fn();
 
 jest.mock<Record<string, unknown>>("expo-location", () => ({
   Accuracy: { Low: 2 },
+  getForegroundPermissionsAsync: () =>
+    mockGetForegroundPermissionsAsync() as unknown,
   requestForegroundPermissionsAsync: () =>
     mockRequestForegroundPermissionsAsync() as unknown,
   getLastKnownPositionAsync: () => mockGetLastKnownPositionAsync() as unknown,
@@ -53,6 +56,12 @@ import { updateUserLocation } from "./update-user-location";
 const SF = { latitude: 37.7749, longitude: -122.4194 };
 
 beforeEach(() => {
+  // The state a first-run user is in: never asked, so the request below is the
+  // one that puts a dialog on screen.
+  mockGetForegroundPermissionsAsync.mockResolvedValue({
+    status: "undetermined",
+    canAskAgain: true,
+  });
   mockRequestForegroundPermissionsAsync.mockResolvedValue({
     status: "granted",
   });
@@ -119,6 +128,19 @@ describe("updateUserLocation", () => {
       event_type: "Location Permission",
       event_properties: { status: "denied" },
     });
+  });
+
+  it("says nothing about permission when the OS never asked", async () => {
+    // LocationMap's manual re-pick runs this with permission already granted.
+    // The OS shows no dialog, so there is no decision to report.
+    mockGetForegroundPermissionsAsync.mockResolvedValue({
+      status: "granted",
+      canAskAgain: false,
+    });
+
+    await updateUserLocation();
+
+    expect(mockTrack).not.toHaveBeenCalled();
   });
 
   it("prefers a caller-supplied position over the device's", async () => {

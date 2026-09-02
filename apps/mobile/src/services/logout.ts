@@ -26,13 +26,14 @@ export const logout = async () => {
 
     // Clear request caches
     queryClient.clear();
-
-    // Last, once every other trace of the session is gone. Without it the next
-    // person to sign in on this device inherits the previous one's distinct id,
-    // and the sign-in funnel counts a returning person as a converting one.
-    // Account deletion routes through here too, so one call covers both.
-    analytics.reset();
   } catch (error) {
     sendError(error);
+  } finally {
+    // In `finally` because `payments.logOut()` above throws when RevenueCat is
+    // already anonymous, which is a normal state to log out from — and a reset
+    // skipped there would leave the next person to sign in on this device
+    // inheriting the previous one's distinct id. Account deletion routes
+    // through here too, so one call covers both.
+    analytics.reset();
   }
 };

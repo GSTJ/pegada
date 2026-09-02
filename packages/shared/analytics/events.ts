@@ -128,7 +128,6 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.RESTORE_PURCHASES]: undefined;
   [ANALYTICS_EVENTS.RESTORE_PURCHASES_SUCCESS]: undefined;
   [ANALYTICS_EVENTS.SAVE_PREFERENCES_PRESSED]: {
-    changed_fields: string[];
     changes: Record<string, { from: unknown; to: unknown }>;
   };
   [ANALYTICS_EVENTS.SAVE_PROFILE_PRESSED]: undefined;
@@ -156,6 +155,55 @@ export type MobileEventProperties = {
 export type MobileEventName = keyof MobileEventProperties;
 
 /**
+ * The RevenueCat vocabulary, restated.
+ *
+ * Deliberately a copy of the unions in `packages/api/src/types/revenuecat.ts`
+ * rather than an import: `@pegada/shared` is a dependency of `@pegada/api`, so
+ * importing back the other way would be a cycle. `packages/api` asserts the two
+ * still agree at compile time (see `assertCatalogueMatchesRevenueCat` in
+ * `payment-service.ts`), which is what stops this copy going stale quietly.
+ */
+export type SubscriptionEventType =
+  | "BILLING_ISSUE"
+  | "CANCELLATION"
+  | "EXPIRATION"
+  | "INITIAL_PURCHASE"
+  | "NON_RENEWING_PURCHASE"
+  | "PRODUCT_CHANGE"
+  | "RENEWAL"
+  | "SUBSCRIBER_ALIAS"
+  | "SUBSCRIPTION_PAUSED"
+  | "TEST"
+  | "TRANSFER"
+  | "UNCANCELLATION";
+
+export type SubscriptionPeriodType =
+  | "INTRO"
+  | "NORMAL"
+  | "PREPAID"
+  | "PROMOTIONAL"
+  | "TRIAL";
+
+export type SubscriptionStore =
+  | "AMAZON"
+  | "APP_STORE"
+  | "MAC_APP_STORE"
+  | "PLAY_STORE"
+  | "PROMOTIONAL"
+  | "STRIPE";
+
+export type SubscriptionEnvironment = "PRODUCTION" | "SANDBOX";
+
+export type SubscriptionCancelReason =
+  | "BILLING_ERROR"
+  | "CUSTOMER_SUPPORT"
+  | "DEVELOPER_INITIATED"
+  | "PRICE_INCREASE"
+  | "SUBSCRIPTION_PAUSED"
+  | "UNKNOWN"
+  | "UNSUBSCRIBE";
+
+/**
  * Event name to property shape, for events captured by the API.
  *
  * "Message Sent" is deliberately the same name the app sends: the app's copy is
@@ -174,15 +222,16 @@ export type ServerEventProperties = {
     message_type: "text";
   };
   [ANALYTICS_EVENTS.SUBSCRIPTION_EVENT]: {
-    cancel_reason?: string | null;
+    cancel_reason?: SubscriptionCancelReason | null;
     currency?: string | null;
-    environment: string;
+    environment: SubscriptionEnvironment;
     expiration?: string | null;
-    period_type?: string | null;
-    price?: number | null;
+    period_type?: SubscriptionPeriodType | null;
+    price_in_purchased_currency?: number | null;
+    price_usd?: number | null;
     product_id?: string | null;
-    store: string;
-    type: string;
+    store: SubscriptionStore;
+    type: SubscriptionEventType;
   };
 };
 
@@ -199,6 +248,12 @@ export type AnalyticsPersonProperties = {
   app_version?: string;
   city?: string | null;
   dogs_count?: number;
+  /**
+   * Nested keys the shared client flattens to `extra.*` on the way in. Holds
+   * `user_plan`, the pre-catalogue name for `plan`, which is still written
+   * alongside it so the insights already filtering on it keep working.
+   */
+  extra?: Record<string, unknown>;
   has_photos?: boolean;
   os_name?: string;
   plan?: string | null;

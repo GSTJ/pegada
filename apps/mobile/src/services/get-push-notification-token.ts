@@ -47,18 +47,20 @@ export const getPushNotificationToken = async () => {
     });
   }
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  const { status: existingStatus, canAskAgain } =
+    await Notifications.getPermissionsAsync();
 
   // Makes sure the user has accepted push notifications permissions
   if (existingStatus === "granted") {
     await setPushPermissionPersonProperty(existingStatus);
-  } else {
+  } else if (canAskAgain) {
     const { status: newStatus } = await Notifications.requestPermissionsAsync();
 
-    // Only the answer to a prompt we actually showed is an event. An already
-    // granted permission fires nothing — it would land on every cold start and
-    // drown the one moment the user made a decision. The standing state lives
-    // on the person record instead, set in both branches.
+    // The only branch that fires an event, because it is the only one where the
+    // OS actually asked. The other two run on every swipe screen mount, and an
+    // event there would be a daily "denied" per already-denied user rather than
+    // the one moment they decided. The standing state is a person property in
+    // all three branches instead.
     analytics.track({
       event_type: "Push Permission",
       event_properties: {
@@ -71,6 +73,12 @@ export const getPushNotificationToken = async () => {
     if (newStatus !== "granted") {
       throw new Error(NotificationTokenError.Denied);
     }
+  } else {
+    // iOS only prompts once. After a denial `requestPermissionsAsync` resolves
+    // immediately with the old answer and nothing is shown, so asking again
+    // here would be a silent no-op reported as a fresh decision.
+    await setPushPermissionPersonProperty(existingStatus);
+    throw new Error(NotificationTokenError.Denied);
   }
 
   const { data } = await Notifications.getExpoPushTokenAsync({

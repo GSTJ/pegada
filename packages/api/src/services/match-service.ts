@@ -12,6 +12,12 @@ import { transformDistanceBetweenUserAndDog } from "../shared/dog-distance";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
 
+/** The two people a new match belongs to, as `createMatch` hands them back. */
+type MatchParticipants = {
+  requester: { id: string; createdAt: Date };
+  responder: { id: string; createdAt: Date };
+};
+
 class MatchService {
   language?: Language;
 
@@ -46,7 +52,12 @@ class MatchService {
         sendError("Duplicate active matches were closed");
       }
 
-      return { match: existingMatch, notification: null, created: false };
+      return {
+        match: existingMatch,
+        notification: null,
+        created: false,
+        participants: null,
+      };
     }
 
     const match = await db.match.create({
@@ -57,11 +68,18 @@ class MatchService {
       select: {
         id: true,
         requesterId: true,
+        // Both users' ids and signup times ride along on the row that is being
+        // written anyway. Analytics used to re-query for them after the commit,
+        // which on a serverless runtime is a database round trip racing the
+        // freeze that follows the response.
+        requester: {
+          select: { user: { select: { id: true, createdAt: true } } },
+        },
         responder: {
           select: {
             name: true,
             user: {
-              select: { pushToken: true },
+              select: { id: true, createdAt: true, pushToken: true },
             },
           },
         },
@@ -89,7 +107,15 @@ class MatchService {
 
     // `created` tells a first match apart from the caller re-finding one that
     // already existed. Both return a match; only one of them is an event.
-    return { match: { id: match.id }, notification, created: true };
+    return {
+      match: { id: match.id },
+      notification,
+      created: true,
+      participants: {
+        requester: match.requester.user,
+        responder: match.responder.user,
+      },
+    };
   }
 
   /**
@@ -103,35 +129,32 @@ class MatchService {
    * `seconds_since_signup` is what turns this into a cohort answer: how long a
    * new user waits for their first match is the number that decides whether
    * they come back.
+   *
+   * Synchronous, and reads nothing back from the database: both people arrive
+   * on the row `createMatch` already wrote.
    */
-  static async captureMatchCreated({
+  static captureMatchCreated({
     matchId,
-    requesterDogId,
-    responderDogId,
+    participants,
   }: {
     matchId: string;
-    requesterDogId: string;
-    responderDogId: string;
+    participants: MatchParticipants;
   }) {
     try {
-      const dogs = await prisma.dog.findMany({
-        where: { id: { in: [requesterDogId, responderDogId] } },
-        select: { id: true, user: { select: { id: true, createdAt: true } } },
-      });
-
+      const { requester, responder } = participants;
       const now = new Date();
 
-      const pairs = dogs
-        .map((dog) => ({ dog, other: dogs.find(({ id }) => id !== dog.id) }))
-        .filter((pair) => Boolean(pair.other));
+      captureEvent(requester.id, ANALYTICS_EVENTS.MATCH_CREATED, {
+        match_id: matchId,
+        other_user_id: responder.id,
+        seconds_since_signup: secondsBetween(requester.createdAt, now),
+      });
 
-      for (const { dog, other } of pairs) {
-        captureEvent(dog.user.id, ANALYTICS_EVENTS.MATCH_CREATED, {
-          match_id: matchId,
-          other_user_id: other?.user.id ?? "",
-          seconds_since_signup: secondsBetween(dog.user.createdAt, now),
-        });
-      }
+      captureEvent(responder.id, ANALYTICS_EVENTS.MATCH_CREATED, {
+        match_id: matchId,
+        other_user_id: requester.id,
+        seconds_since_signup: secondsBetween(responder.createdAt, now),
+      });
     } catch (error) {
       sendError(error);
     }

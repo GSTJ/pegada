@@ -62,18 +62,13 @@ const identify = (userId?: string, properties?: AnalyticsPersonProperties) => {
 /**
  * Adds to the person record without claiming to be a fresh login.
  *
- * PostHog has no separate endpoint for this: `identify` with the distinct id
- * the person already has merges the properties in. It exists as its own name so
- * the call sites that learn a fact late (the dog list resolving, the push
- * prompt being answered) read as what they are.
+ * The same call as {@link identify}, under the name the late call sites mean:
+ * PostHog has no separate endpoint for this, and `identify` with the distinct
+ * id the person already has merges the properties in. Kept as an alias so the
+ * places that learn a fact after login (the dog list resolving, the push prompt
+ * being answered) read as what they are.
  */
-const setPersonProperties = (
-  userId: string | undefined,
-  properties: AnalyticsPersonProperties,
-) => {
-  if (!userId) return;
-  observability.identify(userId, properties);
-};
+const setPersonProperties = identify;
 
 /**
  * Forgets the current person, so the next session starts on a new anonymous id.
