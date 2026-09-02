@@ -16,6 +16,7 @@ import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
+import { LOGIN_PLATFORM, usePendingReferral } from "@/services/referral";
 import {
   shouldRetryTransient,
   transientRetryDelayMs,
@@ -63,6 +64,11 @@ const InsertEmail = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
 
+  // This screen's submit is what creates the account row: it asks for a code,
+  // and `sendVerification` upserts the User. The attribution columns are
+  // create-only, so if the referral is not on this request it is never written.
+  const referral = usePendingReferral();
+
   const loginMutation = api.authentication.login.useMutation({
     // The first request of a cold deployment is the one that fails, and
     // mutations do not retry by default. See services/transient-retry.ts for
@@ -106,7 +112,7 @@ const InsertEmail = () => {
     // "OTP Requested" measures the request and not a typo in the field.
     analytics.track({ event_type: "Sign In Email Submitted" });
 
-    loginMutation.mutate({ email });
+    loginMutation.mutate({ email, referral, platform: LOGIN_PLATFORM });
   };
 
   return (

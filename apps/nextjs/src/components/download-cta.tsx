@@ -33,15 +33,16 @@ export const DownloadCta = ({
   placement,
   store,
   dogId,
+  referral,
   onClick,
   ...props
 }: ComponentProps<"a"> & DownloadCtaClick) => {
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
-      trackDownloadCtaClicked({ page, placement, store, dogId });
+      trackDownloadCtaClicked({ page, placement, store, dogId, referral });
       onClick?.(event);
     },
-    [page, placement, store, dogId, onClick],
+    [page, placement, store, dogId, referral, onClick],
   );
 
   return (

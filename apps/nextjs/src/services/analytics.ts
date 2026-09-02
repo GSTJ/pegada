@@ -31,19 +31,30 @@ export type DownloadCtaClick = {
   store: DownloadCtaStore;
   /** Only on `dog_share`: whose profile the visitor arrived through. */
   dogId?: string;
+  /**
+   * The `?ref=` the visitor arrived with: a user id when the app generated
+   * the link, or a hand typed channel token like `ig`. Reported so a click
+   * here can be lined up with the "Store Redirect" that follows it and with
+   * the install the store eventually attributes.
+   *
+   * Not named `ref`: React reserves that prop name, and this type is spread
+   * onto an anchor. It goes out as `ref`, the same key `/store` sends.
+   */
+  referral?: string;
 };
 
 /**
  * The property bag, split out from the capture so it can be asserted on
- * without a PostHog client. `dog_id` is omitted rather than sent as `null`
- * on the landing page: PostHog stores an explicit null and it would show up
- * as a real value in a breakdown.
+ * without a PostHog client. `dog_id` and `ref` are omitted rather than sent
+ * as `null` on the landing page: PostHog stores an explicit null and it would
+ * show up as a real value in a breakdown.
  */
 export const downloadCtaProperties = (click: DownloadCtaClick) => ({
   page: click.page,
   placement: click.placement,
   store: click.store,
   ...(click.dogId === undefined ? {} : { dog_id: click.dogId }),
+  ...(click.referral === undefined ? {} : { ref: click.referral }),
 });
 
 /**

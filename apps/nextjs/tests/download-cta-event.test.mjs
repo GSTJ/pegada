@@ -49,6 +49,40 @@ test("a share page click carries the dog it came from", () => {
   );
 });
 
+test("a click on a shared link carries the referrer it arrived with", () => {
+  // The same key `/store` sends on "Store Redirect", so the click and the
+  // redirect it causes can be lined up on one property.
+  assert.deepEqual(
+    analytics.downloadCtaProperties({
+      page: "dog_share",
+      placement: "desktop_copy",
+      store: "auto",
+      dogId: "dog_123",
+      referral: "ig",
+    }),
+    {
+      page: "dog_share",
+      placement: "desktop_copy",
+      store: "auto",
+      dog_id: "dog_123",
+      ref: "ig",
+    },
+  );
+});
+
+test("ref is absent rather than null when nobody referred the visitor", () => {
+  assert.equal(
+    "ref" in
+      analytics.downloadCtaProperties({
+        page: "dog_share",
+        placement: "desktop_copy",
+        store: "auto",
+        dogId: "dog_123",
+      }),
+    false,
+  );
+});
+
 test("dog_id is absent rather than null when there is no dog", () => {
   // An explicit null is a value PostHog stores and shows in a breakdown,
   // which would put a "null" row next to the real dog ids.

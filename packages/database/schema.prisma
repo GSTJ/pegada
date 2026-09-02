@@ -86,9 +86,26 @@ model User {
 
   subscriptionEvents SubscriptionEvent[]
 
+  // Which shared dog card brought this account in. Both are plain ids rather
+  // than relations: `relationMode = "prisma"` would turn a relation into an
+  // application-side existence check on every write, and the referrer is
+  // already checked once, at signup, before either column is written.
+  //
+  // Write-once. Set in the `create` branch of the upserts in
+  // authentication-service.ts and never updated, so a returning user who
+  // opens someone else's share link keeps the attribution they signed up
+  // with.
+  referredByUserId String?
+  referredDogId    String?
+  // The raw `ref` when it was a channel token rather than a user id: `ig` for
+  // the Instagram bio link, and whatever the next channel is called. Exactly
+  // one of this and `referredByUserId` is set on an attributed account.
+  referralSource   String?
+
   @@index([latitude])
   @@index([longitude])
   @@index([lastActiveAt])
+  @@index([referredByUserId])
 }
 
 /// Append-only log of every RevenueCat webhook event, so trial conversion,
