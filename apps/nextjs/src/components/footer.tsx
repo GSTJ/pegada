@@ -8,10 +8,10 @@ import { t } from "@/lib/translate";
 /**
  * One line at the foot of the homepage.
  *
- * It exists to give the AI story page a way in from the site's own traffic,
- * which is the only free source of visitors the experiment has. Nothing else
- * belongs here yet: a link farm at the bottom of a one-page site is furniture,
- * and this is the one destination worth pointing at.
+ * The story page's real way in is the link under the store badges in the hero
+ * (`cta.tsx`); this catches anyone who read the whole page instead. Nothing
+ * else belongs here yet: a link farm at the bottom of a one-page site is
+ * furniture, and this is the one destination worth pointing at.
  *
  * `toLocalePath` rather than a bare `/story`, so a Portuguese reader stays in
  * Portuguese instead of being handed to the middleware's guess.
@@ -24,7 +24,7 @@ export const Footer = () => (
           href={toLocalePath(getSafeLocale(), "/story")}
           className="font-semibold text-text underline decoration-primary decoration-2 underline-offset-4 hover:text-primary"
         >
-          {t("home.footer.aiStory")}
+          {t("home.footer.story")}
         </Link>
       </div>
     </Restricter>

@@ -1,7 +1,11 @@
 import type { StoreCampaign } from "@/app/store/store-urls";
 
+import Link from "next/link";
+
 import { storeUrlFor } from "@/app/store/store-urls";
 import { StoreButton } from "@/components/store-button";
+import { getSafeLocale } from "@/lib/get-safe-locale";
+import { toLocalePath } from "@/lib/locales";
 import { t } from "@/lib/translate";
 
 /**
@@ -54,6 +58,26 @@ export const Cta = ({ campaign }: { campaign?: StoreCampaign }) => {
           <StoreButton.Text>{t("home.cta.googlePlay")}</StoreButton.Text>
         </StoreButton>
       </div>
+      {/*
+       * The story page's only way in used to be a line at the foot of the
+       * homepage, 4,600px down on a phone. This one sits under the badges, in
+       * the first screen, which is the whole difference between a page with
+       * traffic and a page without.
+       *
+       * `toLocalePath` rather than a bare `/story`, so a Portuguese reader
+       * stays in Portuguese instead of being handed to the middleware's guess.
+       */}
+      {/*
+       * The negative margin pays back the padding: the line keeps the 24px it
+       * looks like inside the column's gap, and the box a thumb has to land on
+       * is 44px tall.
+       */}
+      <Link
+        href={toLocalePath(getSafeLocale(), "/story")}
+        className="appearFromBottom -my-2.5 flex min-h-[44px] items-center justify-center self-center py-2.5 text-center font-semibold text-text underline decoration-primary decoration-2 underline-offset-4 hover:text-primary lg:justify-start lg:self-start lg:text-left"
+      >
+        {t("home.storyLink")}
+      </Link>
     </div>
   );
 };
