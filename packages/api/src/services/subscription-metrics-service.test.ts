@@ -116,6 +116,21 @@ describe("getSubscriptionMetrics", () => {
     ).resolves.toMatchObject({ trialStarts: 2 });
   });
 
+  it("still counts an event that arrived without an environment", async () => {
+    await prisma.subscriptionEvent.create({
+      data: {
+        eventId: "evt_no_environment",
+        type: "EXPIRATION",
+        environment: null,
+        raw: {},
+      },
+    });
+
+    await expect(getSubscriptionMetrics(wholeWindow)).resolves.toMatchObject({
+      expirations: 1,
+    });
+  });
+
   it("returns zeroes when nothing happened", async () => {
     await expect(getSubscriptionMetrics(wholeWindow)).resolves.toEqual({
       trialStarts: 0,

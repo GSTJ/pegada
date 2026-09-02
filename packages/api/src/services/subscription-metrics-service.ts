@@ -47,7 +47,12 @@ export const getSubscriptionMetrics = async ({
   // filtering on it would file this month's cancellation under the month the
   // subscriber first paid.
   const window = { createdAt: { gte: from, lte: to } };
-  const environment = includeSandbox ? {} : { NOT: { environment: "SANDBOX" } };
+  // `not` on a nullable column drops the null rows in SQL, and the column is
+  // nullable so an event type RevenueCat invents later still gets recorded.
+  // Spelling the null case out keeps those rows in the production counts.
+  const environment = includeSandbox
+    ? {}
+    : { OR: [{ environment: { not: "SANDBOX" } }, { environment: null }] };
   const scope = { ...window, ...environment };
 
   const [
