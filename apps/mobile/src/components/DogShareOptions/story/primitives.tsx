@@ -538,25 +538,29 @@ export const BubbleTail = ({
   // perpendicular moves that line in by `stroke * sqrt(2)` along either axis.
   const bite = stroke * Math.SQRT2;
   const apex = size - bite - stroke;
+  /**
+   * How far past the silhouette the fill runs where it is covering it.
+   *
+   * Above the join the tail is inside the bubble and its hypotenuse has
+   * nothing to divide, so the fill has to reach the full silhouette there.
+   * Running it exactly along that edge put two antialiased edges on the same
+   * line and left a grey hairline climbing off the tail and across the
+   * bubble's white; running it a hair outside instead covers the ink
+   * outright. A third of the stroke is enough to separate them and still
+   * lands well inside the bubble's own bottom keyline, which is the only
+   * thing on that side for it to eat into.
+   */
+  const over = stroke / 3;
 
   return (
     <View style={[style, { width: size, height: size }]}>
       <Svg width={size} height={size}>
-        {/* The ink starts at the join, not at the top of the box: above that
-            line the tail is inside the bubble, where there is nothing for an
-            outline to divide. Drawing the full triangle and then covering its
-            upper stretch with a fill edge on the very same line left the two
-            antialiasing against each other, and the seam read as a grey
-            hairline running up off the tail and across the bubble's white. */}
-        <Polygon
-          points={`0,${joinAt} ${size - joinAt},${joinAt} 0,${size}`}
-          fill={INK}
-        />
+        <Polygon points={`0,0 ${size},0 0,${size}`} fill={INK} />
         <Polygon
           points={[
             `${stroke},0`,
-            `${size},0`,
-            `${size - joinAt},${joinAt}`,
+            `${size + over},0`,
+            `${size + over - joinAt},${joinAt}`,
             `${size - bite - joinAt},${joinAt}`,
             `${stroke},${apex}`,
           ].join(" ")}
