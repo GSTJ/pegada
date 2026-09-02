@@ -65,8 +65,6 @@ const nextConfig = {
   // can't statically analyse — resolve them at runtime instead.
   serverExternalPackages: [
     "sharp",
-    "@tensorflow/tfjs",
-    "nsfwjs",
     "expo-server-sdk",
     "@vercel/queue",
     "cloudflare",

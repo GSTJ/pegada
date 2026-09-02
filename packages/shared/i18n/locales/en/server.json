@@ -17,6 +17,10 @@
       "title": "🐶 {{name}} received a like! 🩷",
       "body": "Search for the misterious admirer 🕵️‍♂️"
     },
+    "photoRejected": {
+      "title": "A photo of {{name}} was not approved",
+      "body": "It does not follow our community guidelines. You can add another one to the profile"
+    },
     "reengagement": {
       "unansweredMatch": {
         "title": "🐶 {{name}} is still waiting",

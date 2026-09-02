@@ -82,6 +82,31 @@ const configSchema = z.object({
   EXPO_ACCESS_TOKEN: z.string().optional(),
 
   /**
+   * IMAGE MODERATION
+   *
+   * `off` skips the provider call entirely. `shadow` calls it, records the
+   * verdict and publishes the photo anyway, which is how the false positive
+   * rate gets measured before anyone's photo is held back. `enforce` is the
+   * only mode where a verdict can reject an image.
+   *
+   * Default `off` so a fresh clone, the test suite and any environment that
+   * has not been given a provider key behave exactly as they did before.
+   */
+  IMAGE_MODERATION_MODE: z.enum(["off", "shadow", "enforce"]).default("off"),
+  /**
+   * `<provider>/<model-id>`, resolved in `image-moderation-service.ts`.
+   * Swapping providers is an environment change rather than a deploy.
+   */
+  IMAGE_MODERATION_MODEL: z.string().default("google/gemini-2.5-flash-lite"),
+  /**
+   * Provider keys, both optional: whichever one the configured model needs
+   * has to be set, and a missing key is reported as a moderation error rather
+   * than a boot failure, so an unset key never takes the API down.
+   */
+  GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+
+  /**
    * CRON
    *
    * Vercel Cron sends `Authorization: Bearer ${CRON_SECRET}` on every
