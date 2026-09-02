@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm -F @pegada/database build && next build",
+    "build": "pnpm -F @pegada/database build && pnpm -F @pegada/database migrate:vercel && next build",
     "start": "next start",
     "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"

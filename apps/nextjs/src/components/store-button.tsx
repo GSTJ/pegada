@@ -1,13 +1,16 @@
+import type { DownloadCtaClick } from "@/services/analytics";
+
 import type { ComponentProps } from "react";
 
 import type { ImageProps } from "next/image";
 
 import Image from "next/image";
 
-export const StoreButton = (props: ComponentProps<"a">) => {
+import { DownloadCta } from "@/components/download-cta";
+
+export const StoreButton = (props: ComponentProps<"a"> & DownloadCtaClick) => {
   return (
-    // oxlint-disable-next-line jsx-a11y/anchor-has-content -- content provided by caller via props spread
-    <a
+    <DownloadCta
       className="bg-card justify-center hover:bg-blue-700 cursor-pointer p-4 text-center rounded-xl gap-3 flex items-center hover:scale-105 transition-all duration-200 ease-in-out"
       {...props}
     />

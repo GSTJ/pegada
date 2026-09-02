@@ -66,6 +66,7 @@ model User {
 
   // Push notifications
   pushToken String?
+  newDogsAlertRequestedAt DateTime?
 
   // Metadata
   createdAt DateTime  @default(now())
@@ -79,10 +80,84 @@ model User {
 
   // Plan
   plan PlanType @default(FREE)
+  // Latest paid-through date reported by the store. `plan` stays the
+  // entitlement source of truth; this is only for churn reporting.
+  premiumUntil DateTime?
+
+  subscriptionEvents SubscriptionEvent[]
+
+  // Which shared dog card brought this account in. Both are plain ids rather
+  // than relations: `relationMode = "prisma"` would turn a relation into an
+  // application-side existence check on every write, and the referrer is
+  // already checked once, at signup, before either column is written.
+  //
+  // Write-once. Set in the `create` branch of the upserts in
+  // authentication-service.ts and never updated, so a returning user who
+  // opens someone else's share link keeps the attribution they signed up
+  // with.
+  referredByUserId String?
+  referredDogId    String?
+  // The raw `ref` when it was a channel token rather than a user id: `ig` for
+  // the Instagram bio link, and whatever the next channel is called. Exactly
+  // one of this and `referredByUserId` is set on an attributed account.
+  referralSource   String?
 
   @@index([latitude])
   @@index([longitude])
   @@index([lastActiveAt])
+  @@index([referredByUserId])
+}
+
+/// Append-only log of every RevenueCat webhook event, so trial conversion,
+/// churn and refunds can be measured against our own users instead of the
+/// RevenueCat dashboard, which cannot be joined to this database.
+model SubscriptionEvent {
+  id String @id @default(cuid())
+
+  /// RevenueCat `event.id`. Unique so webhook retries are idempotent.
+  eventId String @unique
+
+  /// The RevenueCat event type, kept as a string so a new type RevenueCat
+  /// starts sending is recorded instead of rejected.
+  type String
+
+  user   User?   @relation(fields: [userId], references: [id])
+  /// Null when the event carries an anonymous or unknown `app_user_id`.
+  userId String?
+
+  productId  String?
+  /// TRIAL, INTRO, NORMAL, PROMOTIONAL or PREPAID.
+  periodType String?
+  store      String?
+
+  /// What the subscriber actually paid, in `currency`. RevenueCat sends this
+  /// as `price_in_purchased_currency`.
+  price    Float?
+  /// The currency `price` is denominated in.
+  currency String?
+  /// The same transaction converted to USD, which is what RevenueCat's own
+  /// `price` field holds. Kept apart so revenue can be summed across
+  /// currencies without a conversion table.
+  priceUsd Float?
+
+  purchasedAt  DateTime?
+  expirationAt DateTime?
+
+  /// `cancel_reason` on CANCELLATION, `expiration_reason` on EXPIRATION.
+  cancelReason String?
+  /// SANDBOX or PRODUCTION.
+  environment  String?
+
+  /// The event object with `subscriber_attributes` stripped, so a metric we
+  /// did not think of can still be recomputed from history without copying
+  /// subscriber emails into a second table.
+  raw Json
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type, purchasedAt])
+  @@index([purchasedAt])
 }
 
 model Dog {
@@ -263,4 +338,21 @@ model Message {
   @@index([receiverId], map: "message_receiverid_idx")
   @@index([senderId], map: "message_senderid_idx")
   @@index([matchId], map: "message_matchid_idx")
+}
+
+/// One row per re-engagement push the cron enqueued.
+///
+/// `dedupeKey` is the whole point: the cron runs every hour and re-selects the
+/// same candidates until they act, so the unique index is what turns "this user
+/// is eligible" into "this user has not been told yet". `userId` is a plain
+/// column rather than a relation on purpose, so the table can be read and
+/// pruned without widening `User`.
+model NotificationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  dedupeKey String   @unique
+  sentAt    DateTime @default(now())
+
+  @@index([userId, sentAt])
 }

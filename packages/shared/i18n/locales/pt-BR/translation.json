@@ -4,8 +4,7 @@
     "description": "Você curtiu <b>{{count}} cachorros</b> em <b>24h</b>. Espere ou vire <b>premium</b> para continuar deslizando.",
     "remaining": "restantes",
     "timeHours": "{{time}}h",
-    "winFreeTrial": "Ganhe um Teste Gratuito",
-    "getPremium": "Descubra o Premium"
+    "getPremium": "Assinar Premium"
   },
   "liveStatus": {
     "title": "Curtidas recarregando",
@@ -94,11 +93,7 @@
     "month": "{{unit}} mês",
     "months": "{{unit}} meses",
     "year": "{{unit}} ano",
-    "years": "{{unit}} anos",
-    "day": "{{unit}} dia",
-    "days": "{{unit}} dias",
-    "week": "{{unit}} semana",
-    "weeks": "{{unit}} semanas"
+    "years": "{{unit}} anos"
   },
   "dogProfile": {
     "profileInfoError": "⚠️ Oops. Tente novamente mais tarde.",
@@ -213,6 +208,10 @@
     "findDogsNearYou": "<view><title>Encontre </title><highlight>Dogs</highlight></view><view><title>perto de </title><highlight>Você</highlight><view/>",
     "insertEmail": "Insira seu <1>email</1>",
     "loginError": "Ocorreu um erro ao fazer login.",
+    "pendingDogProfileBanner": {
+      "body": "Entre ou crie sua conta e nós te levamos direto para lá.",
+      "title": "Você abriu o perfil de um dog."
+    },
     "validEmail": "Insira um email válido"
   },
   "locationMap": {
@@ -340,11 +339,12 @@
       "fetchingOfferings": "Ocorreu um erro ao buscar as ofertas."
     },
     "upgradeWall": {
-      "earnedFreeTrial": "Inicie o Teste Gratuito",
-      "getPremium": "Obtenha o Premium",
-      "tryPremiumFree": "Experimente o Premium grátis por {{duration}}",
+      "getPremium": "Desbloqueie o Premium",
       "enjoyFullAccess": "Aproveite o acesso total a todos os recursos e turbine o seu doguinho",
-      "startFreeTrial": "Inicie o Teste Gratuito"
+      "subscribe": "Assinar Premium",
+      "price": "{{price}}, cancele quando quiser",
+      "priceMonthly": "{{price}} por mês, cancele quando quiser",
+      "priceYearly": "{{price}} por ano, cancele quando quiser"
     }
   },
   "networkBoundary": {
@@ -380,6 +380,10 @@
   "swipeRequestFeedback": {
     "emptyDescription": "Mas calma! Acabamos de lançar e ainda temos poucos usuários.\n\nEstamos trabalhando para garantir um espaço cheio de doguinhos logo logo 🐶\n\nTente ajustar suas preferências ou volte mais tarde! 😉",
     "emptyTitle": "Parece que os doguinhos acabaram!",
+    "inviteFriendButton": "Convidar um amigo",
+    "inviteFriendMessage": "O Pegada é onde meu cachorro faz amigos. Traz o seu também:\n{{link}}",
+    "notifyNewDogsButton": "Avisar quando chegar dog novo",
+    "notifyNewDogsDone": "Vamos te avisar",
     "preferencesButton": "Ver Preferências"
   },
   "themes": {

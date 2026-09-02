@@ -81,6 +81,17 @@ const configSchema = z.object({
   /** PUSH (Expo access token for send + receipt consumers) */
   EXPO_ACCESS_TOKEN: z.string().optional(),
 
+  /**
+   * CRON
+   *
+   * Vercel Cron sends `Authorization: Bearer ${CRON_SECRET}` on every
+   * scheduled invocation. Optional so a fresh clone and the test suite boot
+   * without it, but the cron route refuses every request while it is unset:
+   * an endpoint that enqueues pushes must never be open because a variable is
+   * missing.
+   */
+  CRON_SECRET: z.string().optional(),
+
   /** APP */
   MIN_APP_VERSION: semverSchema,
 

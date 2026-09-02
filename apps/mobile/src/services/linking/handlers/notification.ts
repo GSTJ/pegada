@@ -9,12 +9,26 @@ import { SceneName } from "@/types/scene-name";
 enum NotificationUrl {
   Match = "match/",
   Chat = "chat/",
+  Like = "like",
+  Swipe = "swipe",
 }
 
 export const getNotificationUrl = (
   response: Notifications.NotificationResponse,
 ): string | undefined => {
   return response.notification.request.content.data?.url as string | undefined;
+};
+
+/**
+ * Which scheduled nudge this push came from, when it came from one.
+ *
+ * Only the re-engagement cron sets it. Reactive pushes have no kind, and the
+ * open is still reported for them, just without the breakdown.
+ */
+export const getNotificationKind = (
+  response: Notifications.NotificationResponse,
+): string | undefined => {
+  return response.notification.request.content.data?.kind as string | undefined;
 };
 
 const handleUnknownNotification = (url: string) => {
@@ -35,7 +49,16 @@ const handleChatNotification = (matchId: string, dogId: string) => {
   });
 };
 
-export const customNotificationHandler = (url?: string) => {
+/**
+ * Both urls land on the deck. A received like has no screen of its own, since
+ * the dog that liked us stays hidden until we like them back, and the "new dogs
+ * nearby" nudge is about the deck itself.
+ */
+const handleDeckNotification = () => {
+  return router.push(SceneName.Swipe);
+};
+
+export const customNotificationHandler = (url?: string, kind?: string) => {
   if (!url) return;
 
   // Both events fire from the same place because on this app they are the same
@@ -44,7 +67,7 @@ export const customNotificationHandler = (url?: string) => {
   // dog page, an email) has somewhere to land without splitting push history.
   analytics.track({
     event_type: "Push Notification Opened",
-    event_properties: { url },
+    event_properties: { kind, url },
   });
   analytics.track({
     event_type: "Deep Link Opened",
@@ -58,6 +81,10 @@ export const customNotificationHandler = (url?: string) => {
     if (!matchId || !dogId) throw new Error("Invalid notification url");
 
     return handleMatchNotification(matchId, dogId);
+  }
+
+  if (url === NotificationUrl.Like || url === NotificationUrl.Swipe) {
+    return handleDeckNotification();
   }
 
   if (url.startsWith(NotificationUrl.Chat)) {

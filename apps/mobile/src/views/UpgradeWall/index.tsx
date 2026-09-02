@@ -15,7 +15,6 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { Button } from "@/components/Button";
-import { useEligibleForTrial } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { haptics } from "@/services/haptics";
@@ -25,6 +24,7 @@ import PlanPackages from "@/views/UpgradeWall/components/PlanPackages";
 import RestorePurchases from "@/views/UpgradeWall/components/RestorePurchases";
 
 import {
+  CancelAnytime,
   CloseButton,
   CloseIcon,
   GradientEffect,
@@ -35,35 +35,26 @@ import {
   Title,
 } from "./styles";
 
-const useTranslatedTrialDuration = (
-  offering: PurchasesPackage | null | undefined,
-) => {
+/**
+ * The store price of the selected plan, spelled out with its billing period so
+ * the amount next to the CTA is the amount that will actually be charged.
+ * Uses RevenueCat's `priceString`, which is already formatted and localised by
+ * the store, rather than reformatting the raw number ourselves.
+ */
+const usePriceLine = (offering: PurchasesPackage | null | undefined) => {
   const { t } = useTranslation();
 
-  const introPrice = offering?.product.introPrice;
-  if (!introPrice) return;
+  if (!offering) return;
 
-  const quantity = introPrice.periodNumberOfUnits;
+  const price = offering.product.priceString;
 
-  const props = { replace: { unit: quantity } };
-
-  switch (introPrice.periodUnit) {
-    case "DAY":
-      return quantity === 1
-        ? t("dateFormatting.day", props)
-        : t("dateFormatting.days", props);
-    case "WEEK":
-      return quantity === 1
-        ? t("dateFormatting.week", props)
-        : t("dateFormatting.weeks", props);
-    case "MONTH":
-      return quantity === 1
-        ? t("dateFormatting.month", props)
-        : t("dateFormatting.months", props);
-    case "YEAR":
-      return quantity === 1
-        ? t("dateFormatting.year", props)
-        : t("dateFormatting.years", props);
+  switch (offering.packageType) {
+    case "ANNUAL":
+      return t("plans.upgradeWall.priceYearly", { price });
+    case "MONTHLY":
+      return t("plans.upgradeWall.priceMonthly", { price });
+    default:
+      return t("plans.upgradeWall.price", { price });
   }
 };
 
@@ -98,7 +89,7 @@ const UpgradeWall: React.FC = () => {
     PurchasesPackage | null | undefined
   >();
 
-  const freeTrialDuration = useTranslatedTrialDuration(selectedOffering);
+  const priceLine = usePriceLine(selectedOffering);
 
   const purchasePackage = useMutation({
     mutationFn: payments.purchasePackage,
@@ -107,7 +98,6 @@ const UpgradeWall: React.FC = () => {
         event_type: "Upgrade",
         event_properties: {
           package: selectedOffering?.product.identifier,
-          trial: isEligibleForTrial,
           type: "start",
         },
       });
@@ -119,7 +109,6 @@ const UpgradeWall: React.FC = () => {
         event_type: "Upgrade",
         event_properties: {
           package: selectedOffering?.product.identifier,
-          trial: isEligibleForTrial,
           type: "success",
         },
       });
@@ -131,7 +120,6 @@ const UpgradeWall: React.FC = () => {
           event_type: "Upgrade",
           event_properties: {
             package: selectedOffering?.product.identifier,
-            trial: isEligibleForTrial,
             type: "cancel",
           },
         });
@@ -148,7 +136,6 @@ const UpgradeWall: React.FC = () => {
         event_type: "Upgrade",
         event_properties: {
           package: selectedOffering?.product.identifier,
-          trial: isEligibleForTrial,
           type: "error",
         },
       });
@@ -158,26 +145,6 @@ const UpgradeWall: React.FC = () => {
   });
 
   const bottomActionStyle = useBottomActionStyle();
-
-  const isEligibleForTrial = useEligibleForTrial({
-    offering: selectedOffering,
-  });
-
-  const title = t(
-    isEligibleForTrial
-      ? "plans.upgradeWall.earnedFreeTrial"
-      : "plans.upgradeWall.getPremium",
-  );
-
-  const trialSubtitle = isEligibleForTrial
-    ? t("plans.upgradeWall.tryPremiumFree", { duration: freeTrialDuration })
-    : t("plans.upgradeWall.enjoyFullAccess");
-
-  const buttonText = t(
-    isEligibleForTrial
-      ? "plans.upgradeWall.startFreeTrial"
-      : "plans.upgradeWall.getPremium",
-  );
 
   const paddingTop =
     Platform.OS === "ios" ? theme.spacing[2] : insets.top + theme.spacing[2];
@@ -208,17 +175,28 @@ const UpgradeWall: React.FC = () => {
         <View style={{ gap: theme.spacing[7] }}>
           <View>
             <Title style={styles.title} fontSize="xl" fontWeight="bold">
-              {title}
+              {t("plans.upgradeWall.getPremium")}
             </Title>
             <Subtitle style={styles.subtitle} fontWeight="semibold">
-              {trialSubtitle}
+              {t("plans.upgradeWall.enjoyFullAccess")}
             </Subtitle>
           </View>
 
-          <PlanPackages
-            selectedPackage={selectedOffering}
-            setSelectedPackage={setSelectedOffering}
-          />
+          <View style={{ gap: theme.spacing[3] }}>
+            <PlanPackages
+              selectedPackage={selectedOffering}
+              setSelectedPackage={setSelectedOffering}
+            />
+            {priceLine ? (
+              <CancelAnytime
+                style={styles.cancelAnytime}
+                color="subtitle"
+                fontSize="sm"
+              >
+                {priceLine}
+              </CancelAnytime>
+            ) : null}
+          </View>
         </View>
 
         <Benefits />
@@ -263,7 +241,7 @@ const UpgradeWall: React.FC = () => {
           disabled={!selectedOffering}
           loading={purchasePackage.isPending || !selectedOffering}
         >
-          {buttonText}
+          {t("plans.upgradeWall.subscribe")}
         </Button>
       </BottomAction.Container>
     </View>

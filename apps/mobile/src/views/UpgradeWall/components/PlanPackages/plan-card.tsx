@@ -14,12 +14,6 @@ import {
   styles as planPackagesStyles,
 } from "@/views/UpgradeWall/components/PlanPackages/styles";
 
-const formatPrice = (value: number, currency: string) =>
-  new Intl.NumberFormat("default", {
-    style: "currency",
-    currency,
-  }).format(value);
-
 const getPeriodDetails = (
   period: string,
 ): {
@@ -40,48 +34,43 @@ type PlanCardProps = {
   selected: boolean;
   onPress: () => void;
   planPackage: PurchasesPackage;
-  oldPrice?: number;
+  /** Percent saved against paying monthly. Hidden when undefined. */
+  savingPercent?: number;
 };
 
 export const PlanCard: React.FC<PlanCardProps> = ({
   selected,
   onPress,
   planPackage: pkg,
-  oldPrice,
+  savingPercent,
 }) => {
   const { t } = useTranslation();
   const { product } = pkg;
 
+  // Both amounts come from the store's own formatter (`priceString` and
+  // `pricePerMonthString`), the same source as the price line under the plan
+  // list, so the card and that line always show one currency symbol and one
+  // decimal format. Reformatting `product.price` locally would follow the
+  // device locale instead of the storefront and the two would disagree.
   const {
-    price: currentPrice,
-    currencyCode,
+    priceString,
+    pricePerMonthString,
     subscriptionPeriod: period,
     identifier,
   } = product;
 
-  const formattedCurrentPrice = formatPrice(currentPrice, currencyCode);
-
   const { periodUnit, periodValue } = getPeriodDetails(period || "");
 
-  const pricePerMonth = (() => {
-    if (!periodUnit || !periodValue) return;
-    switch (periodUnit) {
-      case "D":
-        return currentPrice / periodValue;
-      case "W":
-        return currentPrice / (periodValue * 4); // Approximation
-      case "M":
-        return currentPrice / periodValue;
-      case "Y":
-        return currentPrice / (periodValue * 12); // Approximation
-      default:
-        return 0;
-    }
-  })();
+  const totalPriceLabel = `${priceString}/${t(`plans.${periodUnit}`)}`;
 
-  const percentSaved = oldPrice
-    ? Math.floor(((oldPrice - currentPrice) / oldPrice) * 100)
-    : undefined;
+  // `pricePerMonthString` is null for one-off products, where the total is the
+  // only amount we can show.
+  const pricePerMonthLabel = pricePerMonthString
+    ? `${pricePerMonthString}/${t("plans.M")}`
+    : null;
+
+  // A single month already reads as "X/mo", so the total would just repeat it.
+  const showTotalPrice = !(periodUnit === "M" && periodValue === 1);
 
   const translatedPlanName = (() => {
     switch (identifier) {
@@ -107,30 +96,28 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         <Text fontSize="sm" fontWeight="semibold">
           {translatedPlanName}
         </Text>
-        {pricePerMonth ? (
-          <Price
-            color="subtitle"
-            fontSize="md"
-            fontWeight="semibold"
-            style={planPackagesStyles.price}
-          >
-            {formatPrice(pricePerMonth, currencyCode)}/{t("plans.M")}{" "}
-            {percentSaved ? (
-              <Text color="subtitle" fontSize="md">
-                ({formattedCurrentPrice}/{t(`plans.${periodUnit}`)})
-              </Text>
-            ) : null}
-          </Price>
-        ) : null}
+        <Price
+          color="subtitle"
+          fontSize="md"
+          fontWeight="semibold"
+          style={planPackagesStyles.price}
+        >
+          {pricePerMonthLabel ?? totalPriceLabel}
+          {pricePerMonthLabel && showTotalPrice ? (
+            <Text color="subtitle" fontSize="md">
+              {` (${totalPriceLabel})`}
+            </Text>
+          ) : null}
+        </Price>
       </View>
-      {percentSaved ? (
+      {savingPercent ? (
         <View style={planPackagesStyles.percentContainer}>
           <PercentText
             fontSize="sm"
             fontWeight="semibold"
             style={planPackagesStyles.percentText}
           >
-            {t("plans.save", { percent: percentSaved })}
+            {t("plans.save", { percent: savingPercent })}
           </PercentText>
         </View>
       ) : null}

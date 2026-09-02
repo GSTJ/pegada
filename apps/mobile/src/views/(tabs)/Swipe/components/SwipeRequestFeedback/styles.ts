@@ -31,6 +31,9 @@ export const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.spacing[4],
     maxWidth: 274,
   },
+  actions: {
+    gap: theme.spacing[3],
+  },
 }));
 
 export const Container = withUnistyles(LikeFeedbackStyles.Container);

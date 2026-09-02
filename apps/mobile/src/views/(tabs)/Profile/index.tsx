@@ -57,7 +57,10 @@ const openPrivacyPolicy = () => {
 
 const openRateTheApp = async () => {
   try {
-    analytics.track({ event_type: "App Review" });
+    analytics.track({
+      event_type: "App Review",
+      event_properties: { trigger: "settings" },
+    });
     await StoreReview.requestReview();
     await storeData(StorageKeys.AppReviewStatus, "completed");
   } catch (error) {

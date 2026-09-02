@@ -135,3 +135,57 @@ test("deletes the account even when a photo is on a retired storage origin", asy
   await expect(prisma.image.count()).resolves.toBe(0);
   await expect(prisma.dog.count()).resolves.toBe(0);
 });
+
+/**
+ * The empty-deck opt-in is an interest signal, and the question it answers is
+ * "when did this user first ask", not "when did they last tap". Overwriting
+ * the timestamp on a second tap would make every requester look like they
+ * asked today and would move the cohort every time someone reopened the
+ * screen.
+ */
+test("keeps the first new dogs alert request when the user asks twice", async () => {
+  const user = await prisma.user.create({
+    data: { email: "new-dogs-alert@pegada.app" },
+  });
+
+  await expect(UserService.requestNewDogsAlert(user.id)).resolves.toEqual({
+    alreadyRequested: false,
+  });
+  const first = await prisma.user.findUnique({ where: { id: user.id } });
+
+  await expect(UserService.requestNewDogsAlert(user.id)).resolves.toEqual({
+    alreadyRequested: true,
+  });
+  await expect(
+    prisma.user.findUnique({ where: { id: user.id } }),
+  ).resolves.toMatchObject({
+    newDogsAlertRequestedAt: first?.newDogsAlertRequestedAt,
+  });
+});
+
+/**
+ * The app asks the server whether the opt-in already happened, because local
+ * storage does not survive a reinstall and the button would otherwise be
+ * offered again to someone who already took it. The response stays a closed
+ * shape: everything else on the user row is private.
+ */
+test("reports the new dogs alert opt-in and nothing else about the user", async () => {
+  const user = await prisma.user.create({
+    data: {
+      email: "my-flags@pegada.app",
+      code: "654321",
+      pushToken: "ExponentPushToken[my-flags]",
+    },
+  });
+
+  await expect(UserService.getMyFlags(user.id)).resolves.toEqual({
+    newDogsAlertRequestedAt: null,
+  });
+
+  await UserService.requestNewDogsAlert(user.id);
+  const stored = await prisma.user.findUnique({ where: { id: user.id } });
+
+  await expect(UserService.getMyFlags(user.id)).resolves.toEqual({
+    newDogsAlertRequestedAt: stored?.newDogsAlertRequestedAt,
+  });
+});

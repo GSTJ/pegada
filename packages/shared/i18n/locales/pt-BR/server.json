@@ -16,6 +16,20 @@
     "like": {
       "title": "🐶 {{name}} recebeu um like! 🩷",
       "body": "Vem procurar o pretendente misterioso 🕵️‍♂️"
+    },
+    "reengagement": {
+      "unansweredMatch": {
+        "title": "🐶 {{name}} ainda está esperando",
+        "body": "Você e {{name}} deram match e ninguém falou ainda"
+      },
+      "newDogsNearby": {
+        "title": "🐶 {{amount}} dogs novos perto de você",
+        "body": "Vem ver quem acabou de chegar 👀"
+      },
+      "likesWaiting": {
+        "title": "🐶 {{name}} tem likes esperando 🩷",
+        "body": "Alguém está torcendo pra você curtir de volta"
+      }
     }
   }
 }

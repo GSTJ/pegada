@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { magicToast } from "react-native-magic-toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { PendingDogProfileBanner } from "@/components/PendingDogProfileBanner";
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
 import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
@@ -22,6 +23,11 @@ import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
 import { getInitialRouteName } from "@/services/get-initial-route-name";
+import {
+  clearPendingReferral,
+  LOGIN_PLATFORM,
+  usePendingReferral,
+} from "@/services/referral";
 import { StorageKeys, storeData } from "@/services/storage";
 import {
   shouldRetryTransient,
@@ -56,6 +62,10 @@ const OneTimeCode = () => {
 
   const insetTop = Math.max(15 + insets.top, 50);
 
+  // Resending a code re-runs `sendVerification`, which is one of the two calls
+  // that can create the account row, so this screen sends the referral too.
+  const referral = usePendingReferral();
+
   const loginMutation = api.authentication.login.useMutation({
     // Same policy as the email step. INVALID_OTP_CODE carries an `error_code`
     // and is never retried, so a code the server already consumed is reported
@@ -77,6 +87,12 @@ const OneTimeCode = () => {
 
         const { token } = data;
         await storeData(StorageKeys.Token, token);
+
+        // The referral has done its job: the server has either attributed the
+        // account or decided not to, and either way this device must not
+        // attribute a second one. Cleared here rather than on the server's
+        // say-so so a user who signs up twice on one phone counts once.
+        await clearPendingReferral();
 
         const initialRouteName = await getInitialRouteName();
 
@@ -121,12 +137,21 @@ const OneTimeCode = () => {
 
   const handleResendCode = () => {
     // Submitting with no code will trigger a resend
-    loginMutation.mutate({ email: email as string });
+    loginMutation.mutate({
+      email: email as string,
+      referral,
+      platform: LOGIN_PLATFORM,
+    });
   };
 
   useDidMountEffect(() => {
     if (keyboardInput.length === CODE_LENGTH) {
-      loginMutation.mutate({ email: email as string, code: keyboardInput });
+      loginMutation.mutate({
+        email: email as string,
+        code: keyboardInput,
+        referral,
+        platform: LOGIN_PLATFORM,
+      });
     }
   }, [keyboardInput]);
   styles.useVariants({ disabled: Boolean(timer) });
@@ -157,6 +182,8 @@ const OneTimeCode = () => {
         ]}
       >
         <GoBack onPress={() => router.back()} />
+
+        <PendingDogProfileBanner />
 
         <View style={styles.content}>
           <View style={styles.topColumn}>

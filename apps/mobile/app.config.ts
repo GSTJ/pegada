@@ -42,7 +42,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.7.0",
+  version: "1.7.2",
   runtimeVersion: {
     policy: "appVersion",
   },
@@ -274,20 +274,46 @@ const config: ExpoConfig = {
       backgroundColor: "#FFFFFF",
     },
     package: "app.pegada",
-    // intentFilters: [
-    //   {
-    //     action: 'VIEW',
-    //     autoVerify: true,
-    //     data: [
-    //       {
-    //         scheme: 'https',
-    //         host: '*.pegada.app',
-    //         pathPrefix: '/',
-    //       },
-    //     ],
-    //     category: ['BROWSABLE', 'DEFAULT'],
-    //   },
-    // ],
+    intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        // A wildcard host ("*.pegada.app") makes Android's autoVerify
+        // handshake against /.well-known/assetlinks.json unreliable, so the
+        // hosts that actually serve that file are listed explicitly instead.
+        //
+        // "/pt-br/dog" is listed beside "/dog" because next-intl runs with
+        // `localePrefix: "as-needed"` and 307s a `Accept-Language: pt-BR`
+        // browser from /dog/<id> to /pt-br/dog/<id>, so that is the URL a
+        // Brazilian user copies and shares. Kept in step with the iOS AASA
+        // (apps/nextjs .well-known/apple-app-site-association) and with the
+        // expo-router routes under src/app by the consistency test in
+        // apps/nextjs/tests/apple-app-site-association.test.mjs.
+        data: [
+          {
+            scheme: "https",
+            host: "pegada.app",
+            pathPrefix: "/dog",
+          },
+          {
+            scheme: "https",
+            host: "pegada.app",
+            pathPrefix: "/pt-br/dog",
+          },
+          {
+            scheme: "https",
+            host: "www.pegada.app",
+            pathPrefix: "/dog",
+          },
+          {
+            scheme: "https",
+            host: "www.pegada.app",
+            pathPrefix: "/pt-br/dog",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
   },
   userInterfaceStyle: "automatic",
   locales: {
@@ -322,10 +348,7 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
-    // associatedDomains: [
-    //   'applinks:pegada.app',
-    //   'applinks:www.pegada.app',
-    // ],
+    associatedDomains: ["applinks:pegada.app", "applinks:www.pegada.app"],
   },
   extra: {
     oneSignalAppId: "",

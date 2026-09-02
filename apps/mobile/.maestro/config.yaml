@@ -63,6 +63,17 @@ executionOrder:
     # every screen that renders her, so it sits down here with the other two
     # fixture-heavy flows. `seed-before-test.sh` drops the extra photos again.
     - 45-dog-profile-photo-edges
+    # 46/47 cover the `pegada://dog/<id>` deep-link hand-off (universal
+    # links branch): 46 is the cold, logged-out case (banner on sign-in,
+    # then the profile after login); 47 is the warm, already-logged-in
+    # case. Both resolve a real dog id at run time via
+    # scripts/pre/46-resolve-dog-id.sh (shared by 47's pre-hook), so they
+    # sit after the other fixture-dependent flows for the same reason 43-45
+    # do — nothing here mutates shared state, so their exact position only
+    # needs to be after login-returning.yaml's target account (test@pegada.app)
+    # is in its usual seeded shape.
+    - 46-deep-link-sign-in-handoff
+    - 47-deep-link-logged-in
     # 46 shares the sheet's dog-share-link/copy-link/share-story rows.
     # Placed after the fixture-heavy flows above (so a card with a photo is
     # guaranteed to be at the top of the deck for step 4's "open another

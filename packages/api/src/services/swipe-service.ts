@@ -61,6 +61,9 @@ export class SwipeService {
         body: TranslationService.translate("server:notification.like.body", {
           lng: this.language,
         }),
+        // Gives the like push the same shape as the match and chat pushes so a
+        // tap resolves to a known destination instead of an unknown link.
+        data: { url: "like" },
       });
     } catch (error) {
       sendError(error);
