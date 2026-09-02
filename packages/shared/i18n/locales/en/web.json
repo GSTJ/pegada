@@ -153,5 +153,10 @@
       "title": "Pegada | Request Data Deletion"
     },
     "content": "### Request Data Deletion\n\nTo request account and data deletion outside the app, please send an\nemail to [support@pegada.app](mailto:support@pegada.app) and your request will be processed shortly."
+  },
+  "notFound": {
+    "title": "This page doesn't exist",
+    "description": "The link might have expired, or the profile is gone.",
+    "action": "Back to home"
   }
 }

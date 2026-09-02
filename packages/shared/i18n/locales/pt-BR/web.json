@@ -153,5 +153,10 @@
       "title": "Pegada | Solicitar Exclusão de Conta"
     },
     "content": "### Solicitar Exclusão de Conta\n\nPara solicitar a exclusão da conta e dos dados fora do aplicativo, envie um e-mail para [support@pegada.app](mailto:support@pegada.app) e sua solicitação será processada em breve."
+  },
+  "notFound": {
+    "title": "Essa página não existe",
+    "description": "O link pode ter expirado ou o perfil saiu do ar.",
+    "action": "Voltar pro início"
   }
 }
