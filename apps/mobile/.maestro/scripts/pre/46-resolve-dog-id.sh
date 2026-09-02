@@ -3,12 +3,11 @@
 # (deep link while already logged in). Both open `pegada://dog/<id>` and
 # need an id that resolves through `dog.get` for ANY logged-in user.
 #
-# Bella (test+bella@pegada.app) is exactly that: seeded and upserted on
-# every maestro-seed.ts run (ensureBellaWithMatch in
-# packages/database/maestro-seed.ts) and matched with Rex, so
-# test@pegada.app can always read her profile. Her id is a cuid2 assigned
-# at insert time, not a constant, so it has to be resolved at run time
-# rather than hardcoded here.
+# Bella (test+bella@pegada.app) is exactly that: seeded on every
+# maestro-seed.ts run and matched with Rex, so test@pegada.app can always
+# read her profile. Her id IS a constant now (SEED_DOG_IDS.bella), but
+# resolving it through the API is what makes this hook worth keeping —
+# see below.
 #
 # Maestro's `runScript:` step cannot make this call itself (sandboxed
 # GraalJS, no network access — see the README's "Why a wrapper script"

@@ -25,11 +25,7 @@ DATABASE_URL="${DATABASE_URL:-postgresql://tony:hawk@localhost:3356/pegada}"
 
 cd "$REPO_ROOT"
 
-# Re-seed delete-me. The tsx subcommand is `seed-delete-me`, not the
-# `maestro:purge` script alias - the alias points at a non-existent
-# `purge` subcommand (see packages/database/package.json), so we shell
-# out to tsx directly.
-DATABASE_URL="$DATABASE_URL" pnpm -F @pegada/database exec tsx ./maestro-seed.ts seed-delete-me
+DATABASE_URL="$DATABASE_URL" pnpm -F @pegada/database maestro:seed-delete-me
 
 # Verify the row landed. Defensive guard: if the seed failed silently
 # (e.g. a Breed FK that no longer exists) the downstream login flow

@@ -14,9 +14,10 @@ tags:
 # the DogProfile's black backdrop showing through, photo and pagination dots
 # and distance pill all gone, for the ~330ms the spring ran.
 #
-# It was never reachable from this suite: `maestro-seed.ts` gives every dog
-# exactly one image, and with one image there is no carousel and no boundary.
-# `scripts/pre/45-seed-gallery.sh` gives Nina four.
+# It was never reachable from this suite: `maestro-seed.ts` used to give every
+# dog exactly one image, and with one image there is no carousel and no
+# boundary. Nina is seeded with four, and `scripts/pre/45-seed-gallery.sh`
+# fails the run if she is not.
 #
 # The flow parks on Nina's profile at photo 1. checks/45-*.mjs does the rest,
 # because catching this needs frames sampled WHILE the spring is running, and

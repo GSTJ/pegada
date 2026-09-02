@@ -1,6 +1,6 @@
 {
   "likeLimit": {
-    "dailyLikeLimit": "Limite de Curtidas Diário",
+    "dailyLikeLimit": "Limite de curtidas diário",
     "description": "Você curtiu <b>{{count}} cachorros</b> em <b>24h</b>. Espere ou vire <b>premium</b> para continuar deslizando.",
     "remaining": "restantes",
     "timeHours": "{{time}}h",
@@ -29,7 +29,7 @@
   },
   "askForLocation": {
     "activateLocation": "Ativar localização",
-    "enableLocation": "Ativar Localização",
+    "enableLocation": "Ativar localização",
     "activate": "Ativar",
     "locationUsage": "Sua localização será utilizada para mostrar doguinhos perto de você.",
     "permissionPrompt": "Você precisa permitir o acesso à localização para usar o Pegada."
@@ -67,7 +67,7 @@
   },
   "completeProfile": {
     "additionalInfo": "Assim como você poderá selecionar suas preferências para dogs, os outros doguinhos também podem.\n\nEssas informações servem para que possamos te mostrar para os melhores matches!",
-    "birthDate": "Data de Nascimento",
+    "birthDate": "Data de nascimento",
     "breed": "Raça",
     "color": "Cor",
     "female": "Fêmea",
@@ -81,10 +81,10 @@
     "bio": "Bio",
     "clickAndHold": "* Clique e segure na foto para alterar a ordem.",
     "createProfile": "Criar perfil",
-    "dogName": "Nome do Doguinho",
+    "dogName": "Nome do doguinho",
     "howToCallDog": "Como podemos chamar seu doguinho?",
     "minimumOnePhoto": "Pelo menos uma foto deve incluir você (dono/a)",
-    "profilePictures": "Fotinhas do Dog",
+    "profilePictures": "Fotinhas do dog",
     "tellSomethingCool": "Conte alguma coisa legal sobre vocês.",
     "title": "Crie seu perfil"
   },
@@ -98,7 +98,7 @@
   "dogProfile": {
     "profileInfoError": "⚠️ Oops. Tente novamente mais tarde.",
     "cancel": "Cancelar",
-    "dogProfile": "Perfil do Doguinho",
+    "dogProfile": "Perfil do doguinho",
     "report": "Denunciar",
     "reportBody": "Eu gostaria de denunciar a conta número {{id}}, pertencente a {{name}} por:\n",
     "reportMessage": "Ao denunciar um perfil, você estará nos ajudando a manter a comunidade segura. Deseja continuar?",
@@ -160,16 +160,16 @@
   "editProfile": {
     "bio": "Bio",
     "bioPlaceholder": "Conte alguma coisa legal sobre vocês.",
-    "birthDate": "Data de Nascimento",
+    "birthDate": "Data de nascimento",
     "color": "Cor",
-    "dogName": "Nome do Doguinho",
+    "dogName": "Nome do doguinho",
     "dogNamePlaceholder": "Como podemos chamar seu doguinho?",
     "female": "Fêmea",
     "gender": "Sexo",
     "male": "Macho",
     "profileError": "Não foi possível salvar as informações do perfil",
     "profileUpdated": "Seu perfil foi atualizado!",
-    "saveProfile": "Salvar Perfil",
+    "saveProfile": "Salvar perfil",
     "size": "Tamanho",
     "title": "Editar perfil",
     "weight": "Peso (kg)"
@@ -187,7 +187,7 @@
   "forceUpdate": {
     "button": "Atualizar",
     "description": "Uma nova versão do Pegada está disponível. Por favor, atualize para continuar usando o app.",
-    "title": "Atualização Obrigatória"
+    "title": "Atualização obrigatória"
   },
   "formErrors": {
     "bioTooLong": "A bio deve conter no máximo {{length}} caracteres",
@@ -203,11 +203,11 @@
   },
   "imagePicker": {
     "cancel": "Cancelar",
-    "chooseFromLibrary": "Escolher da Galeria",
+    "chooseFromLibrary": "Escolher da galeria",
     "message": "Tirar uma foto ou escolher da galeria",
     "permissionsRequiredMessage": "Por favor, conceda as permissões necessárias para acessar a câmera e a galeria de fotos.",
     "permissionsRequiredTitle": "Desculpe, precisamos dessa permissão para que isso funcione!",
-    "takePhoto": "Tirar Foto",
+    "takePhoto": "Tirar foto",
     "title": "O que você prefere?",
     "uploadFailed": "Não foi possível enviar a imagem. Tente novamente.",
     "uploadFailedDev": "Falha no upload: {{reason}}"
@@ -216,7 +216,7 @@
     "accountCode": "Vamos enviar um código de 6 dígitos para autorizar sua conta. Se ainda não tem uma, vamos criá-la.",
     "continue": "Continuar",
     "emailPlaceholder": "oi@email.com",
-    "findDogsNearYou": "<view><title>Encontre </title><highlight>Dogs</highlight></view><view><title>perto de </title><highlight>Você</highlight><view/>",
+    "findDogsNearYou": "<view><title>Encontre </title><highlight>dogs</highlight></view><view><title>perto de </title><highlight>você</highlight><view/>",
     "insertEmail": "Insira seu <1>email</1>",
     "loginError": "Ocorreu um erro ao fazer login.",
     "pendingDogProfileBanner": {
@@ -228,7 +228,7 @@
   "locationMap": {
     "adjustYourPosition": "Ajuste sua posição",
     "areYouHere": "Você está aqui?",
-    "confirmLocation": "Confirmar Localização",
+    "confirmLocation": "Confirmar localização",
     "title": "Localização",
     "updateLocationError": "Ocorreu um erro ao atualizar sua localização."
   },
@@ -237,21 +237,21 @@
     "itsAMatchDescription": "Você deu match com esse doguinho!"
   },
   "matches": {
-    "matchedDogs": "Doguinhos Que Deram Match 🐶",
+    "matchedDogs": "Doguinhos que deram Match 🐶",
     "messages": "Mensagens",
     "sendFirstMessage": "Envie a primeira mensagem!"
   },
   "messages": {
     "empty": {
-      "clearSearch": "Limpar Busca",
+      "clearSearch": "Limpar busca",
       "description": " Aqui você irá ver e enviar mensagens para seus Matches.",
-      "searchForDogs": "Procurar Doguinhos",
+      "searchForDogs": "Procurar doguinhos",
       "title": "Não encontramos Matches, procure por novos doguinhos!"
     }
   },
   "newMatch": {
-    "keepSwiping": "Continue Deslizando",
-    "sendMessage": "Enviar Mensagem",
+    "keepSwiping": "Continue deslizando",
+    "sendMessage": "Enviar mensagem",
     "youGotA": "Você deu um",
     "youLikedEachOther": "Você e {{name}} se curtiram!"
   },
@@ -271,7 +271,7 @@
     "color": "Cor",
     "maxDistance": "Distância máxima",
     "preferencesUpdated": "Suas preferências foram atualizadas!",
-    "savePreferences": "Salvar Preferências",
+    "savePreferences": "Salvar preferências",
     "size": "Tamanho",
     "title": "Preferências",
     "updateError": "Ocorreu um erro ao atualizar suas preferências.",
@@ -313,7 +313,7 @@
     "theme": "Tema",
     "updateLocation": "Atualizar localização",
     "plan": {
-      "currentPlan": "Plano Atual",
+      "currentPlan": "Plano atual",
       "errorLoading": "Erro ao carregar o plano",
       "clickToRetry": "Tente novamente",
       "upgradeToPremium": "Atualize para Premium",
@@ -321,7 +321,7 @@
     }
   },
   "plans": {
-    "FREE": "Grátuito",
+    "FREE": "Gratuito",
     "PREMIUM": "Premium",
     "day": "dia",
     "week": "semana",
@@ -333,17 +333,17 @@
     "yearly": "Anual",
     "save": "Economize {{percent}}%",
     "benefits": {
-      "priorityQueue": "Prioridade na Fila",
+      "priorityQueue": "Prioridade na fila",
       "getSeenFirst": "Seja visto primeiro pelos populares!",
-      "unlimitedLikes": "Curtidas Ilimitadas",
+      "unlimitedLikes": "Curtidas ilimitadas",
       "noDailyLimits": "Sem limites para o amor",
-      "rewind": "Voltar na Lista de Doguinhos",
+      "rewind": "Voltar na lista de doguinhos",
       "madeAMistake": "Cometeu um erro? Sem problemas",
-      "noAds": "Sem Anúncios",
+      "noAds": "Sem anúncios",
       "noAdsDescription": "Aproveite o app sem distrações"
     },
     "restorePurchases": {
-      "restore": "Restaurar Compras"
+      "restore": "Restaurar compras"
     },
     "errors": {
       "fetchingOfferingsDevice": "Ocorreu um erro ao buscar as ofertas. Tente em um dispositivo real.",
@@ -390,7 +390,7 @@
     "titleMale": "Compartilhe o {{name}}"
   },
   "sizes": {
-    "extraSmall": "Extra Pequeno",
+    "extraSmall": "Extra pequeno",
     "giant": "Gigante",
     "large": "Grande",
     "medium": "Médio",
