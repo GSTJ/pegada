@@ -510,10 +510,12 @@ const styles = StyleSheet.create(() => ({
     zIndex: 4,
     top: H1_LINE_TWO_TOP,
     left: H1_LEFT,
-    // The concept lets the marker slab run all the way to the frame, and in
-    // Portuguese it very nearly does; a locale that needs more shrinks the
-    // word inside the slab rather than pushing the keyline off the card.
-    width: CARD_WIDTH - H1_LEFT,
+    // The concept's own line stops eight pixels short of the frame, and in
+    // Portuguese this lands it there to the pixel. A locale that needs more
+    // room shrinks the word inside the slab rather than pushing the slab's
+    // keyline against the edge of the card: `WHOLE PACK` runs a third longer
+    // than `CACHORRADA` and would otherwise sit flush with it.
+    width: CARD_WIDTH - H1_LEFT - px(8),
     flexDirection: "row",
     alignItems: "flex-start",
   },
