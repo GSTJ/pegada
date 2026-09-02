@@ -6,7 +6,7 @@ export const styles = StyleSheet.create((theme) => ({
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surfaceElevated,
     borderColor: theme.colors.border,
     borderWidth: theme.stroke.sm,
     borderTopLeftRadius: theme.radii.md,
@@ -69,8 +69,10 @@ export const styles = StyleSheet.create((theme) => ({
   rowLabel: {
     flexGrow: 1,
   },
+  // Same surface as the sheet above it, so the two read as one layer
+  // floating over the dimmed screen rather than as two holes cut in it.
   cancelButton: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surfaceElevated,
     borderColor: theme.colors.border,
     borderWidth: theme.stroke.sm,
     borderTopLeftRadius: theme.radii.round,

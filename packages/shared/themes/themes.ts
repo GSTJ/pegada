@@ -108,6 +108,19 @@ export const LightTheme = {
 
     background: "hsl(0, 0%, 100%)",
 
+    /**
+     * The fill for something floating above `background` with a dimmed
+     * screen behind it — bottom sheets, and the pills that belong to them.
+     *
+     * `card` is the wrong token for that job: it is a tile sitting IN the
+     * page, so it steps toward the background as the page gets darker. This
+     * one steps away from it, which is the only way a sheet reads as a
+     * separate layer once the backdrop and the page are both near black.
+     * Light has nowhere further to go than white, so here the two match and
+     * the dim behind the sheet does the separating on its own.
+     */
+    surfaceElevated: "hsl(0, 0%, 100%)",
+
     text: "hsl(222.2, 84%, 4.9%)",
 
     subtitle: "hsl(222.2, 10%, 39%)",
@@ -143,6 +156,11 @@ export const DarkTheme: typeof LightTheme = {
     secondary: "hsl(333, 58%, 5%)",
 
     background: "hsl(0, 0%, 0%)", // Black
+
+    // See the light theme's note. 11% is the same step iOS puts between a
+    // black background and a sheet on top of it: enough to separate the
+    // layer, not enough to read as grey.
+    surfaceElevated: "hsl(0, 0%, 11%)",
 
     text: "hsl(0, 0%, 95%)", // Almost White, for readability on a black background
 

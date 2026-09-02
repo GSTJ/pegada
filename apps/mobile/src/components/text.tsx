@@ -47,6 +47,7 @@ const styles = StyleSheet.create((theme) => ({
         primary: { color: theme.colors.primary },
         secondary: { color: theme.colors.secondary },
         background: { color: theme.colors.background },
+        surfaceElevated: { color: theme.colors.surfaceElevated },
         text: { color: theme.colors.text },
         subtitle: { color: theme.colors.subtitle },
         card: { color: theme.colors.card },

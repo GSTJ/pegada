@@ -30,23 +30,35 @@ export const styles = StyleSheet.create((theme) => ({
     flexGrow: 1,
   },
   /**
-   * Small, low contrast and after the label: it has to say "not yet" clearly
-   * enough that a tap is a vote and not a bug report, without competing with
-   * the rows that do work.
+   * Small, quiet and after the label: it has to say "not yet" clearly enough
+   * that a tap is a vote and not a bug report, without competing with the
+   * rows that do work.
+   *
+   * Neutral rather than pink. Brand pink on pale pink was the only colour on
+   * the whole sheet, which pulled the eye straight to the two rows that do
+   * nothing, and it read at 2.6:1 — a label announcing itself loudly and
+   * then being the hardest thing there to actually read. Grey on grey lands
+   * at about 6:1 in light and 5.3:1 in dark and stays in the background
+   * where it belongs.
    */
   pill: {
     borderTopLeftRadius: theme.radii.round,
     borderTopRightRadius: theme.radii.round,
     borderBottomRightRadius: theme.radii.round,
     borderBottomLeftRadius: theme.radii.round,
-    backgroundColor: theme.colors.secondary,
+    backgroundColor: theme.colors.card,
     paddingTop: theme.spacing[0.5],
     paddingRight: theme.spacing[2],
     paddingBottom: theme.spacing[0.5],
     paddingLeft: theme.spacing[2],
   },
+  // Uppercase with a touch of tracking: at 11pt the caps read as a status
+  // stamp rather than as another sentence competing with the row's label,
+  // and small type needs the extra letter spacing to stay legible.
   pillLabel: {
-    color: theme.colors.primary,
+    color: theme.colors.subtitle,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
 
   // Sheet chrome, matching `DogShareOptions` so both sheets read as the same
@@ -56,7 +68,7 @@ export const styles = StyleSheet.create((theme) => ({
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surfaceElevated,
     borderColor: theme.colors.border,
     borderWidth: theme.stroke.sm,
     borderTopLeftRadius: theme.radii.md,
@@ -118,7 +130,7 @@ export const styles = StyleSheet.create((theme) => ({
     flexGrow: 1,
   },
   closeButton: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surfaceElevated,
     borderColor: theme.colors.border,
     borderWidth: theme.stroke.sm,
     borderTopLeftRadius: theme.radii.round,

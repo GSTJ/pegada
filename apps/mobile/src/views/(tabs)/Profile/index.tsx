@@ -68,6 +68,31 @@ const openRateTheApp = async () => {
   }
 };
 
+const TRANSITION_POINT = 30;
+
+/**
+ * How far the settings list has to travel before the share button is gone.
+ *
+ * Not the photo header's own height (~283pt): the overlay above finishes
+ * darkening the photo at `TRANSITION_POINT`, so a button tied to the full
+ * header spent the rest of that scroll sitting half visible over the
+ * settings list. Twice the overlay's distance keeps the two reading as one
+ * movement while still clearing the corner early.
+ */
+const SHARE_FADE_DISTANCE = TRANSITION_POINT * 2;
+
+/**
+ * `interpolate` walks straight lines between the stops it is handed, so the
+ * curve is sampled rather than eased: these six pairs are `1 - t³` over
+ * `SHARE_FADE_DISTANCE`. A strong ease-out takes most of the opacity in the
+ * first third of the gesture, which is where the eye is, and lets the tail
+ * settle instead of ending on a hard cut.
+ */
+const SHARE_FADE_SCROLL = [0, 0.15, 0.3, 0.5, 0.7, 1].map(
+  (t) => t * SHARE_FADE_DISTANCE,
+);
+const SHARE_FADE_OPACITY = [1, 0.614, 0.343, 0.125, 0.027, 0];
+
 const Profile = () => {
   const { t } = useTranslation();
 
@@ -80,8 +105,6 @@ const Profile = () => {
   useScrollToTop(scrollRef);
 
   useWarmUpBrowser();
-
-  const TRANSITION_POINT = 30;
 
   const imgStyle = useAnimatedStyle(() => {
     "worklet";
@@ -118,14 +141,10 @@ const Profile = () => {
 
   // The photo header is never actually removed from the tree — it is a fixed
   // background layer that the settings ScrollView's own opaque content
-  // scrolls up and over. It reads as "hidden" once that opaque content has
-  // scrolled past the header's full height, i.e. once `scrollY` has covered
-  // the same distance as the ScrollView's `paddingTop` below
-  // (`dogProfileHeight - marginTop`). The share button lives outside the
-  // header's `imgStyle`/`overlayStyle` tree (see the comment on
-  // `ProfileShareButton`), so it needs its own opacity tied to that same
-  // distance to disappear in step with the photo instead of floating over
-  // the settings list forever.
+  // scrolls up and over. The share button lives outside the header's
+  // `imgStyle`/`overlayStyle` tree (see the comment on `ProfileShareButton`),
+  // so it needs its own opacity to leave with the photo instead of floating
+  // over the settings list.
   //
   // The button is rendered as the LAST sibling in this screen's tree (see
   // `WrappedProfileShareButton`'s own comment), which is what lets it paint
@@ -133,28 +152,25 @@ const Profile = () => {
   // but that same stacking means a fully faded (`opacity: 0`) button is
   // still the topmost node over whatever settings row now occupies that
   // corner, and a `Pressable` captures touches for its whole frame
-  // regardless of opacity. `pointerEvents` has to fade out in lockstep with
-  // `opacity` — not just at the end of the animation — so the button stops
-  // intercepting taps before it visually disappears rather than only after.
+  // regardless of opacity. So `pointerEvents` goes at exactly the frame the
+  // button stops being visible, and not one frame earlier: anything on
+  // screen has to answer a tap, and a cutoff partway through the fade left
+  // a button the user could still see doing nothing at all.
+  //
   // Folded into this same worklet (rather than a separate
   // `useAnimatedProps`) because `pointerEvents` is a plain `ViewStyle` key
   // here, and `useAnimatedStyle` is the pattern already used everywhere
   // else in this codebase for scroll-driven values.
   const shareButtonStyle = useAnimatedStyle(() => {
     "worklet";
-    const hidePoint = Math.max(
-      dogProfileHeight - marginTop,
-      TRANSITION_POINT + 1,
-    );
-
     const opacity = interpolate(
       scrollY.value,
-      [0, hidePoint],
-      [1, 0],
+      SHARE_FADE_SCROLL,
+      SHARE_FADE_OPACITY,
       Extrapolation.CLAMP,
     );
 
-    return { opacity, pointerEvents: opacity < 0.5 ? "none" : "auto" };
+    return { opacity, pointerEvents: opacity > 0 ? "auto" : "none" };
   });
 
   const isFocused = useIsFocused();

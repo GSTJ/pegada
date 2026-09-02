@@ -159,6 +159,7 @@ export const RoleTicketVariant = ({
             <Text
               numberOfLines={1}
               adjustsFontSizeToFit
+              minimumFontScale={0.5}
               fontWeight="black"
               style={styles.emptyName}
             >
@@ -402,13 +403,20 @@ const styles = StyleSheet.create(() => ({
     gap: 8,
     backgroundColor: TICKET.navy,
   },
+  /**
+   * Same fix as `dm-aberta`'s own `emptyName`, for the same reason: iOS skips
+   * `adjustsFontSizeToFit` on a label with an explicit `lineHeight`, and a
+   * `maxWidth` clips the measured label instead of giving the shrink a box to
+   * resolve against, so a long name was cut off mid letter. 265 is the band's
+   * inner width less an even gutter either side.
+   */
   emptyName: {
     fontSize: 26,
-    lineHeight: 32.5,
     letterSpacing: DISPLAY_TRACKING,
     color: TICKET.cream,
     textTransform: "uppercase",
-    maxWidth: 230,
+    textAlign: "center",
+    width: 265,
   },
   tape: {
     position: "absolute",

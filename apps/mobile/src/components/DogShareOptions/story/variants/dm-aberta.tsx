@@ -47,6 +47,37 @@ const BUBBLE = {
 
 const TAIL_SIZE = 29.3;
 
+/** The first chat bubble, hoisted out of the sheet because the empty state
+ * below has to know where its left edge lands. */
+const CHAT_ONE = { top: 347.3, right: 17.3, width: 106.7 };
+
+/**
+ * How wide the dog's name can be drawn in the no-photo panel.
+ *
+ * Not the panel's width. `chatBubbleOne` is painted OVER this panel (it
+ * carries a higher `zIndex` and is a later sibling), and it reaches from
+ * the card's right edge back to `CHAT_ONE`'s left, straight across the row
+ * the centred name sits on. A name laid out to the panel's full width
+ * therefore disappears under the chat bubble rather than being clipped by
+ * anything: `MAXIMILIANO FERREIRA` lost its last two letters with the panel
+ * itself still showing teal underneath.
+ *
+ * So the name is measured against the strip that stays visible, centred on
+ * the panel like the paw mark above it, with `SAFE_GAP` of teal left
+ * between the last letter and the bubble's keyline. `adjustsFontSizeToFit`
+ * only ever shrinks, so short names still draw at the full `fontSize`.
+ */
+const EMPTY_NAME_SAFE_GAP = 8;
+const BUBBLE_INNER_WIDTH =
+  BUBBLE.width - BUBBLE.border * 2 - BUBBLE.padding * 2;
+const BUBBLE_INNER_LEFT = BUBBLE.left + BUBBLE.border + BUBBLE.padding;
+const CHAT_ONE_LEFT = CARD_WIDTH - CHAT_ONE.right - CHAT_ONE.width;
+const EMPTY_NAME_WIDTH =
+  2 *
+  (CHAT_ONE_LEFT -
+    EMPTY_NAME_SAFE_GAP -
+    (BUBBLE_INNER_LEFT + BUBBLE_INNER_WIDTH / 2));
+
 /**
  * Gilroy ExtraBold's own line box is about 1.29em (hhea ascender 1100 on a
  * 1000 upem), and iOS crops the glyph to whatever `lineHeight` it is given
@@ -175,6 +206,7 @@ export const DmAbertaVariant = ({
               <Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
+                minimumFontScale={0.5}
                 fontWeight="black"
                 style={styles.emptyName}
               >
@@ -389,13 +421,23 @@ const styles = StyleSheet.create(() => ({
     gap: 8,
     backgroundColor: DM.checker,
   },
+  /**
+   * The one label on the card that has to survive any name a user types, so
+   * it is the one place `adjustsFontSizeToFit` has to actually fire.
+   *
+   * `maxWidth` was not a box it could resolve against, and an explicit
+   * `lineHeight` stops iOS shrinking the type at all. A real `width` (see
+   * `EMPTY_NAME_WIDTH`) is the box, and with the `lineHeight` gone the
+   * font's own line box (about 1.29em on Gilroy ExtraBold, see the note at
+   * the top of this file) holds whichever size the shrink lands on.
+   */
   emptyName: {
     fontSize: 30,
-    lineHeight: 37.5,
     letterSpacing: DISPLAY_TRACKING,
     color: INK,
     textTransform: "uppercase",
-    maxWidth: 200,
+    textAlign: "center",
+    width: EMPTY_NAME_WIDTH,
   },
   chatBubble: {
     position: "absolute",
@@ -407,9 +449,9 @@ const styles = StyleSheet.create(() => ({
     paddingBottom: 4.3,
   },
   chatBubbleOne: {
-    top: 347.3,
-    right: 17.3,
-    width: 106.7,
+    top: CHAT_ONE.top,
+    right: CHAT_ONE.right,
+    width: CHAT_ONE.width,
     backgroundColor: DM.bubbleTeal,
     transform: [{ rotate: "2.5deg" }],
   },

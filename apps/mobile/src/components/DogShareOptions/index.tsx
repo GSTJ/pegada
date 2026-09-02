@@ -13,10 +13,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 
 import Copy from "@/assets/images/Copy.svg";
-import Dog from "@/assets/images/Dog.svg";
-import Premium from "@/assets/images/Premium.svg";
+import Gift from "@/assets/images/Gift.svg";
 import ShareIcon from "@/assets/images/Share.svg";
 import Story from "@/assets/images/Story.svg";
+import VideoCamera from "@/assets/images/VideoCamera.svg";
 import Divider from "@/components/divider";
 import { FakeDoorRow } from "@/components/FakeDoor";
 import { PressableArea } from "@/components/pressable-area";
@@ -214,6 +214,7 @@ const DogShareSheetContent = ({
         storyCardRef,
         waitForPhoto,
         hide,
+        dogName: dog.name,
         dialogTitle: t("dogProfile.shareProfile", { name: firstName }),
         shareLinkMessage,
         copy: {
@@ -274,24 +275,38 @@ const DogShareSheetContent = ({
         />
         {/* Fake doors, last and marked "em breve": everything above this
             divider works today, and the two below only measure whether they
-            are worth building. */}
+            are worth building.
+
+            Their icons come from the same Phosphor outline set as the three
+            rows above rather than from the app's own solid glyphs: a filled
+            crown and a filled dog drawn edge to edge in a 24pt box read
+            heavier and larger than a 256pt outline mark at the same asked-for
+            size, which put the loudest thing on the sheet next to the two
+            options that do nothing.
+
+            `dismissHost` closes this sheet before the "em breve" sheet
+            opens. Without it the second sheet lands on top of the first,
+            stacking two backdrops and slicing the "Copiar link" row with its
+            own top edge. */}
         <Divider style={styles.rowDivider} />
         <FakeDoorRow
           testID="fake-door-referral"
           feature="referral_reward"
           source="share_sheet"
-          icon={Premium}
+          icon={Gift}
           label={t("fakeDoor.referralReward")}
           disabled={isSharingStory}
+          dismissHost={hide}
         />
         <Divider style={styles.rowDivider} />
         <FakeDoorRow
           testID="fake-door-ai-video"
           feature="ai_story_video"
           source="share_sheet"
-          icon={Dog}
+          icon={VideoCamera}
           label={t("fakeDoor.aiStoryVideo", { name: firstName })}
           disabled={isSharingStory}
+          dismissHost={hide}
         />
       </View>
       <PressableArea
