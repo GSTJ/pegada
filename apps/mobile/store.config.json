@@ -1,7 +1,7 @@
 {
   "configVersion": 0,
   "apple": {
-    "version": "1.2.4",
+    "version": "1.7.2",
     "copyright": "Pegada",
     "release": {
       "automaticRelease": true
@@ -17,7 +17,7 @@
           "Companheiro",
           "Passeio"
         ],
-        "releaseNotes": "Obrigado por usar o Pegada! Nessa versão, fizemos algumas melhorias e correções de bugs para deixar o app ainda melhor.\n\nSe você tiver alguma dúvida ou sugestão, entre em contato conosco pelo email",
+        "releaseNotes": "Obrigado por usar o Pegada! Nessa versão, seu cão pode finalmente aparecer para o mundo.\n\nCompartilhe o perfil do seu cão com um toque, ou monte um story pronto para postar no Instagram e no WhatsApp.\n\nLinks do pegada.app agora abrem direto no app, já na tela certa, mesmo quando você ainda não entrou na sua conta.\n\nQuando não sobra ninguém por perto, a tela de fim de fila passou a sugerir o que fazer em seguida em vez de deixar você parado.\n\nTambém movemos o pedido de avaliação para um momento melhor e corrigimos alguns bugs.\n\nSe você tiver alguma dúvida ou sugestão, entre em contato conosco pelo email",
         "marketingUrl": "https://www.pegada.app/pt-br",
         "supportUrl": "https://www.pegada.app/pt-br",
         "title": "Pegada",
@@ -38,7 +38,7 @@
           "Puppy",
           "Paw"
         ],
-        "releaseNotes": "Thank you for using Pegada! In this version, we've made enhancements and bug fixes to improve the app.\n\nIf you have any questions or suggestions, contact us via our email!",
+        "releaseNotes": "Thank you for using Pegada! In this version, your dog finally gets to show off.\n\nShare your dog's profile in one tap, or build a story that is ready to post on Instagram and WhatsApp.\n\nLinks from pegada.app now open straight in the app, on the right screen, even when you have not signed in yet.\n\nWhen there is nobody left nearby, the end of the queue now suggests what to do next instead of leaving you stuck.\n\nWe also moved the review prompt to a better moment and fixed a few bugs.\n\nIf you have any questions or suggestions, contact us via our email!",
         "marketingUrl": "https://www.pegada.app",
         "supportUrl": "https://www.pegada.app",
         "title": "Pegada",

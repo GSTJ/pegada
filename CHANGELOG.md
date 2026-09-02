@@ -2,6 +2,43 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.7.2 (2026-09-02)
+
+### Features
+
+- **mobile:** share your dog from the empty deck and after the first match ([`a8046d0`](https://github.com/GSTJ/pegada/commit/a8046d0ac2bd19dba1b802cf9593604378b9c2a2))
+- **web:** AI story landing with email capture ([`6ca7c00`](https://github.com/GSTJ/pegada/commit/6ca7c003e4b3c013075dc246be418561062785d3))
+- **mobile:** share your dog's profile, with a story card ([`3c0c60a`](https://github.com/GSTJ/pegada/commit/3c0c60a2c5da80fc0356219db858530bd4af48cd))
+- open pegada.app/dog links in the app, with a sign in hand off ([`2fbbb37`](https://github.com/GSTJ/pegada/commit/2fbbb3764fa761273d997b26c670ca6fd2dac135))
+- attribute installs and signups to the dog that was shared ([`37fa5e2`](https://github.com/GSTJ/pegada/commit/37fa5e2f9382c3217630c18edcd41f6fabaf20ee))
+- **mobile:** ask for a review right after the first match ([`f95737a`](https://github.com/GSTJ/pegada/commit/f95737a009dc001a62454360cc95535ab4ecca42))
+- **mobile:** empty deck that keeps people around ([`b089947`](https://github.com/GSTJ/pegada/commit/b0899473adb153c2b20f2fb57315e72214ecd4de))
+- **api:** scheduled re-engagement pushes ([`6d361e9`](https://github.com/GSTJ/pegada/commit/6d361e92051a48eb9f232946e180ed1952620c1c))
+- **web:** enable PostHog on the marketing site ([`68f41d3`](https://github.com/GSTJ/pegada/commit/68f41d38b360a127298e9392d3f970932cf7367f))
+- **mobile:** paywall without free trial, yearly first ([`ca85667`](https://github.com/GSTJ/pegada/commit/ca856671ea7c9535d8a444b46584ba8c5ebc79b6))
+- **api:** persist subscription lifecycle for churn measurement ([`7d66cfe`](https://github.com/GSTJ/pegada/commit/7d66cfe961b346b332ad548d3934acb5542d051f))
+- **analytics:** funnel events across onboarding, swipe, match, chat, paywall and share ([`c235ae6`](https://github.com/GSTJ/pegada/commit/c235ae6958532bb49b9064d48c3083cadbfe5f9f))
+- **api:** track last activity per user ([`045ff4b`](https://github.com/GSTJ/pegada/commit/045ff4b179ca92a43b66d6736727089d241779e7))
+- **web:** dog share page with real CTA and per-dog OG image ([#184](https://github.com/GSTJ/pegada/pull/184)) ([`58f0071`](https://github.com/GSTJ/pegada/commit/58f00719110f225fc4a0b25ca2467c2ddad61392))
+
+### Fixes
+
+- **mobile:** stop the swipe screen replaying the last notification tap ([`490f439`](https://github.com/GSTJ/pegada/commit/490f4393e037015b0a0c2c899a42647646bf00f9))
+- **ci:** report the iOS E2E gate on every pull request ([`9d5e7a8`](https://github.com/GSTJ/pegada/commit/9d5e7a87ebfeacc12abf74fa9a6c2514ab95ea12))
+- **database:** apply migrations during Vercel production builds ([`a4c5db8`](https://github.com/GSTJ/pegada/commit/a4c5db87e6897276d82be1d3efb91b45a8c095d3))
+- **mobile:** drop 17+ age rating and dating signals from store metadata ([`5011516`](https://github.com/GSTJ/pegada/commit/5011516d427bd2b0e9fb9ce8ca96f5e9f91d3318))
+- **mobile:** stop sending Android submissions straight to production ([#185](https://github.com/GSTJ/pegada/pull/185)) ([`6d3f9e6`](https://github.com/GSTJ/pegada/commit/6d3f9e6beac8f12aef2360de59ce11b6ca492805))
+- **email:** serve the logo from our CDN ([#183](https://github.com/GSTJ/pegada/pull/183)) ([`164c7d5`](https://github.com/GSTJ/pegada/commit/164c7d5df140630b165fb13428779b9b7c6a6451))
+- **mobile:** submit Android releases to production ([#182](https://github.com/GSTJ/pegada/pull/182)) ([`101dde3`](https://github.com/GSTJ/pegada/commit/101dde3a1d4696f71f7cfbfe5c79dc2448185600))
+- **security:** close OTP and release integrity gaps ([#181](https://github.com/GSTJ/pegada/pull/181)) ([`d6f4518`](https://github.com/GSTJ/pegada/commit/d6f4518f9b7370d7fa6d4367e5e60823f0b6cfbe))
+- **api:** constrain image upload grants ([#180](https://github.com/GSTJ/pegada/pull/180)) ([`cd6d0a0`](https://github.com/GSTJ/pegada/commit/cd6d0a0d7bf122af834bd6c81313d5520c65d47d))
+- **api:** harden swipe access and quotas ([#179](https://github.com/GSTJ/pegada/pull/179)) ([`ee2cb23`](https://github.com/GSTJ/pegada/commit/ee2cb2308e008968af8402f6f85013ddb5b314bc))
+- **api:** stop exposing private account data ([#177](https://github.com/GSTJ/pegada/pull/177)) ([`ac05702`](https://github.com/GSTJ/pegada/commit/ac05702b709591e43bee6c283125ad9d25170c5e))
+- **deps:** update codemod postcss ([#178](https://github.com/GSTJ/pegada/pull/178)) ([`fba4489`](https://github.com/GSTJ/pegada/commit/fba44896ba5f883326515c7243dc3c0cfa8ab526))
+- **mobile:** polish TestFlight gesture interactions ([#176](https://github.com/GSTJ/pegada/pull/176)) ([`5418d32`](https://github.com/GSTJ/pegada/commit/5418d324724304681e030cf7e7263bb6e317c768))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.6.2...v1.7.2)
+
 ## v1.6.2 (2026-08-30)
 
 ### Fixes
