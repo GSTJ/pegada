@@ -2,8 +2,10 @@
 # Maestro pre-test seed hook.
 #
 # Resets the local Postgres into a known-good state for every Maestro flow:
-# 12+ dogs near SF, magic user test@pegada.app with dog Rex, one match
-# Rex<->Bella with 2 messages, and OTP code=424242 for every test user.
+# 12+ dogs near SF, magic user test@pegada.app with dog Rex, a Rex<->Bella
+# match with 2 messages, a Rex<->Nina match with an empty thread and four
+# photos on Nina, Mel at the back of the deck, and OTP code=424242 for every
+# test user.
 #
 # Idempotent — re-running is a no-op modulo "Rex deck cleared" count.
 #
@@ -35,11 +37,5 @@ DATABASE_URL="$DATABASE_URL" pnpm -F @pegada/database maestro:seed >/dev/null 2>
 # way. `pre/43-seed-long-chat.sh` runs after this, so 43 and 44 still get it.
 psql "$DATABASE_URL" -q -c \
   "DELETE FROM \"Message\" WHERE content LIKE 'chatux message %';" >/dev/null 2>&1 || true
-
-# Same story for flow 45's extra photos on Nina: they change the pagination
-# dots on every screen that renders her, and `pre/45-seed-gallery.sh` puts them
-# back for the one flow that wants them.
-psql "$DATABASE_URL" -q -c \
-  "DELETE FROM \"Image\" WHERE id LIKE 'chatux-gallery-%';" >/dev/null 2>&1 || true
 
 echo "seeded"

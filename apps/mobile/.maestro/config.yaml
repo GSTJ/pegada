@@ -59,9 +59,9 @@ executionOrder:
     # itself, so it needs the same "after everything that reads the seeded
     # conversations" slot.
     - 44-chat-keyboard-anchor
-    # 45 needs Nina to have four photos, which changes the pagination dots on
-    # every screen that renders her, so it sits down here with the other two
-    # fixture-heavy flows. `seed-before-test.sh` drops the extra photos again.
+    # 45 needs Nina's four photo gallery, which the seed owns, and it reads the
+    # same Rex<->Nina conversation 43 and 44 fill, so it sits down here with
+    # them rather than anywhere the long-chat fixture could still be around.
     - 45-dog-profile-photo-edges
     # 46/47 cover the `pegada://dog/<id>` deep-link hand-off (universal
     # links branch): 46 is the cold, logged-out case (banner on sign-in,

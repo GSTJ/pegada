@@ -67,7 +67,11 @@ export default extendConfig(base, {
     {
       // Seeds are operator-facing scripts that report progress on stdout, they
       // just don't live under `scripts/`.
-      files: ["packages/database/seed.ts", "packages/database/maestro-seed.ts"],
+      files: [
+        "packages/database/seed.ts",
+        "packages/database/maestro-seed.ts",
+        "packages/database/maestro-seed-cli.ts",
+      ],
       rules: {
         "no-console": "off",
         // Seeding is deliberately sequential: every row depends on the one
