@@ -6,6 +6,15 @@ jest.mock("../shared/analytics", () => ({
   captureEvent: (...args: unknown[]) => mockCaptureEvent(...args),
 }));
 
+// `subscription-event-service.ts` reaches `errors.ts` -> `observability.ts` ->
+// the ESM-only `magic-observability/node`, which jest can't parse. Same mock
+// the other service suites use.
+jest.mock("../errors/errors", () => ({
+  sendError: jest.fn(),
+  logDebug: () => undefined,
+  errorDebug: () => undefined,
+}));
+
 jest.mock("@pegada/database", () => ({
   __esModule: true,
   default: { $transaction: (...args: unknown[]) => mockTransaction(...args) },
@@ -95,11 +104,13 @@ beforeEach(() => {
 });
 
 describe("PaymentService.handleRevenueCatEvent", () => {
-  it("captures a Subscription Event for every type RevenueCat can send", () => {
+  it("captures a Subscription Event for every type RevenueCat can send", async () => {
     // Most of these change no plan at all, and those are exactly the ones that
     // answer "why did they leave" — so the capture sits before the switch.
     for (const type of EVERY_EVENT_TYPE) {
-      void service.handleRevenueCatEvent({ event: buildEvent({ type }) });
+      // The assertion below reads the order the captures arrived in.
+      // oxlint-disable-next-line no-await-in-loop -- so these run one at a time.
+      await service.handleRevenueCatEvent({ event: buildEvent({ type }) });
     }
 
     expect(mockCaptureEvent).toHaveBeenCalledTimes(EVERY_EVENT_TYPE.length);
@@ -110,8 +121,8 @@ describe("PaymentService.handleRevenueCatEvent", () => {
     expect(capturedTypes).toEqual(EVERY_EVENT_TYPE);
   });
 
-  it("sends the billing detail the revenue questions are asked in", () => {
-    service.handleRevenueCatEvent({
+  it("sends the billing detail the revenue questions are asked in", async () => {
+    await service.handleRevenueCatEvent({
       event: buildEvent({ type: "INITIAL_PURCHASE" }),
     });
 
@@ -132,14 +143,14 @@ describe("PaymentService.handleRevenueCatEvent", () => {
     );
   });
 
-  it("reads a cancellation's reason and an expiration's under one key", () => {
-    service.handleRevenueCatEvent({
+  it("reads a cancellation's reason and an expiration's under one key", async () => {
+    await service.handleRevenueCatEvent({
       event: buildEvent({
         type: "CANCELLATION",
         cancel_reason: "UNSUBSCRIBE",
       }),
     });
-    service.handleRevenueCatEvent({
+    await service.handleRevenueCatEvent({
       event: buildEvent({
         type: "EXPIRATION",
         expiration_reason: "BILLING_ERROR",
@@ -152,8 +163,8 @@ describe("PaymentService.handleRevenueCatEvent", () => {
     expect(reasons).toEqual(["UNSUBSCRIBE", "BILLING_ERROR"]);
   });
 
-  it("leaves an event with no billing detail with nulls rather than undefined", () => {
-    service.handleRevenueCatEvent({
+  it("leaves an event with no billing detail with nulls rather than undefined", async () => {
+    await service.handleRevenueCatEvent({
       event: {
         type: "TEST",
         id: "event-1",
@@ -181,18 +192,18 @@ describe("PaymentService.handleRevenueCatEvent", () => {
   });
 
   describe("plan mutations, which this change must not touch", () => {
-    it("does not downgrade on CANCELLATION", () => {
+    it("does not downgrade on CANCELLATION", async () => {
       // A cancellation is a promise to leave at the end of the period. The
       // entitlement is still paid for until EXPIRATION says otherwise.
-      service.handleRevenueCatEvent({
+      await service.handleRevenueCatEvent({
         event: buildEvent({ type: "CANCELLATION" }),
       });
 
       expect(mockUpdateUserById).not.toHaveBeenCalled();
     });
 
-    it("downgrades on EXPIRATION", () => {
-      service.handleRevenueCatEvent({
+    it("downgrades on EXPIRATION", async () => {
+      await service.handleRevenueCatEvent({
         event: buildEvent({ type: "EXPIRATION" }),
       });
 
@@ -201,8 +212,8 @@ describe("PaymentService.handleRevenueCatEvent", () => {
       });
     });
 
-    it("upgrades on INITIAL_PURCHASE with the premium entitlement", () => {
-      service.handleRevenueCatEvent({
+    it("upgrades on INITIAL_PURCHASE with the premium entitlement", async () => {
+      await service.handleRevenueCatEvent({
         event: buildEvent({
           type: "INITIAL_PURCHASE",
           entitlement_ids: ["premium"],
@@ -214,8 +225,8 @@ describe("PaymentService.handleRevenueCatEvent", () => {
       });
     });
 
-    it("ignores anonymous purchasers", () => {
-      service.handleRevenueCatEvent({
+    it("ignores anonymous purchasers", async () => {
+      await service.handleRevenueCatEvent({
         event: buildEvent({
           type: "INITIAL_PURCHASE",
           app_user_id: "$RCAnonymousID:abc",
