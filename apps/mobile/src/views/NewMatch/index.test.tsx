@@ -18,6 +18,21 @@ import { SceneName } from "@/types/scene-name";
 
 const mockHandlers = new Map<string, () => Promise<void> | void>();
 const mockBackHandlers: (() => boolean)[] = [];
+const mockEffects: (() => (() => void) | void)[] = [];
+
+jest.mock<Record<string, unknown>>("react", () => {
+  const actual = jest.requireActual<typeof React>("react");
+
+  return {
+    ...actual,
+    // A static render never runs effects, and the review ask lives in one.
+    // Collected here and run by `render` instead, which is what lets a test
+    // watch the timer that ask is scheduled on.
+    useEffect: (effect: () => (() => void) | void) => {
+      mockEffects.push(effect);
+    },
+  };
+});
 
 const mockRouter = {
   back: jest.fn(),
@@ -121,12 +136,22 @@ jest.mock<Record<string, unknown>>("@/contexts/trpc-provider", () => ({
   },
 }));
 
-// The review ask sits behind a `setTimeout` in a `useEffect`, and neither
-// runs under `renderToStaticMarkup`. Its rules are covered in
-// `services/app-review-policy.test.ts`; these stubs only keep the import
-// graph from reaching real storage and a real store review call.
+// What the ask decides once it is made is covered in
+// `services/app-review-policy.test.ts` and `services/app-review.test.tsx`.
+// This stub is about whether the screen makes it at all.
+type ReviewAskOptions = {
+  trigger: string;
+  matchCount?: number;
+  canStillAsk?: () => boolean;
+};
+
+const mockHandleRequestAppReview = jest.fn<Promise<void>, [ReviewAskOptions]>(
+  () => Promise.resolve(),
+);
+
 jest.mock<Record<string, unknown>>("@/services/app-review", () => ({
-  handleRequestAppReview: () => Promise.resolve(),
+  handleRequestAppReview: (options: ReviewAskOptions) =>
+    mockHandleRequestAppReview(options),
 }));
 
 jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
@@ -170,13 +195,25 @@ jest.mock<Record<string, unknown>>("./styles", () => ({
   styles: {},
 }));
 
-import NewMatchScreen from ".";
+import NewMatchScreen, { REVIEW_PROMPT_DELAY_MS } from ".";
 
 const render = () => {
   mockHandlers.clear();
   mockBackHandlers.length = 0;
+  mockEffects.length = 0;
+
   renderToStaticMarkup(<NewMatchScreen />);
+
+  return mockEffects.map((effect) => effect());
 };
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 describe("NewMatch exits", () => {
   it("swaps itself for the chat instead of stacking it on top", async () => {
@@ -220,5 +257,76 @@ describe("NewMatch exits", () => {
     await Promise.resolve();
 
     expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("the first match review ask", () => {
+  it("waits out the confetti before asking", () => {
+    render();
+
+    jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS - 1);
+    expect(mockHandleRequestAppReview).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(1);
+    expect(mockHandleRequestAppReview).toHaveBeenCalledWith(
+      expect.objectContaining({ matchCount: 1, trigger: "first_match" }),
+    );
+  });
+
+  it.each(["new-match-send", "new-match-skip"])(
+    "drops the ask the instant %s is pressed",
+    (testID) => {
+      render();
+
+      // Deliberately not awaited. Both CTAs wait on the interstitial before
+      // they navigate, so the screen stays mounted for seconds after the
+      // press and the timer would otherwise still be running under a full
+      // screen ad, where the prompt is invisible and in the way of closing
+      // it. The cancel has to land in the press itself, before any await.
+      void mockHandlers.get(testID)?.();
+
+      jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS * 4);
+
+      expect(mockHandleRequestAppReview).not.toHaveBeenCalled();
+    },
+  );
+
+  it("leaves the second message fallback armed when a CTA cancels it", async () => {
+    render();
+
+    const pressed = mockHandlers.get("new-match-send")?.();
+    jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS * 4);
+    await pressed;
+
+    // The marker that switches the fallback off is written by the ask, and
+    // only once the prompt is on screen. No ask, no marker, so the second
+    // message still gets to try.
+    expect(mockHandleRequestAppReview).not.toHaveBeenCalled();
+    expect(mockRouter.replace).toHaveBeenCalled();
+  });
+
+  it("withdraws an ask that is already in flight", () => {
+    render();
+
+    jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS);
+
+    // The ask reads storage and calls the API before it shows anything, so a
+    // press can land while it is still deciding.
+    const options = mockHandleRequestAppReview.mock.calls[0]?.[0];
+    expect(options?.canStillAsk?.()).toBe(true);
+
+    void mockHandlers.get("new-match-skip")?.();
+
+    expect(options?.canStillAsk?.()).toBe(false);
+  });
+
+  it("stops the timer when the screen goes away", () => {
+    const cleanups = render();
+
+    for (const cleanup of cleanups) cleanup?.();
+
+    jest.advanceTimersByTime(REVIEW_PROMPT_DELAY_MS * 4);
+
+    expect(mockHandleRequestAppReview).not.toHaveBeenCalled();
   });
 });

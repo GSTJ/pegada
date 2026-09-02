@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import * as React from "react";
 import { BackHandler, ScrollView, View } from "react-native";
 
@@ -26,7 +26,7 @@ import { ConfettiAnimation } from "./confetti-animation";
 import { Content, MatchCaption, MatchWordmark, styles } from "./styles";
 
 /** Long enough for the confetti to land and the cards to settle. */
-const REVIEW_PROMPT_DELAY_MS = 2500;
+export const REVIEW_PROMPT_DELAY_MS = 2500;
 
 const NewMatch: React.FC = () => {
   const { matchId, matchDogId } = useLocalSearchParams<{
@@ -57,7 +57,26 @@ const NewMatch: React.FC = () => {
 
   const router = useRouter();
 
-  const handleSendMessage = async () => {
+  // Flipped the instant a CTA is pressed, before anything is awaited.
+  //
+  // Both CTAs wait on the interstitial, which keeps this screen mounted for
+  // as long as the ad takes to load and for the whole time it is up. The
+  // review prompt is a magic modal, and outside the Maestro build those
+  // render in RNScreens' FullWindowOverlay, a separate native window. Landing
+  // one on top of a full screen ad meant the user could no longer reach the
+  // ad's close button, the CLOSED event the CTA is awaiting never arrived,
+  // and the screen sat there with no way forward.
+  const exitStartedRef = useRef(false);
+  const reviewTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const cancelReviewPrompt = useCallback(() => {
+    exitStartedRef.current = true;
+    clearTimeout(reviewTimeoutRef.current);
+  }, []);
+
+  const handleSendMessage = useCallback(async () => {
+    cancelReviewPrompt();
+
     analytics.track({
       event_type: "New Match",
       event_properties: {
@@ -77,9 +96,11 @@ const NewMatch: React.FC = () => {
       pathname: `${SceneName.Chat}/[matchId]`,
       params: { dogId: matchDogId, matchId },
     });
-  };
+  }, [cancelReviewPrompt, matchDogId, matchId, router, safeLoadAndShow]);
 
   const handleSkip = useCallback(async () => {
+    cancelReviewPrompt();
+
     analytics.track({
       event_type: "New Match",
       event_properties: {
@@ -90,7 +111,7 @@ const NewMatch: React.FC = () => {
     await safeLoadAndShow();
 
     router.back();
-  }, [router, safeLoadAndShow]);
+  }, [cancelReviewPrompt, router, safeLoadAndShow]);
 
   // Assume 'skip' if the user presses the back button.
   // This is pertinent to Android devices only.
@@ -126,10 +147,13 @@ const NewMatch: React.FC = () => {
   // The first match is the high point of the whole app, which is why the
   // review prompt now asks here. It waits out the confetti first: a modal on
   // top of the celebration would spend the good mood instead of riding it.
-  // Taking either CTA before the delay is up unmounts the screen and cancels
-  // the ask, so the prompt never lands on the chat.
+  // The ask belongs to this screen while this screen is the one in front of
+  // the user, and a CTA press ends both at once.
   useEffect(() => {
     if (matchCount === undefined) return;
+
+    // The count arrives from a query, so this effect can run after a press.
+    if (exitStartedRef.current) return;
 
     // Skipped in the Maestro build for the same reason interstitials are: it
     // is a modal that arrives on a timer this screen owns, it eats the tap
@@ -139,11 +163,22 @@ const NewMatch: React.FC = () => {
     if (isMaestroE2EBuild()) return;
 
     const timeout = setTimeout(() => {
+      // A press clears this timeout synchronously, so getting here at all
+      // means none had landed when the timer was queued. Re-read anyway: a
+      // press in the same tick as the timer is a coin toss otherwise.
+      if (exitStartedRef.current) return;
+
       handleRequestAppReview({
         trigger: ReviewTrigger.FirstMatch,
         matchCount,
+        // Read again just before the modal goes up, after the storage reads
+        // and the API call in there. Everything the prompt costs, the month
+        // long throttle included, is spent on this side of it.
+        canStillAsk: () => !exitStartedRef.current,
       }).catch(sendError);
     }, REVIEW_PROMPT_DELAY_MS);
+
+    reviewTimeoutRef.current = timeout;
 
     return () => clearTimeout(timeout);
   }, [matchCount]);

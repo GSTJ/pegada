@@ -138,6 +138,53 @@ describe("the first match trigger", () => {
       StorageKeys.AppReviewMatchPrompted,
       "true",
     );
+    expect(asyncStorage.setItem).toHaveBeenCalledWith(
+      StorageKeys.AppReviewRequestDate,
+      expect.any(String),
+    );
+  });
+
+  it("charges the month to a prompt that reached the screen, and nothing else", async () => {
+    // The celebration screen hands this in and answers false once a CTA has
+    // been pressed, because everything above the modal is asynchronous: three
+    // storage reads, the native availability check, and an API round trip.
+    // A prompt withdrawn in there used to still write the throttle date,
+    // which bought a month of silence for a question nobody was asked, and
+    // the match marker, which switched off the second-message fallback too.
+    await handleRequestAppReview({
+      trigger: ReviewTrigger.FirstMatch,
+      matchCount: 1,
+      canStillAsk: () => false,
+    });
+
+    expect(show).not.toHaveBeenCalled();
+    expect(track).not.toHaveBeenCalled();
+    expect(asyncStorage.setItem).not.toHaveBeenCalledWith(
+      StorageKeys.AppReviewRequestDate,
+      expect.any(String),
+    );
+    expect(asyncStorage.setItem).not.toHaveBeenCalledWith(
+      StorageKeys.AppReviewMatchPrompted,
+      "true",
+    );
+  });
+
+  it("shows one prompt when two triggers arrive together", async () => {
+    // The celebration timer and a message sent from the chat can overlap by
+    // seconds. Both would read the same storage, both would pass the same
+    // throttle, and the second modal would land on top of the first.
+    await Promise.all([
+      handleRequestAppReview({
+        trigger: ReviewTrigger.FirstMatch,
+        matchCount: 1,
+      }),
+      handleRequestAppReview({
+        trigger: ReviewTrigger.MessagesTab,
+        matchCount: 1,
+      }),
+    ]);
+
+    expect(show).toHaveBeenCalledTimes(1);
   });
 
   it("stays silent, and unreported, on a later match", async () => {
