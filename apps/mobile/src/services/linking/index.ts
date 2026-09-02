@@ -67,30 +67,28 @@ export const processLinks = () => {
   };
 };
 
+const storeNotification = (response: Notifications.NotificationResponse) => {
+  setInitialNotification({
+    id: getNotificationId(response),
+    url: getNotificationUrl(response),
+    kind: getNotificationKind(response),
+  });
+};
+
 export const useGetInitialNotifications = () => {
   useEffect(() => {
     // When the app is not already running, and the user clicks on a notification
     Notifications.getLastNotificationResponseAsync()
       .then((response) => {
         if (!response) return;
-        setInitialNotification({
-          id: getNotificationId(response),
-          url: getNotificationUrl(response),
-          kind: getNotificationKind(response),
-        });
+        storeNotification(response);
         return undefined;
       })
       .catch(sendError);
 
     // When the app is already running, and the user clicks on a notification
     const notificationSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        setInitialNotification({
-          id: getNotificationId(response),
-          url: getNotificationUrl(response),
-          kind: getNotificationKind(response),
-        });
-      });
+      Notifications.addNotificationResponseReceivedListener(storeNotification);
 
     return () => {
       notificationSubscription.remove();
