@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import * as Linking from "expo-linking";
 
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { isReferralId } from "@pegada/shared/utils/referral";
 
 import { analytics } from "@/services/analytics";
@@ -32,7 +33,7 @@ const capture = async (url: string | null, cold: boolean) => {
   if (stored !== referral) return;
 
   analytics.track({
-    event_type: "Referral Captured",
+    event_type: ANALYTICS_EVENTS.REFERRAL_CAPTURED,
     event_properties: {
       ref: referral.ref,
       // Only the server can say whether this id names a real account. The app

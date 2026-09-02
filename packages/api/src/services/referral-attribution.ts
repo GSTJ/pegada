@@ -1,4 +1,5 @@
 import prisma from "@pegada/database";
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { isReferralId, isReferralRef } from "@pegada/shared/utils/referral";
 
 import { sendEvent } from "../errors/errors";
@@ -125,7 +126,7 @@ export const trackSignupAttributed = ({
   attribution: ReferralAttribution;
   platform?: ReferralPlatform;
 }) => {
-  sendEvent("Signup Attributed", {
+  sendEvent(ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED, {
     distinctId: userId,
     ref: attribution.ref,
     referredByUserId: attribution.referredByUserId,

@@ -55,6 +55,7 @@ export const ANALYTICS_EVENTS = {
   SHARE_COMPLETED: "Share Completed",
   SHARE_TAPPED: "Share Tapped",
   SIGN_IN_EMAIL_SUBMITTED: "Sign In Email Submitted",
+  SIGNUP_ATTRIBUTED: "Signup Attributed",
   SKIP_COMPLETE_DOG_PROFILE: "Skip Complete Dog Profile",
   SUBSCRIPTION_EVENT: "Subscription Event",
   SWIPE: "Swipe",
@@ -318,6 +319,17 @@ export type ServerEventProperties = {
     dedupe_key: string;
     kind: ReengagementPushKind;
   };
+  // Keys stay camelCase for the same reason "Referral Captured" keeps them:
+  // the two events are joined on `ref` and `referredByUserId`, and a capture
+  // that spells a key one way and the signup it produced another way is a
+  // funnel nobody can build.
+  [ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED]: {
+    platform: string;
+    ref: string;
+    referralSource: string | null;
+    referredByUserId: string | null;
+    referredDogId: string | null;
+  };
   [ANALYTICS_EVENTS.SUBSCRIPTION_EVENT]: {
     cancel_reason?: SubscriptionCancelReason | null;
     currency?: string | null;
@@ -415,6 +427,7 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.MATCH_CREATED,
   ANALYTICS_EVENTS.MESSAGE_SENT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
+  ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
 ] as const;
 
