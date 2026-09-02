@@ -242,7 +242,13 @@ const EmptyState = () => {
               */}
               <SharePromptCard placement="empty_deck" />
               <Button
-                onPress={() => router.push(SceneName.Preferences)}
+                onPress={() => {
+                  analytics.track({
+                    event_type: "Empty Deck Action Tapped",
+                    event_properties: { action: EmptyDeckAction.Preferences },
+                  });
+                  router.push(SceneName.Preferences);
+                }}
                 variant="outline"
               >
                 {t("swipeRequestFeedback.preferencesButton")}
