@@ -30,11 +30,22 @@ const epilogue = Epilogue({
  */
 const SITE_URL = new URL("https://www.pegada.app");
 
-const OG_IMAGE = {
-  url: "/og-image.png",
+/**
+ * The headline is baked into the card, so an English one under `/pt-br` shows
+ * a Portuguese page behind an English preview every time the link is pasted
+ * into WhatsApp. One file per locale, same as the story page's card.
+ */
+const OG_IMAGE_BY_LOCALE: Record<string, string> = {
+  "pt-br": "/og-image-pt-br.png",
+};
+
+const OG_IMAGE_FALLBACK = "/og-image.png";
+
+const ogImage = (locale: string) => ({
+  url: OG_IMAGE_BY_LOCALE[locale] ?? OG_IMAGE_FALLBACK,
   width: 1200,
   height: 630,
-};
+});
 
 /**
  * `public/favicon.ico` is served by convention with no `<link>` at all, which
@@ -60,7 +71,7 @@ export const generateMetadata = () => {
   const routePath = toRoutePath(getRequestPathname());
 
   const canonical = toLocalePath(locale, routePath);
-  const images = [{ ...OG_IMAGE, alt: t("metadata.ogImageAlt") }];
+  const images = [{ ...ogImage(locale), alt: t("metadata.ogImageAlt") }];
 
   return {
     metadataBase: SITE_URL,
