@@ -1,5 +1,7 @@
 import type { RootReducer } from "@/store/reducers";
 
+import type { ShareAction } from "react-native";
+
 import { useEffect, useRef, useState } from "react";
 import { Alert, Share, View } from "react-native";
 
@@ -29,7 +31,13 @@ import { getData, StorageKeys, storeData } from "@/services/storage";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
-import { isNewDogsAlertRequested } from "./new-dogs-alert";
+import {
+  EmptyDeckAction,
+  isNewDogsAlertRequested,
+  PushPermission,
+  pushPermissionFromToken,
+  shareOutcomeOf,
+} from "./new-dogs-alert";
 import {
   Description,
   EmptyAnimation,
@@ -85,17 +93,33 @@ const NotifyNewDogsButton = () => {
   const handlePress = async () => {
     setLoading(true);
 
+    let pushPermission = PushPermission.Unavailable;
+
     try {
       const token = await getPushNotificationToken();
+      pushPermission = pushPermissionFromToken(token);
       if (token) await setPushNotificationToken(token);
     } catch (error) {
       // A refusal is one of the answers this button expects, so only the rest
-      // is worth reporting.
-      if (!isPushDeniedError(error)) sendError(error);
+      // is worth reporting. The prompt itself already sent its own event, so
+      // this one only carries the outcome.
+      if (isPushDeniedError(error)) {
+        pushPermission = PushPermission.Denied;
+      } else {
+        sendError(error);
+      }
     }
 
+    analytics.track({
+      event_type: "Empty Deck Action Tapped",
+      event_properties: {
+        action: EmptyDeckAction.NotifyNewDogs,
+        push_permission: pushPermission,
+      },
+    });
+
     // A refused permission is still someone asking to be told, so the intent
-    // is recorded either way.
+    // is recorded either way and the readout keeps the two apart.
     try {
       await requestAlert.mutateAsync();
       await storeData(StorageKeys.NewDogsAlertRequested, "requested");
@@ -129,8 +153,10 @@ const InviteFriendButton = () => {
   const { t } = useTranslation();
 
   const handlePress = async () => {
+    let result: ShareAction | undefined;
+
     try {
-      await Share.share({
+      result = await Share.share({
         message: t("swipeRequestFeedback.inviteFriendMessage", {
           link: `${APP_SHARE_LINK_BASE}/store`,
         }),
@@ -138,6 +164,16 @@ const InviteFriendButton = () => {
     } catch (error) {
       sendError(error);
     }
+
+    // One event per tap, fired once the sheet settles, so the funnel counts
+    // taps and carries whether the invite actually went out.
+    analytics.track({
+      event_type: "Empty Deck Action Tapped",
+      event_properties: {
+        action: EmptyDeckAction.InviteFriend,
+        share_result: shareOutcomeOf(result),
+      },
+    });
   };
 
   return (
@@ -191,11 +227,13 @@ const SwipeRequestFeedback = ({ deckIsEmpty }: { deckIsEmpty: boolean }) => {
   // nothing about a deck being empty. It mounts mid-load, with cards, and on
   // the error screen. The event belongs to the one state that is genuinely
   // empty: the request settled, it did not fail, we are online, and there is
-  // no card left to act on. The ref re-arms when cards arrive, so a later
-  // refetch that returns empty again is a second event while a re-render is
-  // not.
+  // no card left to act on. `deckIsEmpty` rather than an empty list, because
+  // the card that was just swiped stays in the list so it can be swiped back:
+  // a deck swiped to the end never empties the list and would never have been
+  // counted. The ref re-arms when cards arrive, so a later refetch that
+  // returns empty again is a second event while a re-render is not.
   const isEmptyDeck =
-    !request.loading && !request.error && !offline && request.data.length === 0;
+    !request.loading && !request.error && !offline && deckIsEmpty;
   const hasReportedEmptyDeck = useRef(false);
 
   useEffect(() => {
