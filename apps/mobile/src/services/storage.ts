@@ -9,6 +9,7 @@ export enum StorageKeys {
   Language = "language",
   AppReviewRequestDate = "appReviewRequestDate",
   AppReviewStatus = "appReviewStatus",
+  NewDogsAlertRequested = "newDogsAlertRequested",
 }
 
 export enum Theme {
@@ -23,6 +24,7 @@ export type StorageDataTypes = {
   [StorageKeys.Language]: string;
   [StorageKeys.AppReviewRequestDate]: string;
   [StorageKeys.AppReviewStatus]: "completed";
+  [StorageKeys.NewDogsAlertRequested]: "requested";
 };
 
 export const storeData = async <T extends StorageKeys>(

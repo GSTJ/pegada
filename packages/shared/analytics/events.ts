@@ -24,6 +24,7 @@ export const ANALYTICS_EVENTS = {
   DELETE_ACCOUNT_CANCELED: "Delete Account Canceled",
   DELETE_ACCOUNT_CONFIRMED: "Delete Account Confirmed",
   DELETE_ACCOUNT_PRESSED: "Delete Account Pressed",
+  EMPTY_DECK_ACTION_TAPPED: "Empty Deck Action Tapped",
   EMPTY_DECK_SHOWN: "Empty Deck Shown",
   FEEDBACK: "Feedback",
   INVALID_OTP_TYPED: "User Typed Invalid OTP code",
@@ -78,6 +79,24 @@ export type PaywallTrigger =
 /** An OS permission answer, collapsed to the two states that matter. */
 export type PermissionStatus = "denied" | "granted";
 
+/** The two things the empty swipe deck offers besides the preferences link. */
+export type EmptyDeckAction = "invite_friend" | "notify_new_dogs";
+
+/**
+ * The push answer as the empty deck sees it. Wider than
+ * {@link PermissionStatus} because the button also runs where the OS never
+ * asks at all, and reading that silence as a refusal would put every simulator
+ * session in the denied bucket.
+ */
+export type PushPermissionOutcome = "denied" | "granted" | "unavailable";
+
+/**
+ * What came back from the share sheet. "unavailable" is the sheet that never
+ * opened, which is a different thing from someone opening the invite and
+ * changing their mind.
+ */
+export type ShareOutcome = "dismissed" | "shared" | "unavailable";
+
 /**
  * Which scheduled nudge the re-engagement cron sent.
  *
@@ -114,6 +133,16 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_CANCELED]: undefined;
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_CONFIRMED]: undefined;
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_PRESSED]: undefined;
+  /**
+   * One per tap on an empty deck action. `push_permission` rides on the notify
+   * action and `share_result` on the invite, so the funnel reads both the
+   * intent and what the phone did about it.
+   */
+  [ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED]: {
+    action: EmptyDeckAction;
+    push_permission?: PushPermissionOutcome;
+    share_result?: ShareOutcome;
+  };
   [ANALYTICS_EVENTS.EMPTY_DECK_SHOWN]: undefined;
   [ANALYTICS_EVENTS.FEEDBACK]: { feedback: string };
   [ANALYTICS_EVENTS.INVALID_OTP_TYPED]: undefined;
@@ -307,6 +336,7 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.DELETE_ACCOUNT_CANCELED,
   ANALYTICS_EVENTS.DELETE_ACCOUNT_CONFIRMED,
   ANALYTICS_EVENTS.DELETE_ACCOUNT_PRESSED,
+  ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED,
   ANALYTICS_EVENTS.EMPTY_DECK_SHOWN,
   ANALYTICS_EVENTS.FEEDBACK,
   ANALYTICS_EVENTS.INVALID_OTP_TYPED,

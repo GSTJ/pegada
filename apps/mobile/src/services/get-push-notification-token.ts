@@ -27,6 +27,13 @@ export enum NotificationTokenError {
 }
 
 /**
+ * A refusal is a normal outcome of asking, so callers that offer an opt-in
+ * record it and move on. Every other rejection is a real failure.
+ */
+export const isPushDeniedError = (error: unknown) =>
+  error instanceof Error && error.message === NotificationTokenError.Denied;
+
+/**
  * Records the standing permission state on the person, so "matched but never
  * messaged" can be split by whether the app was ever allowed to tell them.
  */

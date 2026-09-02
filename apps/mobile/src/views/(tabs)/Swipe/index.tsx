@@ -50,6 +50,10 @@ const Matches = () => {
   const topInset = useCustomTopInset();
   const dispatch = useDispatch();
   const cards = useSelector(getCards);
+  // The card that was just swiped stays in the list so it can be swiped back,
+  // so the deck runs out when there is no card left to act on rather than when
+  // the list empties.
+  const currentCardId = useSelector(getCurrentCardId);
 
   useEffect(() => {
     trackUser();
@@ -81,7 +85,7 @@ const Matches = () => {
       <ChangeLocation />
       <Container style={styles.container} edges={["left", "right"]}>
         <SwipeBackButton />
-        <SwipeRequestFeedback />
+        <SwipeRequestFeedback deckIsEmpty={!currentCardId} />
         {cards
           .map((card) => <SwipeHandler key={card.id} card={card} />)
           .slice(0, MAX_TO_RENDER)
