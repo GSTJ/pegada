@@ -80,6 +80,19 @@ const LINE_GAP = 0.25;
 const CAP_HEIGHT = 0.7;
 const X_HEIGHT = 0.5;
 
+/**
+ * How far Gilroy's deepest lowercase descender actually reaches below the
+ * baseline — `g` and `j`, at 214 units of its 1000 upem in every weight the
+ * app ships.
+ *
+ * Not the same number as `DESCENT`. That one is the font's declared metric,
+ * which is what a line box is built from; this is where the ink stops, and
+ * it is 22 units deeper. Anything drawn UNDER a run of text has to clear
+ * this rather than the metric, or it lands on the tail of the first `p` in
+ * the string.
+ */
+const DESCENDER_INK = 0.214;
+
 /** Ascender + descender: the font's content box, what CSS half-leads. */
 const CONTENT = ASCENT + DESCENT;
 
@@ -97,6 +110,10 @@ export const CAP_LINE = ASCENT - CAP_HEIGHT;
 export const BASELINE = ASCENT;
 export const CAP_CENTRE = ASCENT - CAP_HEIGHT / 2;
 export const X_CENTRE = ASCENT - X_HEIGHT / 2;
+
+/** Where the deepest descender's ink stops, measured the same way — the line
+ *  a rule drawn under a run of text has to sit clear of. */
+export const DESCENDER_LINE = ASCENT + DESCENDER_INK;
 
 /**
  * `top` for a run at `px(conceptSize)` whose CAP LINE has to land on

@@ -14,6 +14,7 @@ import { CARD_HEIGHT, CARD_WIDTH } from "../../story-card-styles";
 import {
   BASELINE,
   CAP_LINE,
+  DESCENDER_LINE,
   DM,
   GILROY_LINE,
   INK,
@@ -118,22 +119,32 @@ const MARKER_TOP = CAP_LINE * H1_SIZE - MARKER_BORDER - MARKER_PAD_Y;
  * `.scribble`: `right:58px; top:612px`, 31px, `rotate(9deg)`, over a rule
  * directly under the words, as wide as they are and tilted with them.
  */
-const SCRIBBLE_TOP = px(612) + halfLeading(31);
+const SCRIBBLE_SIZE = 31;
+const SCRIBBLE_TOP = px(612) + halfLeading(SCRIBBLE_SIZE);
+/**
+ * How much air sits between the bottom of the deepest descender and the top
+ * of the rule.
+ *
+ * The concept's grid put the rule 3px under that ink, which at story size is
+ * no gap at all: the tail of the `p` in "responde" ran straight into the
+ * line, and "replies" did the same in English. The rule is therefore placed
+ * off the DESCENDER rather than off the concept's row, so it clears whatever
+ * a name and a verb put below the baseline.
+ */
+const SCRIBBLE_RULE_GAP = px(10);
 const SCRIBBLE = {
   right: px(58),
   top: SCRIBBLE_TOP,
-  size: px(31),
+  size: px(SCRIBBLE_SIZE),
   maxWidth: px(922),
   ruleStroke: px(5),
   /**
-   * The rule's place is taken from the concept's grid rather than from the run
-   * above it: `UIFont` reports a line box a few points shorter than Gilroy's
-   * metrics say, so stacking the rule under the text floats it up by that
-   * much. The block's height is stated for the same reason — it also decides
-   * where the nine-degree rotation pivots.
+   * The block's height is stated rather than left to its contents: `UIFont`
+   * reports a line box a few points shorter than Gilroy's metrics say, and
+   * this is also what decides where the nine-degree rotation pivots.
    */
-  height: px(31 * GILROY_LINE + 22),
-  ruleTop: px(612 + 31 * GILROY_LINE) - SCRIBBLE_TOP,
+  height: px(SCRIBBLE_SIZE * GILROY_LINE + 22),
+  ruleTop: px(SCRIBBLE_SIZE * DESCENDER_LINE) + SCRIBBLE_RULE_GAP,
 };
 
 /**

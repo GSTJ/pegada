@@ -203,6 +203,23 @@ const STAMP = {
   padX: px(5),
 };
 
+/**
+ * How much of the rail's right end the stamp covers.
+ *
+ * The stamp is pinned to the CARD, not to the stub, and it hangs over the
+ * stub's top right corner — across the last 90px of the rail. The concept
+ * lets it sit on the tail of its own serial, which at story size reads as a
+ * string that has been cut off rather than as a stamp on top of one, so the
+ * rail keeps its own gutter clear of the STAMP's edge instead of the stub's
+ * and the serial always shows in full.
+ */
+const STAMP_OVERLAP =
+  TICKET_BOX.left +
+  TICKET_BOX.width -
+  TICKET_BOX.border -
+  (CARD_WIDTH - STAMP.right - STAMP.size);
+const RAIL_PAD_RIGHT = RAIL.padX + STAMP_OVERLAP;
+
 export const RoleTicketVariant = ({
   plan,
   name,
@@ -516,7 +533,10 @@ const styles = StyleSheet.create(() => ({
     // concept's own centring lands them, worked out from the numbers.
     alignItems: "flex-start",
     justifyContent: "space-between",
-    paddingHorizontal: RAIL.padX,
+    paddingLeft: RAIL.padX,
+    // Not the same as the left: see `RAIL_PAD_RIGHT` — the stamp overhangs
+    // this end of the rail and the serial has to finish before it starts.
+    paddingRight: RAIL_PAD_RIGHT,
     paddingTop: (RAIL.height - RAIL.border - lineBox(RAIL.size)) / 2,
   },
   // The mark hangs off the top of the rail's line box and the words off their
@@ -529,6 +549,10 @@ const styles = StyleSheet.create(() => ({
     textTransform: "uppercase",
   },
   railSerial: {
+    // Never squeezed: a `Text` in a flex row will give up its last glyphs
+    // before the row overflows, and the serial losing its final digit is
+    // exactly what that looks like.
+    flexShrink: 0,
     marginTop: halfLeading(20),
     fontSize: RAIL.serial,
     letterSpacing: px(2),
