@@ -1,14 +1,10 @@
 /**
- * The features the app advertises before they exist, so demand can be
- * measured before anything big gets built. Mirrors the zod enum in
- * `packages/api/src/routes/feature-interest.ts`, so the two lists have to stay
- * in step, since the server rejects any id it does not know.
+ * The fake door vocabulary lives in the shared analytics catalogue, because
+ * that is what types every event these rows send. Re-exported here so the
+ * component can name a feature or a surface without reaching past this module
+ * into the catalogue for two unions.
  */
-export type FakeDoorFeature = "referral_reward" | "ai_story_video";
-
-/**
- * Which surface the row was rendered on. Only the share sheet carries fake
- * doors today, and the property is still sent so a second surface can be added
- * without splitting the funnel across event names.
- */
-export type FakeDoorSource = "share_sheet";
+export type {
+  FakeDoorFeature,
+  FakeDoorSource,
+} from "@pegada/shared/analytics/events";

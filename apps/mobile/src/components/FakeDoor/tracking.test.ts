@@ -13,6 +13,8 @@ jest.mock<Partial<typeof import("@/services/analytics")>>(
       track: jest.fn(),
       screenViewed: jest.fn(),
       identify: jest.fn(),
+      setPersonProperties: jest.fn(),
+      reset: jest.fn(),
     },
   }),
 );

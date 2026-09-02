@@ -1,5 +1,7 @@
 import type { FakeDoorFeature, FakeDoorSource } from "./types";
 
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
+
 import { analytics } from "@/services/analytics";
 
 /**
@@ -15,7 +17,7 @@ export const trackFakeDoorShown = (
   source: FakeDoorSource,
 ) =>
   analytics.track({
-    event_type: "Fake Door Shown",
+    event_type: ANALYTICS_EVENTS.FAKE_DOOR_SHOWN,
     event_properties: { feature, source },
   });
 
@@ -24,7 +26,7 @@ export const trackFakeDoorTapped = (
   source: FakeDoorSource,
 ) =>
   analytics.track({
-    event_type: "Fake Door Tapped",
+    event_type: ANALYTICS_EVENTS.FAKE_DOOR_TAPPED,
     event_properties: { feature, source },
   });
 
@@ -38,6 +40,6 @@ export const trackFakeDoorNotifyToggled = (
   interested: boolean,
 ) =>
   analytics.track({
-    event_type: "Fake Door Notify Toggled",
+    event_type: ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED,
     event_properties: { feature, interested },
   });

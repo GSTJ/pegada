@@ -1,21 +1,27 @@
+import type { SharePromptPlacement } from "@pegada/shared/analytics/events";
+
 import { useEffect, useRef } from "react";
+
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 
 import { analytics } from "@/services/analytics";
 
 /**
- * Where the prompt was rendered. Doubles as the share sheet's `source`, so
- * `Share Prompt Shown` to `Share Prompt Tapped` to `Dog Share` is one funnel
- * with one property to break it down by, rather than two vocabularies that
- * have to be mapped onto each other in the readout.
+ * Where the prompt was rendered. Re-exported so the card can name a placement
+ * without reaching past this module into the shared catalogue, which owns the
+ * union because it is what types `Share Prompt Shown`, `Share Prompt Tapped`
+ * and the share sheet's own `source`. Those three are one funnel with one
+ * property to break it down by, rather than two vocabularies that have to be
+ * mapped onto each other in the readout.
  */
-export type SharePromptPlacement = "empty_deck" | "first_match";
+export type { SharePromptPlacement };
 
 export const trackSharePromptShown = (
   placement: SharePromptPlacement,
   dogId: string,
 ) =>
   analytics.track({
-    event_type: "Share Prompt Shown",
+    event_type: ANALYTICS_EVENTS.SHARE_PROMPT_SHOWN,
     event_properties: { placement, dog_id: dogId },
   });
 
@@ -24,7 +30,7 @@ export const trackSharePromptTapped = (
   dogId: string,
 ) =>
   analytics.track({
-    event_type: "Share Prompt Tapped",
+    event_type: ANALYTICS_EVENTS.SHARE_PROMPT_TAPPED,
     event_properties: { placement, dog_id: dogId },
   });
 

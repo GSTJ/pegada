@@ -1,4 +1,4 @@
-import type { ShareOption } from "@pegada/shared/analytics/events";
+import type { ShareOption, ShareSource } from "@pegada/shared/analytics/events";
 import type { TFunction } from "i18next";
 
 import type { ComponentRef, RefObject } from "react";
@@ -29,19 +29,11 @@ import { EXPORT_PNG_HEIGHT, EXPORT_PNG_WIDTH } from "./story-card-styles";
  * straight through to these.
  */
 
-/** Which screen the sheet was opened from, so the entry points can be
- * compared without splitting the funnel across several event names. The last
- * two are the share prompt's placements, passed straight through so
+/** Re-exported so the sheet can name a row or an entry point without reaching
+ * past this module into the shared catalogue for two unions. `ShareSource`
+ * includes the share prompt's placements, passed straight through so
  * `Share Prompt Tapped` and `Share Tapped` join on one property. */
-export type ShareSource =
-  | "own_profile"
-  | "dog_profile"
-  | "empty_deck"
-  | "first_match";
-
-/** Re-exported so the sheet can name a row without reaching past this module
- * into the shared catalogue for one union. */
-export type { ShareOption };
+export type { ShareOption, ShareSource };
 
 export type ShareTracking = {
   source: ShareSource;
