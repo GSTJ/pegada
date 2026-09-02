@@ -15,6 +15,7 @@ import {
   TICKET,
   WHITE,
   X_CENTRE,
+  capTop,
   halfLeading,
   lineBox,
   px,
@@ -73,12 +74,20 @@ const RAIL = {
 /** `.title`: `left:38px; top:116px`, 105px on a .84 line box, `letter-spacing:-4px`. */
 const TITLE_SIZE = px(105);
 const TITLE_TRACKING = px(-4);
-/** iOS starts a run at the top of its box, a browser a half-leading into it,
- *  so the concept's own `top` needs that half-leading added back. */
-const TITLE_TOP = px(116) + halfLeading(105, 0.84);
-/** …and the concept's leading restored as a pull on every line after it, so
- *  the box each line needs stays the font's own and only the box MOVES. */
-const TITLE_PULL = px(105 * 0.84) - lineBox(TITLE_SIZE);
+/**
+ * Each line is placed by its own cap line rather than stacked: the concept's
+ * .84 leading is far tighter than any box iOS will lay out, and pulling the
+ * lines back together with a negative margin means trusting the height
+ * `UIFont` reports for that box — which is a few points short of what the
+ * font's metrics say, and crushed the three lines into each other.
+ *
+ * The first cap line is the concept's `top:116px` plus the half-leading a
+ * browser puts above a run and iOS does not; the rest are 105 x .84 apart.
+ */
+const TITLE_CAP_ONE = 116 + (105 * (0.84 - 1.292)) / 2 + 105 * 0.4;
+const TITLE_TOPS = [0, 1, 2].map((line) =>
+  capTop(TITLE_CAP_ONE + line * 105 * 0.84, 105),
+);
 
 /** `.micro`: `top:135px; right:34px`, 190px wide, 20px on a 1.1 line box. */
 const MICRO = {
@@ -237,28 +246,30 @@ export const RoleTicketVariant = ({
         {/* Three lines, the middle one carrying the pink accent word as a
             nested `Text` so both halves share one line box and one baseline;
             a two-`View` row would let them drift apart. */}
-        <View style={styles.title}>
-          <Text numberOfLines={1} fontWeight="black" style={styles.titleText}>
-            {t("dogShare.story.roleTicket.headline1")}
+        <Text
+          numberOfLines={1}
+          fontWeight="black"
+          style={[styles.titleText, styles.titleLineOne]}
+        >
+          {t("dogShare.story.roleTicket.headline1")}
+        </Text>
+        <Text
+          numberOfLines={1}
+          fontWeight="black"
+          style={[styles.titleText, styles.titleLineTwo]}
+        >
+          {t("dogShare.story.roleTicket.headline2")}{" "}
+          <Text fontWeight="black" style={styles.titleAccent}>
+            {t("dogShare.story.roleTicket.headline3")}
           </Text>
-          <Text
-            numberOfLines={1}
-            fontWeight="black"
-            style={[styles.titleText, styles.titleLinePull]}
-          >
-            {t("dogShare.story.roleTicket.headline2")}{" "}
-            <Text fontWeight="black" style={styles.titleAccent}>
-              {t("dogShare.story.roleTicket.headline3")}
-            </Text>
-          </Text>
-          <Text
-            numberOfLines={1}
-            fontWeight="black"
-            style={[styles.titleText, styles.titleLinePull]}
-          >
-            {t("dogShare.story.roleTicket.headline4")}
-          </Text>
-        </View>
+        </Text>
+        <Text
+          numberOfLines={1}
+          fontWeight="black"
+          style={[styles.titleText, styles.titleLineThree]}
+        >
+          {t("dogShare.story.roleTicket.headline4")}
+        </Text>
 
         <Text numberOfLines={6} fontWeight="semibold" style={styles.fineprint}>
           {t("dogShare.story.roleTicket.fineprint")}
@@ -486,13 +497,9 @@ const styles = StyleSheet.create(() => ({
     color: INK,
     textTransform: "uppercase",
   },
-  title: {
-    position: "absolute",
-    left: PAD_LEFT,
-    top: TITLE_TOP,
-    width: px(645),
-  },
-  titleLinePull: { marginTop: TITLE_PULL },
+  titleLineOne: { position: "absolute", left: PAD_LEFT, top: TITLE_TOPS[0] },
+  titleLineTwo: { position: "absolute", left: PAD_LEFT, top: TITLE_TOPS[1] },
+  titleLineThree: { position: "absolute", left: PAD_LEFT, top: TITLE_TOPS[2] },
   titleText: {
     fontSize: TITLE_SIZE,
     letterSpacing: TITLE_TRACKING,
