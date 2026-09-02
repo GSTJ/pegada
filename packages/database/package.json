@@ -32,6 +32,7 @@
     "test:db:up": "if [ -n \"$CI\" ]; then echo 'CI supplies Postgres as a workflow service container, skipping docker-compose'; else docker-compose -f docker-compose.test.yml up --build --detach; fi",
     "test:db:setup": "pnpm test:db:up && pnpm migrate deploy",
     "migrate": "npx prisma migrate",
+    "migrate:vercel": "bash ./scripts/migrate-deploy-vercel.sh",
     "postinstall": "pnpm run build"
   },
   "dependencies": {
