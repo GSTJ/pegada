@@ -1,3 +1,5 @@
+import { Expo } from "expo-server-sdk";
+
 import prisma from "@pegada/database";
 import { Language } from "@pegada/shared/i18n/types/types";
 import { Prisma } from "@prisma/client";
@@ -87,6 +89,7 @@ export type ReengagementRunSummary = {
   skippedQuietHours: number;
   skippedCooldown: number;
   skippedAlreadySent: number;
+  skippedUnreachable: number;
 };
 
 const hourInOffset = (now: Date, offsetHours: number) =>
@@ -200,7 +203,10 @@ export const selectUnansweredMatchCandidates = async (
           requester: { select: dogSelect },
           responder: { select: dogSelect },
         },
-        orderBy: { createdAt: "asc" },
+        // Newest first. The take is a ceiling on one run, and the rows most
+        // likely to be already claimed by a dedupe key are the oldest ones, so
+        // ordering the other way would let a backlog starve fresh matches.
+        orderBy: { createdAt: "desc" },
         take: MAX_CANDIDATES_PER_QUERY,
       });
 
@@ -236,6 +242,21 @@ export const selectUnansweredMatchCandidates = async (
 
   return buckets.flat();
 };
+
+/**
+ * A user we can actually reach.
+ *
+ * The empty string matters: `UserService.blacklistPushToken` clears a dead
+ * token by writing `""` rather than null, so `IS NOT NULL` alone would keep
+ * re-selecting users whose device has already been rejected by Expo, burning
+ * their daily cap and inflating the sent count this whole change exists to
+ * measure.
+ */
+const REACHABLE_USER = Prisma.sql`
+  "User"."deletedAt" IS NULL
+  AND "User"."pushToken" IS NOT NULL
+  AND "User"."pushToken" <> ''
+`;
 
 /**
  * Has this user liked anybody since `since`? Correlates against the enclosing
@@ -340,8 +361,7 @@ export const selectNewDogsNearbyCandidates = async (
               ORDER BY "OwnDog"."createdAt" ASC LIMIT 1
             ) AS "ownDogId"
           FROM "User"
-          WHERE "User"."deletedAt" IS NULL
-          AND "User"."pushToken" IS NOT NULL
+          WHERE ${REACHABLE_USER}
           AND (${eligibility})
         )
         SELECT
@@ -394,6 +414,22 @@ export const selectNewDogsNearbyCandidates = async (
           )
         ) AS "counted"
         WHERE "counted"."newDogs" >= ${MIN_NEW_DOGS}
+        /* Already told since the anchor last moved, so there is nothing new to
+           say. The dedupe key is built from the same anchor, which makes this a
+           faithful pre-filter rather than a second policy: it keeps users who
+           have had their nudge out of the candidate set instead of letting them
+           occupy the limit forever, and it is what stops a cleared alert
+           request from re-qualifying the user under the inactivity rule the
+           next day. */
+        AND NOT EXISTS (
+          SELECT 1 FROM "NotificationLog"
+          WHERE "NotificationLog"."userId" = "candidate"."userId"
+          AND "NotificationLog"."kind" = ${REENGAGEMENT_KINDS.NEW_DOGS_NEARBY}
+          AND "NotificationLog"."sentAt" > COALESCE("candidate"."anchor", ${newDogsFloor})
+        )
+        /* Freshest lapsers first, for the same reason matches are ordered
+           newest first. */
+        ORDER BY "candidate"."anchor" DESC NULLS LAST
         LIMIT ${MAX_CANDIDATES_PER_QUERY}
       `.then((result) => ({ label, result })),
     ),
@@ -442,36 +478,65 @@ export const selectLikesWaitingCandidates = async (
   const olderThan = new Date(now.getTime() - LIKES_WAITING_HOURS * HOUR_MS);
 
   const rows = await prisma.$queryRaw<LikesWaitingRow[]>`
+    WITH "waiting" AS (
+      SELECT
+        "User"."id" AS "userId",
+        "User"."pushToken" AS "pushToken",
+        "User"."longitude" AS "longitude",
+        "Dog"."name" AS "dogName",
+        (ARRAY_AGG("Interest"."id" ORDER BY "Interest"."createdAt" ASC))[1] AS "anchorId",
+        MAX("Interest"."createdAt") AS "newestLikeAt"
+      FROM "User"
+      JOIN "Dog" ON "Dog"."userId" = "User"."id"
+        AND "Dog"."deletedAt" IS NULL AND "Dog"."banned" = false
+      JOIN "Interest" ON "Interest"."responderId" = "Dog"."id"
+      /* The dog doing the liking has to be one the deck would still show,
+         otherwise the push names somebody the user can never reach. */
+      JOIN "Dog" AS "Admirer" ON "Admirer"."id" = "Interest"."requesterId"
+        AND "Admirer"."deletedAt" IS NULL AND "Admirer"."banned" = false
+      JOIN "User" AS "AdmirerUser" ON "AdmirerUser"."id" = "Admirer"."userId"
+        AND "AdmirerUser"."deletedAt" IS NULL
+      WHERE ${REACHABLE_USER}
+      AND "Interest"."deletedAt" IS NULL
+      AND "Interest"."matchId" IS NULL
+      AND "Interest"."swipeType" IN ('INTERESTED'::"SwipeType", 'MAYBE'::"SwipeType")
+      AND "Interest"."createdAt" < ${olderThan}
+      /* Nothing back from this dog means the like is still unanswered. */
+      AND NOT EXISTS (
+        SELECT 1 FROM "Interest" AS "Reply"
+        WHERE "Reply"."requesterId" = "Dog"."id"
+        AND "Reply"."responderId" = "Interest"."requesterId"
+        AND "Reply"."deletedAt" IS NULL
+      )
+      /* Shadowban gate on the admirer, same shape as the deck. */
+      AND EXISTS (
+        SELECT 1 FROM "Image"
+        WHERE "Image"."dogId" = "Admirer"."id"
+        AND "Image"."status" = 'APPROVED'::"ImageStatus"
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM "Image"
+        WHERE "Image"."dogId" = "Admirer"."id"
+        AND "Image"."status" = 'REJECTED'::"ImageStatus"
+      )
+      GROUP BY "User"."id", "User"."pushToken", "User"."longitude", "Dog"."id", "Dog"."name"
+    )
     SELECT
-      "User"."id" AS "userId",
-      "User"."pushToken" AS "pushToken",
-      "User"."longitude" AS "longitude",
-      "Dog"."name" AS "dogName",
-      (ARRAY_AGG("Interest"."id" ORDER BY "Interest"."createdAt" ASC))[1] AS "anchorId"
-    FROM "User"
-    JOIN "Dog" ON "Dog"."userId" = "User"."id"
-      AND "Dog"."deletedAt" IS NULL AND "Dog"."banned" = false
-    JOIN "Interest" ON "Interest"."responderId" = "Dog"."id"
-    WHERE "User"."deletedAt" IS NULL
-    AND "User"."pushToken" IS NOT NULL
-    AND "Interest"."deletedAt" IS NULL
-    AND "Interest"."matchId" IS NULL
-    AND "Interest"."swipeType" IN ('INTERESTED'::"SwipeType", 'MAYBE'::"SwipeType")
-    AND "Interest"."createdAt" < ${olderThan}
-    /* Nothing back from this dog means the like is still unanswered. */
-    AND NOT EXISTS (
-      SELECT 1 FROM "Interest" AS "Reply"
-      WHERE "Reply"."requesterId" = "Dog"."id"
-      AND "Reply"."responderId" = "Interest"."requesterId"
-      AND "Reply"."deletedAt" IS NULL
+      "waiting"."userId",
+      "waiting"."pushToken",
+      "waiting"."longitude",
+      "waiting"."dogName",
+      "waiting"."anchorId"
+    FROM "waiting"
+    /* Rebuilds the dedupe key the caller would compute. A user whose oldest
+       waiting like has already been announced stays out of the candidate set
+       rather than occupying the limit until they finally answer it. */
+    WHERE NOT EXISTS (
+      SELECT 1 FROM "NotificationLog"
+      WHERE "NotificationLog"."dedupeKey" =
+        ${`${REENGAGEMENT_KINDS.LIKES_WAITING}:`} || "waiting"."userId" || ':' || "waiting"."anchorId"
     )
-    /* A like from a dog the deck would never show is not worth a push. */
-    AND EXISTS (
-      SELECT 1 FROM "Image"
-      WHERE "Image"."dogId" = "Interest"."requesterId"
-      AND "Image"."status" = 'APPROVED'::"ImageStatus"
-    )
-    GROUP BY "User"."id", "User"."pushToken", "User"."longitude", "Dog"."id", "Dog"."name"
+    ORDER BY "waiting"."newestLikeAt" DESC
     LIMIT ${MAX_CANDIDATES_PER_QUERY}
   `;
 
@@ -537,6 +602,7 @@ export class ReengagementService {
       skippedQuietHours: 0,
       skippedCooldown: 0,
       skippedAlreadySent: 0,
+      skippedUnreachable: 0,
     };
 
     if (candidates.length === 0) return summary;
@@ -571,9 +637,14 @@ export class ReengagementService {
     for (const candidate of due) {
       if (summary.sent >= MAX_PUSHES_PER_RUN) break;
 
+      // A token Expo will reject is a guaranteed dropped push. Counting it as
+      // sent would put it in the denominator of the open rate, which is the
+      // number this whole change exists to produce.
+      const isReachable = Expo.isExpoPushToken(candidate.pushToken);
+
       if (recentlyNudged.has(candidate.userId)) {
         summary.skippedCooldown += 1;
-      } else {
+      } else if (isReachable) {
         // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cooldown they enforce on each other.
         const outcome = await ReengagementService.#send(candidate);
 
@@ -584,6 +655,8 @@ export class ReengagementService {
           summary.sent += 1;
           summary.byKind[candidate.kind] += 1;
         }
+      } else {
+        summary.skippedUnreachable += 1;
       }
     }
 

@@ -301,6 +301,33 @@ describe("selectNewDogsNearbyCandidates", () => {
     expect(candidates[0]?.dedupeKey).toContain(":requested:");
     expect(candidates[0]?.clearsNewDogsAlert).toBe(true);
   });
+
+  it("drops a user whose token was blacklisted", async () => {
+    const { user } = await seedInactiveOwnerWithNewDogs(3);
+
+    // `blacklistPushToken` writes an empty string rather than null.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { pushToken: "" },
+    });
+
+    await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toEqual([]);
+  });
+
+  it("does not select a user who was already told about this anchor", async () => {
+    const { user } = await seedInactiveOwnerWithNewDogs(3);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: user.id,
+        kind: REENGAGEMENT_KINDS.NEW_DOGS_NEARBY,
+        dedupeKey: "already-told",
+        sentAt: hoursAgo(2),
+      },
+    });
+
+    await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toEqual([]);
+  });
 });
 
 describe("selectLikesWaitingCandidates", () => {
@@ -358,6 +385,32 @@ describe("selectLikesWaitingCandidates", () => {
         requesterId: liked.id,
         responderId: admirer.id,
         swipeType: "NOT_INTERESTED",
+      },
+    });
+
+    await expect(selectLikesWaitingCandidates(NOW)).resolves.toEqual([]);
+  });
+
+  it("skips a like from a dog the deck would no longer show", async () => {
+    const { admirer } = await seedWaitingLike(30);
+
+    await prisma.dog.update({
+      where: { id: admirer.id },
+      data: { banned: true },
+    });
+
+    await expect(selectLikesWaitingCandidates(NOW)).resolves.toEqual([]);
+  });
+
+  it("does not repeat itself once the oldest waiting like was announced", async () => {
+    const { user, interest } = await seedWaitingLike(30);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: user.id,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: `${REENGAGEMENT_KINDS.LIKES_WAITING}:${user.id}:${interest.id}`,
+        sentAt: hoursAgo(2),
       },
     });
 
@@ -425,5 +478,27 @@ describe("ReengagementService.run", () => {
         select: { newDogsAlertRequestedAt: true },
       }),
     ).resolves.toEqual({ newDogsAlertRequestedAt: null });
+
+    // Clearing the request moves the anchor back to the last positive swipe,
+    // which is what used to re-qualify the user under the inactivity rule the
+    // moment the daily cap expired.
+    const tomorrow = new Date(NOW.getTime() + 25 * 60 * 60 * 1000);
+    const nextDay = await ReengagementService.run(tomorrow);
+
+    expect(nextDay.sent).toBe(0);
+  });
+
+  it("does not count a push to a token Expo will reject", async () => {
+    await seedSilentMatch(25);
+    await prisma.user.updateMany({ data: { pushToken: "not-a-real-token" } });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary.sent).toBe(0);
+    expect(summary.skippedUnreachable).toBe(2);
+    expect(await prisma.notificationLog.count()).toBe(0);
+    expect(
+      PushNotificationService.enqueuePushNotification,
+    ).not.toHaveBeenCalled();
   });
 });
