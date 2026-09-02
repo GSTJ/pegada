@@ -98,26 +98,16 @@ export type PermissionStatus = "denied" | "granted";
 /** Which row of the dog share sheet the user picked. */
 export type ShareOption = "copy_link" | "link" | "story";
 
-/** What the user picked on the empty swipe deck. */
-export type EmptyDeckAction =
-  | "invite_friend"
-  | "notify_new_dogs"
-  | "preferences";
-
 /**
- * The push answer as the empty deck sees it. Wider than
- * {@link PermissionStatus} because the button also runs where the OS never
- * asks at all, and reading that silence as a refusal would put every simulator
- * session in the denied bucket.
+ * What the user picked on the empty swipe deck.
+ *
+ * One value, and it stays a union so a second action can be added without
+ * the property changing shape in the warehouse. The screen's other control
+ * is the share ask, and that reports through `Share Prompt Tapped` with the
+ * `empty_deck` placement so it joins the rest of the share funnel rather
+ * than forking a second one.
  */
-export type PushPermissionOutcome = "denied" | "granted" | "unavailable";
-
-/**
- * What came back from the share sheet. "unavailable" is the sheet that never
- * opened, which is a different thing from someone opening the invite and
- * changing their mind.
- */
-export type ShareOutcome = "dismissed" | "shared" | "unavailable";
+export type EmptyDeckAction = "preferences";
 
 /**
  * Which scheduled nudge the re-engagement cron sent.
@@ -243,15 +233,11 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.DOG_LINK_PROFILE_OPENED]: undefined;
   [ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN]: undefined;
   /**
-   * One per tap on an empty deck action. `push_permission` rides on the notify
-   * action and `share_result` on the invite, so the funnel reads both the
-   * intent and what the phone did about it.
+   * One per tap on an empty deck action. The share ask on that screen is not
+   * one of them: it reports through `Share Prompt Tapped`, so counting it
+   * here as well would double every share tap in the readout.
    */
-  [ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED]: {
-    action: EmptyDeckAction;
-    push_permission?: PushPermissionOutcome;
-    share_result?: ShareOutcome;
-  };
+  [ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED]: { action: EmptyDeckAction };
   [ANALYTICS_EVENTS.EMPTY_DECK_SHOWN]: undefined;
   [ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED]: {
     feature: FakeDoorFeature;

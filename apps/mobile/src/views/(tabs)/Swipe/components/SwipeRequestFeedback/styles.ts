@@ -1,42 +1,31 @@
 import LottieView from "lottie-react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 
-import Check from "@/assets/images/Check.svg";
 import * as LikeFeedbackStyles from "@/components/FeedbackCard/components/LikeFeedback/styles";
+import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
+
+/**
+ * The whole empty state reads as one column: the illustration, the copy and
+ * the action all share a width, so the button never runs wider than the line
+ * of text above it.
+ */
+const COLUMN_MAX_WIDTH = 274;
 
 export const styles = StyleSheet.create((theme) => ({
   container: {
     backgroundColor: "transparent",
   },
   /**
-   * The empty state is taller than one screen once the share card is in it,
-   * and the preferences button is the last thing in the column — the copy asks
-   * people to adjust their preferences, so that button has to be reachable on
-   * the shortest phone we support.
+   * The column fits on one screen now, but a large accessibility text size
+   * can still push the preferences link past the fold, and that link is the
+   * only other way off this screen.
    */
   scroll: {
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 0,
     backgroundColor: "transparent",
-  },
-  notifyDone: {
-    flexDirection: "row",
-    gap: theme.spacing[2],
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: theme.spacing[4],
-    paddingBottom: theme.spacing[4],
-  },
-  /**
-   * The label takes the body text colour and only the check is pink. The
-   * primary pink is a 3:1 foreground on the light background, which is under
-   * the 4.5:1 this size needs, and it is also the colour of everything on this
-   * screen that can still be tapped.
-   */
-  notifyDoneText: {
-    color: theme.colors.text,
   },
   emptyAnimation: {
     width: 100,
@@ -50,19 +39,45 @@ export const styles = StyleSheet.create((theme) => ({
     marginBottom: "auto",
     marginLeft: "auto",
   },
+  column: {
+    width: "100%",
+    maxWidth: COLUMN_MAX_WIDTH,
+  },
+  /**
+   * The empty state's own illustration style. Sharing `logoLoading` gave it
+   * `marginTop: "auto"` and `marginBottom: "auto"`, which let it absorb the
+   * column's free space and pushed its top edge up under the location pill,
+   * where it was clipped.
+   */
+  illustration: {
+    width: 150,
+    height: 150,
+    alignSelf: "center",
+    marginBottom: theme.spacing[2],
+  },
   title: {
-    marginBottom: theme.spacing[1],
+    marginBottom: theme.spacing[2],
     paddingBottom: 2,
     textAlign: "center",
   },
   description: {
     paddingBottom: 4,
     textAlign: "center",
-    marginBottom: theme.spacing[4],
-    maxWidth: 274,
+    marginBottom: theme.spacing[6],
   },
-  actions: {
-    gap: theme.spacing[3],
+  preferencesLink: {
+    alignItems: "center",
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[2],
+  },
+  /**
+   * Subtitle rather than the primary pink: the pink is 2.8:1 on the light
+   * background, under the 4.5:1 this size needs, and it is also the colour of
+   * the button right above it. One pink thing on the screen is the point.
+   */
+  preferencesLinkLabel: {
+    color: theme.colors.subtitle,
+    textDecorationLine: "underline",
   },
 }));
 
@@ -76,9 +91,6 @@ export const Title = Text;
 
 export const Description = Text;
 
-/** The check on the notify opt-in once it has been taken. */
-export const DoneCheck = withUnistyles(Check, (theme) => ({
-  color: theme.colors.primary,
-}));
+export const LinkPressable = PressableArea;
 
-export const DoneLabel = Text;
+export const LinkLabel = Text;

@@ -1,9 +1,7 @@
 import type { RootReducer } from "@/store/reducers";
 
-import type { ShareAction } from "react-native";
-
-import { useEffect, useRef, useState } from "react";
-import { Alert, Share, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { View } from "react-native";
 
 import { router } from "expo-router";
 
@@ -12,42 +10,40 @@ import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Button } from "@/components/Button";
+import { showDogShareOptions } from "@/components/DogShareOptions";
+import { pickByGender } from "@/components/DogShareOptions/story/gender";
 import {
   OfflineComponent,
   RequestErrorComponent,
   useIsOffline,
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
-import { SharePromptCard } from "@/components/SharePromptCard";
-import { APP_SHARE_LINK_BASE } from "@/constants";
+import {
+  trackSharePromptTapped,
+  useSharePromptShown,
+} from "@/components/SharePromptCard/tracking";
 import { api } from "@/contexts/trpc-provider";
 import { analytics } from "@/services/analytics";
-import { sendError } from "@/services/error-tracking";
-import {
-  getPushNotificationToken,
-  isPushDeniedError,
-  setPushNotificationToken,
-} from "@/services/get-push-notification-token";
-import { getData, StorageKeys, storeData } from "@/services/storage";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
 import {
-  EmptyDeckAction,
-  isNewDogsAlertRequested,
-  PushPermission,
-  pushPermissionFromToken,
-  shareOutcomeOf,
-} from "./new-dogs-alert";
-import {
   Description,
-  DoneCheck,
-  DoneLabel,
   EmptyAnimation,
+  LinkLabel,
+  LinkPressable,
   LogoLoading,
   Title,
   styles,
 } from "./styles";
+
+/**
+ * The empty deck is one of the two places the app asks people to share their
+ * own dog, and it reuses the share prompt's own funnel rather than opening a
+ * second one: `Share Prompt Shown` / `Share Prompt Tapped` with this
+ * placement, straight through to the share sheet's `source`.
+ */
+const SHARE_PLACEMENT = "empty_deck";
 
 export const EmptyComponent = () => {
   return (
@@ -64,141 +60,48 @@ export const EmptyComponent = () => {
 };
 
 /**
- * The opt-in for an alert that does not exist yet. Nothing sends a "new dogs
- * near you" push today, so the button only stores the intent: the share of
- * people who tap it here decides whether that alert is worth building.
+ * The screen's only action. It is the same ask as `SharePromptCard`, without
+ * the card: a grey panel with its own title and subtitle around a button was
+ * a second heading competing with the screen's own, and the screen now has
+ * one thing to say.
+ *
+ * Only the share funnel's two events fire here. An `Empty Deck Action Tapped`
+ * alongside them would count the same tap twice.
  */
-const NotifyNewDogsButton = () => {
+const ShareOwnDogButton = () => {
   const { t } = useTranslation();
-  const [storedLocally, setStoredLocally] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const requestAlert = api.user.requestNewDogsAlert.useMutation();
-  // The user carries the answer across installs and across a cleared local
-  // state, so the button cannot offer the opt-in a second time to someone who
-  // already took it. This is a plain query on purpose: the empty deck still
-  // has to render while it is in flight or failing.
-  const me = api.user.me.useQuery();
-
-  const requested = isNewDogsAlertRequested({
-    storedLocally,
-    requestedAt: me.data?.newDogsAlertRequestedAt,
+  // Not `useSuspenseQuery`: the empty state is what someone is already
+  // looking at, so it must not go blank while the dog loads.
+  const { data: dog } = api.myDog.get.useQuery(undefined, {
+    refetchOnMount: false,
   });
 
-  // The local flag is the fast path: it answers before the request comes back
-  // and it keeps answering with no network at all.
-  useEffect(() => {
-    getData(StorageKeys.NewDogsAlertRequested)
-      .then((value) => setStoredLocally(Boolean(value)))
-      .catch(sendError);
-  }, []);
+  useSharePromptShown(SHARE_PLACEMENT, dog?.id);
 
-  const handlePress = async () => {
-    setLoading(true);
+  // The label names the dog, so there is nothing to render before it arrives.
+  // The query is warm by the time anyone swipes to the end of a deck.
+  if (!dog) return null;
 
-    let pushPermission = PushPermission.Unavailable;
-
-    try {
-      const token = await getPushNotificationToken();
-      pushPermission = pushPermissionFromToken(token);
-      if (token) await setPushNotificationToken(token);
-    } catch (error) {
-      // A refusal is one of the answers this button expects, so only the rest
-      // is worth reporting. The prompt itself already sent its own event, so
-      // this one only carries the outcome.
-      if (isPushDeniedError(error)) {
-        pushPermission = PushPermission.Denied;
-      } else {
-        sendError(error);
-      }
-    }
-
-    analytics.track({
-      event_type: "Empty Deck Action Tapped",
-      event_properties: {
-        action: EmptyDeckAction.NotifyNewDogs,
-        push_permission: pushPermission,
-      },
-    });
-
-    // A refused permission is still someone asking to be told, so the intent
-    // is recorded either way and the readout keeps the two apart.
-    try {
-      await requestAlert.mutateAsync();
-      await storeData(StorageKeys.NewDogsAlertRequested, "requested");
-      setStoredLocally(true);
-    } catch (error) {
-      sendError(error);
-      Alert.alert(t("common.somethingWrong"), t("common.tryAgainLater"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Once the opt-in is taken there is nothing left to press, so it stops being
-  // a button. It used to stay one and go disabled, which paints the whole
-  // control at half opacity: pale pink on white, 1.7:1, and no sign of why it
-  // would not respond. A check and a full contrast label say the same thing
-  // and read as an answer rather than a dead control.
-  if (requested) {
-    return (
-      <View style={styles.notifyDone}>
-        <DoneCheck width={16} height={15} />
-        <DoneLabel
-          fontSize="lg"
-          fontWeight="bold"
-          style={styles.notifyDoneText}
-        >
-          {t("swipeRequestFeedback.notifyNewDogsDone")}
-        </DoneLabel>
-      </View>
-    );
-  }
+  // A two-word name in a button label is the owner's, not the dog's.
+  const [firstName] = dog.name.split(" ");
 
   return (
     <Button
-      // On a fresh install the answer is only on the server, so the button
-      // stays out of reach until it arrives. Offering it in that window lets
-      // someone who already opted in tap a second time.
-      disabled={me.isPending}
-      loading={loading}
-      onPress={() => void handlePress()}
+      testID="empty-deck-share"
+      onPress={() => {
+        trackSharePromptTapped(SHARE_PLACEMENT, dog.id);
+        void showDogShareOptions(dog, SHARE_PLACEMENT);
+      }}
     >
-      {t("swipeRequestFeedback.notifyNewDogsButton")}
-    </Button>
-  );
-};
-
-const InviteFriendButton = () => {
-  const { t } = useTranslation();
-
-  const handlePress = async () => {
-    let result: ShareAction | undefined;
-
-    try {
-      result = await Share.share({
-        message: t("swipeRequestFeedback.inviteFriendMessage", {
-          link: `${APP_SHARE_LINK_BASE}/store`,
-        }),
-      });
-    } catch (error) {
-      sendError(error);
-    }
-
-    // One event per tap, fired once the sheet settles, so the funnel counts
-    // taps and carries whether the invite actually went out.
-    analytics.track({
-      event_type: "Empty Deck Action Tapped",
-      event_properties: {
-        action: EmptyDeckAction.InviteFriend,
-        share_result: shareOutcomeOf(result),
-      },
-    });
-  };
-
-  return (
-    <Button onPress={() => void handlePress()} variant="outline">
-      {t("swipeRequestFeedback.inviteFriendButton")}
+      {t(
+        pickByGender(
+          dog.gender,
+          "swipeRequestFeedback.shareButtonMale",
+          "swipeRequestFeedback.shareButtonFemale",
+        ),
+        { name: firstName },
+      )}
     </Button>
   );
 };
@@ -207,14 +110,19 @@ const EmptyState = () => {
   const { t } = useTranslation();
 
   return (
-    // The column runs past the fold on a short phone, and the last thing in it
-    // is the preferences button the copy points at. Scrolling is the safety
-    // net: `Content` still centres the column whenever it fits.
+    // Still scrollable: the column fits on every phone we support now, but a
+    // large accessibility text size can still push the link past the fold.
     <Container style={styles.scroll}>
       <Content>
-        <View>
+        <View style={styles.column}>
+          {/*
+            Its own style rather than the loading spinner's. That one centres
+            itself with auto margins on every side, which made the
+            illustration absorb the free space and pushed the top of it up
+            under the location pill.
+          */}
           <LogoLoading
-            style={styles.logoLoading}
+            style={styles.illustration}
             autoPlay
             source={require("@/assets/animations/loadingLogo.json")}
             speed={0.5}
@@ -223,37 +131,40 @@ const EmptyState = () => {
             <Title fontWeight="bold" style={styles.title}>
               {t("swipeRequestFeedback.emptyTitle")}
             </Title>
-            <Description fontSize="xs" style={styles.description}>
+            <Description
+              fontSize="xs"
+              color="subtitle"
+              style={styles.description}
+            >
               {t("swipeRequestFeedback.emptyDescription")}
             </Description>
-            <View style={styles.actions}>
-              <NotifyNewDogsButton />
-              <InviteFriendButton />
-              {/*
-                Sits below the two actions rather than above them: those two are
-                what this screen was built to offer, and the share ask is the
-                third thing to try, not the headline. The card owns the gap
-                between itself and the preferences link below.
-
-                No render gate of its own. The whole component already returns
-                null unless the deck is empty, and the card waits for the dog
-                before it paints, so `Share Prompt Shown` cannot fire for a
-                prompt nobody saw.
-              */}
-              <SharePromptCard placement="empty_deck" />
-              <Button
-                onPress={() => {
-                  analytics.track({
-                    event_type: "Empty Deck Action Tapped",
-                    event_properties: { action: EmptyDeckAction.Preferences },
-                  });
-                  router.push(SceneName.Preferences);
-                }}
-                variant="outline"
+            <ShareOwnDogButton />
+            {/*
+              A link rather than a second button. Preferences is the fallback
+              for the people the share ask does not land on, and an outlined
+              button next to a filled one reads as two equal choices.
+            */}
+            <LinkPressable
+              testID="empty-deck-preferences"
+              accessible
+              accessibilityRole="button"
+              style={styles.preferencesLink}
+              onPress={() => {
+                analytics.track({
+                  event_type: "Empty Deck Action Tapped",
+                  event_properties: { action: "preferences" },
+                });
+                router.push(SceneName.Preferences);
+              }}
+            >
+              <LinkLabel
+                fontWeight="medium"
+                fontSize="sm"
+                style={styles.preferencesLinkLabel}
               >
-                {t("swipeRequestFeedback.preferencesButton")}
-              </Button>
-            </View>
+                {t("swipeRequestFeedback.preferencesLink")}
+              </LinkLabel>
+            </LinkPressable>
           </Animated.View>
         </View>
       </Content>
@@ -310,7 +221,7 @@ const SwipeRequestFeedback = ({ deckIsEmpty }: { deckIsEmpty: boolean }) => {
   if (request.error) return <RequestErrorComponent reset={refetch} />;
 
   // Mounting the empty state behind a full deck kept an animation running and
-  // asked the server about the alert opt-in for people who never see either.
+  // asked the server for the dog on behalf of people who never see either.
   if (!deckIsEmpty) return null;
 
   return <EmptyState />;

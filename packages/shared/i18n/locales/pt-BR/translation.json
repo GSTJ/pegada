@@ -397,13 +397,11 @@
     "small": "Pequeno"
   },
   "swipeRequestFeedback": {
-    "emptyDescription": "Acabamos de lançar e ainda tem pouca gente por perto 🐶\n\nAjusta suas preferências ou volta mais tarde 😉",
+    "emptyDescription": "Ainda tem pouca gente por perto. A gente te avisa quando chegar dog novo.",
     "emptyTitle": "Parece que os doguinhos acabaram!",
-    "inviteFriendButton": "Convidar um amigo",
-    "inviteFriendMessage": "O Pegada é onde meu cachorro faz amigos. Traz o seu também:\n{{link}}",
-    "notifyNewDogsButton": "Avisar quando chegar dog novo",
-    "notifyNewDogsDone": "Vamos te avisar",
-    "preferencesButton": "Ver Preferências"
+    "preferencesLink": "Ajustar preferências",
+    "shareButtonFemale": "Compartilhar a {{name}}",
+    "shareButtonMale": "Compartilhar o {{name}}"
   },
   "themes": {
     "automatic": "Automático",
