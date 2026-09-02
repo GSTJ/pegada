@@ -31,6 +31,22 @@ import {
 } from "./constants";
 
 /**
+ * `react-native-svg` floors its viewport to whole points, so a box measured
+ * in the fractions this card deals in quietly draws the mark small — asking
+ * for 11.77 points of paw gets 11, seven per cent under, which at brand size
+ * is a visible two pixels in the export.
+ *
+ * Both axes are therefore rounded UP and `preserveAspectRatio` left to fit
+ * the mark to whichever one binds, which is always the axis the caller
+ * actually asked for. The other gains up to a point of empty viewBox with the
+ * paw centred in it, a third of a pixel either side.
+ */
+const pawViewport = (width: number, height: number) => ({
+  width: Math.ceil(width),
+  height: Math.ceil(height),
+});
+
+/**
  * The paw logo mark at a given box size, tinted a single flat colour.
  *
  * `opacity` is a real prop rather than baked into an `rgba()` `color` —
@@ -51,8 +67,7 @@ export const PawMark = ({
 }) => (
   <View style={[style, { opacity }]}>
     <Logo
-      width={size}
-      height={size * PAW_ASPECT}
+      {...pawViewport(size, size * PAW_ASPECT)}
       colorStopOne={color}
       colorStopTwo={color}
     />
@@ -96,8 +111,7 @@ export const BrandLockup = ({
 }) => (
   <View style={[styles.brandRow, style]}>
     <Logo
-      width={markHeight / PAW_ASPECT}
-      height={markHeight}
+      {...pawViewport(markHeight / PAW_ASPECT, markHeight)}
       colorStopOne={color}
       colorStopTwo={color}
     />
