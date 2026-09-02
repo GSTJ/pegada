@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import {
+  initWebAnalytics,
+  resetWebClientForTests,
+} from "magic-observability/web";
+
 /**
  * The download CTA event is the only number that answers "does the share page
  * actually send anyone to a store". Its name and its property keys are what a
@@ -58,10 +63,25 @@ test("dog_id is absent rather than null when there is no dog", () => {
   );
 });
 
-test("capturing without a PostHog key is silent, not a crash", (t) => {
+test("a click without a PostHog key is silent, not a crash", (t) => {
   // Production has no NEXT_PUBLIC_POSTHOG_KEY yet, so this is the path every
-  // real click takes until it is set: the shared client is the no-op one and
-  // a capture has to cost nothing and say nothing.
+  // real click takes until Gabriel sets it. Init has to actually run for the
+  // assertion to mean anything: asserting silence against a client that was
+  // never built would pass with or without a key.
+  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
+
+  t.after(() => {
+    resetWebClientForTests();
+    if (key !== undefined) process.env.NEXT_PUBLIC_POSTHOG_KEY = key;
+  });
+
+  resetWebClientForTests();
+  const client = initWebAnalytics();
+
+  assert.equal(client.enabled, false);
+  assert.equal(client.disabledReason, "missing-key");
+
   const error = t.mock.method(console, "error", () => {});
   const warn = t.mock.method(console, "warn", () => {});
 

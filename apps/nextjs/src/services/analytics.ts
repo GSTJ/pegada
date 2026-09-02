@@ -1,11 +1,10 @@
-import { capture } from "magic-observability/web";
+import { getPostHog, getWebClient } from "magic-observability/web";
 
 /**
  * Product analytics for the marketing site.
  *
- * `capture` is `magic-observability`'s browser shorthand. Without
- * `NEXT_PUBLIC_POSTHOG_KEY` the client behind it is the no-op one, so a call
- * here is a function call and nothing else: no network, no queue, nothing
+ * Without `NEXT_PUBLIC_POSTHOG_KEY` the shared client is the no-op one, so a
+ * call here is a function call and nothing else: no network, no queue, nothing
  * written to the console. Setting that variable on Vercel is the only step
  * needed to start receiving these events.
  *
@@ -47,6 +46,24 @@ export const downloadCtaProperties = (click: DownloadCtaClick) => ({
   ...(click.dogId === undefined ? {} : { dog_id: click.dogId }),
 });
 
+/**
+ * A download click is usually the last thing that happens on the page. On iOS
+ * `/store` redirects to the App Store, the store app takes over and the tab is
+ * backgrounded within the same tick — early enough that `posthog-js`'s batch
+ * timer has not fired and late enough that its `pagehide` flush can be skipped
+ * altogether. That window is exactly the click we are here to count.
+ *
+ * So the event skips the queue and goes out over `sendBeacon`, which the
+ * browser is obliged to deliver even after the page is gone. The shared facade
+ * takes no per-event options, hence the raw handle, and it is only reached for
+ * once the facade reports a live client: `posthog-js` warns when it is called
+ * before `init`, which is every click until the key is set.
+ */
 export const trackDownloadCtaClicked = (click: DownloadCtaClick) => {
-  capture(DOWNLOAD_CTA_CLICKED, downloadCtaProperties(click));
+  if (!getWebClient().enabled) return;
+
+  getPostHog().capture(DOWNLOAD_CTA_CLICKED, downloadCtaProperties(click), {
+    transport: "sendBeacon",
+    send_instantly: true,
+  });
 };

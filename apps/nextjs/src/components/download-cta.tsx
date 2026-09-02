@@ -18,10 +18,17 @@ import { trackDownloadCtaClicked } from "@/services/analytics";
  * serialised structurally.
  *
  * The capture is fire-and-forget and the anchor keeps its normal navigation:
- * PostHog batches over `sendBeacon`, which survives the unload that follows.
+ * it goes out over `sendBeacon`, which survives the unload that follows.
+ *
+ * `rel` is defaulted rather than left to the call sites. Every link here
+ * points at a store, so every one of them is a candidate for `target="_blank"`
+ * and would otherwise hand the opened tab a `window.opener` back into the
+ * site. A caller that needs different values can still pass its own.
  */
 export const DownloadCta = ({
   href,
+  target,
+  rel,
   page,
   placement,
   store,
@@ -39,6 +46,12 @@ export const DownloadCta = ({
 
   return (
     // oxlint-disable-next-line jsx-a11y/anchor-has-content -- content provided by caller via props spread
-    <a href={href} onClick={handleClick} {...props} />
+    <a
+      href={href}
+      target={target}
+      rel={rel ?? (target === "_blank" ? "noopener noreferrer" : undefined)}
+      onClick={handleClick}
+      {...props}
+    />
   );
 };
