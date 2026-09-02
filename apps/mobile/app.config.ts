@@ -281,6 +281,14 @@ const config: ExpoConfig = {
         // A wildcard host ("*.pegada.app") makes Android's autoVerify
         // handshake against /.well-known/assetlinks.json unreliable, so the
         // hosts that actually serve that file are listed explicitly instead.
+        //
+        // "/pt-br/dog" is listed beside "/dog" because next-intl runs with
+        // `localePrefix: "as-needed"` and 307s a `Accept-Language: pt-BR`
+        // browser from /dog/<id> to /pt-br/dog/<id>, so that is the URL a
+        // Brazilian user copies and shares. Kept in step with the iOS AASA
+        // (apps/nextjs .well-known/apple-app-site-association) and with the
+        // expo-router routes under src/app by the consistency test in
+        // apps/nextjs/tests/apple-app-site-association.test.mjs.
         data: [
           {
             scheme: "https",
@@ -289,8 +297,18 @@ const config: ExpoConfig = {
           },
           {
             scheme: "https",
+            host: "pegada.app",
+            pathPrefix: "/pt-br/dog",
+          },
+          {
+            scheme: "https",
             host: "www.pegada.app",
             pathPrefix: "/dog",
+          },
+          {
+            scheme: "https",
+            host: "www.pegada.app",
+            pathPrefix: "/pt-br/dog",
           },
         ],
         category: ["BROWSABLE", "DEFAULT"],

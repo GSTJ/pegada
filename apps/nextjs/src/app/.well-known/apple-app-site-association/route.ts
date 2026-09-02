@@ -12,7 +12,17 @@ export const dynamic = "force-static";
  * the deprecated `paths` array — each entry is a URL-component pattern, `*`
  * matches one or more path segments. The web app serves dog profiles at
  * both `/dog/:id` (default locale) and `/pt-br/dog/:id` (non-default
- * locale prefix), so both need an entry.
+ * locale prefix), so both need an entry: next-intl runs `localePrefix:
+ * "as-needed"` and 307s a `Accept-Language: pt-BR` browser onto the
+ * prefixed URL, which is then the one that gets copied and shared.
+ *
+ * Claiming a path the app has no route for is worse than not claiming it:
+ * iOS would hand the URL to the app and the app would land on expo-router's
+ * "Unmatched Route" screen instead of letting Safari render the page. Every
+ * pattern here therefore needs a matching expo-router route in
+ * apps/mobile/src/app and a matching Android intent filter in
+ * apps/mobile/app.config.ts. tests/apple-app-site-association.test.mjs is
+ * what keeps those three in step, including when a locale is added.
  *
  * `webcredentials` reuses the same `appID` to let iOS offer autofill for
  * credentials shared between the app and this domain. Nothing on the app

@@ -127,6 +127,9 @@ const App = () => {
                 <Stack.Screen name="(app)" />
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen name="dog/[id]" />
+                {/* Same screen, mounted under the pt-BR locale prefix the
+                    web app redirects Brazilian browsers to. */}
+                <Stack.Screen name="pt-br/dog/[id]" />
               </Stack>
             </Provider>
             <MagicModalPortal />
