@@ -397,13 +397,11 @@
     "small": "Small"
   },
   "swipeRequestFeedback": {
-    "emptyDescription": "We just launched and there are still few dogs nearby 🐶\n\nAdjust your preferences or check back later 😉",
+    "emptyDescription": "Still not many people nearby. We'll let you know when a new dog shows up.",
     "emptyTitle": "We couldn't find any more dogs!",
-    "inviteFriendButton": "Invite a friend",
-    "inviteFriendMessage": "Pegada is where my dog makes friends. Bring yours along:\n{{link}}",
-    "notifyNewDogsButton": "Tell me when a new dog arrives",
-    "notifyNewDogsDone": "We will let you know",
-    "preferencesButton": "View Preferences"
+    "preferencesLink": "Adjust preferences",
+    "shareButtonFemale": "Share {{name}}",
+    "shareButtonMale": "Share {{name}}"
   },
   "themes": {
     "automatic": "Automatic",
