@@ -183,10 +183,10 @@
     "close": "Close",
     "comingSoon": "coming soon",
     "notifyMe": "Tell me when it launches",
+    "referralReward": "Invite a friend and get Premium",
     "saveFailed": "Could not save that right now. Try again.",
     "sheetBody": "We are putting this one together with care. Want a heads up when it launches?",
-    "sheetTitle": "Coming soon",
-    "referralReward": "Invite a friend and get Premium"
+    "sheetTitle": "Coming soon"
   },
   "forceUpdate": {
     "button": "Update",

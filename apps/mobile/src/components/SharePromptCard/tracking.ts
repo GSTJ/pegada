@@ -31,7 +31,7 @@ export const trackSharePromptTapped = (
 /**
  * Fires `Share Prompt Shown` once per mount, the first render where the dog
  * is known. The card renders nothing until then, and the funnel's denominator
- * has to be prompts a user actually saw — counting the loading pass would
+ * has to be prompts a user actually saw. Counting the loading pass would
  * inflate it by every mount that never painted.
  */
 export const useSharePromptShown = (

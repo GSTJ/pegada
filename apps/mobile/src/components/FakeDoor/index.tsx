@@ -48,7 +48,7 @@ const FakeDoorSheetContent = ({
   /**
    * `null` means "nobody has touched the switch in this sheet", which is the
    * only state where the server's answer should win. Once the user flips it,
-   * their intent leads and the mutation catches up — a switch that springs
+   * their intent leads and the mutation catches up. A switch that springs
    * back while the request is in flight reads as a broken control.
    */
   const [pending, setPending] = useState<boolean | null>(null);

@@ -8,7 +8,7 @@ import { getData, StorageKeys, storeData } from "@/services/storage";
  * screen are async (they wait on an interstitial), so two dismissals can be
  * in flight at once, and a flag written afterwards would let the second one
  * read `null` and show a second prompt. Writing first means the worst case is
- * a prompt that never appears, rather than one that appears twice — and the
+ * a prompt that never appears, rather than one that appears twice, and the
  * whole point of the gate is that this is a one-shot ask.
  */
 export const runFirstMatchSharePrompt = async (show: () => void) => {

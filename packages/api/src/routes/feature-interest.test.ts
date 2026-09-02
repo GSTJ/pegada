@@ -71,7 +71,7 @@ it("records interest and lists it back", async () => {
 });
 
 // The toggle can be tapped twice before the first request answers, and the
-// row is unique on (userId, feature) — a plain `create` would fail the
+// row is unique on (userId, feature), so a plain `create` would fail the
 // second time.
 it("stays idempotent when the same feature is set twice", async () => {
   const { user } = await generateFakeUserWithDog();

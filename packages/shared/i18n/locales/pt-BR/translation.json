@@ -183,10 +183,10 @@
     "close": "Fechar",
     "comingSoon": "em breve",
     "notifyMe": "Me avisa quando lançar",
+    "referralReward": "Convide um amigo e ganhe Premium",
     "saveFailed": "Não deu pra salvar agora. Tenta de novo.",
     "sheetBody": "Estamos preparando isso com carinho. Quer ser avisado quando lançar?",
-    "sheetTitle": "Em breve",
-    "referralReward": "Convide um amigo e ganhe Premium"
+    "sheetTitle": "Em breve"
   },
   "forceUpdate": {
     "button": "Atualizar",
