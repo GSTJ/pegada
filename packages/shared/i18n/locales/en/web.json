@@ -121,7 +121,8 @@
   "dog": {
     "metadata": {
       "title": "{{name}} | Pegada",
-      "descriptionSuffix": "Meet {{name}} and other dogs near you on Pegada."
+      "descriptionSuffix": "Meet {{name}} and other dogs near you on Pegada.",
+      "ogImageAlt": "A photo of {{name}} on a Pegada card, next to the name, breed and age."
     },
     "hero": {
       "invite": "{{name}} wants to make friends",

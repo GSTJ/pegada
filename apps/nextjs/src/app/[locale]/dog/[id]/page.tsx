@@ -10,6 +10,7 @@ import { isReferralRef } from "@pegada/shared/utils/referral";
 import { DownloadCta } from "@/components/download-cta";
 import { gilroy } from "@/lib/fonts";
 import { getSafeLocale } from "@/lib/get-safe-locale";
+import { toLocalePath, toOpenGraphLocale } from "@/lib/locales";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,9 @@ type DogProfileProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+/** Where these pages live, before the locale prefix is put back on. */
+const ROUTE_PATH = "/dog";
+
 export const generateMetadata = async ({
   params,
 }: DogProfileProps): Promise<Metadata> => {
@@ -51,13 +55,45 @@ export const generateMetadata = async ({
   const lng = getSafeLocale();
   const title = t("dog.metadata.title", { name: dog.name, lng });
   const description = getDogDescription(dog, lng);
+  const url = toLocalePath(lng, `${ROUTE_PATH}/${id}`);
 
+  // `opengraph-image.tsx` next door is picked up by file convention, but the
+  // URL Next writes for it is the rewritten, always-prefixed path
+  // (`/en-us/dog/…`), which 307s to the unprefixed one on the default locale,
+  // and it is resolved against the request host instead of `metadataBase`. A
+  // scraper that does not follow redirects shows no card at all, which is
+  // every English share. Naming the image here puts it on the path the locale
+  // actually serves, and a relative URL is resolved against the layout's
+  // `metadataBase`, so previews point at the canonical domain from any
+  // deployment.
+  const images = [
+    {
+      url: `${url}/opengraph-image`,
+      width: 1200,
+      height: 630,
+      type: "image/png",
+      alt: t("dog.metadata.ogImageAlt", { name: dog.name, lng }),
+    },
+  ];
+
+  // `openGraph` replaces the root layout's wholesale rather than merging into
+  // it, so `url`, `siteName` and `locale` have to be restated here or this
+  // page's card loses them, same as `/story`. `alternates` is a separate field
+  // and still comes from the layout.
   return {
     title,
     description,
     robots: { index: false, follow: false },
-    openGraph: { title, description, type: "profile" },
-    twitter: { card: "summary_large_image" },
+    openGraph: {
+      type: "profile",
+      locale: toOpenGraphLocale(lng),
+      siteName: "Pegada",
+      url,
+      title,
+      description,
+      images,
+    },
+    twitter: { card: "summary_large_image", title, description, images },
   };
 };
 
@@ -165,11 +201,13 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
             )}
 
             {Boolean(dog.breed?.name) && (
-              // Mirrors the app's own breed tag (`breed-tag.tsx` +
-              // `Glassmorphism`): a frosted, bordered pill, not an uppercase
-              // dark badge — same casing, same md radius, same light glass
-              // tint the app uses over photos.
-              <div className="absolute right-4 top-4 flex h-8 items-center rounded-xl border border-white/30 bg-white/20 px-3 leading-none text-white backdrop-blur-md">
+              // Same frosted pill as the app's breed tag (`breed-tag.tsx` +
+              // `Glassmorphism`), with the fill inverted. In the app that tag
+              // sits on a photo the deck has already darkened; here it sits on
+              // the raw photo, and a white tint on a white dog leaves white
+              // text on white. A dark fill carries its own contrast, so it
+              // reads on a snow shot and on a black lab alike.
+              <div className="absolute right-4 top-4 flex h-8 items-center rounded-xl border border-white/15 bg-black/55 px-3 leading-none text-white backdrop-blur-md">
                 <span className="text-sm font-medium">
                   {t(`${dog.breed?.slug as BreedSlug}`, {
                     ns: Namespace.Breed,
