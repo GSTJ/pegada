@@ -64,9 +64,13 @@ const CONTENT_WIDTH =
  * the outer half of it, and `TicketOutline` draws the stub's own keyline
  * curving around the bite rather than running straight past it. That is why
  * the stub carries no `border` of its own — a border would clip the circle a
- * keyline's width inside the edge and leave a flat chord instead of a半 circle.
+ * keyline's width inside the edge and leave a flat chord instead of a half
+ * circle.
  */
-const NOTCH = { radius: px(34), centreY: px(6 + 940 + 34) };
+/** `top:940px` measures the bordered circle's own box from inside the stub's
+ *  6px keyline, so its centre is 940 + 40 down from there and the bite the
+ *  background shows through is the 68px circle inside that border: r = 34. */
+const NOTCH = { radius: px(34), centreY: px(6 + 940 + 40) };
 
 /** `.rail`: 84px tall, a 5px rule under it, 34px of gutter, 22px eyebrows. */
 const RAIL = {

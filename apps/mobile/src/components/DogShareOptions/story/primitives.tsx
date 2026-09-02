@@ -381,7 +381,13 @@ export const TicketOutline = ({
   style?: StyleProp<ViewStyle>;
 }) => {
   const inset = stroke / 2;
-  const radius = notchRadius - inset;
+  // The keyline sits just OUTSIDE the bite, the way it sits just inside the
+  // stub's straight edges: the path's centre line is a half-stroke clear of
+  // the circle, so the ink runs from `notchRadius` out to `notchRadius +
+  // stroke` and the whole half circle of background stays uncovered. Running
+  // the path along the circle itself instead would lay the keyline over the
+  // outer third of the bite and shrink the hole by a stroke's width.
+  const radius = notchRadius + inset;
   // Where the notch's arc crosses the side the keyline runs down.
   const half = Math.sqrt(Math.max(radius * radius - inset * inset, 0));
 
