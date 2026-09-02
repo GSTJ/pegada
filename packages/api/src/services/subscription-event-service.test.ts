@@ -16,6 +16,13 @@ jest.mock("../errors/errors", () => ({
   errorDebug: () => undefined,
 }));
 
+// `payment-service.ts` also reports every webhook to product analytics, and
+// that module reaches `observability.ts` -> the ESM-only
+// `magic-observability/node` the same way `errors.ts` does.
+jest.mock("../shared/analytics", () => ({
+  captureEvent: jest.fn(),
+}));
+
 const reportedError = jest.mocked(sendError);
 const paymentService = new PaymentService();
 
@@ -97,8 +104,11 @@ describe("SubscriptionEventService log", () => {
       periodType: "NORMAL",
       store: "APP_STORE",
       environment: "PRODUCTION",
-      price: 19.9,
+      // What the subscriber paid, in their own currency, with RevenueCat's
+      // USD conversion kept in its own column.
+      price: revenuecat.PRICE_IN_CURRENCY,
       currency: "BRL",
+      priceUsd: revenuecat.PRICE_USD,
       purchasedAt: new Date(revenuecat.PURCHASED_AT_MS),
       expirationAt: new Date(revenuecat.EXPIRATION_AT_MS),
       raw: expect.objectContaining({ id: "evt_fields" }),
@@ -122,6 +132,20 @@ describe("SubscriptionEventService log", () => {
 
     expect(raw).not.toHaveProperty("subscriber_attributes");
     expect(raw).toMatchObject({ product_id: revenuecat.PRODUCT_ID });
+  });
+
+  it("stores the amount paid in the subscriber's currency, not the USD one", async () => {
+    const subscriber = await seedSubscriber("currency@pegada.app");
+
+    await paymentService.handleRevenueCatEvent({
+      event: revenuecat.initialPurchase("evt_currency", subscriber.id),
+    });
+
+    await expect(
+      prisma.subscriptionEvent.findUniqueOrThrow({
+        where: { eventId: "evt_currency" },
+      }),
+    ).resolves.toMatchObject({ price: 19.9, currency: "BRL", priceUsd: 3.99 });
   });
 
   it("stores the cancel reason of a cancellation", async () => {

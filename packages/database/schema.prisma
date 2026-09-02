@@ -112,8 +112,15 @@ model SubscriptionEvent {
   periodType String?
   store      String?
 
+  /// What the subscriber actually paid, in `currency`. RevenueCat sends this
+  /// as `price_in_purchased_currency`.
   price    Float?
+  /// The currency `price` is denominated in.
   currency String?
+  /// The same transaction converted to USD, which is what RevenueCat's own
+  /// `price` field holds. Kept apart so revenue can be summed across
+  /// currencies without a conversion table.
+  priceUsd Float?
 
   purchasedAt  DateTime?
   expirationAt DateTime?
@@ -123,8 +130,9 @@ model SubscriptionEvent {
   /// SANDBOX or PRODUCTION.
   environment  String?
 
-  /// The untouched event object, so a metric we did not think of can still be
-  /// recomputed from history.
+  /// The event object with `subscriber_attributes` stripped, so a metric we
+  /// did not think of can still be recomputed from history without copying
+  /// subscriber emails into a second table.
   raw Json
 
   createdAt DateTime @default(now())

@@ -90,10 +90,13 @@ export class SubscriptionEventService {
           productId: fields.product_id ?? null,
           periodType: fields.period_type ?? null,
           store: event.store,
-          // `price` is null on stores that do not report it, and RevenueCat
-          // documents `price_in_purchased_currency` as the fallback.
-          price: fields.price ?? fields.price_in_purchased_currency ?? null,
+          // RevenueCat's `price` is always USD; `price_in_purchased_currency`
+          // is the amount in `currency`. Storing the USD number next to a BRL
+          // currency code would make every revenue query wrong by the
+          // exchange rate.
+          price: fields.price_in_purchased_currency ?? null,
           currency: fields.currency ?? null,
+          priceUsd: fields.price ?? null,
           purchasedAt: toDate(fields.purchased_at_ms),
           expirationAt: toDate(fields.expiration_at_ms),
           // CANCELLATION carries `cancel_reason`, EXPIRATION carries

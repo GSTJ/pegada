@@ -10,6 +10,7 @@ CREATE TABLE "SubscriptionEvent" (
   "store" TEXT,
   "price" DOUBLE PRECISION,
   "currency" TEXT,
+  "priceUsd" DOUBLE PRECISION,
   "purchasedAt" TIMESTAMP(3),
   "expirationAt" TIMESTAMP(3),
   "cancelReason" TEXT,

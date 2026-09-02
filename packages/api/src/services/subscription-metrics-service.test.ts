@@ -13,6 +13,13 @@ jest.mock("../errors/errors", () => ({
   errorDebug: () => undefined,
 }));
 
+// `payment-service.ts` also reports every webhook to product analytics, and
+// that module reaches `observability.ts` -> the ESM-only
+// `magic-observability/node` the same way `errors.ts` does.
+jest.mock("../shared/analytics", () => ({
+  captureEvent: jest.fn(),
+}));
+
 const paymentService = new PaymentService();
 
 afterAll(async () => {
@@ -56,6 +63,14 @@ describe("getSubscriptionMetrics", () => {
       revenuecat.trialConversion("evt_conversion_1", subscriber.id),
       revenuecat.trialConversion("evt_conversion_2", subscriber.id),
       revenuecat.renewal("evt_renewal_1", subscriber.id),
+      // An intro price is still a paying renewal.
+      revenuecat.renewal("evt_renewal_intro", subscriber.id, {
+        period_type: "INTRO",
+      }),
+      // A renewal into another trial period is not.
+      revenuecat.renewal("evt_renewal_trial", subscriber.id, {
+        period_type: "TRIAL",
+      }),
       revenuecat.cancellation("evt_cancellation_1", subscriber.id),
       revenuecat.cancellation("evt_cancellation_2", subscriber.id),
       revenuecat.refund("evt_refund_1", subscriber.id),
@@ -67,10 +82,12 @@ describe("getSubscriptionMetrics", () => {
 
     await expect(getSubscriptionMetrics(wholeWindow)).resolves.toEqual({
       trialStarts: 3,
-      // The two conversions are NORMAL renewals too, so they are counted in
+      // The two conversions bill the subscriber, so they are counted in
       // `renewals` as well as here.
       trialConversions: 2,
-      renewals: 3,
+      // Two conversions, one normal renewal and one intro renewal. The
+      // renewal into another trial period is not money in.
+      renewals: 4,
       cancellations: 2,
       expirations: 1,
       refunds: 1,

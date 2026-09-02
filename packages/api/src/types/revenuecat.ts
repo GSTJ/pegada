@@ -85,7 +85,6 @@ export type EventInitialPurchase = {
 export type EventRenewal = {
   type: "RENEWAL";
   is_trial_conversion: boolean;
-  grace_period_expiration_at_ms: number;
 } & SubscriptionLifecycleEvent;
 
 export type EventCancellation = {

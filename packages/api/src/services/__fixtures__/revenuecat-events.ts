@@ -27,6 +27,8 @@ import type {
 export const PRODUCT_ID = "pegada_premium_monthly";
 export const PURCHASED_AT_MS = 1_772_000_000_000;
 export const EXPIRATION_AT_MS = 1_774_592_000_000;
+export const PRICE_IN_CURRENCY = 19.9;
+export const PRICE_USD = 3.99;
 
 const base = {
   app_id: "appc1a2b3c4d5",
@@ -48,9 +50,11 @@ const subscription = (appUserId: string) => {
     presented_offering_id: "default",
     purchased_at_ms: PURCHASED_AT_MS,
     expiration_at_ms: EXPIRATION_AT_MS,
-    price: 19.9,
+    // `price` is USD and `price_in_purchased_currency` is what the subscriber
+    // actually paid, so they have to differ for the mapping to be testable.
+    price: PRICE_USD,
     currency: "BRL",
-    price_in_purchased_currency: 19.9,
+    price_in_purchased_currency: PRICE_IN_CURRENCY,
     tax_percentage: 0,
     commission_percentage: 0.15,
     takehome_percentage: 0.85,
@@ -78,7 +82,11 @@ export const trialStart = (
   id: string,
   appUserId: string,
 ): EventInitialPurchase =>
-  initialPurchase(id, appUserId, { period_type: "TRIAL", price: 0 });
+  initialPurchase(id, appUserId, {
+    period_type: "TRIAL",
+    price: 0,
+    price_in_purchased_currency: 0,
+  });
 
 export const renewal = (
   id: string,
@@ -89,7 +97,6 @@ export const renewal = (
   type: "RENEWAL",
   id,
   is_trial_conversion: false,
-  grace_period_expiration_at_ms: EXPIRATION_AT_MS,
   ...overrides,
 });
 

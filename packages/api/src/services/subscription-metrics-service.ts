@@ -46,14 +46,20 @@ export const getSubscriptionMetrics = async ({
   // `purchasedAt`. A CANCELLATION carries the *original* purchase date, so
   // filtering on it would file this month's cancellation under the month the
   // subscriber first paid.
-  const window = { createdAt: { gte: from, lte: to } };
-  // `not` on a nullable column drops the null rows in SQL, and the column is
-  // nullable so an event type RevenueCat invents later still gets recorded.
-  // Spelling the null case out keeps those rows in the production counts.
-  const environment = includeSandbox
-    ? {}
-    : { OR: [{ environment: { not: "SANDBOX" } }, { environment: null }] };
-  const scope = { ...window, ...environment };
+  // `not` on a nullable column drops the null rows in SQL, and both columns
+  // are nullable so an event type RevenueCat invents later still gets
+  // recorded. Spelling the null case out keeps those rows in the counts.
+  const notSandbox = {
+    OR: [{ environment: { not: "SANDBOX" } }, { environment: null }],
+  };
+  const outsideATrial = {
+    OR: [{ periodType: { not: "TRIAL" } }, { periodType: null }],
+  };
+
+  const scope = {
+    createdAt: { gte: from, lte: to },
+    AND: includeSandbox ? [] : [notSandbox],
+  };
 
   const [
     trialStarts,
@@ -78,7 +84,9 @@ export const getSubscriptionMetrics = async ({
       },
     }),
     prisma.subscriptionEvent.count({
-      where: { ...scope, type: "RENEWAL", periodType: "NORMAL" },
+      // Every renewal that is not another free trial period is money in:
+      // INTRO, PROMOTIONAL and PREPAID all bill the subscriber.
+      where: { ...scope, type: "RENEWAL", ...outsideATrial },
     }),
     prisma.subscriptionEvent.count({
       where: { ...scope, type: "EXPIRATION" },
@@ -97,7 +105,7 @@ export const getSubscriptionMetrics = async ({
 
   return {
     trialStarts,
-    // A subset of `renewals`: a converting renewal is also a NORMAL renewal.
+    // A subset of `renewals`: a converting renewal bills the subscriber too.
     trialConversions,
     renewals,
     cancellations: allCancellations - refunds,
