@@ -4,6 +4,18 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { router } from "expo-router";
 
 /**
+ * Deliberately NOT colocated next to `src/app/dog/[id].tsx`, the way every
+ * other test in this package sits next to its subject. `src/app` is
+ * expo-router's route root, and its `require.context` (expo-router/_ctx.ios.js)
+ * matches EVERY `.tsx` under it except `+api`/`+html`/`+middleware` — there is
+ * no exclusion for `.test.`/`.spec.`. A test file left in there becomes a real
+ * route in dev AND release, and the router eagerly requires every route module
+ * at startup. This file's top-level `react-dom/server` import then resolves to
+ * `server.browser.js`, which touches `MessageChannel` — a global Hermes does
+ * not have — so the app threw `ReferenceError: Property 'MessageChannel'
+ * doesn't exist` before it painted a single frame and died on launch.
+ * `no-test-files-in-router-root.test.ts` is the guard that keeps it out.
+ *
  * The defect this file guards: a warm `pegada://dog/<id>` link (app already
  * running, e.g. sitting on SignIn while logged out) gets PUSHED on top of
  * the running app. This screen renders `null`, and root `_layout.tsx`'s
@@ -56,11 +68,10 @@ jest.mock<Record<string, unknown>>("react", () => {
   return { ...actual, useEffect: (effect: () => void) => effect() };
 });
 
+import DogLink from "@/app/dog/[id]";
+import LocalizedDogLink from "@/app/pt-br/dog/[id]";
 import { analytics } from "@/services/analytics";
 import { setPendingDogProfile } from "@/services/linking/handlers/pending-dog-profile";
-
-import LocalizedDogLink from "../pt-br/dog/[id]";
-import DogLink from "./[id]";
 
 const canGoBack = jest.mocked(router.canGoBack);
 const back = jest.mocked(router.back);

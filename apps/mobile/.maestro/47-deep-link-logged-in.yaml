@@ -23,6 +23,11 @@ tags:
     text: "Open"
     optional: true
 - waitForAnimationToEnd
-- assertVisible:
-    id: "dog-profile-name"
+# Same race as flow 46's post-login assert: the pop, the push and `dog.get`
+# all have to land before a name renders, and none of that moves the screen
+# in a way `waitForAnimationToEnd` can see. Poll for the name itself.
+- extendedWaitUntil:
+    visible:
+      id: "dog-profile-name"
+    timeout: 30000
 - takeScreenshot: 47-warm-link-profile
