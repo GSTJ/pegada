@@ -79,67 +79,10 @@ model User {
 
   // Plan
   plan PlanType @default(FREE)
-  // Latest paid-through date reported by the store. `plan` stays the
-  // entitlement source of truth; this is only for churn reporting.
-  premiumUntil DateTime?
-
-  subscriptionEvents SubscriptionEvent[]
 
   @@index([latitude])
   @@index([longitude])
   @@index([lastActiveAt])
-}
-
-/// Append-only log of every RevenueCat webhook event, so trial conversion,
-/// churn and refunds can be measured against our own users instead of the
-/// RevenueCat dashboard, which cannot be joined to this database.
-model SubscriptionEvent {
-  id String @id @default(cuid())
-
-  /// RevenueCat `event.id`. Unique so webhook retries are idempotent.
-  eventId String @unique
-
-  /// The RevenueCat event type, kept as a string so a new type RevenueCat
-  /// starts sending is recorded instead of rejected.
-  type String
-
-  user   User?   @relation(fields: [userId], references: [id])
-  /// Null when the event carries an anonymous or unknown `app_user_id`.
-  userId String?
-
-  productId  String?
-  /// TRIAL, INTRO, NORMAL, PROMOTIONAL or PREPAID.
-  periodType String?
-  store      String?
-
-  /// What the subscriber actually paid, in `currency`. RevenueCat sends this
-  /// as `price_in_purchased_currency`.
-  price    Float?
-  /// The currency `price` is denominated in.
-  currency String?
-  /// The same transaction converted to USD, which is what RevenueCat's own
-  /// `price` field holds. Kept apart so revenue can be summed across
-  /// currencies without a conversion table.
-  priceUsd Float?
-
-  purchasedAt  DateTime?
-  expirationAt DateTime?
-
-  /// `cancel_reason` on CANCELLATION, `expiration_reason` on EXPIRATION.
-  cancelReason String?
-  /// SANDBOX or PRODUCTION.
-  environment  String?
-
-  /// The event object with `subscriber_attributes` stripped, so a metric we
-  /// did not think of can still be recomputed from history without copying
-  /// subscriber emails into a second table.
-  raw Json
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([type, purchasedAt])
-  @@index([purchasedAt])
 }
 
 model Dog {

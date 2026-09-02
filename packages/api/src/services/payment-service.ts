@@ -22,11 +22,6 @@ import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { PlanType } from "@prisma/client";
 
 import { captureEvent } from "../shared/analytics";
-import {
-  findNonAnonymousUserIds,
-  isAnonymous,
-  SubscriptionEventService,
-} from "./subscription-event-service";
 import { UserService } from "./user-service";
 
 enum RevenueCatEntitlement {
@@ -35,6 +30,11 @@ enum RevenueCatEntitlement {
 
 type RevenueCatEvent = {
   event: Event;
+};
+
+const isAnonymous = (alias: string) => alias.startsWith("$RCAnonymousID:");
+const findNonAnonymousUserIds = (aliases: string[]): string[] => {
+  return aliases.filter((alias) => !isAnonymous(alias));
 };
 
 const getPlanByEntitlements = (entitlements: string[] | null) => {
@@ -105,11 +105,7 @@ const readSubscriptionFields = (event: Event) => {
 };
 
 class PaymentService {
-  async handleRevenueCatEvent({ event }: RevenueCatEvent) {
-    // Reporting only, and it swallows its own failures, so a broken
-    // subscription log can never cost a subscriber their entitlement.
-    await SubscriptionEventService.record({ event });
-
+  handleRevenueCatEvent({ event }: RevenueCatEvent) {
     const { app_user_id: userID, type } = event;
 
     // Every type, before the switch, including the nine this service ignores.

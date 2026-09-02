@@ -12,7 +12,6 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "metrics:subscriptions": "tsx src/scripts/subscription-metrics.ts",
     "test": "jest --runInBand --detectOpenHandles",
     "pretest": "pnpm -F @pegada/database test:db:setup",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
