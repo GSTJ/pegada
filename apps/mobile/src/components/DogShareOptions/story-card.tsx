@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 
 import { styles } from "./story-card-styles";
+import { planStoryPhotos } from "./story/photos";
 import {
   DEFAULT_STORY_VARIANT,
   STORY_VARIANTS,
@@ -65,16 +66,11 @@ export const DogStoryCard = forwardRef<
   const getFormattedYears = useGetFormattedYears();
 
   const variantDef = STORY_VARIANTS[variant];
-  // At least one slot even for a dog with no photos, so every layout still
-  // shows its branded fallback panel instead of collapsing.
-  const photoCount = Math.max(
-    1,
-    Math.min(dog.images.length, variantDef.maxPhotos),
-  );
-  const images = Array.from(
-    { length: photoCount },
-    (_, index) => dog.images[index],
-  );
+  const plan = planStoryPhotos(dog.images, variant);
+  // At least one settle even for a dog with no photos: the branded fallback
+  // panel reports itself settled on mount, so the floor keeps the aggregation
+  // below from waiting on a count of zero that can never be reached.
+  const photoCount = Math.max(1, plan.slots.length);
 
   const breedName = dog.breed?.slug
     ? t(dog.breed.slug as BreedSlug)
@@ -117,7 +113,7 @@ export const DogStoryCard = forwardRef<
     <View ref={ref} collapsable={false} style={styles.card}>
       <Variant
         dog={dog}
-        images={images}
+        plan={plan}
         name={dog.name}
         breedName={breedName}
         age={age}

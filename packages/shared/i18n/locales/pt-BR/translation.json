@@ -121,38 +121,39 @@
     "storyFailedFallback": "Não deu pra criar a imagem do story. Vamos mandar o link.",
     "storyUnavailable": "Esse aparelho não deixa compartilhar imagem. Vamos mandar o link.",
     "story": {
-      "appTagline": "o app de amizade pra cachorro",
       "footerCta": "faz o do seu dog também",
-      "lookingFor": "procura: amigos pra farejar por aí",
-      "statusMale": "solteiro",
-      "statusFemale": "solteira",
-      "swipeCard": {
-        "headline": "{{name}} tá no Pegada",
-        "ctaMale": "dá um like nele",
-        "ctaFemale": "dá um like nela"
+      "dmAberta": {
+        "online": "online",
+        "headline1": "DM aberta",
+        "headline2": "pra",
+        "headlineMark": "cachorrada",
+        "scribble": "{{name}} responde!",
+        "opener1": "oi, quer farejar um quarteirão?",
+        "opener2": "bora dividir uma sombra?",
+        "opener3": "tem parque no teu rolê hoje?",
+        "replyMale": "topo. já tô pronto.",
+        "replyFemale": "topo. já tô pronta.",
+        "typing": "outros dogs estão digitando...",
+        "ctaLine2": "e abre o chat"
       },
-      "speechBubble": {
-        "line1": "DM aberta pra cachorrada",
-        "line2": "aceito pedido de amizade",
-        "line3": "quem topa um rolê?"
-      },
-      "polaroid": {
-        "kickerMale": "novo no pedaço",
-        "kickerFemale": "nova no pedaço",
-        "caption": "as aventuras de {{name}}"
-      },
-      "wanted": {
-        "headline": "procura-se",
-        "subheadMale": "amigo pra {{name}}",
-        "subheadFemale": "amiga pra {{name}}",
-        "reward": "recompensa: petisco e carinho"
-      },
-      "tradingCard": {
-        "edition": "edição limitada",
-        "statSniff": "faro",
-        "statCuteness": "fofura",
-        "statStatus": "status",
-        "collect": "colecione todos os amigos"
+      "roleTicket": {
+        "rail": "passe de rolê",
+        "serial": "au • 0109",
+        "headline1": "quem",
+        "headline2": "topa",
+        "headline3": "um",
+        "headline4": "rolê?",
+        "fineprint": "válido pra parque, calçada e aquela árvore interessante",
+        "stamp": "sem data pra vencer",
+        "passengerMale": "passageiro",
+        "passengerFemale": "passageira",
+        "destination": "destino",
+        "destinationValue": "amizades",
+        "gate": "portão",
+        "gateValue": "AU 04",
+        "call": "{{name}} chamou.",
+        "callMark": "vem?",
+        "cta": "gera o passe do seu dog"
       }
     }
   },

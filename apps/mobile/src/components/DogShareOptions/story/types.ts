@@ -1,21 +1,22 @@
 import type { ShareableDog } from "../types";
+import type { StoryPhotoPlan } from "./photos";
 
 /** One entry of `ShareableDog["images"]` — kept as an alias so variants and
  * primitives don't reach into the array type by hand. */
 export type StoryPhoto = ShareableDog["images"][number];
 
 /**
- * Props every story variant receives. `images` is built in `../story-card.tsx`
- * as `Math.max(1, Math.min(dog.images.length, maxPhotos))` slots — at most
- * the variant's `maxPhotos` (`../variants.ts`), never zero even for a dog
- * with no photos — with `undefined` standing in for a slot the dog doesn't
- * have a photo for, so a variant can always map over it and let
- * `PhotoOrFallback` render the branded placeholder for the gaps instead of
- * branching on length itself.
+ * Props every story variant receives.
+ *
+ * `plan` is built in `../story-card.tsx` by `planStoryPhotos` (`./photos.ts`)
+ * and already answers "which photo goes where" for this dog and this
+ * composition, including the no-photo case (`plan.isEmpty`). A variant reads
+ * slots off it rather than slicing `dog.images` itself, which is what keeps
+ * the layout-at-N-photos decisions in a module a unit test can reach.
  */
 export type StoryVariantProps = {
   dog: ShareableDog;
-  images: (StoryPhoto | undefined)[];
+  plan: StoryPhotoPlan;
   name: string;
   breedName?: string;
   /** Localised, e.g. "3 anos" or "1 year and 2 months" — for prose. */
@@ -24,7 +25,7 @@ export type StoryVariantProps = {
   ageYears?: number;
   gender: string;
   /**
-   * Call once per photo slot the variant renders (via `PhotoOrFallback`'s
+   * Call once per photo slot the variant renders (via `StoryImage`'s
    * `onSettle`), whether it loaded, failed, or never had a URL to begin
    * with. `story-card.tsx` aggregates these into the single `onPhotoSettled`
    * the sheet already knows about.
