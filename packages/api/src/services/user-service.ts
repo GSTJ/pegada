@@ -123,6 +123,20 @@ export class UserService {
   }
 
   /**
+   * The fields the signed-in app reads about its own user. Selected one by
+   * one: the row also holds the login code, the push token and the location,
+   * and none of that belongs in a response the client only needs a flag from.
+   */
+  static async getMyFlags(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { newDogsAlertRequestedAt: true },
+    });
+
+    return { newDogsAlertRequestedAt: user?.newDogsAlertRequestedAt ?? null };
+  }
+
+  /**
    * Record that the user asked to be told when a new dog shows up nearby.
    *
    * The empty swipe deck is where sessions end, so the button that writes this

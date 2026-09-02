@@ -29,6 +29,7 @@ import { getData, StorageKeys, storeData } from "@/services/storage";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
+import { isNewDogsAlertRequested } from "./new-dogs-alert";
 import {
   Description,
   EmptyAnimation,
@@ -58,16 +59,26 @@ export const EmptyComponent = () => {
  */
 const NotifyNewDogsButton = () => {
   const { t } = useTranslation();
-  const [requested, setRequested] = useState(false);
+  const [storedLocally, setStoredLocally] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const requestAlert = api.user.requestNewDogsAlert.useMutation();
+  // The user carries the answer across installs and across a cleared local
+  // state, so the button cannot offer the opt-in a second time to someone who
+  // already took it. This is a plain query on purpose: the empty deck still
+  // has to render while it is in flight or failing.
+  const me = api.user.me.useQuery();
 
-  // The done state has to survive a re-render and a relaunch, and the deck is
-  // empty precisely when there is nothing else to read it from.
+  const requested = isNewDogsAlertRequested({
+    storedLocally,
+    requestedAt: me.data?.newDogsAlertRequestedAt,
+  });
+
+  // The local flag is the fast path: it answers before the request comes back
+  // and it keeps answering with no network at all.
   useEffect(() => {
     getData(StorageKeys.NewDogsAlertRequested)
-      .then((value) => setRequested(Boolean(value)))
+      .then((value) => setStoredLocally(Boolean(value)))
       .catch(sendError);
   }, []);
 
@@ -88,7 +99,7 @@ const NotifyNewDogsButton = () => {
     try {
       await requestAlert.mutateAsync();
       await storeData(StorageKeys.NewDogsAlertRequested, "requested");
-      setRequested(true);
+      setStoredLocally(true);
     } catch (error) {
       sendError(error);
       Alert.alert(t("common.somethingWrong"), t("common.tryAgainLater"));
@@ -99,7 +110,10 @@ const NotifyNewDogsButton = () => {
 
   return (
     <Button
-      disabled={requested}
+      // On a fresh install the answer is only on the server, so the button
+      // stays out of reach until it arrives. Offering it in that window lets
+      // someone who already opted in tap a second time.
+      disabled={requested || me.isPending}
       loading={loading}
       onPress={() => void handlePress()}
       variant={requested ? "outline" : "default"}
@@ -168,7 +182,7 @@ const EmptyState = () => {
   );
 };
 
-const SwipeRequestFeedback = () => {
+const SwipeRequestFeedback = ({ deckIsEmpty }: { deckIsEmpty: boolean }) => {
   const offline = useIsOffline();
   const request = useSelector((state: RootReducer) => state.dogs.request);
   const dispatch = useDispatch();
@@ -176,9 +190,10 @@ const SwipeRequestFeedback = () => {
   // This component sits behind the deck on every render, so mounting says
   // nothing about a deck being empty. It mounts mid-load, with cards, and on
   // the error screen. The event belongs to the one state that is genuinely
-  // empty: the request settled, it did not fail, we are online, and nothing
-  // came back. The ref re-arms when cards arrive, so a later refetch that
-  // returns empty again is a second event while a re-render is not.
+  // empty: the request settled, it did not fail, we are online, and there is
+  // no card left to act on. The ref re-arms when cards arrive, so a later
+  // refetch that returns empty again is a second event while a re-render is
+  // not.
   const isEmptyDeck =
     !request.loading && !request.error && !offline && request.data.length === 0;
   const hasReportedEmptyDeck = useRef(false);
@@ -212,6 +227,10 @@ const SwipeRequestFeedback = () => {
 
   if (offline) return <OfflineComponent reset={refetch} />;
   if (request.error) return <RequestErrorComponent reset={refetch} />;
+
+  // Mounting the empty state behind a full deck kept an animation running and
+  // asked the server about the alert opt-in for people who never see either.
+  if (!deckIsEmpty) return null;
 
   return <EmptyState />;
 };

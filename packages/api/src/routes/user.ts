@@ -33,6 +33,17 @@ export const userRouter = createTRPCRouter({
     }),
 
   /**
+   * The current user's own flags, kept to the few fields the app reads so a
+   * profile field added later does not start shipping to the client by
+   * accident. Today that is the empty-deck alert opt-in, which the app needs
+   * from the server because local storage does not survive a reinstall.
+   */
+  me: protectedProcedure.query(({ ctx }) => {
+    const userId = ctx.session.user.id;
+    return UserService.getMyFlags(userId);
+  }),
+
+  /**
    * Interest signal from the empty swipe deck: the user wants to hear about it
    * when a new dog turns up. Nothing sends that alert yet, so this only stores
    * the intent and the share of empty-deck viewers who tap decides whether the

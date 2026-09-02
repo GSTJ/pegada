@@ -162,3 +162,30 @@ test("keeps the first new dogs alert request when the user asks twice", async ()
     newDogsAlertRequestedAt: first?.newDogsAlertRequestedAt,
   });
 });
+
+/**
+ * The app asks the server whether the opt-in already happened, because local
+ * storage does not survive a reinstall and the button would otherwise be
+ * offered again to someone who already took it. The response stays a closed
+ * shape: everything else on the user row is private.
+ */
+test("reports the new dogs alert opt-in and nothing else about the user", async () => {
+  const user = await prisma.user.create({
+    data: {
+      email: "my-flags@pegada.app",
+      code: "654321",
+      pushToken: "ExponentPushToken[my-flags]",
+    },
+  });
+
+  await expect(UserService.getMyFlags(user.id)).resolves.toEqual({
+    newDogsAlertRequestedAt: null,
+  });
+
+  await UserService.requestNewDogsAlert(user.id);
+  const stored = await prisma.user.findUnique({ where: { id: user.id } });
+
+  await expect(UserService.getMyFlags(user.id)).resolves.toEqual({
+    newDogsAlertRequestedAt: stored?.newDogsAlertRequestedAt,
+  });
+});
