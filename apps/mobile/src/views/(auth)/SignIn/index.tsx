@@ -30,6 +30,7 @@ import {
   Container,
   Description,
   Highlight,
+  LOGO_MARGIN_BOTTOM,
   LogoStyled,
   Title,
   TopCard,
@@ -50,10 +51,55 @@ const requestTrackingPermissions = async () => {
   }
 };
 
+const LOGO_SIZE = 70;
+/** The logo's own height plus the gap it keeps under itself. */
+const LOGO_BLOCK = LOGO_SIZE + LOGO_MARGIN_BOTTOM;
+
+/**
+ * The hero's height is whatever the card below leaves, so a mounted banner or
+ * a taller keyboard takes it away. This decides what still fits in it: the
+ * logo goes first, the headline last, and neither is ever painted half.
+ *
+ * The two spacers around them are already the breathing room and they shrink
+ * to nothing before this has to drop anything, so the thresholds are the bare
+ * heights. Anything more and an iPhone 17 Pro with no banner, which has room
+ * for both, would lose its logo.
+ *
+ * `room` comes from the flex layout and does not depend on what this returns,
+ * and `heroHeight` is the headline's natural height, measured once and kept.
+ * Both are stable inputs, so dropping the logo cannot change the answer that
+ * dropped it.
+ */
+const heroFit = ({
+  room,
+  heroHeight,
+}: {
+  room: number | undefined;
+  heroHeight: number | undefined;
+}) => {
+  if (room === undefined || heroHeight === undefined) {
+    return { showLogo: true, showHero: true };
+  }
+
+  return {
+    showLogo: room >= heroHeight + LOGO_BLOCK,
+    showHero: room >= heroHeight,
+  };
+};
+
 const InsertEmail = () => {
   const insets = useSafeAreaInsets();
   const bottomInset = useCustomBottomInset();
   const { theme } = useUnistyles();
+
+  const [heroSpace, setHeroSpace] = useState<number | undefined>(undefined);
+  const [heroHeight, setHeroHeight] = useState<number | undefined>(undefined);
+  // Measured once. The headline is hidden by the very state this measures, so
+  // remeasuring it would feed the layout back its own answer.
+  const measureHero = (height: number) =>
+    setHeroHeight((current) => current ?? height);
+
+  const { showLogo, showHero } = heroFit({ room: heroSpace, heroHeight });
 
   // The email field autofocuses, so the keyboard is up on the first frame of a
   // cold launch and this screen is the one that has to survive it.
@@ -137,15 +183,34 @@ const InsertEmail = () => {
         <Container style={styles.container} edges={["left", "right"]}>
           <TopCard
             source={require("@/assets/images/background.webp")}
-            style={[styles.topCard, { paddingTop: 60 + insets.top }]}
+            style={[styles.topCard, { paddingTop: insets.top }]}
           >
-            <LogoStyled
-              width={70}
-              height={70}
-              fill={theme.colors.text}
-              style={styles.logoStyled}
-            />
-            <HeroText />
+            <View
+              style={styles.heroSpace}
+              onLayout={(event) =>
+                setHeroSpace(event.nativeEvent.layout.height)
+              }
+            >
+              <View style={styles.topSpacer} />
+              {showLogo ? (
+                <LogoStyled
+                  width={LOGO_SIZE}
+                  height={LOGO_SIZE}
+                  fill={theme.colors.text}
+                  style={styles.logoStyled}
+                />
+              ) : null}
+              {showHero ? (
+                <View
+                  onLayout={(event) =>
+                    measureHero(event.nativeEvent.layout.height)
+                  }
+                >
+                  <HeroText />
+                </View>
+              ) : null}
+              <View style={styles.bottomSpacer} />
+            </View>
           </TopCard>
           <View style={[styles.bottomCard, { paddingBottom: bottomInset }]}>
             <PendingDogProfileBanner />
