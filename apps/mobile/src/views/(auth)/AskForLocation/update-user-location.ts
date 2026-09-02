@@ -1,6 +1,7 @@
 import * as Location from "expo-location";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 
 export enum UpdateLocationError {
@@ -57,7 +58,22 @@ export const updateUserLocation = async (newLocation?: {
   longitude: number;
   latitude: number;
 }) => {
+  // Checked before the request so the event can be limited to the case where
+  // the OS actually put a dialog on screen. This function also backs the manual
+  // re-pick on LocationMap, which every user reaches with permission already
+  // granted; tracking the request's answer alone would report a permission
+  // decision every time somebody dragged the map pin.
+  const existing = await Location.getForegroundPermissionsAsync();
+  const willPrompt = existing.status !== "granted" && existing.canAskAgain;
+
   const { status } = await Location.requestForegroundPermissionsAsync();
+
+  if (willPrompt) {
+    analytics.track({
+      event_type: "Location Permission",
+      event_properties: { status: status === "granted" ? "granted" : "denied" },
+    });
+  }
 
   if (status !== "granted") {
     throw new Error(UpdateLocationError.PermissionNotGranted);

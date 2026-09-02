@@ -1,3 +1,4 @@
+import type { SwipeSource } from "@pegada/shared/analytics/events";
 import type {
   GestureEventPayload,
   PanGestureHandlerEventPayload,
@@ -106,7 +107,7 @@ const gotoCoordinate = (
 };
 
 type UseSwipeGestureProps = {
-  onSwipeComplete: (data: Swipe) => void;
+  onSwipeComplete: (data: Swipe, source: SwipeSource) => void;
 };
 
 export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
@@ -132,6 +133,9 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
   const gotoDirection = (
     swipeDirection: Swipe,
     animationConfig = { duration: 250 },
+    // Defaults to the gesture because that is the only caller that cannot pass
+    // it: `onEnd` runs on the UI thread with no idea a button exists.
+    source: SwipeSource = "gesture",
   ) => {
     "worklet";
 
@@ -148,7 +152,7 @@ export const useSwipeGesture = ({ onSwipeComplete }: UseSwipeGestureProps) => {
       translation,
       swipeCoordinates,
       () => {
-        runOnJS(onSwipeComplete)(swipeDirection);
+        runOnJS(onSwipeComplete)(swipeDirection, source);
         runOnJS(safelyEnableWithDelay)(animationConfig.duration);
       },
       animationConfig,

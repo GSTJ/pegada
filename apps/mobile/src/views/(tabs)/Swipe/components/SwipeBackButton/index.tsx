@@ -30,7 +30,10 @@ const SwipeBackButton = () => {
 
     // Free users can't swipe back
     if (!isPremium) {
-      return router.push(SceneName.UpgradeWall);
+      return router.push({
+        pathname: SceneName.UpgradeWall,
+        params: { trigger: "swipe_back" },
+      });
     }
 
     return dispatch(Actions.dogs.swipe.swipeBack());

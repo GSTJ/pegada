@@ -13,6 +13,7 @@ import { Button } from "@/components/Button";
 import { api } from "@/contexts/trpc-provider";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
 import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { getError } from "@/services/get-error";
 import {
@@ -71,6 +72,13 @@ const InsertEmail = () => {
     onError: (error) => {
       // Resend code
       if (getError(error, OTPRequiredError)) {
+        // The server answers a first login with OTP_REQUIRED, so this branch is
+        // the success path: the code was sent and the OTP screen is next.
+        analytics.track({
+          event_type: "OTP Requested",
+          event_properties: { resend: false },
+        });
+
         // Fire-and-forget: the OTP screen must not wait on the ATT prompt.
         // `void` rather than a chained catch, which `promise/no-promise-in-callback`
         // (rightly) reads as a second error path inside a callback.
@@ -93,6 +101,10 @@ const InsertEmail = () => {
     if (!isValidEmail) {
       return setError(t("insertEmail.validEmail"));
     }
+
+    // The top of the funnel. Fired on a valid address only, so the drop-off to
+    // "OTP Requested" measures the request and not a typo in the field.
+    analytics.track({ event_type: "Sign In Email Submitted" });
 
     loginMutation.mutate({ email });
   };

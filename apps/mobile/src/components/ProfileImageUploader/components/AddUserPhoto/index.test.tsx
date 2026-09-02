@@ -34,6 +34,12 @@ jest.mock<Record<string, unknown>>("react-native-magic-toast", () => ({
   magicToast: { error: () => undefined },
 }));
 
+// Stubbed rather than exercised: the real module reaches PostHog through
+// `expo-updates`, which this suite has no reason to load.
+jest.mock<Record<string, unknown>>("@/services/analytics", () => ({
+  analytics: { track: () => undefined },
+}));
+
 jest.mock<Record<string, unknown>>("react-native-reanimated", () => ({
   __esModule: true,
   default: { View: ({ children }: { children?: React.ReactNode }) => children },

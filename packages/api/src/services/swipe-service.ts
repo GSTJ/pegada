@@ -217,6 +217,7 @@ export class SwipeService {
           return {
             interest,
             match: null,
+            matchParticipants: null,
             matchNotification: null,
             sendLikeNotification: false,
           };
@@ -232,26 +233,36 @@ export class SwipeService {
           return {
             interest,
             match: null,
+            matchParticipants: null,
             matchNotification: null,
             sendLikeNotification: canSendNotifications,
           };
         }
 
-        const { match, notification } = await matchService.createMatch(
-          requester.id,
-          responderId,
-          tx,
-        );
+        const { match, notification, created, participants } =
+          await matchService.createMatch(requester.id, responderId, tx);
 
         return {
           interest,
           match,
+          matchParticipants: created ? participants : null,
           matchNotification: notification,
           sendLikeNotification: false,
         };
       },
       { timeout: 10_000 },
     );
+
+    // After the commit, so a rolled-back transaction cannot report a match that
+    // does not exist. Synchronous and database-free — both users came back on
+    // the row `createMatch` wrote — so there is no promise left running into a
+    // serverless freeze, and `captureMatchCreated` swallows its own failures.
+    if (result.matchParticipants && result.match) {
+      MatchService.captureMatchCreated({
+        matchId: result.match.id,
+        participants: result.matchParticipants,
+      });
+    }
 
     if (result.matchNotification) {
       await matchService.sendMatchNotification(result.matchNotification);

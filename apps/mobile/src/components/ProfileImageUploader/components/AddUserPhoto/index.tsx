@@ -27,6 +27,7 @@ import {
   uploadProfileImage,
 } from "@/components/ProfileImageUploader/utils";
 import { Text } from "@/components/text";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 
 import {
@@ -128,6 +129,14 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
       });
 
       onAdd({ url: finalUrl });
+
+      // After the upload finishes, not after the picker closes: a photo that
+      // never reaches the bucket is a shadowban, not a photo. Profiles without
+      // one never match, which is the drop-off this measures.
+      analytics.track({
+        event_type: "Profile Photo Added",
+        event_properties: { position: index ?? 0 },
+      });
     } catch (error) {
       // When the user cancels the image picker, we don't want to show an error
       if (

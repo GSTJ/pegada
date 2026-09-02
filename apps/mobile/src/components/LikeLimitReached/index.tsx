@@ -70,7 +70,10 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
 
           // Need to wait a bit to avoid the modal transition
           setTimeout(() => {
-            router.push(SceneName.UpgradeWall);
+            router.push({
+              pathname: SceneName.UpgradeWall,
+              params: { trigger: "like_limit" },
+            });
           }, 150);
         }}
       >

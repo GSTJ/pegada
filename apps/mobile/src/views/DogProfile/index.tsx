@@ -30,6 +30,7 @@ import {
 import { APP_SHARE_LINK_BASE } from "@/constants";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 import { Actions } from "@/store/reducers";
@@ -51,10 +52,27 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
 
   const handleShare = async () => {
     try {
-      await Share.share({
+      analytics.track({
+        event_type: "Share Tapped",
+        event_properties: { dog_id: dog.id, is_own_dog: false },
+      });
+
+      const result = await Share.share({
         message: i18n.t("dogProfile.shareLink", {
           link: `${APP_SHARE_LINK_BASE}/dog/${dog.id}`,
         }),
+      });
+
+      // `dismissedAction` is the sheet being closed without picking anything,
+      // which is the difference between an intent to share and a share.
+      analytics.track({
+        event_type: "Share Completed",
+        event_properties: {
+          dog_id: dog.id,
+          is_own_dog: false,
+          result:
+            result.action === Share.dismissedAction ? "dismissed" : "shared",
+        },
       });
     } catch {
       Alert.alert(

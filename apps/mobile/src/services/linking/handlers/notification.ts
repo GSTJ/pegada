@@ -2,6 +2,7 @@ import type * as Notifications from "expo-notifications";
 
 import { router } from "expo-router";
 
+import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 
@@ -36,6 +37,19 @@ const handleChatNotification = (matchId: string, dogId: string) => {
 
 export const customNotificationHandler = (url?: string) => {
   if (!url) return;
+
+  // Both events fire from the same place because on this app they are the same
+  // moment: every deep link the app handles arrives as a notification tap. The
+  // pair is kept separate so a link opened from anywhere else later (a shared
+  // dog page, an email) has somewhere to land without splitting push history.
+  analytics.track({
+    event_type: "Push Notification Opened",
+    event_properties: { url },
+  });
+  analytics.track({
+    event_type: "Deep Link Opened",
+    event_properties: { path: url.split("/")[0], url },
+  });
 
   if (url.startsWith(NotificationUrl.Match)) {
     const data = url.replace(NotificationUrl.Match, "");

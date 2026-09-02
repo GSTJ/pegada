@@ -64,6 +64,11 @@ const OneTimeCode = () => {
     retryDelay: transientRetryDelayMs,
     onSuccess: async (data) => {
       try {
+        analytics.track({
+          event_type: "OTP Verified",
+          event_properties: { success: true },
+        });
+
         // The last code cell is still focused, and nothing on the screen this
         // navigates to is. On Android that leaves the keypad up over
         // CreateProfile with no field to type into — an orphan, covering the
@@ -86,6 +91,10 @@ const OneTimeCode = () => {
 
       // Resend code
       if (getError(error, OTPRequiredError)) {
+        analytics.track({
+          event_type: "OTP Requested",
+          event_properties: { resend: true },
+        });
         setTimer(RESEND_TIMEOUT_IN_SECONDS);
         setKeyboardInput("");
         return;
@@ -93,6 +102,12 @@ const OneTimeCode = () => {
 
       // Invalid code
       if (getError(error, InvalidOTPCodeError)) {
+        analytics.track({
+          event_type: "OTP Verified",
+          event_properties: { success: false },
+        });
+        // Kept alongside the funnel event: it predates it and the historical
+        // series is still the one the old insights are built on.
         analytics.track({ event_type: "User Typed Invalid OTP code" });
         magicToast.alert(t("oneTimeCode.invalidCode"), 1000);
         setKeyboardInput("");

@@ -1,5 +1,6 @@
 import type { RootReducer } from "@/store/reducers";
 
+import { useEffect, useRef } from "react";
 import { View } from "react-native";
 
 import { router } from "expo-router";
@@ -15,6 +16,7 @@ import {
   useIsOffline,
 } from "@/components/NetworkBoundary";
 import { Container, Content } from "@/components/NetworkBoundary/styles";
+import { analytics } from "@/services/analytics";
 import { Actions } from "@/store/reducers";
 import { SceneName } from "@/types/scene-name";
 
@@ -75,6 +77,28 @@ const SwipeRequestFeedback = () => {
   const offline = useIsOffline();
   const request = useSelector((state: RootReducer) => state.dogs.request);
   const dispatch = useDispatch();
+
+  // This component sits behind the deck on every render, so mounting says
+  // nothing about a deck being empty — it mounts mid-load, with cards, and on
+  // the error screen. The event belongs to the one state that is genuinely
+  // empty: the request settled, it did not fail, we are online, and nothing
+  // came back. The ref re-arms when cards arrive, so a later refetch that
+  // returns empty again is a second event while a re-render is not.
+  const isEmptyDeck =
+    !request.loading && !request.error && !offline && request.data.length === 0;
+  const hasReportedEmptyDeck = useRef(false);
+
+  useEffect(() => {
+    if (!isEmptyDeck) {
+      hasReportedEmptyDeck.current = false;
+      return;
+    }
+
+    if (hasReportedEmptyDeck.current) return;
+
+    hasReportedEmptyDeck.current = true;
+    analytics.track({ event_type: "Empty Deck Shown" });
+  }, [isEmptyDeck]);
 
   if (request.loading) {
     return (

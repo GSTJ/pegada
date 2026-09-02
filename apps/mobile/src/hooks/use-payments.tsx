@@ -59,7 +59,14 @@ export const useCustomerPlan = () => {
   const customerPlan = data ? payments.getPlan(data) : undefined;
 
   useEffect(() => {
-    void identifyUser({ extra: { user_plan: customerPlan?.userPlan } });
+    // Both keys on purpose. `extra.user_plan` is what every existing insight
+    // and cohort filters on; `plan` is the name the catalogue uses from here
+    // on. Dropping the old one the day the new one starts writing would leave
+    // a gap in the middle of anything built on it.
+    void identifyUser({
+      plan: customerPlan?.userPlan,
+      extra: { user_plan: customerPlan?.userPlan },
+    });
   }, [customerPlan?.userPlan]);
 
   return {
