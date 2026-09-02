@@ -13,6 +13,10 @@ const capOffset = (fontSize: number) => -(fontSize * GILROY_CAP_OFFSET_RATIO);
 // same as the three real actions above them.
 const ROW_MIN_HEIGHT = 54.33;
 
+// The chip's own letter spacing, named so the label can take back the copy
+// of it that iOS lays down after the last letter.
+const PILL_TRACKING = 0.4;
+
 export const styles = StyleSheet.create((theme) => ({
   /**
    * Deliberately the same metrics as `DogShareOptions`' own option row, so a
@@ -78,7 +82,13 @@ export const styles = StyleSheet.create((theme) => ({
   pillLabel: {
     color: theme.colors.subtitle,
     textTransform: "uppercase",
-    letterSpacing: 0.4,
+    letterSpacing: PILL_TRACKING,
+    // iOS lays a letter space after the LAST letter as well as between them,
+    // so the run measures a tracking wider than the ink it draws and the
+    // pill closed three pixels tighter on the left of the E than on the
+    // right of the last N (#244). Giving that trailing space back to the box
+    // is what makes the two paddings the same.
+    marginRight: -PILL_TRACKING,
     transform: [{ translateY: capOffset(theme.typography.sizes.xxs.size) }],
   },
 
