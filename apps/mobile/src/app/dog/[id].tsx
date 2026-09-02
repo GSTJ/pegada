@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
@@ -8,24 +8,35 @@ import { setPendingDogProfile } from "@/services/linking/handlers/pending-dog-pr
 import { getData, StorageKeys } from "@/services/storage";
 
 /**
- * Entry point for `pegada://dog/<id>` and `https://www.pegada.app/dog/<id>`.
- * Renders nothing and does not navigate itself -- it only stashes the id for
+ * Entry point for `pegada://dog/<id>` and `https://www.pegada.app/dog/<id>`
+ * (plus the localized `/pt-br/dog/<id>`, which re-exports this screen from
+ * app/pt-br/dog/[id].tsx). It renders nothing: the id is stashed for
  * `usePendingDogProfile` (services/linking/index.ts) to push once the app
  * reaches its authenticated home route.
  *
- * Deliberately does NOT `router.replace` anywhere from here. It used to
- * replace to `/`, reasoning that would hand the moment back to the same
- * index/splash route a plain cold launch goes through. That broke the warm
- * case: this screen sits *on top of* the already-mounted app (e.g. the
- * Swipe tab), and root `_layout.tsx`'s auth-redirect effect only reruns when
- * `useSegments()`'s first segment toggles into/out of "(auth)" -- replacing
- * to `/` doesn't trigger that, so nothing ever navigated the user off the
- * splash screen and a `back` from the pushed dog profile stranded them
- * there. Left unhandled, this screen just stays as an inert, invisible
- * frame in the stack: harmless on cold start (the auth-redirect effect
- * that already runs on `_layout` mount replaces it directly), and on a warm
- * link it sits, still invisible, one `back` behind the profile
- * `usePendingDogProfile` pushes on top of it.
+ * Rendering nothing means this route MUST NOT be allowed to stay on top of
+ * the stack, or the user is looking at a blank screen with no way out.
+ * There are two ways it gets there and they need opposite handling:
+ *
+ * - Cold start (the link launched the app): this is the only route, and
+ *   `router.canGoBack()` is false. Root `_layout.tsx`'s auth-redirect
+ *   effect runs on mount and REPLACES it with the resolved initial route,
+ *   so nothing is needed here.
+ *
+ * - Warm link (the app was already running): expo-router PUSHES this route
+ *   on top of whatever was on screen, and `_layout.tsx`'s effect does not
+ *   re-run -- it keys on `initialRouteName`, which is unchanged (a logged
+ *   out user sitting on SignIn resolves to `/sign-in` before and after), so
+ *   `router.replace` is never called and the invisible frame stays on top
+ *   forever. `back` does not recover it either, because the user is already
+ *   at the top of the stack. Popping ourselves is what fixes that: the
+ *   screen underneath is exactly where the app was, which is where the
+ *   redirect logic already put the user -- SignIn (banner and all) while
+ *   logged out, Swipe or wherever they were once authenticated.
+ *
+ * The pop happens BEFORE `setPendingDogProfile`, because storing the id is
+ * what wakes `usePendingDogProfile` up to push the profile: popping after
+ * that would pop the profile straight back off.
  */
 /**
  * First step of the shared-link funnel: "Dog Link Opened" ->
@@ -57,6 +68,11 @@ const DogLink = () => {
     // through would clear a pending id that a previous link had just set,
     // and would file a funnel event for a link that names no dog.
     if (!id) return;
+
+    // Warm link: pop this invisible frame off before anything else, so the
+    // screen the app was already showing comes back. Cold start has nothing
+    // underneath, and `_layout.tsx` replaces this route instead.
+    if (router.canGoBack()) router.back();
 
     setPendingDogProfile(id);
     trackLinkOpened().catch(sendError);
