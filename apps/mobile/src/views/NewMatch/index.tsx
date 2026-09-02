@@ -14,12 +14,19 @@ import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
 import { useForAdRequestTracked } from "@/services/advertisement/interstitial";
 import { analytics } from "@/services/analytics";
+import { handleRequestAppReview } from "@/services/app-review";
+import { ReviewTrigger } from "@/services/app-review-policy";
+import { isMaestroE2EBuild } from "@/services/e2e";
+import { sendError } from "@/services/error-tracking";
 import { haptics } from "@/services/haptics";
 import { SceneName } from "@/types/scene-name";
 
 import AnimatedCards from "./animated-cards";
 import { ConfettiAnimation } from "./confetti-animation";
 import { Content, MatchCaption, MatchWordmark, styles } from "./styles";
+
+/** Long enough for the confetti to land and the cards to settle. */
+const REVIEW_PROMPT_DELAY_MS = 2500;
 
 const NewMatch: React.FC = () => {
   const { matchId, matchDogId } = useLocalSearchParams<{
@@ -31,6 +38,13 @@ const NewMatch: React.FC = () => {
     { id: matchDogId as string },
     { refetchOnMount: false },
   );
+
+  // The same query the Messages tab reads, and the swipe saga invalidates it
+  // on its way here, so this is the count including the match on screen.
+  // Deliberately not a suspense query: a slow answer must not hold up the
+  // confetti, and no answer at all just means no prompt.
+  const { data: matches } = api.match.getAll.useQuery();
+  const matchCount = matches?.length;
 
   const { safeLoadAndShow } = useForAdRequestTracked({
     ios: "ca-app-pub-6276873083446538/8154113808",
@@ -108,6 +122,31 @@ const NewMatch: React.FC = () => {
   useEffect(() => {
     haptics.success();
   }, []);
+
+  // The first match is the high point of the whole app, which is why the
+  // review prompt now asks here. It waits out the confetti first: a modal on
+  // top of the celebration would spend the good mood instead of riding it.
+  // Taking either CTA before the delay is up unmounts the screen and cancels
+  // the ask, so the prompt never lands on the chat.
+  useEffect(() => {
+    if (matchCount === undefined) return;
+
+    // Skipped in the Maestro build for the same reason interstitials are: it
+    // is a modal that arrives on a timer this screen owns, it eats the tap
+    // aimed at the CTA underneath, and no flow can wait for a schedule it
+    // cannot see. Both 22-new-match-journey and the grand journey tap a CTA
+    // here within seconds of the screen appearing.
+    if (isMaestroE2EBuild()) return;
+
+    const timeout = setTimeout(() => {
+      handleRequestAppReview({
+        trigger: ReviewTrigger.FirstMatch,
+        matchCount,
+      }).catch(sendError);
+    }, REVIEW_PROMPT_DELAY_MS);
+
+    return () => clearTimeout(timeout);
+  }, [matchCount]);
 
   return (
     <View style={styles.container} testID="new-match-screen">

@@ -111,7 +111,30 @@ jest.mock<Record<string, unknown>>("@/contexts/trpc-provider", () => ({
         useSuspenseQuery: () => [{ id: "dog-matchme", name: "MatchMe" }],
       },
     },
+    // Feeds the review trigger its match count. The screen reads it as a
+    // plain query so a slow answer cannot hold up the celebration.
+    match: {
+      getAll: {
+        useQuery: () => ({ data: [{ id: "match-42" }] }),
+      },
+    },
   },
+}));
+
+// The review ask sits behind a `setTimeout` in a `useEffect`, and neither
+// runs under `renderToStaticMarkup`. Its rules are covered in
+// `services/app-review-policy.test.ts`; these stubs only keep the import
+// graph from reaching real storage and a real store review call.
+jest.mock<Record<string, unknown>>("@/services/app-review", () => ({
+  handleRequestAppReview: () => Promise.resolve(),
+}));
+
+jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
+  sendError: () => undefined,
+}));
+
+jest.mock<Record<string, unknown>>("@/services/e2e", () => ({
+  isMaestroE2EBuild: () => false,
 }));
 
 jest.mock<Record<string, unknown>>(

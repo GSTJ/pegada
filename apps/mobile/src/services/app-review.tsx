@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import * as React from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
 
@@ -18,12 +17,20 @@ import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
+import {
+  ReviewTrigger,
+  SECOND_MESSAGE_TRIGGER_COUNT,
+  shouldRequestReview,
+} from "@/services/app-review-policy";
 import { sendError } from "@/services/error-tracking";
 import { getData, StorageKeys, storeData } from "@/services/storage";
 
-const handleReview = async () => {
+const handleReview = async (trigger: ReviewTrigger) => {
   try {
-    analytics.track({ event_type: "App Review" });
+    analytics.track({
+      event_type: "App Review",
+      event_properties: { trigger },
+    });
     await StoreReview.requestReview();
     await storeData(StorageKeys.AppReviewStatus, "completed");
   } catch (error) {
@@ -80,13 +87,11 @@ const NotLikingTheAppModal: React.FC = () => {
   );
 };
 
-const AreYouLikingTheAppModal: React.FC = () => {
+const AreYouLikingTheAppModal: React.FC<{ trigger: ReviewTrigger }> = ({
+  trigger,
+}) => {
   const { t } = useTranslation();
   const { hide } = useMagicModal();
-
-  useEffect(() => {
-    analytics.track({ event_type: "App Review Request" });
-  }, []);
 
   const openReviewModal = () => {
     analytics.track({
@@ -96,7 +101,7 @@ const AreYouLikingTheAppModal: React.FC = () => {
 
     hide();
 
-    void handleReview();
+    void handleReview(trigger);
   };
 
   const openNotLikingTheAppModal = () => {
@@ -138,19 +143,52 @@ const AreYouLikingTheAppModal: React.FC = () => {
   );
 };
 
-const isOlderThanAMonth = (date: string) =>
-  new Date(date) < new Date(new Date().setMonth(new Date().getMonth() - 1));
+type RequestAppReviewOptions = {
+  trigger: ReviewTrigger;
+  /** Matches the user has, counting the one being celebrated. */
+  matchCount?: number;
+  /** Messages the user has sent, counted on the device. */
+  sentMessageCount?: number;
+};
 
-export const handleRequestAppReview = async () => {
-  const appReviewStatus = await getData(StorageKeys.AppReviewStatus);
+export const handleRequestAppReview = async ({
+  trigger,
+  matchCount = 0,
+  sentMessageCount = 0,
+}: RequestAppReviewOptions) => {
+  const [reviewStatus, lastPromptAt, matchPrompted, isStoreReviewAvailable] =
+    await Promise.all([
+      getData(StorageKeys.AppReviewStatus),
+      getData(StorageKeys.AppReviewRequestDate),
+      getData(StorageKeys.AppReviewMatchPrompted),
+      // Resolves false on TestFlight, on the web, and on Android below 5.0.
+      StoreReview.isAvailableAsync().catch(() => false),
+    ]);
 
-  // The user has already reviewed the app
-  if (appReviewStatus === "completed") return;
+  const decision = shouldRequestReview({
+    trigger,
+    matchCount,
+    sentMessageCount,
+    reviewStatus,
+    lastPromptAt,
+    now: new Date(),
+    // Absence of the marker covers both halves of "skipped": the prompt was
+    // blocked on the celebration screen, or the user was already past their
+    // first match when this shipped and never saw that screen at all.
+    firstPromptSkipped: matchPrompted !== "true",
+    isStoreReviewAvailable,
+  });
 
-  const lastRequestedDate = await getData(StorageKeys.AppReviewRequestDate);
+  if (!decision.allowed) {
+    if (decision.blocked) {
+      analytics.track({
+        event_type: "review_prompt_skipped",
+        event_properties: { trigger, reason: decision.reason },
+      });
+    }
 
-  // We have already asked for a review recently
-  if (lastRequestedDate && !isOlderThanAMonth(lastRequestedDate)) return;
+    return;
+  }
 
   await storeData(StorageKeys.AppReviewRequestDate, new Date().toISOString());
 
@@ -159,8 +197,42 @@ export const handleRequestAppReview = async () => {
   const isTestAccount = dog?.user.email.endsWith("@test.com");
   if (isTestAccount) return storeData(StorageKeys.AppReviewStatus, "completed");
 
+  if (trigger === ReviewTrigger.FirstMatch) {
+    await storeData(StorageKeys.AppReviewMatchPrompted, "true");
+  }
+
+  analytics.track({
+    event_type: "review_prompt_requested",
+    event_properties: { trigger },
+  });
+
   // Finally, we ask for a review
-  magicModal.show(() => <AreYouLikingTheAppModal />);
+  magicModal.show(() => <AreYouLikingTheAppModal trigger={trigger} />);
+};
+
+/**
+ * Trigger 2, the catch-up for everyone trigger 1 could not reach. The count
+ * lives on the device because the server has no per-user sent-message total
+ * and this only ever has to answer "was that the second one".
+ */
+export const handleMessageSentAppReview = async () => {
+  const stored = Number(await getData(StorageKeys.AppReviewSentMessageCount));
+  const sentMessageCount = (Number.isFinite(stored) ? stored : 0) + 1;
+
+  // The counter exists to spot message number two. Past it, stop writing.
+  if (sentMessageCount > SECOND_MESSAGE_TRIGGER_COUNT) return;
+
+  await storeData(
+    StorageKeys.AppReviewSentMessageCount,
+    String(sentMessageCount),
+  );
+
+  if (sentMessageCount < SECOND_MESSAGE_TRIGGER_COUNT) return;
+
+  await handleRequestAppReview({
+    trigger: ReviewTrigger.SecondMessage,
+    sentMessageCount,
+  });
 };
 
 const styles = StyleSheet.create((theme) => ({

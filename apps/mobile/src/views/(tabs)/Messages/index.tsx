@@ -15,6 +15,7 @@ import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
 import { handleRequestAppReview } from "@/services/app-review";
+import { ReviewTrigger } from "@/services/app-review-policy";
 import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 import { Header } from "@/views/(tabs)/Messages/components/Header";
@@ -46,10 +47,13 @@ const Messages = () => {
   });
 
   useEffect(() => {
-    if (matches.length > 0) {
-      // If the user has matches, we request the app review
-      handleRequestAppReview().catch(sendError);
-    }
+    // The fallback trigger, for users the two peak moments never caught. The
+    // "has matches" condition moved into the policy so all three triggers
+    // answer to one set of rules.
+    handleRequestAppReview({
+      trigger: ReviewTrigger.MessagesTab,
+      matchCount: matches.length,
+    }).catch(sendError);
 
     for (const { dog } of matches) {
       getTrcpContext().dog.get.setData({ id: dog.id }, dog);

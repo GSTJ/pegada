@@ -17,6 +17,15 @@ export const logout = async () => {
 
     await deleteData(StorageKeys.Token);
 
+    // The review triggers ask "is this YOUR first match, YOUR second
+    // message", so their counters belong to the session that is ending. The
+    // monthly throttle and the completed status stay: those guard the store's
+    // per-device prompt quota, which the next account shares.
+    await Promise.all([
+      deleteData(StorageKeys.AppReviewMatchPrompted),
+      deleteData(StorageKeys.AppReviewSentMessageCount),
+    ]);
+
     // Clear redux store
     store.dispatch(Actions.logout.logout());
 
