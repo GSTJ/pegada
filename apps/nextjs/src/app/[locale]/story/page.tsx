@@ -8,6 +8,7 @@ import { Logo } from "@/components/logo";
 import { Restricter } from "@/components/restricter";
 import { gilroy } from "@/lib/fonts";
 import { getSafeLocale } from "@/lib/get-safe-locale";
+import { toLocalePath, toOpenGraphLocale } from "@/lib/locales";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,22 @@ const EXAMPLES = [
 const EXAMPLE_WIDTH = 720;
 const EXAMPLE_HEIGHT = 1280;
 
+/**
+ * The share card: the three frames above, laid out on the same paper at the
+ * 1.91:1 every scraper crops to. A 9:16 frame handed to `summary_large_image`
+ * is cropped to a strip of its middle, and WhatsApp's scraper is unreliable on
+ * WebP, so this one is a flat JPEG built by hand
+ * (`scripts` are not involved: it is static art for a static page).
+ */
+const OG_IMAGE = {
+  url: "/story/og.jpg",
+  width: 1200,
+  height: 630,
+};
+
+/** This page's own path, per locale, for the canonical and `og:url`. */
+const ROUTE_PATH = "/story";
+
 const STEPS = ["photos", "build", "post"] as const;
 
 /**
@@ -66,24 +83,27 @@ type StoryPageProps = {
 };
 
 export const generateMetadata = (): Metadata => {
+  const locale = getSafeLocale();
   const title = t("story.metadata.title");
   const description = t("story.metadata.description");
+  const images = [{ ...OG_IMAGE, alt: t("story.metadata.ogImageAlt") }];
 
-  // One of the frames themselves. The page is a picture of a product, and this
-  // is the picture; a separate card would have to be kept in step with it.
-  const images = [
-    {
-      url: EXAMPLES[0].src,
-      width: EXAMPLE_WIDTH,
-      height: EXAMPLE_HEIGHT,
-      alt: t("story.metadata.ogImageAlt"),
-    },
-  ];
-
+  // `openGraph` replaces the root layout's wholesale rather than merging into
+  // it, so `url`, `siteName` and `locale` have to be restated here or this
+  // page's card loses them. `alternates` is a separate field and still comes
+  // from the layout, which builds it from the request path.
   return {
     title,
     description,
-    openGraph: { type: "website", title, description, images },
+    openGraph: {
+      type: "website",
+      locale: toOpenGraphLocale(locale),
+      siteName: "Pegada",
+      url: toLocalePath(locale, ROUTE_PATH),
+      title,
+      description,
+      images,
+    },
     twitter: { card: "summary_large_image", title, description, images },
   };
 };
@@ -128,7 +148,7 @@ const StoryPage = async ({ searchParams }: StoryPageProps) => {
              * first frame lined up with the headline above it.
              */}
             <ul className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:px-0">
-              {EXAMPLES.map(({ key, src }) => (
+              {EXAMPLES.map(({ key, src }, index) => (
                 <li
                   key={key}
                   className="w-[70vw] max-w-[300px] shrink-0 snap-center sm:w-auto sm:max-w-none"
@@ -140,6 +160,10 @@ const StoryPage = async ({ searchParams }: StoryPageProps) => {
                       width={EXAMPLE_WIDTH}
                       height={EXAMPLE_HEIGHT}
                       sizes="(min-width: 640px) 33vw, 70vw"
+                      // The first frame is the LCP element on every viewport;
+                      // the other two are off screen on a phone and below the
+                      // fold on a desktop, so they stay lazy.
+                      priority={index === 0}
                       className="h-auto w-full"
                     />
                   </div>
