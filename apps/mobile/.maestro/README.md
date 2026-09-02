@@ -38,7 +38,7 @@
    After the flow finishes, verify the row was actually wiped:
 
    ```sh
-   pnpm -F @pegada/database maestro:check-deleted   # exits 1 if the row remains
+   pnpm -F @pegada/database maestro:check-delete-me   # exits 1 if the row remains
    ```
 
 3. Make sure `EXPO_PUBLIC_API_URL` points to a running API instance (local or staging).
@@ -80,17 +80,17 @@ maestro test apps/mobile/.maestro/
 
 ## Flows
 
-| File                                | What it does                                                                                                                                                                                                     |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `launch.yaml`                       | Cold-launches the app, asserts the sign-in screen is visible.                                                                                                                                                    |
-| `sign-in.yaml`                      | Enters magic email + 6-digit code, asserts OTP screen exits.                                                                                                                                                     |
-| `create-profile.yaml`               | Runs sign-in, fills dog name, asserts location screen appears.                                                                                                                                                   |
-| `swipe.yaml`                        | Runs sign-in (assumes full profile), taps like button, asserts no crash.                                                                                                                                         |
-| `20-account-creation-journey.yaml`  | Full end-to-end user journey: sign-in → photo upload → name → birthdate → location → swipe. Requires `APPLE_MAGIC_EMAIL_REGEX`.                                                                                  |
-| `26-logout-journey.yaml`            | Login → Profile → Logout → confirm → assert sign-in screen + cold relaunch stays logged out (Keychain wiped).                                                                                                    |
-| `27-delete-account-journey.yaml`    | Login as disposable `delete-me@pegada.app` → Profile → Delete Account → confirm → assert sign-in. Wrap with `maestro:seed` (before) and `maestro:check-deleted` (after) to seed the user and verify DB deletion. |
-| `46-deep-link-sign-in-handoff.yaml` | Cold, logged out → open `pegada://dog/<id>` → assert the pending-profile banner on sign-in → log in → assert the app landed on that dog's profile. Needs `DOG_ID` (see `scripts/pre/46-resolve-dog-id.sh`).      |
-| `47-deep-link-logged-in.yaml`       | Already logged in → open `pegada://dog/<id>` → assert it opens straight to that dog's profile, no banner involved.                                                                                               |
+| File                                | What it does                                                                                                                                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `launch.yaml`                       | Cold-launches the app, asserts the sign-in screen is visible.                                                                                                                                                      |
+| `sign-in.yaml`                      | Enters magic email + 6-digit code, asserts OTP screen exits.                                                                                                                                                       |
+| `create-profile.yaml`               | Runs sign-in, fills dog name, asserts location screen appears.                                                                                                                                                     |
+| `swipe.yaml`                        | Runs sign-in (assumes full profile), taps like button, asserts no crash.                                                                                                                                           |
+| `20-account-creation-journey.yaml`  | Full end-to-end user journey: sign-in → photo upload → name → birthdate → location → swipe. Requires `APPLE_MAGIC_EMAIL_REGEX`.                                                                                    |
+| `26-logout-journey.yaml`            | Login → Profile → Logout → confirm → assert sign-in screen + cold relaunch stays logged out (Keychain wiped).                                                                                                      |
+| `27-delete-account-journey.yaml`    | Login as disposable `delete-me@pegada.app` → Profile → Delete Account → confirm → assert sign-in. Wrap with `maestro:seed` (before) and `maestro:check-delete-me` (after) to seed the user and verify DB deletion. |
+| `46-deep-link-sign-in-handoff.yaml` | Cold, logged out → open `pegada://dog/<id>` → assert the pending-profile banner on sign-in → log in → assert the app landed on that dog's profile. Needs `DOG_ID` (see `scripts/pre/46-resolve-dog-id.sh`).        |
+| `47-deep-link-logged-in.yaml`       | Already logged in → open `pegada://dog/<id>` → assert it opens straight to that dog's profile, no banner involved.                                                                                                 |
 
 ## Required GitHub Secrets
 
