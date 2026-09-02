@@ -5,6 +5,8 @@
  * the reset and the next person to sign in on that device inherited the
  * previous one's PostHog identity. The reset is in a `finally` for that reason.
  */
+import type { CustomerInfo } from "react-native-purchases";
+
 jest.mock<Record<string, unknown>>("expo-router", () => ({
   router: { replace: jest.fn() },
 }));
@@ -55,7 +57,10 @@ const mockSendError = jest.mocked(sendError);
 
 describe("logout", () => {
   it("resets the analytics identity on a clean logout", async () => {
-    mockLogOut.mockResolvedValue(undefined);
+    // `logOut` resolves the anonymous CustomerInfo it switches to. Nothing on
+    // this path reads it, so an empty stub carries the type without pretending
+    // to describe a real RevenueCat customer.
+    mockLogOut.mockResolvedValue({} as CustomerInfo);
 
     await logout();
 
