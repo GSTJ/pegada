@@ -14,8 +14,7 @@ import { useOfferings } from "@/hooks/use-payments";
 import { styles as planPackagesStyles } from "@/views/UpgradeWall/components/PlanPackages/styles";
 
 import { PlanCard } from "./plan-card";
-
-const MONTHS_IN_A_YEAR = 12;
+import { getYearlySavingPercent } from "./saving-percent";
 
 type OfferingsProps = {
   selectedPackage: PurchasesPackage | null | undefined;
@@ -70,20 +69,10 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   }, [defaultPackage, selectedPackage, setSelectedPackage]);
 
   // What a year of the monthly plan would cost against the yearly price.
-  // Undefined when either plan is missing or the yearly plan is not cheaper,
-  // in which case no badge is shown.
-  const yearlySavingPercent = (() => {
-    if (!annualPackage || !monthlyPackage) return;
-
-    const twelveMonths = monthlyPackage.product.price * MONTHS_IN_A_YEAR;
-    if (twelveMonths <= 0) return;
-
-    const percent = Math.round(
-      ((twelveMonths - annualPackage.product.price) / twelveMonths) * 100,
-    );
-
-    return percent > 0 ? percent : undefined;
-  })();
+  const yearlySavingPercent = getYearlySavingPercent(
+    monthlyPackage?.product.price,
+    annualPackage?.product.price,
+  );
 
   return (
     <View style={planPackagesStyles.container}>

@@ -93,11 +93,7 @@
     "month": "{{unit}} mês",
     "months": "{{unit}} meses",
     "year": "{{unit}} ano",
-    "years": "{{unit}} anos",
-    "day": "{{unit}} dia",
-    "days": "{{unit}} dias",
-    "week": "{{unit}} semana",
-    "weeks": "{{unit}} semanas"
+    "years": "{{unit}} anos"
   },
   "dogProfile": {
     "profileInfoError": "⚠️ Oops. Tente novamente mais tarde.",
@@ -295,7 +291,7 @@
       "fetchingOfferings": "Ocorreu um erro ao buscar as ofertas."
     },
     "upgradeWall": {
-      "getPremium": "Obtenha o Premium",
+      "getPremium": "Desbloqueie o Premium",
       "enjoyFullAccess": "Aproveite o acesso total a todos os recursos e turbine o seu doguinho",
       "subscribe": "Assinar Premium",
       "price": "{{price}}, cancele quando quiser",
