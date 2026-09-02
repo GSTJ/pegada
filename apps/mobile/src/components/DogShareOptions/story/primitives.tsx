@@ -275,15 +275,21 @@ export const DotField = ({
  * The concept draws this by clipping a bordered box to
  * `polygon(0 0, 100% 0, 0 100%)`, which keeps the left border and throws the
  * rest away — so the hypotenuse is unstroked and the tail's top edge simply
- * covers the length of bubble border it hangs from. Reproduced here as two
- * polygons rather than a stroke: stroking the triangle would draw a line
- * along the hypotenuse the concept does not have, and centre half of that
- * line outside the shape, which is what left a doubled diagonal and a jog
- * where it met the bubble's bottom border.
+ * covers the length of bubble border it hangs from.
  *
- * The caller positions this so its top edge overlaps the bubble's bottom
- * border and its left edge lines up with the outside of the bubble's left
- * border; the two then read as one continuous outline.
+ * Drawn as the fill first and the keyline over it, never as two shapes
+ * meeting along the hypotenuse: an ink triangle with the fill laid back
+ * inside it makes both share that edge exactly, and the two antialiased
+ * runs blend into a grey seam down the diagonal. Here the hypotenuse is
+ * only ever the fill's own outer boundary, so it antialiases against the
+ * paper the way every other edge on the card does.
+ *
+ * The box is `stroke` taller than `size` and the extra sits at the top, so
+ * the shape runs up under the bubble's bottom border rather than butting
+ * against it — otherwise the join leaves a hairline of paper showing
+ * through. The caller pins the bottom, so that headroom grows upwards into
+ * the bubble; its left edge lines up with the outside of the bubble's left
+ * border, and the two then read as one continuous outline.
  */
 export const BubbleTail = ({
   size,
@@ -295,21 +301,26 @@ export const BubbleTail = ({
   stroke: number;
   fill?: string;
   style?: StyleProp<ViewStyle>;
-}) => (
-  <View style={[style, { width: size, height: size }]}>
-    <Svg width={size} height={size}>
-      {/* The whole tail in ink... */}
-      <Polygon points={`0,0 ${size},0 0,${size}`} fill={INK} />
-      {/* ...then the fill laid back over everything but a `stroke`-wide band
-          down the left edge, which tapers to nothing at the tip exactly as
-          the concept's clipped border does. */}
-      <Polygon
-        points={`${stroke},0 ${size},0 ${stroke},${size - stroke}`}
-        fill={fill}
-      />
-    </Svg>
-  </View>
-);
+}) => {
+  const height = size + stroke;
+
+  return (
+    <View style={[style, { width: size, height }]}>
+      <Svg width={size} height={height}>
+        {/* The tail itself, hypotenuse included. */}
+        <Polygon points={`0,0 ${size},0 0,${height}`} fill={fill} />
+        {/* The bubble's left keyline carrying on down the outside of it,
+            tapering to nothing at the tip exactly as the concept's clipped
+            border does. Painted over the fill, so it shares no edge with
+            anything but itself. */}
+        <Polygon
+          points={`0,0 ${stroke},0 ${stroke},${height - stroke} 0,${height}`}
+          fill={INK}
+        />
+      </Svg>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create(() => ({
   fallback: {

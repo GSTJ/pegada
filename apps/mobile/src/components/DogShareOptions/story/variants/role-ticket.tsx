@@ -31,14 +31,30 @@ import {
  */
 
 /**
- * Display type is set with a line box roomy enough for an uppercase glyph
- * plus its diacritic — a lineHeight under the font size clips the circumflex
- * clean off "ROLÊ?". The concept's much tighter leading is restored by
- * pulling each line after the first up with a negative margin, which moves
- * the whole line box rather than cropping the glyphs inside it.
+ * Gilroy ExtraBold's own line box is about 1.29em (hhea ascender 1100 on a
+ * 1000 upem), and iOS crops the glyph to whatever `lineHeight` it is given
+ * — so anything under that shaves the caret clean off "ROLÊ?". The display
+ * lines therefore ask for 1.3em and the concept's far tighter leading is
+ * restored by pulling each line after the first up by a negative margin,
+ * which moves the whole box instead of cutting the glyph inside it.
+ *
+ * `TICKET_DISPLAY_STEP` is that restored baseline-to-baseline distance; the
+ * title's own `top` is offset by half the slack the roomier box adds above
+ * the caps, so the block lands where the concept puts it.
  */
-const TICKET_DISPLAY_LINE = 35;
-const TICKET_DISPLAY_PULL = 29.4 - TICKET_DISPLAY_LINE;
+const TICKET_DISPLAY_SIZE = 35;
+const TICKET_DISPLAY_LINE = TICKET_DISPLAY_SIZE * 1.3;
+const TICKET_DISPLAY_STEP = 29.4;
+const TICKET_DISPLAY_PULL = TICKET_DISPLAY_STEP - TICKET_DISPLAY_LINE;
+/**
+ * The call line's accent slab, painted behind the word for the same reason
+ * as the dm marker: putting the height on the text's container instead
+ * would clip the glyph to the navy and lose whatever fell outside it.
+ */
+const TICKET_CALL_SIZE = 20;
+const TICKET_CALL_LINE = TICKET_CALL_SIZE * 1.3;
+const TICKET_CALL_MARK_HEIGHT = 23;
+const TICKET_CALL_MARK_INSET = (TICKET_CALL_LINE - TICKET_CALL_MARK_HEIGHT) / 2;
 
 /** The stub itself. Everything inside is positioned against this box. */
 const TICKET_BOX = {
@@ -108,9 +124,8 @@ export const RoleTicketVariant = ({
         </View>
 
         {/* Three lines, the middle one carrying the pink accent word as a
-            nested `Text` so `adjustsFontSizeToFit` measures the whole line at
-            once — a two-`View` row would let the halves shrink independently
-            and break the shared baseline. */}
+            nested `Text` so both halves share one line box and one baseline;
+            a two-`View` row would let them drift apart. */}
         <View style={styles.title}>
           <Text numberOfLines={1} fontWeight="black" style={styles.titleText}>
             {t("dogShare.story.roleTicket.headline1")}
@@ -227,6 +242,7 @@ export const RoleTicketVariant = ({
             {t("dogShare.story.roleTicket.call", { name })}
           </Text>
           <View style={styles.callMark}>
+            <View style={styles.callMarkSlab} />
             <Text
               fontWeight="black"
               style={[styles.callText, styles.callMarkText]}
@@ -329,10 +345,17 @@ const styles = StyleSheet.create(() => ({
     color: INK,
     textTransform: "uppercase",
   },
-  title: { position: "absolute", left: PAD_LEFT, top: 38.7, width: 215 },
+  title: {
+    position: "absolute",
+    left: PAD_LEFT,
+    // Raised by half the slack the 1.3em line box adds above the caps, so
+    // the first line's cap height lands where the concept puts it.
+    top: 30.4,
+    width: 215,
+  },
   titleLinePull: { marginTop: TICKET_DISPLAY_PULL },
   titleText: {
-    fontSize: 35,
+    fontSize: TICKET_DISPLAY_SIZE,
     lineHeight: TICKET_DISPLAY_LINE,
     letterSpacing: DISPLAY_TRACKING,
     color: INK,
@@ -345,7 +368,7 @@ const styles = StyleSheet.create(() => ({
   // its own `fontSize` variant on every instance, so a nested `Text` would
   // otherwise drop to the theme's default body size mid-headline.
   titleAccent: {
-    fontSize: 35,
+    fontSize: TICKET_DISPLAY_SIZE,
     lineHeight: TICKET_DISPLAY_LINE,
     letterSpacing: DISPLAY_TRACKING,
     color: TICKET.stripePink,
@@ -431,22 +454,30 @@ const styles = StyleSheet.create(() => ({
     letterSpacing: -0.2,
     color: INK,
   },
-  call: { position: "absolute", left: PAD_LEFT, top: 350, width: 225 },
+  // Starts just under the meta rule rather than centred in the gap: at the
+  // 1.3em line box a two-line name plus the accent slab needs nearly the
+  // whole run down to the CTA bar.
+  call: { position: "absolute", left: PAD_LEFT, top: 342, width: 213 },
   callText: {
-    fontSize: 20,
-    lineHeight: 20,
+    fontSize: TICKET_CALL_SIZE,
+    lineHeight: TICKET_CALL_LINE,
     letterSpacing: -0.7,
     color: INK,
     textTransform: "uppercase",
   },
   callMark: {
     alignSelf: "flex-start",
-    marginTop: 0,
-    backgroundColor: TICKET.navy,
+    justifyContent: "center",
     paddingHorizontal: 5,
-    paddingTop: 3,
-    paddingBottom: 1.3,
     transform: [{ rotate: "-2deg" }],
+  },
+  callMarkSlab: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: TICKET_CALL_MARK_INSET,
+    bottom: TICKET_CALL_MARK_INSET,
+    backgroundColor: TICKET.navy,
   },
   callMarkText: { color: WHITE },
   stampPhoto: {

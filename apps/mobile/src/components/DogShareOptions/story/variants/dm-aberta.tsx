@@ -48,15 +48,30 @@ const BUBBLE = {
 const TAIL_SIZE = 29.3;
 
 /**
- * Display type is set with a line box roomy enough for an uppercase glyph
- * plus its diacritic: a lineHeight under the font size clips the acute off
- * "JÁ" the same way it clipped the circumflex off the ticket's "ROLÊ?". The
- * concept's much tighter leading is restored by pulling the second line up
- * with a negative margin, which moves the whole line box rather than
- * cropping the glyphs inside it.
+ * Gilroy ExtraBold's own line box is about 1.29em (hhea ascender 1100 on a
+ * 1000 upem), and iOS crops the glyph to whatever `lineHeight` it is given
+ * — so anything under that shaves the top off an accented capital. The
+ * display lines therefore ask for 1.3em and the concept's far tighter
+ * leading is restored by pulling each line after the first up by a negative
+ * margin, which moves the whole box instead of cutting the glyph inside it.
+ *
+ * `DM_DISPLAY_STEP` is that restored baseline-to-baseline distance; the
+ * headline's own `top` is offset by half the slack the roomier box adds
+ * above the caps, so the block lands where the concept puts it.
  */
-const DM_DISPLAY_LINE = 37;
-const DM_DISPLAY_PULL = 33.5 - DM_DISPLAY_LINE;
+const DM_DISPLAY_SIZE = 39.3;
+const DM_DISPLAY_LINE = DM_DISPLAY_SIZE * 1.3;
+const DM_DISPLAY_STEP = 33.5;
+const DM_DISPLAY_PULL = DM_DISPLAY_STEP - DM_DISPLAY_LINE;
+/**
+ * The marker slab is painted as its own layer behind the word rather than
+ * as the text's background, so the pink can hug the caps while the text
+ * keeps the full 1.3em line box it needs to draw a diacritic. Sizing the
+ * slab by putting a height on the text's own container instead would clip
+ * the glyph to the pink — the overflow lands on bare paper and vanishes.
+ */
+const DM_MARKER_HEIGHT = 33;
+const DM_MARKER_INSET = (DM_DISPLAY_LINE - DM_MARKER_HEIGHT) / 2;
 
 /** Deterministic per dog, so a capture retry never swaps the opener. */
 const OPENER_KEYS = [
@@ -126,6 +141,7 @@ export const DmAbertaVariant = ({
             {t("dogShare.story.dmAberta.headline2")}{" "}
           </Text>
           <View style={styles.marker}>
+            <View style={styles.markerSlab} />
             <Text
               numberOfLines={1}
               adjustsFontSizeToFit
@@ -280,7 +296,9 @@ const styles = StyleSheet.create(() => ({
   },
   headline: {
     position: "absolute",
-    top: 116,
+    // Raised by half the slack the 1.3em line box adds above the caps, so
+    // the first line's cap height lands where the concept puts it.
+    top: 107.3,
     left: 19.3,
     // Runs to 4pt off the card's right edge — the concept lets the marker
     // slab all but touch the frame.
@@ -290,7 +308,7 @@ const styles = StyleSheet.create(() => ({
   headlineRow: { flexDirection: "row", alignItems: "center" },
   headlineRowPull: { marginTop: DM_DISPLAY_PULL },
   headlineText: {
-    fontSize: 39.3,
+    fontSize: DM_DISPLAY_SIZE,
     lineHeight: DM_DISPLAY_LINE,
     letterSpacing: DISPLAY_TRACKING,
     color: INK,
@@ -300,12 +318,19 @@ const styles = StyleSheet.create(() => ({
   // a couple of degrees off level so it reads as drawn on rather than typeset.
   marker: {
     flexShrink: 1,
+    justifyContent: "center",
+    paddingHorizontal: 5.7,
+    transform: [{ rotate: "-2deg" }],
+  },
+  markerSlab: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: DM_MARKER_INSET,
+    bottom: DM_MARKER_INSET,
     backgroundColor: DM.edge,
     borderWidth: 1.7,
     borderColor: INK,
-    paddingHorizontal: 5.7,
-    paddingVertical: 0,
-    transform: [{ rotate: "-2deg" }],
   },
   scribble: {
     position: "absolute",
