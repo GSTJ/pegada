@@ -3,14 +3,12 @@ import type { Session } from "@pegada/api/trpc";
 import type { NextRequest } from "next/server";
 
 import { appRouter, createTRPCContext } from "@pegada/api";
-import { sendError } from "@pegada/api/errors/errors";
 import { config } from "@pegada/api/shared/config";
 import { getSession } from "@pegada/api/trpc";
 import { RequestHeaders } from "@pegada/shared/types/types";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-import { ipAddress } from "@vercel/functions";
+
+import { checkRateLimit, createRateLimiter } from "@/lib/rate-limit";
 
 const setCorsHeaders = (res: Response) => {
   res.headers.set("Access-Control-Allow-Origin", "*");
@@ -27,18 +25,11 @@ export const OPTIONS = () => {
   return response;
 };
 
-const loggedOutRatelimit = new Ratelimit({
-  limiter: Ratelimit.slidingWindow(15, "30s"),
-  redis: Redis.fromEnv(),
-  // Bound how long a hanging Redis call can stall a request. Combined with
-  // the fail-open handling below, a dead/unreachable Redis degrades to "no
-  // rate limiting" instead of a full outage.
-  timeout: 2000,
-});
+// No `prefix`: this limiter has been counting under `@upstash/ratelimit`'s
+// default key namespace since it was written, and naming it now would reset
+// every live counter.
+const loggedOutRatelimit = createRateLimiter({ limit: 15, window: "30s" });
 
-// Redis being unreachable (DNS failure, network error, timeout, auth error)
-// must never take the whole API down. Fail open: let the request through,
-// and report the outage once so it's visible instead of silently swallowed.
 const handleRatelimiter = async ({
   req,
   session,
@@ -53,27 +44,12 @@ const handleRatelimiter = async ({
     return;
   }
 
-  const ip = ipAddress(req) ?? "127.0.0.1";
+  const { allowed, limit, remaining, reset } = await checkRateLimit({
+    headers: req.headers,
+    limiter: loggedOutRatelimit,
+  });
 
-  let result: Awaited<ReturnType<typeof loggedOutRatelimit.limit>>;
-  try {
-    result = await loggedOutRatelimit.limit(ip);
-  } catch (error) {
-    sendError(error);
-    return;
-  }
-
-  const { limit, remaining, reset, success, reason } = result;
-
-  if (success) return;
-
-  // `reason === "timeout"` means the limiter itself couldn't reach Redis in
-  // time (see `timeout` above) and is not a genuine rate-limit rejection.
-  // Fail open here too, rather than blocking real traffic on a dead Redis.
-  if (reason === "timeout") {
-    sendError(new Error("Rate limiter timed out reaching Redis"));
-    return;
-  }
+  if (allowed) return;
 
   return new Response(JSON.stringify({ error: "Rate limited" }), {
     status: 429,

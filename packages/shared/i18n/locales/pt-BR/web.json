@@ -72,7 +72,51 @@
         "description": "Onde se encontrar e a que horas.",
         "alt": "Uma conversa no Pegada entre dois donos combinando uma manhã no parque."
       }
+    },
+    "footer": {
+      "aiStory": "Story do seu dog com IA"
     }
+  },
+  "story": {
+    "metadata": {
+      "title": "Pegada | Story do seu dog",
+      "description": "A gente transforma as fotos do seu cachorro em um story pronto pra postar. Feito com IA, em segundos.",
+      "ogImageAlt": "Um story vertical em papel bege, com o nome de uma cachorra em letras grandes, a foto dela e três fotos menores ao lado."
+    },
+    "headline": "Crie o story do seu dog",
+    "subline": "A gente transforma as fotos dele em um story pronto pra postar. Feito com IA, em segundos.",
+    "examples": {
+      "title": "Como fica",
+      "editorial": {
+        "alt": "Story em papel bege com o nome Nina em letras grandes, a foto de uma cachorra cinza e três fotos menores ao lado."
+      },
+      "ticket": {
+        "alt": "Story em forma de ticket, com a pergunta “Quem topa um rolê?”, as fotos de dois cachorros e os campos passageira, destino e portão."
+      },
+      "chat": {
+        "alt": "Story amarelo com o título “DM aberta pra cachorrada”, a foto de um golden retriever filhote e duas mensagens de chat ao lado."
+      }
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "photos": "Escolhe as fotos do seu dog.",
+      "build": "A gente monta o story.",
+      "post": "Você posta e marca a Pegada."
+    },
+    "cta": "Quero o meu",
+    "form": {
+      "title": "Entra na lista",
+      "description": "Avisamos por e-mail quando o story abrir.",
+      "label": "Seu e-mail",
+      "placeholder": "voce@email.com",
+      "honeypot": "Site",
+      "submit": "Quero o meu",
+      "submitting": "Enviando",
+      "invalid": "Esse e-mail parece errado. Confere pra mim?",
+      "rateLimited": "Tenta de novo em um minuto.",
+      "failed": "Não deu pra salvar agora. Tenta de novo."
+    },
+    "success": "Você está na lista, avisamos quando abrir."
   },
   "dog": {
     "metadata": {

@@ -1,4 +1,5 @@
 import { Cta } from "@/components/cta";
+import { Footer } from "@/components/footer";
 import { HeroImage } from "@/components/hero-image";
 import { Logo } from "@/components/logo";
 import { Restricter } from "@/components/restricter";
@@ -47,6 +48,7 @@ const App = () => {
       <Features />
       <HowItWorks />
       <Screens />
+      <Footer />
     </>
   );
 };
