@@ -56,6 +56,8 @@ export const ANALYTICS_EVENTS = {
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
   REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
   PUSH_PERMISSION: "Push Permission",
+  PUSH_RECEIPT_RESULT: "Push Receipt Result",
+  PUSH_TICKET_RESULT: "Push Ticket Result",
   REFERRAL_CAPTURED: "Referral Captured",
   RESTORE_PURCHASES: "RestorePurchases",
   RESTORE_PURCHASES_SUCCESS: "Restore Purchases Success",
@@ -126,6 +128,23 @@ export type ReengagementPushKind =
   | "likes_waiting"
   | "new_dogs_nearby"
   | "unanswered_match";
+
+/**
+ * What a push was for, across every path that sends one: the three scheduled
+ * nudges plus the three transactional ones. One vocabulary so the delivery
+ * events below break down by the same property whoever sent the push.
+ */
+export type PushKind = ReengagementPushKind | "like" | "match" | "message";
+
+/**
+ * Expo's answer about one push, at whichever of the two checkpoints asked.
+ *
+ * A ticket is Expo accepting the message; a receipt, fetched about half an
+ * hour later, is Apple or Google saying what became of it. Only the second one
+ * means delivered, which is why both are recorded separately rather than
+ * collapsed into a single "sent".
+ */
+export type PushDeliveryStatus = "error" | "ok";
 
 /**
  * The moment that produced a review prompt. The whole point of the review
@@ -402,6 +421,31 @@ export type ServerEventProperties = {
     message_type: "text";
   };
   /**
+   * What the device said about a push, roughly half an hour after it left.
+   *
+   * This is the only event in the catalogue that means "delivered". Read as an
+   * ok rate per `kind` it is the denominator every push funnel was missing:
+   * before it existed, a push that Expo dropped and a push nobody opened were
+   * the same data.
+   */
+  [ANALYTICS_EVENTS.PUSH_RECEIPT_RESULT]: {
+    /** Expo's own code, such as `DeviceNotRegistered`. Null when ok. */
+    error_code: string | null;
+    /** Null only for a push enqueued before this property existed. */
+    kind: PushKind | null;
+    status: PushDeliveryStatus;
+  };
+  /**
+   * What Expo said when the push was handed over. An error here is a push that
+   * never reached a device at all, so it is the first place a silent failure
+   * shows up.
+   */
+  [ANALYTICS_EVENTS.PUSH_TICKET_RESULT]: {
+    error_code: string | null;
+    kind: PushKind | null;
+    status: PushDeliveryStatus;
+  };
+  /**
    * One row per re-engagement push handed to Expo. `dedupe_key` is the same key
    * the send claimed in `NotificationLog`, so a send and the open it produced
    * can be lined up without trusting timestamps.
@@ -562,6 +606,8 @@ export const MOBILE_EVENT_NAMES = [
 export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.MATCH_CREATED,
   ANALYTICS_EVENTS.MESSAGE_SENT,
+  ANALYTICS_EVENTS.PUSH_RECEIPT_RESULT,
+  ANALYTICS_EVENTS.PUSH_TICKET_RESULT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
   ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,

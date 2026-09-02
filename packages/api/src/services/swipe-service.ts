@@ -64,6 +64,8 @@ export class SwipeService {
         // Gives the like push the same shape as the match and chat pushes so a
         // tap resolves to a known destination instead of an unknown link.
         data: { url: "like" },
+        userId: dog.user.id,
+        pushKind: "like",
       });
     } catch (error) {
       sendError(error);

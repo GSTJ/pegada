@@ -77,35 +77,77 @@ const NEW_DOGS_FALLBACK_WINDOW_DAYS = 30;
  */
 const UNLIMITED_DISTANCE_KM = 295;
 
-/** Local hours between which nothing is sent. */
-const QUIET_HOURS_START = 21;
-const QUIET_HOURS_END = 9;
+/**
+ * The rule, in full: a re-engagement push may only leave inside 18:00 and
+ * 19:00 of the recipient's own local hour, whatever the kind.
+ *
+ * Two hours rather than one because Vercel Cron is best effort and a single
+ * missed invocation would otherwise drop a whole cohort for the day. The
+ * dedupe key and the per-user cap are what stop the second hour resending.
+ *
+ * This used to be two rules: located users were allowed any hour from 09:00
+ * to 21:00 and only the users without coordinates were held to the evening.
+ * That is what put 200 pushes on the wire at 16:03 America/Sao_Paulo on
+ * 2026-09-02: every one of them a located Brazilian user, comfortably inside a
+ * twelve hour "not quiet hours" window that was never the intent. There is one
+ * window now and every kind goes through it.
+ */
+const SEND_WINDOW_HOURS = new Set([18, 19]);
 
 /**
  * America/Sao_Paulo, for users whose coordinates we do not have.
  *
- * Two hours rather than one because Vercel Cron is best effort: a single
- * missed invocation would drop this whole cohort for the day. The dedupe key
- * and the daily cap are what stop the second hour resending.
+ * A fixed offset is correct rather than convenient: Brazil dropped daylight
+ * saving in 2019, so the zone has been UTC-3 all year round ever since.
  */
 const FALLBACK_OFFSET_HOURS = -3;
-const FALLBACK_SEND_HOURS = new Set([18, 19]);
 
-/** One re-engagement push per user per rolling day. */
 /**
- * One re-engagement push per user per day.
+ * One re-engagement push per user per rolling day, whatever the kind.
  *
  * 23 hours rather than 24, and strictly greater than rather than inclusive,
  * because the job runs hourly and the cap is measured against the previous
  * send. At exactly 24 a user nudged at 19:00 is still inside the window at
  * 18:00 the next day, so their slot slides an hour later each time until it
- * falls out of the evening entirely and they end up on every other day. The
- * hour of slack absorbs that without ever allowing two sends in a calendar
- * day, since the earliest either can land is 09:00 local.
+ * falls out of the evening entirely and they end up on every other day.
  */
 const USER_COOLDOWN_HOURS = 23;
 
-/** Bounds one invocation so a backlog cannot outrun the function budget. */
+/**
+ * How long one kind waits before it may nudge the same user again.
+ *
+ * `likes_waiting` is the outlier and the reason this map exists. Its dedupe
+ * key names one pending like, so a dormant user collecting a like a day was
+ * eligible again every day under a key that had never been claimed: same
+ * person, same "you have likes waiting", every evening. A week between two of
+ * them makes it a nudge rather than a drip, and it costs nothing when the
+ * likes really are new, because the copy never counted them.
+ *
+ * The other two are already self limiting (a match is nudged at 24h and 72h
+ * and never again, new dogs are keyed on an anchor that only the user can
+ * move), so they sit at the shared floor.
+ */
+const KIND_COOLDOWN_HOURS = {
+  [REENGAGEMENT_KINDS.UNANSWERED_MATCH]: USER_COOLDOWN_HOURS,
+  [REENGAGEMENT_KINDS.NEW_DOGS_NEARBY]: USER_COOLDOWN_HOURS,
+  [REENGAGEMENT_KINDS.LIKES_WAITING]: 7 * 24,
+} as const satisfies Record<ReengagementKind, number>;
+
+/** How far back the cooldown lookup has to read to answer every kind. */
+const MAX_COOLDOWN_HOURS = Math.max(...Object.values(KIND_COOLDOWN_HOURS));
+
+/** Set membership key for "this user has had this kind recently". */
+const kindKey = (userId: string, kind: string) => `${userId}:${kind}`;
+
+/**
+ * Bounds one invocation so a backlog cannot outrun the function budget.
+ *
+ * Worth reading next to {@link SEND_WINDOW_HOURS}: a user is only eligible in
+ * two of the twenty four runs a day, and Brazil is one offset, so the whole
+ * base shares those two runs and the real daily ceiling is twice this number.
+ * The 200 the incident sent was this cap being hit, so a backlog does exist.
+ * Raise this before widening the window if the queue stops draining.
+ */
 const MAX_CANDIDATES_PER_QUERY = 500;
 const MAX_PUSHES_PER_RUN = 200;
 
@@ -129,8 +171,12 @@ export type ReengagementRunSummary = {
   sent: number;
   byKind: Record<ReengagementKind, number>;
   candidates: number;
-  skippedQuietHours: number;
+  /** Users whose local hour was not 18:00 or 19:00 when the run started. */
+  skippedOutsideWindow: number;
+  /** Users inside {@link USER_COOLDOWN_HOURS} of their last push, any kind. */
   skippedCooldown: number;
+  /** Candidates dropped by their own kind's cooldown. */
+  skippedKindCooldown: number;
   skippedAlreadySent: number;
   skippedUnreachable: number;
 };
@@ -166,9 +212,14 @@ const hourInOffset = (now: Date, offsetHours: number) =>
  * Longitude over 15 is the solar offset, and it is deliberately the whole
  * timezone story here: a real tz lookup means shipping a coordinate-to-zone
  * dataset (tens of megabytes into a serverless bundle) to decide whether a
- * nudge goes out at 18:00 or 19:00. Political zones drift from solar time by
- * an hour or two at the edges, which the twelve hour send window absorbs, and
- * Brazil (where nearly all the users are) sits close to its solar offset.
+ * nudge goes out at 18:00 or 19:00.
+ *
+ * Political zones drift from solar time by up to an hour at the edges of a
+ * zone, so the two hour window really means "somewhere between 17:00 and
+ * 20:00 local" for a user near one. That is the price of not shipping the
+ * dataset, and it is a price worth paying: every one of those hours is still
+ * the evening. Brazil, where nearly all the users are, sits close enough to
+ * its solar offset that most of them land on the nose.
  *
  * `null` when there is no longitude, which is the caller's cue to fall back to
  * America/Sao_Paulo.
@@ -183,25 +234,20 @@ export const localHourFromLongitude = (
 };
 
 /**
- * Is now a decent moment to interrupt this user?
+ * Is now the moment this user is allowed to be interrupted?
  *
- * With coordinates: any local hour outside 21:00 to 09:00. Without: only the
- * early evening America/Sao_Paulo slot, because guessing a whole day of
- * waking hours for someone whose location we do not know is how a retention
- * push becomes a 3am push.
+ * One rule for everybody: the local hour has to be 18 or 19. The local hour
+ * comes from the user's longitude when there is one, and from
+ * America/Sao_Paulo when there is not. See {@link SEND_WINDOW_HOURS}.
  */
 export const isWithinSendWindow = (
   longitude: number | null | undefined,
   now: Date,
-): boolean => {
-  const localHour = localHourFromLongitude(longitude, now);
-
-  if (localHour === null) {
-    return FALLBACK_SEND_HOURS.has(hourInOffset(now, FALLBACK_OFFSET_HOURS));
-  }
-
-  return localHour >= QUIET_HOURS_END && localHour < QUIET_HOURS_START;
-};
+): boolean =>
+  SEND_WINDOW_HOURS.has(
+    localHourFromLongitude(longitude, now) ??
+      hourInOffset(now, FALLBACK_OFFSET_HOURS),
+  );
 
 type ReengagementCopyKey =
   | "server:notification.reengagement.unansweredMatch.title"
@@ -557,12 +603,21 @@ type LikesWaitingRow = {
  * and nothing back from you. That is the set worth interrupting someone over.
  *
  * The dedupe key is the oldest waiting like, so the nudge does not repeat
- * until that particular like is dealt with.
+ * until that particular like is dealt with. On its own that was not enough:
+ * a new like arriving is a new oldest-unannounced like, so a popular dormant
+ * dog produced one of these every evening. The weekly floor below is the cap
+ * that actually holds, and it is applied here as well as in the run so those
+ * users do not sit in the candidate limit for nothing.
  */
 export const selectLikesWaitingCandidates = async (
   now: Date,
 ): Promise<Candidate[]> => {
   const olderThan = new Date(now.getTime() - LIKES_WAITING_HOURS * HOUR_MS);
+
+  const cooldownFloor = new Date(
+    now.getTime() -
+      KIND_COOLDOWN_HOURS[REENGAGEMENT_KINDS.LIKES_WAITING] * HOUR_MS,
+  );
 
   const rows = await prisma.$queryRaw<LikesWaitingRow[]>`
     WITH "waiting" AS (
@@ -623,6 +678,14 @@ export const selectLikesWaitingCandidates = async (
       SELECT 1 FROM "NotificationLog"
       WHERE "NotificationLog"."dedupeKey" =
         ${`${REENGAGEMENT_KINDS.LIKES_WAITING}:`} || "waiting"."userId" || ':' || "waiting"."anchorId"
+    )
+    /* The weekly per-user floor for this kind, mirrored from the run so the
+       users it holds back never take a slot in the limit below. */
+    AND NOT EXISTS (
+      SELECT 1 FROM "NotificationLog"
+      WHERE "NotificationLog"."userId" = "waiting"."userId"
+      AND "NotificationLog"."kind" = ${REENGAGEMENT_KINDS.LIKES_WAITING}
+      AND "NotificationLog"."sentAt" > ${cooldownFloor}
     )
     ORDER BY "waiting"."newestLikeAt" DESC
     LIMIT ${MAX_CANDIDATES_PER_QUERY}
@@ -687,8 +750,9 @@ export class ReengagementService {
         [REENGAGEMENT_KINDS.LIKES_WAITING]: 0,
       },
       candidates: candidates.length,
-      skippedQuietHours: 0,
+      skippedOutsideWindow: 0,
       skippedCooldown: 0,
+      skippedKindCooldown: 0,
       skippedAlreadySent: 0,
       skippedUnreachable: 0,
     };
@@ -733,23 +797,51 @@ export class ReengagementService {
 
     const due = [...perUser.entries()].filter(([, { longitude }]) => {
       if (isWithinSendWindow(longitude, now)) return true;
-      summary.skippedQuietHours += 1;
+      summary.skippedOutsideWindow += 1;
       return false;
     });
 
     if (due.length === 0) return summary;
 
-    const cooledDown = await prisma.notificationLog.findMany({
+    // One read covers both caps: the widest kind window is a superset of the
+    // per-user one, so the rows are filtered in memory rather than queried
+    // once per kind.
+    const recentLogs = await prisma.notificationLog.findMany({
       where: {
         userId: { in: due.map(([userId]) => userId) },
-        sentAt: {
-          gt: new Date(now.getTime() - USER_COOLDOWN_HOURS * HOUR_MS),
-        },
+        sentAt: { gt: new Date(now.getTime() - MAX_COOLDOWN_HOURS * HOUR_MS) },
       },
-      select: { userId: true },
+      select: { userId: true, kind: true, sentAt: true },
     });
 
-    const recentlyNudged = new Set(cooledDown.map(({ userId }) => userId));
+    const recentlyNudged = new Set(
+      recentLogs
+        .filter(
+          ({ sentAt }) =>
+            sentAt.getTime() > now.getTime() - USER_COOLDOWN_HOURS * HOUR_MS,
+        )
+        .map(({ userId }) => userId),
+    );
+
+    // The selectors mirror their own kind's floor in SQL so a cooled down user
+    // never takes a slot in MAX_CANDIDATES_PER_QUERY. This is the same rule
+    // stated once more where the decision is actually made: it is what a new
+    // kind gets for free, and `skippedKindCooldown` reading anything but zero
+    // is the signal that a selector has stopped mirroring it.
+    const kindOnCooldown = new Set(
+      recentLogs
+        .filter(({ kind, sentAt }) => {
+          const hours = KIND_COOLDOWN_HOURS[kind as ReengagementKind];
+
+          // An unknown kind is a row this service did not write, so it holds
+          // nobody back beyond the per-user cap above.
+          return (
+            hours !== undefined &&
+            sentAt.getTime() > now.getTime() - hours * HOUR_MS
+          );
+        })
+        .map(({ userId, kind }) => kindKey(userId, kind)),
+    );
 
     for (const [userId, { queue }] of due) {
       if (summary.sent >= MAX_PUSHES_PER_RUN) break;
@@ -757,9 +849,15 @@ export class ReengagementService {
       if (recentlyNudged.has(userId)) {
         summary.skippedCooldown += 1;
       } else {
+        const allowed = queue.filter((candidate) => {
+          if (!kindOnCooldown.has(kindKey(userId, candidate.kind))) return true;
+          summary.skippedKindCooldown += 1;
+          return false;
+        });
+
         // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cooldown they enforce on each other.
         const sent = await ReengagementService.#sendFirstAvailable(
-          queue,
+          allowed,
           summary,
         );
 
@@ -814,14 +912,19 @@ export class ReengagementService {
    * push is the thing users uninstall over.
    */
   static async #send(candidate: Candidate): Promise<"sent" | "already-sent"> {
+    let notificationLogId: string;
+
     try {
-      await prisma.notificationLog.create({
+      const log = await prisma.notificationLog.create({
         data: {
           userId: candidate.userId,
           kind: candidate.kind,
           dedupeKey: candidate.dedupeKey,
         },
+        select: { id: true },
       });
+
+      notificationLogId = log.id;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -838,6 +941,11 @@ export class ReengagementService {
       title: candidate.title,
       body: candidate.body,
       data: { url: candidate.url, kind: candidate.kind },
+      // Carried through the queue so the ticket and receipt this produces can
+      // be attributed back to this user, this kind, and this log row.
+      userId: candidate.userId,
+      pushKind: candidate.kind,
+      notificationLogId,
     });
 
     if (candidate.clearsNewDogsAlert) {

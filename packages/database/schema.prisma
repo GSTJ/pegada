@@ -374,7 +374,18 @@ model NotificationLog {
   dedupeKey String   @unique
   sentAt    DateTime @default(now())
 
+  /// What Expo said when the push was handed over, and what the device said
+  /// about half an hour later. Both stay null until the queue handler answers,
+  /// and stay null forever for a push the handler never ran for, which is
+  /// itself the signal that the queue hop dropped it. `sentAt` only ever meant
+  /// "we tried"; these are the columns that mean "it arrived".
+  ticketStatus  String?
+  ticketError   String?
+  receiptStatus String?
+  receiptError  String?
+
   @@index([userId, sentAt])
+  @@index([userId, kind, sentAt])
 }
 
 /// One row per person who asked to be told when a feature we have not built
