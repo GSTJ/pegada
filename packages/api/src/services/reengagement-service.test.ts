@@ -71,6 +71,56 @@ const reachableUser = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+/**
+ * Older than the 30 day floor the new-dogs count falls back to, so a fixture
+ * dog is only ever "new" when a test says so.
+ */
+const DEFAULT_DOG_AGE_DAYS = 60;
+
+/**
+ * A fixture user and dog stamped against {@link NOW}.
+ *
+ * Every row this service reads sits on one side of a time comparison whose
+ * other side comes from the injected clock, so a row left on the column's
+ * `DEFAULT now()` puts the machine clock into the middle of a pinned window
+ * and the suite starts passing or failing on the day it is run. `Dog.createdAt`
+ * is the one that matters here: it is what the new-dogs count is measured
+ * against, and on the real clock the fixture dogs of a likes-waiting test were
+ * silently new enough to queue a second kind behind the one under test.
+ */
+const seedUserWithDog = async (
+  dogData?: Parameters<typeof generateFakeUserWithDog>[0],
+  userData?: Parameters<typeof generateFakeUserWithDog>[1],
+  createdAt: Date = daysAgo(DEFAULT_DOG_AGE_DAYS),
+) => {
+  const created = await generateFakeUserWithDog(dogData, userData);
+
+  await prisma.dog.update({
+    where: { id: created.dog.id },
+    data: { createdAt },
+  });
+
+  return created;
+};
+
+/** A like, with both of its timestamps pinned rather than half of them. */
+const seedInterest = async (
+  data: {
+    requesterId: string;
+    responderId: string;
+    swipeType: "INTERESTED" | "MAYBE" | "NOT_INTERESTED";
+    lastPositiveAt?: Date;
+  },
+  createdAt: Date,
+) => {
+  const interest = await prisma.interest.create({ data });
+
+  return prisma.interest.update({
+    where: { id: interest.id },
+    data: { createdAt },
+  });
+};
+
 afterAll(async () => {
   await prisma.$disconnect();
 });
@@ -93,8 +143,8 @@ beforeEach(async () => {
 /** Two dogs that matched `hours` before `reference` and never spoke. */
 const seedSilentMatch = async (hours: number, reference = NOW) => {
   const [{ dog: requester }, { dog: responder }] = await Promise.all([
-    generateFakeUserWithDog({ gender: "MALE" }, reachableUser()),
-    generateFakeUserWithDog({ gender: "FEMALE" }, reachableUser()),
+    seedUserWithDog({ gender: "MALE" }, reachableUser()),
+    seedUserWithDog({ gender: "FEMALE" }, reachableUser()),
   ]);
 
   const match = await prisma.match.create({
@@ -257,40 +307,35 @@ describe("selectUnansweredMatchCandidates", () => {
 describe("selectNewDogsNearbyCandidates", () => {
   /** An inactive owner plus `count` dogs created since they stopped swiping. */
   const seedInactiveOwnerWithNewDogs = async (count: number) => {
-    const { user, dog } = await generateFakeUserWithDog(
+    const { user, dog } = await seedUserWithDog(
       { gender: "MALE" },
       reachableUser(),
     );
 
     // Somebody they already swiped on, four days ago.
-    const { dog: swiped } = await generateFakeUserWithDog(
+    const { dog: swiped } = await seedUserWithDog(
       { gender: "FEMALE" },
       reachableUser({ pushToken: null }),
     );
 
-    await prisma.interest.create({
-      data: {
+    await seedInterest(
+      {
         requesterId: dog.id,
         responderId: swiped.id,
         swipeType: "INTERESTED",
         lastPositiveAt: daysAgo(4),
       },
-    });
+      daysAgo(4),
+    );
 
-    const newDogs = [];
     for (const index of Array.from({ length: count }, (_value, i) => i)) {
       // oxlint-disable-next-line no-await-in-loop -- Fixture rows are created in order so their timestamps stay distinct.
-      const { dog: newDog } = await generateFakeUserWithDog(
+      await seedUserWithDog(
         { gender: "FEMALE", name: `New ${index}` },
         reachableUser({ pushToken: null }),
+        daysAgo(1),
       );
-      newDogs.push(newDog);
     }
-
-    await prisma.dog.updateMany({
-      where: { id: { in: newDogs.map(({ id }) => id) } },
-      data: { createdAt: daysAgo(1) },
-    });
 
     return { user, dog };
   };
@@ -457,26 +502,19 @@ describe("selectNewDogsNearbyCandidates", () => {
 describe("selectLikesWaitingCandidates", () => {
   const seedWaitingLike = async (hours: number) => {
     const [{ user, dog: liked }, { dog: admirer }] = await Promise.all([
-      generateFakeUserWithDog({ gender: "FEMALE" }, reachableUser()),
-      generateFakeUserWithDog(
-        { gender: "MALE" },
-        reachableUser({ pushToken: null }),
-      ),
+      seedUserWithDog({ gender: "FEMALE" }, reachableUser()),
+      seedUserWithDog({ gender: "MALE" }, reachableUser({ pushToken: null })),
     ]);
 
-    const interest = await prisma.interest.create({
-      data: {
+    const interest = await seedInterest(
+      {
         requesterId: admirer.id,
         responderId: liked.id,
         swipeType: "INTERESTED",
         lastPositiveAt: hoursAgo(hours),
       },
-    });
-
-    await prisma.interest.update({
-      where: { id: interest.id },
-      data: { createdAt: hoursAgo(hours) },
-    });
+      hoursAgo(hours),
+    );
 
     return { user, liked, admirer, interest };
   };
@@ -504,13 +542,14 @@ describe("selectLikesWaitingCandidates", () => {
   it("skips a like the owner already answered", async () => {
     const { liked, admirer } = await seedWaitingLike(30);
 
-    await prisma.interest.create({
-      data: {
+    await seedInterest(
+      {
         requesterId: liked.id,
         responderId: admirer.id,
         swipeType: "NOT_INTERESTED",
       },
-    });
+      hoursAgo(1),
+    );
 
     await expect(selectLikesWaitingCandidates(NOW)).resolves.toEqual([]);
   });
@@ -600,22 +639,19 @@ describe("ReengagementService.run", () => {
     const { requester, responder } = await seedSilentMatch(25);
 
     // A waiting like for the same user, so there is a second kind queued.
-    const { dog: admirer } = await generateFakeUserWithDog(
+    const { dog: admirer } = await seedUserWithDog(
       { gender: "MALE" },
       reachableUser({ pushToken: null }),
     );
-    const like = await prisma.interest.create({
-      data: {
+    await seedInterest(
+      {
         requesterId: admirer.id,
         responderId: responder.id,
         swipeType: "INTERESTED",
         lastPositiveAt: hoursAgo(30),
       },
-    });
-    await prisma.interest.update({
-      where: { id: like.id },
-      data: { createdAt: hoursAgo(30) },
-    });
+      hoursAgo(30),
+    );
 
     expect((await ReengagementService.run(NOW)).sent).toBe(2);
 
@@ -671,22 +707,19 @@ describe("ReengagementService.run", () => {
   it("falls through to the next kind once the cap expires", async () => {
     const { responder } = await seedSilentMatch(25);
 
-    const { dog: admirer } = await generateFakeUserWithDog(
+    const { dog: admirer } = await seedUserWithDog(
       { gender: "MALE" },
       reachableUser({ pushToken: null }),
     );
-    const like = await prisma.interest.create({
-      data: {
+    await seedInterest(
+      {
         requesterId: admirer.id,
         responderId: responder.id,
         swipeType: "INTERESTED",
         lastPositiveAt: hoursAgo(30),
       },
-    });
-    await prisma.interest.update({
-      where: { id: like.id },
-      data: { createdAt: hoursAgo(30) },
-    });
+      hoursAgo(30),
+    );
 
     await ReengagementService.run(NOW);
 
@@ -727,7 +760,7 @@ describe("ReengagementService.run", () => {
   });
 
   it("nudges about waiting likes once a week, not once a day", async () => {
-    const { user, dog: liked } = await generateFakeUserWithDog(
+    const { user, dog: liked } = await seedUserWithDog(
       { gender: "FEMALE" },
       reachableUser(),
     );
@@ -736,26 +769,21 @@ describe("ReengagementService.run", () => {
     const likes: { id: string }[] = [];
     for (const index of [0, 1, 2, 3, 4, 5, 6]) {
       // oxlint-disable-next-line no-await-in-loop -- Fixture rows are created in order so their timestamps stay distinct.
-      const { dog: admirer } = await generateFakeUserWithDog(
+      const { dog: admirer } = await seedUserWithDog(
         { gender: "MALE", name: `Admirer ${index}` },
         reachableUser({ pushToken: null }),
       );
 
       // oxlint-disable-next-line no-await-in-loop -- Same.
-      const like = await prisma.interest.create({
-        data: {
+      const like = await seedInterest(
+        {
           requesterId: admirer.id,
           responderId: liked.id,
           swipeType: "INTERESTED",
           lastPositiveAt: hoursAgo(40 - index),
         },
-      });
-
-      // oxlint-disable-next-line no-await-in-loop -- Same.
-      await prisma.interest.update({
-        where: { id: like.id },
-        data: { createdAt: hoursAgo(40 - index) },
-      });
+        hoursAgo(40 - index),
+      );
 
       likes.push(like);
     }
@@ -814,19 +842,54 @@ describe("ReengagementService.run", () => {
     expect(
       PushNotificationService.enqueuePushNotification,
     ).not.toHaveBeenCalled();
+
+    // The same two candidates, unchanged, at that day's 18:00 local slot. The
+    // pair is the point: it is the hour deciding, not anything else about the
+    // fixture, and the night run left nothing behind that blocks the evening.
+    const evening = await ReengagementService.run(NOW);
+
+    expect(evening.sent).toBe(2);
+    expect(evening.skippedOutsideWindow).toBe(0);
+    expect(
+      PushNotificationService.enqueuePushNotification,
+    ).toHaveBeenCalledTimes(2);
+  });
+
+  it("stamps the log with the run's instant, not the machine clock", async () => {
+    await seedSilentMatch(25);
+
+    await ReengagementService.run(NOW);
+
+    // The whole service measures its caps against the instant it was handed,
+    // so the rows it writes have to be on that clock too. When they were left
+    // on the column's `DEFAULT now()`, the weekly likes-waiting floor was read
+    // against a row from a different day and this suite's result depended on
+    // the date it ran on.
+    const logs = await prisma.notificationLog.findMany({
+      select: { sentAt: true },
+    });
+
+    expect(logs).toHaveLength(2);
+    expect(logs.map(({ sentAt }) => sentAt.toISOString())).toEqual([
+      NOW.toISOString(),
+      NOW.toISOString(),
+    ]);
   });
 
   it("clears the alert request after answering it", async () => {
-    const { user, dog } = await generateFakeUserWithDog(
+    const { user, dog } = await seedUserWithDog(
       { gender: "MALE" },
       reachableUser({ newDogsAlertRequestedAt: daysAgo(2) }),
     );
 
+    // Newer than the moment the alert was asked for, which is the anchor the
+    // count is measured from.
     for (const index of [0, 1, 2]) {
       // oxlint-disable-next-line no-await-in-loop -- Fixture rows are created in order so their timestamps stay distinct.
-      await generateFakeUserWithDog(
+      await seedUserWithDog(
         { gender: "FEMALE", name: `New ${index}` },
         reachableUser({ pushToken: null }),
+        daysAgo(1),
       );
     }
 
