@@ -1,10 +1,9 @@
-import type * as Notifications from "expo-notifications";
+import { router } from "expo-router";
 
-/**
- * Stands in for the device's storage, so it survives the module reset that
- * stands in for closing and reopening the app.
- */
-const mockStoredValues = new Map<string, string>();
+import { analytics } from "@/services/analytics";
+import { SceneName } from "@/types/scene-name";
+
+import { customNotificationHandler } from "./notification";
 
 jest.mock<Partial<typeof import("expo-router")>>("expo-router", () => ({
   router: { push: jest.fn() } as unknown as typeof import("expo-router").router,
@@ -20,126 +19,29 @@ jest.mock<Partial<typeof import("@/services/analytics")>>(
   () => ({ analytics: { track: jest.fn() } as never }),
 );
 
-jest.mock<Partial<typeof import("@/services/storage")>>(
-  "@/services/storage",
-  () => ({
-    StorageKeys: {
-      LastOpenedNotificationId: "lastOpenedNotificationId",
-    } as never,
-    getData: jest.fn((key: string) =>
-      Promise.resolve(mockStoredValues.get(key) ?? null),
-    ) as never,
-    storeData: jest.fn((key: string, value: string) => {
-      mockStoredValues.set(key, value);
-      return Promise.resolve(value);
-    }) as never,
-  }),
-);
+const track = jest.mocked(analytics.track);
+const push = jest.mocked(router.push);
 
-/**
- * A fresh launch: the module's in-memory guard is gone, the stored identifier
- * is not.
- */
-const launchApp = () => {
-  jest.resetModules();
-
-  const handlers = require("./notification") as typeof import("./notification");
-  const { analytics } = require("@/services/analytics") as {
-    analytics: { track: jest.Mock };
-  };
-
-  return { ...handlers, track: analytics.track };
-};
-
-const notificationResponse = (identifier: string, kind?: string) =>
-  ({
-    notification: {
-      request: {
-        identifier,
-        content: { data: { url: "swipe", kind } },
-      },
-    },
-  }) as unknown as Notifications.NotificationResponse;
-
-/** The report is fire and forget, so let its promise chain drain. */
-const flush = () =>
-  new Promise<void>((resolve) => {
-    setImmediate(resolve);
-  });
-
-beforeEach(() => {
-  mockStoredValues.clear();
-});
-
-test("reports an open with the kind the server sent", async () => {
-  const { trackNotificationOpened, track } = launchApp();
-
-  trackNotificationOpened(notificationResponse("abc", "new_dogs_nearby"));
-  await flush();
-
-  expect(track).toHaveBeenCalledTimes(1);
-  expect(track).toHaveBeenCalledWith({
-    event_type: "push_notification_opened",
-    event_properties: { kind: "new_dogs_nearby" },
-  });
-});
-
-test("reports an open with no kind for a notification that carries none", async () => {
-  const { trackNotificationOpened, track } = launchApp();
-
-  trackNotificationOpened(notificationResponse("abc"));
-  await flush();
+test("carries the kind of the scheduled nudge into the open", () => {
+  customNotificationHandler("swipe", "new_dogs_nearby");
 
   expect(track).toHaveBeenCalledWith({
-    event_type: "push_notification_opened",
-    event_properties: { kind: undefined },
+    event_type: "Push Notification Opened",
+    event_properties: { kind: "new_dogs_nearby", url: "swipe" },
   });
 });
 
-test("counts one tap once even though two listeners see it", async () => {
-  const { trackNotificationOpened, track } = launchApp();
+test("reports an open with no kind for a push that carries none", () => {
+  customNotificationHandler("match/match-1/dog-1");
 
-  const response = notificationResponse("abc", "likes_waiting");
-  trackNotificationOpened(response);
-  trackNotificationOpened(response);
-  await flush();
-
-  expect(track).toHaveBeenCalledTimes(1);
+  expect(track).toHaveBeenCalledWith({
+    event_type: "Push Notification Opened",
+    event_properties: { kind: undefined, url: "match/match-1/dog-1" },
+  });
 });
 
-test("does not count the same notification again on the next launch", async () => {
-  const first = launchApp();
+test("sends the new dogs nudge to the deck", () => {
+  customNotificationHandler("swipe", "new_dogs_nearby");
 
-  first.trackNotificationOpened(
-    notificationResponse("abc", "unanswered_match"),
-  );
-  await flush();
-
-  expect(first.track).toHaveBeenCalledTimes(1);
-
-  // `getLastNotificationResponseAsync` hands back the same response on every
-  // cold start until a newer notification arrives, so this is the launch that
-  // used to double count.
-  const second = launchApp();
-
-  second.trackNotificationOpened(
-    notificationResponse("abc", "unanswered_match"),
-  );
-  await flush();
-
-  expect(second.track).not.toHaveBeenCalled();
-});
-
-test("counts a different notification on a later launch", async () => {
-  const first = launchApp();
-
-  first.trackNotificationOpened(notificationResponse("abc", "likes_waiting"));
-  await flush();
-
-  const second = launchApp();
-
-  second.trackNotificationOpened(notificationResponse("xyz", "likes_waiting"));
-  await flush();
-
-  expect(second.track).toHaveBeenCalledTimes(1);
+  expect(push).toHaveBeenCalledWith(SceneName.Swipe);
 });

@@ -43,6 +43,7 @@ export const ANALYTICS_EVENTS = {
   PAYWALL_VIEWED: "Paywall Viewed",
   PROFILE_PHOTO_ADDED: "Profile Photo Added",
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
+  REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
   PUSH_PERMISSION: "Push Permission",
   RESTORE_PURCHASES: "RestorePurchases",
   RESTORE_PURCHASES_SUCCESS: "Restore Purchases Success",
@@ -76,6 +77,19 @@ export type PaywallTrigger =
 
 /** An OS permission answer, collapsed to the two states that matter. */
 export type PermissionStatus = "denied" | "granted";
+
+/**
+ * Which scheduled nudge the re-engagement cron sent.
+ *
+ * Restated here rather than imported from `REENGAGEMENT_KINDS` in the API for
+ * the same reason the RevenueCat unions below are: `@pegada/shared` is a
+ * dependency of `@pegada/api`, so the import would be a cycle. The API's own
+ * constant is checked against this union where it is declared.
+ */
+export type ReengagementPushKind =
+  | "likes_waiting"
+  | "new_dogs_nearby"
+  | "unanswered_match";
 
 /**
  * Event name to property shape, for events sent from the app.
@@ -123,7 +137,12 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.OTP_VERIFIED]: { success: boolean };
   [ANALYTICS_EVENTS.PAYWALL_VIEWED]: { trigger: PaywallTrigger };
   [ANALYTICS_EVENTS.PROFILE_PHOTO_ADDED]: { position: number };
-  [ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED]: { url?: string };
+  /**
+   * `kind` is only set on the scheduled re-engagement pushes, and it is what
+   * pairs an open with the "Reengagement Push Sent" that caused it, so the open
+   * rate can be read per nudge. Reactive pushes carry the url alone.
+   */
+  [ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED]: { kind?: string; url?: string };
   [ANALYTICS_EVENTS.PUSH_PERMISSION]: { status: PermissionStatus };
   [ANALYTICS_EVENTS.RESTORE_PURCHASES]: undefined;
   [ANALYTICS_EVENTS.RESTORE_PURCHASES_SUCCESS]: undefined;
@@ -221,6 +240,15 @@ export type ServerEventProperties = {
     match_id: string;
     message_type: "text";
   };
+  /**
+   * One row per re-engagement push handed to Expo. `dedupe_key` is the same key
+   * the send claimed in `NotificationLog`, so a send and the open it produced
+   * can be lined up without trusting timestamps.
+   */
+  [ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT]: {
+    dedupe_key: string;
+    kind: ReengagementPushKind;
+  };
   [ANALYTICS_EVENTS.SUBSCRIPTION_EVENT]: {
     cancel_reason?: SubscriptionCancelReason | null;
     currency?: string | null;
@@ -314,6 +342,7 @@ export const MOBILE_EVENT_NAMES = [
 export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.MATCH_CREATED,
   ANALYTICS_EVENTS.MESSAGE_SENT,
+  ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
 ] as const;
 

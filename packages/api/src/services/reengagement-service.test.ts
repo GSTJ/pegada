@@ -35,6 +35,10 @@ const { PushNotificationService } = jest.requireMock(
   "./push-notification-service",
 ) as { PushNotificationService: { enqueuePushNotification: jest.Mock } };
 
+const { observability } = jest.requireMock("../shared/observability") as {
+  observability: { capture: jest.Mock };
+};
+
 const PUSH_TOKEN = "ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]";
 
 /** Salvador, Bahia. Longitude -38.5 puts the fixtures three hours behind UTC. */
@@ -193,6 +197,22 @@ describe("selectUnansweredMatchCandidates", () => {
     expect(
       candidates.every((candidate) => candidate.dedupeKey.endsWith(":72h")),
     ).toBe(true);
+  });
+
+  it("leaves alone the side that has been in the app today", async () => {
+    const { requester } = await seedSilentMatch(25);
+
+    // The proxy still says "went silent": nobody has spoken on the match. The
+    // column says this one never left, so only the other side is worth a push.
+    await prisma.user.update({
+      where: { id: requester.userId },
+      data: { lastActiveAt: hoursAgo(2) },
+    });
+
+    const candidates = await selectUnansweredMatchCandidates(NOW);
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]?.userId).not.toBe(requester.userId);
   });
 
   it("skips a user with no push token", async () => {
@@ -363,6 +383,26 @@ describe("selectNewDogsNearbyCandidates", () => {
     expect(candidates[0]?.clearsNewDogsAlert).toBe(true);
   });
 
+  it("leaves alone an owner who opened the app in the last day", async () => {
+    const { user } = await seedInactiveOwnerWithNewDogs(3);
+
+    // Still no positive swipe for four days, so the proxy would nudge them.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastActiveAt: hoursAgo(2) },
+    });
+
+    await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toEqual([]);
+
+    // Older than the window, so the proxy decides again.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastActiveAt: daysAgo(2) },
+    });
+
+    await expect(selectNewDogsNearbyCandidates(NOW)).resolves.toHaveLength(1);
+  });
+
   it("drops a user whose token was blacklisted", async () => {
     const { user } = await seedInactiveOwnerWithNewDogs(3);
 
@@ -493,6 +533,18 @@ describe("ReengagementService.run", () => {
     expect(
       PushNotificationService.enqueuePushNotification.mock.calls[0]?.[0].data,
     ).toMatchObject({ kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH });
+
+    // The send half of the open rate. `dedupe_key` is what pairs it with the
+    // "Push Notification Opened" the tap produces.
+    expect(observability.capture).toHaveBeenCalledWith(
+      "Reengagement Push Sent",
+      expect.objectContaining({
+        kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+        dedupe_key: expect.stringContaining(
+          REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+        ),
+      }),
+    );
 
     const second = await ReengagementService.run(NOW);
 

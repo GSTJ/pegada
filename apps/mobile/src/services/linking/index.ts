@@ -23,7 +23,10 @@ export const processLinks = () => {
     // promise was never the failure mode here; a thrown "Invalid notification
     // url" was, and `.catch` never saw it.
     try {
-      customNotificationHandler(initialNotification, getInitialNotificationKind());
+      customNotificationHandler(
+        initialNotification,
+        getInitialNotificationKind(),
+      );
     } catch (error) {
       sendError(error);
     }

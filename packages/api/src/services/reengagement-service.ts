@@ -1,19 +1,27 @@
+import type { ReengagementPushKind } from "@pegada/shared/analytics/events";
+
 import { Expo } from "expo-server-sdk";
 
 import prisma from "@pegada/database";
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { Language } from "@pegada/shared/i18n/types/types";
 import { Prisma } from "@prisma/client";
 
 import { sendError } from "../errors/errors";
-import { observability } from "../shared/observability";
+import { captureEvent } from "../shared/analytics";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
 
+/**
+ * `satisfies` rather than a bare `as const`: the catalogue restates these three
+ * values (it cannot import them without a cycle), and this is what makes a new
+ * kind added here a compile error until the catalogue knows about it too.
+ */
 export const REENGAGEMENT_KINDS = {
   UNANSWERED_MATCH: "unanswered_match",
   NEW_DOGS_NEARBY: "new_dogs_nearby",
   LIKES_WAITING: "likes_waiting",
-} as const;
+} as const satisfies Record<string, ReengagementPushKind>;
 
 export type ReengagementKind =
   (typeof REENGAGEMENT_KINDS)[keyof typeof REENGAGEMENT_KINDS];
@@ -31,6 +39,17 @@ const UNANSWERED_MATCH_MAX_AGE_HOURS = 14 * 24;
 
 /** Days without a positive swipe that make a user eligible for new dogs. */
 export const INACTIVE_DAYS = [3, 7] as const;
+
+/**
+ * How recently someone has to have used the app to be left alone.
+ *
+ * Every selector below infers "gone quiet" from a proxy (no positive swipe, a
+ * match nobody spoke on, a like nobody answered), and each proxy misses the
+ * person who is in the app right now doing something else. `lastActiveAt` is
+ * the direct signal, written on authenticated requests, so it is the guard that
+ * keeps a win-back push off the screen of someone who never left.
+ */
+export const RECENT_ACTIVITY_HOURS = 24;
 
 /** New dogs that have to exist nearby before the nudge is worth sending. */
 export const MIN_NEW_DOGS = 3;
@@ -115,6 +134,28 @@ export type ReengagementRunSummary = {
   skippedAlreadySent: number;
   skippedUnreachable: number;
 };
+
+/**
+ * The instant before which a user counts as away.
+ *
+ * A null `lastActiveAt` is unknown rather than active: the column is only
+ * written once a user makes an authenticated request after #217 shipped, so
+ * reading null as "here" would mute the whole cron until everyone came back on
+ * their own. The proxy each selector already applies decides those users.
+ */
+const recentActivityFloor = (now: Date) =>
+  new Date(now.getTime() - RECENT_ACTIVITY_HOURS * HOUR_MS);
+
+const isRecentlyActive = (lastActiveAt: Date | null, now: Date) =>
+  lastActiveAt !== null && lastActiveAt > recentActivityFloor(now);
+
+/** The same rule in SQL, for the selectors that run as raw queries. */
+const notRecentlyActive = (now: Date) => Prisma.sql`
+  (
+    "User"."lastActiveAt" IS NULL
+    OR "User"."lastActiveAt" <= ${recentActivityFloor(now)}
+  )
+`;
 
 const hourInOffset = (now: Date, offsetHours: number) =>
   (((now.getUTCHours() + offsetHours) % 24) + 24) % 24;
@@ -203,7 +244,14 @@ export const selectUnansweredMatchCandidates = async (
       const dogSelect = {
         id: true,
         name: true,
-        user: { select: { id: true, pushToken: true, longitude: true } },
+        user: {
+          select: {
+            id: true,
+            pushToken: true,
+            longitude: true,
+            lastActiveAt: true,
+          },
+        },
       } as const;
 
       const matches = await prisma.match.findMany({
@@ -239,7 +287,7 @@ export const selectUnansweredMatchCandidates = async (
           { self: match.requester, other: match.responder },
           { self: match.responder, other: match.requester },
         ].flatMap(({ self, other }) =>
-          self.user.pushToken
+          self.user.pushToken && !isRecentlyActive(self.user.lastActiveAt, now)
             ? [
                 {
                   kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
@@ -357,6 +405,7 @@ export const selectNewDogsNearbyCandidates = async (
         label: `${days}d`,
         eligibility: Prisma.sql`
           "User"."newDogsAlertRequestedAt" IS NULL
+          AND ${notRecentlyActive(now)}
           AND NOT ${swipedPositivelySince(new Date(now.getTime() - days * DAY_MS))}
           ${lowerBound}
         `,
@@ -535,6 +584,7 @@ export const selectLikesWaitingCandidates = async (
       JOIN "User" AS "AdmirerUser" ON "AdmirerUser"."id" = "Admirer"."userId"
         AND "AdmirerUser"."deletedAt" IS NULL
       WHERE ${REACHABLE_USER}
+      AND ${notRecentlyActive(now)}
       AND "Interest"."deletedAt" IS NULL
       AND "Interest"."matchId" IS NULL
       AND "Interest"."swipeType" IN ('INTERESTED'::"SwipeType", 'MAYBE'::"SwipeType")
@@ -804,10 +854,9 @@ export class ReengagementService {
       }
     }
 
-    observability.capture("reengagement_push_sent", {
-      distinctId: candidate.userId,
+    captureEvent(candidate.userId, ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT, {
+      dedupe_key: candidate.dedupeKey,
       kind: candidate.kind,
-      dedupeKey: candidate.dedupeKey,
     });
 
     return "sent";
