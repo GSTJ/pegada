@@ -859,6 +859,7 @@ export class ReengagementService {
         const sent = await ReengagementService.#sendFirstAvailable(
           allowed,
           summary,
+          now,
         );
 
         if (sent) recentlyNudged.add(userId);
@@ -878,6 +879,7 @@ export class ReengagementService {
   static async #sendFirstAvailable(
     queue: Candidate[],
     summary: ReengagementRunSummary,
+    now: Date,
   ): Promise<boolean> {
     for (const candidate of queue) {
       // A token Expo will reject is a guaranteed dropped push, and it is the
@@ -890,7 +892,7 @@ export class ReengagementService {
       }
 
       // oxlint-disable-next-line no-await-in-loop -- Sequential by design: the next candidate is only tried when this one turns out to be claimed.
-      const outcome = await ReengagementService.#send(candidate);
+      const outcome = await ReengagementService.#send(candidate, now);
 
       if (outcome === "sent") {
         summary.sent += 1;
@@ -911,7 +913,10 @@ export class ReengagementService {
    * while the other order costs a duplicate, and a duplicate re-engagement
    * push is the thing users uninstall over.
    */
-  static async #send(candidate: Candidate): Promise<"sent" | "already-sent"> {
+  static async #send(
+    candidate: Candidate,
+    now: Date,
+  ): Promise<"sent" | "already-sent"> {
     let notificationLogId: string;
 
     try {
@@ -920,6 +925,11 @@ export class ReengagementService {
           userId: candidate.userId,
           kind: candidate.kind,
           dedupeKey: candidate.dedupeKey,
+          // The run's clock, not the column default. Every cooldown in here
+          // measures `sentAt` against the `now` the run was handed, so letting
+          // the database stamp its own wall clock puts the row on a different
+          // timeline than the rule that reads it back.
+          sentAt: now,
         },
         select: { id: true },
       });
