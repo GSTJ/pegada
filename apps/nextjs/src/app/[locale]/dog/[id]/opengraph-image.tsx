@@ -94,9 +94,21 @@ const fallbackContainerStyle = {
   background: `linear-gradient(135deg, ${COLORS.secondary} 0%, ${COLORS.background} 65%)`,
 } as const;
 
+/**
+ * The photo is rotated, which means the box it occupies is bigger than the box
+ * it is laid out in: a 3 degree turn on a 420x478 frame swings the corners out
+ * to 444x499. Sized and offset so that swung box lands inside the container's
+ * 64px padding instead of over it. At 440x502 with no offset the frame drew
+ * 53px from the left edge and 54px from the bottom, so the padding in the code
+ * was not the padding on the card.
+ */
+const PHOTO_WIDTH = 420;
+const PHOTO_HEIGHT = 478;
+
 const photoFrameStyle = {
-  width: 440,
-  height: 502,
+  width: PHOTO_WIDTH,
+  height: PHOTO_HEIGHT,
+  marginLeft: 13,
   borderRadius: 32,
   overflow: "hidden",
   display: "flex",
@@ -125,7 +137,20 @@ const brandRowStyle = {
   gap: 12,
 } as const;
 
-const logoMarkStyle = { width: 40, height: 42, display: "flex" } as const;
+/**
+ * Sized against the wordmark's caps rather than against its whole line box.
+ * The row centres both children on their layout boxes, and a text box runs
+ * from ascender to descender, so a mark centred that way floats above the
+ * letters it is meant to sit beside: measured 4px high, on a mark whose ink
+ * was 42px tall against a 22px cap height. Smaller, and nudged down by the
+ * difference.
+ */
+const logoMarkStyle = {
+  width: 32,
+  height: 34,
+  marginTop: 5,
+  display: "flex",
+} as const;
 
 const fallbackLogoMarkStyle = {
   width: 108,
@@ -137,6 +162,10 @@ const wordmarkStyle = {
   fontSize: 32,
   fontWeight: 800,
   fontFamily: "Gilroy",
+  // Gilroy ExtraBold sets loose at display sizes. Small negative values here
+  // and on the name below, in the same proportion the app's own story cards
+  // use, so the two read as the same typography.
+  letterSpacing: -0.4,
   color: COLORS.primary,
   display: "flex",
 } as const;
@@ -147,6 +176,7 @@ const nameStyle = {
   fontSize: 76,
   fontWeight: 800,
   fontFamily: "Gilroy",
+  letterSpacing: -1.5,
   color: COLORS.text,
   lineHeight: 1.05,
   display: "flex",
@@ -170,6 +200,10 @@ const fallbackTaglineStyle = { ...taglineStyle, fontSize: 30 } as const;
 const tagStyle = {
   display: "flex",
   marginTop: 12,
+  // A filled shape and a line of type do not line up on the same number: the
+  // fill has a hard edge where the type has a side bearing. Without this the
+  // button started 5px left of the name above it.
+  marginLeft: 3,
   padding: "20px 40px",
   borderRadius: 9999,
   background: COLORS.primary,
@@ -233,8 +267,8 @@ const Image = async ({ params }: Props) => {
         {/* oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image */}
         <img
           src={dogImage}
-          width={440}
-          height={502}
+          width={PHOTO_WIDTH}
+          height={PHOTO_HEIGHT}
           alt=""
           style={photoImgStyle}
         />
