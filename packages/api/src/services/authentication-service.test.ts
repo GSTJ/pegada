@@ -7,6 +7,7 @@ import { AuthenticationService } from "./authentication-service";
 // `enqueue.test.ts` uses to keep that chain out of suites that don't test it.
 jest.mock("../errors/errors", () => ({
   sendError: jest.fn(),
+  sendEvent: jest.fn(),
   logDebug: () => undefined,
   errorDebug: () => undefined,
 }));

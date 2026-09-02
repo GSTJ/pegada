@@ -1,6 +1,6 @@
 import { getData, storeData } from "@/services/storage";
 
-import { runFirstMatchSharePrompt } from "./first-match-gate";
+import { runMatchSharePrompt } from "./match-gate";
 
 // The key is spelled out rather than pulled from the real module: importing
 // it drags in `expo-secure-store`, which ships untransformed ESM and takes
@@ -19,10 +19,10 @@ beforeEach(() => {
   mockStoreData.mockResolvedValue("shown");
 });
 
-test("shows the prompt on the first dismissed match", async () => {
+test("shows the prompt on the first match it is offered", async () => {
   const show = jest.fn();
 
-  await expect(runFirstMatchSharePrompt(show)).resolves.toBe(true);
+  await expect(runMatchSharePrompt(show)).resolves.toBe(true);
 
   expect(show).toHaveBeenCalledTimes(1);
   expect(mockStoreData).toHaveBeenCalledWith("firstMatchSharePrompt", "shown");
@@ -32,7 +32,7 @@ test("never shows it again once the flag is stored", async () => {
   mockGetData.mockResolvedValue("shown");
   const show = jest.fn();
 
-  await expect(runFirstMatchSharePrompt(show)).resolves.toBe(false);
+  await expect(runMatchSharePrompt(show)).resolves.toBe(false);
 
   expect(show).not.toHaveBeenCalled();
   expect(mockStoreData).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ test("stores the flag before showing, so an overlapping dismissal is gated", asy
     return "shown";
   });
 
-  await runFirstMatchSharePrompt(() => order.push("show"));
+  await runMatchSharePrompt(() => order.push("show"));
 
   expect(order).toStrictEqual(["store", "show"]);
 });

@@ -5,12 +5,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Namespace } from "@pegada/shared/i18n/types/types";
+import { isReferralRef } from "@pegada/shared/utils/referral";
 
+import { DownloadCta } from "@/components/download-cta";
+import { gilroy } from "@/lib/fonts";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
-import { gilroy } from "./fonts";
 import {
   getDog,
   getDogArticle,
@@ -26,6 +28,12 @@ type DogProfileProps = {
   params: Promise<{
     id: string;
   }>;
+  /**
+   * `ref` is the id of whoever shared this card. Read on the page and nowhere
+   * else: `generateMetadata` below never sees it, so the Open Graph card a
+   * link previewer scrapes is identical for every sharer and stays cacheable.
+   */
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export const generateMetadata = async ({
@@ -53,7 +61,7 @@ export const generateMetadata = async ({
   };
 };
 
-const DogProfile = async ({ params }: DogProfileProps) => {
+const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
   const { id } = await params;
   const dog = await getDog(id);
   const lng = getSafeLocale();
@@ -61,6 +69,16 @@ const DogProfile = async ({ params }: DogProfileProps) => {
   if (!dog) {
     return notFound();
   }
+
+  // Same regex the app and the API use. A `ref` that does not survive it is
+  // dropped here rather than forwarded, because the next stop is an App Store
+  // campaign token and a Play install referrer.
+  const query = await searchParams;
+  const referral = isReferralRef(query?.ref) ? query.ref : undefined;
+
+  // The store route sniffs the user agent and redirects; `ref` and `dog` are
+  // what it turns into per-store attribution parameters.
+  const storeHref = referral ? `/store?ref=${referral}&dog=${id}` : "/store";
 
   const dogImage = getDogImage(dog);
   const tagline = getDogTagline(dog, lng);
@@ -182,13 +200,18 @@ const DogProfile = async ({ params }: DogProfileProps) => {
           </h2>
           <p className="text-lg font-light text-subtitle">{nextStep}</p>
           <div className="mt-2 flex flex-col items-start gap-3">
-            {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
-            <a
-              href="/store"
+            {/* /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to, which is why `store` is reported as "auto" rather than a named store. */}
+            <DownloadCta
+              href={storeHref}
+              page="dog_share"
+              placement="desktop_copy"
+              store="auto"
+              dogId={id}
+              referral={referral}
               className="rounded-full bg-primary px-8 py-4 font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               {ctaButton}
-            </a>
+            </DownloadCta>
             <p className="text-sm font-light text-subtitle/80">
               {t("dog.cta.reassurance")}
             </p>
@@ -201,13 +224,17 @@ const DogProfile = async ({ params }: DogProfileProps) => {
         <p className="flex-1 truncate text-sm font-medium text-text">
           {mobileContext}
         </p>
-        {/* oxlint-disable-next-line next/no-html-link-for-pages -- /store is a route handler that UA-sniffs the request and redirects; it isn't a page for `Link` to prefetch or client-navigate to. */}
-        <a
-          href="/store"
+        <DownloadCta
+          href={storeHref}
+          page="dog_share"
+          placement="mobile_sticky_bar"
+          store="auto"
+          dogId={id}
+          referral={referral}
           className="shrink-0 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
           {ctaButton}
-        </a>
+        </DownloadCta>
       </div>
     </div>
   );

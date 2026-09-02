@@ -21,7 +21,6 @@ import {
 } from "@/components/LikeLimitReached/use-countdown";
 import { CloseIcon, styles as pickerStyles } from "@/components/Picker/styles";
 import { Text } from "@/components/text";
-import { useEligibleForTrial } from "@/hooks/use-payments";
 import { analytics } from "@/services/analytics";
 import { SceneName } from "@/types/scene-name";
 
@@ -34,8 +33,6 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
   const { t } = useTranslation();
   const router = useRouter();
   const { hide } = useMagicModal();
-
-  const isEligibleForTrial = useEligibleForTrial();
 
   useEffect(() => {
     // Hide the modal when the time is up
@@ -77,9 +74,7 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
           }, 150);
         }}
       >
-        {isEligibleForTrial
-          ? t("likeLimit.winFreeTrial")
-          : t("likeLimit.getPremium")}
+        {t("likeLimit.getPremium")}
       </OkButton>
       <PinnedCloseButton
         onPress={() => hide()}

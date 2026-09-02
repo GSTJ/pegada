@@ -10,6 +10,11 @@ export enum StorageKeys {
   AppReviewRequestDate = "appReviewRequestDate",
   AppReviewStatus = "appReviewStatus",
   FirstMatchSharePrompt = "firstMatchSharePrompt",
+  NewDogsAlertRequested = "newDogsAlertRequested",
+  AppReviewMatchPrompted = "appReviewMatchPrompted",
+  AppReviewSentMessageCount = "appReviewSentMessageCount",
+  /** JSON, written by `services/referral`. Survives the install, not the login. */
+  PendingReferral = "pendingReferral",
 }
 
 export enum Theme {
@@ -25,6 +30,10 @@ export type StorageDataTypes = {
   [StorageKeys.AppReviewRequestDate]: string;
   [StorageKeys.AppReviewStatus]: "completed";
   [StorageKeys.FirstMatchSharePrompt]: "shown";
+  [StorageKeys.NewDogsAlertRequested]: "requested";
+  [StorageKeys.AppReviewMatchPrompted]: "true";
+  [StorageKeys.AppReviewSentMessageCount]: string;
+  [StorageKeys.PendingReferral]: string;
 };
 
 export const storeData = async <T extends StorageKeys>(

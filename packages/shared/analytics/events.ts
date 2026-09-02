@@ -15,8 +15,12 @@
 
 export const ANALYTICS_EVENTS = {
   ADVERTISEMENT: "Advertisement",
+  AI_STORY_LANDING_CTA_CLICKED: "AI Story Landing CTA Clicked",
+  AI_STORY_LANDING_VIEWED: "AI Story Landing Viewed",
+  AI_STORY_LEAD_CAPTURED: "AI Story Lead Captured",
   APP_REVIEW: "App Review",
   APP_REVIEW_REQUEST: "App Review Request",
+  APP_REVIEW_SKIPPED: "App Review Skipped",
   CHAT_OPENED: "Chat Opened",
   COMPLETE_DOG_PROFILE: "Complete Dog Profile",
   CREATE_DOG_PROFILE: "Create Dog Profile",
@@ -24,6 +28,10 @@ export const ANALYTICS_EVENTS = {
   DELETE_ACCOUNT_CANCELED: "Delete Account Canceled",
   DELETE_ACCOUNT_CONFIRMED: "Delete Account Confirmed",
   DELETE_ACCOUNT_PRESSED: "Delete Account Pressed",
+  DOG_LINK_OPENED: "Dog Link Opened",
+  DOG_LINK_PROFILE_OPENED: "Dog Link Profile Opened",
+  DOG_LINK_SIGN_IN_BANNER_SHOWN: "Dog Link Sign In Banner Shown",
+  EMPTY_DECK_ACTION_TAPPED: "Empty Deck Action Tapped",
   EMPTY_DECK_SHOWN: "Empty Deck Shown",
   FAKE_DOOR_NOTIFY_TOGGLED: "Fake Door Notify Toggled",
   FAKE_DOOR_SHOWN: "Fake Door Shown",
@@ -46,7 +54,9 @@ export const ANALYTICS_EVENTS = {
   PAYWALL_VIEWED: "Paywall Viewed",
   PROFILE_PHOTO_ADDED: "Profile Photo Added",
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
+  REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
   PUSH_PERMISSION: "Push Permission",
+  REFERRAL_CAPTURED: "Referral Captured",
   RESTORE_PURCHASES: "RestorePurchases",
   RESTORE_PURCHASES_SUCCESS: "Restore Purchases Success",
   SAVE_PREFERENCES_PRESSED: "Save Preferences Pressed",
@@ -56,6 +66,7 @@ export const ANALYTICS_EVENTS = {
   SHARE_PROMPT_TAPPED: "Share Prompt Tapped",
   SHARE_TAPPED: "Share Tapped",
   SIGN_IN_EMAIL_SUBMITTED: "Sign In Email Submitted",
+  SIGNUP_ATTRIBUTED: "Signup Attributed",
   SKIP_COMPLETE_DOG_PROFILE: "Skip Complete Dog Profile",
   SUBSCRIPTION_EVENT: "Subscription Event",
   SWIPE: "Swipe",
@@ -84,6 +95,62 @@ export type PermissionStatus = "denied" | "granted";
 
 /** Which row of the dog share sheet the user picked. */
 export type ShareOption = "copy_link" | "link" | "story";
+
+/** The two things the empty swipe deck offers besides the preferences link. */
+export type EmptyDeckAction = "invite_friend" | "notify_new_dogs";
+
+/**
+ * The push answer as the empty deck sees it. Wider than
+ * {@link PermissionStatus} because the button also runs where the OS never
+ * asks at all, and reading that silence as a refusal would put every simulator
+ * session in the denied bucket.
+ */
+export type PushPermissionOutcome = "denied" | "granted" | "unavailable";
+
+/**
+ * What came back from the share sheet. "unavailable" is the sheet that never
+ * opened, which is a different thing from someone opening the invite and
+ * changing their mind.
+ */
+export type ShareOutcome = "dismissed" | "shared" | "unavailable";
+
+/**
+ * Which scheduled nudge the re-engagement cron sent.
+ *
+ * Restated here rather than imported from `REENGAGEMENT_KINDS` in the API for
+ * the same reason the RevenueCat unions below are: `@pegada/shared` is a
+ * dependency of `@pegada/api`, so the import would be a cycle. The API's own
+ * constant is checked against this union where it is declared.
+ */
+export type ReengagementPushKind =
+  | "likes_waiting"
+  | "new_dogs_nearby"
+  | "unanswered_match";
+
+/**
+ * The moment that produced a review prompt. The whole point of the review
+ * instrumentation: ratings per prompt only means something per trigger.
+ */
+export type ReviewTrigger = "first_match" | "messages_tab" | "second_message";
+
+/**
+ * Where a store rating sheet was reached from: the three prompts, plus the
+ * row in Settings that has always let people rate the app on purpose.
+ */
+export type ReviewSource = ReviewTrigger | "settings";
+
+/**
+ * Why a review prompt did not happen. Only the reasons a user who reached the
+ * trigger can hit are ever sent: a plain "not yet" is not a skip.
+ */
+export type ReviewSkipReason =
+  | "already_reviewed"
+  | "first_prompt_already_shown"
+  | "no_matches"
+  | "not_enough_messages"
+  | "not_first_match"
+  | "store_review_unavailable"
+  | "throttled";
 
 /**
  * Where the share prompt card was rendered: an empty deck (nobody left to
@@ -126,8 +193,12 @@ export type FakeDoorSource = "share_sheet";
  */
 export type MobileEventProperties = {
   [ANALYTICS_EVENTS.ADVERTISEMENT]: { action: string; type: string };
-  [ANALYTICS_EVENTS.APP_REVIEW]: undefined;
-  [ANALYTICS_EVENTS.APP_REVIEW_REQUEST]: undefined;
+  [ANALYTICS_EVENTS.APP_REVIEW]: { trigger: ReviewSource };
+  [ANALYTICS_EVENTS.APP_REVIEW_REQUEST]: { trigger: ReviewTrigger };
+  [ANALYTICS_EVENTS.APP_REVIEW_SKIPPED]: {
+    reason: ReviewSkipReason;
+    trigger: ReviewTrigger;
+  };
   [ANALYTICS_EVENTS.CHAT_OPENED]: { match_id: string };
   [ANALYTICS_EVENTS.COMPLETE_DOG_PROFILE]: {
     has_birth_date: boolean;
@@ -140,6 +211,25 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_CANCELED]: undefined;
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_CONFIRMED]: undefined;
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_PRESSED]: undefined;
+  /**
+   * The three steps of the shared dog link funnel, in order: the link landed,
+   * the sign in hand off was shown, the shared profile finally opened.
+   * `authenticated` on the first step is what splits the people who have to
+   * sign in from the ones who go straight through.
+   */
+  [ANALYTICS_EVENTS.DOG_LINK_OPENED]: { authenticated: boolean };
+  [ANALYTICS_EVENTS.DOG_LINK_PROFILE_OPENED]: undefined;
+  [ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN]: undefined;
+  /**
+   * One per tap on an empty deck action. `push_permission` rides on the notify
+   * action and `share_result` on the invite, so the funnel reads both the
+   * intent and what the phone did about it.
+   */
+  [ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED]: {
+    action: EmptyDeckAction;
+    push_permission?: PushPermissionOutcome;
+    share_result?: ShareOutcome;
+  };
   [ANALYTICS_EVENTS.EMPTY_DECK_SHOWN]: undefined;
   [ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED]: {
     feature: FakeDoorFeature;
@@ -179,8 +269,22 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.OTP_VERIFIED]: { success: boolean };
   [ANALYTICS_EVENTS.PAYWALL_VIEWED]: { trigger: PaywallTrigger };
   [ANALYTICS_EVENTS.PROFILE_PHOTO_ADDED]: { position: number };
-  [ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED]: { url?: string };
+  /**
+   * `kind` is only set on the scheduled re-engagement pushes, and it is what
+   * pairs an open with the "Reengagement Push Sent" that caused it, so the open
+   * rate can be read per nudge. Reactive pushes carry the url alone.
+   */
+  [ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED]: { kind?: string; url?: string };
   [ANALYTICS_EVENTS.PUSH_PERMISSION]: { status: PermissionStatus };
+  // Keys stay camelCase here: they are the same names the referral link and
+  // the server attribution already use, and matching them keeps a capture and
+  // the signup it leads to joinable without a translation step.
+  [ANALYTICS_EVENTS.REFERRAL_CAPTURED]: {
+    cold: boolean;
+    ref: string;
+    referredByUserId: string | null;
+    referredDogId: string | null;
+  };
   [ANALYTICS_EVENTS.RESTORE_PURCHASES]: undefined;
   [ANALYTICS_EVENTS.RESTORE_PURCHASES_SUCCESS]: undefined;
   [ANALYTICS_EVENTS.SAVE_PREFERENCES_PRESSED]: {
@@ -297,6 +401,26 @@ export type ServerEventProperties = {
     match_id: string;
     message_type: "text";
   };
+  /**
+   * One row per re-engagement push handed to Expo. `dedupe_key` is the same key
+   * the send claimed in `NotificationLog`, so a send and the open it produced
+   * can be lined up without trusting timestamps.
+   */
+  [ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT]: {
+    dedupe_key: string;
+    kind: ReengagementPushKind;
+  };
+  // Keys stay camelCase for the same reason "Referral Captured" keeps them:
+  // the two events are joined on `ref` and `referredByUserId`, and a capture
+  // that spells a key one way and the signup it produced another way is a
+  // funnel nobody can build.
+  [ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED]: {
+    platform: string;
+    ref: string;
+    referralSource: string | null;
+    referredByUserId: string | null;
+    referredDogId: string | null;
+  };
   [ANALYTICS_EVENTS.SUBSCRIPTION_EVENT]: {
     cancel_reason?: SubscriptionCancelReason | null;
     currency?: string | null;
@@ -312,6 +436,43 @@ export type ServerEventProperties = {
 };
 
 export type ServerEventName = keyof ServerEventProperties;
+
+/**
+ * How someone arrived, copied off the query string of the page they landed on.
+ * Sent with every event of a campaign so a funnel can be read per channel, and
+ * every key is optional because most visits carry none of them.
+ */
+export type LandingAttribution = {
+  ref?: string;
+  utm_campaign?: string;
+  utm_medium?: string;
+  utm_source?: string;
+};
+
+/** Whether the address was new to the list or already on it. */
+export type FeatureInterestStatus = "already_listed" | "captured";
+
+/**
+ * Event name to property shape, for events sent from the marketing site.
+ *
+ * The three below are one funnel: how many people saw the AI story page, how
+ * many asked for it, how many left an address. `locale` sits on all three
+ * because the page ships in two languages and they are not the same audience.
+ */
+export type WebEventProperties = {
+  [ANALYTICS_EVENTS.AI_STORY_LANDING_CTA_CLICKED]: LandingAttribution & {
+    locale: string;
+  };
+  [ANALYTICS_EVENTS.AI_STORY_LANDING_VIEWED]: LandingAttribution & {
+    locale: string;
+  };
+  [ANALYTICS_EVENTS.AI_STORY_LEAD_CAPTURED]: LandingAttribution & {
+    locale: string;
+    status: FeatureInterestStatus;
+  };
+};
+
+export type WebEventName = keyof WebEventProperties;
 
 /**
  * Person properties set on identify.
@@ -348,6 +509,7 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.ADVERTISEMENT,
   ANALYTICS_EVENTS.APP_REVIEW,
   ANALYTICS_EVENTS.APP_REVIEW_REQUEST,
+  ANALYTICS_EVENTS.APP_REVIEW_SKIPPED,
   ANALYTICS_EVENTS.CHAT_OPENED,
   ANALYTICS_EVENTS.COMPLETE_DOG_PROFILE,
   ANALYTICS_EVENTS.CREATE_DOG_PROFILE,
@@ -355,6 +517,10 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.DELETE_ACCOUNT_CANCELED,
   ANALYTICS_EVENTS.DELETE_ACCOUNT_CONFIRMED,
   ANALYTICS_EVENTS.DELETE_ACCOUNT_PRESSED,
+  ANALYTICS_EVENTS.DOG_LINK_OPENED,
+  ANALYTICS_EVENTS.DOG_LINK_PROFILE_OPENED,
+  ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN,
+  ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED,
   ANALYTICS_EVENTS.EMPTY_DECK_SHOWN,
   ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED,
   ANALYTICS_EVENTS.FAKE_DOOR_SHOWN,
@@ -377,6 +543,7 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.PROFILE_PHOTO_ADDED,
   ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED,
   ANALYTICS_EVENTS.PUSH_PERMISSION,
+  ANALYTICS_EVENTS.REFERRAL_CAPTURED,
   ANALYTICS_EVENTS.RESTORE_PURCHASES,
   ANALYTICS_EVENTS.RESTORE_PURCHASES_SUCCESS,
   ANALYTICS_EVENTS.SAVE_PREFERENCES_PRESSED,
@@ -395,7 +562,15 @@ export const MOBILE_EVENT_NAMES = [
 export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.MATCH_CREATED,
   ANALYTICS_EVENTS.MESSAGE_SENT,
+  ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
+  ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
+] as const;
+
+export const WEB_EVENT_NAMES = [
+  ANALYTICS_EVENTS.AI_STORY_LANDING_CTA_CLICKED,
+  ANALYTICS_EVENTS.AI_STORY_LANDING_VIEWED,
+  ANALYTICS_EVENTS.AI_STORY_LEAD_CAPTURED,
 ] as const;
 
 type AssertCovers<Name extends string, Listed extends string> = [
@@ -414,5 +589,10 @@ const SERVER_LIST_IS_COMPLETE: AssertCovers<
   (typeof SERVER_EVENT_NAMES)[number]
 > = true;
 
+const WEB_LIST_IS_COMPLETE: AssertCovers<
+  WebEventName,
+  (typeof WEB_EVENT_NAMES)[number]
+> = true;
+
 export const ANALYTICS_CATALOGUE_IS_COMPLETE =
-  MOBILE_LIST_IS_COMPLETE && SERVER_LIST_IS_COMPLETE;
+  MOBILE_LIST_IS_COMPLETE && SERVER_LIST_IS_COMPLETE && WEB_LIST_IS_COMPLETE;

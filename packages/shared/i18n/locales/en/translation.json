@@ -4,8 +4,7 @@
     "description": "You have liked <b>{{count}} dogs</b> in the last <b>24 hours</b>. Wait or become <b>premium</b> to keep swiping.",
     "remaining": "remaining",
     "timeHours": "{{time}}h",
-    "winFreeTrial": "Win a Free Trial",
-    "getPremium": "Discover Premium"
+    "getPremium": "Get Premium"
   },
   "liveStatus": {
     "title": "Likes recharging",
@@ -94,11 +93,7 @@
     "month": "{{unit}} month",
     "months": "{{unit}} months",
     "year": "{{unit}} year",
-    "years": "{{unit}} years",
-    "day": "{{unit}} day",
-    "days": "{{unit}} days",
-    "week": "{{unit}} week",
-    "weeks": "{{unit}} weeks"
+    "years": "{{unit}} years"
   },
   "dogProfile": {
     "profileInfoError": "⚠️ Loading Error. Try again later.",
@@ -223,6 +218,10 @@
     "findDogsNearYou": "<view><title>Find </title><highlight>Dogs</highlight></view><view><title>Near </title><highlight>You</highlight><view/>",
     "insertEmail": "Insert your <1>email</1>",
     "loginError": "An error occurred while logging in.",
+    "pendingDogProfileBanner": {
+      "body": "Log in or sign up and we'll take you straight there.",
+      "title": "You opened a dog's profile."
+    },
     "validEmail": "Please enter a valid email"
   },
   "locationMap": {
@@ -315,11 +314,12 @@
       "fetchingOfferings": "An error occurred while fetching the offerings."
     },
     "upgradeWall": {
-      "earnedFreeTrial": "You Earned a Free Trial",
-      "getPremium": "Get Premium",
-      "tryPremiumFree": "Try Premium Free for {{duration}}",
+      "getPremium": "Unlock Premium",
       "enjoyFullAccess": "Enjoy full access to all features and supercharge your doggie",
-      "startFreeTrial": "Start Free Trial"
+      "subscribe": "Get Premium",
+      "price": "{{price}}, cancel anytime",
+      "priceMonthly": "{{price}} per month, cancel anytime",
+      "priceYearly": "{{price}} per year, cancel anytime"
     }
   },
   "links": {
@@ -398,6 +398,10 @@
   "swipeRequestFeedback": {
     "emptyDescription": "But hang tight! We've just launched and still have small user base.\n\nWe're working hard to ensure a space filled with doggos very soon 🐶\n\nTry adjusting your preferences or check back later! 😉",
     "emptyTitle": "We couldn't find any more dogs!",
+    "inviteFriendButton": "Invite a friend",
+    "inviteFriendMessage": "Pegada is where my dog makes friends. Bring yours along:\n{{link}}",
+    "notifyNewDogsButton": "Tell me when a new dog arrives",
+    "notifyNewDogsDone": "We will let you know",
     "preferencesButton": "View Preferences"
   },
   "themes": {

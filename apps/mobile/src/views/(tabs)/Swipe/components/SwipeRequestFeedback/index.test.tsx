@@ -6,12 +6,12 @@ import SwipeRequestFeedback from "./index";
 /**
  * This screen renders behind the deck on every visit to the swipe tab, not
  * only when the deck runs out — the cards are stacked on top of it in
- * `views/(tabs)/Swipe/index.tsx`. What is pinned here is that the share
- * prompt is in the tree only when the deck is genuinely empty, the same
- * condition `Empty Deck Shown` is gated on. The prompt fires
- * `Share Prompt Shown` on mount, so one mounted behind a full deck is
- * invisible and counted anyway, and the empty deck funnel's tap rate comes
- * out divided by every visit to the tab.
+ * `views/(tabs)/Swipe/index.tsx`. What is pinned here is that the whole
+ * empty state, share prompt included, is in the tree only when the deck is
+ * genuinely empty. The prompt fires `Share Prompt Shown` once the dog loads,
+ * so one mounted behind a full deck would be invisible and counted anyway,
+ * and the empty deck funnel's tap rate would come out divided by every visit
+ * to the tab.
  *
  * Rendering goes through `react-dom/server`, matching the other suites in
  * this package: there is no React Native renderer here, so the RN-flavoured
@@ -29,12 +29,30 @@ let mockRequest: RequestState = { loading: false, error: false, data: [] };
 let mockLastCardId: string | undefined;
 let mockOffline = false;
 
+// The two buttons this screen already owned both talk to the API, and the
+// real client reaches `expo-constants`, which ships untransformed ESM.
+jest.mock<Record<string, unknown>>("@/contexts/trpc-provider", () => ({
+  api: {
+    user: {
+      requestNewDogsAlert: {
+        useMutation: () => ({ mutateAsync: () => Promise.resolve() }),
+      },
+      me: { useQuery: () => ({ data: undefined, isPending: false }) },
+    },
+  },
+}));
+
 jest.mock<Record<string, unknown>>("react-native", () => {
   const { createElement } = require("react") as typeof React;
 
   return {
     View: ({ children }: { children?: React.ReactNode }) =>
       createElement("div", null, children),
+    Alert: { alert: () => undefined },
+    Share: { share: () => Promise.resolve({ action: "dismissedAction" }) },
+    // The invite button reaches `@/constants`, which sizes the swipe card off
+    // the screen at import time. Any number will do; nothing here reads it.
+    Dimensions: { get: () => ({ width: 390, height: 844 }) },
   };
 });
 
@@ -101,6 +119,26 @@ jest.mock<Record<string, unknown>>("@/services/analytics", () => ({
   analytics: { track: jest.fn() },
 }));
 
+// Reaches `magic-observability/expo`, ESM that jest cannot parse.
+jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
+  sendError: () => undefined,
+}));
+
+jest.mock<Record<string, unknown>>(
+  "@/services/get-push-notification-token",
+  () => ({
+    getPushNotificationToken: () => Promise.resolve(undefined),
+    isPushDeniedError: () => false,
+    setPushNotificationToken: () => Promise.resolve(),
+  }),
+);
+
+jest.mock<Record<string, unknown>>("@/services/storage", () => ({
+  StorageKeys: { NewDogsAlertRequested: "newDogsAlertRequested" },
+  getData: () => Promise.resolve(null),
+  storeData: () => Promise.resolve(),
+}));
+
 jest.mock<Record<string, unknown>>("@/store/reducers", () => ({
   Actions: { dogs: { list: { refetch: jest.fn() } } },
 }));
@@ -149,40 +187,41 @@ beforeEach(() => {
 });
 
 test("renders the share prompt when the deck came back with nobody on it", () => {
-  const html = renderToStaticMarkup(<SwipeRequestFeedback />);
+  const html = renderToStaticMarkup(<SwipeRequestFeedback deckIsEmpty />);
 
   expect(html).toContain("share-prompt:empty_deck");
 });
 
-test("renders the share prompt after the last card is swiped away", () => {
-  // The swipe reducer keeps the dog just swiped in `data` so swipe back has
-  // something to restore, and only takes it out of the active cards. Gating
-  // on `data` alone would hide the prompt on the commonest way of reaching
-  // this screen.
-  mockRequest = { loading: false, error: false, data: [{ id: "dog-1" }] };
-  mockLastCardId = "dog-1";
+test("puts the prompt below the two actions the empty deck already offers", () => {
+  const html = renderToStaticMarkup(<SwipeRequestFeedback deckIsEmpty />);
 
-  const html = renderToStaticMarkup(<SwipeRequestFeedback />);
-
-  expect(html).toContain("share-prompt:empty_deck");
+  // The two buttons are the screen's own answer to an empty deck; the share
+  // ask is the third thing to try, not the headline.
+  expect(html.indexOf("swipeRequestFeedback.inviteFriendButton")).toBeLessThan(
+    html.indexOf("share-prompt:empty_deck"),
+  );
+  expect(html.indexOf("share-prompt:empty_deck")).toBeLessThan(
+    html.indexOf("swipeRequestFeedback.preferencesButton"),
+  );
 });
 
-test("keeps the share prompt out of the tree while cards are still on the deck", () => {
+test("renders nothing at all while cards are still on the deck", () => {
   mockRequest = { loading: false, error: false, data: [{ id: "dog-1" }] };
 
-  const html = renderToStaticMarkup(<SwipeRequestFeedback />);
+  const html = renderToStaticMarkup(
+    <SwipeRequestFeedback deckIsEmpty={false} />,
+  );
 
-  // The empty copy still renders, because the cards cover it. The prompt must
-  // not: it fires `Share Prompt Shown` on mount, and a prompt nobody saw
-  // counts against the empty deck funnel all the same.
-  expect(html).toContain("swipeRequestFeedback.emptyTitle");
+  // The whole empty state stays out of the tree behind a full deck, which is
+  // what keeps `Share Prompt Shown` off a prompt nobody saw.
+  expect(html).not.toContain("swipeRequestFeedback.emptyTitle");
   expect(html).not.toContain("share-prompt");
 });
 
 test("keeps the share prompt out of the tree while the deck is loading", () => {
   mockRequest = { loading: true, error: false, data: [] };
 
-  const html = renderToStaticMarkup(<SwipeRequestFeedback />);
+  const html = renderToStaticMarkup(<SwipeRequestFeedback deckIsEmpty />);
 
   expect(html).not.toContain("share-prompt");
 });

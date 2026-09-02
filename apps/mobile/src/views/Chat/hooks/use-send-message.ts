@@ -6,6 +6,7 @@ import { v4 as uuidV4 } from "uuid";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
+import { handleMessageSentAppReview } from "@/services/app-review";
 import { sendError } from "@/services/error-tracking";
 import { queryClient } from "@/services/query-client";
 
@@ -129,6 +130,11 @@ export const useSendMessage = () => {
           match_id: String(matchId),
         },
       });
+
+      // Same reason, same place: only sends that landed count towards the
+      // second message the review prompt waits for. Fire and forget, because
+      // the prompt must never hold up the message the user just wrote.
+      handleMessageSentAppReview().catch(sendError);
     } catch (error) {
       sendError(error);
 

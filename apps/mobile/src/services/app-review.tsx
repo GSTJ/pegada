@@ -18,12 +18,20 @@ import { Input } from "@/components/Input";
 import { Text } from "@/components/text";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
+import {
+  ReviewTrigger,
+  SECOND_MESSAGE_TRIGGER_COUNT,
+  shouldRequestReview,
+} from "@/services/app-review-policy";
 import { sendError } from "@/services/error-tracking";
 import { getData, StorageKeys, storeData } from "@/services/storage";
 
-const handleReview = async () => {
+const handleReview = async (trigger: ReviewTrigger) => {
   try {
-    analytics.track({ event_type: "App Review" });
+    analytics.track({
+      event_type: "App Review",
+      event_properties: { trigger },
+    });
     await StoreReview.requestReview();
     await storeData(StorageKeys.AppReviewStatus, "completed");
   } catch (error) {
@@ -80,13 +88,21 @@ const NotLikingTheAppModal: React.FC = () => {
   );
 };
 
-const AreYouLikingTheAppModal: React.FC = () => {
+const AreYouLikingTheAppModal: React.FC<{ trigger: ReviewTrigger }> = ({
+  trigger,
+}) => {
   const { t } = useTranslation();
   const { hide } = useMagicModal();
 
+  // Sent from the modal's own mount, which is the only place that can honestly
+  // claim the user was asked. Everything upstream is a decision that can still
+  // come to nothing.
   useEffect(() => {
-    analytics.track({ event_type: "App Review Request" });
-  }, []);
+    analytics.track({
+      event_type: "App Review Request",
+      event_properties: { trigger },
+    });
+  }, [trigger]);
 
   const openReviewModal = () => {
     analytics.track({
@@ -96,7 +112,7 @@ const AreYouLikingTheAppModal: React.FC = () => {
 
     hide();
 
-    void handleReview();
+    void handleReview(trigger);
   };
 
   const openNotLikingTheAppModal = () => {
@@ -138,29 +154,136 @@ const AreYouLikingTheAppModal: React.FC = () => {
   );
 };
 
-const isOlderThanAMonth = (date: string) =>
-  new Date(date) < new Date(new Date().setMonth(new Date().getMonth() - 1));
+type RequestAppReviewOptions = {
+  trigger: ReviewTrigger;
+  /** Matches the user has, counting the one being celebrated. */
+  matchCount?: number;
+  /** Messages the user has sent, counted on the device. */
+  sentMessageCount?: number;
+  /**
+   * Asked again once everything below has been decided, right before the
+   * modal goes up. A caller that owns a moment rather than a screen state
+   * uses this to withdraw the ask while it is still in the air.
+   */
+  canStillAsk?: () => boolean;
+};
 
-export const handleRequestAppReview = async () => {
-  const appReviewStatus = await getData(StorageKeys.AppReviewStatus);
+/**
+ * One ask at a time. Two triggers can overlap by seconds, and without this
+ * the second one reads the storage the first has not written yet, passes the
+ * same throttle, and stacks a second modal on the first.
+ */
+let isAskInFlight = false;
 
-  // The user has already reviewed the app
-  if (appReviewStatus === "completed") return;
+/**
+ * Resolves true only when the modal actually went up.
+ *
+ * Every gate below is a reason the ask never reached the user, and a caller
+ * that owns the same moment needs to tell "asked" from "decided not to ask"
+ * to know whether that moment is still free. `NewMatch` uses it to hand the
+ * moment to the share prompt on the matches where the review does not fire.
+ */
+export const handleRequestAppReview = async ({
+  trigger,
+  matchCount = 0,
+  sentMessageCount = 0,
+  canStillAsk,
+}: RequestAppReviewOptions) => {
+  if (isAskInFlight) return false;
+  isAskInFlight = true;
 
-  const lastRequestedDate = await getData(StorageKeys.AppReviewRequestDate);
+  try {
+    const [reviewStatus, lastPromptAt, matchPrompted, isStoreReviewAvailable] =
+      await Promise.all([
+        getData(StorageKeys.AppReviewStatus),
+        getData(StorageKeys.AppReviewRequestDate),
+        getData(StorageKeys.AppReviewMatchPrompted),
+        // Resolves false on TestFlight, on the web, and on Android below 5.0.
+        StoreReview.isAvailableAsync().catch(() => false),
+      ]);
 
-  // We have already asked for a review recently
-  if (lastRequestedDate && !isOlderThanAMonth(lastRequestedDate)) return;
+    const decision = shouldRequestReview({
+      trigger,
+      matchCount,
+      sentMessageCount,
+      reviewStatus,
+      lastPromptAt,
+      now: new Date(),
+      // Absence of the marker covers both halves of "skipped": the prompt was
+      // blocked on the celebration screen, or the user was already past their
+      // first match when this shipped and never saw that screen at all.
+      firstPromptSkipped: matchPrompted !== "true",
+      isStoreReviewAvailable,
+    });
 
-  await storeData(StorageKeys.AppReviewRequestDate, new Date().toISOString());
+    if (!decision.allowed) {
+      if (decision.blocked) {
+        analytics.track({
+          event_type: "App Review Skipped",
+          event_properties: { trigger, reason: decision.reason },
+        });
+      }
 
-  // Prevent asking for a review in test accounts
-  const dog = await getTrcpContext().client.myDog.get.query();
-  const isTestAccount = dog?.user.email.endsWith("@test.com");
-  if (isTestAccount) return storeData(StorageKeys.AppReviewStatus, "completed");
+      return false;
+    }
 
-  // Finally, we ask for a review
-  magicModal.show(() => <AreYouLikingTheAppModal />);
+    // Prevent asking for a review in test accounts
+    const dog = await getTrcpContext().client.myDog.get.query();
+    const isTestAccount = dog?.user.email.endsWith("@test.com");
+    if (isTestAccount) {
+      await storeData(StorageKeys.AppReviewStatus, "completed");
+      return false;
+    }
+
+    // Last gate before the modal. Three storage reads, a native availability
+    // check and an API round trip sit above this line, and the moment the
+    // caller aimed at can be gone by the time they all answer.
+    if (canStillAsk?.() === false) return false;
+
+    // Finally, we ask for a review. "App Review Request" rides the modal's own
+    // mount rather than this line, so the event and the question the user sees
+    // are the same moment.
+    magicModal.show(() => <AreYouLikingTheAppModal trigger={trigger} />);
+
+    // Recorded after the modal is up, never before. These two are what the
+    // user pays for being asked: a month of silence from every trigger, and
+    // in the first-match case the end of the second-message fallback. An ask
+    // that never reached the screen must not charge them for it.
+    await storeData(StorageKeys.AppReviewRequestDate, new Date().toISOString());
+
+    if (trigger === ReviewTrigger.FirstMatch) {
+      await storeData(StorageKeys.AppReviewMatchPrompted, "true");
+    }
+
+    return true;
+  } finally {
+    isAskInFlight = false;
+  }
+};
+
+/**
+ * Trigger 2, the catch-up for everyone trigger 1 could not reach. The count
+ * lives on the device because the server has no per-user sent-message total
+ * and this only ever has to answer "was that the second one".
+ */
+export const handleMessageSentAppReview = async () => {
+  const stored = Number(await getData(StorageKeys.AppReviewSentMessageCount));
+  const sentMessageCount = (Number.isFinite(stored) ? stored : 0) + 1;
+
+  // The counter exists to spot message number two. Past it, stop writing.
+  if (sentMessageCount > SECOND_MESSAGE_TRIGGER_COUNT) return;
+
+  await storeData(
+    StorageKeys.AppReviewSentMessageCount,
+    String(sentMessageCount),
+  );
+
+  if (sentMessageCount < SECOND_MESSAGE_TRIGGER_COUNT) return;
+
+  await handleRequestAppReview({
+    trigger: ReviewTrigger.SecondMessage,
+    sentMessageCount,
+  });
 };
 
 const styles = StyleSheet.create((theme) => ({

@@ -107,7 +107,7 @@ const logIn = async () => {
 
 /**
  * Synthesizes a `PurchasesOffering` shape sufficient for the upgrade-wall UI
- * (PlanPackages + PlanCard + useEligibleForTrial). Only the fields the React
+ * (PlanPackages + PlanCard). Only the fields the React
  * tree actually reads are populated — anything else stays undefined and is
  * cast through `unknown` because the full RC type has ~40 fields most of
  * which the mobile never touches.
@@ -304,7 +304,7 @@ const maestroMockPurchase = async (pkg: PurchasesPackage) => {
   await trpc.client.payment.maestroGrantPremium.mutate();
 
   // Synthesize the minimum shape consumers (useCustomerPlan, getPlan,
-  // useEligibleForTrial, the upgrade-wall analytics) read from
+  // the upgrade-wall analytics) read from
   // CustomerInfo. The full RC type has ~30 fields; only entitlements is
   // load-bearing for the UI under test.
   const now = new Date();
