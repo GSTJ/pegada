@@ -74,49 +74,52 @@
       }
     },
     "footer": {
-      "aiStory": "Your dog's AI story"
-    }
+      "story": "Your dog's story"
+    },
+    "storyLink": "Make your dog's story"
   },
   "story": {
     "metadata": {
       "title": "Pegada | Your dog's story",
-      "description": "We turn your dog's photos into a story that is ready to post. Made with AI, in seconds.",
-      "ogImageAlt": "Three vertical stories side by side on a cream background: a cover with a dog's name in large letters, a walk pass, and a yellow chat with a puppy."
+      "description": "Pegada builds a story out of your dog's photos. Pick the photos, it comes out on your phone, you post it.",
+      "ogImageAlt": "A cream card with the Pegada wordmark, the line “Make your dog's story”, and beside it two vertical stories: a yellow chat and a cream walk pass on navy stock."
     },
     "headline": "Make your dog's story",
-    "subline": "We turn their photos into a story that is ready to post. Made with AI, in seconds.",
+    "subline": "Pick the photos, the app builds it, you post it.",
+    "download": {
+      "hero": "Get Pegada and make theirs",
+      "footer": "Make your dog's story"
+    },
     "examples": {
-      "title": "How it looks",
-      "editorial": {
-        "alt": "A story on cream paper with the name Nina in large letters, a photo of a grey dog and three smaller photos beside it."
+      "title": "The two designs",
+      "chat": {
+        "alt": "A yellow story titled “DM aberta pra cachorrada”, with a dog's photos inside a speech bubble and two chat messages beside it."
       },
       "ticket": {
-        "alt": "A story shaped like a ticket, asking who is up for a walk, with photos of two dogs and passenger, destination and gate fields."
-      },
-      "chat": {
-        "alt": "A yellow story titled “DM open to the dogs”, with a photo of a golden retriever puppy and two chat messages beside it."
+        "alt": "A story shaped like a walk pass, asking who is up for a walk, with the dog's photos and passenger, destination and gate fields."
       }
     },
     "howItWorks": {
       "title": "How it works",
-      "photos": "Pick your dog's photos.",
-      "build": "We build the story.",
-      "post": "You post it and tag Pegada."
+      "app": "Get Pegada and set up your dog's profile.",
+      "photos": "Tap share and pick the story.",
+      "post": "Save it, post it, tag us."
     },
-    "cta": "I want mine",
+    "cta": "Keep me posted",
     "form": {
-      "title": "Join the list",
-      "description": "We will email you when the story opens.",
+      "title": "On a laptop?",
+      "description": "Leave your address and we'll write when there's news about the story.",
       "label": "Your email",
       "placeholder": "you@email.com",
+      "privacy": "Privacy policy",
       "honeypot": "Website",
-      "submit": "I want mine",
-      "submitting": "Sending",
+      "submit": "Add me",
+      "submitting": "Adding",
       "invalid": "That address looks off. Mind checking it?",
       "rateLimited": "Try again in a minute.",
-      "failed": "We could not save that just now. Try again."
+      "failed": "We couldn't save that just now. Try again."
     },
-    "success": "You are on the list, we will let you know when it opens."
+    "success": "Noted. The app is on the App Store and Google Play in the meantime."
   },
   "dog": {
     "metadata": {

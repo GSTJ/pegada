@@ -2,17 +2,19 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 /**
- * The AI story page is an experiment, and its whole output is a conversion
- * rate split by channel. Two things decide whether that number is readable:
- * the property names PostHog stores an insight against, and what the page
- * makes of the query string it was opened with.
+ * The story page is an experiment, and its whole output is a conversion rate
+ * split by channel. Three things decide whether that number is readable: the
+ * property names PostHog stores an insight against, what the page makes of the
+ * query string it was opened with, and the `ref` it hands the store so an
+ * install can be tied back here.
  *
- * Both are pure functions, imported straight from the TypeScript source, which
- * Node strips the types out of. Neither module reaches for the database or the
- * request, so there is nothing to stand up first.
+ * All pure functions, imported straight from the TypeScript source, which Node
+ * strips the types out of. None of these modules reaches for the database or
+ * the request, so there is nothing to stand up first.
  */
 const analytics = await import("../src/services/analytics.ts");
 const attribution = await import("../src/app/[locale]/story/attribution.ts");
+const storeLink = await import("../src/app/[locale]/story/store-link.ts");
 
 test("the event properties are the snake_case ones PostHog gets", () => {
   assert.deepEqual(
@@ -80,5 +82,39 @@ test("a parameter is trimmed and capped before it is written down", () => {
   assert.equal(
     attribution.toAttributionValue(long).length,
     attribution.MAX_ATTRIBUTION_LENGTH,
+  );
+});
+
+test("the store link always carries the page's own ref", () => {
+  assert.equal(storeLink.storyStoreHref({}), "/store?ref=story");
+});
+
+test("the ref the visitor arrived on does not overwrite it", () => {
+  // Every install from this page has to line up under one token, or the
+  // number the page exists to produce is split across whatever was in the bio
+  // that week. The channel survives in the utm parameters instead.
+  assert.equal(storeLink.storyStoreHref({ ref: "ig" }), "/store?ref=story");
+});
+
+test("the campaign rides along, because Play keeps it and Apple does not", () => {
+  assert.equal(
+    storeLink.storyStoreHref({
+      utmSource: "instagram",
+      utmMedium: "social",
+      utmCampaign: "bio",
+    }),
+    "/store?ref=story&utm_source=instagram&utm_medium=social&utm_campaign=bio",
+  );
+});
+
+test("a click on the store button reports the page and where on it", () => {
+  assert.deepEqual(
+    analytics.downloadCtaProperties({
+      page: "story",
+      placement: "hero",
+      store: "auto",
+      referral: storeLink.STORY_REF,
+    }),
+    { page: "story", placement: "hero", store: "auto", ref: "story" },
   );
 });
