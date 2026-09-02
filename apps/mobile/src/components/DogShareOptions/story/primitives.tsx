@@ -1,28 +1,19 @@
+import type { StoryPhotoSlot } from "./photos";
 import type { StoryPhoto } from "./types";
 
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 
 import { useEffect } from "react";
 import { View } from "react-native";
 
-import { LinearGradient } from "expo-linear-gradient";
-
-import { useTranslation } from "react-i18next";
+import Svg, { Circle, Defs, Pattern, Polygon, Rect } from "react-native-svg";
 import { StyleSheet } from "react-native-unistyles";
 
 import Logo from "@/assets/images/logo";
 import { Image } from "@/components/image";
-import { Text } from "@/components/text";
 
-import {
-  INK,
-  PAW_ASPECT,
-  PHOTO_FALLBACK_COLOR,
-  SAFE_BOTTOM_INSET,
-  SAFE_TOP,
-  WHITE,
-} from "./constants";
+import { INK, PAW_ASPECT, WHITE } from "./constants";
 
 /**
  * The paw logo mark at a given box size, tinted a single flat colour.
@@ -34,7 +25,7 @@ import {
  */
 export const PawMark = ({
   size = 20,
-  color = WHITE,
+  color = INK,
   opacity = 1,
   style,
 }: {
@@ -54,83 +45,24 @@ export const PawMark = ({
 );
 
 /**
- * The always-present "where this came from" mark. Every variant renders one
- * of these — viewers who don't already know Pegada must be able to tell
- * what it is from the image alone — plus a small line aimed at the viewer
- * rather than the dog on screen: people download an app for something
- * *they* get to do, not to admire someone else's post.
+ * One photo, or the branded fallback when there is nothing to show.
+ *
+ * `onSettle` fires exactly once either way — synchronously on mount for the
+ * fallback, since there is nothing to wait for, and on `onLoadEnd` for a
+ * real photo. `story-card.tsx` counts these to decide when the offscreen
+ * card is safe to capture (see `StoryVariantProps.onImageSettled`).
  */
-export const BrandFooter = ({
-  tone = "light",
-  style,
-}: {
-  tone?: "light" | "dark";
-  style?: StyleProp<ViewStyle>;
-}) => {
-  const { t } = useTranslation();
-  const color = tone === "light" ? WHITE : INK;
-
-  return (
-    <View style={style}>
-      <View style={primitiveStyles.brandRow}>
-        <PawMark size={15} color={color} />
-        <Text fontWeight="bold" style={[primitiveStyles.brandText, { color }]}>
-          pegada.app
-        </Text>
-      </View>
-      <Text
-        numberOfLines={1}
-        fontWeight="medium"
-        style={[primitiveStyles.brandCta, { color }]}
-      >
-        {t("dogShare.story.footerCta")}
-      </Text>
-    </View>
-  );
-};
-
-/**
- * Fills the card and pads its content to `SAFE_TOP`..`SAFE_BOTTOM` so every
- * variant gets safe-zone compliance structurally, rather than by each one
- * re-deriving the same margin arithmetic. Stack a top block, a flexible
- * middle (`justifyContent: "center"` by default, so it settles nicely
- * whether it holds one photo or four), and `BrandFooter` as children —
- * normal flow then pins the footer to `SAFE_BOTTOM` on its own.
- */
-export const SafeArea = ({
-  children,
-  style,
-}: {
-  children: ReactNode;
-  style?: StyleProp<ViewStyle>;
-}) => <View style={[primitiveStyles.safeArea, style]}>{children}</View>;
-
-/** The flexible middle slot between `SafeArea`'s top block and its footer. */
-export const SafeMiddle = ({
-  children,
-  style,
-}: {
-  children?: ReactNode;
-  style?: StyleProp<ViewStyle>;
-}) => <View style={[primitiveStyles.safeMiddle, style]}>{children}</View>;
-
-/**
- * A single photo slot with a branded fallback for dogs with no photo (or a
- * slot beyond how many the dog has). `onSettle` fires exactly once either
- * way, synchronously on mount for the fallback case since there is nothing
- * to wait for — see `StoryVariantProps.onImageSettled`.
- */
-export const PhotoOrFallback = ({
+export const StoryImage = ({
   photo,
   onSettle,
   style,
-  contentFit = "cover",
-  fallbackIconSize = 48,
+  fallbackColor,
+  fallbackIconSize = 40,
 }: {
   photo: StoryPhoto | undefined;
   onSettle: () => void;
   style?: StyleProp<ViewStyle>;
-  contentFit?: "cover" | "contain";
+  fallbackColor: string;
   fallbackIconSize?: number;
 }) => {
   const hasPhoto = Boolean(photo?.url);
@@ -147,8 +79,10 @@ export const PhotoOrFallback = ({
 
   if (!hasPhoto || !photo) {
     return (
-      <View style={[style, primitiveStyles.fallback]}>
-        <PawMark size={fallbackIconSize} color={WHITE} />
+      <View
+        style={[style, styles.fallback, { backgroundColor: fallbackColor }]}
+      >
+        <PawMark size={fallbackIconSize} color={INK} opacity={0.28} />
       </View>
     );
   }
@@ -162,269 +96,247 @@ export const PhotoOrFallback = ({
       // ever sets, so the cast to `expo-image`'s stricter `ImageStyle` is
       // safe in practice.
       style={style as ComponentProps<typeof Image>["style"]}
-      contentFit={contentFit}
+      contentFit="cover"
       transition={0}
       onLoadEnd={onSettle}
     />
   );
 };
 
-/** A rounded pill label, e.g. a breed or age chip. */
-export const Chip = ({
-  children,
-  tone = "solid",
-  style,
-}: {
-  children: ReactNode;
-  tone?: "solid" | "outline";
-  style?: StyleProp<ViewStyle>;
-}) => (
-  <View
-    style={[
-      primitiveStyles.chip,
-      tone === "outline" && primitiveStyles.chipOutline,
-      style,
-    ]}
-  >
-    <Text
-      numberOfLines={1}
-      ellipsizeMode="tail"
-      fontWeight="semibold"
-      style={[
-        primitiveStyles.chipText,
-        tone === "outline" && primitiveStyles.chipTextOutline,
-      ]}
-    >
-      {children}
-    </Text>
-  </View>
-);
-
-/** A gradient darkening the bottom of a photo so overlaid text stays legible. */
-export const BottomScrim = ({
-  height,
-  style,
-}: {
-  height: number;
-  style?: StyleProp<ViewStyle>;
-}) => {
-  const dynamicStyle: ViewStyle = {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height,
-  };
-
-  return (
-    <LinearGradient
-      colors={["rgba(15, 23, 42, 0)", "rgba(15, 23, 42, 0.72)"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={[dynamicStyle, style]}
-    />
-  );
-};
-
 /**
- * A rounded speech bubble with a tail poking out one corner, for the dog's
- * own "voice" lines. Rotated a few degrees off-axis by default — dead level
- * reads like a form field, a slight tilt reads like it was stuck on.
+ * Tiles a variant's photo frame from a plan's mosaic slots.
+ *
+ * Every pane is absolutely positioned off its slot's fractional rect, so the
+ * "what does two photos look like" decision stays in `photos.ts` where a
+ * test can read it. `gutter` is applied as an inset on each pane rather than
+ * baked into the rects, which keeps the fractions tiling edge to edge and
+ * the gaps a constant width whatever the frame's size.
  */
-export const SpeechBubble = ({
-  children,
-  rotate = -3,
-  align = "left",
-  style,
-}: {
-  children: ReactNode;
-  rotate?: number;
-  align?: "left" | "right";
-  style?: StyleProp<ViewStyle>;
-}) => (
-  <View
-    style={[
-      primitiveStyles.bubbleWrap,
-      { transform: [{ rotate: `${rotate}deg` }] },
-      style,
-    ]}
-  >
-    <View style={primitiveStyles.bubble}>
-      <Text
-        numberOfLines={2}
-        fontWeight="bold"
-        style={primitiveStyles.bubbleText}
-      >
-        {children}
-      </Text>
-    </View>
-    <View
-      style={[
-        primitiveStyles.bubbleTail,
-        align === "right" && primitiveStyles.bubbleTailRight,
-      ]}
-    />
-  </View>
-);
-
-/**
- * A photo framed like an instant print, with a caption strip along the
- * bottom edge. `rotate` gives the fanned-stack look its life; pass `0` for
- * a single, straight print.
- */
-export const PolaroidFrame = ({
-  photo,
+export const PhotoMosaic = ({
+  slots,
   onSettle,
-  caption,
-  rotate = 0,
-  width = 168,
+  gutter = 3,
+  gutterColor = WHITE,
+  fallbackColor,
   style,
 }: {
-  photo: StoryPhoto | undefined;
+  slots: StoryPhotoSlot[];
   onSettle: () => void;
-  caption?: string;
-  rotate?: number;
-  width?: number;
+  gutter?: number;
+  gutterColor?: string;
+  fallbackColor: string;
+  style?: StyleProp<ViewStyle>;
+}) => (
+  <View style={[style, { backgroundColor: gutterColor }]}>
+    {slots.map((slot) => (
+      <View
+        key={slot.index}
+        style={[
+          styles.pane,
+          {
+            left: `${slot.rect.x * 100}%`,
+            top: `${slot.rect.y * 100}%`,
+            width: `${slot.rect.width * 100}%`,
+            height: `${slot.rect.height * 100}%`,
+            padding: gutter / 2,
+          },
+        ]}
+      >
+        <StoryImage
+          photo={slot.photo}
+          onSettle={onSettle}
+          fallbackColor={fallbackColor}
+          style={styles.paneImage}
+        />
+      </View>
+    ))}
+  </View>
+);
+
+/**
+ * A dashed rule drawn as a row of segments.
+ *
+ * RN's `borderStyle: "dashed"` only paints reliably when all four border
+ * widths match, which a single horizontal perforation line does not — so the
+ * ticket's tear lines are real views instead.
+ */
+export const DashedRule = ({
+  width,
+  dash = 7,
+  gap = 5,
+  thickness = 1.4,
+  color = INK,
+  style,
+}: {
+  width: number;
+  dash?: number;
+  gap?: number;
+  thickness?: number;
+  color?: string;
   style?: StyleProp<ViewStyle>;
 }) => {
-  const photoSize = width - 20;
-  const frameStyle: ViewStyle = {
-    width,
-    transform: [{ rotate: `${rotate}deg` }],
-  };
-  const photoStyle: ViewStyle = {
-    width: photoSize,
-    height: photoSize,
-    borderRadius: 3,
-  };
+  const count = Math.max(1, Math.floor((width + gap) / (dash + gap)));
 
   return (
-    <View style={[primitiveStyles.polaroid, frameStyle, style]}>
-      <PhotoOrFallback
-        photo={photo}
-        onSettle={onSettle}
-        contentFit="cover"
-        fallbackIconSize={Math.round(width * 0.26)}
-        style={photoStyle}
-      />
-      {caption ? (
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          fontWeight="black"
-          style={primitiveStyles.polaroidCaption}
-        >
-          {caption}
-        </Text>
-      ) : null}
+    <View style={[styles.dashRow, style]}>
+      {Array.from({ length: count }, (_, index) => (
+        <View
+          key={index}
+          style={{
+            width: dash,
+            height: thickness,
+            marginRight: gap,
+            backgroundColor: color,
+          }}
+        />
+      ))}
     </View>
   );
 };
 
-const primitiveStyles = StyleSheet.create(() => ({
-  safeArea: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingTop: SAFE_TOP,
-    paddingBottom: SAFE_BOTTOM_INSET,
-    paddingHorizontal: 26,
-  },
-  safeMiddle: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-  },
-  brandText: {
-    fontSize: 14,
-    letterSpacing: 0.4,
-  },
-  brandCta: {
-    marginTop: 3,
-    fontSize: 11.5,
-    textAlign: "center",
-    opacity: 0.7,
-  },
+/**
+ * The concept's checkerboard column, drawn with an SVG tile pattern rather
+ * than a few hundred nested `View`s. `react-native-svg` renders into a real
+ * layer on iOS, so `captureRef` picks it up the same as any other view.
+ */
+export const CheckerField = ({
+  width,
+  height,
+  cell,
+  color,
+  opacity = 1,
+  style,
+}: {
+  width: number;
+  height: number;
+  cell: number;
+  color: string;
+  opacity?: number;
+  style?: StyleProp<ViewStyle>;
+}) => (
+  <View style={[style, { width, height, opacity }]}>
+    <Svg width={width} height={height}>
+      <Defs>
+        <Pattern
+          id="checker"
+          width={cell * 2}
+          height={cell * 2}
+          patternUnits="userSpaceOnUse"
+        >
+          <Rect x={0} y={0} width={cell} height={cell} fill={color} />
+          <Rect x={cell} y={cell} width={cell} height={cell} fill={color} />
+        </Pattern>
+      </Defs>
+      <Rect width={width} height={height} fill="url(#checker)" />
+    </Svg>
+  </View>
+);
+
+/** The ticket concept's dot-grid texture over the navy stock. */
+export const DotField = ({
+  width,
+  height,
+  spacing,
+  radius,
+  color,
+  opacity = 1,
+  style,
+}: {
+  width: number;
+  height: number;
+  spacing: number;
+  radius: number;
+  color: string;
+  opacity?: number;
+  style?: StyleProp<ViewStyle>;
+}) => (
+  <View style={[style, { width, height, opacity }]}>
+    <Svg width={width} height={height}>
+      <Defs>
+        <Pattern
+          id="dots"
+          width={spacing}
+          height={spacing}
+          patternUnits="userSpaceOnUse"
+        >
+          <Circle cx={radius} cy={radius} r={radius} fill={color} />
+        </Pattern>
+      </Defs>
+      <Rect width={width} height={height} fill="url(#dots)" />
+    </Svg>
+  </View>
+);
+
+/**
+ * The speech bubble's tail: the bubble's own fill running down past its
+ * bottom-left corner to a point, with the bubble's left keyline carrying on
+ * down the outside of it.
+ *
+ * The concept draws this by clipping a bordered box to
+ * `polygon(0 0, 100% 0, 0 100%)`, which keeps the left border and throws the
+ * rest away — so the hypotenuse is unstroked and the tail's top edge simply
+ * covers the length of bubble border it hangs from.
+ *
+ * Drawn as the fill first and the keyline over it, never as two shapes
+ * meeting along the hypotenuse: an ink triangle with the fill laid back
+ * inside it makes both share that edge exactly, and the two antialiased
+ * runs blend into a grey seam down the diagonal. Here the hypotenuse is
+ * only ever the fill's own outer boundary, so it antialiases against the
+ * paper the way every other edge on the card does.
+ *
+ * The box is `stroke` taller than `size` and the extra sits at the top, so
+ * the shape runs up under the bubble's bottom border rather than butting
+ * against it — otherwise the join leaves a hairline of paper showing
+ * through. The caller pins the bottom, so that headroom grows upwards into
+ * the bubble; its left edge lines up with the outside of the bubble's left
+ * border, and the two then read as one continuous outline.
+ */
+export const BubbleTail = ({
+  size,
+  stroke,
+  fill = WHITE,
+  style,
+}: {
+  size: number;
+  stroke: number;
+  fill?: string;
+  style?: StyleProp<ViewStyle>;
+}) => {
+  const height = size + stroke;
+
+  return (
+    <View style={[style, { width: size, height }]}>
+      <Svg width={size} height={height}>
+        {/* The tail itself, hypotenuse included. */}
+        <Polygon points={`0,0 ${size},0 0,${height}`} fill={fill} />
+        {/* The bubble's left keyline carrying on down the outside of it,
+            tapering to nothing at the tip exactly as the concept's clipped
+            border does. Painted over the fill, so it shares no edge with
+            anything but itself. */}
+        <Polygon
+          points={`0,0 ${stroke},0 ${stroke},${height - stroke} 0,${height}`}
+          fill={INK}
+        />
+      </Svg>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create(() => ({
   fallback: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: PHOTO_FALLBACK_COLOR,
   },
-  chip: {
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.94)",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  chipOutline: {
-    backgroundColor: "transparent",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.85)",
-  },
-  chipText: {
-    fontSize: 12.5,
-    color: INK,
-  },
-  chipTextOutline: {
-    color: WHITE,
-  },
-  bubbleWrap: {
-    alignSelf: "flex-start",
-  },
-  bubble: {
-    backgroundColor: WHITE,
-    borderRadius: 22,
-    paddingHorizontal: 18,
-    paddingVertical: 13,
-    maxWidth: 250,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-  },
-  bubbleText: {
-    fontSize: 17,
-    lineHeight: 21,
-    color: INK,
-  },
-  bubbleTail: {
+  pane: {
     position: "absolute",
-    bottom: -7,
-    left: 26,
-    width: 18,
-    height: 18,
-    backgroundColor: WHITE,
-    transform: [{ rotate: "45deg" }],
   },
-  bubbleTailRight: {
-    left: undefined,
-    right: 26,
+  paneImage: {
+    width: "100%",
+    height: "100%",
   },
-  polaroid: {
-    backgroundColor: WHITE,
-    borderRadius: 6,
-    paddingTop: 10,
-    paddingHorizontal: 10,
-    paddingBottom: 14,
+  dashRow: {
+    flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 10,
-  },
-  polaroidCaption: {
-    marginTop: 10,
-    fontSize: 11.5,
-    color: INK,
-    letterSpacing: 0.3,
-    textAlign: "center",
+    overflow: "hidden",
   },
 }));

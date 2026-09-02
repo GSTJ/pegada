@@ -2,51 +2,43 @@ import type { StoryVariantProps } from "./types";
 
 import type { ComponentType } from "react";
 
-import { DatingProfileVariant } from "./variants/dating-profile";
-import { PolaroidStackVariant } from "./variants/polaroid-stack";
-import { SpeechBubbleVariant } from "./variants/speech-bubble";
-import { SwipeCardVariant } from "./variants/swipe-card";
-import { TradingCardVariant } from "./variants/trading-card";
-import { WantedPosterVariant } from "./variants/wanted-poster";
+import { STORY_MAX_PHOTOS } from "./photos";
+import { DmAbertaVariant } from "./variants/dm-aberta";
+import { RoleTicketVariant } from "./variants/role-ticket";
 
-export type StoryVariantId =
-  | "swipeCard"
-  | "speechBubble"
-  | "polaroidStack"
-  | "datingProfile"
-  | "tradingCard"
-  | "wantedPoster";
+export type StoryVariantId = "dm-aberta" | "role-ticket";
 
 type StoryVariantDefinition = {
   Component: ComponentType<StoryVariantProps>;
   /**
-   * The most photos this layout will ever put an `Image` in. `story-card.tsx`
-   * slices `dog.images` down to `max(1, min(dog.images.length, maxPhotos))`
-   * before handing them to the variant, so it always renders exactly that
-   * many `PhotoOrFallback` slots — the floor of 1 is what makes the
-   * no-photo fallback panel show up even for variants built around a photo
-   * grid.
+   * The most photos this layout will ever put an `Image` in. `photos.ts`
+   * caps the dog's image list at this before assigning slots, so a dog with
+   * more photos than the composition has room for drops the tail rather than
+   * silently reflowing the layout.
    */
   maxPhotos: number;
 };
 
 /**
- * The full set of story compositions. Order here is display order for a
- * future variant picker in the share sheet — not otherwise meaningful.
+ * The full set of story compositions, both built from the approved concept
+ * art. Order here is display order for a future variant picker in the share
+ * sheet — not otherwise meaningful.
  */
 export const STORY_VARIANTS: Record<StoryVariantId, StoryVariantDefinition> = {
-  swipeCard: { Component: SwipeCardVariant, maxPhotos: 2 },
-  speechBubble: { Component: SpeechBubbleVariant, maxPhotos: 1 },
-  polaroidStack: { Component: PolaroidStackVariant, maxPhotos: 3 },
-  datingProfile: { Component: DatingProfileVariant, maxPhotos: 4 },
-  tradingCard: { Component: TradingCardVariant, maxPhotos: 1 },
-  wantedPoster: { Component: WantedPosterVariant, maxPhotos: 1 },
+  "dm-aberta": {
+    Component: DmAbertaVariant,
+    maxPhotos: STORY_MAX_PHOTOS["dm-aberta"],
+  },
+  "role-ticket": {
+    Component: RoleTicketVariant,
+    maxPhotos: STORY_MAX_PHOTOS["role-ticket"],
+  },
 };
 
 /**
- * The pick that ships as the default render — see the report handed back
- * alongside this change for why: it is the one composition that both
- * explains the app to someone who has never heard of it and stages the
- * dog's own photo as the hero, not a design chrome.
+ * The pick that ships as the default render: "DM aberta" leads with the
+ * dog's own photo at bubble size and states what the app is in the headline,
+ * so a viewer who has never heard of Pegada can read the whole idea off the
+ * image alone.
  */
-export const DEFAULT_STORY_VARIANT: StoryVariantId = "swipeCard";
+export const DEFAULT_STORY_VARIANT: StoryVariantId = "dm-aberta";
