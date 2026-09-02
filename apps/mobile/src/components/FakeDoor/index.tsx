@@ -150,7 +150,6 @@ export const FakeDoorRow = ({
   source,
   icon: Icon,
   label,
-  compact,
   disabled,
   testID,
 }: {
@@ -158,7 +157,6 @@ export const FakeDoorRow = ({
   source: FakeDoorSource;
   icon: ComponentType<SvgIconProps>;
   label: string;
-  compact?: boolean;
   disabled?: boolean;
   testID?: string;
 }) => {
@@ -172,12 +170,7 @@ export const FakeDoorRow = ({
     trackFakeDoorShown(feature, source);
   }, [feature, source]);
 
-  styles.useVariants({
-    compact: compact ? true : undefined,
-    disabled: disabled ? true : undefined,
-  });
-
-  const iconSize = compact ? 18 : 22;
+  styles.useVariants({ disabled: disabled ? true : undefined });
 
   return (
     <PressableArea
@@ -195,13 +188,9 @@ export const FakeDoorRow = ({
       style={styles.row}
     >
       <View style={styles.rowIcon}>
-        <Icon width={iconSize} height={iconSize} fill={theme.colors.text} />
+        <Icon width={22} height={22} fill={theme.colors.text} />
       </View>
-      <Text
-        fontWeight="medium"
-        fontSize={compact ? "xs" : "sm"}
-        style={styles.rowLabel}
-      >
+      <Text fontWeight="medium" fontSize="sm" style={styles.rowLabel}>
         {label}
       </Text>
       <View style={styles.pill}>

@@ -21,6 +21,13 @@ export const styles = StyleSheet.create((theme) => ({
     paddingLeft: theme.spacing[4],
     gap: theme.spacing[2],
   },
+  /**
+   * The empty deck stacks its own buttons under the card, so the card carries
+   * the gap rather than every neighbour having to know about it.
+   */
+  cardOnEmptyDeck: {
+    marginBottom: theme.spacing[3],
+  },
   title: {
     textAlign: "center",
   },

@@ -9,11 +9,9 @@ import { magicModal, useMagicModal } from "react-native-magic-modal";
 import { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Premium from "@/assets/images/Premium.svg";
 import { Button } from "@/components/Button";
 import { showDogShareOptions } from "@/components/DogShareOptions";
 import { pickByGender } from "@/components/DogShareOptions/story/gender";
-import { FakeDoorRow } from "@/components/FakeDoor";
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
@@ -30,7 +28,9 @@ export type { SharePromptPlacement } from "./tracking";
  *
  * One component for both, because the ask is the same and the funnel has to
  * be comparable across placements. `placement` is the only thing that differs,
- * and it rides all the way through to the share sheet as its `source`.
+ * and it rides all the way through to the share sheet as its `source`. It also
+ * owns the gap below itself on the empty deck, where the card sits above that
+ * screen's own buttons.
  */
 export const SharePromptCard = ({
   placement,
@@ -67,7 +67,13 @@ export const SharePromptCard = ({
   };
 
   return (
-    <View testID="share-prompt-card" style={styles.card}>
+    <View
+      testID="share-prompt-card"
+      style={[
+        styles.card,
+        placement === "empty_deck" ? styles.cardOnEmptyDeck : null,
+      ]}
+    >
       <Text fontWeight="bold" fontSize="lg" style={styles.title}>
         {t(
           pickByGender(
@@ -91,16 +97,6 @@ export const SharePromptCard = ({
       <Button testID="share-prompt-button" onPress={handleShare}>
         {t("sharePrompt.button")}
       </Button>
-      {placement === "empty_deck" ? (
-        <FakeDoorRow
-          compact
-          testID="fake-door-referral"
-          feature="referral_reward"
-          source="empty_deck"
-          icon={Premium}
-          label={t("fakeDoor.referralReward")}
-        />
-      ) : null}
     </View>
   );
 };

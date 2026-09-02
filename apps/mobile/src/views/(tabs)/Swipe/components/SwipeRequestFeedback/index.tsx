@@ -62,12 +62,8 @@ const EmptyState = () => {
           <Description fontSize="xs" style={styles.description}>
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
-          {/* Above the preferences button on purpose: widening the filters
-              only helps if there is anyone else to find, and the deck being
-              empty is the moment that argument lands. */}
           <SharePromptCard placement="empty_deck" />
           <Button
-            style={styles.preferencesButton}
             onPress={() => router.push(SceneName.Preferences)}
             variant="outline"
           >

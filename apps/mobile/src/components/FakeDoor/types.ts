@@ -6,5 +6,9 @@
  */
 export type FakeDoorFeature = "referral_reward" | "ai_story_video";
 
-/** Which surface the row the user tapped was rendered on. */
-export type FakeDoorSource = "share_sheet" | "empty_deck";
+/**
+ * Which surface the row was rendered on. Only the share sheet carries fake
+ * doors today, and the property is still sent so a second surface can be added
+ * without splitting the funnel across event names.
+ */
+export type FakeDoorSource = "share_sheet";

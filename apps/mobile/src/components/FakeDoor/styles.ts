@@ -4,9 +4,7 @@ export const styles = StyleSheet.create((theme) => ({
   /**
    * Deliberately the same metrics as `DogShareOptions`' own option row, so a
    * fake door reads as one more thing the sheet can do rather than an
-   * advertisement bolted to the bottom of it. The `compact` variant is the
-   * secondary row under the empty deck's share button, where the card is
-   * already the loudest thing on screen.
+   * advertisement bolted to the bottom of it.
    */
   row: {
     flexDirection: "row",
@@ -17,15 +15,6 @@ export const styles = StyleSheet.create((theme) => ({
     paddingBottom: theme.spacing[4],
     paddingLeft: theme.spacing[4],
     variants: {
-      compact: {
-        true: {
-          gap: theme.spacing[2],
-          paddingTop: theme.spacing[3],
-          paddingRight: 0,
-          paddingBottom: 0,
-          paddingLeft: 0,
-        },
-      },
       disabled: {
         true: { opacity: 0.5 },
         default: { opacity: 1 },
@@ -34,12 +23,7 @@ export const styles = StyleSheet.create((theme) => ({
   },
   rowIcon: {
     alignItems: "center",
-    variants: {
-      compact: {
-        true: { width: 18 },
-        default: { width: 22 },
-      },
-    },
+    width: 22,
   },
   rowLabel: {
     flexShrink: 1,

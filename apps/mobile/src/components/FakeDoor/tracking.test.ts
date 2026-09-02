@@ -34,11 +34,11 @@ test("names the shown event and its properties exactly", () => {
 });
 
 test("names the tapped event and its properties exactly", () => {
-  trackFakeDoorTapped("ai_story_video", "empty_deck");
+  trackFakeDoorTapped("ai_story_video", "share_sheet");
 
   expect(track).toHaveBeenCalledWith({
     event_type: "Fake Door Tapped",
-    event_properties: { feature: "ai_story_video", source: "empty_deck" },
+    event_properties: { feature: "ai_story_video", source: "share_sheet" },
   });
 });
 

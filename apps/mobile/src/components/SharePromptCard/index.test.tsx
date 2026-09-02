@@ -47,7 +47,7 @@ jest.mock<Record<string, unknown>>("react-native", () => {
 });
 
 jest.mock<Record<string, unknown>>("./styles", () => ({
-  styles: { card: {}, title: {}, subtitle: {} },
+  styles: { card: {}, cardOnEmptyDeck: {}, title: {}, subtitle: {} },
 }));
 
 jest.mock<Record<string, unknown>>("./tracking", () => ({
@@ -61,13 +61,6 @@ jest.mock<Record<string, unknown>>("@/contexts/trpc-provider", () => ({
 
 jest.mock<Record<string, unknown>>("@/components/DogShareOptions", () => ({
   showDogShareOptions: jest.fn(),
-}));
-
-jest.mock<Record<string, unknown>>("@/components/FakeDoor", () => ({
-  FakeDoorRow: ({ testID }: { testID?: string }) => {
-    const { createElement } = require("react") as typeof React;
-    return createElement("div", { "data-testid": testID });
-  },
 }));
 
 jest.mock<Record<string, unknown>>("@/components/Button", () => {
@@ -166,19 +159,6 @@ test("hands the dog to onShare instead of opening the sheet", () => {
   expect(mockTrackTapped).toHaveBeenCalledWith("first_match", "dog-1");
   expect(onShare).toHaveBeenCalledWith(mockDog);
   expect(mockShowDogShareOptions).not.toHaveBeenCalled();
-});
-
-// Only the empty deck has room for a second ask under the button.
-test("only offers the invite fake door on the empty deck", () => {
-  const emptyDeck = renderToStaticMarkup(
-    <SharePromptCard placement="empty_deck" />,
-  );
-  const firstMatch = renderToStaticMarkup(
-    <SharePromptCard placement="first_match" />,
-  );
-
-  expect(emptyDeck).toContain("fake-door-referral");
-  expect(firstMatch).not.toContain("fake-door-referral");
 });
 
 test("renders nothing, and reports nothing shown, until the dog loads", () => {
