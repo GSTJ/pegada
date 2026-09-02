@@ -134,7 +134,7 @@
         "replyFemale": "topo. já tô pronta.",
         "typing": "outros dogs estão digitando...",
         "ctaLine1": "faz o perfil do seu dog",
-        "ctaLine2": "e abre o chat"
+        "ctaLine2": "e fale com {{name}}"
       },
       "roleTicket": {
         "rail": "passe de rolê",

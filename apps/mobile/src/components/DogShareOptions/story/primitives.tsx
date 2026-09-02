@@ -7,13 +7,28 @@ import type { StyleProp, ViewStyle } from "react-native";
 import { useEffect } from "react";
 import { View } from "react-native";
 
-import Svg, { Circle, Defs, Pattern, Polygon, Rect } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  Path,
+  Pattern,
+  Polygon,
+  Rect,
+} from "react-native-svg";
 import { StyleSheet } from "react-native-unistyles";
 
 import Logo from "@/assets/images/logo";
 import { Image } from "@/components/image";
+import { Text } from "@/components/text";
 
-import { INK, PAW_ASPECT, WHITE } from "./constants";
+import {
+  CAP_CENTRE,
+  INK,
+  PAW_ASPECT,
+  WHITE,
+  X_CENTRE,
+  lineBox,
+} from "./constants";
 
 /**
  * The paw logo mark at a given box size, tinted a single flat colour.
@@ -41,6 +56,68 @@ export const PawMark = ({
       colorStopOne={color}
       colorStopTwo={color}
     />
+  </View>
+);
+
+/**
+ * The brand lockup: the paw mark and the word "pegada" set as one unit.
+ *
+ * There is no wordmark asset anywhere in the repo — the website pairs this
+ * same paw with plain type — so the lockup is composed here to the concept's
+ * own proportions, which each variant passes in as concept pixels. The word
+ * is "pegada", not "pegada.app": the domain belongs to the website, the brand
+ * is the name.
+ *
+ * The mark is centred on the band the word's own ink occupies — its x-height
+ * set lowercase, its cap height set as an all-caps rail — rather than on its
+ * line box. Centring on the line box, which is all a flex `align-items:
+ * center` can do, hangs the mark visibly high above that ink. The shift goes
+ * on the type rather than the mark so a caller can position the lockup by the
+ * mark's own top-left corner, which is what the concepts measure to.
+ */
+export const BrandLockup = ({
+  markHeight,
+  gap,
+  fontSize,
+  tracking = 0,
+  uppercase = false,
+  color = INK,
+  style,
+}: {
+  /** Height of the paw's ink, in points. */
+  markHeight: number;
+  /** Space between the paw's ink and the word, in points. */
+  gap: number;
+  fontSize: number;
+  tracking?: number;
+  uppercase?: boolean;
+  color?: string;
+  style?: StyleProp<ViewStyle>;
+}) => (
+  <View style={[styles.brandRow, style]}>
+    <Logo
+      width={markHeight / PAW_ASPECT}
+      height={markHeight}
+      colorStopOne={color}
+      colorStopTwo={color}
+    />
+    <Text
+      fontWeight="black"
+      style={[
+        uppercase ? styles.brandWordCaps : styles.brandWord,
+        {
+          marginLeft: gap,
+          marginTop:
+            markHeight / 2 - (uppercase ? CAP_CENTRE : X_CENTRE) * fontSize,
+          fontSize,
+          lineHeight: lineBox(fontSize),
+          letterSpacing: tracking,
+          color,
+        },
+      ]}
+    >
+      pegada
+    </Text>
   </View>
 );
 
@@ -110,13 +187,16 @@ export const StoryImage = ({
  * "what does two photos look like" decision stays in `photos.ts` where a
  * test can read it. `gutter` is applied as an inset on each pane rather than
  * baked into the rects, which keeps the fractions tiling edge to edge and
- * the gaps a constant width whatever the frame's size.
+ * the gaps a constant width whatever the frame's size. `paneBorder` draws
+ * the concept's keyline around each photo rather than around the frame, for
+ * the compositions that box every print separately.
  */
 export const PhotoMosaic = ({
   slots,
   onSettle,
   gutter = 3,
   gutterColor = WHITE,
+  paneBorder = 0,
   fallbackColor,
   style,
 }: {
@@ -124,6 +204,7 @@ export const PhotoMosaic = ({
   onSettle: () => void;
   gutter?: number;
   gutterColor?: string;
+  paneBorder?: number;
   fallbackColor: string;
   style?: StyleProp<ViewStyle>;
 }) => (
@@ -146,7 +227,12 @@ export const PhotoMosaic = ({
           photo={slot.photo}
           onSettle={onSettle}
           fallbackColor={fallbackColor}
-          style={styles.paneImage}
+          style={[
+            styles.paneImage,
+            paneBorder
+              ? { borderWidth: paneBorder, borderColor: INK }
+              : undefined,
+          ]}
         />
       </View>
     ))}
@@ -190,6 +276,47 @@ export const DashedRule = ({
           }}
         />
       ))}
+    </View>
+  );
+};
+
+/**
+ * The concept's hand-drawn underline: a `width` x `height` box carrying only
+ * a top border, with `border-radius: 50%`.
+ *
+ * A browser paints that as the crown of an ellipse — `thickness` at the top
+ * and tapering to nothing at both ends, because the inner curve is the same
+ * ellipse with its vertical radius reduced by the border and its horizontal
+ * radius untouched. Drawn here as the region between those two arcs, which
+ * is the same shape and, unlike a rotated rectangle, actually curves.
+ */
+export const ArcRule = ({
+  width,
+  height,
+  thickness,
+  color = INK,
+  style,
+}: {
+  width: number;
+  height: number;
+  thickness: number;
+  color?: string;
+  style?: StyleProp<ViewStyle>;
+}) => {
+  const rx = width / 2;
+  const ry = height / 2;
+
+  return (
+    <View style={[style, { width, height }]}>
+      <Svg width={width} height={height}>
+        <Path
+          d={
+            `M0,${ry}A${rx},${ry} 0 0 1 ${width},${ry}` +
+            `A${rx},${ry - thickness} 0 0 0 0,${ry}Z`
+          }
+          fill={color}
+        />
+      </Svg>
     </View>
   );
 };
@@ -269,27 +396,24 @@ export const DotField = ({
 
 /**
  * The speech bubble's tail: the bubble's own fill running down past its
- * bottom-left corner to a point, with the bubble's left keyline carrying on
- * down the outside of it.
+ * square bottom-left corner to a point, with the bubble's left keyline
+ * carrying on down the outside of it.
  *
- * The concept draws this by clipping a bordered box to
- * `polygon(0 0, 100% 0, 0 100%)`, which keeps the left border and throws the
- * rest away — so the hypotenuse is unstroked and the tail's top edge simply
- * covers the length of bubble border it hangs from.
+ * The concept draws it as a `size` x `size` box clipped to
+ * `polygon(0 0, 100% 0, 0 100%)` carrying only a left and a bottom border.
+ * The clip keeps the left keyline — tapering to nothing where the hypotenuse
+ * crosses it — and throws away all but a sliver of the bottom one, so the
+ * hypotenuse itself is unstroked: it is the fill meeting the paper.
  *
  * Drawn as the fill first and the keyline over it, never as two shapes
  * meeting along the hypotenuse: an ink triangle with the fill laid back
- * inside it makes both share that edge exactly, and the two antialiased
- * runs blend into a grey seam down the diagonal. Here the hypotenuse is
- * only ever the fill's own outer boundary, so it antialiases against the
- * paper the way every other edge on the card does.
+ * inside it makes both share that edge exactly, and the two antialiased runs
+ * blend into a grey seam down the diagonal.
  *
- * The box is `stroke` taller than `size` and the extra sits at the top, so
- * the shape runs up under the bubble's bottom border rather than butting
- * against it — otherwise the join leaves a hairline of paper showing
- * through. The caller pins the bottom, so that headroom grows upwards into
- * the bubble; its left edge lines up with the outside of the bubble's left
- * border, and the two then read as one continuous outline.
+ * The caller hangs the box off the bubble's bottom so its top edge sits
+ * `size` above the point, INSIDE the bubble — which is what interrupts the
+ * bubble's bottom border where the tail joins it, exactly as the concept's
+ * `bottom: -66px` on a border-box `:after` does.
  */
 export const BubbleTail = ({
   size,
@@ -301,28 +425,27 @@ export const BubbleTail = ({
   stroke: number;
   fill?: string;
   style?: StyleProp<ViewStyle>;
-}) => {
-  const height = size + stroke;
-
-  return (
-    <View style={[style, { width: size, height }]}>
-      <Svg width={size} height={height}>
-        {/* The tail itself, hypotenuse included. */}
-        <Polygon points={`0,0 ${size},0 0,${height}`} fill={fill} />
-        {/* The bubble's left keyline carrying on down the outside of it,
-            tapering to nothing at the tip exactly as the concept's clipped
-            border does. Painted over the fill, so it shares no edge with
-            anything but itself. */}
-        <Polygon
-          points={`0,0 ${stroke},0 ${stroke},${height - stroke} 0,${height}`}
-          fill={INK}
-        />
-      </Svg>
-    </View>
-  );
-};
+}) => (
+  <View style={[style, { width: size, height: size }]}>
+    <Svg width={size} height={size}>
+      {/* The tail itself, hypotenuse included. */}
+      <Polygon points={`0,0 ${size},0 0,${size}`} fill={fill} />
+      {/* The bubble's left keyline carrying on down the outside of it,
+          tapering to nothing at the tip exactly as the concept's clipped
+          border does. Painted over the fill, so it shares no edge with
+          anything but itself. */}
+      <Polygon
+        points={`0,0 ${stroke},0 ${stroke},${size - stroke} 0,${size}`}
+        fill={INK}
+      />
+    </Svg>
+  </View>
+);
 
 const styles = StyleSheet.create(() => ({
+  brandRow: { flexDirection: "row", alignItems: "flex-start" },
+  brandWord: { textTransform: "none" },
+  brandWordCaps: { textTransform: "uppercase" },
   fallback: {
     alignItems: "center",
     justifyContent: "center",

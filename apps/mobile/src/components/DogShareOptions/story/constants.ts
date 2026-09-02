@@ -1,8 +1,8 @@
 /**
- * Fixed palettes for the two story compositions. This PNG is a brand artifact
- * seen on Instagram, outside the app, so its colours never read from the
- * device theme via `useUnistyles` — they are the same regardless of what
- * theme the sharer has picked.
+ * Fixed palettes and the concept-to-card conversion for the two story
+ * compositions. This PNG is a brand artifact seen on Instagram, outside the
+ * app, so its colours never read from the device theme via `useUnistyles` —
+ * they are the same regardless of what theme the sharer has picked.
  *
  * Both palettes are lifted verbatim from the approved concept art
  * (`06-dm-aberta` and `02-role-ticket`) so the shipped card and the concept
@@ -35,28 +35,95 @@ export const TICKET = {
 } as const;
 
 /**
- * Instagram stories reserve roughly the top and bottom 250px of a 1080x1920
- * frame for their own chrome (profile row up top, reply bar at the bottom).
- * The card is laid out at 360x640 (a 3x scale down from the exported PNG),
- * so that reserved band is ~83pt here: both variants keep every piece of
- * meaningful content between y=85 and y=555, and only background texture
- * (the checker column, the dot field, the navy stock) bleeds past it to the
- * card's physical edges. The offsets that honour this are the concept's own,
- * divided by three, so they are written literally in each variant rather
- * than derived from a token.
+ * The concepts are drawn on a 1080x1920 grid; the card is laid out at 360x640
+ * points and `captureRef` multiplies back up (see `story-card-styles.ts`), so
+ * the two differ by exactly this factor.
+ *
+ * Every measurement taken from a concept's CSS passes through `px` and
+ * nowhere else, which is what lets the variants read as the concept files
+ * they were lifted from — `px(690)` instead of a bare `230`.
+ *
+ * Instagram reserves roughly the top and bottom 250px of the frame for its
+ * own chrome, so both variants keep every piece of meaningful content between
+ * `px(255)` and `px(1665)` and let only background texture bleed past it.
  */
+export const CONCEPT_SCALE = 3;
+export const px = (concept: number) => concept / CONCEPT_SCALE;
+
+/**
+ * Gilroy's own vertical metrics, per em. The family ships at 1000 units per
+ * em with an hhea ascender of 1100, a descender of -192 and a line gap of
+ * 250; cap height is 700 and x-height 500, identical across every weight the
+ * card sets.
+ *
+ * They are here because iOS lays text out against them and a browser does
+ * not. Both put the same glyphs in the same places relative to the BASELINE;
+ * they disagree about where the baseline sits inside the box:
+ *
+ * - CSS centres the font's content box (ascender + descender) inside the line
+ *   box, so half the leading falls above the run and half below.
+ * - TextKit hangs the run from the ascender and puts the whole line gap
+ *   underneath. Below `GILROY_LINE * fontSize` it compresses the fragment
+ *   instead and shaves the top off a capital, which is why nothing on the
+ *   card is ever set tighter than `lineBox`.
+ *
+ * So every offset lifted from a concept is converted through the CAP LINE,
+ * the one landmark the two agree on.
+ */
+const ASCENT = 1.1;
+const DESCENT = 0.192;
+const LINE_GAP = 0.25;
+const CAP_HEIGHT = 0.7;
+const X_HEIGHT = 0.5;
+
+/** Ascender + descender: the font's content box, what CSS half-leads. */
+const CONTENT = ASCENT + DESCENT;
+
+/** The font's natural line box, as a multiple of the font size. */
+export const GILROY_LINE = CONTENT + LINE_GAP;
+
+/** `lineHeight` that can never crop a glyph, whatever the accent on it. */
+export const lineBox = (fontSize: number) => fontSize * GILROY_LINE;
+
+/** Cap line, baseline, and the centres of the cap band and the x-height band,
+ * measured down from the top of a `lineBox(fontSize)` box, as multiples of
+ * the font size. */
+export const CAP_LINE = ASCENT - CAP_HEIGHT;
+export const BASELINE = ASCENT;
+export const CAP_CENTRE = ASCENT - CAP_HEIGHT / 2;
+export const X_CENTRE = ASCENT - X_HEIGHT / 2;
+
+/**
+ * `top` for a run set with `lineHeight: lineBox(px(conceptSize))` whose CAP
+ * LINE has to land on `conceptCapY` in the concept's 1080x1920 grid.
+ */
+export const capTop = (conceptCapY: number, conceptSize: number) =>
+  px(conceptCapY - conceptSize * CAP_LINE);
+
+/**
+ * The half-leading a browser puts above a run and iOS does not, for the
+ * boxes the concept positions by padding rather than by offset: add it to
+ * the padding above the run and take it off the padding below, and the box
+ * keeps the concept's height with the type where the concept draws it.
+ */
+export const halfLeading = (conceptSize: number, leading = GILROY_LINE) =>
+  px((conceptSize * (leading - CONTENT)) / 2);
+
+/**
+ * Gilroy's arrow (U+2192, in the family — no fallback font is involved) is
+ * drawn between 50 and 650 units above the baseline, so its ink centre is
+ * this far up. Both variants centre the arrow on that rather than on its line
+ * box, which is what "optically centred in the circle" means here.
+ */
+export const ARROW_INK_CENTRE = 0.35;
 
 /** `Logo`'s natural aspect ratio (from its `534 635` viewBox), height/width. */
 export const PAW_ASPECT = 635 / 534;
 
 /**
- * The concepts are typeset in a wide grotesque the app does not bundle. The
- * app ships Gilroy only (`Font` in `@pegada/shared/themes/themes`), so the
- * editorial weight of the concept headlines is approximated with Gilroy
- * ExtraBold (`fontWeight="black"` on `@/components/text`) at negative
- * tracking and sub-1 leading; eyebrows and rails get SemiBold/Bold uppercase
- * at wide positive tracking. These are the two ends of that scale, kept here
- * so both variants tighten by the same amount.
+ * The concepts are typeset in Gilroy, the family the app already bundles
+ * (`Font` in `@pegada/shared/themes/themes`), so nothing here is an
+ * approximation of another typeface: `font-weight: 900` is
+ * `fontWeight="black"` (ExtraBold), `600` is `"semibold"`, and every
+ * `letter-spacing` goes through `px` like any other measurement.
  */
-export const DISPLAY_TRACKING = -1.6;
-export const EYEBROW_TRACKING = 1.1;
