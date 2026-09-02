@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Share,
   View,
   ScrollView,
 } from "react-native";
@@ -21,16 +20,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 import { useDispatch, useSelector } from "react-redux";
 
+import { showDogShareOptions } from "@/components/DogShareOptions";
 import MainCard from "@/components/MainCard";
 import { MatchActionBar } from "@/components/MatchActionBar";
 import {
   NetworkBoundary,
   UnknownErrorComponent,
 } from "@/components/NetworkBoundary";
-import { APP_SHARE_LINK_BASE } from "@/constants";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
-import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
 import { useGetFormattedYears } from "@/services/use-get-formatted-years";
 import { Actions } from "@/store/reducers";
@@ -50,47 +48,14 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
 
   const [firstName] = dog.name.split(" ");
 
-  const handleShare = async () => {
-    try {
-      analytics.track({
-        event_type: "Share Tapped",
-        event_properties: { dog_id: dog.id, is_own_dog: false },
-      });
-
-      const result = await Share.share({
-        message: i18n.t("dogProfile.shareLink", {
-          link: `${APP_SHARE_LINK_BASE}/dog/${dog.id}`,
-        }),
-      });
-
-      // `dismissedAction` is the sheet being closed without picking anything,
-      // which is the difference between an intent to share and a share.
-      analytics.track({
-        event_type: "Share Completed",
-        event_properties: {
-          dog_id: dog.id,
-          is_own_dog: false,
-          result:
-            result.action === Share.dismissedAction ? "dismissed" : "shared",
-        },
-      });
-    } catch {
-      Alert.alert(
-        i18n.t("dogProfile.sharingNotAvailableTitle"),
-        i18n.t("dogProfile.sharingNotAvailableMessage", {
-          name: dog.name,
-        }),
-      );
-    }
-  };
-
   return (
     <S.ShareButton
       style={styles.shareButton}
       hitSlop={{ top: 10, bottom: 10, right: 20, left: 20 }}
     >
       <S.ActionLabel
-        onPress={handleShare}
+        testID="dog-profile-share"
+        onPress={() => showDogShareOptions(dog, "dog_profile")}
         fontWeight="bold"
         color="primary"
         style={styles.actionLabel}

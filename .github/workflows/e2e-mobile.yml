@@ -1579,7 +1579,7 @@ jobs:
           # stay sequential and co-located, see the shard design note
           # at the top of this file for the full dependency analysis.
           - name: core
-            flows: "02-sign-in,03-create-profile,04-complete-profile,05-ask-location,06-force-update,07-tabs-navigation,08-swipe-like,09-swipe-dislike,10-dog-profile,11-messages-list,12-chat-conversation,19-chat-message-order,25-upgrade-journey,21-swipe-journey,22-new-match-journey,23-preferences-journey,23b-lang-theme-persistence,24-profile-journey,46-deep-link-sign-in-handoff,47-deep-link-logged-in,26-logout-journey"
+            flows: "02-sign-in,03-create-profile,04-complete-profile,05-ask-location,06-force-update,07-tabs-navigation,08-swipe-like,09-swipe-dislike,10-dog-profile,11-messages-list,12-chat-conversation,19-chat-message-order,25-upgrade-journey,21-swipe-journey,22-new-match-journey,23-preferences-journey,23b-lang-theme-persistence,24-profile-journey,46-deep-link-sign-in-handoff,47-deep-link-logged-in,46-dog-share,26-logout-journey"
           # "fresh": self-purging APPLE_MAGIC_EMAIL_REGEX user, disjoint
           # from test@pegada.app's rows.
           - name: fresh

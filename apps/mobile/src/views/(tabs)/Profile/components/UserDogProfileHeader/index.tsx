@@ -1,13 +1,21 @@
+import type { ViewStyle } from "react-native";
+
 import { ActivityIndicator, useWindowDimensions, View } from "react-native";
 
+import { useTranslation } from "react-i18next";
+import Animated, { type AnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 
 import Premium from "@/assets/images/Premium.svg";
+import ShareIcon from "@/assets/images/Share.svg";
+import { showDogShareOptions } from "@/components/DogShareOptions";
+import Glassmorphism from "@/components/Glassmorphism";
 import { BIO_NUMBER_OF_LINES } from "@/components/MainCard/components/PersonalInfo";
 import * as PersonalInfo from "@/components/MainCard/components/PersonalInfo/styles";
 import { Picture } from "@/components/MainCard/styles";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
+import { PressableArea } from "@/components/pressable-area";
 import { api } from "@/contexts/trpc-provider";
 import { useCustomerPlan } from "@/hooks/use-payments";
 import { UserPlan } from "@/services/payments";
@@ -20,6 +28,7 @@ import {
   ProfileUnknownError,
   Scrim,
   Shade,
+  styles,
 } from "@/views/(tabs)/Profile/components/UserDogProfileHeader/styles";
 
 export const useDogProfileHeight = () => {
@@ -133,3 +142,94 @@ const WrappedUserDogProfileHeader = () => {
 };
 
 export default WrappedUserDogProfileHeader;
+
+/**
+ * The share button, floating over the photo's top-right corner.
+ *
+ * Rendered as the LAST sibling in `Profile/index.tsx`'s root view, not
+ * nested inside `UserDogProfileHeader` above. The button's top edge sits
+ * just below the settings `ScrollView`'s own top edge (`marginTop`), so its
+ * hitbox falls inside the ScrollView's frame — and the ScrollView, being a
+ * later sibling of the photo header in the tree, paints on top of it there.
+ * A plain RN view captures touches for its whole frame by default even
+ * where it paints nothing (transparent background, no rows laid out yet),
+ * so the ScrollView ate the tap before it ever reached the button
+ * underneath. `pointerEvents="none"` on the ScrollView isn't an option
+ * either — that would also disable scrolling. Rendering this button as a
+ * sibling declared after the ScrollView, instead of inside the photo
+ * header, puts it on top for that overlapping region and sidesteps the
+ * conflict entirely. Verified by reproducing the swallowed tap with the
+ * button nested back in its original spot, then confirming it starts
+ * working again the moment it moves after the ScrollView in the tree —
+ * with no other change required.
+ *
+ * `api.myDog.get` is called again here rather than threading the query
+ * result down as a prop — react-query dedupes by query key, so this shares
+ * the cache with `UserDogProfileHeader`'s own call instead of firing a
+ * second request.
+ *
+ * `animatedStyle` comes from `Profile/index.tsx`, which knows the same
+ * `scrollY` the header's own `imgStyle`/`overlayStyle` are driven by. It is
+ * applied to this element directly, rather than to a wrapping `Animated.View`
+ * placed around `WrappedProfileShareButton`: a wrapper would have no
+ * non-absolute children to size itself against, so it would collapse to
+ * 0x0 and `styles.shareButton`'s `right`/`top` offsets would resolve against
+ * that empty box instead of the screen. Animating this element in place
+ * keeps its existing absolute-positioning context intact.
+ */
+const AnimatedPressableArea = Animated.createAnimatedComponent(PressableArea);
+
+const ProfileShareButton = ({
+  animatedStyle,
+}: {
+  animatedStyle?: AnimatedStyle<ViewStyle>;
+}) => {
+  const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
+    refetchOnMount: false,
+  });
+
+  const { theme } = useUnistyles();
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+
+  if (!dog) return null;
+
+  return (
+    <AnimatedPressableArea
+      testID="profile-dog-share"
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={t("dogProfile.shareProfile", { name: dog.name })}
+      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      onPress={() => showDogShareOptions(dog, "own_profile")}
+      style={[
+        styles.shareButton,
+        { top: insets.top + theme.spacing[3] },
+        animatedStyle,
+      ]}
+    >
+      <Glassmorphism style={styles.shareButtonGlass}>
+        <View style={styles.shareButtonContent}>
+          <ShareIcon
+            width={18}
+            height={18}
+            fill={theme.colors.text}
+            style={styles.shareButtonIcon}
+          />
+        </View>
+      </Glassmorphism>
+    </AnimatedPressableArea>
+  );
+};
+
+const NullFallback = () => null;
+
+export const WrappedProfileShareButton = ({
+  animatedStyle,
+}: {
+  animatedStyle?: AnimatedStyle<ViewStyle>;
+}) => (
+  <NetworkBoundary errorFallback={NullFallback} suspenseFallback={null}>
+    <ProfileShareButton animatedStyle={animatedStyle} />
+  </NetworkBoundary>
+);

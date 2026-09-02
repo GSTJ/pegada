@@ -1,0 +1,166 @@
+appId: ${APP_ID}
+name: Share a dog's profile — own profile sheet + swipe deck sheet
+tags:
+  - smoke
+  - regression
+---
+# Covers the "share your dog's profile" feature end to end:
+#   1. Own profile (Profile tab, `profile-dog-share`) opens the three-row
+#      sheet (Share link / Copy link / Share to story) + Cancel.
+#   2. Copy link -> `Clipboard.setStringAsync` + a `react-native-magic-toast`
+#      success toast (asserted by the library's own fixed testID
+#      "magic-toast" — see node_modules/react-native-magic-toast's
+#      TOAST_TEST_ID — rather than by text, so this does not depend on the
+#      simulator's language).
+#   3. Share to story -> `captureRef` + `Sharing.shareAsync` opens the real
+#      iOS `UIActivityViewController`. That sheet is native UIKit, not RN,
+#      so `assertVisible: text:` DOES reach it (unlike RN-rendered text —
+#      see REWRITE-PLAN.md's "Lessons"). Its copy is in the SIMULATOR'S own
+#      language, not the app's — this fleet's simulators (and, absent an
+#      explicit language override in e2e-mobile.yml, the CI runner's) are
+#      pt-BR, so this asserts "Copiar" (Copy). If a future CI language
+#      override lands, this line needs to move to whatever `assertVisible`
+#      the new locale renders.
+#   4. `showDogShareOptions` is the single entry point both the own-profile
+#      header (`UserDogProfileHeader`) and another dog's profile
+#      (`DogProfile`'s `ShareButton`, testID `dog-profile-share`) call, so
+#      this flow also opens it from a swipe-deck card to prove the second
+#      call site wires up the same sheet.
+#
+# `extendedWaitUntil: visible: id: swipe-screen` after login (rather than
+# going straight into the tab tap `waitForAnimationToEnd` alone allows for)
+# gives the swipe deck's own data fetch time to settle before the first tab
+# switch — a bare `waitForAnimationToEnd` only waits for animations already
+# in flight, not for the JS thread to finish the post-login burst of
+# queries, and tapping through that burst has been observed to drop the tap
+# silently on a loaded machine (verified against 24-profile-journey.yaml,
+# which lacks this guard and reproduced the same dropped first tap twice in
+# a row while this flow was being written).
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- extendedWaitUntil:
+    visible:
+      id: "swipe-screen"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: 46-01-on-swipe
+
+# --- 1. Own profile: open the sheet, assert every row + Cancel -----------
+# A tab-bar tap has been observed to land while the JS thread is still busy
+# with the post-login query burst and get silently dropped — no crash, no
+# visible feedback, just no tab switch (reproduced 3 separate times against
+# the unrelated 24-profile-journey.yaml while this flow was being written,
+# always on this exact "first tap right after login" spot, and once against
+# this flow itself). A single `extendedWaitUntil` does not recover from
+# this: it polls for the condition but never repeats the tap that never
+# landed. `repeat` does — same pattern as grand-journey/01's gender-item
+# retry loop.
+- repeat:
+    times: 3
+    while:
+      notVisible:
+        id: "profile-dog-share"
+    commands:
+      - tapOn:
+          id: "tab-profile"
+      - extendedWaitUntil:
+          visible:
+            id: "profile-dog-share"
+          timeout: 5000
+          optional: true
+- assertVisible:
+    id: "profile-dog-share"
+- takeScreenshot: 46-02-on-profile
+- tapOn:
+    id: "profile-dog-share"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible:
+    id: "dog-share-link"
+- assertVisible:
+    id: "dog-share-copy-link"
+- assertVisible:
+    id: "dog-share-story"
+- assertVisible:
+    id: "dog-share-cancel"
+- takeScreenshot: 46-03-share-sheet-open
+
+# --- 2. Copy link -> clipboard + toast ------------------------------------
+- tapOn:
+    id: "dog-share-copy-link"
+- extendedWaitUntil:
+    visible:
+      id: "magic-toast"
+    timeout: 5000
+- takeScreenshot: 46-04-copy-link-toast
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# --- 3. Share to story -> native share sheet ------------------------------
+- tapOn:
+    id: "profile-dog-share"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "dog-share-story"
+# Capturing the story card (captureRef) + handing it to Sharing.shareAsync
+# takes noticeably longer than a plain modal transition — give it real
+# headroom before expecting the native sheet.
+- extendedWaitUntil:
+    visible:
+      text: "Copiar"
+    timeout: 20000
+- takeScreenshot: 46-05-native-share-sheet
+# Dismiss the native UIActivityViewController by tapping above it (the
+# system dismiss region) rather than "Cancel" — the current iOS share sheet
+# design has no Cancel button, it is dismissed by a tap outside the sheet
+# or a swipe down (verified visually: 46-05-native-share-sheet shows no
+# Cancel row).
+- tapOn:
+    point: "50%, 10%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible:
+    id: "profile-dog-share"
+- takeScreenshot: 46-06-back-on-profile
+
+# --- 4. Same sheet from another dog's profile (swipe deck) ---------------
+- tapOn:
+    id: "tab-swipe"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "swipe-card-open-profile"
+- extendedWaitUntil:
+    visible:
+      id: "dog-profile-share"
+    timeout: 10000
+- takeScreenshot: 46-07-on-dog-profile
+- tapOn:
+    id: "dog-profile-share"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible:
+    id: "dog-share-link"
+- assertVisible:
+    id: "dog-share-copy-link"
+- assertVisible:
+    id: "dog-share-story"
+- assertVisible:
+    id: "dog-share-cancel"
+- takeScreenshot: 46-08-share-sheet-from-dog-profile
+- tapOn:
+    id: "dog-share-cancel"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    id: "dog-profile-close"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    id: "swipe-card"
+- takeScreenshot: 46-09-back-on-swipe

@@ -112,6 +112,50 @@
     "unmatch": "Desfazer Match",
     "yes": "Sim"
   },
+  "dogShare": {
+    "copyLink": "Copiar link",
+    "copyLinkFailed": "Não deu pra copiar o link. Tenta de novo.",
+    "linkCopied": "Link copiado!",
+    "shareLink": "Compartilhar link",
+    "shareStory": "Compartilhar no story",
+    "storyFailedFallback": "Não deu pra criar a imagem do story. Vamos mandar o link.",
+    "storyUnavailable": "Esse aparelho não deixa compartilhar imagem. Vamos mandar o link.",
+    "story": {
+      "appTagline": "o app de amizade pra cachorro",
+      "footerCta": "faz o do seu dog também",
+      "lookingFor": "procura: amigos pra farejar por aí",
+      "statusMale": "solteiro",
+      "statusFemale": "solteira",
+      "swipeCard": {
+        "headline": "{{name}} tá no Pegada",
+        "ctaMale": "dá um like nele",
+        "ctaFemale": "dá um like nela"
+      },
+      "speechBubble": {
+        "line1": "DM aberta pra cachorrada",
+        "line2": "aceito pedido de amizade",
+        "line3": "quem topa um rolê?"
+      },
+      "polaroid": {
+        "kickerMale": "novo no pedaço",
+        "kickerFemale": "nova no pedaço",
+        "caption": "as aventuras de {{name}}"
+      },
+      "wanted": {
+        "headline": "procura-se",
+        "subheadMale": "amigo pra {{name}}",
+        "subheadFemale": "amiga pra {{name}}",
+        "reward": "recompensa: petisco e carinho"
+      },
+      "tradingCard": {
+        "edition": "edição limitada",
+        "statSniff": "faro",
+        "statCuteness": "fofura",
+        "statStatus": "status",
+        "collect": "colecione todos os amigos"
+      }
+    }
+  },
   "editProfile": {
     "bio": "Bio",
     "bioPlaceholder": "Conte alguma coisa legal sobre vocês.",

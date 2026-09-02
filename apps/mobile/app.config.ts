@@ -42,7 +42,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.7.1",
+  version: "1.7.2",
   runtimeVersion: {
     policy: "appVersion",
   },

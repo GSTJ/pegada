@@ -85,6 +85,9 @@ export type PaywallTrigger =
 /** An OS permission answer, collapsed to the two states that matter. */
 export type PermissionStatus = "denied" | "granted";
 
+/** Which row of the dog share sheet the user picked. */
+export type ShareOption = "copy_link" | "link" | "story";
+
 /** The two things the empty swipe deck offers besides the preferences link. */
 export type EmptyDeckAction = "invite_friend" | "notify_new_dogs";
 
@@ -234,8 +237,15 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.SAVE_PROFILE_PRESSED]: undefined;
   [ANALYTICS_EVENTS.SHARE_COMPLETED]: {
     dog_id: string;
+    /**
+     * True when the story row could not produce an image and shared the plain
+     * link instead, so a degraded share does not read as a story share.
+     */
+    fallback: boolean;
     is_own_dog: boolean;
-    result: "dismissed" | "shared";
+    /** `null` when the sheet was closed without a row being picked. */
+    option: ShareOption | null;
+    result: "dismissed" | "error" | "shared";
   };
   [ANALYTICS_EVENTS.SHARE_TAPPED]: { dog_id: string; is_own_dog: boolean };
   [ANALYTICS_EVENTS.SIGN_IN_EMAIL_SUBMITTED]: undefined;

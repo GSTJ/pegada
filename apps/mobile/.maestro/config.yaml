@@ -74,6 +74,14 @@ executionOrder:
     # is in its usual seeded shape.
     - 46-deep-link-sign-in-handoff
     - 47-deep-link-logged-in
+    # 46 shares the sheet's dog-share-link/copy-link/share-story rows.
+    # Placed after the fixture-heavy flows above (so a card with a photo is
+    # guaranteed to be at the top of the deck for step 4's "open another
+    # dog's profile" leg) and before 50, which is the longest flow and the
+    # one most worth insulating from an upstream flow's state. 46 makes no
+    # DB writes of its own (clipboard + a native share sheet only), so it
+    # cannot disturb 50's own accounts.
+    - 46-dog-share
     # 50 is the two-account journey. It runs late because it is the longest
     # flow in the suite by a wide margin and because it is the only one that
     # creates its own accounts — journey-a / journey-b, reset by

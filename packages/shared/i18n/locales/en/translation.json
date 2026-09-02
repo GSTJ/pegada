@@ -112,6 +112,50 @@
     "unmatch": "Unmatch",
     "yes": "Yes"
   },
+  "dogShare": {
+    "copyLink": "Copy link",
+    "copyLinkFailed": "Couldn't copy the link. Try again.",
+    "linkCopied": "Link copied!",
+    "shareLink": "Share link",
+    "shareStory": "Share to story",
+    "storyFailedFallback": "Couldn't create the story image. Sharing the link instead.",
+    "storyUnavailable": "Image sharing isn't available on this device. Sharing the link instead.",
+    "story": {
+      "appTagline": "the app for making dog friends",
+      "footerCta": "make one for your dog too",
+      "lookingFor": "looking for: friends to sniff around with",
+      "statusMale": "single",
+      "statusFemale": "single",
+      "swipeCard": {
+        "headline": "{{name}} is on Pegada",
+        "ctaMale": "give him a like",
+        "ctaFemale": "give her a like"
+      },
+      "speechBubble": {
+        "line1": "DMs open for the whole pack",
+        "line2": "accepting friend requests",
+        "line3": "who's up for a walk?"
+      },
+      "polaroid": {
+        "kickerMale": "new around here",
+        "kickerFemale": "new around here",
+        "caption": "{{name}}'s adventures"
+      },
+      "wanted": {
+        "headline": "wanted",
+        "subheadMale": "a friend for {{name}}",
+        "subheadFemale": "a friend for {{name}}",
+        "reward": "reward: treats and belly rubs"
+      },
+      "tradingCard": {
+        "edition": "limited edition",
+        "statSniff": "sniff",
+        "statCuteness": "cuteness",
+        "statStatus": "status",
+        "collect": "collect them all"
+      }
+    }
+  },
   "editProfile": {
     "bio": "Bio",
     "bioPlaceholder": "Tell us something cool about you and your dog.",
