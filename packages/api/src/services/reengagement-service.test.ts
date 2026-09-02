@@ -45,11 +45,17 @@ const PUSH_TOKEN = "ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]";
 const LONGITUDE = -38.5;
 const LATITUDE = -12.97;
 
-/** 15:00 in UTC-3, comfortably inside the send window. */
-const NOW = new Date("2026-09-01T18:00:00.000Z");
+/** 18:00 in UTC-3, the first of the two hours a nudge may leave in. */
+const NOW = new Date("2026-09-01T21:00:00.000Z");
 
-/** 03:00 in UTC-3, inside quiet hours. */
+/** 03:00 in UTC-3, the middle of the night. */
 const NIGHT = new Date("2026-09-01T06:00:00.000Z");
+
+/**
+ * The instant of the production incident: 19:03 UTC, which is 16:03 in
+ * Sao Paulo. Inside the old "not quiet hours" window, outside the evening one.
+ */
+const AFTERNOON_BURST = new Date("2026-09-02T19:03:00.000Z");
 
 const hoursBefore = (reference: Date, hours: number) =>
   new Date(reference.getTime() - hours * 60 * 60 * 1000);
@@ -105,9 +111,9 @@ const seedSilentMatch = async (hours: number, reference = NOW) => {
 
 describe("localHourFromLongitude", () => {
   it("reads the hour from the longitude offset", () => {
-    expect(localHourFromLongitude(LONGITUDE, NOW)).toBe(15);
-    expect(localHourFromLongitude(0, NOW)).toBe(18);
-    expect(localHourFromLongitude(150, NOW)).toBe(4);
+    expect(localHourFromLongitude(LONGITUDE, NOW)).toBe(18);
+    expect(localHourFromLongitude(0, NOW)).toBe(21);
+    expect(localHourFromLongitude(150, NOW)).toBe(7);
   });
 
   it("has no hour without a longitude", () => {
@@ -117,22 +123,41 @@ describe("localHourFromLongitude", () => {
 });
 
 describe("isWithinSendWindow", () => {
-  it("sends during the day and stays quiet at night", () => {
+  it("opens for the two evening hours and nothing else", () => {
+    // 18:00 and 19:00 local.
     expect(isWithinSendWindow(LONGITUDE, NOW)).toBe(true);
-    // 23:00 local.
     expect(
-      isWithinSendWindow(LONGITUDE, new Date("2026-09-02T02:00:00.000Z")),
+      isWithinSendWindow(LONGITUDE, new Date("2026-09-01T22:00:00.000Z")),
+    ).toBe(true);
+    // 17:00 local, an hour early.
+    expect(
+      isWithinSendWindow(LONGITUDE, new Date("2026-09-01T20:00:00.000Z")),
     ).toBe(false);
-    // 06:00 local.
+    // 20:00 local, an hour late.
+    expect(
+      isWithinSendWindow(LONGITUDE, new Date("2026-09-01T23:00:00.000Z")),
+    ).toBe(false);
+    // 03:00 local.
     expect(isWithinSendWindow(LONGITUDE, NIGHT)).toBe(false);
   });
 
-  it("falls back to the early evening Sao Paulo slot without coordinates", () => {
+  it("holds a located user to the same window as everybody else", () => {
+    // The production incident. Sao Paulo, 16:03 local: the old rule let any
+    // located user through from 09:00 to 21:00, so this went out.
+    expect(isWithinSendWindow(-46.63, AFTERNOON_BURST)).toBe(false);
+    expect(isWithinSendWindow(null, AFTERNOON_BURST)).toBe(false);
+
+    // Three hours later, in the slot, both are due.
+    const evening = new Date("2026-09-02T22:00:00.000Z");
+
+    expect(isWithinSendWindow(-46.63, evening)).toBe(true);
+    expect(isWithinSendWindow(null, evening)).toBe(true);
+  });
+
+  it("uses America/Sao_Paulo when there are no coordinates", () => {
     // 18:00 in UTC-3, and 19:00 so one missed cron run does not drop the
     // whole cohort for the day.
-    expect(isWithinSendWindow(null, new Date("2026-09-01T21:00:00.000Z"))).toBe(
-      true,
-    );
+    expect(isWithinSendWindow(null, NOW)).toBe(true);
     expect(isWithinSendWindow(null, new Date("2026-09-01T22:00:00.000Z"))).toBe(
       true,
     );
@@ -140,8 +165,6 @@ describe("isWithinSendWindow", () => {
     expect(isWithinSendWindow(null, new Date("2026-09-01T23:00:00.000Z"))).toBe(
       false,
     );
-    // 15:00 in UTC-3, fine for a located user but not for this one.
-    expect(isWithinSendWindow(null, NOW)).toBe(false);
   });
 });
 
@@ -503,6 +526,26 @@ describe("selectLikesWaitingCandidates", () => {
     await expect(selectLikesWaitingCandidates(NOW)).resolves.toEqual([]);
   });
 
+  it("stays quiet for a week after the last one, even for a brand new like", async () => {
+    const { user } = await seedWaitingLike(30);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: user.id,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: "announced-three-days-ago",
+        sentAt: daysAgo(3),
+      },
+    });
+
+    await expect(selectLikesWaitingCandidates(NOW)).resolves.toEqual([]);
+
+    // Eight days on, the floor has passed and the like is fair game again.
+    await prisma.notificationLog.updateMany({ data: { sentAt: daysAgo(8) } });
+
+    await expect(selectLikesWaitingCandidates(NOW)).resolves.toHaveLength(1);
+  });
+
   it("does not repeat itself once the oldest waiting like was announced", async () => {
     const { user, interest } = await seedWaitingLike(30);
 
@@ -576,10 +619,10 @@ describe("ReengagementService.run", () => {
 
     expect((await ReengagementService.run(NOW)).sent).toBe(2);
 
-    // Two hours later the match keys are claimed but the like key is not, and
-    // the daily cap is what has to stop it.
+    // An hour later, still in the window: the match keys are claimed but the
+    // like key is not, and the daily cap is what has to stop it.
     const summary = await ReengagementService.run(
-      new Date(NOW.getTime() + 2 * 60 * 60 * 1000),
+      new Date(NOW.getTime() + 60 * 60 * 1000),
     );
 
     expect(summary.sent).toBe(0);
@@ -658,13 +701,116 @@ describe("ReengagementService.run", () => {
     expect(summary.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(1);
   });
 
-  it("sends nothing during quiet hours", async () => {
+  it("does not send in the afternoon the production burst went out in", async () => {
+    await seedSilentMatch(25, AFTERNOON_BURST);
+
+    // Sao Paulo. The old rule let a located user through at any hour from
+    // 09:00 to 21:00 local, which is how 200 pushes left at 16:03.
+    await prisma.user.updateMany({
+      data: { latitude: -23.55, longitude: -46.63 },
+    });
+
+    const burst = await ReengagementService.run(AFTERNOON_BURST);
+
+    expect(burst.sent).toBe(0);
+    expect(burst.skippedOutsideWindow).toBe(2);
+    expect(
+      PushNotificationService.enqueuePushNotification,
+    ).not.toHaveBeenCalled();
+
+    // The same two candidates three hours later, now 19:00 local.
+    const evening = await ReengagementService.run(
+      new Date("2026-09-02T22:00:00.000Z"),
+    );
+
+    expect(evening.sent).toBe(2);
+  });
+
+  it("nudges about waiting likes once a week, not once a day", async () => {
+    const { user, dog: liked } = await generateFakeUserWithDog(
+      { gender: "FEMALE" },
+      reachableUser(),
+    );
+
+    /** Seven admirers, oldest like first, all of them waiting over a day. */
+    const likes: { id: string }[] = [];
+    for (const index of [0, 1, 2, 3, 4, 5, 6]) {
+      // oxlint-disable-next-line no-await-in-loop -- Fixture rows are created in order so their timestamps stay distinct.
+      const { dog: admirer } = await generateFakeUserWithDog(
+        { gender: "MALE", name: `Admirer ${index}` },
+        reachableUser({ pushToken: null }),
+      );
+
+      // oxlint-disable-next-line no-await-in-loop -- Same.
+      const like = await prisma.interest.create({
+        data: {
+          requesterId: admirer.id,
+          responderId: liked.id,
+          swipeType: "INTERESTED",
+          lastPositiveAt: hoursAgo(40 - index),
+        },
+      });
+
+      // oxlint-disable-next-line no-await-in-loop -- Same.
+      await prisma.interest.update({
+        where: { id: like.id },
+        data: { createdAt: hoursAgo(40 - index) },
+      });
+
+      likes.push(like);
+    }
+
+    const first = await ReengagementService.run(NOW);
+
+    expect(first.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(1);
+
+    /**
+     * The next evening slot, with the like that was announced taken off the
+     * board. A swipe back does exactly this, and it is what moves the anchor
+     * the dedupe key is built from: every one of these days offers a key that
+     * has never been claimed, so the weekly floor is the only thing left
+     * holding the nudge back.
+     */
+    const runOnDay = async (day: number) => {
+      await prisma.interest.update({
+        where: { id: likes[day - 1]?.id },
+        data: { deletedAt: NOW },
+      });
+
+      return ReengagementService.run(
+        new Date(NOW.getTime() + day * 24 * 60 * 60 * 1000),
+      );
+    };
+
+    for (const day of [1, 2, 3, 4, 5, 6]) {
+      // oxlint-disable-next-line no-await-in-loop -- Each day has to see the log the previous day wrote.
+      const summary = await runOnDay(day);
+
+      expect(summary.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(0);
+    }
+
+    await expect(
+      prisma.notificationLog.count({
+        where: { userId: user.id, kind: REENGAGEMENT_KINDS.LIKES_WAITING },
+      }),
+    ).resolves.toBe(1);
+
+    // A week on, the floor has passed and the likes still sitting there are
+    // worth one more nudge.
+    const nextWeek = await ReengagementService.run(
+      new Date(NOW.getTime() + 8 * 24 * 60 * 60 * 1000),
+    );
+
+    expect(nextWeek.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(1);
+  });
+
+  it("sends nothing outside the evening window", async () => {
     await seedSilentMatch(25, NIGHT);
 
     const summary = await ReengagementService.run(NIGHT);
 
     expect(summary.sent).toBe(0);
-    expect(summary.skippedQuietHours).toBe(2);
+    expect(summary.skippedOutsideWindow).toBe(2);
     expect(
       PushNotificationService.enqueuePushNotification,
     ).not.toHaveBeenCalled();

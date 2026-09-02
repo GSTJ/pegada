@@ -120,6 +120,8 @@ class MessageService {
         data: {
           url: `chat/${matchId}/${newMessage.senderId}`,
         },
+        userId: otherDog.user.id,
+        pushKind: "message",
       });
     }
 

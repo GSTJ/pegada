@@ -102,6 +102,8 @@ class MatchService {
           data: {
             url: `match/${match.id}/${match.requesterId}`,
           },
+          userId: match.responder.user.id,
+          pushKind: "match" as const,
         }
       : null;
 
