@@ -244,26 +244,43 @@ name: E2E Mobile (Maestro)
 #                          APPLE_MAGIC_* + MAESTRO_E2E config. Without
 #                          this the extended job no-ops.
 # ---------------------------------------------------------------------------
+# WHY THERE IS NO `paths:` FILTER ON THE TRIGGERS
+# ---------------------------------------------------------------------------
+# "iOS E2E (required, hard gate)" is a REQUIRED status check in the `Main`
+# branch ruleset. A workflow that never starts never reports its checks, so
+# while this file filtered on `paths: [apps/mobile/**, packages/**, ...]`
+# any pull request outside those paths (a web-only or docs-only change)
+# was permanently BLOCKED: GitHub waited forever for a check that could
+# not be produced. Observed on PR #215 (marketing-site only).
+#
+# The fix is to always START the workflow and decide INSIDE it whether the
+# expensive macOS work is worth doing:
+#
+#   `changes`   computes one boolean, `mobile`, from the files this
+#               push/PR actually touched (the same path list that used to
+#               live in the trigger). ~20s on ubuntu.
+#
+#   everything expensive hangs off `quarantine-lint`, which now requires
+#   `mobile == 'true'`. On a web-only PR the whole macOS chain skips and
+#   costs nothing.
+#
+#   `e2e-required-gate` carries the ruleset's check NAME and runs with
+#   `if: always()`. It passes when there were no mobile-relevant changes
+#   (or the PR is still a draft), and otherwise mirrors the real result
+#   of the build + required suite. The suite job that does the actual
+#   work kept its id but was renamed to "iOS E2E (required suite)", since
+#   the hard-gate NAME now belongs to the gate job.
+#
+# Net effect: mobile PRs behave exactly as before (same shards, same
+# secrets, same skips, red when the suite is red), and non-mobile PRs get
+# a green required check in seconds instead of hanging forever.
+# ---------------------------------------------------------------------------
 
 on:
   push:
     branches: [main]
-    paths:
-      - "apps/mobile/**"
-      - "packages/**"
-      - ".github/workflows/e2e-mobile.yml"
-      - ".github/scripts/maestro-*.py"
-      - ".github/scripts/install-maestro.sh"
-      - ".github/scripts/quarantine-lint.py"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "apps/mobile/**"
-      - "packages/**"
-      - ".github/workflows/e2e-mobile.yml"
-      - ".github/scripts/maestro-*.py"
-      - ".github/scripts/install-maestro.sh"
-      - ".github/scripts/quarantine-lint.py"
   workflow_dispatch:
   schedule:
     # Daily 09:00 UTC flake-stats sweep over the last 20 runs.
@@ -292,12 +309,108 @@ env:
 
 jobs:
   # -------------------------------------------------------------------------
-  # 0. Quarantine lint, runs on Ubuntu, gates the whole workflow.
+  # 0a. Path filter. Replaces the `paths:` trigger filter this workflow used
+  #     to carry (see "WHY THERE IS NO `paths:` FILTER" above). Same path
+  #     list, evaluated inside the run so the workflow always reports.
+  #
+  #     No dorny/paths-filter here: this repo does not use it anywhere else
+  #     and `git diff --name-only` against the merge base needs no new
+  #     third-party action to pin and audit.
+  # -------------------------------------------------------------------------
+  changes:
+    name: Detect mobile changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # Full history so merge-base resolves on both PR and push events.
+          fetch-depth: 0
+
+      - name: Compute mobile-relevant changes
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          # Mirrors the old `paths:` globs, as anchored regexes.
+          PATTERN='^apps/mobile/|^packages/|^\.github/workflows/e2e-mobile\.yml$|^\.github/scripts/maestro-[^/]*\.py$|^\.github/scripts/install-maestro\.sh$|^\.github/scripts/quarantine-lint\.py$'
+
+          FILES=""
+          case "$EVENT_NAME" in
+            pull_request)
+              # actions/checkout leaves us on the PR's merge commit, whose
+              # first parent is the base branch tip and second parent is the
+              # PR head. Diffing first-parent..HEAD is exactly the PR's own
+              # changes, and unlike naming the head branch it also works for
+              # forks, whose branch refs are never fetched. Fall back to an
+              # explicit merge-base if the merge ref is unavailable (an
+              # unmergeable PR checks out the head commit instead).
+              if git rev-parse --verify --quiet "HEAD^2" > /dev/null; then
+                FILES=$(git diff --name-only "HEAD^1" HEAD)
+              else
+                BASE=$(git merge-base "$BASE_SHA" HEAD)
+                FILES=$(git diff --name-only "$BASE" HEAD)
+              fi
+              ;;
+            push)
+              # A brand-new branch (or a force push that dropped the old
+              # tip) reports an all-zero "before"; nothing to diff against,
+              # so assume mobile and run the suite.
+              if [ -z "${BEFORE_SHA:-}" ] \
+                 || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] \
+                 || ! git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+                echo "No usable base commit for this push, assuming mobile changes."
+                echo "mobile=true" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              FILES=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")
+              ;;
+            *)
+              # workflow_dispatch and schedule are deliberate full runs.
+              echo "Event '$EVENT_NAME' always runs the full suite."
+              echo "mobile=true" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
+          esac
+
+          echo "::group::changed files"
+          echo "$FILES"
+          echo "::endgroup::"
+
+          if echo "$FILES" | grep -qE "$PATTERN"; then
+            echo "mobile=true" >> "$GITHUB_OUTPUT"
+            echo "Mobile-relevant paths changed, running the iOS suite."
+            {
+              echo "## iOS E2E path filter"
+              echo ""
+              echo "Mobile-relevant paths changed. Running the iOS suite."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "mobile=false" >> "$GITHUB_OUTPUT"
+            echo "No mobile-relevant paths changed, skipping the iOS suite."
+            {
+              echo "## iOS E2E path filter"
+              echo ""
+              echo "No mobile-relevant paths changed. The iOS suite is skipped"
+              echo "and the required check passes without running."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # -------------------------------------------------------------------------
+  # 0b. Quarantine lint, runs on Ubuntu, gates the whole expensive chain.
   #    Cheap, fast, prevents the quarantine list from rotting.
   # -------------------------------------------------------------------------
   quarantine-lint:
     name: Quarantine lint
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -747,13 +860,17 @@ jobs:
           retention-days: 1
 
   # -------------------------------------------------------------------------
-  # 2. REQUIRED iOS suite, HARD GATE.
+  # 2. REQUIRED iOS suite. This is the job that actually runs the flows.
   #    Downloads the .app built above; no compiling here, just sim boot +
   #    maestro. No continue-on-error anywhere. Retries the maestro
   #    invocation up to 3 times to absorb single-run noise.
+  #
+  #    Its result is what "iOS E2E (required, hard gate)" reports, but the
+  #    ruleset-facing NAME lives on the e2e-required-gate job below so the
+  #    check can also report on runs where this job never needs to start.
   # -------------------------------------------------------------------------
   e2e-ios-required:
-    name: iOS E2E (required, hard gate)
+    name: iOS E2E (required suite)
     needs: build-ios-required
     runs-on: macos-latest
     timeout-minutes: 20
@@ -981,6 +1098,82 @@ jobs:
           name: simulator-log-required
           path: simulator-required.logarchive
           if-no-files-found: ignore
+
+  # -------------------------------------------------------------------------
+  # 2b. HARD GATE. Carries the name the `Main` branch ruleset requires, so
+  #     it must report on EVERY pull request, including ones that touch no
+  #     mobile code at all. `always()` guarantees it starts even when every
+  #     job it depends on was skipped.
+  #
+  #     It never runs tests itself. It only turns the results above into
+  #     the single pass/fail the ruleset reads:
+  #
+  #       no mobile-relevant changes -> pass (nothing to test)
+  #       draft pull request         -> pass (suite intentionally deferred)
+  #       otherwise                  -> pass only if the build AND the
+  #                                     required suite both succeeded
+  #
+  #     Anything other than `success` on those two jobs (failure, cancelled,
+  #     or an unexpected skip) fails the gate. That last case matters: a
+  #     skipped job must never be read as a pass when we DID expect it to
+  #     run, which is the exact hole this whole file was written to close.
+  # -------------------------------------------------------------------------
+  e2e-required-gate:
+    name: iOS E2E (required, hard gate)
+    needs: [changes, build-ios-required, e2e-ios-required]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate gate
+        env:
+          MOBILE: ${{ needs.changes.outputs.mobile }}
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          BUILD_RESULT: ${{ needs.build-ios-required.result }}
+          SUITE_RESULT: ${{ needs.e2e-ios-required.result }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+
+          summary() {
+            {
+              echo "## iOS E2E, required hard gate"
+              echo ""
+              echo "$1"
+            } >> "$GITHUB_STEP_SUMMARY"
+          }
+
+          echo "changes=$CHANGES_RESULT (mobile=$MOBILE)"
+          echo "build-ios-required=$BUILD_RESULT"
+          echo "e2e-ios-required=$SUITE_RESULT"
+
+          if [ "$CHANGES_RESULT" != "success" ]; then
+            echo "::error::The path filter job did not succeed, so we cannot tell whether the iOS suite was needed. Failing closed."
+            summary "Failed: the path filter job did not succeed, so the gate failed closed."
+            exit 1
+          fi
+
+          if [ "$MOBILE" != "true" ]; then
+            echo "No mobile-relevant paths changed. Nothing to test, gate passes."
+            summary "Passed without running: this change touches no mobile-relevant paths."
+            exit 0
+          fi
+
+          if [ "$IS_DRAFT" = "true" ]; then
+            echo "Draft pull request, the iOS suite is deferred until it is marked ready for review."
+            summary "Passed without running: draft pull request, the suite runs when it is marked ready for review."
+            exit 0
+          fi
+
+          if [ "$BUILD_RESULT" = "success" ] && [ "$SUITE_RESULT" = "success" ]; then
+            echo "Build and required suite both passed."
+            summary "Passed: the iOS build and the required Maestro suite both succeeded."
+            exit 0
+          fi
+
+          echo "::error::iOS build was '$BUILD_RESULT' and the required suite was '$SUITE_RESULT'; both must be 'success'."
+          summary "Failed: the iOS build was \`$BUILD_RESULT\` and the required suite was \`$SUITE_RESULT\`. Both must succeed."
+          exit 1
 
   # -------------------------------------------------------------------------
   # 3a. Build iOS (extended variant), same fingerprint-cache mechanism as
@@ -1567,8 +1760,11 @@ jobs:
     name: Flake stats (last 20 runs)
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # Don't block, don't depend on the suites, this is observability.
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (github.event_name != 'schedule' || github.repository == github.event.repository.full_name)
+    # Don't block, don't depend on the suites, this is observability. It
+    # does depend on the path filter, only so a web-only PR is not handed a
+    # mobile flake table it has no use for.
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (github.event_name != 'schedule' || github.repository == github.event.repository.full_name)
     permissions:
       actions: read
       contents: read
