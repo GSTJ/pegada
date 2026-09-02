@@ -2,6 +2,7 @@ import { authenticationRouter } from "./routes/authentication";
 import { breedRouter } from "./routes/breed";
 import { dogRouter } from "./routes/dog";
 import { echoRouter } from "./routes/echo";
+import { featureInterestRouter } from "./routes/feature-interest";
 import { imageRouter } from "./routes/image";
 import { matchRouter } from "./routes/match";
 import { messageRouter } from "./routes/message";
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
   match: matchRouter,
   echo: echoRouter,
   payment: paymentRouter,
+  featureInterest: featureInterestRouter,
 });
 
 // export type definition of API

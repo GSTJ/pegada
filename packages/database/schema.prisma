@@ -54,7 +54,8 @@ model User {
   id    String @id(map: "idx_57699_PRIMARY") @default(cuid())
   email String @unique(map: "user_email_key")
 
-  dogs          Dog[]
+  dogs             Dog[]
+  featureInterests FeatureInterest[]
   // Location
   city          String?
   state         String?
@@ -188,6 +189,25 @@ model UploadGrant {
 
   @@index([userId, createdAt])
   @@index([expiresAt, consumedAt])
+}
+
+// One row per user per feature they asked to be notified about from a fake
+// door. `feature` is a free-form string here rather than an enum so adding
+// the next fake door is a code change and not a migration; the tRPC input
+// schema is where the accepted ids are pinned.
+model FeatureInterest {
+  id String @id @default(cuid())
+
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  feature String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Also the index `relationMode = "prisma"` needs on `userId`, since it
+  // leads with that column.
+  @@unique([userId, feature])
 }
 
 model Breed {

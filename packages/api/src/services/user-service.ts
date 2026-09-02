@@ -88,6 +88,7 @@ export class UserService {
       }
 
       await tx.uploadGrant.deleteMany({ where: { userId } });
+      await tx.featureInterest.deleteMany({ where: { userId } });
       await tx.user.delete({ where: { id: userId } });
     });
   }
