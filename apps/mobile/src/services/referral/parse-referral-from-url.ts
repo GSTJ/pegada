@@ -33,8 +33,8 @@ type UrlParts = {
  * React Native ships its own `URL` (Libraries/Blob/URL.js) and it is not the
  * web one: `hostname` is a regex that only matches `^https?://`, so it returns
  * "" for `pegada://`, and `searchParams` is a stub. Written against the global,
- * this function passed every test in jest — where `URL` is node's real one —
- * and silently returned `undefined` for every deep link on the device. The
+ * this function passed every test in jest, where `URL` is node's real one, and
+ * silently returned `undefined` for every deep link on the device. The
  * whole feature reads as "referrals just do not work" and nothing logs.
  *
  * `pegada://dog/<id>` puts "dog" in the authority and the id in the path;
@@ -123,10 +123,11 @@ export const parseReferralFromUrl = (
 /**
  * Put a sharer on a share link.
  *
- * Exported for the share link builder (`DogShareOptions/share-actions.ts`),
- * which calls it so every link this app hands out can be attributed. Built by
- * hand for the same reason as {@link splitUrl}: `URLSearchParams` is a stub in
- * React Native.
+ * Exported for the share link builder coming with the profile share feature,
+ * which should wrap its URL with this once both land, so every link this app
+ * hands out can be attributed. Nothing calls it yet. Built by hand for the
+ * same reason as {@link splitUrl}: `URLSearchParams` is a stub in React
+ * Native.
  */
 export const withReferral = (
   shareUrl: string,

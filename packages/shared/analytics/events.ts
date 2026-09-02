@@ -47,6 +47,7 @@ export const ANALYTICS_EVENTS = {
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
   REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
   PUSH_PERMISSION: "Push Permission",
+  REFERRAL_CAPTURED: "Referral Captured",
   RESTORE_PURCHASES: "RestorePurchases",
   RESTORE_PURCHASES_SUCCESS: "Restore Purchases Success",
   SAVE_PREFERENCES_PRESSED: "Save Preferences Pressed",
@@ -203,6 +204,15 @@ export type MobileEventProperties = {
    */
   [ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED]: { kind?: string; url?: string };
   [ANALYTICS_EVENTS.PUSH_PERMISSION]: { status: PermissionStatus };
+  // Keys stay camelCase here: they are the same names the referral link and
+  // the server attribution already use, and matching them keeps a capture and
+  // the signup it leads to joinable without a translation step.
+  [ANALYTICS_EVENTS.REFERRAL_CAPTURED]: {
+    cold: boolean;
+    ref: string;
+    referredByUserId: string | null;
+    referredDogId: string | null;
+  };
   [ANALYTICS_EVENTS.RESTORE_PURCHASES]: undefined;
   [ANALYTICS_EVENTS.RESTORE_PURCHASES_SUCCESS]: undefined;
   [ANALYTICS_EVENTS.SAVE_PREFERENCES_PRESSED]: {
@@ -387,6 +397,7 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.PROFILE_PHOTO_ADDED,
   ANALYTICS_EVENTS.PUSH_NOTIFICATION_OPENED,
   ANALYTICS_EVENTS.PUSH_PERMISSION,
+  ANALYTICS_EVENTS.REFERRAL_CAPTURED,
   ANALYTICS_EVENTS.RESTORE_PURCHASES,
   ANALYTICS_EVENTS.RESTORE_PURCHASES_SUCCESS,
   ANALYTICS_EVENTS.SAVE_PREFERENCES_PRESSED,

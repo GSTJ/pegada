@@ -44,6 +44,7 @@ export const GET = (request: Request) => {
   }).capture("Store Redirect", {
     store: target,
     ref: campaign.ref ?? null,
+    dogId: campaign.dog ?? null,
     utm_source: campaign.utm_source ?? null,
     utm_medium: campaign.utm_medium ?? null,
     utm_campaign: campaign.utm_campaign ?? null,

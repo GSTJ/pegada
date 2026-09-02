@@ -24,6 +24,7 @@ const {
 } = await import("../src/app/store/store-urls.ts");
 
 const REF = "cms9es4dr0001wbmv1a2b3c4d";
+const DOG_ID = "cms9es4dr0002wbmv9z8y7x6w";
 
 const IPHONE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
@@ -144,17 +145,53 @@ test("a campaign value that could not have come from a link never reaches a stor
   }
 });
 
-test("readCampaign takes only the four parameters, validated", () => {
+test("readCampaign takes only the campaign parameters, validated", () => {
   const params = new URLSearchParams(
-    "ref=ig&utm_source=instagram&utm_medium=bio&utm_campaign=a b&other=keepout",
+    `ref=ig&dog=${DOG_ID}&utm_source=instagram&utm_medium=bio&utm_campaign=a b&other=keepout`,
   );
 
   assert.deepEqual(readCampaign(params), {
     ref: "ig",
+    dog: DOG_ID,
     utm_source: "instagram",
     utm_medium: "bio",
     // A space cannot appear in a value we generated, so it is dropped rather
     // than escaped into a store's campaign report.
     utm_campaign: undefined,
   });
+});
+
+test("the shared dog rides to Play as utm_term and nowhere on iOS", () => {
+  // The dog card is the whole point of the share, so an install has to be able
+  // to open on the dog that earned it. Google's referrer has room for it;
+  // Apple's `ct` is a single slot already spent on the referrer, so on iOS the
+  // dog is dropped rather than smuggled into the same token.
+  const campaign = { ref: REF, dog: DOG_ID };
+
+  assert.equal(
+    new URL(storeUrlFor({ target: "android", campaign })).searchParams.get(
+      "referrer",
+    ),
+    `utm_source=pegada&utm_medium=share&utm_content=${REF}&utm_term=${DOG_ID}`,
+  );
+
+  const ios = new URL(storeUrlFor({ target: "ios", campaign }));
+  assert.equal(ios.searchParams.get("ct"), REF);
+  assert.equal(ios.search, `?ct=${REF}`);
+});
+
+test("a dog that could not be an id never reaches Play", () => {
+  // `dog` is always written by this site, never typed by a human, so a channel
+  // token or anything shorter than an id is a tampered link.
+  for (const dog of [
+    "ig",
+    "../../admin",
+    `${DOG_ID}&pt=evil`,
+    "a".repeat(33),
+  ]) {
+    assert.equal(
+      storeUrlFor({ target: "android", campaign: { ref: REF, dog } }),
+      `${PLAY_STORE_URL}&referrer=utm_source%3Dpegada%26utm_medium%3Dshare%26utm_content%3D${REF}`,
+    );
+  }
 });

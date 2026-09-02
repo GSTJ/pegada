@@ -1,4 +1,4 @@
-import { isReferralRef } from "@pegada/shared/utils/referral";
+import { isReferralId, isReferralRef } from "@pegada/shared/utils/referral";
 
 export const WEBSITE_URL = "https://www.pegada.app/";
 export const APP_STORE_URL =
@@ -12,6 +12,7 @@ export type StoreTarget = "ios" | "android" | "web";
 /** What a campaign link can carry into a store. All optional, all untrusted. */
 export type StoreCampaign = {
   ref?: string | null;
+  dog?: string | null;
   utm_source?: string | null;
   utm_medium?: string | null;
   utm_campaign?: string | null;
@@ -37,8 +38,17 @@ export const storeTargetForUserAgent = (userAgent: string): StoreTarget => {
 const keep = (value: string | null | undefined) =>
   isReferralRef(value) ? value : undefined;
 
+/**
+ * `dog` is narrower than `ref`. A referrer can be a hand typed channel token
+ * like `ig`, but the dog is always an id this site put on the link itself, so
+ * it is held to the id pattern.
+ */
+const keepDog = (value: string | null | undefined) =>
+  isReferralId(value) ? value : undefined;
+
 export const readCampaign = (params: URLSearchParams): StoreCampaign => ({
   ref: keep(params.get("ref")),
+  dog: keepDog(params.get("dog")),
   utm_source: keep(params.get("utm_source")),
   utm_medium: keep(params.get("utm_medium")),
   utm_campaign: keep(params.get("utm_campaign")),
@@ -47,16 +57,18 @@ export const readCampaign = (params: URLSearchParams): StoreCampaign => ({
 /** The campaign with every unusable value already dropped. */
 const cleanCampaign = (campaign?: StoreCampaign) => {
   const ref = keep(campaign?.ref);
+  const dog = keepDog(campaign?.dog);
   const source = keep(campaign?.utm_source);
   const medium = keep(campaign?.utm_medium);
   const name = keep(campaign?.utm_campaign);
 
   return {
     ref,
+    dog,
     source,
     medium,
     name,
-    any: Boolean(ref ?? source ?? medium ?? name),
+    any: Boolean(ref ?? dog ?? source ?? medium ?? name),
   };
 };
 
@@ -72,11 +84,12 @@ const cleanCampaign = (campaign?: StoreCampaign) => {
  *   - Apple: `ct` is the campaign token on an App Store link, readable through
  *     App Analytics. `pt` (provider token) would let it show up per-provider;
  *     this project has no provider id, and inventing one would just be a
- *     parameter Apple ignores.
+ *     parameter Apple ignores. One slot, so the referrer takes it and the dog
+ *     is not carried at all on iOS.
  *   - Google: `referrer` is a single URL-encoded query string, handed to the
  *     app through the Install Referrer API. It is conventionally utm_*, so the
- *     incoming utm_* values are folded into it and the `ref` rides as
- *     `utm_content`.
+ *     incoming utm_* values are folded into it, the `ref` rides as
+ *     `utm_content` and the shared dog rides as `utm_term`.
  */
 export const storeUrlFor = ({
   target,
@@ -87,6 +100,7 @@ export const storeUrlFor = ({
 }): string => {
   const {
     ref,
+    dog,
     source,
     medium,
     name,
@@ -110,6 +124,7 @@ export const storeUrlFor = ({
     referrer.set("utm_medium", medium ?? "share");
     if (name) referrer.set("utm_campaign", name);
     if (ref) referrer.set("utm_content", ref);
+    if (dog) referrer.set("utm_term", dog);
 
     const url = new URL(PLAY_STORE_URL);
     url.searchParams.set("referrer", referrer.toString());
