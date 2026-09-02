@@ -45,6 +45,19 @@ const toDate = (milliseconds: number | null | undefined) =>
   milliseconds ? new Date(milliseconds) : null;
 
 /**
+ * The whole event minus `subscriber_attributes`, which carries the email the
+ * app pushes to RevenueCat through `setEmail`. We already hold that address on
+ * `User`, and none of the churn numbers read it, so copying it into a second
+ * table would only spread the same personal data over more rows.
+ */
+const toStoredPayload = (event: Event): Prisma.InputJsonValue => {
+  const { subscriber_attributes: _attributes, ...rest } = event as Event &
+    LoggableEvent;
+
+  return rest as unknown as Prisma.InputJsonValue;
+};
+
+/**
  * The reporting half of the RevenueCat webhook. Nothing in here decides
  * whether a subscriber has premium, so nothing in here is allowed to throw:
  * `record` catches everything and reports it, leaving the plan mutation in
@@ -88,7 +101,7 @@ export class SubscriptionEventService {
           cancelReason:
             fields.cancel_reason ?? fields.expiration_reason ?? null,
           environment: event.environment,
-          raw: event as unknown as Prisma.InputJsonValue,
+          raw: toStoredPayload(event),
         },
       });
     } catch (error) {

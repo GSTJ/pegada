@@ -105,6 +105,25 @@ describe("SubscriptionEventService log", () => {
     });
   });
 
+  it("keeps the subscriber's email out of the stored payload", async () => {
+    const subscriber = await seedSubscriber("attributes@pegada.app");
+
+    await paymentService.handleRevenueCatEvent({
+      event: revenuecat.initialPurchase("evt_attributes", subscriber.id, {
+        subscriber_attributes: {
+          $email: { value: "attributes@pegada.app", updated_at_ms: 1 },
+        },
+      }),
+    });
+
+    const { raw } = await prisma.subscriptionEvent.findUniqueOrThrow({
+      where: { eventId: "evt_attributes" },
+    });
+
+    expect(raw).not.toHaveProperty("subscriber_attributes");
+    expect(raw).toMatchObject({ product_id: revenuecat.PRODUCT_ID });
+  });
+
   it("stores the cancel reason of a cancellation", async () => {
     const subscriber = await seedSubscriber("reason@pegada.app");
 
