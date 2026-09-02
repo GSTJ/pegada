@@ -15,6 +15,9 @@
 
 export const ANALYTICS_EVENTS = {
   ADVERTISEMENT: "Advertisement",
+  AI_STORY_LANDING_CTA_CLICKED: "AI Story Landing CTA Clicked",
+  AI_STORY_LANDING_VIEWED: "AI Story Landing Viewed",
+  AI_STORY_LEAD_CAPTURED: "AI Story Lead Captured",
   APP_REVIEW: "App Review",
   APP_REVIEW_REQUEST: "App Review Request",
   APP_REVIEW_SKIPPED: "App Review Skipped",
@@ -369,6 +372,43 @@ export type ServerEventProperties = {
 export type ServerEventName = keyof ServerEventProperties;
 
 /**
+ * How someone arrived, copied off the query string of the page they landed on.
+ * Sent with every event of a campaign so a funnel can be read per channel, and
+ * every key is optional because most visits carry none of them.
+ */
+export type LandingAttribution = {
+  ref?: string;
+  utm_campaign?: string;
+  utm_medium?: string;
+  utm_source?: string;
+};
+
+/** Whether the address was new to the list or already on it. */
+export type FeatureInterestStatus = "already_listed" | "captured";
+
+/**
+ * Event name to property shape, for events sent from the marketing site.
+ *
+ * The three below are one funnel: how many people saw the AI story page, how
+ * many asked for it, how many left an address. `locale` sits on all three
+ * because the page ships in two languages and they are not the same audience.
+ */
+export type WebEventProperties = {
+  [ANALYTICS_EVENTS.AI_STORY_LANDING_CTA_CLICKED]: LandingAttribution & {
+    locale: string;
+  };
+  [ANALYTICS_EVENTS.AI_STORY_LANDING_VIEWED]: LandingAttribution & {
+    locale: string;
+  };
+  [ANALYTICS_EVENTS.AI_STORY_LEAD_CAPTURED]: LandingAttribution & {
+    locale: string;
+    status: FeatureInterestStatus;
+  };
+};
+
+export type WebEventName = keyof WebEventProperties;
+
+/**
  * Person properties set on identify.
  *
  * Kept small on purpose: every one of these is a breakdown someone actually
@@ -456,6 +496,12 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
 ] as const;
 
+export const WEB_EVENT_NAMES = [
+  ANALYTICS_EVENTS.AI_STORY_LANDING_CTA_CLICKED,
+  ANALYTICS_EVENTS.AI_STORY_LANDING_VIEWED,
+  ANALYTICS_EVENTS.AI_STORY_LEAD_CAPTURED,
+] as const;
+
 type AssertCovers<Name extends string, Listed extends string> = [
   Exclude<Name, Listed>,
 ] extends [never]
@@ -472,5 +518,10 @@ const SERVER_LIST_IS_COMPLETE: AssertCovers<
   (typeof SERVER_EVENT_NAMES)[number]
 > = true;
 
+const WEB_LIST_IS_COMPLETE: AssertCovers<
+  WebEventName,
+  (typeof WEB_EVENT_NAMES)[number]
+> = true;
+
 export const ANALYTICS_CATALOGUE_IS_COMPLETE =
-  MOBILE_LIST_IS_COMPLETE && SERVER_LIST_IS_COMPLETE;
+  MOBILE_LIST_IS_COMPLETE && SERVER_LIST_IS_COMPLETE && WEB_LIST_IS_COMPLETE;

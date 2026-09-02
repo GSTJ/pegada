@@ -11,7 +11,13 @@ const DEFAULT_LOCALE: (typeof LOCALES)[number] = "en-us";
 
 // Static, indexable pages. `/dog/[id]` is excluded on purpose: those pages
 // are per-swipe-card and not meant to be crawled or ranked individually.
-const PAGES = ["", "privacy-policy", "terms-of-use", "delete-account"] as const;
+const PAGES = [
+  "",
+  "story",
+  "privacy-policy",
+  "terms-of-use",
+  "delete-account",
+] as const;
 
 const localizedPath = (
   locale: (typeof LOCALES)[number],

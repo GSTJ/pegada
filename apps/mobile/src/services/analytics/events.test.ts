@@ -2,6 +2,7 @@ import {
   ANALYTICS_EVENTS,
   MOBILE_EVENT_NAMES,
   SERVER_EVENT_NAMES,
+  WEB_EVENT_NAMES,
 } from "@pegada/shared/analytics/events";
 
 /**
@@ -43,10 +44,19 @@ describe("analytics catalogue", () => {
     expect(new Set(SERVER_EVENT_NAMES).size).toBe(SERVER_EVENT_NAMES.length);
   });
 
+  it("lists only catalogued names on the web side", () => {
+    for (const name of WEB_EVENT_NAMES) {
+      expect(names).toContain(name);
+    }
+
+    expect(new Set(WEB_EVENT_NAMES).size).toBe(WEB_EVENT_NAMES.length);
+  });
+
   it("covers every catalogued name from at least one side", () => {
     const covered = new Set<string>([
       ...MOBILE_EVENT_NAMES,
       ...SERVER_EVENT_NAMES,
+      ...WEB_EVENT_NAMES,
     ]);
 
     expect(names.filter((name) => !covered.has(name))).toStrictEqual([]);

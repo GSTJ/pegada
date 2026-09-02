@@ -72,7 +72,51 @@
         "description": "Where to meet, and when.",
         "alt": "A Pegada chat between two owners settling on a morning at the park."
       }
+    },
+    "footer": {
+      "aiStory": "Your dog's AI story"
     }
+  },
+  "story": {
+    "metadata": {
+      "title": "Pegada | Your dog's story",
+      "description": "We turn your dog's photos into a story that is ready to post. Made with AI, in seconds.",
+      "ogImageAlt": "Three vertical stories side by side on a cream background: a cover with a dog's name in large letters, a walk pass, and a yellow chat with a puppy."
+    },
+    "headline": "Make your dog's story",
+    "subline": "We turn their photos into a story that is ready to post. Made with AI, in seconds.",
+    "examples": {
+      "title": "How it looks",
+      "editorial": {
+        "alt": "A story on cream paper with the name Nina in large letters, a photo of a grey dog and three smaller photos beside it."
+      },
+      "ticket": {
+        "alt": "A story shaped like a ticket, asking who is up for a walk, with photos of two dogs and passenger, destination and gate fields."
+      },
+      "chat": {
+        "alt": "A yellow story titled “DM open to the dogs”, with a photo of a golden retriever puppy and two chat messages beside it."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "photos": "Pick your dog's photos.",
+      "build": "We build the story.",
+      "post": "You post it and tag Pegada."
+    },
+    "cta": "I want mine",
+    "form": {
+      "title": "Join the list",
+      "description": "We will email you when the story opens.",
+      "label": "Your email",
+      "placeholder": "you@email.com",
+      "honeypot": "Website",
+      "submit": "I want mine",
+      "submitting": "Sending",
+      "invalid": "That address looks off. Mind checking it?",
+      "rateLimited": "Try again in a minute.",
+      "failed": "We could not save that just now. Try again."
+    },
+    "success": "You are on the list, we will let you know when it opens."
   },
   "dog": {
     "metadata": {

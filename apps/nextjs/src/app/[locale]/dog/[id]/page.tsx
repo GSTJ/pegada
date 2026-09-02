@@ -8,11 +8,11 @@ import { Namespace } from "@pegada/shared/i18n/types/types";
 import { isReferralRef } from "@pegada/shared/utils/referral";
 
 import { DownloadCta } from "@/components/download-cta";
+import { gilroy } from "@/lib/fonts";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
-import { gilroy } from "./fonts";
 import {
   getDog,
   getDogArticle,

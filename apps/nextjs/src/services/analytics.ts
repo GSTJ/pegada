@@ -1,3 +1,10 @@
+import type {
+  FeatureInterestStatus,
+  WebEventName,
+  WebEventProperties,
+} from "@pegada/shared/analytics/events";
+
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { getPostHog, getWebClient } from "magic-observability/web";
 
 /**
@@ -76,5 +83,87 @@ export const trackDownloadCtaClicked = (click: DownloadCtaClick) => {
   getPostHog().capture(DOWNLOAD_CTA_CLICKED, downloadCtaProperties(click), {
     transport: "sendBeacon",
     send_instantly: true,
+  });
+};
+
+/**
+ * How the visitor arrived, read off the query string on the server and handed
+ * to the client as props. Camel case here, snake case in PostHog: these are
+ * the names the page code uses, and {@link aiStoryProperties} does the
+ * translation once.
+ */
+export type AiStoryAttribution = {
+  ref?: string;
+  utmCampaign?: string;
+  utmMedium?: string;
+  utmSource?: string;
+};
+
+/** Everything the three AI story events carry, before the event's own fields. */
+export type AiStoryContext = AiStoryAttribution & { locale: string };
+
+/**
+ * The property bag, split out from the capture so it can be asserted on
+ * without a PostHog client.
+ *
+ * An absent parameter is omitted rather than sent as `null`, for the same
+ * reason `dog_id` is above: PostHog stores an explicit null and it shows up as
+ * a real value in a breakdown, so every direct visit would form a "null" row
+ * next to the campaigns.
+ */
+export const aiStoryProperties = ({
+  locale,
+  ref,
+  utmCampaign,
+  utmMedium,
+  utmSource,
+}: AiStoryContext) => ({
+  locale,
+  ...(ref === undefined ? {} : { ref }),
+  ...(utmCampaign === undefined ? {} : { utm_campaign: utmCampaign }),
+  ...(utmMedium === undefined ? {} : { utm_medium: utmMedium }),
+  ...(utmSource === undefined ? {} : { utm_source: utmSource }),
+});
+
+/**
+ * `posthog-js` warns when it is called before `init`, which is every event
+ * until the key is set, so the shared client is asked first.
+ */
+const captureWeb = <Name extends WebEventName>(
+  name: Name,
+  properties: WebEventProperties[Name],
+) => {
+  if (!getWebClient().enabled) return;
+
+  getPostHog().capture(name, properties);
+};
+
+/** Denominator of the experiment: one per view of the AI story landing page. */
+export const trackAiStoryLandingViewed = (context: AiStoryContext) => {
+  captureWeb(
+    ANALYTICS_EVENTS.AI_STORY_LANDING_VIEWED,
+    aiStoryProperties(context),
+  );
+};
+
+/** The middle step: asked to see the form, has not typed anything yet. */
+export const trackAiStoryLandingCtaClicked = (context: AiStoryContext) => {
+  captureWeb(
+    ANALYTICS_EVENTS.AI_STORY_LANDING_CTA_CLICKED,
+    aiStoryProperties(context),
+  );
+};
+
+/**
+ * The number the whole page exists to produce. `already_listed` is counted
+ * too, so a returning visitor is not read as a new signup.
+ */
+export const trackAiStoryLeadCaptured = ({
+  status,
+  ...context
+}: AiStoryContext & { status: FeatureInterestStatus }) => {
+  captureWeb(ANALYTICS_EVENTS.AI_STORY_LEAD_CAPTURED, {
+    ...aiStoryProperties(context),
+    status,
   });
 };

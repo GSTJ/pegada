@@ -1,5 +1,6 @@
 import { readCampaign } from "@/app/store/store-urls";
 import { Cta } from "@/components/cta";
+import { Footer } from "@/components/footer";
 import { HeroImage } from "@/components/hero-image";
 import { Logo } from "@/components/logo";
 import { Restricter } from "@/components/restricter";
@@ -62,6 +63,7 @@ const App = async ({
       <Features />
       <HowItWorks />
       <Screens />
+      <Footer />
     </>
   );
 };
