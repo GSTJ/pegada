@@ -9,16 +9,28 @@ jest.mock<Partial<typeof import("expo-router")>>("expo-router", () => ({
 
 // The module under test also wires up notification handling
 // (useGetInitialNotifications / processLinks), which pulls in
-// expo-notifications and the observability stack at import time. Neither
-// runs in this test — only usePendingDogProfile does — so both are stubbed
-// to keep the import side-effect-free, the same way action.test.ts mocks
-// error-tracking for the same reason.
+// expo-notifications and the observability stack at import time. The stub
+// keeps the import side-effect-free the way action.test.ts mocks
+// error-tracking, and doubles as the tap simulator the replay tests drive:
+// it hands back the registered listeners so a tap can be delivered to every
+// one of them, exactly as the native module does.
 jest.mock<Record<string, unknown>>("expo-notifications", () => ({
-  addNotificationResponseReceivedListener: jest.fn(() => ({
-    remove: jest.fn(),
-  })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
+  addNotificationResponseReceivedListener: (
+    listener: (response: unknown) => void,
+  ) => {
+    mockResponseListeners.add(listener);
+    return {
+      remove: () => {
+        mockResponseListeners.delete(listener);
+      },
+    };
+  },
+  getLastNotificationResponseAsync: () =>
+    Promise.resolve(mockLastNotificationResponse),
 }));
+
+const mockResponseListeners = new Set<(response: unknown) => void>();
+let mockLastNotificationResponse: unknown = null;
 
 jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
   sendError: jest.fn(),
@@ -58,7 +70,12 @@ jest.mock<Record<string, unknown>>("react", () => {
 
 import { analytics } from "@/services/analytics";
 
-import { usePendingDogProfile } from ".";
+import {
+  processLinks,
+  useGetInitialNotifications,
+  usePendingDogProfile,
+} from ".";
+import { setInitialNotification } from "./handlers/initial-notification";
 
 const push = jest.mocked(router.push);
 const track = jest.mocked(analytics.track);
@@ -71,9 +88,39 @@ const Harness = ({ enabled }: { enabled: boolean }) => {
 const render = (enabled: boolean) =>
   renderToStaticMarkup(React.createElement(Harness, { enabled }));
 
+const notificationResponse = (identifier: string, url: string) => ({
+  notification: { request: { identifier, content: { data: { url } } } },
+});
+
+/** Mounts the root layout, which is where the app wide tap listener lives. */
+const mountLayout = async () => {
+  const LayoutHarness = () => {
+    useGetInitialNotifications();
+    return null;
+  };
+
+  renderToStaticMarkup(React.createElement(LayoutHarness));
+  // getLastNotificationResponseAsync resolves on a microtask, and the cold
+  // start tap is only stored once it does.
+  await Promise.resolve();
+  await Promise.resolve();
+};
+
+/** Delivers a tap to every registered listener, the way the OS does. */
+const tap = (response: ReturnType<typeof notificationResponse>) => {
+  for (const listener of mockResponseListeners) listener(response);
+};
+
+const countReported = (eventType: string) =>
+  track.mock.calls.filter(([event]) => event.event_type === eventType).length;
+
 afterEach(() => {
   mockPendingDogProfileId = undefined;
+  mockResponseListeners.clear();
+  mockLastNotificationResponse = null;
+  setInitialNotification(undefined);
   track.mockClear();
+  push.mockClear();
 });
 
 test("does not navigate while disabled, even with a pending id", () => {
@@ -137,4 +184,69 @@ test("pushes again for a second id that arrives while already enabled", () => {
     pathname: "/profile/[id]",
     params: { id: "dog-2" },
   });
+});
+
+test("reports a cold start tap once, and not again when Swipe remounts", async () => {
+  mockLastNotificationResponse = notificationResponse("cold-1", "swipe");
+  await mountLayout();
+
+  const firstMount = processLinks();
+
+  expect(countReported("Push Notification Opened")).toBe(1);
+  expect(countReported("Deep Link Opened")).toBe(1);
+  expect(push).toHaveBeenCalledTimes(1);
+
+  firstMount.remove();
+  processLinks().remove();
+
+  expect(countReported("Push Notification Opened")).toBe(1);
+  expect(countReported("Deep Link Opened")).toBe(1);
+  expect(push).toHaveBeenCalledTimes(1);
+});
+
+test("reports a tap taken while the app is open once, and not again when Swipe remounts", async () => {
+  await mountLayout();
+  const firstMount = processLinks();
+
+  tap(notificationResponse("warm-1", "swipe"));
+
+  expect(countReported("Push Notification Opened")).toBe(1);
+  expect(countReported("Deep Link Opened")).toBe(1);
+  expect(push).toHaveBeenCalledTimes(1);
+
+  firstMount.remove();
+  processLinks().remove();
+
+  expect(countReported("Push Notification Opened")).toBe(1);
+  expect(countReported("Deep Link Opened")).toBe(1);
+  expect(push).toHaveBeenCalledTimes(1);
+});
+
+test("handles a tap taken while Swipe is unmounted on the next mount, once", async () => {
+  await mountLayout();
+  processLinks().remove();
+
+  tap(notificationResponse("warm-2", "swipe"));
+
+  expect(countReported("Push Notification Opened")).toBe(0);
+
+  processLinks().remove();
+
+  expect(countReported("Push Notification Opened")).toBe(1);
+  expect(push).toHaveBeenCalledTimes(1);
+
+  processLinks().remove();
+
+  expect(countReported("Push Notification Opened")).toBe(1);
+  expect(push).toHaveBeenCalledTimes(1);
+});
+
+test("reports nothing when Swipe mounts with no tap waiting", async () => {
+  await mountLayout();
+
+  processLinks().remove();
+  processLinks().remove();
+
+  expect(countReported("Push Notification Opened")).toBe(0);
+  expect(push).not.toHaveBeenCalled();
 });

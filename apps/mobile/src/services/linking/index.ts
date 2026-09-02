@@ -8,12 +8,13 @@ import { sendError } from "@/services/error-tracking";
 import { SceneName } from "@/types/scene-name";
 
 import {
-  getInitialNotification,
-  getInitialNotificationKind,
+  claimNotification,
+  consumeInitialNotification,
   setInitialNotification,
 } from "./handlers/initial-notification";
 import {
   customNotificationHandler,
+  getNotificationId,
   getNotificationKind,
   getNotificationUrl,
 } from "./handlers/notification";
@@ -23,7 +24,11 @@ import {
 } from "./handlers/pending-dog-profile";
 
 export const processLinks = () => {
-  const initialNotification = getInitialNotification();
+  // Consuming clears the stored tap in the same call, and hands back nothing
+  // for a tap the listener below already handled. Without that, every mount of
+  // this screen re-ran the whole handler on the last tap: a second
+  // "Push Notification Opened", and a second jump to the notification target.
+  const initialNotification = consumeInitialNotification();
 
   if (initialNotification) {
     // The handler is synchronous — expo-router's push is — so a rejected
@@ -31,19 +36,22 @@ export const processLinks = () => {
     // url" was, and `.catch` never saw it.
     try {
       customNotificationHandler(
-        initialNotification,
-        getInitialNotificationKind(),
+        initialNotification.url,
+        initialNotification.kind,
       );
     } catch (error) {
       sendError(error);
     }
   }
 
-  setInitialNotification(undefined);
-
   // When the app is already running, and the user clicks on a notification
   const notificationSubscription =
     Notifications.addNotificationResponseReceivedListener((response) => {
+      // Claiming here is what marks the tap as spent for the mount path, and
+      // it also covers two of these listeners briefly overlapping while the
+      // screen remounts.
+      if (!claimNotification(getNotificationId(response))) return;
+
       const url = getNotificationUrl(response);
       try {
         customNotificationHandler(url, getNotificationKind(response));
@@ -65,10 +73,11 @@ export const useGetInitialNotifications = () => {
     Notifications.getLastNotificationResponseAsync()
       .then((response) => {
         if (!response) return;
-        setInitialNotification(
-          getNotificationUrl(response),
-          getNotificationKind(response),
-        );
+        setInitialNotification({
+          id: getNotificationId(response),
+          url: getNotificationUrl(response),
+          kind: getNotificationKind(response),
+        });
         return undefined;
       })
       .catch(sendError);
@@ -76,10 +85,11 @@ export const useGetInitialNotifications = () => {
     // When the app is already running, and the user clicks on a notification
     const notificationSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        setInitialNotification(
-          getNotificationUrl(response),
-          getNotificationKind(response),
-        );
+        setInitialNotification({
+          id: getNotificationId(response),
+          url: getNotificationUrl(response),
+          kind: getNotificationKind(response),
+        });
       });
 
     return () => {
