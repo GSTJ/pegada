@@ -21,7 +21,10 @@ import { useProtectedRoute } from "@/hooks/use-protected-route";
 import { useTrackScreens } from "@/hooks/use-track-screens";
 import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
-import { useGetInitialNotifications } from "@/services/linking";
+import {
+  useGetInitialNotifications,
+  usePendingDogProfile,
+} from "@/services/linking";
 import { getExpoPostHog } from "@/services/observability";
 import { useQuickActions } from "@/services/quick-actions";
 import { useCaptureReferral } from "@/services/referral";
@@ -82,6 +85,9 @@ const App = () => {
   useCaptureReferral();
   // Wait for authentication and onboarding before following a shortcut.
   useQuickActions(initialRouteName === SceneName.Swipe);
+  // Same gate: a pending /dog/<id> link is only followed once the user has
+  // landed on Swipe, so it never pushes a protected screen while logged out.
+  usePendingDogProfile(initialRouteName === SceneName.Swipe);
 
   // MAESTRO_E2E only: render magic modals inside the main window instead
   // of RNScreens' FullWindowOverlay. The overlay is a separate native
@@ -120,6 +126,10 @@ const App = () => {
                 <Stack.Screen name="index" />
                 <Stack.Screen name="(app)" />
                 <Stack.Screen name="(auth)" />
+                <Stack.Screen name="dog/[id]" />
+                {/* Same screen, mounted under the pt-BR locale prefix the
+                    web app redirects Brazilian browsers to. */}
+                <Stack.Screen name="pt-br/dog/[id]" />
               </Stack>
             </Provider>
             <MagicModalPortal />

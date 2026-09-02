@@ -164,6 +164,10 @@
     "findDogsNearYou": "<view><title>Encontre </title><highlight>Dogs</highlight></view><view><title>perto de </title><highlight>Você</highlight><view/>",
     "insertEmail": "Insira seu <1>email</1>",
     "loginError": "Ocorreu um erro ao fazer login.",
+    "pendingDogProfileBanner": {
+      "body": "Entre ou crie sua conta e nós te levamos direto para lá.",
+      "title": "Você abriu o perfil de um dog."
+    },
     "validEmail": "Insira um email válido"
   },
   "locationMap": {

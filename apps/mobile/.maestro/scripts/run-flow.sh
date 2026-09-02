@@ -99,6 +99,18 @@ fi
 export APP_ID="${APP_ID:-app.pegada}"
 export APP_SCHEME="${APP_SCHEME:-pegada}"
 
+# 3a. Flows 46/47 (deep-link sign-in hand-off) need a real dog id, resolved
+# at run time by their pre-hook (pre/46-resolve-dog-id.sh) since it's a
+# cuid2 assigned at seed insert time, not a constant. The pre-hook runs in
+# its own subshell above, so it can't export DOG_ID back into this shell —
+# it drops it in a cache file instead, which is read here if present.
+# Harmless for every other flow: an unused `-e` var is a no-op for Maestro.
+MAESTRO_DOG_ID_CACHE="${TMPDIR:-/tmp}/pegada-maestro-dog-id"
+if [[ -z "${DOG_ID:-}" && -f "$MAESTRO_DOG_ID_CACHE" ]]; then
+  DOG_ID="$(cat "$MAESTRO_DOG_ID_CACHE")"
+fi
+export DOG_ID="${DOG_ID:-}"
+
 # 3b. Name the device, don't let anything downstream infer it.
 #
 # This wrapper is the iOS one. Its Android counterpart already exports
@@ -154,7 +166,8 @@ echo ""
 echo "==> maestro test $FLOW_PATH"
 set +e
 maestro "${MAESTRO_DEVICE_ARGS[@]}" test \
-  -e APP_ID="$APP_ID" -e APP_SCHEME="$APP_SCHEME" "$FLOW_PATH" "$@"
+  -e APP_ID="$APP_ID" -e APP_SCHEME="$APP_SCHEME" -e DOG_ID="$DOG_ID" \
+  "$FLOW_PATH" "$@"
 MAESTRO_RC=$?
 set -e
 

@@ -25,6 +25,9 @@ export const ANALYTICS_EVENTS = {
   DELETE_ACCOUNT_CANCELED: "Delete Account Canceled",
   DELETE_ACCOUNT_CONFIRMED: "Delete Account Confirmed",
   DELETE_ACCOUNT_PRESSED: "Delete Account Pressed",
+  DOG_LINK_OPENED: "Dog Link Opened",
+  DOG_LINK_PROFILE_OPENED: "Dog Link Profile Opened",
+  DOG_LINK_SIGN_IN_BANNER_SHOWN: "Dog Link Sign In Banner Shown",
   EMPTY_DECK_ACTION_TAPPED: "Empty Deck Action Tapped",
   EMPTY_DECK_SHOWN: "Empty Deck Shown",
   FEEDBACK: "Feedback",
@@ -165,6 +168,15 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_CANCELED]: undefined;
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_CONFIRMED]: undefined;
   [ANALYTICS_EVENTS.DELETE_ACCOUNT_PRESSED]: undefined;
+  /**
+   * The three steps of the shared dog link funnel, in order: the link landed,
+   * the sign in hand off was shown, the shared profile finally opened.
+   * `authenticated` on the first step is what splits the people who have to
+   * sign in from the ones who go straight through.
+   */
+  [ANALYTICS_EVENTS.DOG_LINK_OPENED]: { authenticated: boolean };
+  [ANALYTICS_EVENTS.DOG_LINK_PROFILE_OPENED]: undefined;
+  [ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN]: undefined;
   /**
    * One per tap on an empty deck action. `push_permission` rides on the notify
    * action and `share_result` on the invite, so the funnel reads both the
@@ -389,6 +401,9 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.DELETE_ACCOUNT_CANCELED,
   ANALYTICS_EVENTS.DELETE_ACCOUNT_CONFIRMED,
   ANALYTICS_EVENTS.DELETE_ACCOUNT_PRESSED,
+  ANALYTICS_EVENTS.DOG_LINK_OPENED,
+  ANALYTICS_EVENTS.DOG_LINK_PROFILE_OPENED,
+  ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN,
   ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED,
   ANALYTICS_EVENTS.EMPTY_DECK_SHOWN,
   ANALYTICS_EVENTS.FEEDBACK,

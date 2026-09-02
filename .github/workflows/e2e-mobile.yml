@@ -1579,7 +1579,7 @@ jobs:
           # stay sequential and co-located, see the shard design note
           # at the top of this file for the full dependency analysis.
           - name: core
-            flows: "02-sign-in,03-create-profile,04-complete-profile,05-ask-location,06-force-update,07-tabs-navigation,08-swipe-like,09-swipe-dislike,10-dog-profile,11-messages-list,12-chat-conversation,19-chat-message-order,25-upgrade-journey,21-swipe-journey,22-new-match-journey,23-preferences-journey,23b-lang-theme-persistence,24-profile-journey,26-logout-journey"
+            flows: "02-sign-in,03-create-profile,04-complete-profile,05-ask-location,06-force-update,07-tabs-navigation,08-swipe-like,09-swipe-dislike,10-dog-profile,11-messages-list,12-chat-conversation,19-chat-message-order,25-upgrade-journey,21-swipe-journey,22-new-match-journey,23-preferences-journey,23b-lang-theme-persistence,24-profile-journey,46-deep-link-sign-in-handoff,47-deep-link-logged-in,26-logout-journey"
           # "fresh": self-purging APPLE_MAGIC_EMAIL_REGEX user, disjoint
           # from test@pegada.app's rows.
           - name: fresh
@@ -1681,6 +1681,45 @@ jobs:
       # need their own DATABASE_URL wired the same way once staging is
       # connected, tracked together with the EXPO_PUBLIC_API_URL secret
       # setup, out of scope for this change.
+      #
+      # 46/47 (deep-link hand-off) are the one pair in "core" that needs a
+      # real dog id rather than just a logged-in session — resolved here
+      # the same way scripts/pre/46-resolve-dog-id.sh does locally: log in
+      # as the magic user against the staging API and read Bella's id off
+      # match.getAll. Runs over HTTP (curl+jq), not psql, so it needs
+      # nothing beyond what this job already has (EXPO_PUBLIC_API_URL,
+      # APPLE_MAGIC_EMAIL/CODE) and works whether or not DATABASE_URL is
+      # ever wired for the other shards' scripts above.
+      - name: Resolve dog id for deep-link flows (core)
+        if: matrix.shard.name == 'core'
+        run: |
+          set -euo pipefail
+          # Default before trimming the comma separated list: `set -u` makes
+          # a suffix expansion on an unset name an error, and the job-level
+          # fallback for this env can be dropped or emptied independently.
+          MAGIC_EMAIL="${APPLE_MAGIC_EMAIL:-test@pegada.app}"
+          MAGIC_EMAIL="${MAGIC_EMAIL%%,*}"
+          TOKEN=$(curl -sf -X POST "$EXPO_PUBLIC_API_URL/trpc/authentication.login?batch=1" \
+            -H "Content-Type: application/json" \
+            -d "{\"0\":{\"json\":{\"email\":\"$MAGIC_EMAIL\",\"code\":\"$APPLE_MAGIC_CODE\"}}}" \
+            | jq -r '.[0].result.data.json.token // empty')
+          # Flows 46/47 are in this shard, so a missing id is not recoverable
+          # later: the flows would open `pegada://dog/` and fail on a screen
+          # assertion instead. Fail here, where the cause is in the message.
+          if [ -z "$TOKEN" ]; then
+            echo "::error::could not log in as $MAGIC_EMAIL at $EXPO_PUBLIC_API_URL to resolve a dog id for flows 46/47"
+            exit 1
+          fi
+          MATCH_INPUT='%7B%220%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%7D'
+          DOG_ID=$(curl -sf "$EXPO_PUBLIC_API_URL/trpc/match.getAll?batch=1&input=$MATCH_INPUT" \
+            -H "Authorization: Bearer $TOKEN" \
+            | jq -r '[.[0].result.data.json[] | select(.dog.name == "Bella")][0].dog.id // empty')
+          if [ -z "$DOG_ID" ]; then
+            echo "::error::logged in as $MAGIC_EMAIL but match.getAll returned no dog named Bella; the staging seed needs a maestro-seed.ts run"
+            exit 1
+          fi
+          echo "DOG_ID=$DOG_ID" >> "$GITHUB_ENV"
+
       - name: Run extended Maestro flows (${{ matrix.shard.name }})
         id: maestro-extended
         run: |
@@ -1709,7 +1748,10 @@ jobs:
           # Single maestro invocation per shard so THIS SHARD's internal
           # ordering is respected (config.yaml's flowsOrder governs
           # relative order when multiple files are passed together).
+          # DOG_ID is only ever set on the "core" shard (see the resolve
+          # step above); every other flow ignores an unused `-e` var.
           maestro test "${FLOWS[@]}" \
+            -e DOG_ID="${DOG_ID:-}" \
             --format junit \
             --output "maestro-results-extended-${{ matrix.shard.name }}.xml" \
             --exclude-tags no-api,util || true

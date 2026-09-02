@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Button } from "@/components/Button";
+import { PendingDogProfileBanner } from "@/components/PendingDogProfileBanner";
 import { api } from "@/contexts/trpc-provider";
 import { useKeyboardAwareSafeAreaInsets } from "@/hooks/use-keyboard-aware-safe-area-insets";
 import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
@@ -147,6 +148,7 @@ const InsertEmail = () => {
             <HeroText />
           </TopCard>
           <View style={[styles.bottomCard, { paddingBottom: bottomInset }]}>
+            <PendingDogProfileBanner />
             <Title style={styles.title} fontSize="xl" fontWeight="bold">
               {/*
                 The leading text is an expression rather than bare JSX text on

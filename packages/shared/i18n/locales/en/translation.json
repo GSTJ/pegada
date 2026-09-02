@@ -164,6 +164,10 @@
     "findDogsNearYou": "<view><title>Find </title><highlight>Dogs</highlight></view><view><title>Near </title><highlight>You</highlight><view/>",
     "insertEmail": "Insert your <1>email</1>",
     "loginError": "An error occurred while logging in.",
+    "pendingDogProfileBanner": {
+      "body": "Log in or sign up and we'll take you straight there.",
+      "title": "You opened a dog's profile."
+    },
     "validEmail": "Please enter a valid email"
   },
   "locationMap": {
