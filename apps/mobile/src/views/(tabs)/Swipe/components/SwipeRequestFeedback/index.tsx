@@ -43,7 +43,16 @@ export const EmptyComponent = () => {
   );
 };
 
-const EmptyState = () => {
+/**
+ * `isEmptyDeck` gates the share prompt for the same reason `Empty Deck Shown`
+ * is gated on it below: this screen renders behind the deck on every visit to
+ * the swipe tab, so mounting it says nothing about the deck being empty. The
+ * copy above can afford to render early because the cards cover it, but a
+ * prompt that fires `Share Prompt Shown` on mount would count every visit to
+ * the tab as a prompt nobody could see, and the empty deck funnel it feeds
+ * would read as a tap rate several times lower than the real one.
+ */
+const EmptyState = ({ isEmptyDeck }: { isEmptyDeck: boolean }) => {
   const { t } = useTranslation();
 
   return (
@@ -62,7 +71,7 @@ const EmptyState = () => {
           <Description fontSize="xs" style={styles.description}>
             {t("swipeRequestFeedback.emptyDescription")}
           </Description>
-          <SharePromptCard placement="empty_deck" />
+          {isEmptyDeck ? <SharePromptCard placement="empty_deck" /> : null}
           <Button
             onPress={() => router.push(SceneName.Preferences)}
             variant="outline"
@@ -120,7 +129,7 @@ const SwipeRequestFeedback = () => {
   if (offline) return <OfflineComponent reset={refetch} />;
   if (request.error) return <RequestErrorComponent reset={refetch} />;
 
-  return <EmptyState />;
+  return <EmptyState isEmptyDeck={isEmptyDeck} />;
 };
 
 export default SwipeRequestFeedback;
