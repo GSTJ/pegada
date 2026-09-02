@@ -82,8 +82,11 @@ export type PaywallTrigger =
 /** An OS permission answer, collapsed to the two states that matter. */
 export type PermissionStatus = "denied" | "granted";
 
-/** The two things the empty swipe deck offers besides the preferences link. */
-export type EmptyDeckAction = "invite_friend" | "notify_new_dogs";
+/** What the user picked on the empty swipe deck. */
+export type EmptyDeckAction =
+  | "invite_friend"
+  | "notify_new_dogs"
+  | "preferences";
 
 /**
  * The push answer as the empty deck sees it. Wider than
