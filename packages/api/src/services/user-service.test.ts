@@ -135,3 +135,30 @@ test("deletes the account even when a photo is on a retired storage origin", asy
   await expect(prisma.image.count()).resolves.toBe(0);
   await expect(prisma.dog.count()).resolves.toBe(0);
 });
+
+/**
+ * The empty-deck opt-in is an interest signal, and the question it answers is
+ * "when did this user first ask", not "when did they last tap". Overwriting
+ * the timestamp on a second tap would make every requester look like they
+ * asked today and would move the cohort every time someone reopened the
+ * screen.
+ */
+test("keeps the first new dogs alert request when the user asks twice", async () => {
+  const user = await prisma.user.create({
+    data: { email: "new-dogs-alert@pegada.app" },
+  });
+
+  await expect(UserService.requestNewDogsAlert(user.id)).resolves.toEqual({
+    alreadyRequested: false,
+  });
+  const first = await prisma.user.findUnique({ where: { id: user.id } });
+
+  await expect(UserService.requestNewDogsAlert(user.id)).resolves.toEqual({
+    alreadyRequested: true,
+  });
+  await expect(
+    prisma.user.findUnique({ where: { id: user.id } }),
+  ).resolves.toMatchObject({
+    newDogsAlertRequestedAt: first?.newDogsAlertRequestedAt,
+  });
+});

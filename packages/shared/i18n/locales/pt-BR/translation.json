@@ -332,6 +332,10 @@
   "swipeRequestFeedback": {
     "emptyDescription": "Mas calma! Acabamos de lançar e ainda temos poucos usuários.\n\nEstamos trabalhando para garantir um espaço cheio de doguinhos logo logo 🐶\n\nTente ajustar suas preferências ou volte mais tarde! 😉",
     "emptyTitle": "Parece que os doguinhos acabaram!",
+    "inviteFriendButton": "Convidar um amigo",
+    "inviteFriendMessage": "O Pegada é onde meu cachorro faz amigos. Traz o seu também:\n{{link}}",
+    "notifyNewDogsButton": "Avisar quando chegar dog novo",
+    "notifyNewDogsDone": "Vamos te avisar",
     "preferencesButton": "Ver Preferências"
   },
   "themes": {

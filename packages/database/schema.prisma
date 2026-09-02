@@ -66,6 +66,7 @@ model User {
 
   // Push notifications
   pushToken String?
+  newDogsAlertRequestedAt DateTime?
 
   // Metadata
   createdAt DateTime  @default(now())

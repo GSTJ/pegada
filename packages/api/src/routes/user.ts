@@ -33,6 +33,17 @@ export const userRouter = createTRPCRouter({
     }),
 
   /**
+   * Interest signal from the empty swipe deck: the user wants to hear about it
+   * when a new dog turns up. Nothing sends that alert yet, so this only stores
+   * the intent and the share of empty-deck viewers who tap decides whether the
+   * alert is worth building.
+   */
+  requestNewDogsAlert: protectedProcedure.mutation(({ ctx }) => {
+    const userId = ctx.session.user.id;
+    return UserService.requestNewDogsAlert(userId);
+  }),
+
+  /**
    * Hard-delete the current user's account and every dependent record.
    * Required for App Store compliance (Guideline 5.1.1(v)).
    */
