@@ -1,5 +1,8 @@
 import type { StoryVariantProps } from "../types";
 
+import type { LayoutChangeEvent } from "react-native";
+
+import { useCallback, useState } from "react";
 import { View } from "react-native";
 
 import { useTranslation } from "react-i18next";
@@ -9,7 +12,6 @@ import { Text } from "@/components/text";
 
 import { CARD_HEIGHT, CARD_WIDTH } from "../../story-card-styles";
 import {
-  ARROW_INK_CENTRE,
   BASELINE,
   CAP_LINE,
   DM,
@@ -23,10 +25,10 @@ import {
 import { pickByGender, pickByHash } from "../gender";
 import { mosaicSlots } from "../photos";
 import {
-  ArcRule,
   BrandLockup,
   BubbleTail,
   CheckerField,
+  MarkerSlab,
   PawMark,
   PhotoMosaic,
 } from "../primitives";
@@ -38,9 +40,8 @@ import {
  * `../constants`), and every run of type is positioned by its CAP LINE rather
  * than by the top of its box — a browser and iOS put the baseline in
  * different places inside a line box, and the caps are the landmark they
- * agree on. Nothing sets `lineHeight`: leaving it unset gives exactly
- * `lineBox`, the font's own box, which is both what those cap-line offsets
- * assume and the only setting iOS will not crop a glyph in.
+ * agree on. Nothing sets `lineHeight` except the two chat bubbles: leaving it
+ * unset gives the font's own box, which is what those cap-line offsets assume.
  */
 
 /** `.checker`: a 64px conic tile, so 32px cells, down the right edge. */
@@ -91,27 +92,31 @@ const H1_LEFT = px(58);
  *  whatever the marker slab's taller line box puts it at. */
 const H1_LINE_ONE_TOP = capTop(371, 118);
 const H1_LINE_TWO_TOP = capTop(473, 118);
+/** The concept's own line stops eight pixels short of the frame. Anything
+ *  longer is scaled down to that run rather than being allowed to push the
+ *  slab's keyline off the card. */
+const H1_LINE_TWO_WIDTH = CARD_WIDTH - H1_LEFT - px(8);
 
 /**
  * `.cut`: `border:5px; padding:6px 17px 0` around the word, `rotate(-2deg)`.
  *
- * The slab is painted as its own layer behind the word rather than as the
- * text's background: the word needs the font's full line box to draw a
- * diacritic, and a background on that box would stand 50px taller than the
- * concept's slab. Its top is measured off the word's cap line — 11px of
- * border and padding above `.cut`'s own content box, plus the 16.4px the caps
- * sit into that box on a .77 leading.
+ * The concept's padding is asymmetric — nothing under the word — which drops
+ * the capitals through the slab's bottom keyline. Here the padding matches top
+ * and bottom, so the word sits inside its own box, and the slab is still the
+ * concept's own height because the concept's slack was simply all above the
+ * caps: 7px either side of an 82.6px cap band inside a 5px keyline is the same
+ * 106.6px box.
  */
 const MARKER_BORDER = px(5);
 const MARKER_PAD_X = px(17);
-const MARKER_HEIGHT = px(5 + 6 + 118 * 0.77 + 5);
-const MARKER_SLAB_TOP = H1_SIZE * CAP_LINE - px(11 + 16.4);
+const MARKER_PAD_Y = px(7);
+const MARKER_CAP = px(118 * 0.7);
+/** Where the slab's own top sits against the cap line the row is built on. */
+const MARKER_TOP = CAP_LINE * H1_SIZE - MARKER_BORDER - MARKER_PAD_Y;
 
 /**
- * `.scribble`: `right:58px; top:612px`, 31px, `rotate(9deg)`, over an
- * `:after` rule 180x22 with a 5px top border, `border-radius:50%` and its own
- * `rotate(-5deg)` — a shallow arc under the text, left-aligned with it and
- * tilted back four degrees off the text, not away from it.
+ * `.scribble`: `right:58px; top:612px`, 31px, `rotate(9deg)`, over a rule
+ * directly under the words, as wide as they are and tilted with them.
  */
 const SCRIBBLE_TOP = px(612) + halfLeading(31);
 const SCRIBBLE = {
@@ -119,15 +124,13 @@ const SCRIBBLE = {
   top: SCRIBBLE_TOP,
   size: px(31),
   maxWidth: px(922),
-  ruleWidth: px(180),
-  ruleHeight: px(22),
   ruleStroke: px(5),
   /**
-   * Both the block's own height and the rule's place inside it are the
-   * concept's, not whatever iOS makes of the line above: `UIFont` reports a
-   * line box a few points shorter than the metrics say, so stacking the rule
-   * under the text would float it up by that much — and the block's height
-   * also decides where the 9-degree rotation pivots.
+   * The rule's place is taken from the concept's grid rather than from the run
+   * above it: `UIFont` reports a line box a few points shorter than Gilroy's
+   * metrics say, so stacking the rule under the text floats it up by that
+   * much. The block's height is stated for the same reason — it also decides
+   * where the nine-degree rotation pivots.
    */
   height: px(31 * GILROY_LINE + 22),
   ruleTop: px(612 + 31 * GILROY_LINE) - SCRIBBLE_TOP,
@@ -154,49 +157,49 @@ const BUBBLE = {
 
 /**
  * `.photo-bubble:after`: a square clipped to a triangle and hung 66px below
- * the bubble's padding box, so it covers the stretch of bottom border it
- * grows out of instead of butting against it.
+ * the bubble's padding box, so it covers the stretch of bottom border it grows
+ * out of instead of butting against it.
  *
- * The concept's square is 88, which starts it four pixels INSIDE the photo
- * and notches a white wedge out of the print's bottom-left corner. 84 puts
- * the top edge exactly on the photo's own bottom instead: the same
- * hypotenuse, on the same line, running to the same point — every visible
- * pixel of the tail is unchanged, because the four it gives up were white
- * padding either way — and the photo no longer shows through it.
+ * The concept's square is 88, which starts it four pixels INSIDE the photo and
+ * notches a white wedge out of the print's bottom-left corner. 84 puts the top
+ * edge exactly on the photo's own bottom instead: same hypotenuse, same line,
+ * same point, and nothing of the photo shows through it.
  */
-const TAIL = { size: px(84), drop: px(66) };
+const TAIL = {
+  size: px(84),
+  drop: px(66),
+  /** How far down the tail the bubble's own bottom border passes — the depth
+   *  at which the tail stops being inside the bubble and needs its outline. */
+  join: px(24),
+};
 
 /** `.bubble.b1`, hoisted out of the sheet because the no-photo panel below
  *  has to know where its left edge lands. */
 const CHAT_ONE = { top: px(1042), right: px(52), width: px(320) };
 /**
- * The chat bubbles keep the concept's own 1.02 leading rather than the
- * font's line box — the only two runs on the card that do. Both wrap to two
- * lines, and the roomier box would grow each bubble by a third and walk it
- * off the photo. Safe at this size: the tallest thing Gilroy's lowercase
- * draws here is a tilde, which still clears the compressed fragment.
+ * The chat bubbles keep the concept's own 1.02 leading rather than the font's
+ * line box — the only two runs on the card that do. Both wrap to two lines,
+ * and the roomier box would grow each bubble by a third and walk it off the
+ * photo. Safe at this size: the tallest thing Gilroy's lowercase draws here is
+ * a tilde, which still clears the compressed fragment.
  */
 const CHAT_LINE = 10.5;
 
-/** `.typing`: `left:65px; top:1397px`, 475x70, 5px keyline, 35px radius. */
+/**
+ * `.typing`: the concept draws this as a 475px bar, which at story size reads
+ * as an empty input field rather than as somebody typing. It is a chat bubble
+ * here instead — three dots centred in a small round bubble, about as wide as
+ * a reply bubble's own padding — sitting at the concept's left margin under
+ * the tail.
+ */
 const TYPING = {
   left: px(65),
   top: px(1397),
-  width: px(475),
-  height: px(70),
-  radius: px(35),
+  width: px(160),
+  height: px(66),
   border: px(5),
-  padLeft: px(26),
   gap: px(12),
   dot: px(13),
-};
-
-/** `.seen`: `left:565px; top:1422px`, 16px SemiBold, `letter-spacing:1px`. */
-const SEEN = {
-  left: px(565),
-  top: px(1422) + halfLeading(16),
-  size: px(16),
-  tracking: px(1),
 };
 
 /** `.cta`: `left:62px; top:1528px`, 42px on a .95 line box. */
@@ -208,32 +211,8 @@ const CTA_LINE_TWO_TOP = CTA_LINE_ONE_TOP + px(42 * 0.95);
  *  bottom of its .95 line box — 0.9px under the baseline at this size. */
 const CTA_RULE_TOP = BASELINE * CTA_SIZE + px(0.9);
 const CTA_RULE_HEIGHT = px(7);
-/** The second line runs up to the arrow button and no further. */
+/** The line runs to where the concept's arrow button used to start. */
 const CTA_WIDTH = px(900 - 62 - 40);
-
-/** `.arrow`: 112x112, a 6px keyline, a 62px glyph. */
-const ARROW_SIZE = px(112);
-const ARROW_BORDER = px(6);
-const ARROW_GLYPH = px(62);
-const ARROW_RIGHT = px(68);
-/**
- * The concept parks the button at `top:1512px`, which leaves its centre 7px
- * above the optical centre of the CTA block beside it. Centred on that block
- * instead — the button and the two lines are one row, and 7px is enough to
- * see.
- */
-const CTA_BLOCK_TOP = CTA_LINE_ONE_TOP + CAP_LINE * CTA_SIZE;
-const CTA_BLOCK_BOTTOM = CTA_LINE_TWO_TOP + CTA_RULE_TOP + CTA_RULE_HEIGHT;
-const ARROW_TOP = (CTA_BLOCK_TOP + CTA_BLOCK_BOTTOM - ARROW_SIZE) / 2;
-/**
- * Gilroy draws U+2192 between 50 and 650 units above the baseline, so its ink
- * centre is `ARROW_INK_CENTRE` up from there. The glyph is hung off this
- * offset rather than centred by the flex box: `UIFont` reports a line box a
- * few points shorter than Gilroy's own metrics, so centring the BOX leaves
- * the ink a visible distance below the middle of the circle.
- */
-const ARROW_GLYPH_TOP =
-  ARROW_SIZE / 2 - ARROW_BORDER - (BASELINE - ARROW_INK_CENTRE) * ARROW_GLYPH;
 
 /**
  * How wide the dog's name can be drawn in the no-photo panel.
@@ -282,6 +261,27 @@ export const DmAbertaVariant = ({
 }: StoryVariantProps) => {
   const { t } = useTranslation();
 
+  /**
+   * How far the headline's second line has to come down to keep the slab's
+   * keyline on the card. The row is laid out at its natural width and scaled
+   * afterwards, so the word and the box around it shrink together and the
+   * slab's padding stays even at any length — auto-shrinking the type inside
+   * a fixed box would leave the slab too tall for the word in it.
+   *
+   * A transform does not affect layout, so the measurement this reads is
+   * always the untransformed width and settling on a scale cannot loop.
+   */
+  const [markScale, setMarkScale] = useState(1);
+
+  const handleHeadlineLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    if (width <= 0) return;
+    const next = Math.min(1, H1_LINE_TWO_WIDTH / width);
+    setMarkScale((current) =>
+      Math.abs(current - next) < 0.001 ? current : next,
+    );
+  }, []);
+
   const opener = t(pickByHash(OPENER_KEYS, dog.id));
   const reply = t(
     pickByGender(
@@ -324,38 +324,38 @@ export const DmAbertaVariant = ({
       >
         {t("dogShare.story.dmAberta.headline1")}
       </Text>
-      {/* The marker slab runs to within a few points of the card's right
-          edge, as in the concept. It shrinks rather than clipping, so a
-          longer word in another locale loses a couple of points of type
-          instead of losing its own keyline off the frame. */}
-      <View style={styles.headlineTwo}>
+      <View
+        onLayout={handleHeadlineLayout}
+        style={[
+          styles.headlineTwo,
+          {
+            top: H1_LINE_TWO_TOP + CAP_LINE * H1_SIZE * (1 - markScale),
+            transform: [{ scale: markScale }],
+          },
+        ]}
+      >
         <Text fontWeight="black" style={styles.headlineText}>
           {t("dogShare.story.dmAberta.headline2")}{" "}
         </Text>
-        <View style={styles.marker}>
-          <View style={styles.markerSlab} />
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.6}
-            fontWeight="black"
-            style={styles.headlineText}
-          >
-            {t("dogShare.story.dmAberta.headlineMark")}
-          </Text>
-        </View>
+        <MarkerSlab
+          fontSize={H1_SIZE}
+          capHeight={MARKER_CAP}
+          padX={MARKER_PAD_X}
+          padY={MARKER_PAD_Y}
+          border={MARKER_BORDER}
+          fill={DM.edge}
+          textStyle={styles.headlineText}
+          style={styles.marker}
+        >
+          {t("dogShare.story.dmAberta.headlineMark")}
+        </MarkerSlab>
       </View>
 
       <View style={styles.scribble}>
         <Text numberOfLines={1} fontWeight="black" style={styles.scribbleText}>
           {t("dogShare.story.dmAberta.scribble", { name })}
         </Text>
-        <ArcRule
-          width={SCRIBBLE.ruleWidth}
-          height={SCRIBBLE.ruleHeight}
-          thickness={SCRIBBLE.ruleStroke}
-          style={styles.scribbleRule}
-        />
+        <View style={styles.scribbleRule} />
       </View>
 
       <View style={styles.bubble}>
@@ -387,6 +387,7 @@ export const DmAbertaVariant = ({
         <BubbleTail
           size={TAIL.size}
           stroke={BUBBLE.border}
+          joinAt={TAIL.join}
           style={styles.tail}
         />
       </View>
@@ -409,14 +410,11 @@ export const DmAbertaVariant = ({
         </Text>
       </View>
 
-      <View style={styles.typingPill}>
+      <View style={styles.typingBubble}>
         <View style={styles.typingDot} />
         <View style={[styles.typingDot, styles.typingDotMid]} />
         <View style={[styles.typingDot, styles.typingDotLast]} />
       </View>
-      <Text numberOfLines={1} fontWeight="semibold" style={styles.typingLabel}>
-        {t("dogShare.story.dmAberta.typing")}
-      </Text>
 
       <Text
         numberOfLines={1}
@@ -434,12 +432,6 @@ export const DmAbertaVariant = ({
           {t("dogShare.story.dmAberta.ctaLine2", { name })}
         </Text>
         <View style={styles.ctaRule} />
-      </View>
-
-      <View style={styles.arrowCircle}>
-        <Text fontWeight="black" style={styles.arrowGlyph}>
-          →
-        </Text>
       </View>
     </View>
   );
@@ -508,41 +500,23 @@ const styles = StyleSheet.create(() => ({
   headlineTwo: {
     position: "absolute",
     zIndex: 4,
-    top: H1_LINE_TWO_TOP,
     left: H1_LEFT,
-    // The concept's own line stops eight pixels short of the frame, and in
-    // Portuguese this lands it there to the pixel. A locale that needs more
-    // room shrinks the word inside the slab rather than pushing the slab's
-    // keyline against the edge of the card: `WHOLE PACK` runs a third longer
-    // than `CACHORRADA` and would otherwise sit flush with it.
-    width: CARD_WIDTH - H1_LEFT - px(8),
     flexDirection: "row",
     alignItems: "flex-start",
+    // Scaled from its own top left, so `left` stays the concept's margin and
+    // the compensation on `top` only has to put the cap line back.
+    transformOrigin: "0% 0%",
   },
   // The concept's marker highlight: a pink slab, hard black keyline, knocked
   // a couple of degrees off level so it reads as drawn on rather than typeset.
-  marker: {
-    flexShrink: 1,
-    paddingHorizontal: MARKER_PAD_X + MARKER_BORDER,
-    transform: [{ rotate: "-2deg" }],
-  },
-  markerSlab: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: MARKER_SLAB_TOP,
-    height: MARKER_HEIGHT,
-    backgroundColor: DM.edge,
-    borderWidth: MARKER_BORDER,
-    borderColor: INK,
-  },
+  marker: { marginTop: MARKER_TOP, transform: [{ rotate: "-2deg" }] },
   scribble: {
     position: "absolute",
     top: SCRIBBLE.top,
     right: SCRIBBLE.right,
-    // Shrinks to the line, so the arc under it always starts where the text
-    // does. The cap is a backstop for a name long enough to walk the line off
-    // the left edge of the card, nothing a real name reaches.
+    // Shrinks to the line, so the rule under it is exactly as wide as the
+    // words and starts where they do. The cap is a backstop for a name long
+    // enough to walk the line off the left edge of the card.
     maxWidth: SCRIBBLE.maxWidth,
     height: SCRIBBLE.height,
     alignItems: "flex-start",
@@ -552,8 +526,10 @@ const styles = StyleSheet.create(() => ({
   scribbleRule: {
     position: "absolute",
     left: 0,
+    right: 0,
     top: SCRIBBLE.ruleTop,
-    transform: [{ rotate: "-5deg" }],
+    height: SCRIBBLE.ruleStroke,
+    backgroundColor: INK,
   },
   bubble: {
     position: "absolute",
@@ -636,19 +612,19 @@ const styles = StyleSheet.create(() => ({
     textAlign: "right",
     color: INK,
   },
-  typingPill: {
+  typingBubble: {
     position: "absolute",
     left: TYPING.left,
     top: TYPING.top,
     width: TYPING.width,
     height: TYPING.height,
-    borderRadius: TYPING.radius,
+    borderRadius: TYPING.height / 2,
     borderWidth: TYPING.border,
     borderColor: INK,
     backgroundColor: WHITE,
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: TYPING.padLeft,
+    justifyContent: "center",
     gap: TYPING.gap,
   },
   typingDot: {
@@ -659,14 +635,6 @@ const styles = StyleSheet.create(() => ({
   },
   typingDotMid: { opacity: 0.6 },
   typingDotLast: { opacity: 0.3 },
-  typingLabel: {
-    position: "absolute",
-    left: SEEN.left,
-    top: SEEN.top,
-    fontSize: SEEN.size,
-    letterSpacing: SEEN.tracking,
-    color: INK,
-  },
   ctaLine: { fontSize: CTA_SIZE, color: INK },
   ctaLineOne: {
     position: "absolute",
@@ -678,8 +646,7 @@ const styles = StyleSheet.create(() => ({
     top: CTA_LINE_TWO_TOP,
     left: CTA_LEFT,
     // Shrinks to the line so the underline is exactly as wide as the words
-    // over it, and stops short of the arrow button whatever the dog is
-    // called: `e fale com Maximiliano Ferreira` needs 617 of the 798 concept
+    // over it. `e fale com Maximiliano Ferreira` needs 617 of the 798 concept
     // pixels this leaves, so nothing realistic reaches the cap.
     maxWidth: CTA_WIDTH,
   },
@@ -691,25 +658,5 @@ const styles = StyleSheet.create(() => ({
     top: CTA_RULE_TOP,
     height: CTA_RULE_HEIGHT,
     backgroundColor: INK,
-  },
-  arrowCircle: {
-    position: "absolute",
-    right: ARROW_RIGHT,
-    top: ARROW_TOP,
-    width: ARROW_SIZE,
-    height: ARROW_SIZE,
-    borderRadius: ARROW_SIZE / 2,
-    borderWidth: ARROW_BORDER,
-    borderColor: INK,
-    backgroundColor: DM.lime,
-  },
-  arrowGlyph: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: ARROW_GLYPH_TOP,
-    fontSize: ARROW_GLYPH,
-    textAlign: "center",
-    color: INK,
   },
 }));

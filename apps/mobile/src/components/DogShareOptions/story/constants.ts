@@ -114,14 +114,6 @@ export const capTop = (conceptCapY: number, conceptSize: number) =>
 export const halfLeading = (conceptSize: number, leading = GILROY_LINE) =>
   px((conceptSize * (leading - CONTENT)) / 2);
 
-/**
- * Gilroy's arrow (U+2192, in the family — no fallback font is involved) is
- * drawn between 50 and 650 units above the baseline, so its ink centre is
- * this far up. Both variants centre the arrow on that rather than on its line
- * box, which is what "optically centred in the circle" means here.
- */
-export const ARROW_INK_CENTRE = 0.35;
-
 /** `Logo`'s natural aspect ratio (from its `534 635` viewBox), height/width. */
 export const PAW_ASPECT = 635 / 534;
 

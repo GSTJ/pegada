@@ -9,12 +9,10 @@ import { Text } from "@/components/text";
 
 import { CARD_HEIGHT, CARD_WIDTH } from "../../story-card-styles";
 import {
-  ARROW_INK_CENTRE,
-  BASELINE,
+  CAP_LINE,
   INK,
   TICKET,
   WHITE,
-  X_CENTRE,
   capTop,
   halfLeading,
   lineBox,
@@ -26,9 +24,11 @@ import {
   BrandLockup,
   DashedRule,
   DotField,
+  MarkerSlab,
   PawMark,
   PhotoMosaic,
   StoryImage,
+  TicketOutline,
 } from "../primitives";
 
 /**
@@ -55,9 +55,18 @@ const PAD_RIGHT = px(36);
 const CONTENT_WIDTH =
   TICKET_BOX.width - TICKET_BOX.border * 2 - PAD_LEFT - PAD_RIGHT;
 
-/** `.ticket:before/:after`: 68px tear circles straddling the stub's edges at
- *  940px down its padding box. */
-const NOTCH = { size: px(68), top: px(940), inset: px(36), border: px(6) };
+/**
+ * `.ticket:before/:after`: 68px tear circles centred on the stub's edges, 940px
+ * down it.
+ *
+ * They are a hole, not a sticker: the background colour fills a circle whose
+ * centre sits exactly ON the stub's edge, the stub's `overflow: hidden` keeps
+ * the outer half of it, and `TicketOutline` draws the stub's own keyline
+ * curving around the bite rather than running straight past it. That is why
+ * the stub carries no `border` of its own — a border would clip the circle a
+ * keyline's width inside the edge and leave a flat chord instead of a半 circle.
+ */
+const NOTCH = { radius: px(34), centreY: px(6 + 940 + 34) };
 
 /** `.rail`: 84px tall, a 5px rule under it, 34px of gutter, 22px eyebrows. */
 const RAIL = {
@@ -150,9 +159,13 @@ const META = {
 const CALL_SIZE = px(60);
 const CALL_LINE = CALL_SIZE * 1.3;
 const CALL_TOP = px(1026);
-const CALL_MARK_HEIGHT = px(69);
-const CALL_MARK_INSET = (CALL_LINE - CALL_MARK_HEIGHT) / 2;
+/** `.call span`: `background:#162348; padding:9px 15px 4px`, `rotate(-2deg)`.
+ *  Padded evenly here for the same reason as the DM card's marker slab, and
+ *  sized off the word rather than off a constant. */
+const CALL_CAP = CALL_SIZE * 0.7;
 const CALL_MARK_PAD_X = px(15);
+const CALL_MARK_PAD_Y = px(7);
+const CALL_MARK_TOP = CAP_LINE * CALL_SIZE - CALL_MARK_PAD_Y;
 
 /** `.mini`: the tilted print stuck over the bottom right of the stub. */
 const MINI = {
@@ -171,15 +184,7 @@ const CTA = {
   border: px(5),
   size: px(CTA_CONCEPT_SIZE),
   tracking: px(0.5),
-  arrow: px(45),
-  gap: px(16),
 };
-/** Gilroy draws U+2192 between 50 and 650 units above the baseline, so its
- *  ink centre is `ARROW_INK_CENTRE` up. Line THAT up with the label's
- *  x-height centre; centring the two line boxes instead leaves the arrow
- *  visibly low, since it is set half again as large as the words. */
-const CTA_ARROW_NUDGE =
-  X_CENTRE * CTA.size - (BASELINE - ARROW_INK_CENTRE) * CTA.arrow;
 
 /** `.corner`: the round stamp overlapping the stub's top right, on the card's
  *  own frame rather than the stub's. */
@@ -224,187 +229,203 @@ export const RoleTicketVariant = ({
       <View style={[styles.stripe, styles.stripeYellow]} />
 
       <View style={styles.ticket}>
-        <View style={[styles.notch, styles.notchLeft]} />
-        <View style={[styles.notch, styles.notchRight]} />
-
-        <View style={styles.rail}>
-          <BrandLockup
-            markHeight={RAIL.mark}
-            gap={RAIL.gap}
-            fontSize={RAIL.size}
-            tracking={RAIL.tracking}
-            uppercase
-          />
-          <Text fontWeight="black" style={styles.railText}>
-            {t("dogShare.story.roleTicket.rail")}
-          </Text>
-          <Text fontWeight="black" style={styles.railSerial}>
-            {t("dogShare.story.roleTicket.serial")}
-          </Text>
-        </View>
-
-        {/* Three lines, the middle one carrying the pink accent word as a
-            nested `Text` so both halves share one line box and one baseline;
-            a two-`View` row would let them drift apart. */}
-        <Text
-          numberOfLines={1}
-          fontWeight="black"
-          style={[styles.titleText, styles.titleLineOne]}
-        >
-          {t("dogShare.story.roleTicket.headline1")}
-        </Text>
-        <Text
-          numberOfLines={1}
-          fontWeight="black"
-          style={[styles.titleText, styles.titleLineTwo]}
-        >
-          {t("dogShare.story.roleTicket.headline2")}{" "}
-          <Text fontWeight="black" style={styles.titleAccent}>
-            {t("dogShare.story.roleTicket.headline3")}
-          </Text>
-        </Text>
-        <Text
-          numberOfLines={1}
-          fontWeight="black"
-          style={[styles.titleText, styles.titleLineThree]}
-        >
-          {t("dogShare.story.roleTicket.headline4")}
-        </Text>
-
-        <Text numberOfLines={6} fontWeight="semibold" style={styles.fineprint}>
-          {t("dogShare.story.roleTicket.fineprint")}
-        </Text>
-
-        {plan.isEmpty ? (
-          <View style={[styles.band, styles.emptyBand]}>
-            <PawMark size={44} color={TICKET.cream} />
-            <Text
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.5}
-              fontWeight="black"
-              style={styles.emptyName}
-            >
-              {name}
+        <View style={styles.ticketInner}>
+          <View style={styles.rail}>
+            <BrandLockup
+              markHeight={RAIL.mark}
+              gap={RAIL.gap}
+              fontSize={RAIL.size}
+              tracking={RAIL.tracking}
+              uppercase
+            />
+            <Text fontWeight="black" style={styles.railText}>
+              {t("dogShare.story.roleTicket.rail")}
+            </Text>
+            <Text fontWeight="black" style={styles.railSerial}>
+              {t("dogShare.story.roleTicket.serial")}
             </Text>
           </View>
-        ) : (
-          <PhotoMosaic
-            slots={mosaicSlots(plan)}
-            onSettle={onImageSettled}
-            gutter={BAND.gutter}
-            gutterColor={TICKET.cream}
-            paneBorder={BAND.border}
-            fallbackColor={TICKET.navy}
-            style={styles.band}
-          />
-        )}
-        {/* Strip of tape over the seam between the two band photos. */}
-        <View style={styles.tape} />
 
-        <View style={styles.meta}>
-          <DashedRule
-            width={CONTENT_WIDTH}
-            dash={META.dash}
-            gap={META.dashGap}
-            thickness={META.rule}
-          />
-          <View style={styles.metaRow}>
-            <View style={styles.metaCellOne}>
-              <Text
-                numberOfLines={1}
-                fontWeight="black"
-                style={styles.metaLabel}
-              >
-                {passengerLabel}
-              </Text>
+          {/* Three lines, the middle one carrying the pink accent word as a
+            nested `Text` so both halves share one line box and one baseline;
+            a two-`View` row would let them drift apart. */}
+          <Text
+            numberOfLines={1}
+            fontWeight="black"
+            style={[styles.titleText, styles.titleLineOne]}
+          >
+            {t("dogShare.story.roleTicket.headline1")}
+          </Text>
+          <Text
+            numberOfLines={1}
+            fontWeight="black"
+            style={[styles.titleText, styles.titleLineTwo]}
+          >
+            {t("dogShare.story.roleTicket.headline2")}{" "}
+            <Text fontWeight="black" style={styles.titleAccent}>
+              {t("dogShare.story.roleTicket.headline3")}
+            </Text>
+          </Text>
+          <Text
+            numberOfLines={1}
+            fontWeight="black"
+            style={[styles.titleText, styles.titleLineThree]}
+          >
+            {t("dogShare.story.roleTicket.headline4")}
+          </Text>
+
+          <Text
+            numberOfLines={6}
+            fontWeight="semibold"
+            style={styles.fineprint}
+          >
+            {t("dogShare.story.roleTicket.fineprint")}
+          </Text>
+
+          {plan.isEmpty ? (
+            <View style={[styles.band, styles.emptyBand]}>
+              <PawMark size={44} color={TICKET.cream} />
               <Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
+                minimumFontScale={0.5}
                 fontWeight="black"
-                style={[styles.metaValue, styles.metaName]}
+                style={styles.emptyName}
               >
                 {name}
               </Text>
             </View>
-            <View style={styles.metaCellTwo}>
-              <Text
-                numberOfLines={1}
-                fontWeight="black"
-                style={styles.metaLabel}
-              >
-                {t("dogShare.story.roleTicket.destination")}
-              </Text>
-              <Text
-                numberOfLines={1}
-                fontWeight="black"
-                style={styles.metaValue}
-              >
-                {t("dogShare.story.roleTicket.destinationValue")}
-              </Text>
-            </View>
-            <View style={styles.metaCellThree}>
-              <Text
-                numberOfLines={1}
-                fontWeight="black"
-                style={styles.metaLabel}
-              >
-                {t("dogShare.story.roleTicket.gate")}
-              </Text>
-              <Text
-                numberOfLines={1}
-                fontWeight="black"
-                style={styles.metaValue}
-              >
-                {t("dogShare.story.roleTicket.gateValue")}
-              </Text>
-            </View>
-          </View>
-          <DashedRule
-            width={CONTENT_WIDTH}
-            dash={META.dash}
-            gap={META.dashGap}
-            thickness={META.rule}
-          />
-        </View>
+          ) : (
+            <PhotoMosaic
+              slots={mosaicSlots(plan)}
+              onSettle={onImageSettled}
+              gutter={BAND.gutter}
+              gutterColor={TICKET.cream}
+              paneBorder={BAND.border}
+              fallbackColor={TICKET.navy}
+              style={styles.band}
+            />
+          )}
+          {/* Strip of tape over the seam between the two band photos. */}
+          <View style={styles.tape} />
 
-        <View style={styles.call}>
-          {/* Wraps rather than auto-shrinking: a long name that shrank to
+          <View style={styles.meta}>
+            <DashedRule
+              width={CONTENT_WIDTH}
+              dash={META.dash}
+              gap={META.dashGap}
+              thickness={META.rule}
+            />
+            <View style={styles.metaRow}>
+              <View style={styles.metaCellOne}>
+                <Text
+                  numberOfLines={1}
+                  fontWeight="black"
+                  style={styles.metaLabel}
+                >
+                  {passengerLabel}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  fontWeight="black"
+                  style={[styles.metaValue, styles.metaName]}
+                >
+                  {name}
+                </Text>
+              </View>
+              <View style={styles.metaCellTwo}>
+                <Text
+                  numberOfLines={1}
+                  fontWeight="black"
+                  style={styles.metaLabel}
+                >
+                  {t("dogShare.story.roleTicket.destination")}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  fontWeight="black"
+                  style={styles.metaValue}
+                >
+                  {t("dogShare.story.roleTicket.destinationValue")}
+                </Text>
+              </View>
+              <View style={styles.metaCellThree}>
+                <Text
+                  numberOfLines={1}
+                  fontWeight="black"
+                  style={styles.metaLabel}
+                >
+                  {t("dogShare.story.roleTicket.gate")}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  fontWeight="black"
+                  style={styles.metaValue}
+                >
+                  {t("dogShare.story.roleTicket.gateValue")}
+                </Text>
+              </View>
+            </View>
+            <DashedRule
+              width={CONTENT_WIDTH}
+              dash={META.dash}
+              gap={META.dashGap}
+              thickness={META.rule}
+            />
+          </View>
+
+          <View style={styles.call}>
+            {/* Wraps rather than auto-shrinking: a long name that shrank to
               fit one line would end up set smaller than the boxed accent
               directly under it, which reads as a mistake. */}
-          <Text numberOfLines={2} fontWeight="black" style={styles.callText}>
-            {t("dogShare.story.roleTicket.call", { name })}
-          </Text>
-          <View style={styles.callMark}>
-            <View style={styles.callMarkSlab} />
-            <Text
-              fontWeight="black"
-              style={[styles.callText, styles.callMarkText]}
+            <Text numberOfLines={2} fontWeight="black" style={styles.callText}>
+              {t("dogShare.story.roleTicket.call", { name })}
+            </Text>
+            <MarkerSlab
+              fontSize={CALL_SIZE}
+              capHeight={CALL_CAP}
+              padX={CALL_MARK_PAD_X}
+              padY={CALL_MARK_PAD_Y}
+              border={0}
+              fill={TICKET.navy}
+              textStyle={[styles.callText, styles.callMarkText]}
+              style={styles.callMark}
             >
               {t("dogShare.story.roleTicket.callMark")}
+            </MarkerSlab>
+          </View>
+
+          {stamp ? (
+            <View style={styles.stampPhoto}>
+              <StoryImage
+                photo={stamp.photo}
+                onSettle={onImageSettled}
+                fallbackColor={TICKET.navy}
+                style={styles.stampPhotoImage}
+              />
+            </View>
+          ) : null}
+
+          <View style={styles.ctaBar}>
+            <Text numberOfLines={1} fontWeight="black" style={styles.ctaText}>
+              {t("dogShare.story.roleTicket.cta")}
             </Text>
           </View>
         </View>
 
-        {stamp ? (
-          <View style={styles.stampPhoto}>
-            <StoryImage
-              photo={stamp.photo}
-              onSettle={onImageSettled}
-              fallbackColor={TICKET.navy}
-              style={styles.stampPhotoImage}
-            />
-          </View>
-        ) : null}
-
-        <View style={styles.ctaBar}>
-          <Text numberOfLines={1} fontWeight="black" style={styles.ctaText}>
-            {t("dogShare.story.roleTicket.cta")}
-          </Text>
-          <Text fontWeight="black" style={styles.ctaArrow}>
-            →
-          </Text>
-        </View>
+        {/* The bites and the keyline that curves into them, over everything
+            else so the stub's own edge is what the eye follows. */}
+        <View style={[styles.notch, styles.notchLeft]} />
+        <View style={[styles.notch, styles.notchRight]} />
+        <TicketOutline
+          width={TICKET_BOX.width}
+          height={TICKET_BOX.height}
+          stroke={TICKET_BOX.border}
+          notchRadius={NOTCH.radius}
+          notchY={NOTCH.centreY}
+          style={styles.ticketOutline}
+        />
       </View>
 
       <View style={styles.stampBadge}>
@@ -448,24 +469,34 @@ const styles = StyleSheet.create(() => ({
     width: TICKET_BOX.width,
     height: TICKET_BOX.height,
     backgroundColor: TICKET.cream,
-    borderWidth: TICKET_BOX.border,
-    borderColor: INK,
+    // No border: `overflow: hidden` clips to the padding box, so a border
+    // would cut the notch circles a keyline inside the stub's edge and leave
+    // them flat-sided. The keyline is drawn by `TicketOutline` instead, which
+    // can take the bites out of it.
     overflow: "hidden",
     transform: [{ rotate: "-1deg" }],
   },
+  // Everything the stub holds, inset by the keyline the outline draws, so
+  // each element keeps the offset the concept measures from inside the border.
+  ticketInner: {
+    position: "absolute",
+    top: TICKET_BOX.border,
+    left: TICKET_BOX.border,
+    right: TICKET_BOX.border,
+    bottom: TICKET_BOX.border,
+  },
+  ticketOutline: { position: "absolute", zIndex: 6, top: 0, left: 0 },
   notch: {
     position: "absolute",
     zIndex: 5,
-    top: NOTCH.top,
-    width: NOTCH.size,
-    height: NOTCH.size,
-    borderRadius: NOTCH.size / 2,
-    borderWidth: NOTCH.border,
-    borderColor: INK,
+    top: NOTCH.centreY - NOTCH.radius,
+    width: NOTCH.radius * 2,
+    height: NOTCH.radius * 2,
+    borderRadius: NOTCH.radius,
     backgroundColor: TICKET.navy,
   },
-  notchLeft: { left: -NOTCH.inset },
-  notchRight: { right: -NOTCH.inset },
+  notchLeft: { left: -NOTCH.radius },
+  notchRight: { right: -NOTCH.radius },
   rail: {
     height: RAIL.height,
     backgroundColor: TICKET.rail,
@@ -621,18 +652,8 @@ const styles = StyleSheet.create(() => ({
     textTransform: "uppercase",
   },
   callMark: {
-    alignSelf: "flex-start",
-    justifyContent: "center",
-    paddingHorizontal: CALL_MARK_PAD_X,
+    marginTop: CALL_MARK_TOP,
     transform: [{ rotate: "-2deg" }],
-  },
-  callMarkSlab: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: CALL_MARK_INSET,
-    bottom: CALL_MARK_INSET,
-    backgroundColor: TICKET.navy,
   },
   callMarkText: { color: WHITE },
   stampPhoto: {
@@ -656,9 +677,7 @@ const styles = StyleSheet.create(() => ({
     borderWidth: CTA.border,
     borderColor: INK,
     backgroundColor: TICKET.stripePink,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "center",
+    alignItems: "center",
     paddingTop:
       (CTA.height - CTA.border * 2 - lineBox(CTA.size)) / 2 +
       halfLeading(CTA_CONCEPT_SIZE),
@@ -667,12 +686,6 @@ const styles = StyleSheet.create(() => ({
     fontSize: CTA.size,
     letterSpacing: CTA.tracking,
     color: INK,
-  },
-  ctaArrow: {
-    marginLeft: CTA.gap,
-    fontSize: CTA.arrow,
-    color: INK,
-    marginTop: CTA_ARROW_NUDGE,
   },
   stampBadge: {
     position: "absolute",

@@ -2,7 +2,7 @@ import type { StoryPhotoSlot } from "./photos";
 import type { StoryPhoto } from "./types";
 
 import type { ComponentProps } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 import { useEffect } from "react";
 import { View } from "react-native";
@@ -23,6 +23,7 @@ import { Text } from "@/components/text";
 
 import {
   CAP_CENTRE,
+  CAP_LINE,
   INK,
   PAW_ASPECT,
   WHITE,
@@ -295,40 +296,113 @@ export const DashedRule = ({
 };
 
 /**
- * The concept's hand-drawn underline: a `width` x `height` box carrying only
- * a top border, with `border-radius: 50%`.
+ * A word set on the concept's marker slab: a filled box with a hard keyline,
+ * sized by the WORD rather than by a constant. The box takes the text's own
+ * width plus the concept's side padding, and a height built from the cap band
+ * plus the same padding over and under it, so the word sits inside the slab
+ * with even space all round whatever a locale puts in it.
  *
- * A browser paints that as the crown of an ellipse — `thickness` at the top
- * and tapering to nothing at both ends, because the inner curve is the same
- * ellipse with its vertical radius reduced by the border and its horizontal
- * radius untouched. Drawn here as the region between those two arcs, which
- * is the same shape and, unlike a rotated rectangle, actually curves.
+ * The word hangs off its cap line rather than being laid out in the box:
+ * Gilroy's line box is half again as tall as its capitals, and a slab that
+ * tall would stand well clear of the one the concept draws. Nothing clips the
+ * overhang — RN views do not clip their children — and no glyph draws in it
+ * anyway, since every word set this way is uppercase.
  */
-export const ArcRule = ({
+export const MarkerSlab = ({
+  fontSize,
+  capHeight,
+  padX,
+  padY,
+  border,
+  fill,
+  textStyle,
+  children,
+  style,
+}: {
+  fontSize: number;
+  /** The cap band the slab is built around, in points. */
+  capHeight: number;
+  padX: number;
+  padY: number;
+  border: number;
+  fill: string;
+  textStyle?: StyleProp<TextStyle>;
+  children: string;
+  style?: StyleProp<ViewStyle>;
+}) => (
+  <View
+    style={[
+      styles.markerSlab,
+      {
+        height: capHeight + padY * 2 + border * 2,
+        paddingHorizontal: padX,
+        borderWidth: border,
+        backgroundColor: fill,
+      },
+      style,
+    ]}
+  >
+    <Text
+      numberOfLines={1}
+      fontWeight="black"
+      style={[textStyle, { marginTop: padY - CAP_LINE * fontSize }]}
+    >
+      {children}
+    </Text>
+  </View>
+);
+
+/**
+ * The ticket stub's outline, drawn as one path so its two tear notches are
+ * real bites out of the edge: the keyline runs down the side, curves into the
+ * half circle and back out again. Laying a bordered disc over a bordered box
+ * instead leaves the box's own edge running straight behind it, which reads as
+ * a sticker rather than a punched hole.
+ *
+ * The path is its own half-stroke inside the box so the whole keyline lands
+ * within the stub, matching a CSS `border` on a border-box element.
+ */
+export const TicketOutline = ({
   width,
   height,
-  thickness,
+  stroke,
+  notchRadius,
+  notchY,
   color = INK,
   style,
 }: {
   width: number;
   height: number;
-  thickness: number;
+  stroke: number;
+  /** Outer radius of the notch, the same circle the background shows through. */
+  notchRadius: number;
+  notchY: number;
   color?: string;
   style?: StyleProp<ViewStyle>;
 }) => {
-  const rx = width / 2;
-  const ry = height / 2;
+  const inset = stroke / 2;
+  const radius = notchRadius - inset;
+  // Where the notch's arc crosses the side the keyline runs down.
+  const half = Math.sqrt(Math.max(radius * radius - inset * inset, 0));
 
   return (
-    <View style={[style, { width, height }]}>
+    <View style={[style, { width, height }]} pointerEvents="none">
       <Svg width={width} height={height}>
         <Path
           d={
-            `M0,${ry}A${rx},${ry} 0 0 1 ${width},${ry}` +
-            `A${rx},${ry - thickness} 0 0 0 0,${ry}Z`
+            `M${inset},${inset}` +
+            `L${width - inset},${inset}` +
+            `L${width - inset},${notchY - half}` +
+            `A${radius},${radius} 0 0 0 ${width - inset},${notchY + half}` +
+            `L${width - inset},${height - inset}` +
+            `L${inset},${height - inset}` +
+            `L${inset},${notchY + half}` +
+            `A${radius},${radius} 0 0 0 ${inset},${notchY - half}` +
+            "Z"
           }
-          fill={color}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
         />
       </Svg>
     </View>
@@ -409,55 +483,62 @@ export const DotField = ({
 );
 
 /**
- * The speech bubble's tail: the bubble's own fill running down past its
- * square bottom-left corner to a point, with the bubble's left keyline
- * carrying on down the outside of it.
+ * The speech bubble's tail: the bubble's own fill running down past its square
+ * bottom-left corner to a point, with the bubble's keyline carried around BOTH
+ * of the tail's outside edges in the same stroke as the bubble itself.
  *
- * The concept draws it as a `size` x `size` box clipped to
- * `polygon(0 0, 100% 0, 0 100%)` carrying only a left and a bottom border.
- * The clip keeps the left keyline — tapering to nothing where the hypotenuse
- * crosses it — and throws away all but a sliver of the bottom one, so the
- * hypotenuse itself is unstroked: it is the fill meeting the paper.
+ * Drawn as two polygons — the ink silhouette, then the fill inset inside it —
+ * rather than as a stroked path, so the keyline's width is exact on the
+ * diagonal as well as the vertical and the tip closes to a solid point the way
+ * a drawn tail does.
  *
- * Drawn as the fill first and the keyline over it, never as two shapes
- * meeting along the hypotenuse: an ink triangle with the fill laid back
- * inside it makes both share that edge exactly, and the two antialiased runs
- * blend into a grey seam down the diagonal.
- *
- * The caller hangs the box off the bubble's bottom so its top edge sits
- * `size` above the point, INSIDE the bubble — which is what interrupts the
- * bubble's bottom border where the tail joins it, exactly as the concept's
- * `bottom: -66px` on a border-box `:after` does.
+ * The fill's inset stops at `joinAt`, the depth at which the bubble's own
+ * bottom border passes: above that line the tail is inside the bubble, so it
+ * runs out to the full silhouette and merges with the white padding, and the
+ * bubble's bottom border is interrupted exactly where the tail meets it. Below
+ * it the ink is the outline the tail is read by.
  */
 export const BubbleTail = ({
   size,
   stroke,
+  joinAt,
   fill = WHITE,
   style,
 }: {
   size: number;
   stroke: number;
+  /** How far down the tail the bubble's own bottom border ends. */
+  joinAt: number;
   fill?: string;
   style?: StyleProp<ViewStyle>;
-}) => (
-  <View style={[style, { width: size, height: size }]}>
-    <Svg width={size} height={size}>
-      {/* The tail itself, hypotenuse included. */}
-      <Polygon points={`0,0 ${size},0 0,${size}`} fill={fill} />
-      {/* The bubble's left keyline carrying on down the outside of it,
-          tapering to nothing at the tip exactly as the concept's clipped
-          border does. Painted over the fill, so it shares no edge with
-          anything but itself. */}
-      <Polygon
-        points={`0,0 ${stroke},0 ${stroke},${size - stroke} 0,${size}`}
-        fill={INK}
-      />
-    </Svg>
-  </View>
-);
+}) => {
+  // The hypotenuse runs `x + y = size`; insetting it by `stroke` measured
+  // perpendicular moves that line in by `stroke * sqrt(2)` along either axis.
+  const bite = stroke * Math.SQRT2;
+  const apex = size - bite - stroke;
+
+  return (
+    <View style={[style, { width: size, height: size }]}>
+      <Svg width={size} height={size}>
+        <Polygon points={`0,0 ${size},0 0,${size}`} fill={INK} />
+        <Polygon
+          points={[
+            `${stroke},0`,
+            `${size},0`,
+            `${size - joinAt},${joinAt}`,
+            `${size - bite - joinAt},${joinAt}`,
+            `${stroke},${apex}`,
+          ].join(" ")}
+          fill={fill}
+        />
+      </Svg>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create(() => ({
   brandRow: { flexDirection: "row", alignItems: "flex-start" },
+  markerSlab: { alignSelf: "flex-start", borderColor: INK },
   brandWord: { textTransform: "none" },
   brandWordCaps: { textTransform: "uppercase" },
   fallback: {
