@@ -407,9 +407,21 @@ export const TicketOutline = ({
   // Where the notch's arc crosses the side the keyline runs down.
   const half = Math.sqrt(Math.max(radius * radius - inset * inset, 0));
 
+  // `Svg` puts its `width` and `height` through `parseInt` before they reach
+  // the canvas's own style, so a fractional point size truncates: the stub is
+  // 940 concept px = 313.33pt wide and the canvas came out 313pt, a device
+  // pixel short of the box. The path is still drawn to the full width, so
+  // that last pixel of the right-hand keyline was clipped off the canvas and
+  // the stub's cream showed through between the ink and the card. Rounding
+  // the canvas up leaves every coordinate where it is and gives the stroke
+  // room to land; the surplus is transparent and falls outside the stub's
+  // own clip. The left edge never showed it because the canvas starts at 0.
+  const canvasWidth = Math.ceil(width);
+  const canvasHeight = Math.ceil(height);
+
   return (
     <View style={[style, { width, height }]} pointerEvents="none">
-      <Svg width={width} height={height}>
+      <Svg width={canvasWidth} height={canvasHeight}>
         <Path
           d={
             `M${inset},${inset}` +
