@@ -53,6 +53,24 @@ function formatPercent(value) {
   return value === null ? "n/a" : `${value.toFixed(1)}%`;
 }
 
+/** A share of a denominator, or null when the denominator is empty. */
+function ratio(numerator, denominator) {
+  return denominator === 0 ? null : (numerator / denominator) * 100;
+}
+
+/** A percentage row, with the delta in points and `n/a` on either empty side. */
+function rateRow(label, current, previous) {
+  return {
+    current: formatPercent(current),
+    delta:
+      current === null || previous === null
+        ? "n/a"
+        : formatRateDelta(current, previous),
+    label,
+    previous: formatPercent(previous),
+  };
+}
+
 /** Indexes the totals rows so a lookup cannot depend on result ordering. */
 function indexTotals(rows) {
   const index = new Map();
@@ -69,13 +87,19 @@ function totalOf(index, event, period, field) {
   return index.get(`${event}::${period}`)?.[field] ?? 0;
 }
 
-function indexBreakdown(rows) {
+/**
+ * Buckets a breakdown into one entry per value.
+ *
+ * `field` is which column carries the number: counts come back as `total`, the
+ * version split comes back as `people`, and both render the same table.
+ */
+function indexBreakdown(rows, field = "total") {
   const index = new Map();
   for (const row of rows ?? []) {
     const bucket = String(row.bucket ?? "unknown");
     const entry = index.get(bucket) ?? { current: 0, previous: 0 };
     entry[row.period === "current" ? "current" : "previous"] += Number(
-      row.total ?? 0,
+      row[field] ?? 0,
     );
     index.set(bucket, entry);
   }
@@ -121,8 +145,8 @@ function countRow(index, label, event, field = "total") {
   };
 }
 
-function breakdownTable(rows) {
-  const index = indexBreakdown(rows);
+function breakdownTable(rows, { field = "total", header = "Bucket" } = {}) {
+  const index = indexBreakdown(rows, field);
   if (index.size === 0) {
     return "No events in either window.";
   }
@@ -132,7 +156,7 @@ function breakdownTable(rows) {
     .slice(0, MAX_BREAKDOWN_ROWS);
 
   return [
-    "| Bucket | Last 7 days | Previous 7 days | Delta |",
+    `| ${header} | Last 7 days | Previous 7 days | Delta |`,
     "| --- | ---: | ---: | ---: |",
     ...ordered.map(
       (row) =>
@@ -146,6 +170,7 @@ function breakdownTable(rows) {
  *
  * @param {object} input
  * @param {Array} input.activeUsers rows from the active users query
+ * @param {Array} input.activeUsersByVersion rows from the version split
  * @param {Record<string, Array>} input.breakdowns rows per breakdown id
  * @param {Date} input.generatedAt when the job ran
  * @param {Array} input.totals rows from the totals query
@@ -153,6 +178,7 @@ function breakdownTable(rows) {
  */
 export function buildReport({
   activeUsers,
+  activeUsersByVersion,
   breakdowns,
   generatedAt,
   totals,
@@ -177,11 +203,21 @@ export function buildReport({
   const okCurrent = bucketRate(pushTickets, "ok", "current");
   const okPrevious = bucketRate(pushTickets, "ok", "previous");
 
+  // Opens over sends, not over tickets: a send is one nudge aimed at one
+  // person, which is the thing an open rate is a share of.
+  const openRate = (period) =>
+    ratio(
+      totalOf(index, EVENTS.PUSH_NOTIFICATION_OPENED, period, "total"),
+      totalOf(index, EVENTS.REENGAGEMENT_PUSH_SENT, period, "total"),
+    );
+  const openRateCurrent = openRate("current");
+  const openRatePrevious = openRate("previous");
+
   const core = metricTable([
     {
       current: number(activeCurrent),
       delta: formatDelta(activeCurrent, activePrevious),
-      label: "Active users (any event)",
+      label: "Active users (app and site)",
       previous: number(activePrevious),
     },
     countRow(
@@ -217,21 +253,20 @@ export function buildReport({
 
   const push = metricTable([
     countRow(index, "Reengagement Push Sent", EVENTS.REENGAGEMENT_PUSH_SENT),
+    countRow(
+      index,
+      "Users reached by push",
+      EVENTS.REENGAGEMENT_PUSH_SENT,
+      "people",
+    ),
     countRow(index, "Push Ticket Result", EVENTS.PUSH_TICKET_RESULT),
-    {
-      current: formatPercent(okCurrent),
-      delta:
-        okCurrent === null || okPrevious === null
-          ? "n/a"
-          : formatRateDelta(okCurrent, okPrevious),
-      label: "Push Ticket Result ok rate",
-      previous: formatPercent(okPrevious),
-    },
+    rateRow("Push Ticket Result ok rate", okCurrent, okPrevious),
     countRow(
       index,
       "Push Notification Opened",
       EVENTS.PUSH_NOTIFICATION_OPENED,
     ),
+    rateRow("Push open rate", openRateCurrent, openRatePrevious),
   ]);
 
   const breakdownSections = BREAKDOWNS.map((breakdown) =>
@@ -262,6 +297,13 @@ export function buildReport({
     "### Push",
     "",
     push,
+    "",
+    "### Active users by app version",
+    "",
+    breakdownTable(activeUsersByVersion, {
+      field: "people",
+      header: "App version",
+    }),
     "",
     ...breakdownSections,
     "This comment is rewritten in place by the daily metrics workflow.",

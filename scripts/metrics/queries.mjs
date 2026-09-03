@@ -37,6 +37,44 @@ export const EVENTS = {
 export const COUNTED_EVENTS = Object.values(EVENTS).sort();
 
 /**
+ * The `$lib` values the PostHog SDKs report when a person is the one acting.
+ *
+ * `posthog-react-native` is the app, `web` is posthog-js on the marketing site.
+ * The API uses posthog-node, which reports `posthog-node`, so an allow list
+ * keeps a new server integration out of the activity number by default rather
+ * than letting it in until somebody notices.
+ */
+export const CLIENT_LIBS = ["posthog-react-native", "web"];
+
+/**
+ * Events emitted from `packages/api`, listed so they can be excluded.
+ *
+ * They are captured against the user they are about, so a push the cron sent to
+ * a person who never opened the app still carries that person's distinct id.
+ * Counting them as activity is what turned 20 real users into 579. The `$lib`
+ * allow list above already removes them; this list is the second guard, for the
+ * day one of these is captured through a proxy that rewrites `$lib`.
+ */
+export const SERVER_EVENTS = [
+  "Image Moderation Result",
+  "Match Created",
+  "Message Sent",
+  "Push Receipt Result",
+  "Push Ticket Result",
+  "Reengagement Push Sent",
+  "Signup Attributed",
+  "Subscription Event",
+].sort();
+
+/**
+ * The property posthog-react-native puts on every event from the native app,
+ * read out of the app bundle rather than sent by hand. Web events do not carry
+ * it, so they land in the `unknown` bucket, which is the honest answer for a
+ * browser.
+ */
+export const APP_VERSION_PROPERTY = "$app_version";
+
+/**
  * The breakdowns, each one event split by one property.
  *
  * Three of them double as headline numbers: the successful upgrades, the story
@@ -138,7 +176,25 @@ function windowFilter(windows) {
   ].join("\n  AND ");
 }
 
-/** Distinct people with any event at all, which is the activity denominator. */
+/**
+ * The clause that keeps a query to events a person caused.
+ *
+ * Both halves are needed for the reason each list documents: the `$lib` allow
+ * list is the definition, the event deny list is the backstop.
+ */
+function clientEventFilter() {
+  return [
+    `properties.$lib IN (${CLIENT_LIBS.map(quote).join(", ")})`,
+    `event NOT IN (${SERVER_EVENTS.map(quote).join(", ")})`,
+  ].join("\n  AND ");
+}
+
+/**
+ * Distinct people who did something in the app or on the site.
+ *
+ * Server events are excluded on purpose: the readout is asking how many people
+ * used the product, not how many rows the API wrote about them.
+ */
 export function buildActiveUsersQuery(windows) {
   return [
     "SELECT",
@@ -146,7 +202,30 @@ export function buildActiveUsersQuery(windows) {
     "  count(DISTINCT person_id) AS people",
     "FROM events",
     `WHERE ${windowFilter(windows)}`,
+    `  AND ${clientEventFilter()}`,
     "GROUP BY period",
+  ].join("\n");
+}
+
+/**
+ * The same active users, split by the build they are running.
+ *
+ * A person on two builds inside one window counts once per build, so the
+ * buckets can add up to more than the headline. That is the point: it answers
+ * "is anybody still on the old build", which a single number cannot.
+ */
+export function buildActiveUsersByVersionQuery(windows) {
+  const value = `ifNull(nullIf(toString(properties.${APP_VERSION_PROPERTY}), ''), 'unknown')`;
+  return [
+    "SELECT",
+    `  ${value} AS bucket,`,
+    `  ${periodExpression(windows)} AS period,`,
+    "  count(DISTINCT person_id) AS people",
+    "FROM events",
+    `WHERE ${windowFilter(windows)}`,
+    `  AND ${clientEventFilter()}`,
+    "GROUP BY bucket, period",
+    "ORDER BY bucket, period",
   ].join("\n");
 }
 

@@ -49,6 +49,16 @@ function fakeWorld({ existingComment = null } = {}) {
           ],
         });
       }
+      if (name.endsWith("active users by app version")) {
+        return json({
+          columns: ["bucket", "period", "people"],
+          results: [
+            ["1.4.0", "current", 900],
+            ["1.3.2", "current", 320],
+            ["1.4.0", "previous", 210],
+          ],
+        });
+      }
       if (name.endsWith("event totals")) {
         return json({
           columns: ["event", "period", "total", "people"],
@@ -95,6 +105,10 @@ test("a dry run renders the comment and never touches GitHub", async () => {
     result.body,
     /\| Swipes \| 5,400 \| 5,000 \| \+400 \(\+8\.0%\) \|/,
   );
+  assert.match(
+    result.body,
+    /\| 1\.4\.0 \| 900 \| 210 \| \+690 \(\+328\.6%\) \|/,
+  );
   assert.equal(
     fetchImpl.calls.every((call) => isPostHog(call.url)),
     true,
@@ -104,7 +118,7 @@ test("a dry run renders the comment and never touches GitHub", async () => {
 test("one query goes out per metric block", async () => {
   const fetchImpl = fakeWorld();
   await runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW });
-  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 2);
+  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 3);
 });
 
 test("a full run posts the readout once", async () => {
