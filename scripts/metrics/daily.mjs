@@ -19,6 +19,7 @@ import { upsertMarkedComment } from "./github.mjs";
 import { queryHogql } from "./posthog.mjs";
 import {
   BREAKDOWNS,
+  buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
   buildTotalsQuery,
@@ -61,16 +62,21 @@ export async function runDailyMetrics({
   const run = (name, query) =>
     queryHogql({ apiKey, fetchImpl, host, name, projectId, query });
 
-  const [activeUsers, totals, ...breakdownRows] = await Promise.all([
-    run("pegada daily metrics: active users", buildActiveUsersQuery(windows)),
-    run("pegada daily metrics: event totals", buildTotalsQuery(windows)),
-    ...BREAKDOWNS.map((breakdown) =>
+  const [activeUsers, activeUsersByVersion, totals, ...breakdownRows] =
+    await Promise.all([
+      run("pegada daily metrics: active users", buildActiveUsersQuery(windows)),
       run(
-        `pegada daily metrics: ${breakdown.id}`,
-        buildBreakdownQuery(windows, breakdown),
+        "pegada daily metrics: active users by app version",
+        buildActiveUsersByVersionQuery(windows),
       ),
-    ),
-  ]);
+      run("pegada daily metrics: event totals", buildTotalsQuery(windows)),
+      ...BREAKDOWNS.map((breakdown) =>
+        run(
+          `pegada daily metrics: ${breakdown.id}`,
+          buildBreakdownQuery(windows, breakdown),
+        ),
+      ),
+    ]);
 
   const breakdowns = Object.fromEntries(
     BREAKDOWNS.map((breakdown, position) => [
@@ -81,6 +87,7 @@ export async function runDailyMetrics({
 
   const body = buildReport({
     activeUsers,
+    activeUsersByVersion,
     breakdowns,
     generatedAt: now,
     totals,

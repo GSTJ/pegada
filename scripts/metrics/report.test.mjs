@@ -24,11 +24,23 @@ function breakdown(rows) {
   return rows.map(([bucket, period, total]) => ({ bucket, period, total }));
 }
 
+function versions(rows) {
+  return rows.map(([bucket, period, people]) => ({ bucket, people, period }));
+}
+
 const FIXTURE = {
   activeUsers: [
     { people: 1240, period: "current" },
     { people: 1100, period: "previous" },
   ],
+  activeUsersByVersion: versions([
+    ["1.4.0", "current", 900],
+    ["1.4.0", "previous", 210],
+    ["1.3.2", "current", 320],
+    ["1.3.2", "previous", 870],
+    ["unknown", "current", 20],
+    ["unknown", "previous", 20],
+  ]),
   breakdowns: {
     fake_door_feature: breakdown([
       ["ai_story_video", "current", 31],
@@ -141,7 +153,7 @@ test("the core table reports counts, distinct people and deltas", () => {
   const body = buildReport(FIXTURE);
   assert.match(
     body,
-    /\| Active users \(any event\) \| 1,240 \| 1,100 \| \+140 \(\+12\.7%\) \|/,
+    /\| Active users \(app and site\) \| 1,240 \| 1,100 \| \+140 \(\+12\.7%\) \|/,
   );
   assert.match(
     body,
@@ -171,6 +183,52 @@ test("the story shares are split out of Share Completed", () => {
     body,
     /\| Share Completed \(option story\) \| 40 \| 10 \| \+30 \(\+300\.0%\) \|/,
   );
+});
+
+test("the app version table splits the active users by build", () => {
+  const body = buildReport(FIXTURE);
+  assert.ok(body.includes("### Active users by app version"));
+  const [, versionSection] = body.split("### Active users by app version");
+  assert.match(versionSection, /\| App version \| Last 7 days \|/);
+  assert.match(
+    versionSection,
+    /\| 1\.4\.0 \| 900 \| 210 \| \+690 \(\+328\.6%\) \|/,
+  );
+  assert.match(
+    versionSection,
+    /\| 1\.3\.2 \| 320 \| 870 \| -550 \(-63\.2%\) \|/,
+  );
+  assert.ok(
+    versionSection.indexOf("| 1.4.0 |") < versionSection.indexOf("| 1.3.2 |"),
+  );
+});
+
+test("a missing app version split says so instead of rendering an empty table", () => {
+  const body = buildReport({ ...FIXTURE, activeUsersByVersion: [] });
+  const [, versionSection] = body.split("### Active users by app version");
+  assert.match(versionSection, /^\n\nNo events in either window\./);
+});
+
+test("the push table reports how many people a send reached", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(
+    body,
+    /\| Reengagement Push Sent \| 1,000 \| 0 \| \+1,000 \(new\) \|/,
+  );
+  assert.match(
+    body,
+    /\| Users reached by push \| 800 \| 0 \| \+800 \(new\) \|/,
+  );
+});
+
+test("the push open rate is opens over sends", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(body, /\| Push open rate \| 14\.0% \| n\/a \| n\/a \|/);
+});
+
+test("the push open rate is n/a rather than infinite when nothing was sent", () => {
+  const body = buildReport({ ...FIXTURE, totals: [] });
+  assert.match(body, /\| Push open rate \| n\/a \| n\/a \| n\/a \|/);
 });
 
 test("the push ok rate is a share of the tickets in each window", () => {

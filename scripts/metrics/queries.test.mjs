@@ -5,8 +5,11 @@ import { fileURLToPath } from "node:url";
 
 import {
   BREAKDOWNS,
+  CLIENT_LIBS,
   COUNTED_EVENTS,
   EVENTS,
+  SERVER_EVENTS,
+  buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
   buildTotalsQuery,
@@ -42,6 +45,59 @@ test("the active users query buckets by the current window start", () => {
   );
   assert.match(query, /timestamp < toDateTime\('2026-09-02 12:00:00', 'UTC'\)/);
   assert.match(query, /GROUP BY period/);
+});
+
+test("the active users query counts only events a person caused", () => {
+  const query = buildActiveUsersQuery(buildWindows(NOW));
+  assert.match(query, /properties\.\$lib IN \('posthog-react-native', 'web'\)/);
+  for (const event of SERVER_EVENTS) {
+    assert.ok(query.includes(quote(event)), `${event} is not excluded`);
+  }
+  assert.match(query, /event NOT IN \(/);
+});
+
+test("posthog-node never counts as a client library", () => {
+  assert.equal(CLIENT_LIBS.includes("posthog-node"), false);
+  assert.ok(CLIENT_LIBS.includes("posthog-react-native"));
+  assert.ok(CLIENT_LIBS.includes("web"));
+});
+
+test("the events the API emits are all on the deny list", () => {
+  for (const event of [
+    "Image Moderation Result",
+    "Match Created",
+    "Message Sent",
+    "Push Receipt Result",
+    "Push Ticket Result",
+    "Reengagement Push Sent",
+    "Signup Attributed",
+    "Subscription Event",
+  ]) {
+    assert.ok(SERVER_EVENTS.includes(event), `${event} is not denied`);
+  }
+  assert.equal(SERVER_EVENTS.includes("Swipe"), false);
+  assert.equal(SERVER_EVENTS.includes("Push Notification Opened"), false);
+});
+
+test("the version split counts distinct people per build, client events only", () => {
+  const query = buildActiveUsersByVersionQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /ifNull\(nullIf\(toString\(properties\.\$app_version\), ''\), 'unknown'\) AS bucket/,
+  );
+  assert.match(query, /count\(DISTINCT person_id\) AS people/);
+  assert.match(query, /properties\.\$lib IN \('posthog-react-native', 'web'\)/);
+  assert.match(query, /GROUP BY bucket, period/);
+  assert.match(
+    query,
+    /toDateTime\('2026-08-26 12:00:00', 'UTC'\), 'current', 'previous'/,
+  );
+});
+
+test("the totals query still counts server events, which are volume not activity", () => {
+  const query = buildTotalsQuery(buildWindows(NOW));
+  assert.equal(query.includes("$lib"), false);
+  assert.ok(query.includes(quote("Reengagement Push Sent")));
 });
 
 test("the totals query asks for every counted event once", () => {
@@ -99,7 +155,7 @@ test("every event name still exists in the shared analytics catalogue", () => {
     ),
   );
   assert.ok(declared.size > 20, "the catalogue parse found almost nothing");
-  for (const event of COUNTED_EVENTS) {
+  for (const event of [...COUNTED_EVENTS, ...SERVER_EVENTS]) {
     assert.ok(
       declared.has(event),
       `${event} is no longer in the analytics catalogue`,
