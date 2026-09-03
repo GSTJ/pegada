@@ -6,8 +6,15 @@ import localFont from "next/font/local";
  * the root layout, so only the pages that exist to look like the app they are
  * advertising pay for it: the dog share card and the story landing page.
  *
- * The weights below are the ones those pages set: body copy in medium, CTAs
- * and taglines in semibold, headlines in bold/extrabold.
+ * The weights below are the ones those pages set: secondary copy in light,
+ * body copy in medium, CTAs and taglines in semibold, headlines in
+ * bold/extrabold.
+ *
+ * Light is here because `/dog/[id]` sets `font-light` on the card bio, the
+ * "next step" line and the reassurance under the CTA. Without the face those
+ * three fell back to Medium, which is the weight of the tagline sitting right
+ * above the bio, so the two lines that were meant to differ were the same
+ * stroke with different opacity.
  *
  * The TTFs live in `packages/shared/themes/fonts`, outside this app. That path
  * survives `next build` (verified via `pnpm -F @pegada/nextjs build`), so there
@@ -17,6 +24,11 @@ export const gilroy = localFont({
   variable: "--font-gilroy",
   display: "swap",
   src: [
+    {
+      path: "../../../../packages/shared/themes/fonts/Gilroy-Light.ttf",
+      weight: "300",
+      style: "normal",
+    },
     {
       path: "../../../../packages/shared/themes/fonts/Gilroy-Medium.ttf",
       weight: "500",

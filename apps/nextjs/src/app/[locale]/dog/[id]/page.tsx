@@ -217,7 +217,14 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
             )}
 
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-5 pb-5 pt-16">
-              <h1 className="text-2xl font-extrabold leading-tight text-white md:text-3xl">
+              {/*
+               * The leading is restated at every size that changes the size.
+               * Tailwind's `text-*` utilities set a line height as well, and
+               * the responsive ones are emitted after `leading-*`, so a bare
+               * `leading-tight` here was overridden by `md:text-3xl` and the
+               * name rendered at a leading of 1.
+               */}
+              <h1 className="text-2xl font-extrabold leading-[1.15] text-white md:text-3xl md:leading-[1.1]">
                 {dog.name}
               </h1>
               {tagline ? (
@@ -233,7 +240,9 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
         </div>
         {/* Desktop copy column. Hidden below `md`, where the sticky bar carries the ask instead. */}
         <div className="hidden fill-mode-both animate-in fade-in slide-in-from-bottom-2 delay-150 duration-700 motion-reduce:animate-none md:flex md:max-w-md md:flex-col md:gap-5">
-          <h2 className="text-4xl font-extrabold leading-tight text-text lg:text-5xl">
+          {/* Same reason as the `h1` above: `lg:text-5xl` was resetting the
+              leading to 1, and a long name makes this four lines. */}
+          <h2 className="text-4xl font-extrabold leading-[1.1] text-text lg:text-5xl lg:leading-[1.05]">
             {invite}
           </h2>
           <p className="text-lg font-light text-subtitle">{nextStep}</p>
