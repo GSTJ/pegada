@@ -1,0 +1,54 @@
+name: Daily Metrics
+
+# Noon UTC, which is early morning in Brazil: the readout is waiting before
+# anyone opens the repo, and the window it closes is a whole day rather than a
+# partial one.
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Print the readout in the job log instead of commenting
+        type: boolean
+        default: false
+
+# The job edits one comment in place, so two runs overlapping would race each
+# other for the same body. Queue instead of cancelling: a scheduled run that
+# loses to a manual dispatch would silently skip a day.
+concurrency:
+  group: daily-metrics
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # Writing the readout comment on the tracking issue.
+  issues: write
+
+jobs:
+  readout:
+    name: 📊 Readout
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 🏗 Setup Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: 🏗 Setup PNPM
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22.x
+
+      # No `pnpm install`: the script is plain Node with no dependencies, and
+      # installing the whole monorepo to run it would cost minutes a day for
+      # nothing. `pnpm run` only needs package.json.
+      - name: 📊 Post the readout
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+          POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
+        run: pnpm run metrics:daily ${{ inputs.dry_run && '--dry-run' || '' }}

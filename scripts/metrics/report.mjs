@@ -1,0 +1,270 @@
+/**
+ * The comment body: rows, deltas and tables, built from query results.
+ *
+ * Pure, so the whole formatter can be checked against fixtures. The hidden
+ * marker on the first line is what lets the job find its own comment tomorrow
+ * instead of leaving a new one behind every day.
+ */
+
+import { BREAKDOWNS, EVENTS } from "./queries.mjs";
+
+export const COMMENT_MARKER = "<!-- pegada-daily-metrics -->";
+
+const MAX_BREAKDOWN_ROWS = 12;
+
+function number(value) {
+  return Number(value ?? 0).toLocaleString("en-US");
+}
+
+function utcStamp(date) {
+  return `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`;
+}
+
+/**
+ * A count delta, as an absolute change and a percentage.
+ *
+ * A previous window of zero has no percentage to report, so it says `new`
+ * rather than dividing by zero and printing an infinity.
+ */
+export function formatDelta(current, previous) {
+  const diff = current - previous;
+  if (diff === 0) {
+    return "0";
+  }
+  const sign = diff > 0 ? "+" : "-";
+  const magnitude = number(Math.abs(diff));
+  if (previous === 0) {
+    return `${sign}${magnitude} (new)`;
+  }
+  const percent = ((diff / previous) * 100).toFixed(1);
+  return `${sign}${magnitude} (${diff > 0 ? "+" : ""}${percent}%)`;
+}
+
+/** A rate delta, in percentage points, because a percent of a percent reads wrong. */
+export function formatRateDelta(current, previous) {
+  const diff = current - previous;
+  if (Math.abs(diff) < 0.05) {
+    return "0";
+  }
+  return `${diff > 0 ? "+" : "-"}${Math.abs(diff).toFixed(1)} pp`;
+}
+
+function formatPercent(value) {
+  return value === null ? "n/a" : `${value.toFixed(1)}%`;
+}
+
+/** Indexes the totals rows so a lookup cannot depend on result ordering. */
+function indexTotals(rows) {
+  const index = new Map();
+  for (const row of rows) {
+    index.set(`${row.event}::${row.period}`, {
+      people: Number(row.people ?? 0),
+      total: Number(row.total ?? 0),
+    });
+  }
+  return index;
+}
+
+function totalOf(index, event, period, field) {
+  return index.get(`${event}::${period}`)?.[field] ?? 0;
+}
+
+function indexBreakdown(rows) {
+  const index = new Map();
+  for (const row of rows ?? []) {
+    const bucket = String(row.bucket ?? "unknown");
+    const entry = index.get(bucket) ?? { current: 0, previous: 0 };
+    entry[row.period === "current" ? "current" : "previous"] += Number(
+      row.total ?? 0,
+    );
+    index.set(bucket, entry);
+  }
+  return index;
+}
+
+function bucketValue(rows, bucket, period) {
+  return indexBreakdown(rows).get(bucket)?.[period] ?? 0;
+}
+
+/** Share of a breakdown that landed in one bucket, or null when nothing happened. */
+function bucketRate(rows, bucket, period) {
+  const index = indexBreakdown(rows);
+  let all = 0;
+  for (const entry of index.values()) {
+    all += entry[period];
+  }
+  if (all === 0) {
+    return null;
+  }
+  return ((index.get(bucket)?.[period] ?? 0) / all) * 100;
+}
+
+function metricTable(rows) {
+  return [
+    "| Metric | Last 7 days | Previous 7 days | Delta |",
+    "| --- | ---: | ---: | ---: |",
+    ...rows.map(
+      (row) =>
+        `| ${row.label} | ${row.current} | ${row.previous} | ${row.delta} |`,
+    ),
+  ].join("\n");
+}
+
+function countRow(index, label, event, field = "total") {
+  const current = totalOf(index, event, "current", field);
+  const previous = totalOf(index, event, "previous", field);
+  return {
+    current: number(current),
+    delta: formatDelta(current, previous),
+    label,
+    previous: number(previous),
+  };
+}
+
+function breakdownTable(rows) {
+  const index = indexBreakdown(rows);
+  if (index.size === 0) {
+    return "No events in either window.";
+  }
+  const ordered = [...index.entries()]
+    .map(([bucket, entry]) => ({ bucket, ...entry }))
+    .sort((a, b) => b.current - a.current || b.previous - a.previous)
+    .slice(0, MAX_BREAKDOWN_ROWS);
+
+  return [
+    "| Bucket | Last 7 days | Previous 7 days | Delta |",
+    "| --- | ---: | ---: | ---: |",
+    ...ordered.map(
+      (row) =>
+        `| ${row.bucket} | ${number(row.current)} | ${number(row.previous)} | ${formatDelta(row.current, row.previous)} |`,
+    ),
+  ].join("\n");
+}
+
+/**
+ * The whole comment.
+ *
+ * @param {object} input
+ * @param {Array} input.activeUsers rows from the active users query
+ * @param {Record<string, Array>} input.breakdowns rows per breakdown id
+ * @param {Date} input.generatedAt when the job ran
+ * @param {Array} input.totals rows from the totals query
+ * @param {{ currentEnd: Date, currentStart: Date, previousStart: Date }} input.windows
+ */
+export function buildReport({
+  activeUsers,
+  breakdowns,
+  generatedAt,
+  totals,
+  windows,
+}) {
+  const index = indexTotals(totals);
+  const activeCurrent = Number(
+    activeUsers.find((row) => row.period === "current")?.people ?? 0,
+  );
+  const activePrevious = Number(
+    activeUsers.find((row) => row.period === "previous")?.people ?? 0,
+  );
+
+  const upgrades = breakdowns.upgrade_type ?? [];
+  const shareOptions = breakdowns.share_option ?? [];
+  const pushTickets = breakdowns.push_ticket_status ?? [];
+
+  const upgradeCurrent = bucketValue(upgrades, "success", "current");
+  const upgradePrevious = bucketValue(upgrades, "success", "previous");
+  const storyCurrent = bucketValue(shareOptions, "story", "current");
+  const storyPrevious = bucketValue(shareOptions, "story", "previous");
+  const okCurrent = bucketRate(pushTickets, "ok", "current");
+  const okPrevious = bucketRate(pushTickets, "ok", "previous");
+
+  const core = metricTable([
+    {
+      current: number(activeCurrent),
+      delta: formatDelta(activeCurrent, activePrevious),
+      label: "Active users (any event)",
+      previous: number(activePrevious),
+    },
+    countRow(
+      index,
+      "New signups (Create Dog Profile)",
+      EVENTS.CREATE_DOG_PROFILE,
+    ),
+    countRow(index, "Swipes", EVENTS.SWIPE),
+    countRow(index, "Swipers (distinct)", EVENTS.SWIPE, "people"),
+    countRow(index, "Matches (New Match)", EVENTS.NEW_MATCH),
+    countRow(index, "Messages sent", EVENTS.MESSAGE_SENT),
+    countRow(index, "Paywall views", EVENTS.PAYWALL_VIEWED),
+    {
+      current: number(upgradeCurrent),
+      delta: formatDelta(upgradeCurrent, upgradePrevious),
+      label: "Upgrades (type success)",
+      previous: number(upgradePrevious),
+    },
+  ]);
+
+  const sharing = metricTable([
+    countRow(index, "Share Tapped", EVENTS.SHARE_TAPPED),
+    countRow(index, "Share Completed", EVENTS.SHARE_COMPLETED),
+    {
+      current: number(storyCurrent),
+      delta: formatDelta(storyCurrent, storyPrevious),
+      label: "Share Completed (option story)",
+      previous: number(storyPrevious),
+    },
+    countRow(index, "Empty Deck Shown", EVENTS.EMPTY_DECK_SHOWN),
+    countRow(index, "Share Prompt Tapped", EVENTS.SHARE_PROMPT_TAPPED),
+  ]);
+
+  const push = metricTable([
+    countRow(index, "Reengagement Push Sent", EVENTS.REENGAGEMENT_PUSH_SENT),
+    countRow(index, "Push Ticket Result", EVENTS.PUSH_TICKET_RESULT),
+    {
+      current: formatPercent(okCurrent),
+      delta:
+        okCurrent === null || okPrevious === null
+          ? "n/a"
+          : formatRateDelta(okCurrent, okPrevious),
+      label: "Push Ticket Result ok rate",
+      previous: formatPercent(okPrevious),
+    },
+    countRow(
+      index,
+      "Push Notification Opened",
+      EVENTS.PUSH_NOTIFICATION_OPENED,
+    ),
+  ]);
+
+  const breakdownSections = BREAKDOWNS.map((breakdown) =>
+    [
+      `### ${breakdown.title}`,
+      "",
+      breakdownTable(breakdowns[breakdown.id]),
+      "",
+    ].join("\n"),
+  );
+
+  return [
+    COMMENT_MARKER,
+    "## Daily metrics",
+    "",
+    `Last 7 days: ${utcStamp(windows.currentStart)} to ${utcStamp(windows.currentEnd)}.`,
+    `Previous 7 days: ${utcStamp(windows.previousStart)} to ${utcStamp(windows.currentStart)}.`,
+    `Updated ${utcStamp(generatedAt)}.`,
+    "",
+    "### Core",
+    "",
+    core,
+    "",
+    "### Sharing and deck",
+    "",
+    sharing,
+    "",
+    "### Push",
+    "",
+    push,
+    "",
+    ...breakdownSections,
+    "This comment is rewritten in place by the daily metrics workflow.",
+    "",
+  ].join("\n");
+}
