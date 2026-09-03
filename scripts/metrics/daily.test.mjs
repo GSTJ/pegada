@@ -24,6 +24,11 @@ function json(payload) {
  * One fake that answers both services, so the test covers the wiring between
  * them rather than each half in isolation.
  */
+/** True only for the PostHog host itself, never for a name that merely ends in it. */
+function isPostHog(url) {
+  return new URL(url).host === "us.posthog.com";
+}
+
 function fakeWorld({ existingComment = null } = {}) {
   const calls = [];
   const impl = (url, init) => {
@@ -33,7 +38,7 @@ function fakeWorld({ existingComment = null } = {}) {
       url,
     });
 
-    if (url.includes("/api/projects/")) {
+    if (isPostHog(url)) {
       const { name } = JSON.parse(init.body);
       if (name.endsWith("active users")) {
         return json({
@@ -91,7 +96,7 @@ test("a dry run renders the comment and never touches GitHub", async () => {
     /\| Swipes \| 5,400 \| 5,000 \| \+400 \(\+8\.0%\) \|/,
   );
   assert.equal(
-    fetchImpl.calls.every((call) => call.url.includes("posthog.com")),
+    fetchImpl.calls.every((call) => isPostHog(call.url)),
     true,
   );
 });
