@@ -37,6 +37,7 @@ export const ANALYTICS_EVENTS = {
   FAKE_DOOR_SHOWN: "Fake Door Shown",
   FAKE_DOOR_TAPPED: "Fake Door Tapped",
   FEEDBACK: "Feedback",
+  IMAGE_MODERATION_RESULT: "Image Moderation Result",
   INVALID_OTP_TYPED: "User Typed Invalid OTP code",
   LIKE_LIMIT_REACHED: "Like Limit Reached",
   LOCATION_PERMISSION: "Location Permission",
@@ -98,26 +99,16 @@ export type PermissionStatus = "denied" | "granted";
 /** Which row of the dog share sheet the user picked. */
 export type ShareOption = "copy_link" | "link" | "story";
 
-/** What the user picked on the empty swipe deck. */
-export type EmptyDeckAction =
-  | "invite_friend"
-  | "notify_new_dogs"
-  | "preferences";
-
 /**
- * The push answer as the empty deck sees it. Wider than
- * {@link PermissionStatus} because the button also runs where the OS never
- * asks at all, and reading that silence as a refusal would put every simulator
- * session in the denied bucket.
+ * What the user picked on the empty swipe deck.
+ *
+ * One value, and it stays a union so a second action can be added without
+ * the property changing shape in the warehouse. The screen's other control
+ * is the share ask, and that reports through `Share Prompt Tapped` with the
+ * `empty_deck` placement so it joins the rest of the share funnel rather
+ * than forking a second one.
  */
-export type PushPermissionOutcome = "denied" | "granted" | "unavailable";
-
-/**
- * What came back from the share sheet. "unavailable" is the sheet that never
- * opened, which is a different thing from someone opening the invite and
- * changing their mind.
- */
-export type ShareOutcome = "dismissed" | "shared" | "unavailable";
+export type EmptyDeckAction = "preferences";
 
 /**
  * Which scheduled nudge the re-engagement cron sent.
@@ -134,10 +125,15 @@ export type ReengagementPushKind =
 
 /**
  * What a push was for, across every path that sends one: the three scheduled
- * nudges plus the three transactional ones. One vocabulary so the delivery
- * events below break down by the same property whoever sent the push.
+ * nudges plus the transactional ones. One vocabulary so the delivery events
+ * below break down by the same property whoever sent the push.
  */
-export type PushKind = ReengagementPushKind | "like" | "match" | "message";
+export type PushKind =
+  | ReengagementPushKind
+  | "like"
+  | "match"
+  | "message"
+  | "photo_rejected";
 
 /**
  * Expo's answer about one push, at whichever of the two checkpoints asked.
@@ -207,6 +203,21 @@ export type FakeDoorFeature = "ai_story_video" | "referral_reward";
 export type FakeDoorSource = "share_sheet";
 
 /**
+ * How far image moderation is turned up, mirroring `IMAGE_MODERATION_MODE` in
+ * `packages/api/src/shared/config.ts`. Restated here rather than imported for
+ * the same reason the RevenueCat unions further down are: `@pegada/shared` is a
+ * dependency of `@pegada/api`, so importing back the other way would be a cycle.
+ */
+export type ImageModerationMode = "enforce" | "off" | "shadow";
+
+/**
+ * What the model said. `error` is a verdict rather than a missing event: the
+ * photo is published either way, and an outage that is not counted is an outage
+ * nobody notices.
+ */
+export type ImageModerationVerdict = "approve" | "error" | "reject";
+
+/**
  * Event name to property shape, for events sent from the app.
  *
  * `analytics.track` is typed against this, so an unknown name or a property
@@ -243,15 +254,11 @@ export type MobileEventProperties = {
   [ANALYTICS_EVENTS.DOG_LINK_PROFILE_OPENED]: undefined;
   [ANALYTICS_EVENTS.DOG_LINK_SIGN_IN_BANNER_SHOWN]: undefined;
   /**
-   * One per tap on an empty deck action. `push_permission` rides on the notify
-   * action and `share_result` on the invite, so the funnel reads both the
-   * intent and what the phone did about it.
+   * One per tap on an empty deck action. The share ask on that screen is not
+   * one of them: it reports through `Share Prompt Tapped`, so counting it
+   * here as well would double every share tap in the readout.
    */
-  [ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED]: {
-    action: EmptyDeckAction;
-    push_permission?: PushPermissionOutcome;
-    share_result?: ShareOutcome;
-  };
+  [ANALYTICS_EVENTS.EMPTY_DECK_ACTION_TAPPED]: { action: EmptyDeckAction };
   [ANALYTICS_EVENTS.EMPTY_DECK_SHOWN]: undefined;
   [ANALYTICS_EVENTS.FAKE_DOOR_NOTIFY_TOGGLED]: {
     feature: FakeDoorFeature;
@@ -414,6 +421,29 @@ export type SubscriptionCancelReason =
  * apart by the properties each carries.
  */
 export type ServerEventProperties = {
+  /**
+   * One row per photo the moderation model looked at.
+   *
+   * `mode` is the property the whole rollout hangs on: the same verdict means
+   * "would have rejected" in shadow and "did reject" in enforce, and without it
+   * the two populations sit in one series and neither can be read. `verdict`
+   * includes `error`, so a provider outage shows up as a shape change in the
+   * distribution rather than as a gap.
+   */
+  [ANALYTICS_EVENTS.IMAGE_MODERATION_RESULT]: {
+    /** Null when the model did not answer, which is every `error`. */
+    contains_dog: boolean | null;
+    cost_usd_estimate: number | null;
+    dog_id: string | null;
+    image_id: string;
+    latency_ms: number;
+    mode: ImageModerationMode;
+    /** The `<provider>/<model-id>` the verdict came from. */
+    model: string;
+    /** Short category on a rejection, or the failure cause on an error. */
+    reason: string | null;
+    verdict: ImageModerationVerdict;
+  };
   [ANALYTICS_EVENTS.MATCH_CREATED]: {
     match_id: string;
     other_user_id: string;
@@ -607,6 +637,7 @@ export const MOBILE_EVENT_NAMES = [
 ] as const;
 
 export const SERVER_EVENT_NAMES = [
+  ANALYTICS_EVENTS.IMAGE_MODERATION_RESULT,
   ANALYTICS_EVENTS.MATCH_CREATED,
   ANALYTICS_EVENTS.MESSAGE_SENT,
   ANALYTICS_EVENTS.PUSH_RECEIPT_RESULT,

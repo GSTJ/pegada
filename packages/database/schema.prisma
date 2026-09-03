@@ -240,6 +240,22 @@ model Image {
 
   position Int
 
+  /// What the moderation model said about this image, kept apart from `status`
+  /// on purpose. In shadow mode `status` is APPROVED while these columns record
+  /// what enforcement would have done, which is the only way to measure the
+  /// false positive rate before a single photo is held back. Null means the
+  /// image predates moderation or was uploaded while the mode was `off`.
+  moderationVerdict String?
+  /// 0..1 confidence that the image violates the guidelines.
+  moderationScore   Float?
+  /// Short category such as `sexual` or `gore`, or the failure cause when the
+  /// verdict is `error`.
+  moderationReason  String?
+  /// The `<provider>/<model-id>` the verdict came from, so a change of model
+  /// does not silently mix two populations in the same chart.
+  moderationModel   String?
+  moderatedAt       DateTime?
+
   @@index([dogId], map: "image_dogid_idx")
   // The swipe deck's shadow-ban gate runs `EXISTS (dogId = ? AND status =
   // 'APPROVED')` and `NOT EXISTS (dogId = ? AND status = 'REJECTED')` once per

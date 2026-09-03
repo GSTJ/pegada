@@ -12,14 +12,14 @@ type EnqueueOptions = {
    * {@link ENQUEUE_MAX_ATTEMPTS}. Opt-in per call, because it is only the
    * right trade for jobs that are cheap, fast, and worth more to the user
    * than the request latency they cost — `mail` during login is the case it
-   * exists for. Never set it on `process-image` (sharp/tfjs, 120s budget) or
-   * on anything that relies on `delaySeconds`.
+   * exists for. Never set it on `process-image` (sharp plus a moderation call
+   * out to a model, 120s budget) or on anything that relies on `delaySeconds`.
    */
   fallbackInline?: boolean;
 };
 
-// Handlers are imported lazily so heavyweight consumers (sharp, tfjs) stay
-// out of the module graph of regular API routes.
+// Handlers are imported lazily so heavyweight consumers (sharp, the AI SDK)
+// stay out of the module graph of regular API routes.
 const INLINE_HANDLERS: {
   [T in Topic]: () => Promise<(payload: TopicPayloads[T]) => Promise<unknown>>;
 } = {

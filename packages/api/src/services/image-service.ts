@@ -200,6 +200,42 @@ export class ImageService {
     });
   }
 
+  /**
+   * The verdict already on an image, if there is one.
+   *
+   * Read before the image job calls a provider so a redelivered job reuses what
+   * was already paid for.
+   */
+  static getStoredModerationVerdict(id: string) {
+    return prisma.image.findUnique({
+      where: { id },
+      select: { moderationVerdict: true },
+    });
+  }
+
+  /**
+   * The dog and the person behind one image, for the image job.
+   *
+   * The job payload carries the image row as it was enqueued and nothing about
+   * who owns it, and both things that happen after a verdict need the owner:
+   * the analytics event is attributed to them, and the rejection push goes to
+   * their device.
+   */
+  static getImageOwner(id: string) {
+    return prisma.image.findUnique({
+      where: { id },
+      select: {
+        dogId: true,
+        dog: {
+          select: {
+            name: true,
+            user: { select: { id: true, pushToken: true } },
+          },
+        },
+      },
+    });
+  }
+
   static updateImage({ id, ...data }: Partial<Image> & { id: string }) {
     return prisma.image.update({
       where: { id },
