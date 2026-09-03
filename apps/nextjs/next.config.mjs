@@ -90,6 +90,39 @@ const nextConfig = {
       destination: "/store",
       permanent: false,
     },
+    /**
+     * www is the canonical host, so the apex has to send visitors there. It
+     * cannot send Apple and Google there: `swcd`, the daemon that installs
+     * an app's associated domains, fetches
+     * `https://<domain>/.well-known/apple-app-site-association` and treats
+     * anything other than a direct 200 as a failure, and Android's domain
+     * verifier does the same for `assetlinks.json`. Neither follows a
+     * redirect. `apps/mobile/app.config.ts` declares
+     * `applinks:pegada.app` alongside `applinks:www.pegada.app` and lists
+     * both as Android verified hosts, so a blanket apex redirect silently
+     * drops the apex half of every universal link: the OS never installs
+     * the association and a shared `pegada.app/dog/<id>` opens in the
+     * browser instead of the app, with no error anywhere to say why.
+     *
+     * The negative lookahead is what keeps the two well-known files
+     * answering 200 on the apex while every other apex path still hops to
+     * www. Query strings ride along on their own, Next preserves them
+     * whenever the destination declares none.
+     *
+     * Inert until the "Redirect to www.pegada.app" setting is removed from
+     * the `pegada.app` domain in the Vercel project. That redirect is a
+     * whole-domain one applied at the platform's routing layer, ahead of
+     * this deployment, and it has no path exclusions, so today it answers
+     * 308 for `/.well-known/*` too and nothing here is ever reached.
+     * Landing this first means clearing that setting is the only step left
+     * and the apex never goes a deploy without a canonical redirect.
+     */
+    {
+      source: "/:path((?!\\.well-known).*)",
+      has: [{ type: "host", value: "pegada.app" }],
+      destination: "https://www.pegada.app/:path",
+      permanent: true,
+    },
   ],
 };
 
