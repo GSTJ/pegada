@@ -13,7 +13,10 @@
  * Android compares the certificate of the installed APK, and which key that
  * is depends on how the build reached the device.
  */
-export const APPLE_TEAM_ID = "23DRM684H8";
+// Read from the App Store provisioning profile entitlements
+// (`application-identifier = TWHC5L37B2.app.pegada`), which match the
+// distribution certificate and the App Store Connect API key in use.
+export const APPLE_TEAM_ID = "TWHC5L37B2";
 
 export const ANDROID_SHA256_CERT_FINGERPRINTS = [
   // Upload key. Signs the bundle we hand to Play, and the one Play strips off
