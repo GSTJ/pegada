@@ -35,6 +35,33 @@ jest.mock<Record<string, unknown>>("react-native-view-shot", () => ({
   captureRef: jest.fn(),
 }));
 
+// A file system just real enough to name a file: `File` joins the parts it
+// was constructed from into a URI and `move` adopts the destination's, which
+// is the whole of what `captureStoryImage` asks of it. `Paths.cache` stands
+// in for the cache directory the renamed PNG lands in.
+jest.mock<Record<string, unknown>>("expo-file-system", () => {
+  class MockFile {
+    uri: string;
+    exists = false;
+
+    constructor(...parts: (string | MockFile)[]) {
+      this.uri = parts
+        .map((part) => (typeof part === "string" ? part : part.uri))
+        .join("/");
+    }
+
+    delete() {
+      this.exists = false;
+    }
+
+    move(destination: MockFile) {
+      this.uri = destination.uri;
+    }
+  }
+
+  return { File: MockFile, Paths: { cache: "file:///cache" } };
+});
+
 jest.mock<Record<string, unknown>>("@/services/error-tracking", () => ({
   sendError: jest.fn(),
 }));
@@ -63,6 +90,7 @@ jest.mock<Record<string, unknown>>("./story-card-styles", () => ({
 import { Alert, PixelRatio, Share } from "react-native";
 
 import * as Clipboard from "expo-clipboard";
+import { File } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 import { magicToast } from "react-native-magic-toast";
@@ -220,11 +248,17 @@ describe("buildDogShareLinkMessage", () => {
 });
 
 describe("captureStoryImage", () => {
+  // `clearMocks` empties the calls but leaves a `spyOn` in place, and two of
+  // these tests replace `File.prototype.move` to force the failure path.
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("captures at exactly 1080x1920 pixels on a 3x device", async () => {
     pixelRatioGet.mockReturnValue(3);
     capture.mockResolvedValue("file:///tmp/story.png");
 
-    await captureStoryImage(fakeRef());
+    await captureStoryImage(fakeRef(), "Rex");
 
     expect(capture).toHaveBeenCalledWith(expect.anything(), {
       width: 360, // 1080 / 3
@@ -239,12 +273,51 @@ describe("captureStoryImage", () => {
     pixelRatioGet.mockReturnValue(2);
     capture.mockResolvedValue("file:///tmp/story.png");
 
-    await captureStoryImage(fakeRef());
+    await captureStoryImage(fakeRef(), "Rex");
 
     expect(capture).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ width: 540, height: 960 }),
     );
+  });
+
+  it("renames the UUID temp file after the dog", async () => {
+    capture.mockResolvedValue("file:///tmp/9F2C-4A11-B0D3.png");
+
+    const uri = await captureStoryImage(fakeRef(), "Rex");
+
+    expect(uri).toBe("file:///cache/pegada-rex.png");
+  });
+
+  it("folds accents and spaces out of the name", async () => {
+    capture.mockResolvedValue("file:///tmp/9F2C-4A11-B0D3.png");
+
+    const uri = await captureStoryImage(fakeRef(), "Maximiliano Ferreira Café");
+
+    expect(uri).toBe("file:///cache/pegada-maximiliano-ferreira-cafe.png");
+  });
+
+  it("adds the file scheme captureRef leaves off", async () => {
+    capture.mockResolvedValue("/tmp/9F2C-4A11-B0D3.png");
+    jest.spyOn(File.prototype, "move").mockImplementationOnce(() => {
+      throw new Error("read-only volume");
+    });
+
+    const uri = await captureStoryImage(fakeRef(), "Rex");
+
+    expect(uri).toBe("file:///tmp/9F2C-4A11-B0D3.png");
+  });
+
+  it("keeps the captured file when the rename fails, rather than losing the share", async () => {
+    capture.mockResolvedValue("file:///tmp/9F2C-4A11-B0D3.png");
+    jest.spyOn(File.prototype, "move").mockImplementationOnce(() => {
+      throw new Error("read-only volume");
+    });
+
+    const uri = await captureStoryImage(fakeRef(), "Rex");
+
+    expect(uri).toBe("file:///tmp/9F2C-4A11-B0D3.png");
+    expect(trackedError).toHaveBeenCalled();
   });
 });
 
@@ -355,6 +428,7 @@ describe("shareDogStory", () => {
     storyCardRef: fakeRef(),
     waitForPhoto: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
     hide: jest.fn(),
+    dogName: "Rex",
     dialogTitle: "Share Rex's profile",
     shareLinkMessage: "check out Rex",
     copy: {
@@ -364,9 +438,9 @@ describe("shareDogStory", () => {
     },
   });
 
-  it("captures the card and hands it to the native share sheet", async () => {
+  it("captures the card and hands it to the native share sheet under a readable name", async () => {
     isAvailableAsync.mockResolvedValue(true);
-    capture.mockResolvedValue("file:///tmp/story.png");
+    capture.mockResolvedValue("file:///tmp/9F2C-4A11-B0D3.png");
     shareAsync.mockResolvedValue();
     const params = baseParams();
 
@@ -375,7 +449,7 @@ describe("shareDogStory", () => {
     expect(params.waitForPhoto).toHaveBeenCalled();
     expect(capture).toHaveBeenCalled();
     expect(params.hide).toHaveBeenCalledTimes(1);
-    expect(shareAsync).toHaveBeenCalledWith("file:///tmp/story.png", {
+    expect(shareAsync).toHaveBeenCalledWith("file:///cache/pegada-rex.png", {
       mimeType: "image/png",
       UTI: "public.png",
       dialogTitle: "Share Rex's profile",

@@ -1,12 +1,39 @@
 import { StyleSheet } from "react-native-unistyles";
 
+/**
+ * `Text` centres the ascent-to-descent box, and Gilroy's descent runs
+ * deeper than the gap above its caps, so an unstyled label always renders
+ * about 10.4% of its own font size low: with hhea ascender 1100, descender
+ * -192 and cap height 700 (all /1000 upem), the cap band's own centre sits
+ * at 0.75em from the top of the run, against 0.646em for the ascent
+ * descent box's centre — a 0.104em gap. Nudging the label up by that much
+ * of its `fontSize` re-centres it on the icon or pill next to it instead of
+ * on its own invisible descender. Same fix at every call site since `Text`
+ * itself is shared well beyond this sheet.
+ */
+const GILROY_CAP_OFFSET_RATIO = 0.104;
+const capOffset = (fontSize: number) => -(fontSize * GILROY_CAP_OFFSET_RATIO);
+
+// One line of a `sm` label plus the row's own vertical padding: the height
+// all five rows land on now that none of their labels wraps.
+//
+// #244 measured the referral row 31% taller than the other four because its
+// copy needed a second line. Of the two fixes that issue offered — reserve
+// two lines on every row, or shorten the copy — this takes the second: the
+// two "em breve" rows are the quiet ones at the bottom of the sheet, and
+// growing all five by a third to make room for a fake door's label would
+// have let the two options that do nothing set the height of the three that
+// work. `numberOfLines={2}` stays on both labels as a backstop, and this
+// floor keeps every row on the same line whatever a locale sends.
+const ROW_MIN_HEIGHT = 54.33;
+
 export const styles = StyleSheet.create((theme) => ({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surfaceElevated,
     borderColor: theme.colors.border,
     borderWidth: theme.stroke.sm,
     borderTopLeftRadius: theme.radii.md,
@@ -41,11 +68,13 @@ export const styles = StyleSheet.create((theme) => ({
   titleDivider: {
     marginLeft: 0,
     marginRight: 0,
+    backgroundColor: theme.elevated.border,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing[3.5],
+    minHeight: ROW_MIN_HEIGHT,
     paddingTop: theme.spacing[4],
     paddingRight: theme.spacing[4],
     paddingBottom: theme.spacing[4],
@@ -58,9 +87,14 @@ export const styles = StyleSheet.create((theme) => ({
       },
     },
   },
+  // Full bleed, same as `titleDivider`: the list had two separator
+  // treatments (this one inset to the icon's left edge, the title's rule
+  // edge to edge), which read as neither a full rule nor a text-aligned
+  // one. One rule style for the whole sheet.
   rowDivider: {
-    marginLeft: theme.spacing[4],
+    marginLeft: 0,
     marginRight: 0,
+    backgroundColor: theme.elevated.border,
   },
   rowIcon: {
     width: 22,
@@ -68,15 +102,21 @@ export const styles = StyleSheet.create((theme) => ({
   },
   rowLabel: {
     flexGrow: 1,
+    transform: [{ translateY: capOffset(theme.typography.sizes.sm.size) }],
   },
+  // Same surface as the sheet above it, so the two read as one layer
+  // floating over the dimmed screen rather than as two holes cut in it.
+  // Radius matches the sheet's own `radii.md` too — the two stack 8pt
+  // apart and were reading as two different kinds of surface when this
+  // one used `radii.round` instead.
   cancelButton: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surfaceElevated,
     borderColor: theme.colors.border,
     borderWidth: theme.stroke.sm,
-    borderTopLeftRadius: theme.radii.round,
-    borderTopRightRadius: theme.radii.round,
-    borderBottomRightRadius: theme.radii.round,
-    borderBottomLeftRadius: theme.radii.round,
+    borderTopLeftRadius: theme.radii.md,
+    borderTopRightRadius: theme.radii.md,
+    borderBottomRightRadius: theme.radii.md,
+    borderBottomLeftRadius: theme.radii.md,
     marginTop: theme.spacing[2],
     marginLeft: theme.spacing[3],
     marginRight: theme.spacing[3],
@@ -84,6 +124,9 @@ export const styles = StyleSheet.create((theme) => ({
     paddingTop: theme.spacing[4],
     paddingBottom: theme.spacing[4],
     alignItems: "center",
+  },
+  cancelLabel: {
+    transform: [{ translateY: capOffset(theme.typography.sizes.lg.size) }],
   },
   /**
    * Sized and shaped like the real card, moved just past the right edge of

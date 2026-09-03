@@ -6,6 +6,7 @@ import type { ComponentRef, RefObject } from "react";
 import { Alert, PixelRatio, Share, type View } from "react-native";
 
 import * as Clipboard from "expo-clipboard";
+import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 import { magicToast } from "react-native-magic-toast";
@@ -154,8 +155,24 @@ export const copyDogLink = async (
 };
 
 /**
+ * `Maximiliano Ferreira` -> `maximiliano-ferreira`. Accents are folded rather
+ * than dropped so `Nina Café` stays `nina-cafe` instead of `nina-caf`, and a
+ * name with nothing left after folding (an emoji, a script with no ASCII
+ * form) falls back to `dog` rather than producing a file called `-.png`.
+ */
+const slugifyDogName = (name: string) =>
+  name
+    .normalize("NFD")
+    .replaceAll(/[\u0300-\u036F]/gu, "")
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/gu, "-")
+    .replaceAll(/^-|-$/gu, "")
+    .slice(0, 40) || "dog";
+
+/**
  * Captures the offscreen `DogStoryCard` at `ref` as a PNG at exactly
- * `EXPORT_PNG_WIDTH` x `EXPORT_PNG_HEIGHT` pixels, on any device.
+ * `EXPORT_PNG_WIDTH` x `EXPORT_PNG_HEIGHT` pixels, on any device, and hands
+ * back a `file://` URI named after the dog.
  *
  * `captureRef`'s `width`/`height` options are in POINTS, and iOS
  * multiplies them by the device's pixel ratio when it rasterizes —
@@ -163,19 +180,49 @@ export const copyDogLink = async (
  * `PixelRatio.get()` times too large (3240x5760 at 12.7 MB on a 3x
  * device instead of the intended 1080x1920). Dividing by the ratio here
  * lands on the exact pixel size regardless of device.
+ *
+ * `result: "tmpfile"` names the file after a fresh UUID, and the iOS share
+ * sheet shows that name to the user under the preview — the last thing
+ * before a story goes out was a row of hex. Moving it (rather than copying)
+ * puts one readable file in the cache and leaves nothing behind; reusing the
+ * same name per dog means repeat shares overwrite instead of piling up.
+ *
+ * A rename that fails is not worth losing the share over, so it falls back to
+ * whatever `captureRef` produced and only reports the error.
  */
-export const captureStoryImage = (
+export const captureStoryImage = async (
   ref: RefObject<ComponentRef<typeof View> | null>,
+  dogName: string,
 ) => {
   const scale = PixelRatio.get();
 
-  return captureRef(ref, {
+  const captured = await captureRef(ref, {
     width: EXPORT_PNG_WIDTH / scale,
     height: EXPORT_PNG_HEIGHT / scale,
     format: "png",
     quality: 1,
     result: "tmpfile",
   });
+
+  const capturedUri = captured.startsWith("file://")
+    ? captured
+    : `file://${captured}`;
+
+  try {
+    const file = new File(capturedUri);
+    const named = new File(
+      Paths.cache,
+      `pegada-${slugifyDogName(dogName)}.png`,
+    );
+
+    if (named.exists) named.delete();
+    file.move(named);
+
+    return file.uri;
+  } catch (error) {
+    sendError(error);
+    return capturedUri;
+  }
 };
 
 export type ShareDogStoryCopy = {
@@ -211,6 +258,9 @@ export const shareDogStory = async (params: {
   storyCardRef: RefObject<ComponentRef<typeof View> | null>;
   waitForPhoto: () => Promise<void>;
   hide: () => void;
+  /** Full name, not the first name the dialog title uses: it names the PNG
+   * the iOS share sheet puts in front of the user. */
+  dogName: string;
   dialogTitle: string;
   shareLinkMessage: string;
   copy: ShareDogStoryCopy;
@@ -221,6 +271,7 @@ export const shareDogStory = async (params: {
     storyCardRef,
     waitForPhoto,
     hide,
+    dogName,
     dialogTitle,
     shareLinkMessage,
     copy,
@@ -268,8 +319,7 @@ export const shareDogStory = async (params: {
       throw new Error("Story card was not mounted for capture");
     }
 
-    const uri = await captureStoryImage(storyCardRef);
-    const fileUri = uri.startsWith("file://") ? uri : `file://${uri}`;
+    const fileUri = await captureStoryImage(storyCardRef, dogName);
 
     hide();
 

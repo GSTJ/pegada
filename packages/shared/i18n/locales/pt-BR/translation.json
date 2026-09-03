@@ -132,9 +132,8 @@
         "opener3": "tem parque no teu rolê hoje?",
         "replyMale": "topo. já tô pronto.",
         "replyFemale": "topo. já tô pronta.",
-        "typing": "outros dogs estão digitando...",
         "ctaLine1": "faz o perfil do seu dog",
-        "ctaLine2": "e abre o chat"
+        "ctaLine2": "e fale com {{name}}"
       },
       "roleTicket": {
         "rail": "passe de rolê",
@@ -175,11 +174,11 @@
     "weight": "Peso (kg)"
   },
   "fakeDoor": {
-    "aiStoryVideo": "Gerar vídeo do {{name}} com IA",
+    "aiStoryVideo": "Vídeo do {{name}} com IA",
     "close": "Fechar",
     "comingSoon": "em breve",
     "notifyMe": "Me avisa quando lançar",
-    "referralReward": "Convide um amigo e ganhe Premium",
+    "referralReward": "Convide e ganhe Premium",
     "saveFailed": "Não deu pra salvar agora. Tenta de novo.",
     "sheetBody": "Estamos preparando isso com carinho. Quer ser avisado quando lançar?",
     "sheetTitle": "Em breve"

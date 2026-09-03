@@ -132,9 +132,8 @@
         "opener3": "any parks on your route today?",
         "replyMale": "i’m in. already by the door.",
         "replyFemale": "i’m in. already by the door.",
-        "typing": "other dogs are typing...",
         "ctaLine1": "make your dog’s profile",
-        "ctaLine2": "and open the chat"
+        "ctaLine2": "and talk to {{name}}"
       },
       "roleTicket": {
         "rail": "walk pass",
@@ -175,11 +174,11 @@
     "weight": "Weight (kg)"
   },
   "fakeDoor": {
-    "aiStoryVideo": "Make an AI video of {{name}}",
+    "aiStoryVideo": "AI video of {{name}}",
     "close": "Close",
     "comingSoon": "coming soon",
     "notifyMe": "Tell me when it launches",
-    "referralReward": "Invite a friend and get Premium",
+    "referralReward": "Invite and get Premium",
     "saveFailed": "Could not save that right now. Try again.",
     "sheetBody": "We are putting this one together with care. Want a heads up when it launches?",
     "sheetTitle": "Coming soon"

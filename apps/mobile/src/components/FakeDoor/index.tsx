@@ -113,7 +113,7 @@ const FakeDoorSheetContent = ({
         onPress={() => hide(undefined)}
         style={styles.closeButton}
       >
-        <Text fontWeight="bold" fontSize="lg">
+        <Text fontWeight="bold" fontSize="lg" style={styles.closeLabel}>
           {t("fakeDoor.close")}
         </Text>
       </PressableArea>
@@ -121,21 +121,44 @@ const FakeDoorSheetContent = ({
   );
 };
 
+/** Matches the `exiting` duration below, which every sheet in this flow
+ * shares. `hide()` drops its entry from the modal stack on the spot but its
+ * exit animation keeps playing for this long, so a sheet opened inside that
+ * window would fade in through the one still fading out. */
+const SHEET_EXIT_MS = 200;
+
 /**
  * The "em breve" sheet behind every fake door. Opening it is the signal the
  * feature is wanted at all; the switch inside is the stronger signal, and the
  * only part that outlives the session.
+ *
+ * `dismissHost` is the closer for whatever sheet the tapped row lives in.
+ * The two sheets replace each other rather than stack: same shape, same
+ * corner of the screen, one backdrop, and the row the user tapped stays
+ * whole on the way out instead of being sliced by a new sheet's top edge.
  */
-export const showFakeDoorSheet = (feature: FakeDoorFeature, label: string) =>
-  magicModal.show(
+export const showFakeDoorSheet = async (
+  feature: FakeDoorFeature,
+  label: string,
+  dismissHost?: () => void,
+) => {
+  if (dismissHost) {
+    dismissHost();
+    await new Promise((resolve) => {
+      setTimeout(resolve, SHEET_EXIT_MS);
+    });
+  }
+
+  return magicModal.show(
     () => <FakeDoorSheetContent feature={feature} label={label} />,
     {
       style: { justifyContent: "flex-end" },
       swipeDirection: "down",
       entering: FadeInDown.duration(220),
-      exiting: FadeOutDown.duration(200),
+      exiting: FadeOutDown.duration(SHEET_EXIT_MS),
     },
   );
+};
 
 /**
  * One row advertising a feature that does not exist yet. Renders like a real
@@ -152,6 +175,7 @@ export const FakeDoorRow = ({
   label,
   disabled,
   testID,
+  dismissHost,
 }: {
   feature: FakeDoorFeature;
   source: FakeDoorSource;
@@ -159,6 +183,9 @@ export const FakeDoorRow = ({
   label: string;
   disabled?: boolean;
   testID?: string;
+  /** Closes the sheet this row is rendered inside, if it is in one, so the
+   * "em breve" sheet replaces it instead of landing on top of it. */
+  dismissHost?: () => void;
 }) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
@@ -183,18 +210,23 @@ export const FakeDoorRow = ({
       disabled={disabled}
       onPress={() => {
         trackFakeDoorTapped(feature, source);
-        void showFakeDoorSheet(feature, label);
+        void showFakeDoorSheet(feature, label, dismissHost);
       }}
       style={styles.row}
     >
       <View style={styles.rowIcon}>
         <Icon width={22} height={22} fill={theme.colors.text} />
       </View>
-      <Text fontWeight="medium" fontSize="sm" style={styles.rowLabel}>
+      <Text
+        fontWeight="medium"
+        fontSize="sm"
+        numberOfLines={2}
+        style={styles.rowLabel}
+      >
         {label}
       </Text>
       <View style={styles.pill}>
-        <Text fontWeight="bold" fontSize="xxs" style={styles.pillLabel}>
+        <Text fontWeight="medium" fontSize="xxs" style={styles.pillLabel}>
           {t("fakeDoor.comingSoon")}
         </Text>
       </View>

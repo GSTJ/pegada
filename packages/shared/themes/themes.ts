@@ -108,6 +108,19 @@ export const LightTheme = {
 
     background: "hsl(0, 0%, 100%)",
 
+    /**
+     * The fill for something floating above `background` with a dimmed
+     * screen behind it — bottom sheets, and the pills that belong to them.
+     *
+     * `card` is the wrong token for that job: it is a tile sitting IN the
+     * page, so it steps toward the background as the page gets darker. This
+     * one steps away from it, which is the only way a sheet reads as a
+     * separate layer once the backdrop and the page are both near black.
+     * Light has nowhere further to go than white, so here the two match and
+     * the dim behind the sheet does the separating on its own.
+     */
+    surfaceElevated: "hsl(0, 0%, 100%)",
+
     text: "hsl(222.2, 84%, 4.9%)",
 
     subtitle: "hsl(222.2, 10%, 39%)",
@@ -123,6 +136,36 @@ export const LightTheme = {
     border: "hsl(214.3, 31.8%, 91.4%)",
 
     input: "hsl(0, 0%, 98%)",
+  },
+  /**
+   * Off `colors` on purpose: `Text`'s own `color` prop is typed as
+   * `keyof AppTheme["colors"]` and resolved through a Unistyles variant
+   * that enumerates every one of those keys by hand, so any addition to
+   * `colors` has to land in that variant list too — which lives in
+   * `components/text.tsx`, some 40 call sites away from this sheet. These
+   * two are only ever read as `backgroundColor`, never through `Text`, so
+   * they live in their own namespace instead of widening a prop type
+   * nothing here is allowed to also update.
+   */
+  elevated: {
+    /**
+     * `border` is checked against `background`. Sheets sit on
+     * `surfaceElevated`, which in light theme is the same white, so the two
+     * tokens happen to read alike here — this one exists so the pairing
+     * with dark theme's `surfaceElevated` doesn't disappear. 1.34:1 against
+     * `surfaceElevated`, cleared of the 1.3:1 floor a rule needs to read as
+     * a line rather than nothing.
+     */
+    border: "hsl(214.3, 31.8%, 88%)",
+
+    /**
+     * A fill for a status chip floating on `surfaceElevated` — a "coming
+     * soon" pill, not a page tile. `card` steps toward the background as
+     * the page darkens, which is backwards for something that has to stay
+     * visible on top of it; see `surfaceElevated`'s own note. 1.34:1 against
+     * `surfaceElevated`, past the 1.3:1 a chip needs to read as a fill.
+     */
+    chip: "hsl(220, 14%, 88%)",
   },
 };
 
@@ -144,6 +187,11 @@ export const DarkTheme: typeof LightTheme = {
 
     background: "hsl(0, 0%, 0%)", // Black
 
+    // See the light theme's note. 11% is the same step iOS puts between a
+    // black background and a sheet on top of it: enough to separate the
+    // layer, not enough to read as grey.
+    surfaceElevated: "hsl(0, 0%, 11%)",
+
     text: "hsl(0, 0%, 95%)", // Almost White, for readability on a black background
 
     subtitle: "hsl(0, 0%, 60%)",
@@ -159,6 +207,16 @@ export const DarkTheme: typeof LightTheme = {
     border: "hsl(0, 0%, 12%)", // Dark gray border for separation
 
     input: "hsl(0, 0%, 7%)", // Slightly lighter black for inputs
+  },
+  elevated: {
+    // See the light theme's note on `elevated.border`. 1.35:1 against
+    // `surfaceElevated` (11%), where plain `border` (12%) was only 1.03:1 —
+    // functionally invisible on the sheet it actually sits on.
+    border: "hsl(0, 0%, 20%)",
+
+    // See the light theme's note on `elevated.chip`. 1.31:1 against
+    // `surfaceElevated`, where `card` (15%) was only 1.13:1.
+    chip: "hsl(0, 0%, 19.3%)",
   },
 };
 
