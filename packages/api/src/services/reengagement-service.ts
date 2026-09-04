@@ -1,4 +1,7 @@
-import type { ReengagementPushKind } from "@pegada/shared/analytics/events";
+import type {
+  ReengagementPushKind,
+  ReengagementSuppressionReason,
+} from "@pegada/shared/analytics/events";
 
 import { Expo } from "expo-server-sdk";
 
@@ -10,6 +13,13 @@ import { Prisma } from "@prisma/client";
 import { sendError } from "../errors/errors";
 import { captureEvent } from "../shared/analytics";
 import { PushNotificationService } from "./push-notification-service";
+import {
+  cadenceDecision,
+  MIN_GAP_DAYS,
+  POLICY_REPORT_HOUR,
+  readCadence,
+  WINDOW_REPORT_HOUR,
+} from "./reengagement-cadence";
 import { TranslationService } from "./translation-service";
 
 /**
@@ -103,43 +113,6 @@ const SEND_WINDOW_HOURS = new Set([18, 19]);
 const FALLBACK_OFFSET_HOURS = -3;
 
 /**
- * One re-engagement push per user per rolling day, whatever the kind.
- *
- * 23 hours rather than 24, and strictly greater than rather than inclusive,
- * because the job runs hourly and the cap is measured against the previous
- * send. At exactly 24 a user nudged at 19:00 is still inside the window at
- * 18:00 the next day, so their slot slides an hour later each time until it
- * falls out of the evening entirely and they end up on every other day.
- */
-const USER_COOLDOWN_HOURS = 23;
-
-/**
- * How long one kind waits before it may nudge the same user again.
- *
- * `likes_waiting` is the outlier and the reason this map exists. Its dedupe
- * key names one pending like, so a dormant user collecting a like a day was
- * eligible again every day under a key that had never been claimed: same
- * person, same "you have likes waiting", every evening. A week between two of
- * them makes it a nudge rather than a drip, and it costs nothing when the
- * likes really are new, because the copy never counted them.
- *
- * The other two are already self limiting (a match is nudged at 24h and 72h
- * and never again, new dogs are keyed on an anchor that only the user can
- * move), so they sit at the shared floor.
- */
-const KIND_COOLDOWN_HOURS = {
-  [REENGAGEMENT_KINDS.UNANSWERED_MATCH]: USER_COOLDOWN_HOURS,
-  [REENGAGEMENT_KINDS.NEW_DOGS_NEARBY]: USER_COOLDOWN_HOURS,
-  [REENGAGEMENT_KINDS.LIKES_WAITING]: 7 * 24,
-} as const satisfies Record<ReengagementKind, number>;
-
-/** How far back the cooldown lookup has to read to answer every kind. */
-const MAX_COOLDOWN_HOURS = Math.max(...Object.values(KIND_COOLDOWN_HOURS));
-
-/** Set membership key for "this user has had this kind recently". */
-const kindKey = (userId: string, kind: string) => `${userId}:${kind}`;
-
-/**
  * Bounds one invocation so a backlog cannot outrun the function budget.
  *
  * Worth reading next to {@link SEND_WINDOW_HOURS}: a user is only eligible in
@@ -171,12 +144,12 @@ export type ReengagementRunSummary = {
   sent: number;
   byKind: Record<ReengagementKind, number>;
   candidates: number;
-  /** Users whose local hour was not 18:00 or 19:00 when the run started. */
-  skippedOutsideWindow: number;
-  /** Users inside {@link USER_COOLDOWN_HOURS} of their last push, any kind. */
-  skippedCooldown: number;
-  /** Candidates dropped by their own kind's cooldown. */
-  skippedKindCooldown: number;
+  /**
+   * Users who had a nudge waiting and did not get it, by reason. Counted once
+   * per user per run, which is not the same as the events: those are reported
+   * once a day so they count people rather than passes.
+   */
+  suppressed: Record<ReengagementSuppressionReason, number>;
   skippedAlreadySent: number;
   skippedUnreachable: number;
 };
@@ -240,14 +213,17 @@ export const localHourFromLongitude = (
  * comes from the user's longitude when there is one, and from
  * America/Sao_Paulo when there is not. See {@link SEND_WINDOW_HOURS}.
  */
+export const localHourFor = (
+  longitude: number | null | undefined,
+  now: Date,
+): number =>
+  localHourFromLongitude(longitude, now) ??
+  hourInOffset(now, FALLBACK_OFFSET_HOURS);
+
 export const isWithinSendWindow = (
   longitude: number | null | undefined,
   now: Date,
-): boolean =>
-  SEND_WINDOW_HOURS.has(
-    localHourFromLongitude(longitude, now) ??
-      hourInOffset(now, FALLBACK_OFFSET_HOURS),
-  );
+): boolean => SEND_WINDOW_HOURS.has(localHourFor(longitude, now));
 
 type ReengagementCopyKey =
   | "server:notification.reengagement.unansweredMatch.title"
@@ -606,18 +582,15 @@ type LikesWaitingRow = {
  * until that particular like is dealt with. On its own that was not enough:
  * a new like arriving is a new oldest-unannounced like, so a popular dormant
  * dog produced one of these every evening. The weekly floor below is the cap
- * that actually holds, and it is applied here as well as in the run so those
- * users do not sit in the candidate limit for nothing.
+ * that actually holds, and it is mirrored here as well as enforced in the run
+ * so those users do not sit in the candidate limit for nothing.
  */
 export const selectLikesWaitingCandidates = async (
   now: Date,
 ): Promise<Candidate[]> => {
   const olderThan = new Date(now.getTime() - LIKES_WAITING_HOURS * HOUR_MS);
 
-  const cooldownFloor = new Date(
-    now.getTime() -
-      KIND_COOLDOWN_HOURS[REENGAGEMENT_KINDS.LIKES_WAITING] * HOUR_MS,
-  );
+  const cooldownFloor = new Date(now.getTime() - MIN_GAP_DAYS * DAY_MS);
 
   const rows = await prisma.$queryRaw<LikesWaitingRow[]>`
     WITH "waiting" AS (
@@ -679,12 +652,12 @@ export const selectLikesWaitingCandidates = async (
       WHERE "NotificationLog"."dedupeKey" =
         ${`${REENGAGEMENT_KINDS.LIKES_WAITING}:`} || "waiting"."userId" || ':' || "waiting"."anchorId"
     )
-    /* The weekly per-user floor for this kind, mirrored from the run so the
-       users it holds back never take a slot in the limit below. */
+    /* The weekly per-user floor, mirrored from the run so the users it holds
+       back never take a slot in the limit below. Every kind counts, because
+       the floor in the run counts every kind. */
     AND NOT EXISTS (
       SELECT 1 FROM "NotificationLog"
       WHERE "NotificationLog"."userId" = "waiting"."userId"
-      AND "NotificationLog"."kind" = ${REENGAGEMENT_KINDS.LIKES_WAITING}
       AND "NotificationLog"."sentAt" > ${cooldownFloor}
     )
     ORDER BY "waiting"."newestLikeAt" DESC
@@ -750,9 +723,13 @@ export class ReengagementService {
         [REENGAGEMENT_KINDS.LIKES_WAITING]: 0,
       },
       candidates: candidates.length,
-      skippedOutsideWindow: 0,
-      skippedCooldown: 0,
-      skippedKindCooldown: 0,
+      suppressed: {
+        cooldown: 0,
+        dead_token: 0,
+        gave_up: 0,
+        monthly_cap: 0,
+        window: 0,
+      },
       skippedAlreadySent: 0,
       skippedUnreachable: 0,
     };
@@ -795,74 +772,57 @@ export class ReengagementService {
         });
     }
 
-    const due = [...perUser.entries()].filter(([, { longitude }]) => {
-      if (isWithinSendWindow(longitude, now)) return true;
-      summary.skippedOutsideWindow += 1;
-      return false;
-    });
+    if (perUser.size === 0) return summary;
 
-    if (due.length === 0) return summary;
+    const cadence = await readCadence([...perUser.keys()], now);
 
-    // One read covers both caps: the widest kind window is a superset of the
-    // per-user one, so the rows are filtered in memory rather than queried
-    // once per kind.
-    const recentLogs = await prisma.notificationLog.findMany({
-      where: {
-        userId: { in: due.map(([userId]) => userId) },
-        sentAt: { gt: new Date(now.getTime() - MAX_COOLDOWN_HOURS * HOUR_MS) },
-      },
-      select: { userId: true, kind: true, sentAt: true },
-    });
+    /**
+     * Count it always, report it once a day.
+     *
+     * See {@link POLICY_REPORT_HOUR}. The summary is per run because the cron
+     * response is read per run; the event is per person because that is the
+     * number the readout is being asked for.
+     */
+    const suppress = (
+      userId: string,
+      kind: ReengagementKind,
+      reason: ReengagementSuppressionReason,
+      localHour: number,
+    ) => {
+      summary.suppressed[reason] += 1;
 
-    const recentlyNudged = new Set(
-      recentLogs
-        .filter(
-          ({ sentAt }) =>
-            sentAt.getTime() > now.getTime() - USER_COOLDOWN_HOURS * HOUR_MS,
-        )
-        .map(({ userId }) => userId),
-    );
+      const reportAt =
+        reason === "window" ? WINDOW_REPORT_HOUR : POLICY_REPORT_HOUR;
 
-    // The selectors mirror their own kind's floor in SQL so a cooled down user
-    // never takes a slot in MAX_CANDIDATES_PER_QUERY. This is the same rule
-    // stated once more where the decision is actually made: it is what a new
-    // kind gets for free, and `skippedKindCooldown` reading anything but zero
-    // is the signal that a selector has stopped mirroring it.
-    const kindOnCooldown = new Set(
-      recentLogs
-        .filter(({ kind, sentAt }) => {
-          const hours = KIND_COOLDOWN_HOURS[kind as ReengagementKind];
+      if (localHour !== reportAt) return;
 
-          // An unknown kind is a row this service did not write, so it holds
-          // nobody back beyond the per-user cap above.
-          return (
-            hours !== undefined &&
-            sentAt.getTime() > now.getTime() - hours * HOUR_MS
-          );
-        })
-        .map(({ userId, kind }) => kindKey(userId, kind)),
-    );
+      captureEvent(userId, ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED, {
+        kind,
+        reason,
+      });
+    };
 
-    for (const [userId, { queue }] of due) {
+    for (const [userId, { longitude, queue }] of perUser) {
       if (summary.sent >= MAX_PUSHES_PER_RUN) break;
 
-      if (recentlyNudged.has(userId)) {
-        summary.skippedCooldown += 1;
-      } else {
-        const allowed = queue.filter((candidate) => {
-          if (!kindOnCooldown.has(kindKey(userId, candidate.kind))) return true;
-          summary.skippedKindCooldown += 1;
-          return false;
-        });
+      const facts = cadence.get(userId);
+      const [best] = queue;
 
-        // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cooldown they enforce on each other.
-        const sent = await ReengagementService.#sendFirstAvailable(
-          allowed,
-          summary,
-          now,
-        );
+      // A missing row means the user was deleted between the selector and here.
+      if (facts && best) {
+        const localHour = localHourFor(longitude, now);
+        const decision = cadenceDecision(facts, now);
 
-        if (sent) recentlyNudged.add(userId);
+        // The cadence is decided before the clock, so somebody held back for a
+        // month is not also counted as "wrong hour" twenty-two times a day.
+        if (!decision.allowed) {
+          suppress(userId, best.kind, decision.reason, localHour);
+        } else if (SEND_WINDOW_HOURS.has(localHour)) {
+          // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cadence they enforce on each other.
+          await ReengagementService.#sendFirstAvailable(queue, summary, now);
+        } else {
+          suppress(userId, best.kind, "window", localHour);
+        }
       }
     }
 

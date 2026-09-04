@@ -56,6 +56,7 @@ export const ANALYTICS_EVENTS = {
   PROFILE_PHOTO_ADDED: "Profile Photo Added",
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
   REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
+  REENGAGEMENT_PUSH_SUPPRESSED: "Reengagement Push Suppressed",
   PUSH_PERMISSION: "Push Permission",
   PUSH_RECEIPT_RESULT: "Push Receipt Result",
   PUSH_TICKET_RESULT: "Push Ticket Result",
@@ -122,6 +123,20 @@ export type ReengagementPushKind =
   | "likes_waiting"
   | "new_dogs_nearby"
   | "unanswered_match";
+
+/**
+ * Why a re-engagement push that had something to say was not sent.
+ *
+ * Restated here rather than imported for the same reason the kinds above are.
+ * `window` is the only one that is not a cadence decision: the candidate was
+ * due but the run caught the user outside their evening slot.
+ */
+export type ReengagementSuppressionReason =
+  | "cooldown"
+  | "dead_token"
+  | "gave_up"
+  | "monthly_cap"
+  | "window";
 
 /**
  * What a push was for, across every path that sends one: the three scheduled
@@ -487,6 +502,21 @@ export type ServerEventProperties = {
     dedupe_key: string;
     kind: ReengagementPushKind;
   };
+  /**
+   * One row per user the cron had a nudge for and deliberately did not send.
+   *
+   * The counterweight to the event above: sends alone cannot tell a quiet week
+   * from a broken cron. `reason` is what makes the cadence auditable, and
+   * `kind` is the nudge that was withheld, so the cost of the cadence can be
+   * read per kind rather than only in aggregate.
+   *
+   * Emitted at most once per user per day rather than once per hourly run, so
+   * the counts are people held back rather than passes over the same person.
+   */
+  [ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED]: {
+    kind: ReengagementPushKind;
+    reason: ReengagementSuppressionReason;
+  };
   // Keys stay camelCase for the same reason "Referral Captured" keeps them:
   // the two events are joined on `ref` and `referredByUserId`, and a capture
   // that spells a key one way and the signup it produced another way is a
@@ -643,6 +673,7 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.PUSH_RECEIPT_RESULT,
   ANALYTICS_EVENTS.PUSH_TICKET_RESULT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
+  ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
   ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
 ] as const;
