@@ -183,6 +183,16 @@ export const BREAKDOWNS = [
     property: "cancel_reason",
     title: "Subscription Event by cancel reason",
   },
+  // Which plan people actually buy. The store product id carries the duration,
+  // so yearly, monthly and weekly land in separate buckets and the mix can be
+  // read after a price change. TEST and TRANSFER events carry no product, so
+  // they sit in `unknown` rather than inflating one of the plans.
+  {
+    id: "subscription_product",
+    event: EVENTS.SUBSCRIPTION_EVENT,
+    property: "product_id",
+    title: "Subscription Event by product",
+  },
 ];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
