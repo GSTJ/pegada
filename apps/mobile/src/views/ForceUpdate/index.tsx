@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Linking } from "react-native";
 
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { useTranslation } from "react-i18next";
 import { useUnistyles } from "react-native-unistyles";
 
@@ -35,7 +36,7 @@ const ForceUpdate: React.FC = () => {
   // off it is the store.
   React.useEffect(() => {
     analytics.track({
-      event_type: "Update Required Shown",
+      event_type: ANALYTICS_EVENTS.UPDATE_REQUIRED_SHOWN,
       event_properties: versionProperties(),
     });
   }, []);
@@ -64,7 +65,7 @@ const ForceUpdate: React.FC = () => {
           testID="force-update-button"
           onPress={() => {
             analytics.track({
-              event_type: "Update Required Store Tapped",
+              event_type: ANALYTICS_EVENTS.UPDATE_REQUIRED_STORE_TAPPED,
               event_properties: versionProperties(),
             });
             // Store automatically redirects to the app store or play store

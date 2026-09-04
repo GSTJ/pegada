@@ -38,9 +38,10 @@ export const rememberMinimumSupportedVersion = (version?: string) => {
  * the check on `getInitialRouteName` never runs again. This re-asks on the way
  * back to the foreground.
  *
- * Once it has sent someone to the update screen it stops asking. There is no
- * route off that screen except the store, so a second answer cannot change
- * anything, and a failed re-check must not quietly let a gated build back in.
+ * Once the wall is up it stops asking, so a later foreground does not navigate
+ * again and report a second `Update Required Shown` for one wall. That flag is
+ * only ever set after the navigation succeeds: latching it on an attempt that
+ * threw would leave the app both ungated and no longer asking.
  */
 let blocked = false;
 
@@ -66,8 +67,13 @@ export const useForceUpdateOnForeground = () => {
 
           if (!forceUpdate) return;
 
-          blocked = true;
+          // `replace` alone only swaps the top of the stack: everything the
+          // user had pushed stays underneath, and one back gesture puts them
+          // straight back into the app the floor just locked them out of.
+          // Clearing the stack first leaves the wall with nothing behind it.
+          if (router.canDismiss()) router.dismissAll();
           router.replace(SceneName.ForceUpdate);
+          blocked = true;
         } catch (error) {
           // Fail open. This runs on every foreground, so a flaky network or an
           // API that is briefly down would otherwise wall off an app that is
