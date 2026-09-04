@@ -1,16 +1,17 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import type { OgAssets } from "@/lib/og-assets";
 
 import { ImageResponse } from "next/og";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
+import { getOgAssets } from "@/lib/og-assets";
 import { t } from "@/lib/translate";
 
 import { getDog, getDogImage, getDogTagline } from "./get-dog";
 
 // Explicit, not the segment default: this route reads the Gilroy font files
-// off disk (`node:fs/promises`, `process.cwd()`) and queries the dog via
-// Prisma, both Node-only, so it needs the Node runtime rather than Edge.
+// off disk (`node:fs/promises`, `process.cwd()`, see `@/lib/og-assets`) and
+// queries the dog via Prisma, both Node-only, so it needs the Node runtime
+// rather than Edge.
 export const runtime = "nodejs";
 
 export const size = { width: 1200, height: 630 };
@@ -26,49 +27,6 @@ const COLORS = {
   text: "#0F172A",
   subtitle: "#5A5F6D",
 };
-
-// Read once at module scope, same as the docs example for `ImageResponse`
-// fonts (`readFile` + `process.cwd()`), not per-request: font data never
-// changes between requests. `process.cwd()` is `apps/nextjs` in both `next
-// dev` and `next build`/the deployed function, so two `..` reaches the repo
-// root and into the same `packages/shared/themes/fonts` the app itself
-// loads its Gilroy weights from.
-const FONTS_DIR = join(
-  process.cwd(),
-  "..",
-  "..",
-  "packages",
-  "shared",
-  "themes",
-  "fonts",
-);
-
-const LOGO_PATH = join(process.cwd(), "public", "logo.svg");
-
-const [gilroyMedium, gilroySemiBold, gilroyBold, gilroyExtraBold, logoSvg] =
-  await Promise.all([
-    readFile(join(FONTS_DIR, "Gilroy-Medium.ttf")),
-    readFile(join(FONTS_DIR, "Gilroy-SemiBold.ttf")),
-    readFile(join(FONTS_DIR, "Gilroy-Bold.ttf")),
-    readFile(join(FONTS_DIR, "Gilroy-ExtraBold.ttf")),
-    readFile(LOGO_PATH, "utf8"),
-  ]);
-
-// Satori (`next/og`'s renderer) only reliably draws an `<img>` from a data
-// URI, not an arbitrary `src` path — the actual brand mark
-// (`public/logo.svg`, the heart-shaped paw), inlined this way, is what makes
-// this a logo instead of the word "Pegada" set in a font.
-const logoBase64 = Buffer.from(logoSvg).toString("base64");
-const LOGO_DATA_URI = `data:image/svg+xml;base64,${logoBase64}`;
-
-const OG_FONTS = [
-  { name: "Gilroy", data: gilroyMedium, weight: 500, style: "normal" },
-  { name: "Gilroy", data: gilroySemiBold, weight: 600, style: "normal" },
-  { name: "Gilroy", data: gilroyBold, weight: 700, style: "normal" },
-  { name: "Gilroy", data: gilroyExtraBold, weight: 800, style: "normal" },
-] satisfies NonNullable<
-  ConstructorParameters<typeof ImageResponse>[1]
->["fonts"];
 
 // Hoisted to module scope, not inlined in JSX: every value below is static
 // (only the text nodes vary per dog), so building these once avoids a fresh
@@ -128,9 +86,9 @@ const detailsStyle = {
   flex: 1,
 } as const;
 
-// The lockup: the real mark (an `<img>` of `public/logo.svg`, see
-// `LOGO_DATA_URI` above) next to the wordmark, in the same Gilroy ExtraBold
-// the app itself sets its brand name in. Neither one alone is the logo.
+// The lockup: the real mark (an `<img>` of `public/logo.svg`, inlined by
+// `@/lib/og-assets`) next to the wordmark, in the same Gilroy ExtraBold the
+// app itself sets its brand name in. Neither one alone is the logo.
 const brandRowStyle = {
   display: "flex",
   alignItems: "center",
@@ -220,34 +178,35 @@ type Props = {
 
 type LogoStyle = { width: number; height: number; display: "flex" };
 
-const LogoMark = (props: { style: LogoStyle }) => (
-  // oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image
-  <img
-    src={LOGO_DATA_URI}
-    width={props.style.width}
-    height={props.style.height}
-    alt=""
-    style={props.style}
-  />
-);
+const LogoMark = (props: { src: string | undefined; style: LogoStyle }) =>
+  props.src ? (
+    // oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image
+    <img
+      src={props.src}
+      width={props.style.width}
+      height={props.style.height}
+      alt=""
+      style={props.style}
+    />
+  ) : null;
 
 /** Branded card with no dog-specific data, for a missing/removed profile. */
-const buildFallbackImage = () =>
+const buildFallbackImage = ({ fonts, logoDataUri }: OgAssets) =>
   new ImageResponse(
     <div style={fallbackContainerStyle}>
-      <LogoMark style={fallbackLogoMarkStyle} />
+      <LogoMark src={logoDataUri} style={fallbackLogoMarkStyle} />
       <div style={fallbackWordmarkStyle}>Pegada</div>
       <div style={fallbackTaglineStyle}>{t("home.title")}</div>
     </div>,
-    { ...size, fonts: OG_FONTS },
+    { ...size, fonts },
   );
 
 const Image = async ({ params }: Props) => {
   const { id } = await params;
-  const dog = await getDog(id);
+  const [assets, dog] = await Promise.all([getOgAssets(), getDog(id)]);
 
   if (!dog) {
-    return buildFallbackImage();
+    return buildFallbackImage(assets);
   }
 
   const dogImage = getDogImage(dog);
@@ -255,7 +214,7 @@ const Image = async ({ params }: Props) => {
   // `getDog`'s `where` already requires an approved image, so this is
   // belt and braces rather than a case that fires in practice.
   if (!dogImage) {
-    return buildFallbackImage();
+    return buildFallbackImage(assets);
   }
 
   const lng = getSafeLocale();
@@ -276,7 +235,7 @@ const Image = async ({ params }: Props) => {
 
       <div style={detailsStyle}>
         <div style={brandRowStyle}>
-          <LogoMark style={logoMarkStyle} />
+          <LogoMark src={assets.logoDataUri} style={logoMarkStyle} />
           <div style={wordmarkStyle}>Pegada</div>
         </div>
         <div style={nameStyle}>{dog.name}</div>
@@ -284,7 +243,7 @@ const Image = async ({ params }: Props) => {
         <div style={tagStyle}>{t("dog.og.tag")}</div>
       </div>
     </div>,
-    { ...size, fonts: OG_FONTS },
+    { ...size, fonts: assets.fonts },
   );
 };
 

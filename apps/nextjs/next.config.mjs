@@ -45,18 +45,25 @@ const nextConfig = {
     qualities: [75, 90],
   },
 
-  // `opengraph-image.tsx` reads Gilroy TTFs from `packages/shared` (outside
-  // this app's directory) and `public/logo.svg` off disk at module scope.
-  // Next's default output file tracing only follows files it can see through
-  // static imports/requires, and these are read with `node:fs` at a path
-  // built from `process.cwd()`, so the standalone/serverless bundle Vercel
-  // deploys would otherwise ship without them and 500 at runtime even though
-  // `next dev` (which runs from the full repo checkout) never surfaces it.
-  // Keys are globs matched against the route; values are globs relative to
-  // this file's directory (`apps/nextjs`, the project root `next build` and
-  // Vercel's build both use).
+  // `src/lib/og-assets.ts` reads Gilroy TTFs from `packages/shared` (outside
+  // this app's directory) and `public/logo.svg` off disk. Next's default
+  // output file tracing only follows files it can see through static
+  // imports/requires, and these are read with `node:fs` at a path built from
+  // `process.cwd()`, so unless they are named here the serverless bundle
+  // Vercel deploys ships without them and every shared dog gets a card in a
+  // stock font, which `next dev` (running from the full repo checkout) never
+  // surfaces.
+  //
+  // Values are globs relative to this file's directory (`apps/nextjs`, the
+  // project root that `next build` and Vercel's build both use). The key is a
+  // glob matched against the route path, with `contains: true`, so it is
+  // written against Next's `opengraph-image` file convention rather than
+  // against this app's own segment names: `[locale]`, `dog` and `[id]` are
+  // ours to rename, and spelling them out here means a rename ships a
+  // deployment that builds and typechecks and still loses the font.
+  // `tests/og-image-assets.test.mjs` holds this key and those files together.
   outputFileTracingIncludes: {
-    "/\\[locale\\]/dog/\\[id\\]/opengraph-image": [
+    "**/{opengraph,twitter}-image": [
       "../../packages/shared/themes/fonts/Gilroy-*.ttf",
       "./public/logo.svg",
     ],
