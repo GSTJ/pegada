@@ -8,6 +8,8 @@
 
 import {
   BREAKDOWNS,
+  CITY_TABLE_ROWS,
+  CITY_UNKNOWN_BUCKET,
   EVENTS,
   PUSH_RETURN_WINDOW_MINUTES,
   STORE_BUILD_COVERAGE,
@@ -174,7 +176,10 @@ function countRow(index, label, event, field = "total") {
   };
 }
 
-function breakdownTable(rows, { field = "total", header = "Bucket" } = {}) {
+function breakdownTable(
+  rows,
+  { field = "total", header = "Bucket", limit = MAX_BREAKDOWN_ROWS } = {},
+) {
   const index = indexBreakdown(rows, field);
   if (index.size === 0) {
     return "No events in either window.";
@@ -182,7 +187,7 @@ function breakdownTable(rows, { field = "total", header = "Bucket" } = {}) {
   const ordered = [...index.entries()]
     .map(([bucket, entry]) => ({ bucket, ...entry }))
     .sort((a, b) => b.current - a.current || b.previous - a.previous)
-    .slice(0, MAX_BREAKDOWN_ROWS);
+    .slice(0, limit);
 
   return [
     `| ${header} | Last 7 days | Previous 7 days | Delta |`,
@@ -195,10 +200,38 @@ function breakdownTable(rows, { field = "total", header = "Bucket" } = {}) {
 }
 
 /**
+ * Where the city in the table comes from, said once under it.
+ *
+ * Whoever reads this row is about to pick a city to put dogs in, and the two
+ * sources are not equally good: one is the city the person allowed the app to
+ * read off their device, the other is a guess from an IP address.
+ */
+export const CITY_SOURCE_NOTE =
+  "City is the one the app reverse geocoded after the person allowed location, falling back to the PostHog IP lookup and then to unknown.";
+
+/**
+ * The share of the active users the city table cannot place.
+ *
+ * Measured against the headline active users rather than against the sum of the
+ * table, because a person whose events do not all carry the same city appears
+ * in more than one row and the rows can add up to more than the headline.
+ */
+export function noCityLine(rows, activeCurrent, activePrevious) {
+  const entry = indexBreakdown(rows, "people").get(CITY_UNKNOWN_BUCKET) ?? {
+    current: 0,
+    previous: 0,
+  };
+  const share = (people, active) =>
+    `${number(people)} of ${number(active)} (${formatPercent(ratio(people, active))})`;
+  return `No city: ${share(entry.current, activeCurrent)} in the last 7 days, ${share(entry.previous, activePrevious)} in the previous 7 days.`;
+}
+
+/**
  * The whole comment.
  *
  * @param {object} input
  * @param {Array} input.activeUsers rows from the active users query
+ * @param {Array} input.activeUsersByCity rows from the city split
  * @param {Array} input.activeUsersByVersion rows from the version split
  * @param {Record<string, Array>} input.breakdowns rows per breakdown id
  * @param {Date} input.generatedAt when the job ran
@@ -208,6 +241,7 @@ function breakdownTable(rows, { field = "total", header = "Bucket" } = {}) {
  */
 export function buildReport({
   activeUsers,
+  activeUsersByCity,
   activeUsersByVersion,
   breakdowns,
   generatedAt,
@@ -367,6 +401,18 @@ export function buildReport({
       field: "people",
       header: "App version",
     }),
+    "",
+    "### Active users by city",
+    "",
+    breakdownTable(activeUsersByCity, {
+      field: "people",
+      header: "City",
+      limit: CITY_TABLE_ROWS,
+    }),
+    "",
+    noCityLine(activeUsersByCity, activeCurrent, activePrevious),
+    "",
+    CITY_SOURCE_NOTE,
     "",
     ...breakdownSections,
     "This comment is rewritten in place by the daily metrics workflow.",

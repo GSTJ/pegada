@@ -3,11 +3,13 @@ import { test } from "node:test";
 
 import { STORE_BUILD_COVERAGE, buildWindows } from "./queries.mjs";
 import {
+  CITY_SOURCE_NOTE,
   COMMENT_MARKER,
   buildReport,
   coverageNote,
   formatDelta,
   formatRateDelta,
+  noCityLine,
 } from "./report.mjs";
 
 const NOW = new Date("2026-09-02T12:00:00.000Z");
@@ -29,11 +31,33 @@ function versions(rows) {
   return rows.map(([bucket, period, people]) => ({ bucket, people, period }));
 }
 
+/** The city split comes back in the same shape as the version split. */
+const cities = versions;
+
 const FIXTURE = {
   activeUsers: [
     { people: 1240, period: "current" },
     { people: 1100, period: "previous" },
   ],
+  activeUsersByCity: cities([
+    ["Sao Paulo", "current", 420],
+    ["Sao Paulo", "previous", 400],
+    ["Rio de Janeiro", "current", 260],
+    ["Rio de Janeiro", "previous", 300],
+    ["Belo Horizonte", "current", 140],
+    ["Belo Horizonte", "previous", 120],
+    ["Curitiba", "current", 90],
+    ["Porto Alegre", "current", 80],
+    ["Recife", "current", 70],
+    ["Salvador", "current", 60],
+    ["Brasilia", "current", 50],
+    ["Fortaleza", "current", 40],
+    ["Manaus", "current", 30],
+    ["Belem", "current", 20],
+    ["Natal", "current", 10],
+    ["unknown", "current", 124],
+    ["unknown", "previous", 220],
+  ]),
   activeUsersByVersion: versions([
     ["1.4.0", "current", 900],
     ["1.4.0", "previous", 210],
@@ -242,6 +266,69 @@ test("a missing app version split says so instead of rendering an empty table", 
   const body = buildReport({ ...FIXTURE, activeUsersByVersion: [] });
   const [, versionSection] = body.split("### Active users by app version");
   assert.match(versionSection, /^\n\nNo events in either window\./);
+});
+
+test("the city table names the top ten and stops there", () => {
+  const body = buildReport(FIXTURE);
+  assert.ok(body.includes("### Active users by city"));
+  const [, citySection] = body.split("### Active users by city");
+  assert.match(citySection, /\| City \| Last 7 days \|/);
+  assert.match(
+    citySection,
+    /\| Sao Paulo \| 420 \| 400 \| \+20 \(\+5\.0%\) \|/,
+  );
+  assert.match(
+    citySection,
+    /\| Rio de Janeiro \| 260 \| 300 \| -40 \(-13\.3%\) \|/,
+  );
+  assert.ok(
+    citySection.indexOf("| Sao Paulo |") <
+      citySection.indexOf("| Rio de Janeiro |"),
+  );
+  // Fifteen cities and an unknown bucket went in, ten rows come out, and the
+  // unknown bucket earns its row on size like any other.
+  assert.match(citySection, /\| unknown \| 124 \| 220 \| -96 \(-43\.6%\) \|/);
+  assert.ok(citySection.includes("| Fortaleza |"));
+  assert.equal(citySection.includes("| Manaus |"), false);
+  assert.equal(citySection.includes("| Natal |"), false);
+  const [table] = citySection.split("No city:");
+  assert.equal(
+    table.split("\n").filter((line) => line.startsWith("| ")).length,
+    12,
+  );
+});
+
+test("the unplaced people are a share of the headline, not of the table", () => {
+  const body = buildReport(FIXTURE);
+  // 124 of the 1,240 active users this week, 220 of the 1,100 the week before.
+  assert.match(
+    body,
+    /No city: 124 of 1,240 \(10\.0%\) in the last 7 days, 220 of 1,100 \(20\.0%\) in the previous 7 days\./,
+  );
+  assert.ok(body.includes(CITY_SOURCE_NOTE));
+});
+
+test("a week nobody used the app reports no share rather than a division", () => {
+  assert.equal(
+    noCityLine([], 0, 0),
+    "No city: 0 of 0 (n/a) in the last 7 days, 0 of 0 (n/a) in the previous 7 days.",
+  );
+});
+
+test("every active user counts as unplaced when no city ever arrives", () => {
+  const line = noCityLine(
+    [{ bucket: "unknown", people: 12, period: "current" }],
+    12,
+    0,
+  );
+  assert.match(line, /No city: 12 of 12 \(100\.0%\) in the last 7 days/);
+});
+
+test("a missing city split says so instead of rendering an empty table", () => {
+  const body = buildReport({ ...FIXTURE, activeUsersByCity: [] });
+  const [, citySection] = body.split("### Active users by city");
+  assert.match(citySection, /^\n\nNo events in either window\./);
+  assert.match(citySection, /No city: 0 of 1,240 \(0\.0%\)/);
 });
 
 test("the push table reports how many people a send reached", () => {
