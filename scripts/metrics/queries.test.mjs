@@ -9,6 +9,7 @@ import {
   CITY_UNKNOWN_BUCKET,
   CLIENT_LIBS,
   COUNTED_EVENTS,
+  DECK_TIERS,
   EVENTS,
   PUSH_RETURN_LIB,
   PUSH_RETURN_WINDOW_MINUTES,
@@ -18,6 +19,7 @@ import {
   buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
+  buildDeckSupplyQuery,
   buildPushAttributedReturnsQuery,
   buildTotalsQuery,
   buildWindows,
@@ -71,12 +73,14 @@ test("posthog-node never counts as a client library", () => {
 
 test("the events the API emits are all on the deny list", () => {
   for (const event of [
+    "Deck Served",
     "Image Moderation Result",
     "Match Created",
     "Message Sent",
     "Push Receipt Result",
     "Push Ticket Result",
     "Reengagement Push Sent",
+    "Reengagement Push Suppressed",
     "Signup Attributed",
     "Subscription Event",
   ]) {
@@ -200,6 +204,95 @@ test("every breakdown names an event the totals query also counts", () => {
   }
   const ids = BREAKDOWNS.map((breakdown) => breakdown.id);
   assert.equal(new Set(ids).size, ids.length);
+});
+
+test("the suppression breakdown reads why a nudge was withheld", () => {
+  const suppressed = BREAKDOWNS.find(
+    (breakdown) => breakdown.id === "push_suppressed_reason",
+  );
+  assert.equal(suppressed.event, EVENTS.REENGAGEMENT_PUSH_SUPPRESSED);
+  assert.equal(suppressed.property, "reason");
+  const query = buildBreakdownQuery(buildWindows(NOW), suppressed);
+  assert.match(query, /AND event = 'Reengagement Push Suppressed'/);
+  assert.match(
+    query,
+    /ifNull\(nullIf\(toString\(properties\.reason\), ''\), 'unknown'\) AS bucket/,
+  );
+
+  // The cron writes one of these five, so a sixth bucket means the vocabulary
+  // moved and the table stopped being readable against the cadence.
+  const cataloguePath = fileURLToPath(
+    new URL("../../packages/shared/analytics/events.ts", import.meta.url),
+  );
+  const catalogue = readFileSync(cataloguePath, "utf8");
+  for (const reason of [
+    "cooldown",
+    "dead_token",
+    "gave_up",
+    "monthly_cap",
+    "window",
+  ]) {
+    assert.ok(
+      catalogue.includes(`| "${reason}"`),
+      `${reason} is no longer a suppression reason`,
+    );
+  }
+});
+
+test("the deck supply query sums the tiers and counts the short pages", () => {
+  const query = buildDeckSupplyQuery(buildWindows(NOW));
+  assert.match(query, /AND event = 'Deck Served'/);
+  assert.match(query, /count\(\) AS pages/);
+  assert.match(
+    query,
+    /sum\(toFloat64OrNull\(toString\(properties\.served\)\)\) AS served/,
+  );
+  for (const tier of DECK_TIERS) {
+    assert.ok(
+      query.includes(
+        `sum(toFloat64OrNull(toString(properties.${tier.property}))) AS ${tier.property}`,
+      ),
+      `${tier.id} is not summed`,
+    );
+  }
+  // Short is the same condition the API falls back on, so the share can be read
+  // as how often the wider tiers had anything to do.
+  assert.match(
+    query,
+    /countIf\(toFloat64OrNull\(toString\(properties\.served\)\) < toFloat64OrNull\(toString\(properties\.requested\)\)\) AS short_pages/,
+  );
+  assert.match(query, /GROUP BY period/);
+  assert.match(
+    query,
+    /toDateTime\('2026-08-26 12:00:00', 'UTC'\), 'current', 'previous'/,
+  );
+});
+
+test("the deck tiers name the property the Deck Served event really carries", () => {
+  assert.deepEqual(
+    DECK_TIERS.map((tier) => tier.id),
+    ["primary", "beyond_radius", "same_gender", "recycled_pass"],
+  );
+  // The last tier is the one whose id and counter disagree, which is exactly
+  // the pair a hand written query gets wrong.
+  assert.equal(
+    DECK_TIERS.find((tier) => tier.id === "recycled_pass").property,
+    "recycled_count",
+  );
+  const cataloguePath = fileURLToPath(
+    new URL("../../packages/shared/analytics/events.ts", import.meta.url),
+  );
+  const catalogue = readFileSync(cataloguePath, "utf8");
+  for (const tier of DECK_TIERS) {
+    assert.match(
+      catalogue,
+      new RegExp(`^\\s+${tier.property}: number;$`, "m"),
+      `${tier.property} is not a Deck Served property`,
+    );
+  }
+  for (const property of ["requested", "served"]) {
+    assert.match(catalogue, new RegExp(`^\\s+${property}: number;$`, "m"));
+  }
 });
 
 test("the pricing breakdowns ask the paywall and the subscription the right thing", () => {
@@ -339,6 +432,23 @@ test("the coverage list holds real event names and no server event", () => {
     );
   }
   assert.ok(STORE_BUILD_COVERAGE.missingEvents.length > 0);
+});
+
+// The over the air update publishes new JavaScript to the 1.6.2 runtime, so a
+// name here is missing on the phones that have not fetched it and present on
+// the ones that have. Listing an event the update never carried would excuse a
+// zero that has nothing to do with the rollout.
+test("the over the air list is a subset of the gap and carries the day it shipped", () => {
+  for (const event of STORE_BUILD_COVERAGE.otaEvents) {
+    assert.ok(
+      STORE_BUILD_COVERAGE.missingEvents.includes(event),
+      `${event} is not part of the coverage gap`,
+    );
+  }
+  assert.ok(
+    STORE_BUILD_COVERAGE.otaEvents.includes(EVENTS.PUSH_NOTIFICATION_OPENED),
+  );
+  assert.match(STORE_BUILD_COVERAGE.otaDate, /^\d{4}-\d{2}-\d{2}$/);
 });
 
 // Every name here has arrived from an `$app_version` of 1.6.2 in the events
