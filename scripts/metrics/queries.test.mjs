@@ -186,6 +186,25 @@ test("the pricing breakdowns ask the paywall and the subscription the right thin
   );
 });
 
+test("the product breakdown reads the property the server actually sends", () => {
+  const product = BREAKDOWNS.find(
+    (breakdown) => breakdown.id === "subscription_product",
+  );
+  assert.equal(product.event, EVENTS.SUBSCRIPTION_EVENT);
+  assert.equal(product.property, "product_id");
+  assert.match(
+    buildBreakdownQuery(buildWindows(NOW), product),
+    /ifNull\(nullIf\(toString\(properties\.product_id\), ''\), 'unknown'\) AS bucket/,
+  );
+
+  // The name has to match the shared catalogue, otherwise every bucket would
+  // silently be `unknown`.
+  const cataloguePath = fileURLToPath(
+    new URL("../../packages/shared/analytics/events.ts", import.meta.url),
+  );
+  assert.match(readFileSync(cataloguePath, "utf8"), /^\s+product_id\?:/m);
+});
+
 test("every event name still exists in the shared analytics catalogue", () => {
   const cataloguePath = fileURLToPath(
     new URL("../../packages/shared/analytics/events.ts", import.meta.url),

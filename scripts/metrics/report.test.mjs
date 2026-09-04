@@ -87,6 +87,14 @@ const FIXTURE = {
       ["BILLING_ERROR", "current", 1],
       ["unknown", "current", 28],
     ]),
+    subscription_product: breakdown([
+      ["pegada_yearly", "current", 18],
+      ["pegada_yearly", "previous", 11],
+      ["pegada_monthly", "current", 9],
+      ["pegada_monthly", "previous", 14],
+      ["pegada_weekly", "current", 4],
+      ["unknown", "current", 1],
+    ]),
     subscription_period_type: breakdown([
       ["TRIAL", "current", 14],
       ["TRIAL", "previous", 9],
@@ -279,6 +287,7 @@ test("every breakdown gets its own table, ordered by the current window", () => 
     "Paywall Viewed by trigger",
     "Subscription Event by period type",
     "Subscription Event by cancel reason",
+    "Subscription Event by product",
   ]) {
     assert.ok(body.includes(`### ${title}`), `missing ${title}`);
   }
@@ -312,6 +321,18 @@ test("the cancel reason table separates a refund from a voluntary cancel", () =>
   assert.match(reasons, /\| BILLING_ERROR \| 1 \| 0 \| \+1 \(new\) \|/);
   // Every subscription event that is not a cancel carries no reason at all.
   assert.match(reasons, /\| unknown \| 28 \| 0 \| \+28 \(new\) \|/);
+});
+
+test("the product table separates yearly from monthly and weekly", () => {
+  const body = buildReport(FIXTURE);
+  const [, products] = body.split("### Subscription Event by product");
+  assert.match(products, /\| pegada_yearly \| 18 \| 11 \| \+7 \(\+63\.6%\) \|/);
+  assert.match(products, /\| pegada_monthly \| 9 \| 14 \| -5 \(-35\.7%\) \|/);
+  assert.match(products, /\| pegada_weekly \| 4 \| 0 \| \+4 \(new\) \|/);
+  assert.ok(
+    products.indexOf("| pegada_yearly |") <
+      products.indexOf("| pegada_monthly |"),
+  );
 });
 
 test("an empty breakdown says so instead of rendering an empty table", () => {
