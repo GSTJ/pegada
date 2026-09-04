@@ -11,6 +11,22 @@ const breedSchema = z
   })
   .nullable();
 
+/**
+ * Where a dog in the deck came from.
+ *
+ * `primary` is the deck as the person's preferences describe it. The rest are
+ * refills, used only when the primary comes back short, and each one names the
+ * single thing it relaxed so the app can say so on the card.
+ */
+export const DECK_TIERS = [
+  "primary",
+  "beyond_radius",
+  "same_gender",
+  "recycled_pass",
+] as const;
+
+export type DeckTier = (typeof DECK_TIERS)[number];
+
 const dogImageSchema = z.object({
   id: z.string(),
   url: z.string(),
@@ -25,6 +41,8 @@ export const dogSafeSchema = z
     breed: breedSchema,
     birthDate: z.date().nullable(),
     color: z.string().nullable(),
+    // Optional so a build that predates the refill tiers still parses a deck.
+    deckTier: z.enum(DECK_TIERS).optional(),
     gender: z.string(),
     distance: z.number().nullable(),
     images: z.array(dogImageSchema),

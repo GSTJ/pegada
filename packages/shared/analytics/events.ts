@@ -24,6 +24,7 @@ export const ANALYTICS_EVENTS = {
   CHAT_OPENED: "Chat Opened",
   COMPLETE_DOG_PROFILE: "Complete Dog Profile",
   CREATE_DOG_PROFILE: "Create Dog Profile",
+  DECK_SERVED: "Deck Served",
   DEEP_LINK_OPENED: "Deep Link Opened",
   DELETE_ACCOUNT_CANCELED: "Delete Account Canceled",
   DELETE_ACCOUNT_CONFIRMED: "Delete Account Confirmed",
@@ -422,6 +423,33 @@ export type SubscriptionCancelReason =
  */
 export type ServerEventProperties = {
   /**
+   * One row per page of the swipe deck the API hands back.
+   *
+   * The tier counts are the whole point: a deck of ten that is ten `primary`
+   * dogs and a deck of ten that is two `primary` and eight refills look
+   * identical from the app, and only the second one says the preferences are
+   * starving the deck. `supply_*` is the same question asked of the city
+   * instead of the filters, counted before any preference is applied, so an
+   * empty deck in an empty town can be told apart from an empty deck behind a
+   * tight filter. All three are null when the person has no location.
+   */
+  [ANALYTICS_EVENTS.DECK_SERVED]: {
+    beyond_radius_count: number;
+    /** `served === 0`, kept as its own property so the rate is one breakdown. */
+    empty: boolean;
+    primary_count: number;
+    /** The radius the person set, or null for no limit. */
+    radius_km: number | null;
+    recycled_count: number;
+    /** The page size the app asked for, which `served` is read against. */
+    requested: number;
+    same_gender_count: number;
+    served: number;
+    supply_10km: number | null;
+    supply_25km: number | null;
+    supply_50km: number | null;
+  };
+  /**
    * One row per photo the moderation model looked at.
    *
    * `mode` is the property the whole rollout hangs on: the same verdict means
@@ -637,6 +665,7 @@ export const MOBILE_EVENT_NAMES = [
 ] as const;
 
 export const SERVER_EVENT_NAMES = [
+  ANALYTICS_EVENTS.DECK_SERVED,
   ANALYTICS_EVENTS.IMAGE_MODERATION_RESULT,
   ANALYTICS_EVENTS.MATCH_CREATED,
   ANALYTICS_EVENTS.MESSAGE_SENT,

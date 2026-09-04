@@ -2,11 +2,13 @@ import { faker } from "@faker-js/faker";
 import prisma from "@pegada/database";
 import { breedData } from "@pegada/database/fixtures/breed-data";
 import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { Color, Dog, Gender, PlanType, Size, SwipeType } from "@prisma/client";
 import { z } from "zod";
 
 import { dogSafeSchema } from "../../dtos/dog-dto";
+import { observability } from "../../shared/observability";
 import { SwipeService } from "../swipe-service";
 import { SuggestionService } from "./suggestion-service";
 
@@ -37,6 +39,34 @@ const smallInt = () => faker.number.int({ min: 1, max: 10 });
 
 const LIMIT = 10;
 
+const capture = observability.capture as unknown as jest.Mock;
+
+const daysAgo = (days: number) =>
+  new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+/**
+ * Backdates a pass. `updatedAt` is `@updatedAt`, so writing it through the
+ * client would just stamp it with now again.
+ */
+const backdatePass = (requesterId: string, responderId: string, at: Date) =>
+  prisma.$executeRaw`UPDATE "Interest" SET "updatedAt" = ${at} WHERE "requesterId" = ${requesterId} AND "responderId" = ${responderId}`;
+
+/** The last Deck Served event, minus the distinct id every capture carries. */
+const lastDeckServed = () => {
+  const call = [...capture.mock.calls]
+    .reverse()
+    .find(([event]) => event === ANALYTICS_EVENTS.DECK_SERVED);
+
+  if (!call) return null;
+
+  const { distinctId: _distinctId, ...properties } = call[1] as Record<
+    string,
+    unknown
+  >;
+
+  return properties;
+};
+
 beforeAll(async () => {
   // Seed the database
   await prisma.breed.deleteMany();
@@ -44,6 +74,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  capture.mockClear();
   await prisma.image.deleteMany();
   await prisma.message.deleteMany();
   await prisma.match.deleteMany();
@@ -349,9 +380,17 @@ describe("SuggestionService", () => {
           [],
         );
 
-        expect(potentialMatches).toHaveLength(1);
+        const primary = potentialMatches.filter(
+          (match) => match.deckTier === "primary",
+        );
 
-        expect(potentialMatches[0]?.gender).toEqual(Gender.MALE);
+        expect(primary).toHaveLength(1);
+        expect(primary[0]?.gender).toEqual(Gender.MALE);
+
+        // The same gender dog is only ever a refill, never part of the deck
+        // the preference describes.
+        expect(potentialMatches[1]?.gender).toEqual(Gender.FEMALE);
+        expect(potentialMatches[1]?.deckTier).toEqual("same_gender");
       });
 
       test("size", async () => {
@@ -487,8 +526,12 @@ describe("SuggestionService", () => {
           [],
         );
 
-        expect(potentialMatches).toHaveLength(1);
-        expect(potentialMatches[0]!.id).toEqual(nearDog.id);
+        const primary = potentialMatches.filter(
+          (match) => match.deckTier === "primary",
+        );
+
+        expect(primary).toHaveLength(1);
+        expect(primary[0]!.id).toEqual(nearDog.id);
       });
       test("breed", async () => {
         const preferredBreedId = faker.helpers.arrayElement(breedData).id!;
@@ -648,6 +691,320 @@ describe("SuggestionService", () => {
 
         expect(potentialMatches).toHaveLength(1);
         expect(potentialMatches[0]!.images).toHaveLength(1);
+      });
+    });
+
+    describe("Refill", () => {
+      test("a full primary deck is never topped up", async () => {
+        const { dog } = await generateFakeUserWithDog({ gender: Gender.MALE });
+
+        await Promise.all([
+          ...Array.from({ length: LIMIT }).map(() =>
+            generateFakeUserWithDog({ gender: Gender.FEMALE }),
+          ),
+          ...Array.from({ length: 3 }).map(() =>
+            generateFakeUserWithDog({ gender: Gender.MALE }),
+          ),
+        ]);
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches).toHaveLength(LIMIT);
+        expect(
+          potentialMatches.every((match) => match.deckTier === "primary"),
+        ).toBe(true);
+      });
+
+      test("a short primary deck is filled with same gender dogs, last", async () => {
+        const [{ dog }, { dog: oppositeDog }] = await Promise.all([
+          generateFakeUserWithDog({ gender: Gender.MALE }),
+          generateFakeUserWithDog({ gender: Gender.FEMALE }),
+          generateFakeUserWithDog({ gender: Gender.MALE }),
+          generateFakeUserWithDog({ gender: Gender.MALE }),
+        ]);
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches).toHaveLength(3);
+        expect(potentialMatches[0]!.id).toEqual(oppositeDog.id);
+        expect(potentialMatches.map((match) => match.deckTier)).toEqual([
+          "primary",
+          "same_gender",
+          "same_gender",
+        ]);
+      });
+
+      test("dogs beyond the radius come after the ones inside it", async () => {
+        const [{ dog }, { dog: nearDog }, { dog: farDog }] = await Promise.all([
+          generateFakeUserWithDog(
+            { gender: Gender.MALE, preferredMaxDistance: 10 },
+            { latitude: 0, longitude: 0 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.05, longitude: 0.05 }, // roughly 8 km away
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.2, longitude: 0.2 }, // roughly 31 km away
+          ),
+        ]);
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches.map((match) => match.id)).toEqual([
+          nearDog.id,
+          farDog.id,
+        ]);
+        expect(potentialMatches.map((match) => match.deckTier)).toEqual([
+          "primary",
+          "beyond_radius",
+        ]);
+        expect(potentialMatches[1]!.distance).toBeGreaterThan(10);
+      });
+
+      test("no dog is served twice across the tiers", async () => {
+        const [{ dog }] = await Promise.all([
+          generateFakeUserWithDog(
+            { gender: Gender.MALE, preferredMaxDistance: 10 },
+            { latitude: 0, longitude: 0 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.05, longitude: 0.05 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.2, longitude: 0.2 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.MALE },
+            { latitude: 0.05, longitude: 0.05 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.MALE },
+            { latitude: 0.2, longitude: 0.2 },
+          ),
+        ]);
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        const ids = potentialMatches.map((match) => match.id);
+
+        // The male dog outside the radius is the one nothing reaches: the
+        // radius is only dropped for the opposite gender tier.
+        expect(ids).toHaveLength(3);
+        expect(new Set(ids).size).toEqual(ids.length);
+        expect(potentialMatches.map((match) => match.deckTier)).toEqual([
+          "primary",
+          "beyond_radius",
+          "same_gender",
+        ]);
+      });
+
+      test("a recent pass stays out of the deck", async () => {
+        const [{ dog }, { dog: passedDog }] = await Promise.all([
+          generateFakeUserWithDog({ gender: Gender.MALE }),
+          generateFakeUserWithDog({ gender: Gender.FEMALE }),
+        ]);
+
+        await SwipeService.createOrUpdateInterest(
+          dog.id,
+          passedDog.id,
+          SwipeType.NOT_INTERESTED,
+        );
+        await backdatePass(dog.id, passedDog.id, daysAgo(13));
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches).toHaveLength(0);
+      });
+
+      test("an old pass comes back, tagged and at the end", async () => {
+        const [{ dog }, { dog: passedDog }, { dog: freshDog }] =
+          await Promise.all([
+            generateFakeUserWithDog(
+              { gender: Gender.MALE },
+              { latitude: 0, longitude: 0 },
+            ),
+            generateFakeUserWithDog(
+              { gender: Gender.FEMALE },
+              { latitude: 0, longitude: 0 }, // co-located, so distance cannot be why it is last
+            ),
+            generateFakeUserWithDog(
+              { gender: Gender.FEMALE },
+              { latitude: 5, longitude: 5 },
+            ),
+          ]);
+
+        await SwipeService.createOrUpdateInterest(
+          dog.id,
+          passedDog.id,
+          SwipeType.NOT_INTERESTED,
+        );
+        await backdatePass(dog.id, passedDog.id, daysAgo(15));
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches.map((match) => match.id)).toEqual([
+          freshDog.id,
+          passedDog.id,
+        ]);
+        expect(potentialMatches[1]!.deckTier).toEqual("recycled_pass");
+      });
+
+      test("a like is never recycled", async () => {
+        const [{ dog }, { dog: likedDog }] = await Promise.all([
+          generateFakeUserWithDog({ gender: Gender.MALE }),
+          generateFakeUserWithDog({ gender: Gender.FEMALE }),
+        ]);
+
+        await SwipeService.createOrUpdateInterest(
+          dog.id,
+          likedDog.id,
+          SwipeType.INTERESTED,
+        );
+        await backdatePass(dog.id, likedDog.id, daysAgo(400));
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches).toHaveLength(0);
+      });
+
+      test("an active owner outranks a dormant one at the same distance", async () => {
+        const [{ dog }, { dog: dormantDog }, { dog: activeDog }] =
+          await Promise.all([
+            generateFakeUserWithDog(
+              { gender: Gender.MALE },
+              { latitude: 0, longitude: 0 },
+            ),
+            generateFakeUserWithDog(
+              { gender: Gender.FEMALE },
+              { latitude: 0, longitude: 0, lastActiveAt: daysAgo(90) },
+            ),
+            generateFakeUserWithDog(
+              { gender: Gender.FEMALE },
+              { latitude: 0, longitude: 0, lastActiveAt: daysAgo(1) },
+            ),
+          ]);
+
+        const potentialMatches = await SuggestionService.getPotentialMatches(
+          dog,
+          LIMIT,
+          [],
+        );
+
+        expect(potentialMatches.map((match) => match.id)).toEqual([
+          activeDog.id,
+          dormantDog.id,
+        ]);
+      });
+    });
+
+    describe("Deck Served", () => {
+      test("reports the tier split and the supply around the swiper", async () => {
+        const [{ dog }] = await Promise.all([
+          generateFakeUserWithDog(
+            { gender: Gender.MALE },
+            { latitude: 0, longitude: 0 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.05, longitude: 0.05 }, // roughly 8 km
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.15, longitude: 0.15 }, // roughly 24 km
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.MALE },
+            { latitude: 0.2, longitude: 0.2 }, // roughly 31 km
+          ),
+        ]);
+
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+
+        expect(lastDeckServed()).toEqual({
+          beyond_radius_count: 0,
+          empty: false,
+          primary_count: 2,
+          radius_km: null,
+          recycled_count: 0,
+          requested: LIMIT,
+          same_gender_count: 1,
+          served: 3,
+          supply_10km: 1,
+          supply_25km: 2,
+          supply_50km: 3,
+        });
+      });
+
+      test("an empty deck is reported as empty", async () => {
+        const { dog } = await generateFakeUserWithDog(
+          { gender: Gender.MALE, preferredMaxDistance: 5 },
+          { latitude: 0, longitude: 0 },
+        );
+
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+
+        expect(lastDeckServed()).toMatchObject({
+          empty: true,
+          radius_km: 5,
+          served: 0,
+          supply_10km: 0,
+          supply_25km: 0,
+          supply_50km: 0,
+        });
+      });
+
+      test("supply is unknown when the swiper has no location", async () => {
+        const [{ dog }] = await Promise.all([
+          generateFakeUserWithDog(
+            { gender: Gender.MALE },
+            { latitude: null, longitude: null },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.05, longitude: 0.05 },
+          ),
+        ]);
+
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+
+        expect(lastDeckServed()).toMatchObject({
+          served: 1,
+          supply_10km: null,
+          supply_25km: null,
+          supply_50km: null,
+        });
       });
     });
   });
