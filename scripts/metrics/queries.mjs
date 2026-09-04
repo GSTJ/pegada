@@ -56,6 +56,7 @@ export const CLIENT_LIBS = ["posthog-react-native", "web"];
  * day one of these is captured through a proxy that rewrites `$lib`.
  */
 export const SERVER_EVENTS = [
+  "Deck Served",
   "Image Moderation Result",
   "Match Created",
   "Message Sent",
