@@ -2,6 +2,7 @@ import prisma from "@pegada/database";
 import { breedData } from "@pegada/database/fixtures/breed-data";
 import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
 
+import { cadenceDecision, readCadence } from "./reengagement-cadence";
 import {
   isWithinSendWindow,
   localHourFromLongitude,
@@ -635,76 +636,39 @@ describe("ReengagementService.run", () => {
     expect(await prisma.notificationLog.count()).toBe(2);
   });
 
-  it("holds a user to one push a day across different kinds", async () => {
-    const { requester, responder } = await seedSilentMatch(25);
-
-    // A waiting like for the same user, so there is a second kind queued.
-    const { dog: admirer } = await seedUserWithDog(
-      { gender: "MALE" },
-      reachableUser({ pushToken: null }),
-    );
-    await seedInterest(
-      {
-        requesterId: admirer.id,
-        responderId: responder.id,
-        swipeType: "INTERESTED",
-        lastPositiveAt: hoursAgo(30),
-      },
-      hoursAgo(30),
-    );
+  it("holds a user to one push whatever else they qualify for", async () => {
+    const { responder } = await seedSilentMatch(25);
 
     expect((await ReengagementService.run(NOW)).sent).toBe(2);
 
-    // An hour later, still in the window: the match keys are claimed but the
-    // like key is not, and the daily cap is what has to stop it.
+    // A second silent match for the same person, so an hour later there is a
+    // candidate whose key has never been claimed. The cadence is the only
+    // thing left that can stop it.
+    const { dog: other } = await seedUserWithDog(
+      { gender: "MALE" },
+      reachableUser({ pushToken: null }),
+    );
+    const second = await prisma.match.create({
+      data: { requesterId: other.id, responderId: responder.id },
+    });
+    await prisma.match.update({
+      where: { id: second.id },
+      data: { createdAt: hoursAgo(25) },
+    });
+
     const summary = await ReengagementService.run(
       new Date(NOW.getTime() + 60 * 60 * 1000),
     );
 
     expect(summary.sent).toBe(0);
-    expect(summary.skippedCooldown).toBe(1);
-    expect(requester.id).not.toBe(responder.id);
+    expect(summary.suppressed.cooldown).toBe(1);
+    // The two from the first run and nothing since.
+    expect(
+      PushNotificationService.enqueuePushNotification,
+    ).toHaveBeenCalledTimes(2);
   });
 
-  it("does not let the daily cap drift out of the evening slot", async () => {
-    // 18:00 in Sao Paulo, the first of the two fallback hours.
-    const eveningSlot = new Date("2026-09-01T21:00:00.000Z");
-    const { requester } = await seedSilentMatch(25, eveningSlot);
-
-    // No coordinates, so this user only ever gets the evening slot.
-    await prisma.user.updateMany({
-      data: { latitude: null, longitude: null },
-    });
-
-    /** Nudged at yesterday's 19:00 slot, then run at today's 18:00 one. */
-    const runAfterPreviousNudge = async (hoursSince: number) => {
-      await prisma.notificationLog.deleteMany();
-      await prisma.notificationLog.create({
-        data: {
-          userId: requester.userId,
-          kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
-          dedupeKey: `yesterday:${hoursSince}`,
-          sentAt: hoursBefore(eveningSlot, hoursSince),
-        },
-      });
-
-      return ReengagementService.run(eveningSlot);
-    };
-
-    // An hour earlier in the evening than yesterday's send is exactly the
-    // case a 24 hour window pushed into the following day.
-    const onTime = await runAfterPreviousNudge(23);
-
-    expect(onTime.skippedCooldown).toBe(0);
-    expect(onTime.sent).toBe(2);
-
-    // Well inside the same day, still held back.
-    const tooSoon = await runAfterPreviousNudge(2);
-
-    expect(tooSoon.skippedCooldown).toBe(1);
-  });
-
-  it("falls through to the next kind once the cap expires", async () => {
+  it("falls through to the next kind once the schedule comes round", async () => {
     const { responder } = await seedSilentMatch(25);
 
     const { dog: admirer } = await seedUserWithDog(
@@ -723,10 +687,10 @@ describe("ReengagementService.run", () => {
 
     await ReengagementService.run(NOW);
 
-    // Age the log past the daily cap. The match nudge is still claimed, so a
-    // user whose best candidate is spent has to reach their next one rather
-    // than lose the day to it.
-    await prisma.notificationLog.updateMany({ data: { sentAt: hoursAgo(30) } });
+    // Age the log past the first unanswered gap. The match nudge is still
+    // claimed, so a user whose best candidate is spent has to reach their next
+    // one rather than lose the slot to it.
+    await prisma.notificationLog.updateMany({ data: { sentAt: daysAgo(11) } });
 
     const summary = await ReengagementService.run(NOW);
 
@@ -746,7 +710,7 @@ describe("ReengagementService.run", () => {
     const burst = await ReengagementService.run(AFTERNOON_BURST);
 
     expect(burst.sent).toBe(0);
-    expect(burst.skippedOutsideWindow).toBe(2);
+    expect(burst.suppressed.window).toBe(2);
     expect(
       PushNotificationService.enqueuePushNotification,
     ).not.toHaveBeenCalled();
@@ -759,15 +723,15 @@ describe("ReengagementService.run", () => {
     expect(evening.sent).toBe(2);
   });
 
-  it("nudges about waiting likes once a week, not once a day", async () => {
+  it("nudges about waiting likes on the schedule, not once a day", async () => {
     const { user, dog: liked } = await seedUserWithDog(
       { gender: "FEMALE" },
       reachableUser(),
     );
 
-    /** Seven admirers, oldest like first, all of them waiting over a day. */
+    /** Eleven admirers, oldest like first, all of them waiting over a day. */
     const likes: { id: string }[] = [];
-    for (const index of [0, 1, 2, 3, 4, 5, 6]) {
+    for (const index of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
       // oxlint-disable-next-line no-await-in-loop -- Fixture rows are created in order so their timestamps stay distinct.
       const { dog: admirer } = await seedUserWithDog(
         { gender: "MALE", name: `Admirer ${index}` },
@@ -780,9 +744,9 @@ describe("ReengagementService.run", () => {
           requesterId: admirer.id,
           responderId: liked.id,
           swipeType: "INTERESTED",
-          lastPositiveAt: hoursAgo(40 - index),
+          lastPositiveAt: hoursAgo(60 - index),
         },
-        hoursAgo(40 - index),
+        hoursAgo(60 - index),
       );
 
       likes.push(like);
@@ -796,8 +760,8 @@ describe("ReengagementService.run", () => {
      * The next evening slot, with the like that was announced taken off the
      * board. A swipe back does exactly this, and it is what moves the anchor
      * the dedupe key is built from: every one of these days offers a key that
-     * has never been claimed, so the weekly floor is the only thing left
-     * holding the nudge back.
+     * has never been claimed, so the cadence is the only thing left holding
+     * the nudge back.
      */
     const runOnDay = async (day: number) => {
       await prisma.interest.update({
@@ -810,7 +774,7 @@ describe("ReengagementService.run", () => {
       );
     };
 
-    for (const day of [1, 2, 3, 4, 5, 6]) {
+    for (const day of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       // oxlint-disable-next-line no-await-in-loop -- Each day has to see the log the previous day wrote.
       const summary = await runOnDay(day);
 
@@ -823,13 +787,11 @@ describe("ReengagementService.run", () => {
       }),
     ).resolves.toBe(1);
 
-    // A week on, the floor has passed and the likes still sitting there are
-    // worth one more nudge.
-    const nextWeek = await ReengagementService.run(
-      new Date(NOW.getTime() + 8 * 24 * 60 * 60 * 1000),
-    );
+    // Ten days on, the gap owed after one unanswered push has passed and the
+    // likes still sitting there are worth one more nudge.
+    const later = await runOnDay(10);
 
-    expect(nextWeek.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(1);
+    expect(later.byKind[REENGAGEMENT_KINDS.LIKES_WAITING]).toBe(1);
   });
 
   it("sends nothing outside the evening window", async () => {
@@ -838,7 +800,7 @@ describe("ReengagementService.run", () => {
     const summary = await ReengagementService.run(NIGHT);
 
     expect(summary.sent).toBe(0);
-    expect(summary.skippedOutsideWindow).toBe(2);
+    expect(summary.suppressed.window).toBe(2);
     expect(
       PushNotificationService.enqueuePushNotification,
     ).not.toHaveBeenCalled();
@@ -849,7 +811,7 @@ describe("ReengagementService.run", () => {
     const evening = await ReengagementService.run(NOW);
 
     expect(evening.sent).toBe(2);
-    expect(evening.skippedOutsideWindow).toBe(0);
+    expect(evening.suppressed.window).toBe(0);
     expect(
       PushNotificationService.enqueuePushNotification,
     ).toHaveBeenCalledTimes(2);
@@ -927,5 +889,367 @@ describe("ReengagementService.run", () => {
     expect(
       PushNotificationService.enqueuePushNotification,
     ).not.toHaveBeenCalled();
+  });
+});
+
+describe("reengagement cadence", () => {
+  /**
+   * The cadence reads two things: the log rows and `lastActiveAt`. Seeding
+   * both directly is what lets one test span six months without inventing six
+   * months of matches, and it is the same pair the service reads in
+   * production.
+   */
+  const seedDormantUser = async (lastActiveAt: Date | null) => {
+    const { user } = await seedUserWithDog(
+      { gender: "MALE" },
+      reachableUser({ lastActiveAt }),
+    );
+
+    return user;
+  };
+
+  let sequence = 0;
+
+  const seedPush = (
+    userId: string,
+    sentAt: Date,
+    overrides: { receiptError?: string; ticketError?: string } = {},
+  ) => {
+    sequence += 1;
+
+    return prisma.notificationLog.create({
+      data: {
+        userId,
+        kind: REENGAGEMENT_KINDS.NEW_DOGS_NEARBY,
+        dedupeKey: `seeded:${sequence}`,
+        sentAt,
+        ...overrides,
+      },
+    });
+  };
+
+  /** The decision the run would make, derived the way the run derives it. */
+  const decide = async (userId: string, now: Date) => {
+    const facts = await readCadence([userId], now);
+    const found = facts.get(userId);
+
+    if (!found) throw new Error(`no cadence row for ${userId}`);
+
+    return cadenceDecision(found, now);
+  };
+
+  const setLastActiveAt = (userId: string, lastActiveAt: Date | null) =>
+    prisma.user.update({ where: { id: userId }, data: { lastActiveAt } });
+
+  it("waits five days of dormancy before the first push", async () => {
+    const user = await seedDormantUser(daysAgo(4));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+
+    await setLastActiveAt(user.id, daysAgo(5));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("treats a user it has never seen as away", async () => {
+    // The column is only written for people who have made a request since it
+    // shipped, so null has to mean unknown rather than here.
+    const user = await seedDormantUser(null);
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("waits ten days after one unanswered push and twenty after two", async () => {
+    const user = await seedDormantUser(daysAgo(60));
+
+    await seedPush(user.id, daysAgo(9));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+
+    await prisma.notificationLog.updateMany({ data: { sentAt: daysAgo(10) } });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+
+    // Two unanswered now, and the same ten days is no longer enough.
+    await prisma.notificationLog.deleteMany();
+    await seedPush(user.id, daysAgo(50));
+    await seedPush(user.id, daysAgo(19));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+
+    await prisma.notificationLog.updateMany({
+      where: { sentAt: daysAgo(19) },
+      data: { sentAt: daysAgo(20) },
+    });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("stops for six months after three unanswered pushes", async () => {
+    const user = await seedDormantUser(daysAgo(120));
+
+    await seedPush(user.id, daysAgo(60));
+    await seedPush(user.id, daysAgo(50));
+    await seedPush(user.id, daysAgo(40));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "gave_up",
+    });
+
+    // Still nothing at four months, which is where a schedule that kept
+    // doubling would have started again.
+    const fourMonths = new Date(NOW.getTime() + 80 * 24 * 60 * 60 * 1000);
+
+    await expect(decide(user.id, fourMonths)).resolves.toEqual({
+      allowed: false,
+      reason: "gave_up",
+    });
+
+    // Six months after the last one, one more try.
+    const sixMonths = new Date(NOW.getTime() + 141 * 24 * 60 * 60 * 1000);
+
+    await expect(decide(user.id, sixMonths)).resolves.toEqual({
+      allowed: true,
+    });
+
+    // Which also goes unanswered, so it buys another six months.
+    await seedPush(user.id, sixMonths);
+
+    const later = new Date(sixMonths.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    await expect(decide(user.id, later)).resolves.toEqual({
+      allowed: false,
+      reason: "gave_up",
+    });
+  });
+
+  it("puts somebody who came back on the normal schedule again", async () => {
+    const user = await seedDormantUser(daysAgo(10));
+
+    // Pushed twenty days ago, back in the app ten days ago, quiet since.
+    await seedPush(user.id, daysAgo(20));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+
+    // Back three days ago instead, which is not dormant yet.
+    await setLastActiveAt(user.id, daysAgo(3));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+  });
+
+  it("resets to the first gap when a response follows the second push", async () => {
+    const user = await seedDormantUser(daysAgo(29));
+
+    await seedPush(user.id, daysAgo(40));
+    await seedPush(user.id, daysAgo(31));
+    // The first push after they came back, itself unanswered.
+    await seedPush(user.id, daysAgo(8));
+
+    // Three pushes on the row, but only one of them since they were last seen,
+    // so the wait is the first rung and not the six month pause.
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+
+    await prisma.notificationLog.updateMany({
+      where: { sentAt: daysAgo(8) },
+      data: { sentAt: daysAgo(10) },
+    });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("counts a response that lands after the next push went out", async () => {
+    const user = await seedDormantUser(daysAgo(11));
+
+    await seedPush(user.id, daysAgo(40));
+    await seedPush(user.id, daysAgo(9));
+
+    // Last seen before the second push, so that push is unanswered and the
+    // ten day gap is still running.
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+
+    // Same rows, but they turned up the day after that push. The streak is
+    // cleared even though the return was late.
+    await setLastActiveAt(user.id, daysAgo(8));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("never sends two pushes inside seven days", async () => {
+    const user = await seedDormantUser(daysAgo(5));
+
+    // Answered, dormant five days again, and the schedule would allow it. The
+    // hard floor is the only thing in the way.
+    await seedPush(user.id, daysAgo(6));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+
+    await prisma.notificationLog.updateMany({ data: { sentAt: daysAgo(8) } });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("never sends more than two pushes inside thirty days", async () => {
+    const user = await seedDormantUser(daysAgo(14));
+
+    await seedPush(user.id, daysAgo(25));
+    await seedPush(user.id, daysAgo(15));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "monthly_cap",
+    });
+
+    // The older of the two drops out of the window and the third is allowed.
+    await prisma.notificationLog.updateMany({
+      where: { sentAt: daysAgo(25) },
+      data: { sentAt: daysAgo(35) },
+    });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("stops pushing a token the device no longer answers for", async () => {
+    const user = await seedDormantUser(daysAgo(60));
+
+    const dead = await seedPush(user.id, daysAgo(30), {
+      ticketError: "DeviceNotRegistered",
+    });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "dead_token",
+    });
+
+    // The receipt says it half an hour later rather than the ticket saying it
+    // straight away, and it means the same thing.
+    await prisma.notificationLog.update({
+      where: { id: dead.id },
+      data: { ticketError: null, receiptError: "DeviceNotRegistered" },
+    });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "dead_token",
+    });
+  });
+
+  it("lets a reinstall back in after a dead token", async () => {
+    const user = await seedDormantUser(daysAgo(60));
+
+    await seedPush(user.id, daysAgo(30), {
+      receiptError: "DeviceNotRegistered",
+    });
+
+    // Registering a new token means opening the app, which is the same event
+    // that clears the streak. Without this the reinstall would be muted for
+    // good.
+    await setLastActiveAt(user.id, daysAgo(20));
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({ allowed: true });
+  });
+
+  it("counts every kind against the same schedule", async () => {
+    const user = await seedDormantUser(daysAgo(60));
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: user.id,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: "a-different-kind",
+        sentAt: daysAgo(3),
+      },
+    });
+
+    await expect(decide(user.id, NOW)).resolves.toEqual({
+      allowed: false,
+      reason: "cooldown",
+    });
+  });
+});
+
+describe("Reengagement Push Suppressed", () => {
+  /** One hour past {@link NOW}, so 19:00 local: the close of the window. */
+  const WINDOW_CLOSE = new Date(NOW.getTime() + 60 * 60 * 1000);
+  /** Two hours past, so 20:00 local: the first hour the slot is spent. */
+  const AFTER_WINDOW = new Date(NOW.getTime() + 2 * 60 * 60 * 1000);
+
+  const suppressedCalls = () =>
+    observability.capture.mock.calls.filter(
+      ([event]) => event === "Reengagement Push Suppressed",
+    );
+
+  it("reports a cadence decision once, at the close of the window", async () => {
+    const { requester } = await seedSilentMatch(25);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: requester.userId,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: "yesterday",
+        sentAt: hoursAgo(2),
+      },
+    });
+
+    // 18:00 local. The push is held back and counted, but the day is not over
+    // so nothing is reported yet.
+    const early = await ReengagementService.run(NOW);
+
+    expect(early.suppressed.cooldown).toBe(1);
+    expect(suppressedCalls()).toHaveLength(0);
+
+    const close = await ReengagementService.run(WINDOW_CLOSE);
+
+    expect(close.suppressed.cooldown).toBe(1);
+    expect(suppressedCalls()).toEqual([
+      [
+        "Reengagement Push Suppressed",
+        expect.objectContaining({
+          kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+          reason: "cooldown",
+        }),
+      ],
+    ]);
+  });
+
+  it("reports a missed window at the hour after it closed", async () => {
+    await seedSilentMatch(25, AFTER_WINDOW);
+
+    const spent = await ReengagementService.run(AFTER_WINDOW);
+
+    expect(spent.sent).toBe(0);
+    expect(spent.suppressed.window).toBe(2);
+    expect(suppressedCalls()).toHaveLength(2);
+    expect(suppressedCalls()[0]?.[1]).toMatchObject({ reason: "window" });
+
+    // The middle of the night is the same suppression and not worth a second
+    // row for the same person on the same day.
+    const night = await ReengagementService.run(
+      new Date(AFTER_WINDOW.getTime() + 7 * 60 * 60 * 1000),
+    );
+
+    expect(night.suppressed.window).toBe(2);
+    expect(suppressedCalls()).toHaveLength(2);
   });
 });
