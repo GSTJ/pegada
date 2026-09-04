@@ -19,6 +19,7 @@
     "test:security": "node scripts/test-image-size-patch.cjs",
     "test:metrics": "node --test scripts/metrics/*.test.mjs",
     "metrics:daily": "node scripts/metrics/daily.mjs",
+    "metrics:events-audit": "node scripts/metrics/events-audit.mjs",
     "build": "dotenv -e .env.dev -- turbo build",
     "lint": "oxlint --report-unused-disable-directives",
     "lint:fix": "oxlint --report-unused-disable-directives --fix",
