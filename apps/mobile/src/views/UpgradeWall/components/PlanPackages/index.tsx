@@ -15,6 +15,7 @@ import { styles as planPackagesStyles } from "@/views/UpgradeWall/components/Pla
 
 import { PlanCard } from "./plan-card";
 import { getYearlySavingPercent } from "./saving-percent";
+import { sortPlanPackages } from "./sort-packages";
 
 type OfferingsProps = {
   selectedPackage: PurchasesPackage | null | undefined;
@@ -42,10 +43,7 @@ const PlanPackages: React.FC<OfferingsProps> = ({
   }, [isError, router, t]);
 
   const packageList = offeringsData
-    ? [...offeringsData.availablePackages].sort(
-        // Highest price first
-        (a, b) => b.product.price - a.product.price,
-      )
+    ? sortPlanPackages(offeringsData.availablePackages)
     : [];
 
   const annualPackage =
@@ -56,8 +54,12 @@ const PlanPackages: React.FC<OfferingsProps> = ({
     offeringsData?.monthly ??
     packageList.find((pkg) => pkg.packageType === "MONTHLY");
 
+  const weeklyPackage =
+    offeringsData?.weekly ??
+    packageList.find((pkg) => pkg.packageType === "WEEKLY");
+
   // Yearly first: preselect the annual package when the offering has one, and
-  // otherwise fall back to the most expensive package (the previous default).
+  // otherwise fall back to the first row in the list.
   // Both are stable references from the offerings query, so the effect below
   // does not re-run on every render even though `packageList` is rebuilt.
   const defaultPackage = annualPackage ?? packageList[0];
@@ -68,11 +70,12 @@ const PlanPackages: React.FC<OfferingsProps> = ({
     }
   }, [defaultPackage, selectedPackage, setSelectedPackage]);
 
-  // What a year of the monthly plan would cost against the yearly price.
-  const yearlySavingPercent = getYearlySavingPercent(
-    monthlyPackage?.product.price,
-    annualPackage?.product.price,
-  );
+  // What a year of paying as you go would cost against the yearly price.
+  const yearlySavingPercent = getYearlySavingPercent({
+    monthlyPrice: monthlyPackage?.product.price,
+    weeklyPrice: weeklyPackage?.product.price,
+    yearlyPrice: annualPackage?.product.price,
+  });
 
   return (
     <View style={planPackagesStyles.container}>

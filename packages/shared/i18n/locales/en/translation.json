@@ -295,6 +295,7 @@
     "W": "wk",
     "monthly": "Monthly",
     "yearly": "Yearly",
+    "weekly": "Weekly",
     "save": "Save {{percent}}%",
     "benefits": {
       "priorityQueue": "Priority on the Queue",
@@ -319,7 +320,8 @@
       "subscribe": "Get Premium",
       "price": "{{price}}, cancel anytime",
       "priceMonthly": "{{price}} per month, cancel anytime",
-      "priceYearly": "{{price}} per year, cancel anytime"
+      "priceYearly": "{{price}} per year, cancel anytime",
+      "priceWeekly": "{{price}} per week, cancel anytime"
     }
   },
   "links": {

@@ -330,6 +330,7 @@
     "W": "semana",
     "monthly": "Mensal",
     "yearly": "Anual",
+    "weekly": "Semanal",
     "save": "Economize {{percent}}%",
     "benefits": {
       "priorityQueue": "Prioridade na fila",
@@ -354,7 +355,8 @@
       "subscribe": "Assinar Premium",
       "price": "{{price}}, cancele quando quiser",
       "priceMonthly": "{{price}} por mês, cancele quando quiser",
-      "priceYearly": "{{price}} por ano, cancele quando quiser"
+      "priceYearly": "{{price}} por ano, cancele quando quiser",
+      "priceWeekly": "{{price}} por semana, cancele quando quiser"
     }
   },
   "networkBoundary": {

@@ -53,6 +53,8 @@ const usePriceLine = (offering: PurchasesPackage | null | undefined) => {
       return t("plans.upgradeWall.priceYearly", { price });
     case "MONTHLY":
       return t("plans.upgradeWall.priceMonthly", { price });
+    case "WEEKLY":
+      return t("plans.upgradeWall.priceWeekly", { price });
     default:
       return t("plans.upgradeWall.price", { price });
   }
