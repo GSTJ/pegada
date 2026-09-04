@@ -248,14 +248,29 @@ export class ImageModerationService {
         abortSignal: AbortSignal.timeout(TIMEOUT_MS),
       });
 
+      // The SDK is asked for a typed object, but a model can still answer with
+      // prose or half a field, and the types here say otherwise. Re-checking the
+      // shape turns that into the `error` verdict the readout can count instead
+      // of a result with an empty verdict in it.
+      const answer = moderationSchema.safeParse(result.output);
+      if (!answer.success) {
+        sendError(
+          new Error("Image moderation answer did not match the schema"),
+          {
+            image_moderation_model: setting,
+          },
+        );
+        return failure("invalid_output");
+      }
+
       const inputTokens = finiteOrNull(result.usage?.inputTokens);
       const outputTokens = finiteOrNull(result.usage?.outputTokens);
 
       return {
-        verdict: result.output.verdict,
-        score: result.output.score,
-        reason: result.output.reason,
-        containsDog: result.output.containsDog,
+        verdict: answer.data.verdict,
+        score: answer.data.score,
+        reason: answer.data.reason,
+        containsDog: answer.data.containsDog,
         model: setting,
         latencyMs: Date.now() - startedAt,
         costUsdEstimate: estimateCostUsd({

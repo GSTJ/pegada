@@ -6,6 +6,7 @@ import { IMAGE_STATUS } from "@pegada/shared/schemas/dog-schema";
 import { encode as encodeBlurhash } from "blurhash";
 import sharp from "sharp";
 
+import { sendError } from "../errors/errors";
 import { config } from "../shared/config";
 import { FEATURES, FlagService } from "./flag-service";
 import { ImageModerationService } from "./image-moderation-service";
@@ -34,11 +35,11 @@ export class ImageProcessingService {
   /**
    * Decide whether a freshly uploaded photo can be published.
    *
-   * Two independent switches have to agree before a provider is called: the
-   * `IMAGE_MODERATION_MODE` environment variable, which is a deploy-time
-   * decision about how far the feature is turned up, and the `profanity_check`
-   * PostHog flag, which is the runtime kill switch. Either one off means no
-   * call, no cost, and the same APPROVED the old path produced.
+   * `IMAGE_MODERATION_MODE` is the only switch. `off` calls nobody and costs
+   * nothing, `shadow` buys a verdict and records it without letting it change
+   * the status, and `enforce` is the one mode allowed to reject. Turning the
+   * feature down is a change of that variable, which is also the level the
+   * cost lives at.
    *
    * An `error` verdict approves in every mode: a provider outage must not be
    * able to hold back everyone's photos at once.
@@ -59,13 +60,49 @@ export class ImageProcessingService {
 
     if (mode === "off") return skipped;
 
-    const isModerationEnabled = await FlagService.isFeatureEnabled({
-      feature: FEATURES.PROFANITY_CHECK,
-      defaultValue: false,
-    });
+    const startedAt = Date.now();
 
-    if (!isModerationEnabled) return skipped;
+    try {
+      return await ImageProcessingService.runModeration({
+        arrayBuffer,
+        imageId,
+        mode,
+      });
+    } catch (error) {
+      // The moderation service is written never to throw, so anything landing
+      // here came from below it, such as the verdict lookup losing the
+      // database. Publishing is still the right answer, and reporting it as an
+      // `error` verdict keeps the failure in the same chart as every other one
+      // instead of dropping it.
+      sendError(error, { image_id: imageId });
 
+      return {
+        status: IMAGE_STATUS.APPROVED,
+        result: {
+          verdict: "error",
+          score: null,
+          reason: "unexpected_error",
+          containsDog: null,
+          model: config.IMAGE_MODERATION_MODEL,
+          latencyMs: Date.now() - startedAt,
+          costUsdEstimate: null,
+          inputTokens: null,
+          outputTokens: null,
+        },
+        mode,
+      };
+    }
+  };
+
+  private static runModeration = async ({
+    arrayBuffer,
+    imageId,
+    mode,
+  }: {
+    arrayBuffer: ArrayBuffer;
+    imageId: string;
+    mode: ImageModerationMode;
+  }): Promise<ImageModerationOutcome> => {
     // The queue delivers at least once, and the job can also be retried after
     // the write that follows this call fails. A row that already carries a
     // verdict has already been paid for, so the redelivery re-derives the
