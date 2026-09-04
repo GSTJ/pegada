@@ -121,7 +121,7 @@ const FALLBACK_OFFSET_HOURS = -3;
  * The 200 the incident sent was this cap being hit, so a backlog does exist.
  * Raise this before widening the window if the queue stops draining.
  */
-const MAX_CANDIDATES_PER_QUERY = 500;
+export const MAX_CANDIDATES_PER_QUERY = 500;
 const MAX_PUSHES_PER_RUN = 200;
 
 const HOUR_MS = 60 * 60 * 1000;
