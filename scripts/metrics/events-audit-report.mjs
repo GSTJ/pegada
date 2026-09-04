@@ -463,6 +463,7 @@ function exceptionSection(exceptions) {
   const rows = exceptions.map((row) => [
     codeCell(row.exception_type),
     codeCell(row.message),
+    codeCell(row.frame) || "n/a",
     number(row.total),
     number(row.people),
     libLabel(row.libs),
@@ -471,10 +472,18 @@ function exceptionSection(exceptions) {
   return [
     "### 5. Exceptions",
     "",
-    `The ${number(MAX_EXCEPTION_GROUPS)} busiest \`$exception\` groups in the window, by exception type and message. Messages are cut at ${number(EXCEPTION_MESSAGE_LENGTH)} characters, and the grouping is on the cut value, so two failures that differ only in a trailing id count as one. App version is the build the phone was running, and \`n/a\` on anything the server threw.`,
+    `The ${number(MAX_EXCEPTION_GROUPS)} busiest \`$exception\` groups in the window, by exception type and message. Messages are cut at ${number(EXCEPTION_MESSAGE_LENGTH)} characters, and the grouping is on the cut value, so two failures that differ only in a trailing id count as one. Frame is the line that threw, on one of the events in the group, and \`n/a\` when the exception arrived without a stack. App version is the build the phone was running, and \`n/a\` on anything the server threw.`,
     "",
     table(
-      ["Type", "Message", "Events", "People", "Library", "App version"],
+      [
+        "Type",
+        "Message",
+        "Frame",
+        "Events",
+        "People",
+        "Library",
+        "App version",
+      ],
       rows,
       "No exceptions in the window.",
     ),

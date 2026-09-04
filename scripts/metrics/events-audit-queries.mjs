@@ -199,6 +199,82 @@ export const MAX_EXCEPTION_GROUPS = 15;
 export const EXCEPTION_MESSAGE_LENGTH = 120;
 
 /**
+ * The property both SDKs in this repo put an exception on.
+ *
+ * posthog-react-native and posthog-node send an array of exception objects
+ * here, so it arrives as a JSON string and has to be read with the ClickHouse
+ * JSON functions rather than with property dot access. HogQL allows at most
+ * five keys per `JSONExtract` call, which is why the paths below step through
+ * the list, the exception and the frame instead of going in one hop.
+ */
+const EXCEPTION_LIST_PROPERTY = "properties.$exception_list";
+
+/** The exception that was thrown. Anything after it is a cause it wrapped. */
+const THROWN_EXCEPTION = `JSONExtractRaw(${EXCEPTION_LIST_PROPERTY}, 1)`;
+
+/**
+ * The frame that threw.
+ *
+ * Last rather than first: the SDK reverses the parsed stack before it sends
+ * it, so the list runs from the entry point every crash shares to the line the
+ * fault is actually on.
+ */
+const THROWN_FRAME = `JSONExtractRaw(${THROWN_EXCEPTION}, 'stacktrace', 'frames', -1)`;
+
+/** An event property as a string, or nothing when it is not there. */
+function propertyString(key) {
+  return `nullIf(toString(properties.${key}), '')`;
+}
+
+/**
+ * A string out of a JSON value, or nothing when it is missing.
+ *
+ * `?` counts as missing: it is what symbolication writes for a frame it could
+ * not resolve, and a table of question marks is worse than a table of blanks.
+ */
+function jsonString(json, ...path) {
+  const keys = path.map(quote).join(", ");
+  return `nullIf(nullIf(JSONExtractString(${json}, ${keys}), ''), '?')`;
+}
+
+/** The first of these with anything in it. */
+function firstOf(...expressions) {
+  return `coalesce(${expressions.join(", ")})`;
+}
+
+/**
+ * The line that threw, as `function in file`.
+ *
+ * A frame is read three ways because it depends on how far PostHog got with
+ * it. A symbolicated frame has `resolved_name` and `source`; an unsymbolicated
+ * one keeps what the SDK sent under `junk_drawer.raw_frame`; an exception that
+ * never went through error tracking still has the SDK's own `function` and
+ * `filename`. `mangled_name` is last because a minified name is better than an
+ * empty cell and worse than everything above it.
+ *
+ * The two halves are joined through an array with the blanks dropped rather
+ * than concatenated, so a frame with only a file still reads and a frame with
+ * neither collapses to nothing instead of to a stray separator.
+ */
+function topFrameExpression() {
+  const rawFrame = `JSONExtractRaw(${THROWN_FRAME}, 'junk_drawer', 'raw_frame')`;
+  const name = firstOf(
+    jsonString(THROWN_FRAME, "resolved_name"),
+    jsonString(rawFrame, "function"),
+    jsonString(THROWN_FRAME, "function"),
+    jsonString(THROWN_FRAME, "mangled_name"),
+    quote(""),
+  );
+  const file = firstOf(
+    jsonString(THROWN_FRAME, "source"),
+    jsonString(rawFrame, "filename"),
+    jsonString(THROWN_FRAME, "filename"),
+    quote(""),
+  );
+  return `arrayStringConcat(arrayFilter(part -> part != '', [${name}, ${file}]), ' in ')`;
+}
+
+/**
  * The busiest exception groups in the window, one row per type and message.
  *
  * `$exception` is the only autocapture event that is a bug report rather than a
@@ -213,9 +289,17 @@ export const EXCEPTION_MESSAGE_LENGTH = 120;
  * a trailing id are one fault, and counting them apart is how a fault that is
  * happening constantly reads as fifteen rare ones.
  *
- * `$exception_type` and `$exception_message` are what PostHog's error tracking
- * writes. A client that sent an exception without them lands in `unknown`,
- * which is a group worth seeing rather than a row worth dropping.
+ * The name and the message come out of `$exception_list`, which is what both
+ * SDKs in this repo actually send: an array of exceptions, each one carrying
+ * `type`, `value` and a `stacktrace`. `$exception_type` and `$exception_message`
+ * are read as a fallback because PostHog's own error tracking writes them and
+ * anything sent by hand may still carry them. Reading only the flat pair is how
+ * every row in the first version of this table said `unknown`.
+ *
+ * The frame is collected inside the group rather than grouped on, for the same
+ * reason the libraries are: one fault reached by two paths is still one fault.
+ * `max` picks one of them and prefers a real one, since a blank sorts below
+ * every name.
  */
 export function buildExceptionGroupsQuery(
   window,
@@ -223,13 +307,23 @@ export function buildExceptionGroupsQuery(
 ) {
   const lib = `ifNull(nullIf(toString(properties.$lib), ''), 'unknown')`;
   const version = `ifNull(nullIf(toString(properties.${APP_VERSION_PROPERTY}), ''), 'unknown')`;
-  const type = `ifNull(nullIf(toString(properties.$exception_type), ''), 'unknown')`;
-  const message = `ifNull(nullIf(toString(properties.$exception_message), ''), 'unknown')`;
+  const type = firstOf(
+    jsonString(THROWN_EXCEPTION, "type"),
+    propertyString("$exception_type"),
+    quote("unknown"),
+  );
+  const message = firstOf(
+    jsonString(THROWN_EXCEPTION, "value"),
+    propertyString("$exception_message"),
+    quote("unknown"),
+  );
+  const frame = topFrameExpression();
   const clientLibs = CLIENT_LIBS.map(quote).join(", ");
   return [
     "SELECT",
     `  ${type} AS exception_type,`,
     `  substring(${message}, 1, ${EXCEPTION_MESSAGE_LENGTH}) AS message,`,
+    `  substring(max(${frame}), 1, ${EXCEPTION_MESSAGE_LENGTH}) AS frame,`,
     "  count() AS total,",
     "  count(DISTINCT person_id) AS people,",
     `  arrayStringConcat(arraySort(groupUniqArray(${lib})), ', ') AS libs,`,
