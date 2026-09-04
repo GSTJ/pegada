@@ -1,5 +1,8 @@
+import type { ServerEventProperties } from "@pegada/shared/analytics/events";
+
 import { redirect } from "next/navigation";
 
+import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
 import { getServerClient } from "magic-observability/next";
 
 import {
@@ -25,6 +28,11 @@ import {
  * `https://www.pegada.app/store` is the canonical form. The old
  * `share.pegada.app` host has no DNS record behind it (#211), so anything
  * still pointing there is a dead link, not a slower one.
+ *
+ * The event it sends is in the shared catalogue, and `satisfies` below is what
+ * keeps the payload and the catalogue entry the same shape. The events audit
+ * reads that catalogue, so a name only this file knew about read as an event
+ * nobody could account for.
  */
 export const GET = (request: Request) => {
   const userAgent = request.headers.get("user-agent") ?? "";
@@ -41,14 +49,14 @@ export const GET = (request: Request) => {
     host: posthogHost(),
     environment: deployEnvironment(),
     release: deployRelease(),
-  }).capture("Store Redirect", {
+  }).capture(ANALYTICS_EVENTS.STORE_REDIRECT, {
     store: target,
     ref: campaign.ref ?? null,
     dogId: campaign.dog ?? null,
     utm_source: campaign.utm_source ?? null,
     utm_medium: campaign.utm_medium ?? null,
     utm_campaign: campaign.utm_campaign ?? null,
-  });
+  } satisfies ServerEventProperties[typeof ANALYTICS_EVENTS.STORE_REDIRECT]);
 
   // Desktop has no install to send anyone to. The landing page already shows
   // both store badges, so it is the fallback, with the campaign still attached.

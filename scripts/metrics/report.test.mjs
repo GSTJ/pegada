@@ -344,6 +344,17 @@ test("the coverage note lists every event the store build cannot send", () => {
   }
 });
 
+test("the coverage note does not excuse an event 1.6.2 is really sending", () => {
+  const note = coverageNote();
+  for (const event of ["Swipe", "Paywall Viewed", "Empty Deck Shown"]) {
+    assert.equal(
+      note.includes(event),
+      false,
+      `${event} arrives from 1.6.2, so the note must not blame the build`,
+    );
+  }
+});
+
 test("the coverage note says so plainly once the store build sends everything", () => {
   const note = coverageNote({ missingEvents: [], version: "1.8.0" });
   assert.match(note, /build 1\.8\.0 emits every event in this readout/);

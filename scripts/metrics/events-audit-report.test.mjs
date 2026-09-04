@@ -5,6 +5,7 @@ import {
   COMMENT_MARKER,
   buildFindings,
   buildReport,
+  codeCell,
   summarise,
 } from "./events-audit-report.mjs";
 
@@ -184,6 +185,47 @@ export const PROPERTY_KEYS = [
   { event: "Reengagement Push Sent", key: "kind", total: 80 },
 ];
 
+/**
+ * Exception groups, one of each shape the table has to survive: an app crash
+ * with a version behind it, a server throw with none, a message carrying the
+ * two characters that break a markdown table, and a client that sent no type
+ * at all.
+ */
+export const EXCEPTIONS = [
+  {
+    app_versions: "1.6.2, 1.7.2",
+    exception_type: "TypeError",
+    libs: "posthog-react-native",
+    message: "undefined is not an object (evaluating 'dog.photos[0].url')",
+    people: 14,
+    total: 31,
+  },
+  {
+    app_versions: "",
+    exception_type: "PrismaClientKnownRequestError",
+    libs: "posthog-node",
+    message: "Timed out fetching a new connection from the connection pool",
+    people: 6,
+    total: 12,
+  },
+  {
+    app_versions: "1.6.2",
+    exception_type: "Error",
+    libs: "posthog-node, posthog-react-native",
+    message: "Request failed | GET /api/trpc/dog.list\nstatus `500`",
+    people: 3,
+    total: 5,
+  },
+  {
+    app_versions: "unknown",
+    exception_type: "",
+    libs: "",
+    message: "",
+    people: 1,
+    total: 1,
+  },
+];
+
 export const FUNNEL_EVENTS = [
   { name: "Paywall Viewed", target: "Paywall Viewed" },
   { name: "Swipe", target: "Swipe" },
@@ -195,6 +237,7 @@ export const FUNNEL_EVENTS = [
 
 export const FIXTURE = {
   catalogue: CATALOGUE,
+  exceptions: EXCEPTIONS,
   funnelEvents: FUNNEL_EVENTS,
   generatedAt: new Date("2026-09-04T12:03:00.000Z"),
   propertyKeys: PROPERTY_KEYS,
@@ -328,7 +371,7 @@ test("a clean window says so instead of printing an empty list", () => {
   assert.deepEqual(findings, ["Nothing to flag in this window."]);
 });
 
-test("the body carries the marker and all four sections", () => {
+test("the body carries the marker and every section", () => {
   const body = buildReport(FIXTURE);
   assert.ok(body.startsWith(COMMENT_MARKER));
   assert.match(body, /## Events audit/);
@@ -336,6 +379,7 @@ test("the body carries the marker and all four sections", () => {
   assert.match(body, /### 1\. Every event seen/);
   assert.match(body, /### 2\. Catalogue coverage/);
   assert.match(body, /### 3\. Property sanity on the funnel events/);
+  assert.match(body, /### 5\. Exceptions/);
   assert.match(
     body,
     /Seven days, 2026-08-28 12:00 UTC to 2026-09-04 12:00 UTC/,
@@ -404,5 +448,61 @@ test("an event the property query never covered is not called incomplete", () =>
   assert.equal(
     findings.some((line) => line.includes("is missing required properties")),
     false,
+  );
+});
+
+test("the exception table reports counts, library and app version", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(
+    body,
+    /\| Type \| Message \| Events \| People \| Library \| App version \|/,
+  );
+  assert.match(
+    body,
+    /\| `TypeError` \| `undefined is not an object \(evaluating 'dog\.photos\[0\]\.url'\)` \| 31 \| 14 \| mobile \| `1\.6\.2, 1\.7\.2` \|/,
+  );
+});
+
+test("a server exception is labelled server and has no app version", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(
+    body,
+    /\| `PrismaClientKnownRequestError` \| .+ \| 12 \| 6 \| server \| n\/a \|/,
+  );
+});
+
+test("an exception seen from both sides names both", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(body, /\| 5 \| 3 \| server, mobile \| `1\.6\.2` \|/);
+});
+
+test("a message cannot break the row it sits in", () => {
+  const body = buildReport(FIXTURE);
+  const row = body.split("\n").find((line) => line.includes("Request failed"));
+  // Six columns means seven pipes. A raw pipe or a newline in the message
+  // would silently shift every column after it.
+  assert.equal(row.split(/(?<!\\)\|/u).length - 1, 7);
+  assert.equal(row.includes("\n"), false);
+  assert.match(row, /Request failed \\\| GET/);
+});
+
+test("a code cell survives backticks, pipes and blank values", () => {
+  assert.equal(codeCell("plain"), "`plain`");
+  assert.equal(codeCell("a | b"), "`a \\| b`");
+  assert.equal(codeCell("`quoted`"), "`` `quoted` ``");
+  assert.equal(codeCell(""), "");
+  assert.equal(codeCell(null), "");
+});
+
+test("an exception with nothing on it still gets a row", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(body, /\| 1 \| 1 \| unknown \| `unknown` \|/);
+});
+
+test("no exceptions in the window says so", () => {
+  const body = buildReport({ ...FIXTURE, exceptions: [] });
+  assert.match(
+    body,
+    /### 5\. Exceptions\n\n.+\n\nNo exceptions in the window\./s,
   );
 });

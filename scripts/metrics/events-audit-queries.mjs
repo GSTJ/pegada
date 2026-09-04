@@ -185,3 +185,60 @@ export function resolveFunnelEvents(seenEvents, targets = FUNNEL_TARGETS) {
     return { name: alias ?? target.name, target: target.name };
   });
 }
+
+/** How many exception groups the audit prints before it stops. */
+export const MAX_EXCEPTION_GROUPS = 15;
+
+/**
+ * How much of an exception message survives into the table.
+ *
+ * Long enough to tell two failures of the same type apart, short enough that a
+ * stack trace pasted into the message does not push every other column off the
+ * side of the comment.
+ */
+export const EXCEPTION_MESSAGE_LENGTH = 120;
+
+/**
+ * The busiest exception groups in the window, one row per type and message.
+ *
+ * `$exception` is the only autocapture event that is a bug report rather than a
+ * measurement, and it arrives from both the app and the API, so the group alone
+ * does not say who is broken. `libs` and `app_versions` are collected inside the
+ * group instead of being grouped on: splitting a single failure across a row per
+ * library would push the real leader down the table and hide that the same
+ * exception is happening in two places.
+ *
+ * The message is truncated in ClickHouse rather than in the renderer so the
+ * grouping itself is on the truncated value. Two exceptions that differ only in
+ * a trailing id are one fault, and counting them apart is how a fault that is
+ * happening constantly reads as fifteen rare ones.
+ *
+ * `$exception_type` and `$exception_message` are what PostHog's error tracking
+ * writes. A client that sent an exception without them lands in `unknown`,
+ * which is a group worth seeing rather than a row worth dropping.
+ */
+export function buildExceptionGroupsQuery(
+  window,
+  limit = MAX_EXCEPTION_GROUPS,
+) {
+  const lib = `ifNull(nullIf(toString(properties.$lib), ''), 'unknown')`;
+  const version = `ifNull(nullIf(toString(properties.${APP_VERSION_PROPERTY}), ''), 'unknown')`;
+  const type = `ifNull(nullIf(toString(properties.$exception_type), ''), 'unknown')`;
+  const message = `ifNull(nullIf(toString(properties.$exception_message), ''), 'unknown')`;
+  const clientLibs = CLIENT_LIBS.map(quote).join(", ");
+  return [
+    "SELECT",
+    `  ${type} AS exception_type,`,
+    `  substring(${message}, 1, ${EXCEPTION_MESSAGE_LENGTH}) AS message,`,
+    "  count() AS total,",
+    "  count(DISTINCT person_id) AS people,",
+    `  arrayStringConcat(arraySort(groupUniqArray(${lib})), ', ') AS libs,`,
+    `  arrayStringConcat(arraySort(groupUniqArrayIf(${version}, ${lib} IN (${clientLibs}))), ', ') AS app_versions`,
+    "FROM events",
+    `WHERE ${windowFilter(window)}`,
+    "  AND event = '$exception'",
+    "GROUP BY exception_type, message",
+    "ORDER BY total DESC, exception_type, message",
+    `LIMIT ${limit}`,
+  ].join("\n");
+}

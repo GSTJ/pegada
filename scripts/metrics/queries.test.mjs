@@ -230,10 +230,17 @@ test("the coverage list holds real event names and no server event", () => {
   assert.ok(STORE_BUILD_COVERAGE.missingEvents.length > 0);
 });
 
+// Every name here has arrived from an `$app_version` of 1.6.2 in the events
+// audit on issue #188. Excusing one of them in the coverage note would tell a
+// reader that a row is zero for reach reasons when it is really zero because
+// nobody did the thing.
 test("the coverage list leaves out the events the store build does send", () => {
   for (const event of [
     EVENTS.CREATE_DOG_PROFILE,
+    EVENTS.EMPTY_DECK_SHOWN,
     EVENTS.NEW_MATCH,
+    EVENTS.PAYWALL_VIEWED,
+    EVENTS.SWIPE,
     EVENTS.UPGRADE,
   ]) {
     assert.equal(STORE_BUILD_COVERAGE.missingEvents.includes(event), false);
