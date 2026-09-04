@@ -19,6 +19,7 @@ import { upsertMarkedComment } from "./github.mjs";
 import { queryHogql } from "./posthog.mjs";
 import {
   BREAKDOWNS,
+  buildActiveUsersByCityQuery,
   buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
@@ -73,6 +74,7 @@ export async function runDailyMetrics({
 
   const [
     activeUsers,
+    activeUsersByCity,
     activeUsersByVersion,
     totals,
     pushReturnsCurrent,
@@ -80,6 +82,10 @@ export async function runDailyMetrics({
     ...breakdownRows
   ] = await Promise.all([
     run("pegada daily metrics: active users", buildActiveUsersQuery(windows)),
+    run(
+      "pegada daily metrics: active users by city",
+      buildActiveUsersByCityQuery(windows),
+    ),
     run(
       "pegada daily metrics: active users by app version",
       buildActiveUsersByVersionQuery(windows),
@@ -110,6 +116,7 @@ export async function runDailyMetrics({
 
   const body = buildReport({
     activeUsers,
+    activeUsersByCity,
     activeUsersByVersion,
     breakdowns,
     generatedAt: now,

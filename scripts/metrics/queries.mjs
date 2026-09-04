@@ -298,6 +298,73 @@ export function buildActiveUsersByVersionQuery(windows) {
 }
 
 /**
+ * How many cities the readout prints. Enough to see where the people are
+ * without turning the comment into a directory of every town one person has
+ * ever opened the app in.
+ */
+export const CITY_TABLE_ROWS = 10;
+
+/** The bucket a person the readout cannot place lands in. */
+export const CITY_UNKNOWN_BUCKET = "unknown";
+
+/**
+ * Where a person is, in the order the answer can be trusted.
+ *
+ * `person.properties.city` is the real one: the app reverse geocodes the device
+ * location once the person allows it and sends the result on identify, so it is
+ * the city they told us they are in. Being a person property rather than an
+ * event property, it is their current city on every one of their events, which
+ * is what keeps a person with a city in a single row.
+ *
+ * `$geoip_city_name` is PostHog's own guess from the request IP. Nothing in the
+ * app turns GeoIP off, so it is present for everyone, but it is an IP lookup: a
+ * carrier that routes through another state, or a VPN, moves the person. It is
+ * the fallback, never the first answer.
+ *
+ * `$geoip_subdivision_1_code` carries the state and is deliberately left out.
+ * Appending it would split one city between the people whose city came from the
+ * app and the people whose city came from an IP, and a state that disagrees
+ * with the city the person chose is worse than no state at all.
+ *
+ * Somebody who declined location is identified with a literal null, which
+ * arrives as the string `null` rather than as an absent property, so it is ruled
+ * out alongside the empty string.
+ */
+function cityExpression() {
+  const stated = "nullIf(nullIf(toString(person.properties.city), ''), 'null')";
+  const geoip = "nullIf(toString(properties.$geoip_city_name), '')";
+  return `coalesce(${stated}, ${geoip}, ${quote(CITY_UNKNOWN_BUCKET)})`;
+}
+
+/**
+ * The active users of {@link buildActiveUsersQuery}, split by city.
+ *
+ * Client events only, the same rule as the headline, so the number under a city
+ * counts people who used the product there rather than rows the API wrote about
+ * them.
+ *
+ * Every city comes back and the formatter keeps the top `CITY_TABLE_ROWS`. That
+ * is deliberate: the `unknown` bucket has to be readable even in a week when it
+ * is too small to make the table.
+ *
+ * Drafted on issue #270 to answer one question, which city gets the seeded team
+ * dogs of issue #273.
+ */
+export function buildActiveUsersByCityQuery(windows) {
+  return [
+    "SELECT",
+    `  ${cityExpression()} AS bucket,`,
+    `  ${periodExpression(windows)} AS period,`,
+    "  count(DISTINCT person_id) AS people",
+    "FROM events",
+    `WHERE ${windowFilter(windows)}`,
+    `  AND ${clientEventFilter()}`,
+    "GROUP BY bucket, period",
+    "ORDER BY bucket, period",
+  ].join("\n");
+}
+
+/**
  * One row per event per window, carrying both the raw count and the number of
  * distinct people behind it. The people column is what answers "how many
  * swipers", so it is cheaper to select it for every event than to run a second

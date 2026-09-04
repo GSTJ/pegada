@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 
 import {
   BREAKDOWNS,
+  CITY_TABLE_ROWS,
+  CITY_UNKNOWN_BUCKET,
   CLIENT_LIBS,
   COUNTED_EVENTS,
   EVENTS,
@@ -12,6 +14,7 @@ import {
   PUSH_RETURN_WINDOW_MINUTES,
   SERVER_EVENTS,
   STORE_BUILD_COVERAGE,
+  buildActiveUsersByCityQuery,
   buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
@@ -96,6 +99,57 @@ test("the version split counts distinct people per build, client events only", (
     query,
     /toDateTime\('2026-08-26 12:00:00', 'UTC'\), 'current', 'previous'/,
   );
+});
+
+test("the city split prefers the city the person gave us over the IP guess", () => {
+  const query = buildActiveUsersByCityQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /coalesce\(nullIf\(nullIf\(toString\(person\.properties\.city\), ''\), 'null'\), nullIf\(toString\(properties\.\$geoip_city_name\), ''\), 'unknown'\) AS bucket/,
+  );
+  // The order is the whole point: an IP lookup never overrides a city the
+  // person allowed the app to read off their device.
+  assert.ok(
+    query.indexOf("person.properties.city") < query.indexOf("$geoip_city_name"),
+  );
+});
+
+test("the city split leaves the state out so one city stays one row", () => {
+  const query = buildActiveUsersByCityQuery(buildWindows(NOW));
+  assert.equal(query.includes("$geoip_subdivision_1_code"), false);
+});
+
+test("the city split counts distinct people over the same client events as the headline", () => {
+  const windows = buildWindows(NOW);
+  const query = buildActiveUsersByCityQuery(windows);
+  const headline = buildActiveUsersQuery(windows);
+  assert.match(query, /count\(DISTINCT person_id\) AS people/);
+  assert.match(query, /properties\.\$lib IN \('posthog-react-native', 'web'\)/);
+  for (const event of SERVER_EVENTS) {
+    assert.ok(query.includes(quote(event)), `${event} is not excluded`);
+  }
+  assert.match(query, /GROUP BY bucket, period/);
+  assert.match(
+    query,
+    /toDateTime\('2026-08-26 12:00:00', 'UTC'\), 'current', 'previous'/,
+  );
+  // Same window and same filter as the headline, so a city count can be read
+  // as a share of it.
+  assert.ok(
+    headline.includes("timestamp >= toDateTime('2026-08-19 12:00:00', 'UTC')"),
+  );
+  assert.ok(
+    query.includes("timestamp >= toDateTime('2026-08-19 12:00:00', 'UTC')"),
+  );
+});
+
+test("the city split asks for every city and leaves the trimming to the report", () => {
+  const query = buildActiveUsersByCityQuery(buildWindows(NOW));
+  // A LIMIT here would drop the unknown bucket in any week it is small, and
+  // that bucket is how the share of unplaced people is read.
+  assert.equal(query.includes("LIMIT"), false);
+  assert.equal(CITY_TABLE_ROWS, 10);
+  assert.equal(CITY_UNKNOWN_BUCKET, "unknown");
 });
 
 test("the totals query still counts server events, which are volume not activity", () => {
