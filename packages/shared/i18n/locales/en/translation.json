@@ -183,6 +183,21 @@
     "sheetBody": "We are putting this one together with care. Want a heads up when it launches?",
     "sheetTitle": "Coming soon"
   },
+  "reportSheet": {
+    "cancel": "Cancel",
+    "detailsLabel": "Want to tell us what happened? (optional)",
+    "detailsPlaceholder": "Write here",
+    "failed": "We could not send that now. Please try again.",
+    "reasonFakeProfile": "Fake profile",
+    "reasonHarassment": "Harassment or threats",
+    "reasonInappropriatePhotos": "Inappropriate photos",
+    "reasonOther": "Something else",
+    "reasonSpam": "Spam or scam",
+    "submit": "Send report",
+    "subtitle": "Pick a reason. We read every report and the profile is never told who sent it.",
+    "success": "Report sent, thank you",
+    "title": "Report {{name}}"
+  },
   "forceUpdate": {
     "button": "Update",
     "description": "A new version of Pegada is available. Please update to continue using the app.",

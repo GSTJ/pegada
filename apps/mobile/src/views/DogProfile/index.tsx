@@ -2,19 +2,12 @@ import type { SwipeDog } from "@/store/reducers/dogs/swipe";
 
 import { useState } from "react";
 import * as React from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Linking,
-  View,
-  ScrollView,
-} from "react-native";
+import { ActivityIndicator, Alert, View, ScrollView } from "react-native";
 
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { Header, HeaderBackButton } from "@react-navigation/elements";
-import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnistyles } from "react-native-unistyles";
@@ -27,6 +20,7 @@ import {
   NetworkBoundary,
   UnknownErrorComponent,
 } from "@/components/NetworkBoundary";
+import { showReportSheet } from "@/components/ReportSheet";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { api } from "@/contexts/trpc-provider";
 import { sendError } from "@/services/error-tracking";
@@ -66,45 +60,35 @@ export const ShareButton: React.FC<{ dog: SwipeDog }> = ({ dog }) => {
   );
 };
 
+/**
+ * What happens to the reported dog once the complaint is filed: it leaves the
+ * deck as a dislike and the profile closes. Unchanged from when reporting was
+ * a mailto, and it runs after the fallback too.
+ */
+const dismissReportedDog = async (dog: SwipeDog) => {
+  try {
+    await getTrcpContext().client.swipe.swipe.mutate({
+      id: dog.id,
+      swipeType: Swipe.Dislike,
+    });
+
+    getTrcpContext().match.getAll.setData(undefined, (request) => {
+      if (!request) return [];
+      return request.filter((match) => match.dog.id !== dog.id);
+    });
+
+    router.back();
+  } catch (error) {
+    // Silently fail: the report is already recorded, and leaving the profile
+    // open is a smaller failure than an error dialog on top of the toast.
+    sendError(error);
+  }
+};
+
 export const reportUser = (dog: SwipeDog) => {
-  Alert.alert(i18n.t("dogProfile.report"), i18n.t("dogProfile.reportMessage"), [
-    {
-      text: i18n.t("dogProfile.cancel"),
-      style: "cancel",
-    },
-    {
-      text: i18n.t("dogProfile.yes"),
-      style: "destructive",
-      onPress: async () => {
-        try {
-          await Linking.openURL(
-            `mailto:report@pegada.app?subject=${encodeURIComponent(
-              i18n.t("dogProfile.report"),
-            )}&body=${encodeURIComponent(
-              i18n.t("dogProfile.reportBody", {
-                id: dog.id,
-                name: dog.name,
-              }),
-            )}`,
-          );
-
-          await getTrcpContext()
-            .client.swipe.swipe.mutate({ id: dog.id, swipeType: Swipe.Dislike })
-            .then(() => {
-              getTrcpContext().match.getAll.setData(undefined, (request) => {
-                if (!request) return [];
-                return request.filter((match) => match.dog.id !== dog.id);
-              });
-
-              router.back();
-            });
-        } catch (error) {
-          // Silently fail
-          sendError(error);
-        }
-      },
-    },
-  ]);
+  showReportSheet({ id: dog.id, name: dog.name }, () => {
+    void dismissReportedDog(dog);
+  });
 };
 
 const useSwipeHandler = (id: string) => {

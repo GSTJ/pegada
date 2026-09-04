@@ -44,6 +44,19 @@ enum PlanType {
   PREMIUM
 }
 
+enum ReportTargetType {
+  DOG
+  USER
+}
+
+enum ReportReason {
+  FAKE_PROFILE
+  INAPPROPRIATE_PHOTOS
+  HARASSMENT
+  SPAM
+  OTHER
+}
+
 model Temperament {
   id   String @id(map: "idx_57696_PRIMARY") @default(uuid())
   name String @unique(map: "temperament_name_key")
@@ -56,6 +69,7 @@ model User {
 
   dogs             Dog[]
   featureInterests FeatureInterest[]
+  reports          Report[]
   // Location
   city          String?
   state         String?
@@ -299,6 +313,35 @@ model FeatureInterest {
   // Also the index `relationMode = "prisma"` needs on `userId`, since it
   // leads with that column.
   @@unique([userId, feature])
+}
+
+/// One row per complaint a person filed about a dog or another account.
+/// Before this existed reporting was a mailto, so nothing was counted and
+/// there is no history to compare against.
+model Report {
+  id String @id @default(cuid())
+
+  reporter   User   @relation(fields: [reporterId], references: [id])
+  reporterId String
+
+  targetType ReportTargetType
+
+  /// The reported Dog or User id, depending on `targetType`. Not a relation:
+  /// the column points at one of two tables, and `relationMode = "prisma"`
+  /// would turn either one into an application side existence check on every
+  /// write. The API checks the target exists before it writes the row.
+  targetId String
+
+  reason ReportReason
+
+  /// Optional free text from the reporter, capped at 500 characters by the API.
+  details String?
+
+  createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([reporterId])
+  @@index([createdAt])
 }
 
 model Breed {

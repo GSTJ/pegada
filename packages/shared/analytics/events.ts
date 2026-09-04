@@ -62,6 +62,7 @@ export const ANALYTICS_EVENTS = {
   PUSH_RECEIPT_RESULT: "Push Receipt Result",
   PUSH_TICKET_RESULT: "Push Ticket Result",
   REFERRAL_CAPTURED: "Referral Captured",
+  REPORT_SUBMITTED: "Report Submitted",
   RESTORE_PURCHASES: "RestorePurchases",
   RESTORE_PURCHASES_SUCCESS: "Restore Purchases Success",
   SAVE_PREFERENCES_PRESSED: "Save Preferences Pressed",
@@ -95,6 +96,21 @@ export type PaywallTrigger =
   | "other"
   | "profile_plan"
   | "swipe_back";
+
+/** What a complaint is about. A dog card, or the account behind it. */
+export type ReportTargetType = "dog" | "user";
+
+/**
+ * Why someone complained. Five fixed choices rather than free text, because
+ * the readout has to be countable per reason; the free text is optional and
+ * sits alongside them.
+ */
+export type ReportReason =
+  | "fake_profile"
+  | "harassment"
+  | "inappropriate_photos"
+  | "other"
+  | "spam";
 
 /** An OS permission answer, collapsed to the two states that matter. */
 export type PermissionStatus = "denied" | "granted";
@@ -521,6 +537,19 @@ export type ServerEventProperties = {
     message_type: "text";
   };
   /**
+   * One row per complaint, sent from the API so it cannot be dropped by an ad
+   * blocker and so it always agrees with the `Report` table.
+   *
+   * `target_id` rides along because the question this event exists to answer is
+   * about specific profiles, such as the seeded team dogs in #273, and asking
+   * it in PostHog should not need a database round trip.
+   */
+  [ANALYTICS_EVENTS.REPORT_SUBMITTED]: {
+    reason: ReportReason;
+    target_id: string;
+    target_type: ReportTargetType;
+  };
+  /**
    * What the device said about a push, roughly half an hour after it left.
    *
    * This is the only event in the catalogue that means "delivered". Read as an
@@ -750,6 +779,7 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.PUSH_TICKET_RESULT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
+  ANALYTICS_EVENTS.REPORT_SUBMITTED,
   ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
   ANALYTICS_EVENTS.STORE_REDIRECT,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
