@@ -148,6 +148,44 @@ test("every breakdown names an event the totals query also counts", () => {
   assert.equal(new Set(ids).size, ids.length);
 });
 
+test("the pricing breakdowns ask the paywall and the subscription the right thing", () => {
+  const byId = new Map(
+    BREAKDOWNS.map((breakdown) => [breakdown.id, breakdown]),
+  );
+
+  const trigger = byId.get("paywall_trigger");
+  assert.equal(trigger.event, EVENTS.PAYWALL_VIEWED);
+  assert.equal(trigger.property, "trigger");
+
+  const period = byId.get("subscription_period_type");
+  assert.equal(period.event, EVENTS.SUBSCRIPTION_EVENT);
+  assert.equal(period.property, "period_type");
+
+  const reason = byId.get("subscription_cancel_reason");
+  assert.equal(reason.event, EVENTS.SUBSCRIPTION_EVENT);
+  assert.equal(reason.property, "cancel_reason");
+
+  const windows = buildWindows(NOW);
+  assert.match(
+    buildBreakdownQuery(windows, trigger),
+    /ifNull\(nullIf\(toString\(properties\.trigger\), ''\), 'unknown'\) AS bucket/,
+  );
+  assert.match(
+    buildBreakdownQuery(windows, trigger),
+    /AND event = 'Paywall Viewed'/,
+  );
+  // A subscription event that is not a cancel has no reason, so the null side
+  // of this query is most of it and has to stay a bucket rather than vanish.
+  assert.match(
+    buildBreakdownQuery(windows, reason),
+    /ifNull\(nullIf\(toString\(properties\.cancel_reason\), ''\), 'unknown'\) AS bucket/,
+  );
+  assert.match(
+    buildBreakdownQuery(windows, period),
+    /ifNull\(nullIf\(toString\(properties\.period_type\), ''\), 'unknown'\) AS bucket/,
+  );
+});
+
 test("every event name still exists in the shared analytics catalogue", () => {
   const cataloguePath = fileURLToPath(
     new URL("../../packages/shared/analytics/events.ts", import.meta.url),
