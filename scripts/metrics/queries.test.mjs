@@ -8,10 +8,14 @@ import {
   CLIENT_LIBS,
   COUNTED_EVENTS,
   EVENTS,
+  PUSH_RETURN_LIB,
+  PUSH_RETURN_WINDOW_MINUTES,
   SERVER_EVENTS,
+  STORE_BUILD_COVERAGE,
   buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
+  buildPushAttributedReturnsQuery,
   buildTotalsQuery,
   buildWindows,
   quote,
@@ -160,5 +164,78 @@ test("every event name still exists in the shared analytics catalogue", () => {
       declared.has(event),
       `${event} is no longer in the analytics catalogue`,
     );
+  }
+});
+
+const CURRENT = {
+  end: new Date("2026-09-02T12:00:00.000Z"),
+  start: new Date("2026-08-26T12:00:00.000Z"),
+};
+
+test("the push returns query pairs a send with what the person did after it", () => {
+  const query = buildPushAttributedReturnsQuery(CURRENT);
+  assert.match(query, /count\(DISTINCT push\.person_id\) AS people/);
+  assert.match(query, /WHERE event = 'Reengagement Push Sent'/);
+  assert.match(query, /properties\.\$lib = 'posthog-react-native'/);
+  assert.match(query, /activity\.acted_at >= push\.sent_at/);
+  assert.match(
+    query,
+    /activity\.acted_at < push\.sent_at \+ toIntervalMinute\(60\)/,
+  );
+});
+
+test("the push returns query counts app events only, never the browser", () => {
+  const query = buildPushAttributedReturnsQuery(CURRENT);
+  assert.equal(PUSH_RETURN_LIB, "posthog-react-native");
+  assert.equal(query.includes("'web'"), false);
+});
+
+test("the sends stay inside the window and the activity reaches past its end", () => {
+  const query = buildPushAttributedReturnsQuery(CURRENT);
+  assert.equal(PUSH_RETURN_WINDOW_MINUTES, 60);
+  // The send side closes at the window end so nobody is counted twice.
+  assert.match(query, /timestamp < toDateTime\('2026-09-02 12:00:00', 'UTC'\)/);
+  // The activity side runs an extra hour so a send at 11:59 can still be credited.
+  assert.match(query, /timestamp < toDateTime\('2026-09-02 13:00:00', 'UTC'\)/);
+  assert.match(
+    query,
+    /timestamp >= toDateTime\('2026-08-26 12:00:00', 'UTC'\)/,
+  );
+});
+
+test("the previous window asks about its own seven days", () => {
+  const windows = buildWindows(NOW);
+  const query = buildPushAttributedReturnsQuery({
+    end: windows.currentStart,
+    start: windows.previousStart,
+  });
+  assert.match(
+    query,
+    /timestamp >= toDateTime\('2026-08-19 12:00:00', 'UTC'\)/,
+  );
+  assert.match(query, /timestamp < toDateTime\('2026-08-26 13:00:00', 'UTC'\)/);
+  assert.equal(query.includes("2026-09-02"), false);
+});
+
+test("the coverage list holds real event names and no server event", () => {
+  const known = new Set(Object.values(EVENTS));
+  for (const event of STORE_BUILD_COVERAGE.missingEvents) {
+    assert.ok(known.has(event), `${event} is not an event the readout counts`);
+    assert.equal(
+      SERVER_EVENTS.includes(event),
+      false,
+      `${event} comes from the server, so the app build cannot be why it is zero`,
+    );
+  }
+  assert.ok(STORE_BUILD_COVERAGE.missingEvents.length > 0);
+});
+
+test("the coverage list leaves out the events the store build does send", () => {
+  for (const event of [
+    EVENTS.CREATE_DOG_PROFILE,
+    EVENTS.NEW_MATCH,
+    EVENTS.UPGRADE,
+  ]) {
+    assert.equal(STORE_BUILD_COVERAGE.missingEvents.includes(event), false);
   }
 });

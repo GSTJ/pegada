@@ -67,6 +67,36 @@ export const SERVER_EVENTS = [
 ].sort();
 
 /**
+ * The build most people are actually running, and the readout events it has no
+ * code to send.
+ *
+ * Checked against the app at tag v1.6.2. The list is only client events: the
+ * API emits `Message Sent`, `Reengagement Push Sent`, `Push Ticket Result` and
+ * the rest of `SERVER_EVENTS` from the deployed server, so those rows are real
+ * whatever build a person is on. `Create Dog Profile`, `New Match` and
+ * `Upgrade` do exist in 1.6.2, which is why they are not here.
+ *
+ * `Swipe` covers both the swipe count and the distinct swiper count, since one
+ * missing event empties both rows.
+ *
+ * Keep this in step with what is in the store, not with what is on main. The
+ * point of the note is to stop a reach gap from reading as a dead product.
+ */
+export const STORE_BUILD_COVERAGE = {
+  missingEvents: [
+    EVENTS.EMPTY_DECK_SHOWN,
+    EVENTS.FAKE_DOOR_TAPPED,
+    EVENTS.PAYWALL_VIEWED,
+    EVENTS.PUSH_NOTIFICATION_OPENED,
+    EVENTS.SHARE_COMPLETED,
+    EVENTS.SHARE_PROMPT_TAPPED,
+    EVENTS.SHARE_TAPPED,
+    EVENTS.SWIPE,
+  ],
+  version: "1.6.2",
+};
+
+/**
  * The property posthog-react-native puts on every event from the native app,
  * read out of the app bundle rather than sent by hand. Web events do not carry
  * it, so they land in the `unknown` bucket, which is the honest answer for a
@@ -267,5 +297,69 @@ export function buildBreakdownQuery(windows, breakdown) {
     `  AND event = ${quote(breakdown.event)}`,
     "GROUP BY bucket, period",
     "ORDER BY bucket, period",
+  ].join("\n");
+}
+
+/**
+ * The `$lib` value that only the mobile app reports.
+ *
+ * Narrower than `CLIENT_LIBS` on purpose: a push lands on a phone, so a browser
+ * session on the marketing site is not the person coming back from it.
+ */
+export const PUSH_RETURN_LIB = "posthog-react-native";
+
+/** How long after a send an app event still counts as a return. */
+export const PUSH_RETURN_WINDOW_MINUTES = 60;
+
+/**
+ * People who opened the app soon after a push aimed at them.
+ *
+ * This is a proxy for the open rate, and it exists because the build in the
+ * store cannot emit `Push Notification Opened` at all, so the real rate reads
+ * as a flat zero no matter how well the pushes work.
+ *
+ * It still works on that build: every screen change sends `$screen` from the
+ * app, so a person who opens it after a push leaves a client event behind even
+ * though nothing in the app tracks the tap itself.
+ *
+ * It is a proxy and not the answer. Somebody who was going to open the app in
+ * that hour anyway is counted too, so read the trend rather than the level.
+ *
+ * The join is on `person_id` rather than on the raw distinct id because the
+ * denominator this number is divided by, "Users reached by push", is itself a
+ * count of distinct `person_id`. Joining on anything else would put a numerator
+ * and a denominator that count different things in the same row.
+ *
+ * The activity side reaches `PUSH_RETURN_WINDOW_MINUTES` past the end of the
+ * window so a push sent in the last minutes of it can still be credited, and
+ * the push side stays inside the window so a person is only ever counted in the
+ * window their push was sent in.
+ *
+ * One row, one window: the caller runs it twice rather than grouping, because
+ * the two windows need two different activity ranges.
+ */
+export function buildPushAttributedReturnsQuery({ end, start }) {
+  const activityEnd = new Date(
+    end.getTime() + PUSH_RETURN_WINDOW_MINUTES * 60 * 1000,
+  );
+  return [
+    "SELECT",
+    "  count(DISTINCT push.person_id) AS people",
+    "FROM (",
+    "  SELECT person_id, timestamp AS sent_at",
+    "  FROM events",
+    `  WHERE event = ${quote(EVENTS.REENGAGEMENT_PUSH_SENT)}`,
+    `    AND timestamp >= toDateTime(${quote(clickhouseTime(start))}, 'UTC')`,
+    `    AND timestamp < toDateTime(${quote(clickhouseTime(end))}, 'UTC')`,
+    ") AS push",
+    "INNER JOIN (",
+    "  SELECT person_id, timestamp AS acted_at",
+    "  FROM events",
+    `  WHERE properties.$lib = ${quote(PUSH_RETURN_LIB)}`,
+    `    AND timestamp >= toDateTime(${quote(clickhouseTime(start))}, 'UTC')`,
+    `    AND timestamp < toDateTime(${quote(clickhouseTime(activityEnd))}, 'UTC')`,
+    ") AS activity ON activity.person_id = push.person_id",
+    "WHERE activity.acted_at >= push.sent_at",
+    `  AND activity.acted_at < push.sent_at + toIntervalMinute(${PUSH_RETURN_WINDOW_MINUTES})`,
   ].join("\n");
 }

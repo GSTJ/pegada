@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { buildWindows } from "./queries.mjs";
+import { STORE_BUILD_COVERAGE, buildWindows } from "./queries.mjs";
 import {
   COMMENT_MARKER,
   buildReport,
+  coverageNote,
   formatDelta,
   formatRateDelta,
 } from "./report.mjs";
@@ -85,6 +86,10 @@ const FIXTURE = {
     ]),
   },
   generatedAt: NOW,
+  pushReturns: {
+    current: [{ people: 200 }],
+    previous: [{ people: 160 }],
+  },
   totals: totals([
     ["Create Dog Profile", "current", 120, 118],
     ["Create Dog Profile", "previous", 150, 149],
@@ -273,4 +278,73 @@ test("an empty breakdown says so instead of rendering an empty table", () => {
 test("no emoji reaches the comment", () => {
   const body = buildReport(FIXTURE);
   assert.equal(/\p{Extended_Pictographic}/u.test(body), false);
+});
+
+test("push attributed returns land in the push table over the people reached", () => {
+  const body = buildReport({
+    ...FIXTURE,
+    totals: [
+      ...FIXTURE.totals,
+      {
+        event: "Reengagement Push Sent",
+        people: 640,
+        period: "previous",
+        total: 900,
+      },
+    ],
+  });
+  assert.match(
+    body,
+    /\| Push attributed returns \(60 min\) \| 200 \| 160 \| \+40 \(\+25\.0%\) \|/,
+  );
+  // 200 of the 800 reached came back, against 160 of 640 the week before.
+  assert.match(
+    body,
+    /\| Push attributed return rate \| 25\.0% \| 25\.0% \| 0 \|/,
+  );
+});
+
+test("a window nobody was pushed in reports no rate rather than a division", () => {
+  const body = buildReport({
+    ...FIXTURE,
+    pushReturns: { current: [], previous: [] },
+    totals: FIXTURE.totals.filter(
+      (row) => row.event !== "Reengagement Push Sent",
+    ),
+  });
+  assert.match(body, /\| Push attributed returns \(60 min\) \| 0 \| 0 \| 0 \|/);
+  assert.match(
+    body,
+    /\| Push attributed return rate \| n\/a \| n\/a \| n\/a \|/,
+  );
+});
+
+test("the returns row survives a query that answered with no rows at all", () => {
+  const body = buildReport({ ...FIXTURE, pushReturns: undefined });
+  assert.match(body, /\| Push attributed returns \(60 min\) \| 0 \| 0 \| 0 \|/);
+});
+
+test("the coverage note sits under the push table and names the store build", () => {
+  const body = buildReport(FIXTURE);
+  const note = coverageNote();
+  assert.ok(body.includes(note));
+  assert.ok(
+    body.indexOf(note) > body.indexOf("| Push attributed return rate |"),
+  );
+  assert.ok(
+    body.indexOf(note) < body.indexOf("### Active users by app version"),
+  );
+});
+
+test("the coverage note lists every event the store build cannot send", () => {
+  const note = coverageNote();
+  assert.match(note, /store build 1\.6\.2/);
+  for (const event of STORE_BUILD_COVERAGE.missingEvents) {
+    assert.ok(note.includes(event), `the note should name ${event}`);
+  }
+});
+
+test("the coverage note says so plainly once the store build sends everything", () => {
+  const note = coverageNote({ missingEvents: [], version: "1.8.0" });
+  assert.match(note, /build 1\.8\.0 emits every event in this readout/);
 });
