@@ -22,6 +22,7 @@ import {
   buildActiveUsersByVersionQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
+  buildPushAttributedReturnsQuery,
   buildTotalsQuery,
   buildWindows,
 } from "./queries.mjs";
@@ -62,21 +63,43 @@ export async function runDailyMetrics({
   const run = (name, query) =>
     queryHogql({ apiKey, fetchImpl, host, name, projectId, query });
 
-  const [activeUsers, activeUsersByVersion, totals, ...breakdownRows] =
-    await Promise.all([
-      run("pegada daily metrics: active users", buildActiveUsersQuery(windows)),
+  // Two queries rather than one grouped query: each window needs its own
+  // activity range, because a push sent at the end of a window is followed by
+  // an hour that falls outside it.
+  const pushReturnWindows = {
+    current: { end: windows.currentEnd, start: windows.currentStart },
+    previous: { end: windows.currentStart, start: windows.previousStart },
+  };
+
+  const [
+    activeUsers,
+    activeUsersByVersion,
+    totals,
+    pushReturnsCurrent,
+    pushReturnsPrevious,
+    ...breakdownRows
+  ] = await Promise.all([
+    run("pegada daily metrics: active users", buildActiveUsersQuery(windows)),
+    run(
+      "pegada daily metrics: active users by app version",
+      buildActiveUsersByVersionQuery(windows),
+    ),
+    run("pegada daily metrics: event totals", buildTotalsQuery(windows)),
+    run(
+      "pegada daily metrics: push attributed returns, last 7 days",
+      buildPushAttributedReturnsQuery(pushReturnWindows.current),
+    ),
+    run(
+      "pegada daily metrics: push attributed returns, previous 7 days",
+      buildPushAttributedReturnsQuery(pushReturnWindows.previous),
+    ),
+    ...BREAKDOWNS.map((breakdown) =>
       run(
-        "pegada daily metrics: active users by app version",
-        buildActiveUsersByVersionQuery(windows),
+        `pegada daily metrics: ${breakdown.id}`,
+        buildBreakdownQuery(windows, breakdown),
       ),
-      run("pegada daily metrics: event totals", buildTotalsQuery(windows)),
-      ...BREAKDOWNS.map((breakdown) =>
-        run(
-          `pegada daily metrics: ${breakdown.id}`,
-          buildBreakdownQuery(windows, breakdown),
-        ),
-      ),
-    ]);
+    ),
+  ]);
 
   const breakdowns = Object.fromEntries(
     BREAKDOWNS.map((breakdown, position) => [
@@ -90,6 +113,10 @@ export async function runDailyMetrics({
     activeUsersByVersion,
     breakdowns,
     generatedAt: now,
+    pushReturns: {
+      current: pushReturnsCurrent,
+      previous: pushReturnsPrevious,
+    },
     totals,
     windows,
   });

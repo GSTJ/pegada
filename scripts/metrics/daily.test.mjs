@@ -59,12 +59,20 @@ function fakeWorld({ existingComment = null } = {}) {
           ],
         });
       }
+      if (name.includes("push attributed returns")) {
+        return json({
+          columns: ["people"],
+          results: [[name.includes("previous") ? 160 : 200]],
+        });
+      }
       if (name.endsWith("event totals")) {
         return json({
           columns: ["event", "period", "total", "people"],
           results: [
             ["Swipe", "current", 5400, 300],
             ["Swipe", "previous", 5000, 280],
+            ["Reengagement Push Sent", "current", 1000, 800],
+            ["Reengagement Push Sent", "previous", 900, 640],
             ["Share Tapped", "current", 80, 70],
           ],
         });
@@ -118,7 +126,33 @@ test("a dry run renders the comment and never touches GitHub", async () => {
 test("one query goes out per metric block", async () => {
   const fetchImpl = fakeWorld();
   await runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW });
-  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 3);
+  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 5);
+});
+
+test("both push return windows are asked for separately and land in the table", async () => {
+  const fetchImpl = fakeWorld();
+  const result = await runDailyMetrics({
+    argv: ["--dry-run"],
+    env: ENV,
+    fetchImpl,
+    now: NOW,
+  });
+
+  const names = fetchImpl.calls
+    .filter((call) => call.body?.name?.includes("push attributed returns"))
+    .map((call) => call.body.name);
+  assert.deepEqual(names.sort(), [
+    "pegada daily metrics: push attributed returns, last 7 days",
+    "pegada daily metrics: push attributed returns, previous 7 days",
+  ]);
+  assert.match(
+    result.body,
+    /\| Push attributed returns \(60 min\) \| 200 \| 160 \| \+40 \(\+25\.0%\) \|/,
+  );
+  assert.match(
+    result.body,
+    /Coverage note: the store build 1\.6\.2 cannot emit/,
+  );
 });
 
 test("a full run posts the readout once", async () => {

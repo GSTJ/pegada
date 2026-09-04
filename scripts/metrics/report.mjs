@@ -6,7 +6,12 @@
  * instead of leaving a new one behind every day.
  */
 
-import { BREAKDOWNS, EVENTS } from "./queries.mjs";
+import {
+  BREAKDOWNS,
+  EVENTS,
+  PUSH_RETURN_WINDOW_MINUTES,
+  STORE_BUILD_COVERAGE,
+} from "./queries.mjs";
 
 export const COMMENT_MARKER = "<!-- pegada-daily-metrics -->";
 
@@ -56,6 +61,30 @@ function formatPercent(value) {
 /** A share of a denominator, or null when the denominator is empty. */
 function ratio(numerator, denominator) {
   return denominator === 0 ? null : (numerator / denominator) * 100;
+}
+
+/**
+ * The single number a one row query answers with, or zero when it matched
+ * nothing. ClickHouse returns no row at all for an empty join, so a missing row
+ * and a zero mean the same thing here.
+ */
+function singleValue(rows, field = "people") {
+  return Number(rows?.[0]?.[field] ?? 0);
+}
+
+/**
+ * The line under the push table naming what the live build cannot send.
+ *
+ * Without it the zero rows read as a product that nobody uses, when what they
+ * actually measure is how many people are running a build that was cut before
+ * the event existed.
+ */
+export function coverageNote(coverage = STORE_BUILD_COVERAGE) {
+  const events = coverage.missingEvents;
+  if (events.length === 0) {
+    return `Coverage note: build ${coverage.version} emits every event in this readout.`;
+  }
+  return `Coverage note: the store build ${coverage.version} cannot emit ${events.join(", ")}, so those rows read zero for anyone still on it. They measure reach, not the product.`;
 }
 
 /** A percentage row, with the delta in points and `n/a` on either empty side. */
@@ -173,6 +202,7 @@ function breakdownTable(rows, { field = "total", header = "Bucket" } = {}) {
  * @param {Array} input.activeUsersByVersion rows from the version split
  * @param {Record<string, Array>} input.breakdowns rows per breakdown id
  * @param {Date} input.generatedAt when the job ran
+ * @param {{ current: Array, previous: Array }} input.pushReturns rows from the push attributed returns query, one per window
  * @param {Array} input.totals rows from the totals query
  * @param {{ currentEnd: Date, currentStart: Date, previousStart: Date }} input.windows
  */
@@ -181,6 +211,7 @@ export function buildReport({
   activeUsersByVersion,
   breakdowns,
   generatedAt,
+  pushReturns,
   totals,
   windows,
 }) {
@@ -251,6 +282,25 @@ export function buildReport({
     countRow(index, "Share Prompt Tapped", EVENTS.SHARE_PROMPT_TAPPED),
   ]);
 
+  // The proxy for the open rate: people the push reached who then used the app
+  // within the hour. It is a proxy and not the truth, because a person who was
+  // going to open the app anyway lands in it too, but it moves when the pushes
+  // work and the real open rate cannot.
+  const reachedCurrent = totalOf(
+    index,
+    EVENTS.REENGAGEMENT_PUSH_SENT,
+    "current",
+    "people",
+  );
+  const reachedPrevious = totalOf(
+    index,
+    EVENTS.REENGAGEMENT_PUSH_SENT,
+    "previous",
+    "people",
+  );
+  const returnedCurrent = singleValue(pushReturns?.current);
+  const returnedPrevious = singleValue(pushReturns?.previous);
+
   const push = metricTable([
     countRow(index, "Reengagement Push Sent", EVENTS.REENGAGEMENT_PUSH_SENT),
     countRow(
@@ -267,6 +317,17 @@ export function buildReport({
       EVENTS.PUSH_NOTIFICATION_OPENED,
     ),
     rateRow("Push open rate", openRateCurrent, openRatePrevious),
+    {
+      current: number(returnedCurrent),
+      delta: formatDelta(returnedCurrent, returnedPrevious),
+      label: `Push attributed returns (${PUSH_RETURN_WINDOW_MINUTES} min)`,
+      previous: number(returnedPrevious),
+    },
+    rateRow(
+      "Push attributed return rate",
+      ratio(returnedCurrent, reachedCurrent),
+      ratio(returnedPrevious, reachedPrevious),
+    ),
   ]);
 
   const breakdownSections = BREAKDOWNS.map((breakdown) =>
@@ -297,6 +358,8 @@ export function buildReport({
     "### Push",
     "",
     push,
+    "",
+    coverageNote(),
     "",
     "### Active users by app version",
     "",
