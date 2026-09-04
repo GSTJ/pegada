@@ -70,6 +70,7 @@ function fakeWorld({ existingComment = null, swipeName = "Swipe" } = {}) {
           columns: [
             "exception_type",
             "message",
+            "frame",
             "total",
             "people",
             "libs",
@@ -79,6 +80,7 @@ function fakeWorld({ existingComment = null, swipeName = "Swipe" } = {}) {
             [
               "TypeError",
               "undefined is not an object",
+              "DogCard in src/components/DogCard.tsx",
               6,
               4,
               "posthog-react-native",
@@ -135,7 +137,7 @@ test("a dry run prints the body and never touches GitHub", async () => {
   assert.match(result.body, /### 5\. Exceptions/);
   assert.match(
     result.body,
-    /\| `TypeError` \| `undefined is not an object` \| 6 \| 4 \| mobile \| `1\.6\.2` \|/,
+    /\| `TypeError` \| `undefined is not an object` \| `DogCard in src\/components\/DogCard\.tsx` \| 6 \| 4 \| mobile \| `1\.6\.2` \|/,
   );
   assert.equal(
     fetchImpl.calls.some((call) => !isPostHog(call.url)),

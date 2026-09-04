@@ -188,13 +188,14 @@ export const PROPERTY_KEYS = [
 /**
  * Exception groups, one of each shape the table has to survive: an app crash
  * with a version behind it, a server throw with none, a message carrying the
- * two characters that break a markdown table, and a client that sent no type
- * at all.
+ * two characters that break a markdown table and no frame to go with it, and a
+ * client that sent no type at all.
  */
 export const EXCEPTIONS = [
   {
     app_versions: "1.6.2, 1.7.2",
     exception_type: "TypeError",
+    frame: "DogCard in src/components/DogCard.tsx",
     libs: "posthog-react-native",
     message: "undefined is not an object (evaluating 'dog.photos[0].url')",
     people: 14,
@@ -203,6 +204,7 @@ export const EXCEPTIONS = [
   {
     app_versions: "",
     exception_type: "PrismaClientKnownRequestError",
+    frame: "listDogs in packages/api/src/router/dog.ts",
     libs: "posthog-node",
     message: "Timed out fetching a new connection from the connection pool",
     people: 6,
@@ -211,6 +213,7 @@ export const EXCEPTIONS = [
   {
     app_versions: "1.6.2",
     exception_type: "Error",
+    frame: "",
     libs: "posthog-node, posthog-react-native",
     message: "Request failed | GET /api/trpc/dog.list\nstatus `500`",
     people: 3,
@@ -219,6 +222,7 @@ export const EXCEPTIONS = [
   {
     app_versions: "unknown",
     exception_type: "",
+    frame: "",
     libs: "",
     message: "",
     people: 1,
@@ -455,11 +459,11 @@ test("the exception table reports counts, library and app version", () => {
   const body = buildReport(FIXTURE);
   assert.match(
     body,
-    /\| Type \| Message \| Events \| People \| Library \| App version \|/,
+    /\| Type \| Message \| Frame \| Events \| People \| Library \| App version \|/,
   );
   assert.match(
     body,
-    /\| `TypeError` \| `undefined is not an object \(evaluating 'dog\.photos\[0\]\.url'\)` \| 31 \| 14 \| mobile \| `1\.6\.2, 1\.7\.2` \|/,
+    /\| `TypeError` \| `undefined is not an object \(evaluating 'dog\.photos\[0\]\.url'\)` \| `DogCard in src\/components\/DogCard\.tsx` \| 31 \| 14 \| mobile \| `1\.6\.2, 1\.7\.2` \|/,
   );
 });
 
@@ -479,9 +483,9 @@ test("an exception seen from both sides names both", () => {
 test("a message cannot break the row it sits in", () => {
   const body = buildReport(FIXTURE);
   const row = body.split("\n").find((line) => line.includes("Request failed"));
-  // Six columns means seven pipes. A raw pipe or a newline in the message
+  // Seven columns means eight pipes. A raw pipe or a newline in the message
   // would silently shift every column after it.
-  assert.equal(row.split(/(?<!\\)\|/u).length - 1, 7);
+  assert.equal(row.split(/(?<!\\)\|/u).length - 1, 8);
   assert.equal(row.includes("\n"), false);
   assert.match(row, /Request failed \\\| GET/);
 });
@@ -492,6 +496,20 @@ test("a code cell survives backticks, pipes and blank values", () => {
   assert.equal(codeCell("`quoted`"), "`` `quoted` ``");
   assert.equal(codeCell(""), "");
   assert.equal(codeCell(null), "");
+});
+
+test("an exception with no stack says so instead of leaving a gap", () => {
+  const body = buildReport(FIXTURE);
+  const row = body.split("\n").find((line) => line.includes("Request failed"));
+  assert.match(row, /\| n\/a \| 5 \| 3 \|/);
+});
+
+test("the frame column names the line that threw", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(
+    body,
+    /\| `listDogs in packages\/api\/src\/router\/dog\.ts` \| 12 \| 6 \|/,
+  );
 });
 
 test("an exception with nothing on it still gets a row", () => {
