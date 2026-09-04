@@ -985,6 +985,56 @@ describe("SuggestionService", () => {
         });
       });
 
+      test("a full page skips the supply probe", async () => {
+        const { dog } = await generateFakeUserWithDog(
+          { gender: Gender.MALE },
+          { latitude: 0, longitude: 0 },
+        );
+
+        await Promise.all(
+          Array.from({ length: LIMIT }).map(() =>
+            generateFakeUserWithDog(
+              { gender: Gender.FEMALE },
+              { latitude: 0.05, longitude: 0.05 },
+            ),
+          ),
+        );
+
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+
+        // Nothing was short, so nothing was counted.
+        expect(lastDeckServed()).toMatchObject({
+          empty: false,
+          served: LIMIT,
+          supply_10km: null,
+          supply_25km: null,
+          supply_50km: null,
+        });
+      });
+
+      test("a radius that filters nothing is reported as no radius", async () => {
+        const [{ dog }] = await Promise.all([
+          generateFakeUserWithDog(
+            { gender: Gender.MALE, preferredMaxDistance: 300 },
+            { latitude: 0, longitude: 0 },
+          ),
+          generateFakeUserWithDog(
+            { gender: Gender.FEMALE },
+            { latitude: 0.05, longitude: 0.05 },
+          ),
+        ]);
+
+        await SuggestionService.getPotentialMatches(dog, LIMIT, []);
+
+        expect(lastDeckServed()).toMatchObject({
+          // The slider is parked at the far end, so no dog was ever excluded
+          // for being far away and the beyond radius tier never ran.
+          beyond_radius_count: 0,
+          radius_km: null,
+          served: 1,
+        });
+      });
+
       test("supply is unknown when the swiper has no location", async () => {
         const [{ dog }] = await Promise.all([
           generateFakeUserWithDog(

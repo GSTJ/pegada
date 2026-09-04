@@ -431,20 +431,30 @@ export type ServerEventProperties = {
    * starving the deck. `supply_*` is the same question asked of the city
    * instead of the filters, counted before any preference is applied, so an
    * empty deck in an empty town can be told apart from an empty deck behind a
-   * tight filter. All three are null when the person has no location.
+   * tight filter.
+   *
+   * The supply counts are only taken when the page came back short, since the
+   * scan behind them costs real time and a full page has already answered the
+   * question. They are null on a full page and null when the person has no
+   * location, so read them against `served < requested` rather than as a
+   * series on their own.
    */
   [ANALYTICS_EVENTS.DECK_SERVED]: {
     beyond_radius_count: number;
     /** `served === 0`, kept as its own property so the rate is one breakdown. */
     empty: boolean;
     primary_count: number;
-    /** The radius the person set, or null for no limit. */
+    /**
+     * The radius that was actually applied, or null when nothing was narrowed:
+     * no radius set, or a slider parked at the far end, which filters nothing.
+     */
     radius_km: number | null;
     recycled_count: number;
     /** The page size the app asked for, which `served` is read against. */
     requested: number;
     same_gender_count: number;
     served: number;
+    /** Null on a full page and when the person has no location. */
     supply_10km: number | null;
     supply_25km: number | null;
     supply_50km: number | null;

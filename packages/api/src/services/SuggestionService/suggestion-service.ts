@@ -342,7 +342,11 @@ export class SuggestionService {
    *
    * This is the denominator the deck never had. A short deck can mean the
    * filters are too tight or it can mean the city is empty, and the two need
-   * completely different fixes, so the counts ship next to every served page.
+   * completely different fixes.
+   *
+   * It is only asked on a short deck. The counts scan every dog and every
+   * image, which is around 175 ms on a table this size, and a full page has
+   * already answered the only question they exist to settle.
    */
   static async #getSupplyCounts(dog: Dog): Promise<SupplyCounts> {
     const [near, mid, far] = SUPPLY_RADII_KM;
@@ -413,33 +417,44 @@ export class SuggestionService {
   /**
    * The supply probe and the event are both best effort. A deck that was
    * already built is not worth failing over a number nobody is waiting on.
+   *
+   * The event goes out on every page. The probe behind it does not: it only
+   * runs when the page came back short, which is the only case where the
+   * answer changes what anyone would do about it.
    */
   static async #reportDeckServed({
     dog,
     deck,
+    radiusKm,
     requested,
   }: {
     dog: Dog;
     deck: DeckDog[];
+    radiusKm: number | null;
     requested: number;
   }) {
     if (!dog.userId) return;
 
     try {
-      const supply = await SuggestionService.#getSupplyCounts(dog);
+      const served = deck.length;
+
+      const supply =
+        served < requested
+          ? await SuggestionService.#getSupplyCounts(dog)
+          : UNKNOWN_SUPPLY;
 
       captureEvent(dog.userId, ANALYTICS_EVENTS.DECK_SERVED, {
         beyond_radius_count: SuggestionService.#countByTier(
           deck,
           "beyond_radius",
         ),
-        empty: deck.length === 0,
+        empty: served === 0,
         primary_count: SuggestionService.#countByTier(deck, "primary"),
-        radius_km: dog.preferredMaxDistance ?? null,
+        radius_km: radiusKm,
         recycled_count: SuggestionService.#countByTier(deck, "recycled_pass"),
         requested,
         same_gender_count: SuggestionService.#countByTier(deck, "same_gender"),
-        served: deck.length,
+        served,
         supply_10km: supply.supply10km,
         supply_25km: supply.supply25km,
         supply_50km: supply.supply50km,
@@ -545,7 +560,15 @@ export class SuggestionService {
       }
     }
 
-    await SuggestionService.#reportDeckServed({ deck, dog, requested: limit });
+    await SuggestionService.#reportDeckServed({
+      deck,
+      dog,
+      // The radius that was actually applied. A slider parked at the far end
+      // filters nothing and skips the beyond radius tier, so reporting the raw
+      // preference there would describe a deck that was never narrowed.
+      radiusKm: radiusCondition ? (dog.preferredMaxDistance ?? null) : null,
+      requested: limit,
+    });
 
     return SuggestionService.#anonimizeDistances(deck);
   }
