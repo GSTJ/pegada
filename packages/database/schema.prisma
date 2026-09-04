@@ -69,7 +69,6 @@ model User {
 
   dogs             Dog[]
   featureInterests FeatureInterest[]
-  reports          Report[]
   // Location
   city          String?
   state         String?
@@ -321,7 +320,11 @@ model FeatureInterest {
 model Report {
   id String @id @default(cuid())
 
-  reporter   User   @relation(fields: [reporterId], references: [id])
+  /// The reporter. A plain id rather than a relation, for the same reason
+  /// `User.referredByUserId` is one: under `relationMode = "prisma"` a
+  /// relation is an application side check on every write, and it would also
+  /// make a complaint disappear when the person who filed it deletes their
+  /// account, which is the opposite of what a report is for.
   reporterId String
 
   targetType ReportTargetType
