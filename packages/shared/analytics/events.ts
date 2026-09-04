@@ -75,6 +75,8 @@ export const ANALYTICS_EVENTS = {
   SUBSCRIPTION_EVENT: "Subscription Event",
   SWIPE: "Swipe",
   SWIPE_BACK: "Swipe Back",
+  UPDATE_REQUIRED_SHOWN: "Update Required Shown",
+  UPDATE_REQUIRED_STORE_TAPPED: "Update Required Store Tapped",
   UPGRADE: "Upgrade",
 } as const;
 
@@ -369,6 +371,21 @@ export type MobileEventProperties = {
     swipe_type: SwipeKind;
   };
   [ANALYTICS_EVENTS.SWIPE_BACK]: undefined;
+  /**
+   * Both halves of the forced update carry the same two versions, so the wall
+   * and the tap that leaves it join on their own without a session lookup.
+   * `Update Required Shown` grouped by `app_version` is how many people a
+   * raised floor is actually holding, and the ratio to
+   * `Update Required Store Tapped` is how many of them go and get the build.
+   */
+  [ANALYTICS_EVENTS.UPDATE_REQUIRED_SHOWN]: {
+    app_version: string;
+    minimum_version: string;
+  };
+  [ANALYTICS_EVENTS.UPDATE_REQUIRED_STORE_TAPPED]: {
+    app_version: string;
+    minimum_version: string;
+  };
   [ANALYTICS_EVENTS.UPGRADE]: {
     package?: string;
     trial?: boolean | null;
@@ -663,6 +680,8 @@ export const MOBILE_EVENT_NAMES = [
   ANALYTICS_EVENTS.SKIP_COMPLETE_DOG_PROFILE,
   ANALYTICS_EVENTS.SWIPE,
   ANALYTICS_EVENTS.SWIPE_BACK,
+  ANALYTICS_EVENTS.UPDATE_REQUIRED_SHOWN,
+  ANALYTICS_EVENTS.UPDATE_REQUIRED_STORE_TAPPED,
   ANALYTICS_EVENTS.UPGRADE,
 ] as const;
 

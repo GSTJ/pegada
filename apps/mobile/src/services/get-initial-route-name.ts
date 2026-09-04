@@ -6,6 +6,7 @@ import Constants from "expo-constants";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
+import { rememberMinimumSupportedVersion } from "@/services/force-update";
 import { getLoggedUserID } from "@/services/get-logged-user-id";
 import { SceneName } from "@/types/scene-name";
 
@@ -58,8 +59,10 @@ export const trackUser = () => {
 
 export const getInitialRouteName = async () => {
   try {
-    const { authenticated, forceUpdate } =
+    const { authenticated, forceUpdate, minimumSupportedVersion } =
       await getTrcpContext().client.echo.get.query();
+
+    rememberMinimumSupportedVersion(minimumSupportedVersion);
 
     if (forceUpdate) {
       return SceneName.ForceUpdate;
