@@ -303,6 +303,36 @@ describe("selectUnansweredMatchCandidates", () => {
 
     await expect(selectUnansweredMatchCandidates(NOW)).resolves.toHaveLength(1);
   });
+
+  it("skips a user whose token Expo has already rejected", async () => {
+    const { match } = await seedSilentMatch(25);
+    const silent = await prisma.match.findUniqueOrThrow({
+      where: { id: match.id },
+      select: { requester: { select: { userId: true } } },
+    });
+
+    // What the pruner writes when a push comes back `DeviceNotRegistered`.
+    await prisma.user.update({
+      where: { id: silent.requester.userId },
+      data: { pushToken: "" },
+    });
+
+    const candidates = await selectUnansweredMatchCandidates(NOW);
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]?.userId).not.toBe(silent.requester.userId);
+  });
+
+  it("leaves out a match where neither side can be reached", async () => {
+    const { requester, responder } = await seedSilentMatch(25);
+
+    await prisma.user.updateMany({
+      where: { id: { in: [requester.userId, responder.userId] } },
+      data: { pushToken: "" },
+    });
+
+    await expect(selectUnansweredMatchCandidates(NOW)).resolves.toEqual([]);
+  });
 });
 
 describe("selectNewDogsNearbyCandidates", () => {

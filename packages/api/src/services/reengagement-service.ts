@@ -245,6 +245,31 @@ const translate = (
 ): string => TranslationService.translate(key, { lng: Language.PtBr, replace });
 
 /**
+ * A user we can actually reach.
+ *
+ * The empty string matters: `UserService.blacklistPushToken` clears a dead
+ * token by writing `""` rather than null, so `IS NOT NULL` alone would keep
+ * re-selecting users whose device has already been rejected by Expo, burning
+ * their daily cap and inflating the sent count this whole change exists to
+ * measure.
+ */
+const REACHABLE_USER = Prisma.sql`
+  "User"."deletedAt" IS NULL
+  AND "User"."pushToken" IS NOT NULL
+  AND "User"."pushToken" <> ''
+`;
+
+/**
+ * The same rule, for the one selector that goes through Prisma rather than
+ * raw SQL. Both halves are needed for the same reason the SQL needs both.
+ */
+const REACHABLE_USER_WHERE = {
+  deletedAt: null,
+  pushToken: { not: null },
+  NOT: { pushToken: "" },
+} satisfies Prisma.UserWhereInput;
+
+/**
  * Matches that went silent, one candidate per side that can be reached.
  *
  * Both sides get the nudge because either of them can break the silence and
@@ -291,6 +316,15 @@ export const selectUnansweredMatchCandidates = async (
             banned: false,
             user: { deletedAt: null },
           },
+          // At least one side has to still have a live token. Either side can
+          // break the silence, so a match is worth pulling for one reachable
+          // half; a match where neither device answers any more is not, and
+          // leaving it in let dead installs fill the per run candidate ceiling
+          // and pushed the reachable people behind them out of the run.
+          OR: [
+            { requester: { user: REACHABLE_USER_WHERE } },
+            { responder: { user: REACHABLE_USER_WHERE } },
+          ],
         },
         select: {
           id: true,
@@ -336,21 +370,6 @@ export const selectUnansweredMatchCandidates = async (
 
   return buckets.flat();
 };
-
-/**
- * A user we can actually reach.
- *
- * The empty string matters: `UserService.blacklistPushToken` clears a dead
- * token by writing `""` rather than null, so `IS NOT NULL` alone would keep
- * re-selecting users whose device has already been rejected by Expo, burning
- * their daily cap and inflating the sent count this whole change exists to
- * measure.
- */
-const REACHABLE_USER = Prisma.sql`
-  "User"."deletedAt" IS NULL
-  AND "User"."pushToken" IS NOT NULL
-  AND "User"."pushToken" <> ''
-`;
 
 /**
  * Has this user liked anybody since `since`? Correlates against the enclosing

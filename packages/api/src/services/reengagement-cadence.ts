@@ -3,6 +3,8 @@ import type { ReengagementSuppressionReason } from "@pegada/shared/analytics/eve
 import prisma from "@pegada/database";
 import { Prisma } from "@prisma/client";
 
+import { DEAD_TOKEN_ERROR } from "../shared/push-errors";
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
@@ -68,9 +70,6 @@ const MAX_PUSHES_PER_MONTH = 2;
  * them.
  */
 const SLOT_SLACK_HOURS = 2;
-
-/** Expo's code for a token that no longer belongs to an install. */
-const DEAD_TOKEN_ERROR = "DeviceNotRegistered";
 
 /**
  * When a suppression is worth an event.
