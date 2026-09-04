@@ -1,0 +1,51 @@
+name: Events Audit
+
+# Dispatch only. This is a "what is the tracking actually doing" pass, run when
+# somebody is about to trust a funnel or has just shipped instrumentation, not
+# something worth a comment rewrite every morning.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Print the audit in the job log instead of commenting
+        type: boolean
+        default: false
+
+# The job edits one comment in place, so two runs overlapping would race each
+# other for the same body.
+concurrency:
+  group: events-audit
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # Writing the audit comment on the tracking issue.
+  issues: write
+
+jobs:
+  audit:
+    name: 🔍 Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 🏗 Setup Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: 🏗 Setup PNPM
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22.x
+
+      # No `pnpm install`, for the same reason the daily readout skips it: the
+      # script is plain Node with no dependencies, and it reads the catalogue
+      # out of the checkout as text rather than importing it.
+      - name: 🔍 Post the audit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+          POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
+        run: pnpm run metrics:events-audit ${{ inputs.dry_run && '--dry-run' || '' }}
