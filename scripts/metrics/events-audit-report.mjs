@@ -6,7 +6,11 @@
  * comment instead of leaving a second one on the tracking issue.
  */
 
-import { LIB_BUCKETS } from "./events-audit-queries.mjs";
+import {
+  EXCEPTION_MESSAGE_LENGTH,
+  LIB_BUCKETS,
+  MAX_EXCEPTION_GROUPS,
+} from "./events-audit-queries.mjs";
 
 export const COMMENT_MARKER = "<!-- pegada-events-audit -->";
 
@@ -392,9 +396,95 @@ function propertySection(summary, funnelEvents) {
   ].join("\n");
 }
 
+/**
+ * `$lib` in the words the readout uses everywhere else.
+ *
+ * The raw values are SDK names, and an exception table is read by whoever is
+ * about to go and fix it: "mobile" and "server" say which half of the codebase
+ * to open, "posthog-node" does not. Anything unmapped is passed through as it
+ * arrived rather than swept into a bucket, since a `$lib` nobody recognises on
+ * a crash is itself the finding.
+ */
+const LIB_LABELS = {
+  "posthog-node": "server",
+  "posthog-react-native": "mobile",
+  web: "web",
+};
+
+function libLabel(libs) {
+  const values = String(libs ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (values.length === 0) {
+    return "unknown";
+  }
+  return [...new Set(values.map((value) => LIB_LABELS[value] ?? value))].join(
+    ", ",
+  );
+}
+
+/**
+ * Text in a table cell, as a code span that the text cannot break out of.
+ *
+ * Exception messages arrive with whatever the thrower put in them: pipes, which
+ * end a cell, newlines, which end a row, and backticks, which end a code span.
+ * The fence grows past the longest run of backticks in the content, which is
+ * what CommonMark asks for, and a value that starts or ends with one is padded
+ * so the fence is still readable.
+ */
+export function codeCell(value) {
+  const text = String(value ?? "")
+    .replaceAll(/\s+/gu, " ")
+    .trim();
+  if (text === "") {
+    return "";
+  }
+  const escaped = text.replaceAll("|", String.raw`\|`);
+  const longest = Math.max(
+    0,
+    ...[...escaped.matchAll(/`+/gu)].map((match) => match[0].length),
+  );
+  const fence = "`".repeat(longest + 1);
+  const pad = escaped.startsWith("`") || escaped.endsWith("`") ? " " : "";
+  return `${fence}${pad}${escaped}${pad}${fence}`;
+}
+
+/**
+ * The exception table.
+ *
+ * Last on purpose: everything above it is about whether the instrumentation is
+ * telling the truth, and this is the one section about whether the product is
+ * working. Grouped by type and message rather than listed one by one, because
+ * the number that matters is how many people a single fault reached, and that
+ * is the column a fix gets prioritised on.
+ */
+function exceptionSection(exceptions) {
+  const rows = exceptions.map((row) => [
+    codeCell(row.exception_type),
+    codeCell(row.message),
+    number(row.total),
+    number(row.people),
+    libLabel(row.libs),
+    codeCell(row.app_versions) || "n/a",
+  ]);
+  return [
+    "### 5. Exceptions",
+    "",
+    `The ${number(MAX_EXCEPTION_GROUPS)} busiest \`$exception\` groups in the window, by exception type and message. Messages are cut at ${number(EXCEPTION_MESSAGE_LENGTH)} characters, and the grouping is on the cut value, so two failures that differ only in a trailing id count as one. App version is the build the phone was running, and \`n/a\` on anything the server threw.`,
+    "",
+    table(
+      ["Type", "Message", "Events", "People", "Library", "App version"],
+      rows,
+      "No exceptions in the window.",
+    ),
+  ].join("\n");
+}
+
 /** The whole comment body. */
 export function buildReport({
   catalogue,
+  exceptions = [],
   funnelEvents,
   generatedAt,
   propertyKeys,
@@ -427,5 +517,7 @@ export function buildReport({
     coverageSection(summary),
     "",
     propertySection(summary, funnelEvents),
+    "",
+    exceptionSection(exceptions),
   ].join("\n");
 }

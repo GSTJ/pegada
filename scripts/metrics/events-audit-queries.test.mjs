@@ -4,12 +4,15 @@ import { test } from "node:test";
 import {
   AUDIT_WINDOW_DAYS,
   CLIENT_LIBS,
+  EXCEPTION_MESSAGE_LENGTH,
   FUNNEL_TARGETS,
   LIB_BUCKETS,
+  MAX_EXCEPTION_GROUPS,
   MAX_ROWS,
   buildAuditWindow,
   buildEventSplitQuery,
   buildEventTotalsQuery,
+  buildExceptionGroupsQuery,
   buildPropertyKeysQuery,
   quote,
   resolveFunnelEvents,
@@ -127,4 +130,44 @@ test("every query states its own row limit", () => {
   ]) {
     assert.match(query, new RegExp(`LIMIT ${MAX_ROWS}$`));
   }
+});
+
+test("the exception query asks for fifteen groups of type and message", () => {
+  const query = buildExceptionGroupsQuery(buildAuditWindow(NOW));
+  assert.equal(MAX_EXCEPTION_GROUPS, 15);
+  assert.match(query, /AND event = '\$exception'/);
+  assert.match(query, /GROUP BY exception_type, message/);
+  assert.match(query, /ORDER BY total DESC, exception_type, message/);
+  assert.match(query, new RegExp(`LIMIT ${MAX_EXCEPTION_GROUPS}$`));
+});
+
+test("the exception query truncates the message before grouping on it", () => {
+  // Truncating in the renderer instead would group on the full message, and
+  // one fault whose message ends in an id would fill the whole table.
+  const query = buildExceptionGroupsQuery(buildAuditWindow(NOW));
+  assert.equal(EXCEPTION_MESSAGE_LENGTH, 120);
+  assert.match(
+    query,
+    new RegExp(`substring\\(.+, 1, ${EXCEPTION_MESSAGE_LENGTH}\\) AS message`),
+  );
+  assert.equal(query.indexOf("substring(") < query.indexOf("GROUP BY"), true);
+});
+
+test("the exception query keeps the libraries and versions inside the group", () => {
+  const query = buildExceptionGroupsQuery(buildAuditWindow(NOW));
+  assert.match(query, /groupUniqArray\(.+\$lib.+\) AS libs/);
+  assert.match(query, /groupUniqArrayIf\(.+\) AS app_versions/);
+  for (const lib of CLIENT_LIBS) {
+    assert.ok(query.includes(quote(lib)));
+  }
+  assert.equal(query.includes("GROUP BY exception_type, message, lib"), false);
+});
+
+test("the exception query stays inside its own seven days", () => {
+  const query = buildExceptionGroupsQuery(buildAuditWindow(NOW));
+  assert.match(
+    query,
+    /timestamp >= toDateTime\('2026-08-28 12:00:00', 'UTC'\)/,
+  );
+  assert.match(query, /timestamp < toDateTime\('2026-09-04 12:00:00', 'UTC'\)/);
 });

@@ -65,6 +65,28 @@ function fakeWorld({ existingComment = null, swipeName = "Swipe" } = {}) {
           ],
         });
       }
+      if (body.name.endsWith("exception groups")) {
+        return json({
+          columns: [
+            "exception_type",
+            "message",
+            "total",
+            "people",
+            "libs",
+            "app_versions",
+          ],
+          results: [
+            [
+              "TypeError",
+              "undefined is not an object",
+              6,
+              4,
+              "posthog-react-native",
+              "1.6.2",
+            ],
+          ],
+        });
+      }
       if (body.name.endsWith("event split")) {
         return json({
           columns: ["event", "lib", "app_version", "total"],
@@ -110,10 +132,32 @@ test("a dry run prints the body and never touches GitHub", async () => {
   assert.equal(result.action, "printed");
   assert.match(result.body, /### 1\. Every event seen/);
   assert.match(result.body, /`source` on 9\.5%/);
+  assert.match(result.body, /### 5\. Exceptions/);
+  assert.match(
+    result.body,
+    /\| `TypeError` \| `undefined is not an object` \| 6 \| 4 \| mobile \| `1\.6\.2` \|/,
+  );
   assert.equal(
     fetchImpl.calls.some((call) => !isPostHog(call.url)),
     false,
   );
+});
+
+test("the exception query goes out with the first round", async () => {
+  const fetchImpl = fakeWorld();
+  await runEventsAudit({
+    argv: ["--dry-run"],
+    catalogue: CATALOGUE,
+    env: ENV,
+    fetchImpl,
+    now: NOW,
+  });
+
+  const exceptionQuery = fetchImpl.calls.find((call) =>
+    call.body.name.endsWith("exception groups"),
+  ).body.query.query;
+  assert.match(exceptionQuery, /AND event = '\$exception'/);
+  assert.match(exceptionQuery, /LIMIT 15/);
 });
 
 test("the property query only runs once the event names are known", async () => {
@@ -127,10 +171,10 @@ test("the property query only runs once the event names are known", async () => 
   });
 
   const queries = fetchImpl.calls.map((call) => call.body.query.query);
-  assert.equal(queries.length, 3);
-  assert.match(queries[2], /arrayJoin\(JSONExtractKeys\(properties\)\)/);
-  assert.match(queries[2], /'Paywall Viewed'/);
-  assert.match(queries[2], /'Swipe'/);
+  assert.equal(queries.length, 4);
+  assert.match(queries[3], /arrayJoin\(JSONExtractKeys\(properties\)\)/);
+  assert.match(queries[3], /'Paywall Viewed'/);
+  assert.match(queries[3], /'Swipe'/);
 });
 
 test("a funnel event sent under another name is audited under that name", async () => {
@@ -143,7 +187,7 @@ test("a funnel event sent under another name is audited under that name", async 
     now: NOW,
   });
 
-  const propertyQuery = fetchImpl.calls[2].body.query.query;
+  const propertyQuery = fetchImpl.calls[3].body.query.query;
   assert.match(propertyQuery, /'Swiped'/);
   assert.match(result.body, /`Swipe` is sent as `Swiped`/);
   assert.match(result.body, /#### `Swipe`, sent as `Swiped`/);

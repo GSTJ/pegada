@@ -79,5 +79,8 @@ describe("analytics catalogue", () => {
     expect(ANALYTICS_EVENTS.UPGRADE).toBe("Upgrade");
     expect(ANALYTICS_EVENTS.NEW_MATCH).toBe("New Match");
     expect(ANALYTICS_EVENTS.SWIPE_BACK).toBe("Swipe Back");
+    // Sent by the `/store` redirect since before the catalogue existed, which
+    // is why the audit reported it as an event nobody could account for.
+    expect(ANALYTICS_EVENTS.STORE_REDIRECT).toBe("Store Redirect");
   });
 });

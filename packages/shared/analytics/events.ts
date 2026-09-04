@@ -72,6 +72,7 @@ export const ANALYTICS_EVENTS = {
   SIGN_IN_EMAIL_SUBMITTED: "Sign In Email Submitted",
   SIGNUP_ATTRIBUTED: "Signup Attributed",
   SKIP_COMPLETE_DOG_PROFILE: "Skip Complete Dog Profile",
+  STORE_REDIRECT: "Store Redirect",
   SUBSCRIPTION_EVENT: "Subscription Event",
   SWIPE: "Swipe",
   SWIPE_BACK: "Swipe Back",
@@ -201,6 +202,19 @@ export type SharePromptPlacement = "empty_deck" | "first_match";
  * tell a prompted share from the profile button.
  */
 export type ShareSource = SharePromptPlacement | "dog_profile" | "own_profile";
+
+/**
+ * Where `/store` sent a visitor, picked from the user agent. Mirrors
+ * `StoreTarget` in `apps/nextjs/src/app/store/store-urls.ts`, restated here for
+ * the same reason the RevenueCat unions below are: `@pegada/shared` is a
+ * dependency of the site, not the other way round.
+ *
+ * `web` is a desktop browser, which has no install to be sent to and lands on
+ * the landing page instead. Splitting the redirect by it is what separates a
+ * link that reached a phone from one that reached a laptop, and only the first
+ * kind can become an install.
+ */
+export type StoreRedirectTarget = "android" | "ios" | "web";
 
 /**
  * A feature the app advertises before it exists, so demand can be measured
@@ -528,6 +542,29 @@ export type ServerEventProperties = {
     referredByUserId: string | null;
     referredDogId: string | null;
   };
+  /**
+   * One hit on `/store`, the printable link that forwards a visitor into the
+   * App Store or Play Store with the campaign attached.
+   *
+   * Captured server side because the redirect is the entire response: there is
+   * no page for a browser event to fire from. Every property except `store` is
+   * read off the query string and is null when the link carried nothing, which
+   * is most of them, so a breakdown by `ref` reads the channels that were
+   * tagged rather than inventing a bucket for the ones that were not.
+   *
+   * `dogId` keeps its camelCase spelling. It is the key `/store` has always
+   * sent and the same one "Referral Captured" and "Signup Attributed" use, and
+   * a share link that spells it one way and the signup it produced another way
+   * is a funnel nobody can join.
+   */
+  [ANALYTICS_EVENTS.STORE_REDIRECT]: {
+    dogId: string | null;
+    ref: string | null;
+    store: StoreRedirectTarget;
+    utm_campaign: string | null;
+    utm_medium: string | null;
+    utm_source: string | null;
+  };
   [ANALYTICS_EVENTS.SUBSCRIPTION_EVENT]: {
     cancel_reason?: SubscriptionCancelReason | null;
     currency?: string | null;
@@ -675,6 +712,7 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
   ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
+  ANALYTICS_EVENTS.STORE_REDIRECT,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
 ] as const;
 

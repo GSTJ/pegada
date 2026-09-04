@@ -20,6 +20,7 @@ import {
   buildAuditWindow,
   buildEventSplitQuery,
   buildEventTotalsQuery,
+  buildExceptionGroupsQuery,
   buildPropertyKeysQuery,
   resolveFunnelEvents,
 } from "./events-audit-queries.mjs";
@@ -43,8 +44,9 @@ function requireEnv(env, name) {
  * Runs the queries, renders the comment, and either posts it or returns it.
  *
  * Two round trips rather than one: the property query can only name the funnel
- * events once the first pair has said which names PostHog actually holds, so a
- * renamed event is audited under the name it is really sent under.
+ * events once the first round has said which names PostHog actually holds, so a
+ * renamed event is audited under the name it is really sent under. The
+ * exception query depends on nothing, so it goes out with that first round.
  */
 export async function runEventsAudit({
   argv = [],
@@ -64,9 +66,13 @@ export async function runEventsAudit({
   const run = (name, query) =>
     queryHogql({ apiKey, fetchImpl, host, name, projectId, query });
 
-  const [totals, splits] = await Promise.all([
+  const [totals, splits, exceptions] = await Promise.all([
     run("pegada events audit: event totals", buildEventTotalsQuery(window)),
     run("pegada events audit: event split", buildEventSplitQuery(window)),
+    run(
+      "pegada events audit: exception groups",
+      buildExceptionGroupsQuery(window),
+    ),
   ]);
 
   const funnelEvents = resolveFunnelEvents(totals.map((row) => row.event));
@@ -78,6 +84,7 @@ export async function runEventsAudit({
 
   const body = buildReport({
     catalogue,
+    exceptions,
     funnelEvents,
     generatedAt: now,
     propertyKeys,

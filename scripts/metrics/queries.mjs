@@ -70,28 +70,31 @@ export const SERVER_EVENTS = [
  * The build most people are actually running, and the readout events it has no
  * code to send.
  *
- * Checked against the app at tag v1.6.2. The list is only client events: the
- * API emits `Message Sent`, `Reengagement Push Sent`, `Push Ticket Result` and
- * the rest of `SERVER_EVENTS` from the deployed server, so those rows are real
- * whatever build a person is on. `Create Dog Profile`, `New Match` and
- * `Upgrade` do exist in 1.6.2, which is why they are not here.
+ * Checked against the live events audit on issue #188, not against the v1.6.2
+ * tag. `runtimeVersion` follows `appVersion`, so a phone reporting
+ * `$app_version` 1.6.2 runs whatever JavaScript was last published to the 1.6.2
+ * runtime, which is the backport branch rather than the tag. Reading the tag is
+ * what put `Swipe`, `Paywall Viewed` and `Empty Deck Shown` on this list while
+ * PostHog was receiving all three from 1.6.2 phones, and a coverage note that
+ * excuses a live row is worse than no note: it explains away the number someone
+ * needed to act on.
  *
- * `Swipe` covers both the swipe count and the distinct swiper count, since one
- * missing event empties both rows.
+ * The list is only client events: the API emits `Message Sent`,
+ * `Reengagement Push Sent`, `Push Ticket Result` and the rest of
+ * `SERVER_EVENTS` from the deployed server, so those rows are real whatever
+ * build a person is on.
  *
- * Keep this in step with what is in the store, not with what is on main. The
- * point of the note is to stop a reach gap from reading as a dead product.
+ * Keep this in step with what the audit sees from 1.6.2, not with what is on
+ * main. The point of the note is to stop a reach gap from reading as a dead
+ * product, and it only works while every name on it is a genuine gap.
  */
 export const STORE_BUILD_COVERAGE = {
   missingEvents: [
-    EVENTS.EMPTY_DECK_SHOWN,
     EVENTS.FAKE_DOOR_TAPPED,
-    EVENTS.PAYWALL_VIEWED,
     EVENTS.PUSH_NOTIFICATION_OPENED,
     EVENTS.SHARE_COMPLETED,
     EVENTS.SHARE_PROMPT_TAPPED,
     EVENTS.SHARE_TAPPED,
-    EVENTS.SWIPE,
   ],
   version: "1.6.2",
 };
