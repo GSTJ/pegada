@@ -1,12 +1,30 @@
 import semver from "semver";
 import { z } from "zod";
 
-export const semverSchema = z.string().refine((version) => {
-  const isValid = semver.valid(version);
-  if (!isValid) throw new Error("Invalid version");
+/**
+ * Throwing inside `refine` was never caught by `safeParse`: zod lets an
+ * exception from a refinement escape, so the "safe" call was only safe for
+ * strings that were already valid. Returning a boolean keeps the same message
+ * on an invalid `MIN_APP_VERSION` at boot and makes `safeParse` usable on the
+ * version header, which arrives from a client and can be anything.
+ */
+export const semverSchema = z
+  .string()
+  .refine((version) => semver.valid(version) !== null, {
+    message: "Invalid version",
+  });
 
-  return isValid;
-});
+/**
+ * A semver that is allowed to be absent.
+ *
+ * An empty string counts as absent on purpose. Vercel keeps a variable in the
+ * project once it has been added, so blanking the value is how someone turns a
+ * gate back off, and that has to mean the same thing as never setting it.
+ */
+export const optionalSemverSchema = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  semverSchema.optional(),
+);
 
 const configSchema = z.object({
   /** GENERAL */
@@ -117,8 +135,25 @@ const configSchema = z.object({
    */
   CRON_SECRET: z.string().optional(),
 
-  /** APP */
+  /**
+   * APP
+   *
+   * The oldest build allowed to keep running. Anything below it gets the
+   * blocking update screen instead of the app.
+   *
+   * `MIN_APP_VERSION` is the floor both stores share. The per platform pair
+   * exists because approvals do not land together: a build can be live on the
+   * App Store while the same build is still in review on Google Play, and
+   * raising one global floor in that window locks every Android user out of an
+   * app they have no way to update yet. Raise the platform that shipped, leave
+   * the other alone, and clear both once the release is out everywhere.
+   *
+   * Unset or empty on a platform means "no platform floor", which falls back
+   * to `MIN_APP_VERSION`.
+   */
   MIN_APP_VERSION: semverSchema,
+  MIN_APP_VERSION_IOS: optionalSemverSchema,
+  MIN_APP_VERSION_ANDROID: optionalSemverSchema,
 
   /**
    * APPLE MAGIC
