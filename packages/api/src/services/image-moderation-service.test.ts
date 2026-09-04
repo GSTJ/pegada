@@ -205,6 +205,78 @@ describe("ImageModerationService.moderate", () => {
     expect(sendError).not.toHaveBeenCalled();
   });
 
+  it("fails open on a key that is set to an empty string", async () => {
+    config.GOOGLE_GENERATIVE_AI_API_KEY = "";
+
+    const result = await ImageModerationService.moderate(photo);
+
+    expect(result).toMatchObject({
+      verdict: "error",
+      reason: "missing_api_key",
+    });
+    expect(generateText).not.toHaveBeenCalled();
+  });
+
+  it("fails open when the provider refuses on quota", async () => {
+    generateText.mockRejectedValue(
+      Object.assign(new Error("429 RESOURCE_EXHAUSTED"), { statusCode: 429 }),
+    );
+
+    const result = await ImageModerationService.moderate(photo);
+
+    expect(result).toMatchObject({
+      verdict: "error",
+      reason: "provider_error",
+    });
+    expect(sendError).toHaveBeenCalled();
+  });
+
+  it("fails open when the model answers with prose instead of the object", async () => {
+    generateText.mockResolvedValue(answer("looks fine to me" as never));
+
+    const result = await ImageModerationService.moderate(photo);
+
+    expect(result).toMatchObject({
+      verdict: "error",
+      reason: "invalid_output",
+      score: null,
+    });
+    expect(sendError).toHaveBeenCalled();
+  });
+
+  it("fails open when the answer is missing half its fields", async () => {
+    generateText.mockResolvedValue(answer({ verdict: "reject" }));
+
+    const result = await ImageModerationService.moderate(photo);
+
+    // A half answer that mentions a rejection must not become one.
+    expect(result.verdict).toBe("error");
+    expect(result.reason).toBe("invalid_output");
+  });
+
+  it("fails open when the answer invents a verdict of its own", async () => {
+    generateText.mockResolvedValue(
+      answer({ ...APPROVAL, verdict: "maybe_reject" }),
+    );
+
+    const result = await ImageModerationService.moderate(photo);
+
+    expect(result.verdict).toBe("error");
+    expect(result.reason).toBe("invalid_output");
+  });
+
+  it("fails open when the upload is not a picture the resizer can read", async () => {
+    const notAPhoto = Buffer.from("this is not an image");
+
+    const result = await ImageModerationService.moderate(notAPhoto);
+
+    expect(result).toMatchObject({
+      verdict: "error",
+      reason: "provider_error",
+    });
+    expect(generateText).not.toHaveBeenCalled();
+  });
+
   it("fails open on a model string no provider claims", async () => {
     config.IMAGE_MODERATION_MODEL = "anthropic/claude";
 

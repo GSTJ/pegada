@@ -17,7 +17,6 @@ const cachedIsFeatureEnabled = cacheFunctionResultFor(
 );
 
 export const FEATURES = {
-  PROFANITY_CHECK: "profanity_check",
   IMAGE_BLURHASH: "image_blurhash",
 } as const;
 

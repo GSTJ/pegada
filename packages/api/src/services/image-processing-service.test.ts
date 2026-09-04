@@ -1,19 +1,28 @@
 /**
- * The gate in front of the provider. Two switches have to agree before a photo
- * costs anything, and only one of the three modes is allowed to reject, so
- * these are the cases that decide whether a rollout is reversible.
+ * The gate in front of the provider. The mode is the whole gate: it decides
+ * whether a photo costs anything and it is the only thing allowed to reject,
+ * so these are the cases that decide whether a rollout is reversible.
  */
-const config = { IMAGE_MODERATION_MODE: "off" as string };
+const config = {
+  IMAGE_MODERATION_MODE: "off" as string,
+  IMAGE_MODERATION_MODEL: "google/gemini-2.5-flash-lite",
+};
 
 jest.mock("../shared/config", () => ({
   config,
   isMagicEmail: () => false,
 }));
 
+const sendError = jest.fn();
+jest.mock("../errors/errors", () => ({
+  sendError: (...args: unknown[]) => sendError(...args),
+  logDebug: () => undefined,
+  errorDebug: () => undefined,
+}));
+
 const isFeatureEnabled = jest.fn();
 jest.mock("./flag-service", () => ({
   FEATURES: {
-    PROFANITY_CHECK: "profanity_check",
     IMAGE_BLURHASH: "image_blurhash",
   },
   FlagService: {
@@ -54,13 +63,14 @@ const verdict = (value: "approve" | "error" | "reject") => ({
 });
 
 beforeEach(() => {
+  sendError.mockClear();
   isFeatureEnabled.mockResolvedValue(true);
   moderate.mockResolvedValue(verdict("approve"));
   getStoredModerationVerdict.mockResolvedValue({ moderationVerdict: null });
 });
 
 describe("ImageProcessingService.moderateImage", () => {
-  it("calls nobody while the mode is off, whatever the flag says", async () => {
+  it("calls nobody while the mode is off", async () => {
     config.IMAGE_MODERATION_MODE = "off";
 
     const outcome = await ImageProcessingService.moderateImage({
@@ -70,11 +80,10 @@ describe("ImageProcessingService.moderateImage", () => {
 
     expect(outcome).toEqual({ status: "APPROVED", result: null, mode: "off" });
     expect(moderate).not.toHaveBeenCalled();
-    expect(isFeatureEnabled).not.toHaveBeenCalled();
   });
 
-  it("calls nobody while the flag is off, whatever the mode says", async () => {
-    config.IMAGE_MODERATION_MODE = "enforce";
+  it("moderates on the mode alone, with no flag left to consult", async () => {
+    config.IMAGE_MODERATION_MODE = "shadow";
     isFeatureEnabled.mockResolvedValue(false);
 
     const outcome = await ImageProcessingService.moderateImage({
@@ -82,23 +91,26 @@ describe("ImageProcessingService.moderateImage", () => {
       imageId,
     });
 
-    expect(outcome).toEqual({
-      status: "APPROVED",
-      result: null,
-      mode: "enforce",
-    });
-    expect(moderate).not.toHaveBeenCalled();
+    // A disabled flag used to swallow every call here, which is why shadow ran
+    // in production for a week without producing a single verdict.
+    expect(isFeatureEnabled).not.toHaveBeenCalled();
+    expect(moderate).toHaveBeenCalledWith(arrayBuffer);
+    expect(outcome.result?.verdict).toBe("approve");
   });
 
-  it("defaults the flag to off, so an unreachable PostHog spends nothing", async () => {
+  it("records an approval in shadow without touching the status", async () => {
     config.IMAGE_MODERATION_MODE = "shadow";
 
-    await ImageProcessingService.moderateImage({ arrayBuffer, imageId });
-
-    expect(isFeatureEnabled).toHaveBeenCalledWith({
-      feature: "profanity_check",
-      defaultValue: false,
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
     });
+
+    expect(outcome.status).toBe("APPROVED");
+    // A non null result is what makes the handler emit the verdict event, so
+    // shadow reports as loudly as enforce does.
+    expect(outcome.result).toMatchObject({ verdict: "approve" });
+    expect(outcome.mode).toBe("shadow");
   });
 
   it("keeps a rejection out of the status in shadow, but keeps the verdict", async () => {
@@ -128,9 +140,57 @@ describe("ImageProcessingService.moderateImage", () => {
     expect(outcome.result?.verdict).toBe("reject");
   });
 
-  it("publishes on a provider error even in enforce", async () => {
+  // Every way the provider can let us down arrives here as the same `error`
+  // verdict, so the property worth pinning is that none of them, in either
+  // mode that calls anyone, can hold a photo back.
+  it.each(["shadow", "enforce"])(
+    "publishes the photo on a provider failure in %s",
+    async (mode) => {
+      config.IMAGE_MODERATION_MODE = mode;
+      moderate.mockResolvedValue({
+        ...verdict("error"),
+        reason: "provider_error",
+      });
+
+      const outcome = await ImageProcessingService.moderateImage({
+        arrayBuffer,
+        imageId,
+      });
+
+      expect(outcome.status).toBe("APPROVED");
+      // The failure still travels back as a result, which is what puts it in
+      // the readout rather than leaving the week looking quiet.
+      expect(outcome.result).toMatchObject({
+        verdict: "error",
+        reason: "provider_error",
+      });
+      expect(outcome.mode).toBe(mode);
+    },
+  );
+
+  it.each(["shadow", "enforce"])(
+    "publishes the photo when the call itself blows up in %s",
+    async (mode) => {
+      config.IMAGE_MODERATION_MODE = mode;
+      moderate.mockRejectedValue(new Error("socket hang up"));
+
+      const outcome = await ImageProcessingService.moderateImage({
+        arrayBuffer,
+        imageId,
+      });
+
+      expect(outcome.status).toBe("APPROVED");
+      expect(outcome.result).toMatchObject({
+        verdict: "error",
+        reason: "unexpected_error",
+      });
+      expect(sendError).toHaveBeenCalled();
+    },
+  );
+
+  it("publishes the photo when the stored verdict lookup fails", async () => {
     config.IMAGE_MODERATION_MODE = "enforce";
-    moderate.mockResolvedValue(verdict("error"));
+    getStoredModerationVerdict.mockRejectedValue(new Error("database is away"));
 
     const outcome = await ImageProcessingService.moderateImage({
       arrayBuffer,
@@ -139,6 +199,7 @@ describe("ImageProcessingService.moderateImage", () => {
 
     expect(outcome.status).toBe("APPROVED");
     expect(outcome.result?.verdict).toBe("error");
+    expect(moderate).not.toHaveBeenCalled();
   });
 
   it("publishes an approval in enforce", async () => {

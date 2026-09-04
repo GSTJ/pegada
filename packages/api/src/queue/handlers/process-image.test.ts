@@ -226,6 +226,37 @@ describe("handleProcessImage", () => {
     expect(push?.body).toBeTruthy();
   });
 
+  it.each(["shadow", "enforce"])(
+    "publishes the photo and counts the failure when moderation errors in %s",
+    async (mode) => {
+      moderateImage.mockResolvedValue({
+        status: "APPROVED",
+        result: { ...REJECTION, verdict: "error", reason: "provider_error" },
+        mode: mode as "shadow" | "enforce",
+      });
+
+      await expect(
+        handleProcessImage({ id: "image-id", url: `${BUCKET_URL}/dogs/6` }),
+      ).resolves.toBeDefined();
+
+      expect(updateImage).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "APPROVED" }),
+      );
+      // Without this the failure is invisible and a broken provider looks the
+      // same as a quiet week.
+      expect(captureEvent).toHaveBeenCalledWith(
+        "user-id",
+        "Image Moderation Result",
+        expect.objectContaining({
+          verdict: "error",
+          reason: "provider_error",
+          mode,
+        }),
+      );
+      expect(enqueuePushNotification).not.toHaveBeenCalled();
+    },
+  );
+
   it("skips the push when the owner has no device to send it to", async () => {
     moderateImage.mockResolvedValue({
       status: "REJECTED",
