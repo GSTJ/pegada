@@ -2,8 +2,15 @@ import type { ReportReason } from "@pegada/shared/analytics/events";
 
 import { useState } from "react";
 import * as React from "react";
-import { ActivityIndicator, Linking, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Keyboard,
+  Linking,
+  TextInput,
+  View,
+} from "react-native";
 
+import { REPORT_DETAILS_MAX_LENGTH } from "@pegada/shared/constants/constants";
 import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { magicModal, useMagicModal } from "react-native-magic-modal";
@@ -16,12 +23,10 @@ import Divider from "@/components/divider";
 import { PressableArea } from "@/components/pressable-area";
 import { Text } from "@/components/text";
 import { api } from "@/contexts/trpc-provider";
+import { useKeyboardOverlap } from "@/hooks/use-keyboard-aware-scroll";
 import { sendError } from "@/services/error-tracking";
 
 import { styles } from "./styles";
-
-/** Kept in step with `REPORT_DETAILS_MAX_LENGTH` in the API's report route. */
-const DETAILS_MAX_LENGTH = 500;
 
 /**
  * Order matters: the two reasons that moderation acts on fastest come first,
@@ -108,6 +113,13 @@ const ReportSheetContent = ({
   const { theme } = useUnistyles();
   const { hide } = useMagicModal();
 
+  // The sheet is anchored to the bottom of the screen, so without this the
+  // keyboard covers the note box and the send button under it, and the only
+  // way out is to swipe the sheet away and lose what was typed. Same hook
+  // `Picker` uses for the same reason; a KeyboardAvoidingView does nothing on
+  // Android, where `behavior` has to be left undefined.
+  const keyboardOverlap = useKeyboardOverlap();
+
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState("");
 
@@ -150,18 +162,27 @@ const ReportSheetContent = ({
 
   return (
     <View
-      style={[styles.overlay, { paddingBottom: insets.bottom || undefined }]}
+      style={[
+        styles.overlay,
+        {
+          paddingBottom: Math.max(keyboardOverlap, insets.bottom) || undefined,
+        },
+      ]}
     >
       <View style={styles.sheet}>
         <View style={styles.handleContainer}>
           <View style={styles.handleBar} />
         </View>
-        <Text fontWeight="medium" fontSize="lg" style={styles.title}>
-          {t("reportSheet.title", { name: firstName })}
-        </Text>
-        <Text fontSize="xs" style={styles.subtitle}>
-          {t("reportSheet.subtitle")}
-        </Text>
+        {/* The header doubles as the way out of the note box: tapping it puts
+            the keyboard away without losing what was typed. */}
+        <PressableArea accessible={false} onPress={() => Keyboard.dismiss()}>
+          <Text fontWeight="medium" fontSize="lg" style={styles.title}>
+            {t("reportSheet.title", { name: firstName })}
+          </Text>
+          <Text fontSize="xs" style={styles.subtitle}>
+            {t("reportSheet.subtitle")}
+          </Text>
+        </PressableArea>
         <Divider style={styles.titleDivider} />
 
         {REASONS.map((item) => (
@@ -181,7 +202,7 @@ const ReportSheetContent = ({
           testID="report-details"
           accessibilityLabel={t("reportSheet.detailsLabel")}
           multiline
-          maxLength={DETAILS_MAX_LENGTH}
+          maxLength={REPORT_DETAILS_MAX_LENGTH}
           value={details}
           onChangeText={setDetails}
           placeholder={t("reportSheet.detailsPlaceholder")}

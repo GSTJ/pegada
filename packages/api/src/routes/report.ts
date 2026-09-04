@@ -4,6 +4,7 @@ import type {
 } from "@pegada/shared/analytics/events";
 
 import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
+import { REPORT_DETAILS_MAX_LENGTH } from "@pegada/shared/constants/constants";
 import { ReportReason, ReportTargetType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -28,9 +29,6 @@ const REASONS: Record<ReportReasonName, ReportReason> = {
   other: ReportReason.OTHER,
   spam: ReportReason.SPAM,
 };
-
-/** Long enough to describe what happened, short enough to stay readable. */
-export const REPORT_DETAILS_MAX_LENGTH = 500;
 
 export const reportTargetTypeSchema = z.enum(["dog", "user"]);
 
