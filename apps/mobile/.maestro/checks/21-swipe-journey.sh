@@ -7,7 +7,7 @@
 # Schema reminder (psql \dt):
 #   - The Report flow in apps/mobile/src/views/DogProfile/index.tsx opens the
 #     report sheet, which calls `report.create` and then
-#     `swipe.swipe.mutate({ swipeType: Dislike })` — so a report persists as a
+#     `swipe.swipe.mutate({ swipeType: Dislike })`, so a report persists as a
 #     Report row AND as a NOT_INTERESTED Interest row on the reported dog.
 #
 # Expected end state (against the maestro-seed.ts baseline):
@@ -85,7 +85,7 @@ if [[ "$MAYBE" -lt 1 ]]; then
   fail=1
 fi
 if [[ "$REPORTS" -lt 1 ]]; then
-  echo "[check-21] FAIL — expected >=1 Report row from the report sheet, got $REPORTS" >&2
+  echo "[check-21] FAIL: expected >=1 Report row from the report sheet, got $REPORTS" >&2
   fail=1
 fi
 
