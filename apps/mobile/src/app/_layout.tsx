@@ -21,6 +21,7 @@ import { useProtectedRoute } from "@/hooks/use-protected-route";
 import { useTrackScreens } from "@/hooks/use-track-screens";
 import { config } from "@/services/config";
 import { sendError } from "@/services/error-tracking";
+import { useForceUpdateOnForeground } from "@/services/force-update";
 import { useGetInitialNotifications } from "@/services/linking";
 import { getExpoPostHog } from "@/services/observability";
 import { useQuickActions } from "@/services/quick-actions";
@@ -76,6 +77,10 @@ const App = () => {
 
   useTrackScreens();
   useGetInitialNotifications();
+  // The launch check only ever runs once. This is the same check on the way
+  // back from the background, for the phones that go weeks without a cold
+  // start and would otherwise never see a raised floor.
+  useForceUpdateOnForeground();
   // Ahead of the auth gate on purpose: the link that carries a referral is
   // usually opened by someone with no account, and the referral has to be on
   // disk before they reach the sign in screen.

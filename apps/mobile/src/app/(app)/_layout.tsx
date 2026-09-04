@@ -96,7 +96,14 @@ const AppLayout = () => {
           animation: "default",
         }}
       />
-      <Stack.Screen name="force-update" />
+      <Stack.Screen
+        name="force-update"
+        options={{
+          // There is no way off this screen except the store, so it does not
+          // get the back gesture either.
+          gestureEnabled: false,
+        }}
+      />
       <Stack.Screen
         name="new-match"
         options={{

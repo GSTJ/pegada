@@ -2,7 +2,7 @@ import type { AppRouter } from "@pegada/api";
 
 import { useEffect } from "react";
 import * as React from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 
 import Constants from "expo-constants";
 
@@ -73,6 +73,10 @@ export const trpcQueryClient = api.createClient({
         const appVersion = Constants.expoConfig?.version ?? "0.0.0";
 
         headers.set(RequestHeaders.XAppVersion, appVersion);
+        // Which store this build came from, so the update floor can be raised
+        // on the platform a release is already live on without locking out the
+        // one still waiting on review.
+        headers.set(RequestHeaders.XAppPlatform, Platform.OS);
         headers.set(RequestHeaders.XTRPCSource, "expo-react");
         headers.set(RequestHeaders.AcceptLanguage, i18n.language);
 
