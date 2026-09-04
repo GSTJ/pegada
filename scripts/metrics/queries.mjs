@@ -155,6 +155,31 @@ export const BREAKDOWNS = [
     property: "type",
     title: "Subscription Event by type",
   },
+  // The three below are the pricing readout. Together they answer which
+  // trigger sends people to the paywall and how well each one converts, how
+  // much of the revenue is a trial that has not become paid yet, and whether a
+  // subscription ended because the person asked for their money back or
+  // because they simply stopped paying. RevenueCat spells a refund
+  // `CUSTOMER_SUPPORT`, a voluntary cancel `UNSUBSCRIBE` and a failed charge
+  // `BILLING_ERROR`, so the three read very differently and cannot share a row.
+  {
+    id: "paywall_trigger",
+    event: EVENTS.PAYWALL_VIEWED,
+    property: "trigger",
+    title: "Paywall Viewed by trigger",
+  },
+  {
+    id: "subscription_period_type",
+    event: EVENTS.SUBSCRIPTION_EVENT,
+    property: "period_type",
+    title: "Subscription Event by period type",
+  },
+  {
+    id: "subscription_cancel_reason",
+    event: EVENTS.SUBSCRIPTION_EVENT,
+    property: "cancel_reason",
+    title: "Subscription Event by cancel reason",
+  },
 ];
 
 const DAY_MS = 24 * 60 * 60 * 1000;

@@ -55,6 +55,14 @@ const FIXTURE = {
       ["reject", "previous", 14],
       ["error", "current", 2],
     ]),
+    paywall_trigger: breakdown([
+      ["like_limit", "current", 180],
+      ["like_limit", "previous", 150],
+      ["profile_plan", "current", 90],
+      ["profile_plan", "previous", 60],
+      ["swipe_back", "current", 30],
+      ["unknown", "current", 5],
+    ]),
     push_ticket_status: breakdown([
       ["ok", "current", 90],
       ["error", "current", 10],
@@ -71,6 +79,20 @@ const FIXTURE = {
       ["organic", "current", 50],
       ["organic", "previous", 55],
       ["unknown", "current", 3],
+    ]),
+    subscription_cancel_reason: breakdown([
+      ["UNSUBSCRIBE", "current", 6],
+      ["UNSUBSCRIBE", "previous", 4],
+      ["CUSTOMER_SUPPORT", "current", 2],
+      ["BILLING_ERROR", "current", 1],
+      ["unknown", "current", 28],
+    ]),
+    subscription_period_type: breakdown([
+      ["TRIAL", "current", 14],
+      ["TRIAL", "previous", 9],
+      ["NORMAL", "current", 21],
+      ["NORMAL", "previous", 18],
+      ["INTRO", "current", 3],
     ]),
     subscription_type: breakdown([
       ["INITIAL_PURCHASE", "current", 7],
@@ -254,6 +276,9 @@ test("every breakdown gets its own table, ordered by the current window", () => 
     "Signup Attributed by ref",
     "Image Moderation Result by verdict",
     "Subscription Event by type",
+    "Paywall Viewed by trigger",
+    "Subscription Event by period type",
+    "Subscription Event by cancel reason",
   ]) {
     assert.ok(body.includes(`### ${title}`), `missing ${title}`);
   }
@@ -263,6 +288,30 @@ test("every breakdown gets its own table, ordered by the current window", () => 
       subscriptions.indexOf("| INITIAL_PURCHASE |"),
   );
   assert.match(body, /\| ai_story_video \| 31 \| 12 \| \+19 \(\+158\.3%\) \|/);
+});
+
+test("the pricing tables split the paywall by trigger and the subscription by period", () => {
+  const body = buildReport(FIXTURE);
+  const [, triggers] = body.split("### Paywall Viewed by trigger");
+  assert.match(triggers, /\| like_limit \| 180 \| 150 \| \+30 \(\+20\.0%\) \|/);
+  assert.match(triggers, /\| profile_plan \| 90 \| 60 \| \+30 \(\+50\.0%\) \|/);
+  assert.ok(
+    triggers.indexOf("| like_limit |") < triggers.indexOf("| profile_plan |"),
+  );
+
+  const [, periods] = body.split("### Subscription Event by period type");
+  assert.match(periods, /\| TRIAL \| 14 \| 9 \| \+5 \(\+55\.6%\) \|/);
+  assert.match(periods, /\| NORMAL \| 21 \| 18 \| \+3 \(\+16\.7%\) \|/);
+});
+
+test("the cancel reason table separates a refund from a voluntary cancel", () => {
+  const body = buildReport(FIXTURE);
+  const [, reasons] = body.split("### Subscription Event by cancel reason");
+  assert.match(reasons, /\| UNSUBSCRIBE \| 6 \| 4 \| \+2 \(\+50\.0%\) \|/);
+  assert.match(reasons, /\| CUSTOMER_SUPPORT \| 2 \| 0 \| \+2 \(new\) \|/);
+  assert.match(reasons, /\| BILLING_ERROR \| 1 \| 0 \| \+1 \(new\) \|/);
+  // Every subscription event that is not a cancel carries no reason at all.
+  assert.match(reasons, /\| unknown \| 28 \| 0 \| \+28 \(new\) \|/);
 });
 
 test("an empty breakdown says so instead of rendering an empty table", () => {
