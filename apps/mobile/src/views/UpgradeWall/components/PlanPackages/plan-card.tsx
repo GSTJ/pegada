@@ -72,7 +72,20 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   // A single month already reads as "X/mo", so the total would just repeat it.
   const showTotalPrice = !(periodUnit === "M" && periodValue === 1);
 
+  // Keyed off the package type, not the product id: on Google Play a
+  // RevenueCat product identifier is `subscriptionId:basePlanId`, so matching
+  // on the bare id sent every Android row to the raw store title. The product
+  // ids stay as a fallback for offerings that arrive with a custom type.
   const translatedPlanName = (() => {
+    switch (pkg.packageType) {
+      case "ANNUAL":
+        return t("plans.yearly");
+      case "MONTHLY":
+        return t("plans.monthly");
+      case "WEEKLY":
+        return t("plans.weekly");
+    }
+
     switch (identifier) {
       case "premium_monthly":
         return t("plans.monthly");

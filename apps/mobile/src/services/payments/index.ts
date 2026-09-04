@@ -127,6 +127,7 @@ const logIn = async () => {
 const buildMaestroSyntheticOfferings = (): PurchasesOffering => {
   const monthlyPrice = 9.99;
   const yearlyPrice = 49.99;
+  const weeklyPrice = 4.99;
 
   const baseProduct = {
     description: "Pegada Premium",
@@ -143,7 +144,7 @@ const buildMaestroSyntheticOfferings = (): PurchasesOffering => {
   };
 
   // String literals (not ProductIdentifier.*) because the enum is declared
-  // further down in this file — both values match the enum exactly.
+  // further down in this file, and these are the ids the stores publish.
   const monthlyProduct = {
     ...baseProduct,
     identifier: "premium_monthly",
@@ -172,6 +173,20 @@ const buildMaestroSyntheticOfferings = (): PurchasesOffering => {
     subscriptionPeriod: "P1Y",
   };
 
+  const weeklyProduct = {
+    ...baseProduct,
+    identifier: "premium_weekly",
+    price: weeklyPrice,
+    priceString: `$${weeklyPrice.toFixed(2)}`,
+    pricePerWeek: weeklyPrice,
+    pricePerMonth: weeklyPrice * 4,
+    pricePerYear: weeklyPrice * 52,
+    pricePerWeekString: `$${weeklyPrice.toFixed(2)}`,
+    pricePerMonthString: `$${(weeklyPrice * 4).toFixed(2)}`,
+    pricePerYearString: `$${(weeklyPrice * 52).toFixed(2)}`,
+    subscriptionPeriod: "P1W",
+  };
+
   const monthlyPackage = {
     identifier: "$rc_monthly",
     packageType: "MONTHLY",
@@ -188,18 +203,26 @@ const buildMaestroSyntheticOfferings = (): PurchasesOffering => {
     presentedOfferingContext: { offeringIdentifier: "default" },
   };
 
+  const weeklyPackage = {
+    identifier: "$rc_weekly",
+    packageType: "WEEKLY",
+    product: weeklyProduct,
+    offeringIdentifier: "default",
+    presentedOfferingContext: { offeringIdentifier: "default" },
+  };
+
   return {
     identifier: "default",
     serverDescription: "Pegada Premium (Maestro/Sim fallback)",
     metadata: {},
-    availablePackages: [monthlyPackage, yearlyPackage],
+    availablePackages: [monthlyPackage, yearlyPackage, weeklyPackage],
     lifetime: null,
     annual: yearlyPackage,
     sixMonth: null,
     threeMonth: null,
     twoMonth: null,
     monthly: monthlyPackage,
-    weekly: null,
+    weekly: weeklyPackage,
   } as unknown as PurchasesOffering;
 };
 
