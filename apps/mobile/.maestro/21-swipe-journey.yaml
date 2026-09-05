@@ -30,14 +30,12 @@ tags:
 #     like / dislike / maybe / report cycle runs against them safely.
 #
 # Report flow (apps/mobile/src/views/DogProfile/index.tsx → reportUser):
-# - Triggers a native Alert with title "Report" (i18n key dogProfile.report)
-#   and body "By reporting a profile, you are helping us to keep the
-#   community safe. Would you like to proceed?" (dogProfile.reportMessage).
-# - Tapping "Yes" (dogProfile.yes) calls Linking.openURL(mailto:) then
-#   swipe.swipe.mutate({ swipeType: Dislike }) on the reported dog, then
-#   router.back(). No Report table exists — the act of reporting persists
-#   only as an Interest row of type NOT_INTERESTED (verified via psql
-#   \dt — see checks/21-swipe-journey.sh).
+# - Opens the report sheet (src/components/ReportSheet), which lists five
+#   reasons and one optional text box.
+# - Picking a reason enables "Send report", which calls report.create and
+#   writes a Report row, then swipe.swipe.mutate({ swipeType: Dislike }) on
+#   the reported dog, then router.back(). checks/21-swipe-journey.sh asserts
+#   the row landed.
 - launchApp:
     clearState: true
     clearKeychain: true
@@ -117,26 +115,36 @@ tags:
 - scroll
 - waitForAnimationToEnd
 
-# --- 9. Trigger the report Alert and confirm -----------------------------
+# --- 9. Open the report sheet and file a report --------------------------
 # Report row sits at the BOTTOM of the BottomColumn ScrollView, below
-# reportUser(dog) → Alert.alert("Report", ...).
+# reportUser(dog) → showReportSheet(dog).
 - tapOn:
     id: "dog-profile-report"
 - waitForAnimationToEnd:
     timeout: 3000
 
-# Title "Report" + body text (dogProfile.reportMessage from en.json).
+# The five reasons and the send button (reportSheet.* keys from en.json).
 - assertVisible:
-    text: "Report"
-- assertVisible: "By reporting a profile, you are helping us to keep the community safe. Would you like to proceed?"
-- takeScreenshot: 21-report-dialog
+    id: "report-reason-fake_profile"
+- assertVisible:
+    id: "report-submit"
+- takeScreenshot: 21-report-sheet
 
-# Confirm — "Yes" (dogProfile.yes). The handler fires
-# Linking.openURL("mailto:report@pegada.app...") + swipe.swipe.mutate
-# (Dislike) + router.back(). The Alert dismisses regardless of whether
-# mailto can be handled by the simulator.
+# Send is disabled until a reason is picked, so pick one first.
 - tapOn:
-    text: "Yes"
+    id: "report-reason-fake_profile"
+- waitForAnimationToEnd
+- tapOn:
+    id: "report-details"
+- inputText: "Maestro run"
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 21-report-sheet-filled
+
+# report.create writes the row, the sheet closes, a toast confirms, and the
+# reported dog leaves the deck as a dislike.
+- tapOn:
+    id: "report-submit"
 - waitForAnimationToEnd:
     timeout: 8000
 

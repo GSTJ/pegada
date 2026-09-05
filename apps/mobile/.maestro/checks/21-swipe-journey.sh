@@ -5,13 +5,13 @@
 # rows to Postgres for test@pegada.app's Rex.
 #
 # Schema reminder (psql \dt):
-#   - There is NO Report table. The Report flow in
-#     apps/mobile/src/views/DogProfile/index.tsx fires
-#     `Linking.openURL("mailto:report@pegada.app...")` and then
-#     `swipe.swipe.mutate({ swipeType: Dislike })` — so a "report" persists
-#     ONLY as a NOT_INTERESTED Interest row on the reported dog.
+#   - The Report flow in apps/mobile/src/views/DogProfile/index.tsx opens the
+#     report sheet, which calls `report.create` and then
+#     `swipe.swipe.mutate({ swipeType: Dislike })`, so a report persists as a
+#     Report row AND as a NOT_INTERESTED Interest row on the reported dog.
 #
 # Expected end state (against the maestro-seed.ts baseline):
+#   - >=1 Report row filed by the magic user (step 9).
 #   - >=2 NOT_INTERESTED interests from Rex (one for MatchMe step 4,
 #     one for SwipeDog3 step 6, possibly one extra from the Report step 9
 #     against whatever dog was on top after step 7).
@@ -61,7 +61,15 @@ MAYBE=$(psql "$DATABASE_URL" -tAc \
        AND \"swipeType\" = 'MAYBE'
        AND \"deletedAt\" IS NULL")
 
-echo "[check-21] NOT_INTERESTED=$NOT_INTERESTED, INTERESTED=$INTERESTED, MAYBE=$MAYBE"
+# The report sheet writes one row per complaint. Before it existed the report
+# step left nothing behind but the dislike, so this count is the only thing
+# that tells a working sheet apart from a button that silently does nothing.
+REPORTS=$(psql "$DATABASE_URL" -tAc \
+  "SELECT COUNT(*) FROM \"Report\" r
+     JOIN \"User\" u ON u.id = r.\"reporterId\"
+     WHERE u.email = '$TEST_EMAIL'")
+
+echo "[check-21] NOT_INTERESTED=$NOT_INTERESTED, INTERESTED=$INTERESTED, MAYBE=$MAYBE, REPORTS=$REPORTS"
 
 fail=0
 if [[ "$NOT_INTERESTED" -lt 2 ]]; then
@@ -74,6 +82,10 @@ if [[ "$INTERESTED" -lt 1 ]]; then
 fi
 if [[ "$MAYBE" -lt 1 ]]; then
   echo "[check-21] FAIL — expected >=1 MAYBE (SwipeDog4), got $MAYBE" >&2
+  fail=1
+fi
+if [[ "$REPORTS" -lt 1 ]]; then
+  echo "[check-21] FAIL: expected >=1 Report row from the report sheet, got $REPORTS" >&2
   fail=1
 fi
 

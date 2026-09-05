@@ -8,6 +8,7 @@ import { matchRouter } from "./routes/match";
 import { messageRouter } from "./routes/message";
 import { myDogRouter } from "./routes/my-dog";
 import { paymentRouter } from "./routes/payment";
+import { reportRouter } from "./routes/report";
 import { swipeRouter } from "./routes/swipe";
 import { userRouter } from "./routes/user";
 import { createTRPCRouter } from "./trpc";
@@ -25,6 +26,7 @@ export const appRouter = createTRPCRouter({
   echo: echoRouter,
   payment: paymentRouter,
   featureInterest: featureInterestRouter,
+  report: reportRouter,
 });
 
 // export type definition of API

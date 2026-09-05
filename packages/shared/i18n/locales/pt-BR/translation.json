@@ -183,6 +183,21 @@
     "sheetBody": "Estamos preparando isso com carinho. Quer ser avisado quando lançar?",
     "sheetTitle": "Em breve"
   },
+  "reportSheet": {
+    "cancel": "Cancelar",
+    "detailsLabel": "Quer contar o que aconteceu? (opcional)",
+    "detailsPlaceholder": "Escreva aqui",
+    "failed": "Não deu pra enviar agora. Tenta de novo.",
+    "reasonFakeProfile": "Perfil falso",
+    "reasonHarassment": "Assédio ou ameaça",
+    "reasonInappropriatePhotos": "Fotos impróprias",
+    "reasonOther": "Outro motivo",
+    "reasonSpam": "Spam ou golpe",
+    "submit": "Enviar denúncia",
+    "subtitle": "Escolhe o motivo. A gente olha todas as denúncias e o perfil não fica sabendo quem denunciou.",
+    "success": "Denúncia enviada, obrigado",
+    "title": "Denunciar {{name}}"
+  },
   "forceUpdate": {
     "button": "Atualizar",
     "description": "Uma nova versão do Pegada está disponível. Por favor, atualize para continuar usando o app.",
