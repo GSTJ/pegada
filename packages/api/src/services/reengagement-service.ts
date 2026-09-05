@@ -1,3 +1,4 @@
+import type { ReengagementRunSummary } from "./reengagement-report";
 import type {
   ReengagementPushKind,
   ReengagementSuppressionReason,
@@ -20,7 +21,10 @@ import {
   readCadence,
   WINDOW_REPORT_HOUR,
 } from "./reengagement-cadence";
+import { reportRun } from "./reengagement-report";
 import { TranslationService } from "./translation-service";
+
+export type { ReengagementRunSummary } from "./reengagement-report";
 
 /**
  * `satisfies` rather than a bare `as const`: the catalogue restates these three
@@ -138,20 +142,6 @@ export type Candidate = {
   url: string;
   /** Set on the "tell me when a new dog shows up" path, cleared once sent. */
   clearsNewDogsAlert?: boolean;
-};
-
-export type ReengagementRunSummary = {
-  sent: number;
-  byKind: Record<ReengagementKind, number>;
-  candidates: number;
-  /**
-   * Users who had a nudge waiting and did not get it, by reason. Counted once
-   * per user per run, which is not the same as the events: those are reported
-   * once a day so they count people rather than passes.
-   */
-  suppressed: Record<ReengagementSuppressionReason, number>;
-  skippedAlreadySent: number;
-  skippedUnreachable: number;
 };
 
 /**
@@ -732,6 +722,15 @@ export class ReengagementService {
    * can be honoured; this method is what decides who is actually due.
    */
   static async run(now = new Date()): Promise<ReengagementRunSummary> {
+    const summary = await ReengagementService.#decide(now);
+
+    await reportRun(summary, now);
+
+    return summary;
+  }
+
+  /** Everything the run does, minus the reporting the caller wraps it in. */
+  static async #decide(now: Date): Promise<ReengagementRunSummary> {
     const candidates = await collectCandidates(now);
 
     const summary: ReengagementRunSummary = {

@@ -1317,3 +1317,58 @@ describe("Reengagement Push Suppressed", () => {
     expect(suppressedCalls()).toHaveLength(2);
   });
 });
+
+describe("Reengagement Cron Ran", () => {
+  const ranCalls = () =>
+    observability.capture.mock.calls.filter(
+      ([event]) => event === "Reengagement Cron Ran",
+    );
+
+  it("reports a run that had nothing to do", async () => {
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary.candidates).toBe(0);
+    expect(ranCalls()).toEqual([
+      [
+        "Reengagement Cron Ran",
+        expect.objectContaining({
+          candidates: 0,
+          sent: 0,
+          users_in_weekly_floor: 0,
+        }),
+      ],
+    ]);
+  });
+
+  it("counts the people the weekly floor is holding, candidates or not", async () => {
+    const { requester } = await seedSilentMatch(25);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: requester.userId,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: "inside-the-week",
+        sentAt: hoursAgo(48),
+      },
+    });
+
+    await ReengagementService.run(NOW);
+
+    // Two: the side held back by its own push from two days ago, and the side
+    // that was sent one during this run. The count is the state at the end of
+    // the run rather than at the start of it, which is the number that answers
+    // "how many people is the floor holding right now".
+    expect(ranCalls()[0]?.[1]).toMatchObject({
+      sent: 1,
+      suppressed_cooldown: 1,
+      users_in_weekly_floor: 2,
+    });
+  });
+
+  it("arrives on every run, not only at the daily report hour", async () => {
+    await ReengagementService.run(NIGHT);
+    await ReengagementService.run(NOW);
+
+    expect(ranCalls()).toHaveLength(2);
+  });
+});
