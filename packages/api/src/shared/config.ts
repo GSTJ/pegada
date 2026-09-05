@@ -114,8 +114,14 @@ const configSchema = z.object({
   /**
    * `<provider>/<model-id>`, resolved in `image-moderation-service.ts`.
    * Swapping providers is an environment change rather than a deploy.
+   *
+   * Pinned to a model id rather than an alias such as
+   * `gemini-flash-lite-latest`, because the cost estimate is keyed on this
+   * exact string: an alias that moves under us prices every photo wrong
+   * without anything failing. The cost of pinning is that a retired id has to
+   * be replaced here, which is what happened to `gemini-2.5-flash-lite`.
    */
-  IMAGE_MODERATION_MODEL: z.string().default("google/gemini-2.5-flash-lite"),
+  IMAGE_MODERATION_MODEL: z.string().default("google/gemini-3.5-flash-lite"),
   /**
    * Provider keys, both optional: whichever one the configured model needs
    * has to be set, and a missing key is reported as a moderation error rather

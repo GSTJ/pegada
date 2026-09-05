@@ -5,7 +5,7 @@
  */
 const config = {
   IMAGE_MODERATION_MODE: "off" as string,
-  IMAGE_MODERATION_MODEL: "google/gemini-2.5-flash-lite",
+  IMAGE_MODERATION_MODEL: "google/gemini-3.5-flash-lite",
 };
 
 jest.mock("../shared/config", () => ({
@@ -55,7 +55,7 @@ const verdict = (value: "approve" | "error" | "reject") => ({
   score: value === "reject" ? 0.9 : 0.01,
   reason: value === "reject" ? "gore" : "none",
   containsDog: true,
-  model: "google/gemini-2.5-flash-lite",
+  model: "google/gemini-3.5-flash-lite",
   latencyMs: 420,
   costUsdEstimate: 0.00004,
   inputTokens: 300,
@@ -232,6 +232,23 @@ describe("ImageProcessingService.moderateImage", () => {
     // sending the owner a second push.
     expect(outcome.result).toBeNull();
     expect(moderate).not.toHaveBeenCalled();
+  });
+
+  it("asks again when the row only carries a failure from an earlier run", async () => {
+    config.IMAGE_MODERATION_MODE = "enforce";
+    getStoredModerationVerdict.mockResolvedValue({
+      moderationVerdict: "error",
+    });
+
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
+
+    // Nobody was billed for the failed run, so there is nothing to save by
+    // reusing it, and reusing it would leave the photo unchecked forever.
+    expect(moderate).toHaveBeenCalledWith(arrayBuffer);
+    expect(outcome.result?.verdict).toBe("approve");
   });
 
   it("does not look up a stored verdict when it would not call anyone", async () => {

@@ -96,6 +96,7 @@ const RATES_USD_PER_MILLION_TOKENS: Record<
   { input: number; output: number }
 > = {
   "gemini-2.5-flash-lite": { input: 0.1, output: 0.4 },
+  "gemini-3.5-flash-lite": { input: 0.3, output: 2.5 },
   "gpt-4.1-nano": { input: 0.1, output: 0.4 },
   "gpt-5-nano": { input: 0.05, output: 0.4 },
 };

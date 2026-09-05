@@ -6,7 +6,7 @@
  */
 const config = {
   IMAGE_MODERATION_MODE: "shadow" as string,
-  IMAGE_MODERATION_MODEL: "google/gemini-2.5-flash-lite",
+  IMAGE_MODERATION_MODEL: "google/gemini-3.5-flash-lite",
   GOOGLE_GENERATIVE_AI_API_KEY: "google-key" as string | undefined,
   OPENAI_API_KEY: "openai-key" as string | undefined,
 };
@@ -47,6 +47,9 @@ const createOpenAI = jest.fn((..._options: unknown[]) => createOpenAiModel);
 jest.mock("@ai-sdk/openai", () => ({
   createOpenAI: (...args: unknown[]) => createOpenAI(...args),
 }));
+
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import sharp from "sharp";
 
@@ -95,7 +98,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  config.IMAGE_MODERATION_MODEL = "google/gemini-2.5-flash-lite";
+  config.IMAGE_MODERATION_MODEL = "google/gemini-3.5-flash-lite";
   config.GOOGLE_GENERATIVE_AI_API_KEY = "google-key";
   config.OPENAI_API_KEY = "openai-key";
   sendError.mockClear();
@@ -111,12 +114,12 @@ describe("ImageModerationService.moderate", () => {
       score: 0.02,
       reason: "none",
       containsDog: true,
-      model: "google/gemini-2.5-flash-lite",
+      model: "google/gemini-3.5-flash-lite",
       inputTokens: 300,
       outputTokens: 20,
     });
-    // 300 in at $0.10/M plus 20 out at $0.40/M.
-    expect(result.costUsdEstimate).toBeCloseTo(0.000038, 9);
+    // 300 in at $0.30/M plus 20 out at $2.50/M.
+    expect(result.costUsdEstimate).toBeCloseTo(0.00014, 9);
     expect(result.latencyMs).toBeGreaterThanOrEqual(0);
     expect(sendError).not.toHaveBeenCalled();
   });
@@ -198,7 +201,7 @@ describe("ImageModerationService.moderate", () => {
     expect(result).toMatchObject({
       verdict: "error",
       reason: "missing_api_key",
-      model: "google/gemini-2.5-flash-lite",
+      model: "google/gemini-3.5-flash-lite",
     });
     expect(generateText).not.toHaveBeenCalled();
     // A key that was never configured is a deployment fact, not an incident.
@@ -351,7 +354,7 @@ describe("estimateCostUsd", () => {
 
 describe("parseModelSetting", () => {
   it.each([
-    ["google/gemini-2.5-flash-lite", "google", "gemini-2.5-flash-lite"],
+    ["google/gemini-3.5-flash-lite", "google", "gemini-3.5-flash-lite"],
     ["openai/gpt-5-nano", "openai", "gpt-5-nano"],
     ["google/models/one/two", "google", "models/one/two"],
   ])("splits %s on the first slash", (setting, provider, modelId) => {
@@ -365,5 +368,33 @@ describe("parseModelSetting", () => {
     "cohere/command",
   ])("refuses %s", (setting) => {
     expect(parseModelSetting(setting)).toBeNull();
+  });
+});
+
+/**
+ * The model id lives in `config.ts` as a default, so it is the string
+ * production runs unless somebody sets the variable, and nothing else in the
+ * codebase checks it. Both ways it can be wrong are silent: a retired id
+ * turns every verdict into `error` and photos keep publishing, and an id with
+ * no entry in the rate table turns the cost estimate into nulls. Reading the
+ * file as text rather than importing it keeps this off the environment
+ * validation that runs on import.
+ */
+describe("the model shipped as the default", () => {
+  const setting =
+    /IMAGE_MODERATION_MODEL: z\.string\(\)\.default\("([^"]+)"\)/.exec(
+      readFileSync(join(__dirname, "../shared/config.ts"), "utf8"),
+    )?.[1] ?? "";
+
+  it("names a provider and a model this file can call", () => {
+    expect(parseModelSetting(setting)).not.toBeNull();
+  });
+
+  it("names a model the cost estimate has a published rate for", () => {
+    const modelId = parseModelSetting(setting)?.modelId ?? "";
+
+    expect(
+      estimateCostUsd({ modelId, inputTokens: 510, outputTokens: 40 }),
+    ).toBeGreaterThan(0);
   });
 });
