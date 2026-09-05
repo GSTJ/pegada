@@ -68,16 +68,58 @@ const wait = (ms: number) =>
   });
 
 /**
- * Runs the launch query under the same policy the auth mutations use.
+ * Ceiling on one attempt at the launch query.
+ *
+ * Deliberately shorter than the tRPC client's own 15 second ceiling (see
+ * contexts/trpc-provider). That one is sized for a request a screen is waiting
+ * to render, where waiting is the only option. This one is sized for a request
+ * the splash screen is waiting on, where a second attempt is worth more than a
+ * long first one. Four seconds clears a function that has to boot and a Prisma
+ * engine that has to start, and leaves room for the retries inside the budget
+ * below.
+ */
+const LAUNCH_QUERY_TIMEOUT_MS = 4_000;
+
+/**
+ * Ceiling on the whole decision, retries and the dog query included.
+ *
+ * The fallback below answers the same question from disk, instantly, so there
+ * is no reason to hold the splash screen much past one cold boot while the
+ * network makes its mind up. `useProtectedRoute` re-runs this when the route
+ * segments change, so an unbounded launch was paid for twice: a phone with no
+ * connection sat on the splash screen for a minute and a half.
+ */
+export const LAUNCH_ROUTE_BUDGET_MS = 10_000;
+
+/**
+ * One attempt at the launch query, abandoned rather than left hanging.
  *
  * `client.echo.get.query()` goes straight down the tRPC client, so nothing
- * retries it: the first request of a cold deployment is also the one request
- * every launch waits on, and a single blip on it used to decide where the
- * user lands. React Query already retries `myDog.get.fetch()`, so only this
- * call needs the wrapper.
+ * retries it and nothing but the client's own long timeout stops it: the first
+ * request of a cold deployment is also the one request every launch waits on,
+ * and a single blip on it used to decide where the user lands.
+ */
+const queryLaunchState = async () => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LAUNCH_QUERY_TIMEOUT_MS);
+
+  try {
+    return await getTrcpContext().client.echo.get.query(undefined, {
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+/**
+ * Retries the launch query under the same policy the auth mutations use, for
+ * as long as the budget can still pay for another attempt. React Query already
+ * retries `myDog.get.fetch()`, so only this call needs the wrapper.
  */
 const withTransientRetry = async <T>(
   run: () => Promise<T>,
+  deadline: number,
   failureCount = 0,
 ): Promise<T> => {
   try {
@@ -85,8 +127,13 @@ const withTransientRetry = async <T>(
   } catch (error) {
     if (!shouldRetryTransient(failureCount, error)) throw error;
 
-    await wait(transientRetryDelayMs(failureCount));
-    return withTransientRetry(run, failureCount + 1);
+    const delay = transientRetryDelayMs(failureCount);
+    // Never start an attempt that cannot finish before the budget runs out.
+    // Firing it would cost a request nobody is left waiting for.
+    if (Date.now() + delay + LAUNCH_QUERY_TIMEOUT_MS > deadline) throw error;
+
+    await wait(delay);
+    return withTransientRetry(run, deadline, failureCount + 1);
   }
 };
 
@@ -113,10 +160,10 @@ const getOfflineRouteName = async () => {
   }
 };
 
-export const getInitialRouteName = async () => {
+const resolveInitialRouteName = async (deadline: number) => {
   try {
     const { authenticated, forceUpdate, minimumSupportedVersion } =
-      await withTransientRetry(() => getTrcpContext().client.echo.get.query());
+      await withTransientRetry(queryLaunchState, deadline);
 
     rememberMinimumSupportedVersion(minimumSupportedVersion);
 
@@ -144,5 +191,23 @@ export const getInitialRouteName = async () => {
   } catch (error) {
     sendError(error);
     return getOfflineRouteName();
+  }
+};
+
+export const getInitialRouteName = async () => {
+  const deadline = Date.now() + LAUNCH_ROUTE_BUDGET_MS;
+
+  let budgetTimer: ReturnType<typeof setTimeout> | undefined;
+  const budgetSpent = new Promise<void>((resolve) => {
+    budgetTimer = setTimeout(resolve, LAUNCH_ROUTE_BUDGET_MS);
+  });
+
+  try {
+    return await Promise.race([
+      resolveInitialRouteName(deadline),
+      budgetSpent.then(getOfflineRouteName),
+    ]);
+  } finally {
+    clearTimeout(budgetTimer);
   }
 };

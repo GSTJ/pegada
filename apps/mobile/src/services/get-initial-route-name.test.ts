@@ -16,7 +16,10 @@ import { getData } from "@/services/storage";
 import { TRANSIENT_RETRY_ATTEMPTS } from "@/services/transient-retry";
 import { SceneName } from "@/types/scene-name";
 
-import { getInitialRouteName } from "./get-initial-route-name";
+import {
+  getInitialRouteName,
+  LAUNCH_ROUTE_BUDGET_MS,
+} from "./get-initial-route-name";
 
 jest.mock<Record<string, unknown>>("react-native", () => ({
   Platform: { OS: "ios" },
@@ -60,6 +63,23 @@ const mockGetData = jest.mocked(getData);
 /** The failure this function is built around: an attempt that never answered. */
 const timedOut = () => Promise.reject(new TypeError("Aborted"));
 
+/** A server that accepted the connection and then went quiet. */
+const neverAnswers = () =>
+  new Promise(() => {
+    // Accepted, and then nothing.
+  });
+
+/** The same, but honouring the abort the launch attaches to each attempt. */
+const hangsUntilAbandoned = (
+  _input: unknown,
+  options: { signal: AbortSignal },
+) =>
+  new Promise((_resolve, reject) => {
+    options.signal.addEventListener("abort", () => {
+      reject(new TypeError("Aborted"));
+    });
+  });
+
 const dogWithLocation = {
   images: [],
   user: { latitude: -23.5, longitude: -46.6 },
@@ -75,6 +95,10 @@ beforeEach(() => {
   myDogFetch.mockReset();
   myDogFetch.mockResolvedValue(dogWithLocation);
   mockGetData.mockResolvedValue(null);
+});
+
+afterEach(() => {
+  jest.useRealTimers();
 });
 
 test("opens the app when the launch query never answers and a token is stored", async () => {
@@ -123,4 +147,37 @@ test("keeps a token holder out of sign in when the dog query is the one that fai
   mockGetData.mockResolvedValue("stored-token");
 
   await expect(getInitialRouteName()).resolves.toBe(SceneName.Swipe);
+});
+
+test("gives up on the splash screen once the launch budget is spent", async () => {
+  jest.useFakeTimers();
+  echoQuery.mockImplementation(neverAnswers);
+  mockGetData.mockResolvedValue("stored-token");
+
+  const routeName = getInitialRouteName();
+  await jest.advanceTimersByTimeAsync(LAUNCH_ROUTE_BUDGET_MS);
+
+  // A server that accepts the connection and then says nothing cannot hold the
+  // splash screen open. The stored token answers from disk instead.
+  await expect(routeName).resolves.toBe(SceneName.Swipe);
+});
+
+test("abandons a hanging attempt in time to make another inside the budget", async () => {
+  jest.useFakeTimers();
+  echoQuery.mockImplementation(hangsUntilAbandoned);
+  mockGetData.mockResolvedValue("stored-token");
+
+  const routeName = getInitialRouteName();
+  await jest.advanceTimersByTimeAsync(LAUNCH_ROUTE_BUDGET_MS);
+
+  await expect(routeName).resolves.toBe(SceneName.Swipe);
+  // Two attempts, not one that ran out the clock and not a third the budget
+  // could not pay for.
+  expect(echoQuery).toHaveBeenCalledTimes(2);
+});
+
+test("keeps the launch budget inside a wait someone will sit through", () => {
+  // `useProtectedRoute` runs the launch again when the route segments change,
+  // so the worst case a user feels is twice this.
+  expect(LAUNCH_ROUTE_BUDGET_MS).toBeLessThanOrEqual(10_000);
 });
