@@ -30,8 +30,35 @@ import {
 const PERMANENT_STORAGE_FOLDER = "dogs";
 export const UPLOAD_GRANT_LIMIT = 12;
 export const UPLOAD_GRANT_WINDOW_SECONDS = 60 * 60;
+
+/**
+ * How long the presigned PUT stays signable. The app uploads the bytes the
+ * moment the picker closes, so this window only has to cover one request that
+ * is already in flight, and a short one keeps a leaked URL cheap.
+ */
 export const UPLOAD_URL_TTL_SECONDS = 10 * 60;
-export const UPLOAD_CLEANUP_DELAY_SECONDS = UPLOAD_URL_TTL_SECONDS + 60;
+
+/**
+ * How long the grant stays claimable, which is what `makeTemporaryImagesPermanent`
+ * checks when the profile is finally saved.
+ *
+ * These two used to be one constant, and that is the bug in issue #282: Create
+ * Profile is a single screen where the photos upload first and the name, the
+ * bio and the gender are typed afterwards. Anyone who took more than ten
+ * minutes over that form hit "This photo upload has expired" on save, and
+ * every further tap resubmitted the same dead URLs out of form state, so the
+ * profile could never be saved at all. The PUT window and the window a person
+ * has to finish typing are unrelated, so they are now separate numbers.
+ */
+export const UPLOAD_GRANT_TTL_SECONDS = 60 * 60;
+
+/**
+ * Deleting the object has to wait for the grant, not for the signature: the
+ * cleanup job bails out on a grant that has not expired yet, so a delay tied
+ * to the PUT window would fire early, do nothing, and leave the object behind
+ * forever.
+ */
+export const UPLOAD_CLEANUP_DELAY_SECONDS = UPLOAD_GRANT_TTL_SECONDS + 60;
 
 export type SignedUploadInput = {
   contentLength?: number;
@@ -82,7 +109,7 @@ export class ImageService {
         data: {
           userId,
           temporaryUrl,
-          expiresAt: addSeconds(new Date(), UPLOAD_URL_TTL_SECONDS),
+          expiresAt: addSeconds(new Date(), UPLOAD_GRANT_TTL_SECONDS),
         },
         select: { id: true },
       });

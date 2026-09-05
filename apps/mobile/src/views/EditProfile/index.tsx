@@ -8,6 +8,7 @@ import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InvalidUploadGrantError } from "@pegada/shared/errors/errors";
 import { dogClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { format } from "date-fns/format";
@@ -37,6 +38,8 @@ import {
 import { analytics } from "@/services/analytics";
 import { colors, sizes } from "@/services/consts";
 import { sendError } from "@/services/error-tracking";
+import { saveWithExpiredUploadRetry } from "@/services/expired-upload-retry";
+import { getError } from "@/services/get-error";
 import { maskDate } from "@/services/mask-date";
 import { Actions } from "@/store/reducers";
 
@@ -146,6 +149,11 @@ const EditProfile = () => {
       router.back();
     },
     onError: (error) => {
+      // Newly added photos that went stale while the rest of the form was
+      // being filled in are handled by `saveWithExpiredUploadRetry` below,
+      // which uploads them again and saves a second time.
+      if (getError(error, InvalidUploadGrantError)) return;
+
       magicToast.alert(t("editProfile.profileError"));
       sendError(error);
     },
@@ -162,14 +170,44 @@ const EditProfile = () => {
       breedId: data.breedId ? data.breedId : null,
       color: data.color ? data.color : null,
       size: data.size ?? null,
-      images: data.images?.map((image, index) => ({
-        id: image.id,
-        url: image.url,
-        position: index,
-      })),
     };
 
-    await myDogUpdateMutation.mutateAsync(updateData);
+    const images = ((data.images ?? []) as Picture[]).map((image, index) => ({
+      id: image.id,
+      url: image.url,
+      position: index,
+      localUri: image.localUri,
+    }));
+
+    try {
+      await saveWithExpiredUploadRetry({
+        images,
+        save: (attemptImages) =>
+          myDogUpdateMutation.mutateAsync({
+            ...updateData,
+            images: attemptImages.map(({ id, url, position }) => ({
+              id,
+              url,
+              position,
+            })),
+          }),
+        onReuploaded: (attemptImages) => {
+          setValue(
+            "images",
+            (getValues("images") as Picture[]).map((picture) => {
+              const reuploaded = attemptImages.find(
+                (image) => image.id === picture.id,
+              );
+
+              return reuploaded ? { ...picture, url: reuploaded.url } : picture;
+            }),
+          );
+        },
+      });
+    } catch {
+      // Both failure paths have already reported and toasted. The screen keeps
+      // the form exactly as it is so the next tap is a save, not a rebuild.
+    }
   });
 
   return (

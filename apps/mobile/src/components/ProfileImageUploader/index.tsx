@@ -40,7 +40,7 @@ const AddUserPhotoWrapper = ({
     });
   };
 
-  const onAdd = ({ url }: { url: string }) => {
+  const onAdd = ({ url, localUri }: { url: string; localUri?: string }) => {
     onChange((images) =>
       images
         .map((currentPicture) => {
@@ -51,6 +51,7 @@ const AddUserPhotoWrapper = ({
           return {
             ...currentPicture,
             url,
+            localUri,
             disabledDrag: false,
             disabledReSorted: false,
           };

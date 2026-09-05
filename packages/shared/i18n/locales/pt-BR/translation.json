@@ -166,6 +166,7 @@
     "female": "Fêmea",
     "gender": "Sexo",
     "male": "Macho",
+    "photosExpired": "Não foi possível reenviar suas fotos. Adicione de novo e salve o perfil.",
     "profileError": "Não foi possível salvar as informações do perfil",
     "profileUpdated": "Seu perfil foi atualizado!",
     "saveProfile": "Salvar perfil",
