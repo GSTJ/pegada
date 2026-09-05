@@ -2,6 +2,7 @@ import {
   REFERRAL_ID_REGEX,
   REFERRAL_REF_REGEX,
 } from "@pegada/shared/utils/referral";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { AuthenticationService } from "../services/authentication-service";
@@ -38,8 +39,17 @@ export const authenticationRouter = createTRPCRouter({
 
       // Prevents malicious users from exploiting the lack of
       // rate limiting for logged in users
+      //
+      // Coded, not a bare Error: an uncoded throw leaves tRPC no choice but
+      // INTERNAL_SERVER_ERROR, and the app retries an uncoded 5xx twice (see
+      // apps/mobile/src/services/transient-retry.ts). One tap by someone who
+      // already had a session cost three requests and logged three
+      // exceptions. CONFLICT maps to 409, which the client treats as final.
       if (alreadyLoggedIn) {
-        throw new Error("Already logged in");
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Already logged in",
+        });
       }
 
       const authenticationService = new AuthenticationService({

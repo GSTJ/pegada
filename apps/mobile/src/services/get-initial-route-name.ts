@@ -8,6 +8,11 @@ import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
 import { rememberMinimumSupportedVersion } from "@/services/force-update";
 import { getLoggedUserID } from "@/services/get-logged-user-id";
+import { getData, StorageKeys } from "@/services/storage";
+import {
+  shouldRetryTransient,
+  transientRetryDelayMs,
+} from "@/services/transient-retry";
 import { SceneName } from "@/types/scene-name";
 
 import { sendError } from "./error-tracking";
@@ -57,10 +62,61 @@ export const trackUser = () => {
   });
 };
 
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+/**
+ * Runs the launch query under the same policy the auth mutations use.
+ *
+ * `client.echo.get.query()` goes straight down the tRPC client, so nothing
+ * retries it: the first request of a cold deployment is also the one request
+ * every launch waits on, and a single blip on it used to decide where the
+ * user lands. React Query already retries `myDog.get.fetch()`, so only this
+ * call needs the wrapper.
+ */
+const withTransientRetry = async <T>(
+  run: () => Promise<T>,
+  failureCount = 0,
+): Promise<T> => {
+  try {
+    return await run();
+  } catch (error) {
+    if (!shouldRetryTransient(failureCount, error)) throw error;
+
+    await wait(transientRetryDelayMs(failureCount));
+    return withTransientRetry(run, failureCount + 1);
+  }
+};
+
+/**
+ * Where to land when the launch query never answered.
+ *
+ * The stored token is the only evidence of a session that survives a failed
+ * request, and this branch runs precisely when no request succeeded. Sending a
+ * user who holds one to sign in was the loop: they are already signed in, so
+ * the login mutation answers "Already logged in" and there is no way forward.
+ *
+ * Into the app instead. Every screen there fetches for itself, and a token the
+ * server actually rejects comes back as a 401, which the tRPC client turns
+ * into a real logout. Sign in stays the answer for a device with no token,
+ * which is the only case where it is the truth.
+ */
+const getOfflineRouteName = async () => {
+  try {
+    const token = await getData(StorageKeys.Token);
+    return token ? SceneName.Swipe : SceneName.SignIn;
+  } catch (error) {
+    sendError(error);
+    return SceneName.SignIn;
+  }
+};
+
 export const getInitialRouteName = async () => {
   try {
     const { authenticated, forceUpdate, minimumSupportedVersion } =
-      await getTrcpContext().client.echo.get.query();
+      await withTransientRetry(() => getTrcpContext().client.echo.get.query());
 
     rememberMinimumSupportedVersion(minimumSupportedVersion);
 
@@ -68,6 +124,8 @@ export const getInitialRouteName = async () => {
       return SceneName.ForceUpdate;
     }
 
+    // The server looked at the token and said no. That is an answer, not a
+    // failure, so sign in is correct here even with a token on disk.
     if (!authenticated) {
       return SceneName.SignIn;
     }
@@ -85,6 +143,6 @@ export const getInitialRouteName = async () => {
     return SceneName.Swipe;
   } catch (error) {
     sendError(error);
-    return SceneName.SignIn;
+    return getOfflineRouteName();
   }
 };
