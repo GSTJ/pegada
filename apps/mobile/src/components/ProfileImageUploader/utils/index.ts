@@ -31,6 +31,15 @@ export type Picture = {
   position: number;
   status?: keyof typeof IMAGE_STATUS;
   blurhash?: string;
+  /**
+   * The photo as it still sits on the phone, kept for the whole life of the
+   * form. `url` points at a bucket object the server only holds for a while,
+   * and the profile is not saved until the person has finished typing, so
+   * this is what makes a second upload possible without asking them to pick
+   * the same photo again. Absent on photos loaded from an existing profile:
+   * those are already permanent.
+   */
+  localUri?: string;
 };
 
 export type DeletedPicture = Omit<Picture, "position">;

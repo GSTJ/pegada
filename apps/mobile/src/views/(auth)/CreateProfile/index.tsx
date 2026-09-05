@@ -8,6 +8,7 @@ import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InvalidUploadGrantError } from "@pegada/shared/errors/errors";
 import { dogQuickClientSchema } from "@pegada/shared/schemas/dog-schema";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,8 @@ import {
 } from "@/hooks/use-keyboard-aware-scroll";
 import { analytics } from "@/services/analytics";
 import { sendError } from "@/services/error-tracking";
+import { saveWithExpiredUploadRetry } from "@/services/expired-upload-retry";
+import { getError } from "@/services/get-error";
 import { SceneName } from "@/types/scene-name";
 
 import { DragHint, MultilineInput, PhotoHint, styles } from "./styles";
@@ -45,7 +48,7 @@ const DEFAULT_VALUES: DogQuickClientSchema = {
 const CreateProfile = () => {
   const { t } = useTranslation();
 
-  const { control, handleSubmit, getValues } = useForm({
+  const { control, handleSubmit, getValues, setValue } = useForm({
     defaultValues: DEFAULT_VALUES,
     resolver: zodResolver(dogQuickClientSchema),
   });
@@ -77,26 +80,58 @@ const CreateProfile = () => {
       });
     },
     onError: (error) => {
+      // Photos that went stale while the form was being filled in are handled
+      // by `saveWithExpiredUploadRetry` below, which uploads them again and
+      // saves a second time. Toasting here would put an error on screen for an
+      // attempt the person never needed to know about.
+      if (getError(error, InvalidUploadGrantError)) return;
+
       magicToast.alert(t("editProfile.profileError"));
       sendError(error);
     },
   });
 
   const saveUser = handleSubmit(async (data) => {
-    const dogData = {
-      name: data.name,
-      bio: data.bio,
-      gender: data.gender,
-      images: data.images
-        .filter((image) => Boolean(image.url))
-        .map((image, index) => ({
-          id: image.id,
-          url: image.url as string,
-          position: index,
-        })),
-    };
+    const images = (data.images as Picture[])
+      .filter((image) => Boolean(image.url))
+      .map((image, index) => ({
+        id: image.id,
+        url: image.url,
+        position: index,
+        localUri: image.localUri,
+      }));
 
-    await dogCreateMutation.mutateAsync(dogData);
+    try {
+      await saveWithExpiredUploadRetry({
+        images,
+        save: (attemptImages) =>
+          dogCreateMutation.mutateAsync({
+            name: data.name,
+            bio: data.bio,
+            gender: data.gender,
+            images: attemptImages.map(({ id, url, position }) => ({
+              id,
+              url,
+              position,
+            })),
+          }),
+        onReuploaded: (attemptImages) => {
+          setValue(
+            "images",
+            (getValues("images") as Picture[]).map((picture) => {
+              const reuploaded = attemptImages.find(
+                (image) => image.id === picture.id,
+              );
+
+              return reuploaded ? { ...picture, url: reuploaded.url } : picture;
+            }),
+          );
+        },
+      });
+    } catch {
+      // Both failure paths have already reported and toasted. The screen keeps
+      // the form exactly as it is so the next tap is a save, not a rebuild.
+    }
   });
 
   const [gesturesEnabled, setGesturesEnabled] = useState(true);

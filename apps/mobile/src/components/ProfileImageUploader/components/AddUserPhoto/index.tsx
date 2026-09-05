@@ -41,7 +41,7 @@ import {
 type AddUserPhotoProps = {
   picture: Picture;
   onDelete: () => void;
-  onAdd: ({ url }: { url: string }) => void;
+  onAdd: ({ url, localUri }: { url: string; localUri?: string }) => void;
   /**
    * Position of this slot inside the photo grid. Used to derive a stable
    * `testID` (`add-photo-{index}` / `remove-photo-{index}`) so Maestro flows
@@ -121,14 +121,18 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
       const selectedImage = await showImagePickerOptions();
 
       /** Early on visual feedback */
-      onAdd({ url: selectedImage.uri });
+      onAdd({ url: selectedImage.uri, localUri: selectedImage.uri });
       setLocalPicture(selectedImage.uri);
 
       const finalUrl = await uploadProfileImage(selectedImage.uri, (s) => {
         stage = s;
       });
 
-      onAdd({ url: finalUrl });
+      // The local URI rides along with the bucket URL for the rest of the
+      // form. The server only holds a fresh upload for a while, and the
+      // profile is not saved until the person has stopped typing, so keeping
+      // the file on hand is what lets the save recover on its own.
+      onAdd({ url: finalUrl, localUri: selectedImage.uri });
 
       // After the upload finishes, not after the picker closes: a photo that
       // never reaches the bucket is a shadowban, not a photo. Profiles without
@@ -183,14 +187,14 @@ export const AddUserPhoto: React.FC<AddUserPhotoProps> = ({
 
       // Optimistic feedback identical to the real flow so screenshots/check
       // observers see the same intermediate state.
-      onAdd({ url: placeholderUri });
+      onAdd({ url: placeholderUri, localUri: placeholderUri });
       setLocalPicture(placeholderUri);
 
       const finalUrl = await uploadProfileImage(placeholderUri, (s) => {
         stage = s;
       });
 
-      onAdd({ url: finalUrl });
+      onAdd({ url: finalUrl, localUri: placeholderUri });
     } catch (error) {
       reportUploadFailure(
         error,
