@@ -2,6 +2,7 @@ import * as Updates from "expo-updates";
 
 import { getExpoPostHog, initExpo } from "magic-observability/expo";
 
+import { buildOtaUpdateProperties } from "@/services/analytics/ota-properties";
 import { config } from "@/services/config";
 
 /**
@@ -47,6 +48,18 @@ export const observability = initExpo({
   sessionReplay: false,
   posthogOptions: { captureAppLifecycleEvents: false },
 });
+
+/**
+ * Every event carries the update the device is running, not just the binary
+ * version it was installed from.
+ *
+ * Store users sit on build 1.6.2 while `main` publishes to a newer runtime, so
+ * `$app_version` alone cannot say whether a fix published as an OTA update has
+ * reached anybody. Registering these once, here, means the answer is already in
+ * the data by the time somebody thinks to ask, including on the `$exception`
+ * events the error tracker sends without going through `analytics.track`.
+ */
+observability.register(buildOtaUpdateProperties(Updates));
 
 /**
  * The raw `posthog-react-native` instance, or `null` when telemetry is off.
