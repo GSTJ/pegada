@@ -3,12 +3,14 @@ import {
   InvalidUploadGrantError,
   UploadLimitReachedError,
 } from "@pegada/shared/errors/errors";
+import { addMinutes } from "date-fns/addMinutes";
 
 import { deleteImageFromS3, moveImageToFolder } from "../shared/file-upload";
 import {
   createTemporaryUploadKey,
   ImageService,
   UPLOAD_GRANT_LIMIT,
+  UPLOAD_GRANT_TTL_SECONDS,
   UPLOAD_URL_TTL_SECONDS,
 } from "./image-service";
 
@@ -186,5 +188,92 @@ describe("upload grants", () => {
     });
     await ImageService.cleanupExpiredTemporaryUpload(activeGrant.id);
     expect(deleteStoredImage).toHaveBeenCalledWith(activeUpload.publicUrl);
+  });
+});
+
+/**
+ * Issue #282: photos uploaded on Create Profile went stale while the person was
+ * still typing the name and the bio, because the presigned PUT window and the
+ * window to finish the form were the same ten minutes. Save then failed, and
+ * every retap resubmitted the same dead URLs out of form state.
+ *
+ * Only `Date` is faked here. Prisma's pool and the S3 client run on real
+ * timers, and freezing those hangs the suite instead of failing it.
+ */
+const freezeClockAt = (now: Date) =>
+  jest.useFakeTimers({
+    doNotFake: [
+      "cancelAnimationFrame",
+      "cancelIdleCallback",
+      "clearImmediate",
+      "clearInterval",
+      "clearTimeout",
+      "hrtime",
+      "nextTick",
+      "performance",
+      "queueMicrotask",
+      "requestAnimationFrame",
+      "requestIdleCallback",
+      "setImmediate",
+      "setInterval",
+      "setTimeout",
+    ],
+    now,
+  });
+
+describe("how long an uploaded photo stays claimable", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const uploadAt = async (uploadedAt: Date) => {
+    freezeClockAt(uploadedAt);
+    return ImageService.getSignedUpload("slow-form-user", {
+      contentLength: 4,
+      contentType: "image/webp",
+    });
+  };
+
+  it("outlives the presigned PUT by a long way", async () => {
+    const uploadedAt = new Date();
+    const upload = await uploadAt(uploadedAt);
+
+    await expect(
+      prisma.uploadGrant.findUniqueOrThrow({
+        where: { temporaryUrl: upload.publicUrl },
+      }),
+    ).resolves.toMatchObject({
+      expiresAt: new Date(
+        uploadedAt.getTime() + UPLOAD_GRANT_TTL_SECONDS * 1000,
+      ),
+    });
+    expect(UPLOAD_GRANT_TTL_SECONDS).toBeGreaterThan(UPLOAD_URL_TTL_SECONDS);
+  });
+
+  it("still saves a profile filled in over three quarters of an hour", async () => {
+    const uploadedAt = new Date();
+    const upload = await uploadAt(uploadedAt);
+
+    jest.setSystemTime(addMinutes(uploadedAt, 45));
+
+    const [image] = await ImageService.makeTemporaryImagesPermanent(
+      [{ url: upload.publicUrl, position: 0 }],
+      "slow-form-user",
+    );
+    expect(image?.url).toContain("/dogs/");
+  });
+
+  it("stops accepting the photo once the hour is up", async () => {
+    const uploadedAt = new Date();
+    const upload = await uploadAt(uploadedAt);
+
+    jest.setSystemTime(addMinutes(uploadedAt, 61));
+
+    await expect(
+      ImageService.makeTemporaryImagesPermanent(
+        [{ url: upload.publicUrl, position: 0 }],
+        "slow-form-user",
+      ),
+    ).rejects.toBeInstanceOf(InvalidUploadGrantError);
   });
 });
