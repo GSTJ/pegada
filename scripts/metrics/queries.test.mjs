@@ -17,6 +17,7 @@ import {
   STORE_BUILD_COVERAGE,
   buildActiveUsersByCityQuery,
   buildActiveUsersByVersionQuery,
+  buildOtaUpdatesQuery,
   buildActiveUsersQuery,
   buildBreakdownQuery,
   buildDeckSupplyQuery,
@@ -466,4 +467,47 @@ test("the coverage list leaves out the events the store build does send", () => 
   ]) {
     assert.equal(STORE_BUILD_COVERAGE.missingEvents.includes(event), false);
   }
+});
+
+test("the update split counts distinct people per runtime and update prefix", () => {
+  const query = buildOtaUpdatesQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /ifNull\(nullIf\(toString\(properties\.runtime_version\), ''\), 'unknown'\) AS runtime_version/,
+  );
+  assert.match(
+    query,
+    /ifNull\(nullIf\(substring\(toString\(properties\.ota_update_id\), 1, 8\), ''\), 'unknown'\) AS update_id/,
+  );
+  assert.match(query, /count\(DISTINCT person_id\) AS people/);
+  assert.match(query, /min\(timestamp\) AS first_seen/);
+  assert.match(query, /GROUP BY runtime_version, update_id, launched_from/);
+});
+
+test("the update split separates a downloaded bundle from the embedded one", () => {
+  const query = buildOtaUpdatesQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /toString\(properties\.ota_is_embedded\) = 'true', 'embedded'/,
+  );
+  assert.match(
+    query,
+    /toString\(properties\.ota_is_embedded\) = 'false', 'downloaded'/,
+  );
+  // A device that reports nothing is not a device on the embedded bundle.
+  assert.match(query, /'downloaded',\n\s+'unknown'\) AS launched_from/);
+});
+
+test("the update split reads one window and only the app", () => {
+  const query = buildOtaUpdatesQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /timestamp >= toDateTime\('2026-08-26 12:00:00', 'UTC'\)/,
+  );
+  assert.match(query, /timestamp < toDateTime\('2026-09-02 12:00:00', 'UTC'\)/);
+  // No period column: this table describes right now, not a comparison.
+  assert.equal(query.includes("'current', 'previous'"), false);
+  assert.match(query, /properties\.\$lib = 'posthog-react-native'/);
+  assert.equal(query.includes("'web'"), false);
+  assert.match(query, /event NOT IN \('Deck Served'/);
 });

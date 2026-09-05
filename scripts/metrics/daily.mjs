@@ -24,6 +24,7 @@ import {
   buildActiveUsersQuery,
   buildBreakdownQuery,
   buildDeckSupplyQuery,
+  buildOtaUpdatesQuery,
   buildPushAttributedReturnsQuery,
   buildTotalsQuery,
   buildWindows,
@@ -78,6 +79,7 @@ export async function runDailyMetrics({
     activeUsersByCity,
     activeUsersByVersion,
     deckSupply,
+    otaUpdates,
     totals,
     pushReturnsCurrent,
     pushReturnsPrevious,
@@ -93,6 +95,10 @@ export async function runDailyMetrics({
       buildActiveUsersByVersionQuery(windows),
     ),
     run("pegada daily metrics: deck supply", buildDeckSupplyQuery(windows)),
+    run(
+      "pegada daily metrics: ota updates in use",
+      buildOtaUpdatesQuery(windows),
+    ),
     run("pegada daily metrics: event totals", buildTotalsQuery(windows)),
     run(
       "pegada daily metrics: push attributed returns, last 7 days",
@@ -124,6 +130,7 @@ export async function runDailyMetrics({
     breakdowns,
     deckSupply,
     generatedAt: now,
+    otaUpdates,
     pushReturns: {
       current: pushReturnsCurrent,
       previous: pushReturnsPrevious,

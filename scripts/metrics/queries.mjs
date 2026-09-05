@@ -46,7 +46,9 @@ export const COUNTED_EVENTS = Object.values(EVENTS).sort();
  * keeps a new server integration out of the activity number by default rather
  * than letting it in until somebody notices.
  */
-export const CLIENT_LIBS = ["posthog-react-native", "web"];
+export const MOBILE_LIB = "posthog-react-native";
+
+export const CLIENT_LIBS = [MOBILE_LIB, "web"];
 
 /**
  * Events emitted from `packages/api`, listed so they can be excluded.
@@ -319,6 +321,69 @@ export function buildActiveUsersByVersionQuery(windows) {
     `  AND ${clientEventFilter()}`,
     "GROUP BY bucket, period",
     "ORDER BY bucket, period",
+  ].join("\n");
+}
+
+/**
+ * How much of an update id the readout prints.
+ *
+ * The full value is a uuid, and eight characters is already unique across every
+ * update pegada has ever published while leaving the table narrow enough to
+ * read on a phone. It is also the prefix `eas update:list` shows, so a row here
+ * can be matched to a publish without trimming anything by hand.
+ */
+export const OTA_ID_PREFIX_LENGTH = 8;
+
+/** Where a device the readout cannot place lands, in every column of the table. */
+export const OTA_UNKNOWN_BUCKET = "unknown";
+
+/**
+ * Which over the air update the people using the app are actually running.
+ *
+ * `$app_version` comes from the binary, so a store user who installed 1.6.2
+ * reports 1.6.2 whether they are running the JavaScript that shipped inside it
+ * or an update published this morning. Publishing a fix to the 1.6.2 runtime
+ * and then watching this table is the difference between knowing it arrived and
+ * assuming it did.
+ *
+ * The embedded column is the half that answers the question. A device on
+ * runtime 1.6.2 still launching the embedded bundle has not taken the update;
+ * one reporting `downloaded` has. Devices sending nothing here are on a build
+ * that predates these properties, and they age out as people update.
+ *
+ * One window only. This is a "what is out there right now" table, and a
+ * comparison against a week ago would just repeat the previous column of the
+ * app version table above it. The site is left out rather than swept into the
+ * unknown bucket: only the app runs on an update.
+ */
+export function buildOtaUpdatesQuery(windows) {
+  const unknown = quote(OTA_UNKNOWN_BUCKET);
+  const runtime = `ifNull(nullIf(toString(properties.runtime_version), ''), ${unknown})`;
+  const update = `ifNull(nullIf(substring(toString(properties.ota_update_id), 1, ${OTA_ID_PREFIX_LENGTH}), ''), ${unknown})`;
+  // Compared as text because the property crosses the wire as JSON: a boolean
+  // from the SDK and the string a replayed export carries both land here, and
+  // an absent one falls through to the unknown bucket rather than to `false`.
+  const embedded = [
+    "multiIf(",
+    `    toString(properties.ota_is_embedded) = 'true', 'embedded',`,
+    `    toString(properties.ota_is_embedded) = 'false', 'downloaded',`,
+    `    ${unknown})`,
+  ].join("\n  ");
+
+  return [
+    "SELECT",
+    `  ${runtime} AS runtime_version,`,
+    `  ${update} AS update_id,`,
+    `  ${embedded} AS launched_from,`,
+    "  count(DISTINCT person_id) AS people,",
+    "  min(timestamp) AS first_seen",
+    "FROM events",
+    `WHERE timestamp >= toDateTime(${quote(clickhouseTime(windows.currentStart))}, 'UTC')`,
+    `  AND timestamp < toDateTime(${quote(clickhouseTime(windows.currentEnd))}, 'UTC')`,
+    `  AND properties.$lib = ${quote(MOBILE_LIB)}`,
+    `  AND event NOT IN (${SERVER_EVENTS.map(quote).join(", ")})`,
+    "GROUP BY runtime_version, update_id, launched_from",
+    "ORDER BY people DESC, runtime_version, update_id",
   ].join("\n");
 }
 

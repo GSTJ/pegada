@@ -69,6 +69,22 @@ function fakeWorld({ existingComment = null } = {}) {
           ],
         });
       }
+      if (name.endsWith("ota updates in use")) {
+        return json({
+          columns: [
+            "runtime_version",
+            "update_id",
+            "launched_from",
+            "people",
+            "first_seen",
+          ],
+          results: [
+            ["1.7.2", "a1b2c3d4", "downloaded", 780, "2026-08-27 04:10:00"],
+            ["1.6.2", "9f8e7d6c", "embedded", 300, "2026-08-26 12:05:00"],
+            ["1.6.2", "4b5c6d7e", "downloaded", 40, "2026-09-02 06:45:00"],
+          ],
+        });
+      }
       if (name.includes("push attributed returns")) {
         return json({
           columns: ["people"],
@@ -160,7 +176,7 @@ test("a dry run renders the comment and never touches GitHub", async () => {
 test("one query goes out per metric block", async () => {
   const fetchImpl = fakeWorld();
   await runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW });
-  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 7);
+  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 8);
 });
 
 test("both push return windows are asked for separately and land in the table", async () => {
@@ -272,4 +288,27 @@ test("one broken query fails the whole run", async () => {
     runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW }),
     /rejected the query "pegada daily metrics: event totals" with status 400/,
   );
+});
+
+test("the readout carries the updates in use through to the comment", async () => {
+  const fetchImpl = fakeWorld();
+  const { body } = await runDailyMetrics({
+    argv: ["--dry-run"],
+    env: { ...ENV, GITHUB_TOKEN: "" },
+    fetchImpl,
+    now: NOW,
+  });
+
+  assert.ok(body.includes("### OTA updates in use"));
+  assert.match(
+    body,
+    /\| 1\.6\.2 \| 4b5c6d7e \| downloaded \| 40 \| 2026-09-02 06:45 UTC \|/,
+  );
+  assert.match(body, /\| 1\.6\.2 \| 9f8e7d6c \| embedded \| 300 \|/);
+
+  const query = fetchImpl.calls.find((call) =>
+    call.body?.name?.endsWith("ota updates in use"),
+  );
+  assert.ok(query, "the readout never asked PostHog which updates are in use");
+  assert.match(query.body.query.query, /properties\.ota_update_id/);
 });

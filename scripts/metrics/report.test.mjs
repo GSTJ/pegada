@@ -5,6 +5,7 @@ import { STORE_BUILD_COVERAGE, buildWindows } from "./queries.mjs";
 import {
   CITY_SOURCE_NOTE,
   COMMENT_MARKER,
+  OTA_SOURCE_NOTE,
   buildReport,
   coverageNote,
   formatAverageDelta,
@@ -34,6 +35,18 @@ function versions(rows) {
 
 /** The city split comes back in the same shape as the version split. */
 const cities = versions;
+
+function otaRows(rows) {
+  return rows.map(
+    ([runtime_version, update_id, launched_from, people, first_seen]) => ({
+      first_seen,
+      launched_from,
+      people,
+      runtime_version,
+      update_id,
+    }),
+  );
+}
 
 function deck(rows) {
   return rows.map(
@@ -92,6 +105,12 @@ const FIXTURE = {
     ["1.3.2", "previous", 870],
     ["unknown", "current", 20],
     ["unknown", "previous", 20],
+  ]),
+  otaUpdates: otaRows([
+    ["1.7.2", "a1b2c3d4", "downloaded", 780, "2026-08-27 04:10:00"],
+    ["1.6.2", "9f8e7d6c", "embedded", 300, "2026-08-26 12:05:00"],
+    ["1.6.2", "4b5c6d7e", "downloaded", 40, "2026-09-02 06:45:00"],
+    ["unknown", "unknown", "unknown", 12, null],
   ]),
   breakdowns: {
     fake_door_feature: breakdown([
@@ -687,4 +706,58 @@ test("the coverage note leaves the exception out when no update has shipped", ()
 test("the coverage note says so plainly once the store build sends everything", () => {
   const note = coverageNote({ missingEvents: [], version: "1.8.0" });
   assert.match(note, /build 1\.8\.0 emits every event in this readout/);
+});
+
+test("the update table says which bundle each runtime is actually running", () => {
+  const body = buildReport(FIXTURE);
+  assert.ok(body.includes("### OTA updates in use"));
+  const [, otaSection] = body.split("### OTA updates in use");
+  assert.match(
+    otaSection,
+    /\| Runtime \| Update \| Launched from \| People \| First seen \|/,
+  );
+  assert.match(
+    otaSection,
+    /\| 1\.7\.2 \| a1b2c3d4 \| downloaded \| 780 \| 2026-08-27 04:10 UTC \|/,
+  );
+  // The row that answers the backport question: people on the store runtime who
+  // are no longer launching the bundle that shipped inside the binary.
+  assert.match(
+    otaSection,
+    /\| 1\.6\.2 \| 4b5c6d7e \| downloaded \| 40 \| 2026-09-02 06:45 UTC \|/,
+  );
+  assert.match(
+    otaSection,
+    /\| 1\.6\.2 \| 9f8e7d6c \| embedded \| 300 \| 2026-08-26 12:05 UTC \|/,
+  );
+  assert.ok(body.includes(OTA_SOURCE_NOTE));
+});
+
+test("the busiest update leads the table and a device with no timestamp gets a dash", () => {
+  const body = buildReport(FIXTURE);
+  const [, otaSection] = body.split("### OTA updates in use");
+  assert.ok(
+    otaSection.indexOf("| 1.7.2 | a1b2c3d4 |") <
+      otaSection.indexOf("| 1.6.2 | 9f8e7d6c |"),
+  );
+  assert.match(otaSection, /\| unknown \| unknown \| unknown \| 12 \| - \|/);
+});
+
+test("the update table sits above the city table so the two are not confused", () => {
+  const body = buildReport(FIXTURE);
+  assert.ok(
+    body.indexOf("### OTA updates in use") <
+      body.indexOf("### Active users by city"),
+  );
+});
+
+test("a week with no app events says so instead of rendering an empty update table", () => {
+  const body = buildReport({ ...FIXTURE, otaUpdates: [] });
+  const [, otaSection] = body.split("### OTA updates in use");
+  assert.match(otaSection, /^\n\nNo app events in the last 7 days\./);
+});
+
+test("the update table survives a run made before the query existed", () => {
+  const body = buildReport({ ...FIXTURE, otaUpdates: undefined });
+  assert.ok(body.includes("No app events in the last 7 days."));
 });

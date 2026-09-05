@@ -12,6 +12,7 @@ import {
   CITY_UNKNOWN_BUCKET,
   DECK_TIERS,
   EVENTS,
+  OTA_UNKNOWN_BUCKET,
   PUSH_RETURN_WINDOW_MINUTES,
   STORE_BUILD_COVERAGE,
 } from "./queries.mjs";
@@ -263,6 +264,82 @@ function breakdownTable(
   ].join("\n");
 }
 
+/** How many update rows the readout prints before it stops. */
+const MAX_OTA_ROWS = 12;
+
+/**
+ * `min(timestamp)` comes back in whatever shape the transport chose: a string
+ * from the query API, a `Date` from a replayed fixture. Both become the same
+ * minute stamp, and anything else becomes a dash rather than `Invalid Date`.
+ *
+ * ClickHouse writes `2026-09-02 06:45:00` with no zone, and `new Date` reads
+ * that as local time. On a machine in Sao Paulo that silently moves every row
+ * three hours, which is exactly the resolution the "did it arrive today"
+ * question is asked at, so the zone is spelled out before parsing.
+ */
+function firstSeen(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? "-" : utcStamp(value);
+  }
+  const text = String(value).trim().replace(" ", "T");
+  const zoned = /(Z|[+-]\d{2}:?\d{2})$/.test(text) ? text : `${text}Z`;
+  const date = new Date(zoned);
+  return Number.isNaN(date.getTime()) ? "-" : utcStamp(date);
+}
+
+/**
+ * Which update the app is running, per runtime.
+ *
+ * The row that matters on a backport day is a runtime the store build is on
+ * with a `downloaded` launch: that is somebody who took the update, and the
+ * first seen column says when the first one did. Sorted by people so the
+ * bundle most devices are on leads, which is also the one a regression would
+ * hit hardest.
+ */
+export function otaUpdatesTable(rows, { limit = MAX_OTA_ROWS } = {}) {
+  const ordered = (rows ?? [])
+    .map((row) => ({
+      firstSeen: firstSeen(row.first_seen),
+      launchedFrom: row.launched_from || OTA_UNKNOWN_BUCKET,
+      people: Number(row.people ?? 0),
+      runtime: row.runtime_version || OTA_UNKNOWN_BUCKET,
+      update: row.update_id || OTA_UNKNOWN_BUCKET,
+    }))
+    .sort(
+      (a, b) =>
+        b.people - a.people ||
+        a.runtime.localeCompare(b.runtime) ||
+        a.update.localeCompare(b.update),
+    )
+    .slice(0, limit);
+
+  if (ordered.length === 0) {
+    return "No app events in the last 7 days.";
+  }
+
+  return [
+    "| Runtime | Update | Launched from | People | First seen |",
+    "| --- | --- | --- | ---: | --- |",
+    ...ordered.map(
+      (row) =>
+        `| ${row.runtime} | ${row.update} | ${row.launchedFrom} | ${number(row.people)} | ${row.firstSeen} |`,
+    ),
+  ].join("\n");
+}
+
+/**
+ * What the unknown rows mean, said once so nobody reads them as a broken query.
+ *
+ * Every device on a build that predates these properties reports nothing here,
+ * and that is most of them on the day this ships. The bucket shrinking week
+ * over week is the update landing.
+ */
+export const OTA_SOURCE_NOTE =
+  "Update is the first 8 characters of the update id the device launched. Unknown rows are devices on a build published before the app started reporting this.";
+
 /**
  * Where the city in the table comes from, said once under it.
  *
@@ -300,6 +377,7 @@ export function noCityLine(rows, activeCurrent, activePrevious) {
  * @param {Record<string, Array>} input.breakdowns rows per breakdown id
  * @param {Array} input.deckSupply rows from the deck supply query, one per window
  * @param {Date} input.generatedAt when the job ran
+ * @param {Array} input.otaUpdates rows from the over the air update split
  * @param {{ current: Array, previous: Array }} input.pushReturns rows from the push attributed returns query, one per window
  * @param {Array} input.totals rows from the totals query
  * @param {{ currentEnd: Date, currentStart: Date, previousStart: Date }} input.windows
@@ -311,6 +389,7 @@ export function buildReport({
   breakdowns,
   deckSupply,
   generatedAt,
+  otaUpdates,
   pushReturns,
   totals,
   windows,
@@ -505,6 +584,12 @@ export function buildReport({
       field: "people",
       header: "App version",
     }),
+    "",
+    "### OTA updates in use",
+    "",
+    otaUpdatesTable(otaUpdates),
+    "",
+    OTA_SOURCE_NOTE,
     "",
     "### Active users by city",
     "",
