@@ -56,6 +56,7 @@ export const ANALYTICS_EVENTS = {
   PAYWALL_VIEWED: "Paywall Viewed",
   PROFILE_PHOTO_ADDED: "Profile Photo Added",
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
+  REENGAGEMENT_CRON_RAN: "Reengagement Cron Ran",
   REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
   REENGAGEMENT_PUSH_SUPPRESSED: "Reengagement Push Suppressed",
   PUSH_PERMISSION: "Push Permission",
@@ -606,6 +607,35 @@ export type ServerEventProperties = {
    * the send claimed in `NotificationLog`, so a send and the open it produced
    * can be lined up without trusting timestamps.
    */
+  /**
+   * One row per hourly run of the re-engagement cron, whatever it decided.
+   *
+   * The two events below only exist when there was something to say, so a
+   * chart built on them alone reads the same whether the cadence is holding
+   * everybody back or the cron has stopped running. That ambiguity cost a day
+   * of investigation on 2026-09-05, and this is the row that ends it: it
+   * arrives every hour, so a gap in it is a dead cron and a run of zeroes in
+   * it is a quiet week.
+   *
+   * `users_in_weekly_floor` is the count the per-user event cannot give. Two
+   * of the three selectors mirror the weekly floor into their own SQL so the
+   * users it holds do not occupy the candidate limit, which means those people
+   * are never candidates and never reach the suppression path at all. This
+   * counts them straight off `NotificationLog`, so "nobody was sent anything
+   * because 500 people are inside their week" is readable rather than inferred.
+   */
+  [ANALYTICS_EVENTS.REENGAGEMENT_CRON_RAN]: {
+    candidates: number;
+    sent: number;
+    skipped_already_sent: number;
+    skipped_unreachable: number;
+    suppressed_cooldown: number;
+    suppressed_dead_token: number;
+    suppressed_gave_up: number;
+    suppressed_monthly_cap: number;
+    suppressed_window: number;
+    users_in_weekly_floor: number;
+  };
   [ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT]: {
     dedupe_key: string;
     kind: ReengagementPushKind;
@@ -806,6 +836,7 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.MESSAGE_SENT,
   ANALYTICS_EVENTS.PUSH_RECEIPT_RESULT,
   ANALYTICS_EVENTS.PUSH_TICKET_RESULT,
+  ANALYTICS_EVENTS.REENGAGEMENT_CRON_RAN,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SENT,
   ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
   ANALYTICS_EVENTS.REPORT_SUBMITTED,
