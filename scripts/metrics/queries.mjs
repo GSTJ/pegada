@@ -179,6 +179,17 @@ export const BREAKDOWNS = [
     property: "verdict",
     title: "Image Moderation Result by verdict",
   },
+  // The verdict table alone cannot tell a provider outage from a model id we
+  // retired out from under ourselves, because moderation publishes the photo
+  // either way and both land in the same `error` bucket. The reason is the
+  // column that separates them, so it gets its own table rather than waiting
+  // for somebody to go reading exceptions.
+  {
+    id: "moderation_reason",
+    event: EVENTS.IMAGE_MODERATION_RESULT,
+    property: "reason",
+    title: "Image Moderation Result by reason",
+  },
   {
     id: "subscription_type",
     event: EVENTS.SUBSCRIPTION_EVENT,

@@ -5,7 +5,7 @@
  */
 const config = {
   IMAGE_MODERATION_MODE: "off" as string,
-  IMAGE_MODERATION_MODEL: "google/gemini-2.5-flash-lite",
+  IMAGE_MODERATION_MODEL: "google/gemini-3.5-flash-lite",
 };
 
 jest.mock("../shared/config", () => ({
@@ -55,7 +55,7 @@ const verdict = (value: "approve" | "error" | "reject") => ({
   score: value === "reject" ? 0.9 : 0.01,
   reason: value === "reject" ? "gore" : "none",
   containsDog: true,
-  model: "google/gemini-2.5-flash-lite",
+  model: "google/gemini-3.5-flash-lite",
   latencyMs: 420,
   costUsdEstimate: 0.00004,
   inputTokens: 300,
