@@ -2,13 +2,7 @@ import type { ReportReason } from "@pegada/shared/analytics/events";
 
 import { useState } from "react";
 import * as React from "react";
-import {
-  ActivityIndicator,
-  Keyboard,
-  Linking,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Linking, TextInput, View } from "react-native";
 
 import { REPORT_DETAILS_MAX_LENGTH } from "@pegada/shared/constants/constants";
 import i18n from "i18next";
@@ -173,16 +167,12 @@ const ReportSheetContent = ({
         <View style={styles.handleContainer}>
           <View style={styles.handleBar} />
         </View>
-        {/* The header doubles as the way out of the note box: tapping it puts
-            the keyboard away without losing what was typed. */}
-        <PressableArea accessible={false} onPress={() => Keyboard.dismiss()}>
-          <Text fontWeight="medium" fontSize="lg" style={styles.title}>
-            {t("reportSheet.title", { name: firstName })}
-          </Text>
-          <Text fontSize="xs" style={styles.subtitle}>
-            {t("reportSheet.subtitle")}
-          </Text>
-        </PressableArea>
+        <Text fontWeight="medium" fontSize="lg" style={styles.title}>
+          {t("reportSheet.title", { name: firstName })}
+        </Text>
+        <Text fontSize="xs" style={styles.subtitle}>
+          {t("reportSheet.subtitle")}
+        </Text>
         <Divider style={styles.titleDivider} />
 
         {REASONS.map((item) => (
