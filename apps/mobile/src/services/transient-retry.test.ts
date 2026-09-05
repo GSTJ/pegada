@@ -60,6 +60,13 @@ describe("shouldRetryTransient", () => {
     expect(shouldRetryTransient(0, serverError(429))).toBe(false);
   });
 
+  it("leaves an already logged in login alone", () => {
+    // The login guard used to throw a bare Error, which tRPC could only send
+    // as a 500, so this very policy turned one tap into three requests. It
+    // throws CONFLICT now, and a 409 is final.
+    expect(shouldRetryTransient(0, serverError(409))).toBe(false);
+  });
+
   it("stops once the attempts are spent", () => {
     const error = serverError(500);
 
