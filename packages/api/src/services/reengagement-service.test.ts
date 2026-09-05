@@ -6,6 +6,7 @@ import { cadenceDecision, readCadence } from "./reengagement-cadence";
 import {
   isWithinSendWindow,
   localHourFromLongitude,
+  MAX_CANDIDATES_PER_QUERY,
   REENGAGEMENT_KINDS,
   ReengagementService,
   selectLikesWaitingCandidates,
@@ -302,6 +303,69 @@ describe("selectUnansweredMatchCandidates", () => {
     });
 
     await expect(selectUnansweredMatchCandidates(NOW)).resolves.toHaveLength(1);
+  });
+
+  /**
+   * `count` silent matches between users whose token has already been pruned,
+   * seeded in bulk because the point of the test below is the row count.
+   */
+  const seedPrunedMatches = async (count: number, createdAt: Date) => {
+    const dogs = Array.from({ length: count * 2 }, (_, index) => ({
+      id: `pruned-dog-${index}`,
+      name: `pruned-${index}`,
+      gender: index % 2 === 0 ? ("MALE" as const) : ("FEMALE" as const),
+      userId: `pruned-user-${index}`,
+    }));
+
+    await prisma.user.createMany({
+      data: dogs.map((dog, index) => ({
+        id: dog.userId,
+        email: `pruned-${index}@test.example`,
+        // What `UserService.blacklistPushToken` writes once Expo has answered
+        // `DeviceNotRegistered`.
+        pushToken: "",
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+      })),
+    });
+
+    await prisma.dog.createMany({ data: dogs });
+
+    await prisma.match.createMany({
+      data: Array.from({ length: count }, (_, index) => ({
+        id: `pruned-match-${index}`,
+        requesterId: `pruned-dog-${index * 2}`,
+        responderId: `pruned-dog-${index * 2 + 1}`,
+        createdAt,
+      })),
+    });
+  };
+
+  /**
+   * The reachability rule has to be in the query, not after it.
+   *
+   * `take` is applied by Postgres, so a filter that runs in JS on the rows
+   * that came back cannot rescue somebody who never came back: dead installs
+   * sorted ahead of a live one take every slot and the live one is simply not
+   * in the result to be filtered. A full ceiling of pruned matches, all newer
+   * than the one reachable match, is the only shape that tells the two apart.
+   */
+  it("keeps a reachable match when pruned tokens would fill the whole run", async () => {
+    const { match, requester, responder } = await seedSilentMatch(71);
+
+    await seedPrunedMatches(MAX_CANDIDATES_PER_QUERY, hoursAgo(25));
+
+    const candidates = await selectUnansweredMatchCandidates(NOW);
+
+    expect(candidates.map(({ userId }) => userId).sort()).toEqual(
+      [requester.userId, responder.userId].sort(),
+    );
+    expect(candidates.map(({ url }) => url).sort()).toEqual(
+      [
+        `chat/${match.id}/${requester.id}`,
+        `chat/${match.id}/${responder.id}`,
+      ].sort(),
+    );
   });
 });
 

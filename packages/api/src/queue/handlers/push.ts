@@ -1,3 +1,4 @@
+import type { ExpoDeliveryResult } from "../../shared/push-errors";
 import type {
   ICheckPushNotificationReceiptsJobData,
   IPushReceiptReference,
@@ -17,6 +18,7 @@ import { sendError } from "../../errors/errors";
 import { UserService } from "../../services/user-service";
 import { captureEvent } from "../../shared/analytics";
 import { config } from "../../shared/config";
+import { DEAD_TOKEN_ERROR, isDeadTokenError } from "../../shared/push-errors";
 import { enqueue } from "../enqueue";
 import { TOPICS } from "../topics";
 
@@ -28,20 +30,23 @@ const expo = new Expo({
   maxConcurrentRequests: 100,
 });
 
-const handlePushError = async (errorMessage: string, pushToken: string) => {
-  const newError = new Error(
-    `There was an error sending a notification: ${errorMessage}.`,
-  );
+/**
+ * Take a token Expo has rejected out of circulation.
+ *
+ * Best effort. A prune that fails is worth reporting, but it must not fail a
+ * job whose push has already been handed over: the queue would retry the send
+ * and the user would see it twice.
+ */
+const pruneToken = async (pushToken: string) => {
+  try {
+    await UserService.blacklistPushToken(pushToken);
 
-  if (errorMessage === "DeviceNotRegistered") {
-    try {
-      await UserService.blacklistPushToken(pushToken);
-    } catch (error) {
-      sendError(error);
-    }
+    return true;
+  } catch (error) {
+    sendError(error);
+
+    return false;
   }
-
-  sendError(newError);
 };
 
 type DeliveryEvent =
@@ -51,26 +56,46 @@ type DeliveryEvent =
 type DeliveryOutcome = {
   errorCode: string | null;
   status: PushDeliveryStatus;
+  /** Expo says the token is gone, so nothing may be sent to it again. */
+  deadToken: boolean;
 };
 
-/** A ticket or a receipt, in the two fields both of them answer with. */
-type ExpoResult = { details?: { error?: string }; status: string };
-
-/** Neither confirmed nor rejected yet, so there is nothing to record. */
-const isInFlight = (result: ExpoResult) =>
-  result.status !== "ok" && !result.details?.error;
+/**
+ * Neither confirmed nor rejected yet, so there is nothing to record.
+ *
+ * Read off the status rather than off `details.error`: Expo does not always
+ * put a code on a rejection, and treating an uncoded rejection as unsettled
+ * had it queued for another look every thirty-five minutes forever, while the
+ * dead token that caused it stayed in the database.
+ */
+const isInFlight = (result: ExpoDeliveryResult) =>
+  result.status !== "ok" && result.status !== "error";
 
 /**
  * Expo's answer, in the two fields the events break down by.
  *
  * An error with no code of its own still counts as an error: what matters for
  * the ok rate is that the push did not make it, and `Unknown` is a more honest
- * bucket than dropping the row.
+ * bucket than dropping the row. A dead token recognised from the message alone
+ * is filed under the code it would have carried, so the ok rate does not split
+ * the same failure across two buckets and the cadence gate, which reads the
+ * code back off `NotificationLog`, sees it.
  */
-const outcomeOf = (result: ExpoResult): DeliveryOutcome =>
-  result.status === "error"
-    ? { errorCode: result.details?.error ?? "Unknown", status: "error" }
-    : { errorCode: null, status: "ok" };
+const outcomeOf = (result: ExpoDeliveryResult): DeliveryOutcome => {
+  if (result.status !== "error") {
+    return { errorCode: null, status: "ok", deadToken: false };
+  }
+
+  const deadToken = isDeadTokenError(result);
+
+  return {
+    errorCode: deadToken
+      ? DEAD_TOKEN_ERROR
+      : (result.details?.error ?? "Unknown"),
+    status: "error",
+    deadToken,
+  };
+};
 
 /**
  * Write down what became of one push.
@@ -89,12 +114,14 @@ const recordDelivery = async (
   event: DeliveryEvent,
   { notificationLogId, pushKind, userId }: PushAttribution,
   { errorCode, status }: DeliveryOutcome,
+  tokenPruned: boolean,
 ) => {
   if (userId) {
     captureEvent(userId, event, {
       error_code: errorCode,
       kind: pushKind ?? null,
       status,
+      token_pruned: tokenPruned,
     });
   }
 
@@ -111,6 +138,43 @@ const recordDelivery = async (
   } catch (error) {
     sendError(error);
   }
+};
+
+/**
+ * Everything that has to happen once Expo has answered about one push.
+ *
+ * The prune comes before the event on purpose, so the event can say whether
+ * the token was actually dropped. That turns "how many dead devices are we
+ * still holding" into a number on the same series as the error code it came
+ * from, rather than something only the database knows.
+ *
+ * `DeviceNotRegistered` is deliberately not reported as an error. Somebody
+ * uninstalling the app is the expected end of a push token, and reporting it
+ * made it the loudest exception on the server while the only sensible response
+ * to it, dropping the token, was already happening one line above. Every other
+ * code still goes to the funnel, because those are the ones nobody has looked
+ * at yet.
+ */
+const settle = async (
+  event: DeliveryEvent,
+  attribution: PushAttribution,
+  pushToken: string | undefined,
+  result: ExpoDeliveryResult,
+) => {
+  const outcome = outcomeOf(result);
+
+  const tokenPruned =
+    outcome.deadToken && pushToken ? await pruneToken(pushToken) : false;
+
+  await recordDelivery(event, attribution, outcome, tokenPruned);
+
+  if (outcome.status !== "error" || outcome.deadToken) return;
+
+  sendError(
+    new Error(
+      `There was an error sending a notification: ${outcome.errorCode}.`,
+    ),
+  );
 };
 
 export const handleSendPushNotification = async (
@@ -135,20 +199,16 @@ export const handleSendPushNotification = async (
   const tickets = await expo.sendPushNotificationsAsync([message]);
 
   // Error codes: https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
-  await Promise.all([
-    ...tickets.map((ticket) =>
-      recordDelivery(
+  await Promise.all(
+    tickets.map((ticket) =>
+      settle(
         ANALYTICS_EVENTS.PUSH_TICKET_RESULT,
         attribution,
-        outcomeOf(ticket),
+        pushToken,
+        ticket,
       ),
     ),
-    ...tickets.flatMap((ticket) =>
-      ticket.status === "error" && ticket.details?.error
-        ? [handlePushError(ticket.details.error, pushToken)]
-        : [],
-    ),
-  ]);
+  );
 
   // Tickets for notifications that could not be enqueued have no id.
   const receipts = tickets.flatMap((ticket) =>
@@ -187,17 +247,14 @@ export const handleCheckPushReceipts = async ({
       if (isInFlight(receipt)) return [];
 
       const reference = referenceFor(id);
-      const pushToken = reference?.pushToken;
 
       return [
-        recordDelivery(
+        settle(
           ANALYTICS_EVENTS.PUSH_RECEIPT_RESULT,
           reference ?? {},
-          outcomeOf(receipt),
+          reference?.pushToken,
+          receipt,
         ),
-        ...(receipt.status === "error" && receipt.details?.error && pushToken
-          ? [handlePushError(receipt.details.error, pushToken)]
-          : []),
       ];
     }),
   );

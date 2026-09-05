@@ -93,6 +93,17 @@ export class UserService {
     });
   }
 
+  /**
+   * Drop a token no push will ever reach.
+   *
+   * The empty string rather than null, which is what the column has always
+   * used for this and what the selectors in `reengagement-service` test for.
+   * `updateMany` because the same install can have been signed into more than
+   * one account, and every one of those rows points at a device that is gone.
+   *
+   * Nothing has to undo this: the app re-registers its token every time the
+   * deck opens, so a reinstall writes a live one back.
+   */
   static blacklistPushToken(pushToken: string) {
     return prisma.user.updateMany({
       where: { pushToken },

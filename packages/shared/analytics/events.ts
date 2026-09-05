@@ -551,6 +551,14 @@ export type ServerEventProperties = {
     /** Null only for a push enqueued before this property existed. */
     kind: PushKind | null;
     status: PushDeliveryStatus;
+    /**
+     * The token was dropped because Expo said the device is gone.
+     *
+     * Sits next to `error_code` so the clean-up can be read on the same series
+     * as the failure that caused it: how many dead devices we found, and how
+     * many of them we actually stopped sending to.
+     */
+    token_pruned: boolean;
   };
   /**
    * What Expo said when the push was handed over. An error here is a push that
@@ -561,6 +569,8 @@ export type ServerEventProperties = {
     error_code: string | null;
     kind: PushKind | null;
     status: PushDeliveryStatus;
+    /** See the same property on `Push Receipt Result`. */
+    token_pruned: boolean;
   };
   /**
    * One row per re-engagement push handed to Expo. `dedupe_key` is the same key
