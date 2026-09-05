@@ -47,6 +47,39 @@ test("migrates a legacy token when it is first read", async () => {
   expect(asyncStorage.removeItem).toHaveBeenCalledWith(StorageKeys.Token);
 });
 
+test("looks again when the keychain is not ready for the first read", async () => {
+  secureStore.getItemAsync
+    .mockRejectedValueOnce(
+      new Error("Calling the 'getValueWithKeyAsync' function has failed"),
+    )
+    .mockResolvedValueOnce("signed-token");
+
+  await expect(getData(StorageKeys.Token)).resolves.toBe("signed-token");
+  expect(secureStore.getItemAsync).toHaveBeenCalledTimes(2);
+  expect(asyncStorage.getItem).not.toHaveBeenCalled();
+});
+
+test("gives the keychain error back when every read fails", async () => {
+  const failure = new Error(
+    "Calling the 'getValueWithKeyAsync' function has failed",
+  );
+  secureStore.getItemAsync
+    .mockRejectedValueOnce(failure)
+    .mockRejectedValueOnce(failure)
+    .mockRejectedValueOnce(failure);
+
+  await expect(getData(StorageKeys.Token)).rejects.toBe(failure);
+  expect(secureStore.getItemAsync).toHaveBeenCalledTimes(3);
+});
+
+test("does not retry a phone that simply has no token", async () => {
+  secureStore.getItemAsync.mockResolvedValueOnce(null);
+  asyncStorage.getItem.mockResolvedValueOnce(null);
+
+  await expect(getData(StorageKeys.Token)).resolves.toBeNull();
+  expect(secureStore.getItemAsync).toHaveBeenCalledTimes(1);
+});
+
 test("removes current and legacy token copies on logout", async () => {
   await deleteData(StorageKeys.Token);
 
