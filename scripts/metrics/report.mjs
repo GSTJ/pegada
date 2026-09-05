@@ -10,6 +10,7 @@ import {
   BREAKDOWNS,
   CITY_TABLE_ROWS,
   CITY_UNKNOWN_BUCKET,
+  DECK_TIERS,
   EVENTS,
   PUSH_RETURN_WINDOW_MINUTES,
   STORE_BUILD_COVERAGE,
@@ -56,8 +57,34 @@ export function formatRateDelta(current, previous) {
   return `${diff > 0 ? "+" : "-"}${Math.abs(diff).toFixed(1)} pp`;
 }
 
+/**
+ * A mean delta, as a plain difference rather than a percentage.
+ *
+ * An average page size moving from 8.0 to 8.4 is worth half a card, and saying
+ * it grew five percent hides which half of the fraction moved.
+ */
+export function formatAverageDelta(current, previous) {
+  if (current === null || previous === null) {
+    return "n/a";
+  }
+  const diff = current - previous;
+  if (Math.abs(diff) < 0.05) {
+    return "0";
+  }
+  return `${diff > 0 ? "+" : "-"}${Math.abs(diff).toFixed(1)}`;
+}
+
 function formatPercent(value) {
   return value === null ? "n/a" : `${value.toFixed(1)}%`;
+}
+
+function formatAverage(value) {
+  return value === null ? "n/a" : value.toFixed(1);
+}
+
+/** A mean, or null when there is nothing to divide by. */
+function mean(total, count) {
+  return count === 0 ? null : total / count;
 }
 
 /** A share of a denominator, or null when the denominator is empty. */
@@ -86,7 +113,13 @@ export function coverageNote(coverage = STORE_BUILD_COVERAGE) {
   if (events.length === 0) {
     return `Coverage note: build ${coverage.version} emits every event in this readout.`;
   }
-  return `Coverage note: the store build ${coverage.version} cannot emit ${events.join(", ")}, so those rows read zero for anyone still on it. They measure reach, not the product.`;
+  const gap = `Coverage note: the store build ${coverage.version} cannot emit ${events.join(", ")}, so those rows read zero for anyone still on it. They measure reach, not the product.`;
+  const updated = coverage.otaEvents ?? [];
+  if (updated.length === 0) {
+    return gap;
+  }
+  const one = updated.length === 1;
+  return `${gap} ${updated.join(", ")} ${one ? "is" : "are"} the exception: the over the air update of ${coverage.otaDate} carries ${one ? "it" : "them"} to the ${coverage.version} runtime, so ${one ? "that row fills" : "those rows fill"} from every phone that has taken the update and the gap is only the devices that have not.`;
 }
 
 /** A percentage row, with the delta in points and `n/a` on either empty side. */
@@ -99,6 +132,16 @@ function rateRow(label, current, previous) {
         : formatRateDelta(current, previous),
     label,
     previous: formatPercent(previous),
+  };
+}
+
+/** An average row, printed to one decimal with the difference as the delta. */
+function averageRow(label, current, previous) {
+  return {
+    current: formatAverage(current),
+    delta: formatAverageDelta(current, previous),
+    label,
+    previous: formatAverage(previous),
   };
 }
 
@@ -165,15 +208,36 @@ function metricTable(rows) {
   ].join("\n");
 }
 
-function countRow(index, label, event, field = "total") {
-  const current = totalOf(index, event, "current", field);
-  const previous = totalOf(index, event, "previous", field);
+/** A count row built from two numbers the totals index does not carry. */
+function valueRow(label, current, previous) {
   return {
     current: number(current),
     delta: formatDelta(current, previous),
     label,
     previous: number(previous),
   };
+}
+
+function countRow(index, label, event, field = "total") {
+  return valueRow(
+    label,
+    totalOf(index, event, "current", field),
+    totalOf(index, event, "previous", field),
+  );
+}
+
+/**
+ * The deck supply rows, keyed by the window they describe.
+ *
+ * ClickHouse leaves a window out entirely when nothing was served in it, so a
+ * missing row and a row of zeroes have to mean the same thing here.
+ */
+function indexDeckSupply(rows) {
+  const index = new Map();
+  for (const row of rows ?? []) {
+    index.set(row.period === "current" ? "current" : "previous", row);
+  }
+  return index;
 }
 
 function breakdownTable(
@@ -234,6 +298,7 @@ export function noCityLine(rows, activeCurrent, activePrevious) {
  * @param {Array} input.activeUsersByCity rows from the city split
  * @param {Array} input.activeUsersByVersion rows from the version split
  * @param {Record<string, Array>} input.breakdowns rows per breakdown id
+ * @param {Array} input.deckSupply rows from the deck supply query, one per window
  * @param {Date} input.generatedAt when the job ran
  * @param {{ current: Array, previous: Array }} input.pushReturns rows from the push attributed returns query, one per window
  * @param {Array} input.totals rows from the totals query
@@ -244,6 +309,7 @@ export function buildReport({
   activeUsersByCity,
   activeUsersByVersion,
   breakdowns,
+  deckSupply,
   generatedAt,
   pushReturns,
   totals,
@@ -279,12 +345,7 @@ export function buildReport({
   const openRatePrevious = openRate("previous");
 
   const core = metricTable([
-    {
-      current: number(activeCurrent),
-      delta: formatDelta(activeCurrent, activePrevious),
-      label: "Active users (app and site)",
-      previous: number(activePrevious),
-    },
+    valueRow("Active users (app and site)", activeCurrent, activePrevious),
     countRow(
       index,
       "New signups (Create Dog Profile)",
@@ -295,23 +356,13 @@ export function buildReport({
     countRow(index, "Matches (New Match)", EVENTS.NEW_MATCH),
     countRow(index, "Messages sent", EVENTS.MESSAGE_SENT),
     countRow(index, "Paywall views", EVENTS.PAYWALL_VIEWED),
-    {
-      current: number(upgradeCurrent),
-      delta: formatDelta(upgradeCurrent, upgradePrevious),
-      label: "Upgrades (type success)",
-      previous: number(upgradePrevious),
-    },
+    valueRow("Upgrades (type success)", upgradeCurrent, upgradePrevious),
   ]);
 
   const sharing = metricTable([
     countRow(index, "Share Tapped", EVENTS.SHARE_TAPPED),
     countRow(index, "Share Completed", EVENTS.SHARE_COMPLETED),
-    {
-      current: number(storyCurrent),
-      delta: formatDelta(storyCurrent, storyPrevious),
-      label: "Share Completed (option story)",
-      previous: number(storyPrevious),
-    },
+    valueRow("Share Completed (option story)", storyCurrent, storyPrevious),
     countRow(index, "Empty Deck Shown", EVENTS.EMPTY_DECK_SHOWN),
     countRow(index, "Share Prompt Tapped", EVENTS.SHARE_PROMPT_TAPPED),
   ]);
@@ -343,6 +394,20 @@ export function buildReport({
       EVENTS.REENGAGEMENT_PUSH_SENT,
       "people",
     ),
+    // The other side of the cadence. A send count on its own cannot tell a week
+    // when nobody was due a nudge from a week when the cron was broken, and
+    // these two rows are what separate the two.
+    countRow(
+      index,
+      "Reengagement Push Suppressed",
+      EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
+    ),
+    countRow(
+      index,
+      "Users held back from a push",
+      EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
+      "people",
+    ),
     countRow(index, "Push Ticket Result", EVENTS.PUSH_TICKET_RESULT),
     rateRow("Push Ticket Result ok rate", okCurrent, okPrevious),
     countRow(
@@ -351,16 +416,51 @@ export function buildReport({
       EVENTS.PUSH_NOTIFICATION_OPENED,
     ),
     rateRow("Push open rate", openRateCurrent, openRatePrevious),
-    {
-      current: number(returnedCurrent),
-      delta: formatDelta(returnedCurrent, returnedPrevious),
-      label: `Push attributed returns (${PUSH_RETURN_WINDOW_MINUTES} min)`,
-      previous: number(returnedPrevious),
-    },
+    valueRow(
+      `Push attributed returns (${PUSH_RETURN_WINDOW_MINUTES} min)`,
+      returnedCurrent,
+      returnedPrevious,
+    ),
     rateRow(
       "Push attributed return rate",
       ratio(returnedCurrent, reachedCurrent),
       ratio(returnedPrevious, reachedPrevious),
+    ),
+  ]);
+
+  // What the deck handed out, against what the app asked for. The tier rows
+  // say whether the fallbacks are carrying the deck or the primary query
+  // already covered it, and the short share is how often they had anything to
+  // do at all.
+  const deckRows = indexDeckSupply(deckSupply);
+  const deckField = (period, field) =>
+    Number(deckRows.get(period)?.[field] ?? 0);
+
+  const pagesCurrent = deckField("current", "pages");
+  const pagesPrevious = deckField("previous", "pages");
+  const perPageCurrent = mean(deckField("current", "served"), pagesCurrent);
+  const perPagePrevious = mean(deckField("previous", "served"), pagesPrevious);
+  const shortCurrent = ratio(deckField("current", "short_pages"), pagesCurrent);
+  const shortPrevious = ratio(
+    deckField("previous", "short_pages"),
+    pagesPrevious,
+  );
+
+  const deck = metricTable([
+    countRow(index, "Deck Served", EVENTS.DECK_SERVED),
+    countRow(index, "Swipers served a deck", EVENTS.DECK_SERVED, "people"),
+    averageRow("Cards served per page", perPageCurrent, perPagePrevious),
+    ...DECK_TIERS.map((tier) =>
+      valueRow(
+        `Cards from ${tier.id}`,
+        deckField("current", tier.property),
+        deckField("previous", tier.property),
+      ),
+    ),
+    rateRow(
+      "Short pages (served under requested)",
+      shortCurrent,
+      shortPrevious,
     ),
   ]);
 
@@ -388,6 +488,10 @@ export function buildReport({
     "### Sharing and deck",
     "",
     sharing,
+    "",
+    "### Deck",
+    "",
+    deck,
     "",
     "### Push",
     "",

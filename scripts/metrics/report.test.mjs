@@ -7,6 +7,7 @@ import {
   COMMENT_MARKER,
   buildReport,
   coverageNote,
+  formatAverageDelta,
   formatDelta,
   formatRateDelta,
   noCityLine,
@@ -33,6 +34,32 @@ function versions(rows) {
 
 /** The city split comes back in the same shape as the version split. */
 const cities = versions;
+
+function deck(rows) {
+  return rows.map(
+    ([
+      period,
+      pages,
+      served,
+      requested,
+      primary_count,
+      beyond_radius_count,
+      same_gender_count,
+      recycled_count,
+      short_pages,
+    ]) => ({
+      beyond_radius_count,
+      pages,
+      period,
+      primary_count,
+      recycled_count,
+      requested,
+      same_gender_count,
+      served,
+      short_pages,
+    }),
+  );
+}
 
 const FIXTURE = {
   activeUsers: [
@@ -87,6 +114,16 @@ const FIXTURE = {
       ["swipe_back", "current", 30],
       ["unknown", "current", 5],
     ]),
+    push_suppressed_reason: breakdown([
+      ["cooldown", "current", 140],
+      ["cooldown", "previous", 20],
+      ["monthly_cap", "current", 60],
+      ["monthly_cap", "previous", 8],
+      ["window", "current", 40],
+      ["gave_up", "current", 12],
+      ["dead_token", "current", 8],
+      ["dead_token", "previous", 12],
+    ]),
     push_ticket_status: breakdown([
       ["ok", "current", 90],
       ["error", "current", 10],
@@ -139,6 +176,10 @@ const FIXTURE = {
       ["error", "current", 1],
     ]),
   },
+  deckSupply: deck([
+    ["current", 100, 840, 1000, 700, 90, 30, 20, 40],
+    ["previous", 80, 560, 800, 560, 0, 0, 0, 48],
+  ]),
   generatedAt: NOW,
   pushReturns: {
     current: [{ people: 200 }],
@@ -160,7 +201,11 @@ const FIXTURE = {
     ["Share Completed", "previous", 30, 28],
     ["Empty Deck Shown", "current", 400, 220],
     ["Share Prompt Tapped", "current", 45, 40],
+    ["Deck Served", "current", 100, 40],
+    ["Deck Served", "previous", 80, 35],
     ["Reengagement Push Sent", "current", 1000, 800],
+    ["Reengagement Push Suppressed", "current", 260, 210],
+    ["Reengagement Push Suppressed", "previous", 40, 32],
     ["Push Ticket Result", "current", 100, 90],
     ["Push Ticket Result", "previous", 100, 88],
     ["Push Notification Opened", "current", 140, 120],
@@ -361,12 +406,120 @@ test("the push ok rate is a share of the tickets in each window", () => {
   );
 });
 
+test("the push table counts the nudges the cadence held back", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(
+    body,
+    /\| Reengagement Push Suppressed \| 260 \| 40 \| \+220 \(\+550\.0%\) \|/,
+  );
+  assert.match(
+    body,
+    /\| Users held back from a push \| 210 \| 32 \| \+178 \(\+556\.3%\) \|/,
+  );
+  // A suppression is only readable next to the send it replaced, so both rows
+  // sit in the push table rather than in a section of their own.
+  const [, pushSection] = body.split("### Push");
+  assert.ok(
+    pushSection.indexOf("| Reengagement Push Sent |") <
+      pushSection.indexOf("| Reengagement Push Suppressed |"),
+  );
+});
+
+test("the suppression reasons separate the caps from a dead phone", () => {
+  const body = buildReport(FIXTURE);
+  const [, reasons] = body.split("### Reengagement Push Suppressed by reason");
+  assert.match(reasons, /\| cooldown \| 140 \| 20 \| \+120 \(\+600\.0%\) \|/);
+  assert.match(reasons, /\| monthly_cap \| 60 \| 8 \| \+52 \(\+650\.0%\) \|/);
+  assert.match(reasons, /\| gave_up \| 12 \| 0 \| \+12 \(new\) \|/);
+  assert.match(reasons, /\| dead_token \| 8 \| 12 \| -4 \(-33\.3%\) \|/);
+  assert.ok(reasons.indexOf("| cooldown |") < reasons.indexOf("| window |"));
+});
+
+test("the deck table reports the pages, the page size and the tiers behind it", () => {
+  const body = buildReport(FIXTURE);
+  assert.ok(body.includes("### Deck"));
+  const [, deckSection] = body.split("### Deck");
+  assert.match(
+    deckSection,
+    /\| Deck Served \| 100 \| 80 \| \+20 \(\+25\.0%\) \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Swipers served a deck \| 40 \| 35 \| \+5 \(\+14\.3%\) \|/,
+  );
+  // 840 cards over 100 pages against 560 over 80.
+  assert.match(
+    deckSection,
+    /\| Cards served per page \| 8\.4 \| 7\.0 \| \+1\.4 \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Cards from primary \| 700 \| 560 \| \+140 \(\+25\.0%\) \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Cards from beyond_radius \| 90 \| 0 \| \+90 \(new\) \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Cards from same_gender \| 30 \| 0 \| \+30 \(new\) \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Cards from recycled_pass \| 20 \| 0 \| \+20 \(new\) \|/,
+  );
+  // 40 of 100 pages came back short, against 48 of 80 the week before.
+  assert.match(
+    deckSection,
+    /\| Short pages \(served under requested\) \| 40\.0% \| 60\.0% \| -20\.0 pp \|/,
+  );
+});
+
+test("the deck table sits between the sharing table and the push table", () => {
+  const body = buildReport(FIXTURE);
+  assert.ok(body.indexOf("### Sharing and deck") < body.indexOf("### Deck\n"));
+  assert.ok(body.indexOf("### Deck\n") < body.indexOf("### Push"));
+});
+
+test("a week the deck served nothing reports no page size rather than a division", () => {
+  const body = buildReport({ ...FIXTURE, deckSupply: [] });
+  const [, deckSection] = body.split("### Deck");
+  assert.match(
+    deckSection,
+    /\| Cards served per page \| n\/a \| n\/a \| n\/a \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Short pages \(served under requested\) \| n\/a \| n\/a \| n\/a \|/,
+  );
+  assert.match(deckSection, /\| Cards from primary \| 0 \| 0 \| 0 \|/);
+});
+
+test("the deck rows survive a query that answered with no rows at all", () => {
+  const body = buildReport({ ...FIXTURE, deckSupply: undefined });
+  const [, deckSection] = body.split("### Deck");
+  assert.match(
+    deckSection,
+    /\| Cards served per page \| n\/a \| n\/a \| n\/a \|/,
+  );
+});
+
+test("an average delta is a plain difference, not a percentage", () => {
+  assert.equal(formatAverageDelta(8.4, 7), "+1.4");
+  assert.equal(formatAverageDelta(7, 8.4), "-1.4");
+  assert.equal(formatAverageDelta(8, 8), "0");
+  assert.equal(formatAverageDelta(8.01, 8), "0");
+  assert.equal(formatAverageDelta(null, 8), "n/a");
+  assert.equal(formatAverageDelta(8, null), "n/a");
+});
+
 test("every breakdown gets its own table, ordered by the current window", () => {
   const body = buildReport(FIXTURE);
   for (const title of [
     "Upgrade by type",
     "Share Completed by option",
     "Push Ticket Result by status",
+    "Reengagement Push Suppressed by reason",
     "Fake Door Tapped by feature",
     "Signup Attributed by ref",
     "Image Moderation Result by verdict",
@@ -510,6 +663,25 @@ test("the coverage note does not excuse an event 1.6.2 is really sending", () =>
       `${event} arrives from 1.6.2, so the note must not blame the build`,
     );
   }
+});
+
+test("the coverage note says the update closed the gap on the phones that took it", () => {
+  const note = coverageNote();
+  assert.match(note, /Push Notification Opened is the exception/);
+  assert.match(note, /over the air update of 2026-09-04/);
+  assert.match(note, /only the devices that have not/);
+  // The gap sentence still comes first: the row is a mix of two populations
+  // while the update rolls out, so neither half can be dropped.
+  assert.ok(note.indexOf("cannot emit") < note.indexOf("is the exception"));
+});
+
+test("the coverage note leaves the exception out when no update has shipped", () => {
+  const note = coverageNote({
+    missingEvents: ["Share Tapped"],
+    version: "1.6.2",
+  });
+  assert.equal(note.includes("over the air"), false);
+  assert.match(note, /cannot emit Share Tapped/);
 });
 
 test("the coverage note says so plainly once the store build sends everything", () => {

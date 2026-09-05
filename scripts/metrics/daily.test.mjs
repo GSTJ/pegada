@@ -75,6 +75,25 @@ function fakeWorld({ existingComment = null } = {}) {
           results: [[name.includes("previous") ? 160 : 200]],
         });
       }
+      if (name.endsWith("deck supply")) {
+        return json({
+          columns: [
+            "period",
+            "pages",
+            "served",
+            "requested",
+            "primary_count",
+            "beyond_radius_count",
+            "same_gender_count",
+            "recycled_count",
+            "short_pages",
+          ],
+          results: [
+            ["current", 100, 840, 1000, 700, 90, 30, 20, 40],
+            ["previous", 80, 560, 800, 560, 0, 0, 0, 48],
+          ],
+        });
+      }
       if (name.endsWith("event totals")) {
         return json({
           columns: ["event", "period", "total", "people"],
@@ -141,7 +160,7 @@ test("a dry run renders the comment and never touches GitHub", async () => {
 test("one query goes out per metric block", async () => {
   const fetchImpl = fakeWorld();
   await runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW });
-  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 6);
+  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 7);
 });
 
 test("both push return windows are asked for separately and land in the table", async () => {
@@ -167,6 +186,36 @@ test("both push return windows are asked for separately and land in the table", 
   assert.match(
     result.body,
     /Coverage note: the store build 1\.6\.2 cannot emit/,
+  );
+});
+
+test("the deck supply query fills the deck table", async () => {
+  const fetchImpl = fakeWorld();
+  const result = await runDailyMetrics({
+    argv: ["--dry-run"],
+    env: ENV,
+    fetchImpl,
+    now: NOW,
+  });
+
+  assert.equal(
+    fetchImpl.calls.filter(
+      (call) => call.body?.name === "pegada daily metrics: deck supply",
+    ).length,
+    1,
+  );
+  const [, deckSection] = result.body.split("### Deck");
+  assert.match(
+    deckSection,
+    /\| Cards served per page \| 8\.4 \| 7\.0 \| \+1\.4 \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Cards from beyond_radius \| 90 \| 0 \| \+90 \(new\) \|/,
+  );
+  assert.match(
+    deckSection,
+    /\| Short pages \(served under requested\) \| 40\.0% \| 60\.0% \| -20\.0 pp \|/,
   );
 });
 

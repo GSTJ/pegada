@@ -15,6 +15,7 @@
 /** Names used by the readout, spelled exactly as PostHog stores them. */
 export const EVENTS = {
   CREATE_DOG_PROFILE: "Create Dog Profile",
+  DECK_SERVED: "Deck Served",
   EMPTY_DECK_SHOWN: "Empty Deck Shown",
   FAKE_DOOR_TAPPED: "Fake Door Tapped",
   IMAGE_MODERATION_RESULT: "Image Moderation Result",
@@ -24,6 +25,7 @@ export const EVENTS = {
   PUSH_NOTIFICATION_OPENED: "Push Notification Opened",
   PUSH_TICKET_RESULT: "Push Ticket Result",
   REENGAGEMENT_PUSH_SENT: "Reengagement Push Sent",
+  REENGAGEMENT_PUSH_SUPPRESSED: "Reengagement Push Suppressed",
   SHARE_COMPLETED: "Share Completed",
   SHARE_PROMPT_TAPPED: "Share Prompt Tapped",
   SHARE_TAPPED: "Share Tapped",
@@ -63,6 +65,7 @@ export const SERVER_EVENTS = [
   "Push Receipt Result",
   "Push Ticket Result",
   "Reengagement Push Sent",
+  "Reengagement Push Suppressed",
   "Signup Attributed",
   "Subscription Event",
 ].sort();
@@ -88,6 +91,13 @@ export const SERVER_EVENTS = [
  * Keep this in step with what the audit sees from 1.6.2, not with what is on
  * main. The point of the note is to stop a reach gap from reading as a dead
  * product, and it only works while every name on it is a genuine gap.
+ *
+ * `otaEvents` is the half of the gap that is already closing. An over the air
+ * update publishes new JavaScript to the 1.6.2 runtime, so a name listed here
+ * is missing on the phones that have not fetched that bundle yet and present on
+ * the ones that have. The row is therefore a mix of two populations while the
+ * update rolls out, and reading it as a flat zero would be wrong in the other
+ * direction: the number is real, it is just smaller than the install base.
  */
 export const STORE_BUILD_COVERAGE = {
   missingEvents: [
@@ -97,6 +107,9 @@ export const STORE_BUILD_COVERAGE = {
     EVENTS.SHARE_PROMPT_TAPPED,
     EVENTS.SHARE_TAPPED,
   ],
+  /** The day the update below was published to the 1.6.2 runtime. */
+  otaDate: "2026-09-04",
+  otaEvents: [EVENTS.PUSH_NOTIFICATION_OPENED],
   version: "1.6.2",
 };
 
@@ -140,6 +153,17 @@ export const BREAKDOWNS = [
     event: EVENTS.FAKE_DOOR_TAPPED,
     property: "feature",
     title: "Fake Door Tapped by feature",
+  },
+  // Why a nudge the cron had ready never went out. Sends alone cannot tell a
+  // quiet week from a broken cadence, and the reasons read very differently:
+  // `cooldown` and `monthly_cap` are the caps doing their job, `gave_up` is a
+  // person the app has stopped trying with, `dead_token` is a phone that can no
+  // longer be reached at all, and `window` is only the evening gate.
+  {
+    id: "push_suppressed_reason",
+    event: EVENTS.REENGAGEMENT_PUSH_SUPPRESSED,
+    property: "reason",
+    title: "Reengagement Push Suppressed by reason",
   },
   {
     id: "signup_ref",
@@ -467,5 +491,65 @@ export function buildPushAttributedReturnsQuery({ end, start }) {
     ") AS activity ON activity.person_id = push.person_id",
     "WHERE activity.acted_at >= push.sent_at",
     `  AND activity.acted_at < push.sent_at + toIntervalMinute(${PUSH_RETURN_WINDOW_MINUTES})`,
+  ].join("\n");
+}
+
+/**
+ * The four tiers a card can come from, in the order the deck falls back
+ * through them.
+ *
+ * `id` is the value the API puts on `deckTier`, and `property` is the counter
+ * the `Deck Served` event carries for it. They differ for the last one:
+ * the tier is called `recycled_pass` and its counter is `recycled_count`, so
+ * both spellings live here rather than being guessed at either end.
+ */
+export const DECK_TIERS = [
+  { id: "primary", property: "primary_count" },
+  { id: "beyond_radius", property: "beyond_radius_count" },
+  { id: "same_gender", property: "same_gender_count" },
+  { id: "recycled_pass", property: "recycled_count" },
+];
+
+/**
+ * Reads a numeric event property as a number.
+ *
+ * PostHog stores properties as JSON, so a count arrives as a value ClickHouse
+ * will not sum without a cast. `OrNull` rather than `OrZero` on purpose: a page
+ * that never carried the property is missing from the sum instead of dragging
+ * the average towards zero.
+ */
+function numericProperty(name) {
+  return `toFloat64OrNull(toString(properties.${name}))`;
+}
+
+/**
+ * One row per window describing what the deck actually handed out.
+ *
+ * The counts are summed rather than averaged in ClickHouse so the report can
+ * divide them by whatever denominator each row needs: pages for the average
+ * page size, the page count for the short share.
+ *
+ * A page is short when it served fewer cards than the app asked for, which is
+ * the same condition the API uses to decide whether to fall back to a wider
+ * tier, so this share is how often the fallbacks had anything to do.
+ */
+export function buildDeckSupplyQuery(windows) {
+  const served = numericProperty("served");
+  const requested = numericProperty("requested");
+  return [
+    "SELECT",
+    `  ${periodExpression(windows)} AS period,`,
+    "  count() AS pages,",
+    `  sum(${served}) AS served,`,
+    `  sum(${requested}) AS requested,`,
+    ...DECK_TIERS.map(
+      (tier) => `  sum(${numericProperty(tier.property)}) AS ${tier.property},`,
+    ),
+    `  countIf(${served} < ${requested}) AS short_pages`,
+    "FROM events",
+    `WHERE ${windowFilter(windows)}`,
+    `  AND event = ${quote(EVENTS.DECK_SERVED)}`,
+    "GROUP BY period",
+    "ORDER BY period",
   ].join("\n");
 }
