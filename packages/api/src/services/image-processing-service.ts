@@ -25,6 +25,16 @@ export type ImageModerationOutcome = {
   mode: ImageModerationMode;
 };
 
+/**
+ * Whether a stored verdict is a decision a model actually made.
+ *
+ * `error` is written to the row like any other verdict so the failure is
+ * visible in the data, but it is not an answer and nobody was billed for it.
+ * Reusing it would mean one bad afternoon at the provider leaves a photo
+ * permanently unmoderated, with no second chance on any later redelivery.
+ */
+const isDecided = (verdict: string) => verdict !== "error";
+
 /** Only `enforce` can turn a rejection into a status. */
 const statusFor = (mode: ImageModerationMode, verdict: string) =>
   mode === "enforce" && verdict === "reject"
@@ -105,12 +115,13 @@ export class ImageProcessingService {
   }): Promise<ImageModerationOutcome> => {
     // The queue delivers at least once, and the job can also be retried after
     // the write that follows this call fails. A row that already carries a
-    // verdict has already been paid for, so the redelivery re-derives the
-    // status from it instead of buying a second opinion. The read only happens
-    // on jobs that would otherwise call a provider, so the `off` path is still
-    // a single query.
+    // decided verdict has been paid for, so the redelivery re-derives the
+    // status from it instead of buying a second opinion. A row carrying only
+    // an `error` is the one case worth asking again about. The read only
+    // happens on jobs that would otherwise call a provider, so the `off` path
+    // is still a single query.
     const stored = await ImageService.getStoredModerationVerdict(imageId);
-    if (stored?.moderationVerdict) {
+    if (stored?.moderationVerdict && isDecided(stored.moderationVerdict)) {
       return {
         status: statusFor(mode, stored.moderationVerdict),
         result: null,

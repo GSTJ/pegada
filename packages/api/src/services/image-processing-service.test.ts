@@ -234,6 +234,23 @@ describe("ImageProcessingService.moderateImage", () => {
     expect(moderate).not.toHaveBeenCalled();
   });
 
+  it("asks again when the row only carries a failure from an earlier run", async () => {
+    config.IMAGE_MODERATION_MODE = "enforce";
+    getStoredModerationVerdict.mockResolvedValue({
+      moderationVerdict: "error",
+    });
+
+    const outcome = await ImageProcessingService.moderateImage({
+      arrayBuffer,
+      imageId,
+    });
+
+    // Nobody was billed for the failed run, so there is nothing to save by
+    // reusing it, and reusing it would leave the photo unchecked forever.
+    expect(moderate).toHaveBeenCalledWith(arrayBuffer);
+    expect(outcome.result?.verdict).toBe("approve");
+  });
+
   it("does not look up a stored verdict when it would not call anyone", async () => {
     config.IMAGE_MODERATION_MODE = "off";
 
