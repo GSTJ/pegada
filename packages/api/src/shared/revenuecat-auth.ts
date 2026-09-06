@@ -44,8 +44,10 @@ export type RevenueCatAuthFailure = "missing" | "rejected";
  *
  * The legacy path is still accepted so a token that has not aged out yet keeps
  * working through the deploy. `REVENUECAT_WEBHOOK_SECRET` is the one that does
- * not expire, and an unset secret refuses rather than falling open, because the
- * route behind this changes what people are paying for.
+ * not expire. While it is unset the legacy check is the only way in, so an
+ * unset secret narrows the door rather than opening it: nothing is accepted
+ * that was not already accepted before, which matters because the route behind
+ * this changes what people are paying for.
  */
 export const authorizeRevenueCatRequest = (
   authorizationHeader: string | null | undefined,

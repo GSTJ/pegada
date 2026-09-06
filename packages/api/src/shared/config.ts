@@ -149,8 +149,8 @@ const configSchema = z.object({
    * secret on purpose: the previous check verified a signed token with a thirty
    * day maximum age, so a working webhook silently stopped being one a month
    * after it was set up. Optional so a fresh clone and the test suite boot
-   * without it, and the route still accepts a live legacy token while it is
-   * unset.
+   * without it. While it is unset the route accepts nothing it did not already
+   * accept: the older token check is the only way in.
    */
   REVENUECAT_WEBHOOK_SECRET: z.string().optional(),
 
