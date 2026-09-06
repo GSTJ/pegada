@@ -255,7 +255,21 @@ export type MobileEventProperties = {
     minimum_version: string;
   };
   [ANALYTICS_EVENTS.UPGRADE]: {
+    /**
+     * Whether the receipt behind a successful upgrade was a sandbox one.
+     * `null` when the entitlement could not be read, which is a different
+     * answer from `false` and is counted separately.
+     */
+    is_sandbox?: boolean | null;
     package?: string;
+    /**
+     * Where a successful upgrade came from. `store` is a real purchase through
+     * RevenueCat, which is the only one that also produces a `Subscription
+     * Event` on the server. `maestro_mock` is the premium grant the end to end
+     * flows hand themselves, which produces nothing server side and is not
+     * revenue.
+     */
+    source?: "maestro_mock" | "store";
     trial?: boolean | null;
     type: "cancel" | "error" | "start" | "success";
   };
