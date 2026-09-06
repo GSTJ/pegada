@@ -104,7 +104,7 @@ const UpgradeWall: React.FC = () => {
         },
       });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       haptics.success();
 
       analytics.track({
@@ -112,6 +112,11 @@ const UpgradeWall: React.FC = () => {
         event_properties: {
           package: selectedOffering?.product.identifier,
           type: "success",
+          // Says whether the money was real. A sandbox receipt and the grant
+          // the Maestro flows hand themselves both land here otherwise
+          // indistinguishable from an App Store charge, and only the charge
+          // produces a RevenueCat webhook event on the server.
+          ...payments.describePurchase(result?.customerInfo),
         },
       });
       router.back();
