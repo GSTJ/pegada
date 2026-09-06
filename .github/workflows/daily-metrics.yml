@@ -1,11 +1,12 @@
 name: Daily Metrics
 
-# Noon UTC, which is early morning in Brazil: the readout is waiting before
-# anyone opens the repo, and the window it closes is a whole day rather than a
-# partial one.
+# 08:30 UTC, early morning in Brazil: the readout is waiting before anyone
+# opens the repo. Noon UTC used to be the schedule, but GitHub's shared cron
+# queue delayed it by hours on back to back days, so it moved earlier to
+# leave room for that slack.
 on:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "30 8 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
