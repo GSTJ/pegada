@@ -32,6 +32,7 @@ export const EVENTS = {
   SHARE_TAPPED: "Share Tapped",
   SIGNUP_ATTRIBUTED: "Signup Attributed",
   SUBSCRIPTION_EVENT: "Subscription Event",
+  SUBSCRIPTION_WEBHOOK_REJECTED: "Subscription Webhook Rejected",
   SWIPE: "Swipe",
   UPGRADE: "Upgrade",
 };
@@ -72,6 +73,7 @@ export const SERVER_EVENTS = [
   "Reengagement Push Suppressed",
   "Signup Attributed",
   "Subscription Event",
+  "Subscription Webhook Rejected",
 ].sort();
 
 /**
@@ -270,6 +272,17 @@ export const BREAKDOWNS = [
     event: EVENTS.SUBSCRIPTION_EVENT,
     property: "product_id",
     title: "Subscription Event by product",
+  },
+  // Why the subscription tables above are empty, when they are. A webhook
+  // nobody ever configured sends nothing at all, so this table is empty too. A
+  // webhook whose credential no longer matches sends every delivery straight
+  // into a refusal, and they land here. Reading an empty subscription table
+  // without this one cannot tell those apart.
+  {
+    id: "subscription_webhook_rejected",
+    event: EVENTS.SUBSCRIPTION_WEBHOOK_REJECTED,
+    property: "reason",
+    title: "Subscription Webhook Rejected by reason",
   },
 ];
 

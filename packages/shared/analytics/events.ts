@@ -77,6 +77,7 @@ export const ANALYTICS_EVENTS = {
   SKIP_COMPLETE_DOG_PROFILE: "Skip Complete Dog Profile",
   STORE_REDIRECT: "Store Redirect",
   SUBSCRIPTION_EVENT: "Subscription Event",
+  SUBSCRIPTION_WEBHOOK_REJECTED: "Subscription Webhook Rejected",
   SWIPE: "Swipe",
   SWIPE_BACK: "Swipe Back",
   UPDATE_REQUIRED_SHOWN: "Update Required Shown",
@@ -715,6 +716,21 @@ export type ServerEventProperties = {
     store: SubscriptionStore;
     type: SubscriptionEventType;
   };
+  /**
+   * A delivery to the subscriptions webhook that never reached the handler.
+   *
+   * Without this row a refused delivery and a webhook nobody ever set up look
+   * identical from the readout: both are an empty `Subscription Event` table.
+   * They need opposite actions, so the refusal is a row of its own rather than
+   * a silence to be interpreted.
+   *
+   * `missing` means the delivery carried no credential at all. `rejected`
+   * means it carried one we do not recognise, which is what an expired or
+   * rotated value looks like from here.
+   */
+  [ANALYTICS_EVENTS.SUBSCRIPTION_WEBHOOK_REJECTED]: {
+    reason: "missing" | "rejected";
+  };
 };
 
 export type ServerEventName = keyof ServerEventProperties;
@@ -857,6 +873,7 @@ export const SERVER_EVENT_NAMES = [
   ANALYTICS_EVENTS.SIGNUP_ATTRIBUTED,
   ANALYTICS_EVENTS.STORE_REDIRECT,
   ANALYTICS_EVENTS.SUBSCRIPTION_EVENT,
+  ANALYTICS_EVENTS.SUBSCRIPTION_WEBHOOK_REJECTED,
 ] as const;
 
 export const WEB_EVENT_NAMES = [
