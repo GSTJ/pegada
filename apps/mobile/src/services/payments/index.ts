@@ -464,10 +464,32 @@ const restorePurchases = async () => {
   await Purchases.restorePurchases();
 };
 
+/**
+ * What a completed purchase actually was, for the analytics call site.
+ *
+ * `Upgrade` with `type: "success"` is the only client side signal that somebody
+ * paid, and on its own it cannot tell an App Store charge from a sandbox one or
+ * from the grant the Maestro flows hand themselves. All three read as revenue
+ * in the readout and only one of them is, which is how successful upgrades can
+ * show up with no matching RevenueCat webhook event behind them.
+ *
+ * `null` rather than `false` when the entitlement is missing, because "not a
+ * sandbox purchase" and "we could not read the receipt" are different answers.
+ */
+const describePurchase = (customerInfo?: CustomerInfo | null) => {
+  const entitlement = customerInfo?.entitlements.active[Entitlement.Premium];
+
+  return {
+    is_sandbox: entitlement?.isSandbox ?? null,
+    source: isMaestroMockMode ? ("maestro_mock" as const) : ("store" as const),
+  };
+};
+
 export const payments = {
   init,
   getOfferings,
   purchasePackage,
+  describePurchase,
   getPlan,
   logIn,
   restorePurchases,

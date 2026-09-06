@@ -207,6 +207,48 @@ test("every breakdown names an event the totals query also counts", () => {
   assert.equal(new Set(ids).size, ids.length);
 });
 
+const breakdownById = (id) =>
+  BREAKDOWNS.find((breakdown) => breakdown.id === id);
+
+test("the upgrade breakdowns say what was bought and whether it was real", () => {
+  const pkg = breakdownById("upgrade_package");
+  assert.equal(pkg.event, EVENTS.UPGRADE);
+  assert.equal(pkg.property, "package");
+
+  const source = breakdownById("upgrade_source");
+  assert.equal(source.event, EVENTS.UPGRADE);
+  assert.equal(source.property, "source");
+
+  const sandbox = breakdownById("upgrade_sandbox");
+  assert.equal(sandbox.event, EVENTS.UPGRADE);
+  assert.equal(sandbox.property, "is_sandbox");
+
+  const version = breakdownById("upgrade_app_version");
+  assert.equal(version.event, EVENTS.UPGRADE);
+  assert.equal(version.property, "$app_version");
+
+  const query = buildBreakdownQuery(buildWindows(NOW), source);
+  assert.match(query, /AND event = 'Upgrade'/);
+  assert.match(
+    query,
+    /ifNull\(nullIf\(toString\(properties\.source\), ''\), 'unknown'\) AS bucket/,
+  );
+
+  // The app writes one of these two, so a third bucket means the vocabulary
+  // moved and the table stopped separating revenue from a test grant.
+  const cataloguePath = fileURLToPath(
+    new URL("../../packages/shared/analytics/events.ts", import.meta.url),
+  );
+  const catalogue = readFileSync(cataloguePath, "utf8");
+  for (const name of ["is_sandbox", "source"]) {
+    assert.ok(
+      catalogue.includes(name),
+      `${name} is missing from the catalogue`,
+    );
+  }
+  assert.match(catalogue, /source\?: "maestro_mock" \| "store";/);
+});
+
 test("the suppression breakdown reads why a nudge was withheld", () => {
   const suppressed = BREAKDOWNS.find(
     (breakdown) => breakdown.id === "push_suppressed_reason",

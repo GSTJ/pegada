@@ -140,6 +140,44 @@ export const BREAKDOWNS = [
     property: "type",
     title: "Upgrade by type",
   },
+  // What the successful upgrades actually bought, and whether the money was
+  // real. `Upgrade` is a client event: the app fires it the moment the purchase
+  // sheet resolves, with no server confirmation behind it. A sandbox receipt, a
+  // TestFlight purchase and the premium grant the end to end flows hand
+  // themselves all resolve the same way, so a week can show successful upgrades
+  // while `Subscription Event by type` stays empty because RevenueCat never
+  // charged anybody. These three tables are what separates the cases.
+  //
+  // `unknown` in the source and sandbox tables is a build that predates the
+  // properties, not a purchase we failed to classify.
+  {
+    id: "upgrade_package",
+    event: EVENTS.UPGRADE,
+    property: "package",
+    title: "Upgrade by package",
+  },
+  {
+    id: "upgrade_source",
+    event: EVENTS.UPGRADE,
+    property: "source",
+    title: "Upgrade by source",
+  },
+  {
+    id: "upgrade_sandbox",
+    event: EVENTS.UPGRADE,
+    property: "is_sandbox",
+    title: "Upgrade by sandbox",
+  },
+  // Which build the upgrade came from, scoped to the event rather than to the
+  // whole population. The over the air table below counts people across every
+  // event, so it cannot say whether a given upgrade came from a phone in the
+  // store or from a release build one of us was driving on a simulator.
+  {
+    id: "upgrade_app_version",
+    event: EVENTS.UPGRADE,
+    property: APP_VERSION_PROPERTY,
+    title: "Upgrade by app version",
+  },
   {
     id: "share_option",
     event: EVENTS.SHARE_COMPLETED,
