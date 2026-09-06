@@ -142,6 +142,19 @@ const configSchema = z.object({
   CRON_SECRET: z.string().optional(),
 
   /**
+   * REVENUECAT
+   *
+   * The value pasted into the subscriptions webhook's "Authorization header
+   * value" box, sent back to us verbatim on every delivery. A plain shared
+   * secret on purpose: the previous check verified a signed token with a thirty
+   * day maximum age, so a working webhook silently stopped being one a month
+   * after it was set up. Optional so a fresh clone and the test suite boot
+   * without it, and the route still accepts a live legacy token while it is
+   * unset.
+   */
+  REVENUECAT_WEBHOOK_SECRET: z.string().optional(),
+
+  /**
    * APP
    *
    * The oldest build allowed to keep running. Anything below it gets the
