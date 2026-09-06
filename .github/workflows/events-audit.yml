@@ -1,9 +1,12 @@
 name: Events Audit
 
-# Dispatch only. This is a "what is the tracking actually doing" pass, run when
-# somebody is about to trust a funnel or has just shipped instrumentation, not
-# something worth a comment rewrite every morning.
+# 08:40 UTC, ten minutes after the daily metrics readout, so the two comments
+# land close together in the morning in Brazil. Also runs on dispatch, for
+# when somebody is about to trust a funnel or has just shipped instrumentation
+# and wants a check sooner than the next scheduled run.
 on:
+  schedule:
+    - cron: "40 8 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
