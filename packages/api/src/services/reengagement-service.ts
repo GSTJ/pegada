@@ -145,6 +145,12 @@ export class ReengagementService {
     // out either way and the error still leaves through the route.
     try {
       await ReengagementService.#decide(summary, now);
+    } catch (error) {
+      // Without this the row a failed run emits is all zeroes, which is the
+      // same row a quiet evening emits. The flag is what separates "nothing to
+      // do" from "did not get to find out".
+      summary.failed = true;
+      throw error;
     } finally {
       await reportRun(summary, now);
     }
@@ -223,13 +229,6 @@ export class ReengagementService {
         return;
       }
 
-      // Every nudge they were due had already been claimed, so there is
-      // nothing left to try. That is a decision about them and it has a name.
-      if (queue.length === 0) {
-        suppress(userId, kind, "already_sent", localHour);
-        return;
-      }
-
       try {
         const reason = await ReengagementService.#decideOne(
           facts,
@@ -239,7 +238,11 @@ export class ReengagementService {
           now,
         );
 
-        if (reason) suppress(userId, kind, reason, localHour);
+        // The kind of the nudge actually queued, falling back to the best one
+        // they were due when the queue is empty. Reporting the claimed kind
+        // for a user who still had a second nudge waiting would quietly change
+        // what an existing event property means.
+        if (reason) suppress(userId, queue[0]?.kind ?? kind, reason, localHour);
       } catch (error) {
         // One failed send used to take the run with it, and the run took the
         // heartbeat with it: the hour reported nothing at all, so an outage
@@ -270,12 +273,20 @@ export class ReengagementService {
     summary: ReengagementRunSummary,
     now: Date,
   ): Promise<ReengagementSuppressionReason | null> {
-    // The cadence is decided before the clock, so somebody held back for a
-    // month is not also counted as "wrong hour" twenty-two times a day.
+    // The cadence is decided before the clock, and both before the queue.
+    // Somebody held back for a month is not also counted as "wrong hour"
+    // twenty-two times a day, and somebody the schedule is holding is reported
+    // against the schedule rather than against whichever of their keys a
+    // previous run happened to claim. Ordering it the other way round would
+    // put `already_sent` on most of the base and bury every cadence reason
+    // underneath it, which is the opposite of what the reasons are for.
     const decision = cadenceDecision(facts, now);
 
     if (!decision.allowed) return decision.reason;
     if (!SEND_WINDOW_HOURS.has(localHour)) return "window";
+
+    // Due, inside their own hour, and every nudge they had already claimed.
+    if (queue.length === 0) return "already_sent";
 
     const outcome = await ReengagementService.#sendFirstAvailable(
       queue,

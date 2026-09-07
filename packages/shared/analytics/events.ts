@@ -152,8 +152,11 @@ export type ReengagementPushKind =
  * Restated here rather than imported for the same reason the kinds above are.
  * Three of these are not cadence decisions. `window` is the candidate being
  * due while the run caught the user outside their evening slot.
- * `already_sent` is every nudge in that person's queue having had its dedupe
- * key claimed by a run racing this one. `dead_token` doubles as the device
+ * `already_sent` is every nudge that person was due having had its dedupe key
+ * claimed already, by an earlier run or by one racing this one. It is only
+ * reported for somebody the cadence would otherwise have allowed, inside their
+ * own hour, so it reads as "due and nothing left to say" rather than burying
+ * the schedule reasons underneath it. `dead_token` doubles as the device
  * having a token Expo will not accept at all, which is decided at the send
  * rather than by the cadence.
  *
@@ -651,6 +654,15 @@ export type ServerEventProperties = {
    */
   [ANALYTICS_EVENTS.REENGAGEMENT_CRON_RAN]: {
     candidates: number;
+    /**
+     * The run threw before it finished deciding.
+     *
+     * A failed run reports whatever it had counted, and a failure in the
+     * selectors or the cadence read means that is zero across the board. That
+     * is the same row a quiet evening produces, so without this flag a
+     * database outage reads as an evening with nobody to nudge.
+     */
+    failed: boolean;
     /**
      * People the run looked at and reached no decision about.
      *

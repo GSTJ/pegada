@@ -114,6 +114,7 @@ function fakeWorld({ existingComment = null } = {}) {
             "people",
             "sent",
             "held",
+            "failed",
             "suppressed_already_sent",
             "suppressed_cooldown",
             "suppressed_dead_token",
@@ -123,8 +124,8 @@ function fakeWorld({ existingComment = null } = {}) {
             "suppressed",
           ],
           results: [
-            ["2026-09-02 11:00:00", 3, 3, 1, 0, 0, 1, 0, 0, 0, 1, 2],
-            ["2026-09-02 10:00:00", 4, 4, 1, 0, 0, 3, 0, 0, 0, 0, 3],
+            ["2026-09-02 11:00:00", 3, 3, 1, 0, false, 0, 1, 0, 0, 0, 1, 2],
+            ["2026-09-02 10:00:00", 4, 4, 1, 0, false, 0, 3, 0, 0, 0, 0, 3],
           ],
         });
       }

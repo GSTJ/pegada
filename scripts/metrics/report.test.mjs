@@ -46,13 +46,17 @@ const cities = versions;
  * `people` defaults to whatever the run accounted for, so a fixture that does
  * not care about it still balances the way a real run has to.
  */
-function cronRunRow(runAt, { candidates, held = 0, people, sent, ...reasons }) {
+function cronRunRow(
+  runAt,
+  { candidates, failed = false, held = 0, people, sent, ...reasons },
+) {
   const suppressed = Object.values(reasons).reduce(
     (total, value) => total + value,
     0,
   );
   return {
     candidates,
+    failed,
     held,
     people: people ?? sent + suppressed + held,
     run_at: runAt,
@@ -908,6 +912,19 @@ test("a run that reached no decision about somebody says so", () => {
   assert.match(
     table,
     /\| 2026-09-02 09:00 UTC \| 3 \| 3 \| 2 \| 0 \| 1 \| - \|/,
+  );
+});
+
+test("a run that threw says so instead of reading as a quiet hour", () => {
+  // A failed run reports whatever it had counted, which for a failure in the
+  // selection is zero everywhere, and that is the row a quiet evening
+  // produces too.
+  const table = reengagementCronRunsTable([
+    cronRunRow("2026-09-02 09:00:00", { candidates: 0, failed: true, sent: 0 }),
+  ]);
+  assert.match(
+    table,
+    /\| 2026-09-02 09:00 UTC \| 0 \| 0 \| 0 \| 0 \| 0 \| run failed \|/,
   );
 });
 

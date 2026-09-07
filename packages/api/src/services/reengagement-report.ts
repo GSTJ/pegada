@@ -55,6 +55,15 @@ export type ReengagementRunSummary = {
    * their send threw.
    */
   held: number;
+  /**
+   * The run threw before it finished deciding.
+   *
+   * Every other count on a failed run is whatever it had reached, which for a
+   * failure in the selectors or the cadence read is zero across the board, and
+   * that is the same row a quiet evening produces. This is the one field that
+   * tells them apart.
+   */
+  failed: boolean;
   /** Candidate rows, not people, whose dedupe key was already claimed. */
   skippedAlreadySent: number;
   /** Candidate rows, not people, whose token Expo would reject outright. */
@@ -83,6 +92,7 @@ export const emptyRunSummary = (): ReengagementRunSummary => ({
     window: 0,
   },
   held: 0,
+  failed: false,
   skippedAlreadySent: 0,
   skippedUnreachable: 0,
 });
@@ -166,6 +176,7 @@ export const reportRun = async (
       ANALYTICS_EVENTS.REENGAGEMENT_CRON_RAN,
       {
         candidates: summary.candidates,
+        failed: summary.failed,
         held: summary.held,
         people: summary.people,
         sent: summary.sent,

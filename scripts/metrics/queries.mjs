@@ -728,6 +728,7 @@ export function buildReengagementCronRunsQuery(windows) {
     `  ifNull(${numericProperty("people")}, 0) AS people,`,
     `  ${numericProperty("sent")} AS sent,`,
     `  ifNull(${numericProperty("held")}, 0) AS held,`,
+    "  ifNull(toBool(properties.failed), false) AS failed,",
     ...CRON_SUPPRESSION_PROPERTIES.map(
       (property) => `  ifNull(${numericProperty(property)}, 0) AS ${property},`,
     ),

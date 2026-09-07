@@ -727,7 +727,11 @@ describe("ReengagementService.run", () => {
     );
 
     expect(summary.sent).toBe(0);
-    expect(summary.suppressed.cooldown).toBe(1);
+    // Both sides, not one. The other side of the first match had its only key
+    // claimed by the earlier run and used to leave this run counted in
+    // nothing at all; the row that claimed the key is also what puts them in
+    // cooldown, so that is the reason they are counted under.
+    expect(summary.suppressed.cooldown).toBe(2);
     // The two from the first run and nothing since.
     expect(
       PushNotificationService.enqueuePushNotification,
@@ -1287,17 +1291,16 @@ describe("Reengagement Push Suppressed", () => {
 
     const close = await ReengagementService.run(WINDOW_CLOSE);
 
-    expect(close.suppressed.cooldown).toBe(1);
+    // Both sides of the match, not one. The side whose nudge went out in the
+    // earlier run is inside the week that push started and used to leave the
+    // run counted in nothing; it is a cadence decision like the other one.
+    expect(close.suppressed.cooldown).toBe(2);
 
-    // Both sides of the match are accounted for at the close of the window:
-    // the one the cadence held, and the one whose nudge went out in the
-    // earlier run and so has nothing left to claim. One row each, which is
-    // what "once" means here.
+    // One row each, which is what "once" means here.
+    expect(suppressedCalls()).toHaveLength(2);
     expect(
-      suppressedCalls()
-        .map(([, properties]) => properties.reason)
-        .sort(),
-    ).toEqual(["already_sent", "cooldown"]);
+      suppressedCalls().map(([, properties]) => properties.reason),
+    ).toEqual(["cooldown", "cooldown"]);
     expect(suppressedCalls()).toContainEqual([
       "Reengagement Push Suppressed",
       expect.objectContaining({
@@ -1580,10 +1583,11 @@ describe("reengagement run accounting", () => {
   });
 
   it("counts a user whose only nudge was claimed before the run started", async () => {
-    // The common case on an hourly cron, and the one that used to leave no
-    // trace: the key was claimed by an earlier run, so the person never
-    // reached the loop and appeared in nothing but a row level tally.
-    const told = await seedDueUser();
+    // The key was claimed by an earlier run, so the person never reached the
+    // loop and appeared in nothing but a row level tally. Claimed eight days
+    // back, which is the case worth naming: the schedule would let them
+    // through today and there is simply nothing left to say to them.
+    const told = await seedDueUser({}, null);
 
     const [candidate] = await selectUnansweredMatchCandidates(NOW);
 
@@ -1592,7 +1596,7 @@ describe("reengagement run accounting", () => {
         userId: told.id,
         kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
         dedupeKey: candidate?.dedupeKey ?? "",
-        sentAt: hoursAgo(1),
+        sentAt: daysAgo(8),
       },
     });
 
@@ -1600,6 +1604,7 @@ describe("reengagement run accounting", () => {
 
     expect(summary).toMatchObject({
       candidates: 1,
+      failed: false,
       held: 0,
       people: 1,
       sent: 0,
@@ -1607,6 +1612,64 @@ describe("reengagement run accounting", () => {
     });
     expect(summary.suppressed.already_sent).toBe(1);
     expectBalanced(summary);
+  });
+
+  it("names the schedule ahead of a claimed key when both apply", async () => {
+    // Most of the base is inside some part of the cadence, and on an hourly
+    // cron most of them also have a claimed key. Reporting the claimed key
+    // first would put `already_sent` on nearly everybody and bury the reason
+    // anybody can act on.
+    const capped = await seedDueUser();
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: capped.id,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: `monthly:${capped.id}`,
+        sentAt: daysAgo(20),
+      },
+    });
+
+    const [candidate] = await selectUnansweredMatchCandidates(NOW);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: capped.id,
+        kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+        dedupeKey: candidate?.dedupeKey ?? "",
+        sentAt: hoursAgo(1),
+      },
+    });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary.suppressed.monthly_cap).toBe(1);
+    expect(summary.suppressed.already_sent).toBe(0);
+    expectBalanced(summary);
+  });
+
+  it("says so on the heartbeat when the run threw before deciding", async () => {
+    await seedDueUser();
+
+    const broken = jest
+      .spyOn(reengagementCadence, "readCadence")
+      .mockRejectedValue(new Error("database is down"));
+
+    try {
+      // The failure still leaves through the route, so the hour reads as an
+      // error rather than as an evening with nobody to nudge.
+      await expect(ReengagementService.run(NOW)).rejects.toThrow(
+        "database is down",
+      );
+    } finally {
+      broken.mockRestore();
+    }
+
+    const ran = observability.capture.mock.calls.find(
+      ([event]) => event === "Reengagement Cron Ran",
+    );
+
+    expect(ran?.[1]).toMatchObject({ failed: true, people: 0, sent: 0 });
   });
 
   it("holds a user who disappeared between the selector and the decision", async () => {

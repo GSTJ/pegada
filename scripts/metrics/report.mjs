@@ -376,6 +376,16 @@ export function reengagementCronTable(rows) {
 const NO_REASONS = "-";
 
 /**
+ * What a reasons cell says when the run threw.
+ *
+ * A failed run reports whatever it had counted, which for a failure in the
+ * selection is zero everywhere, and that is the row a quiet evening produces
+ * too. Saying so in the cell the reader is already looking at beats a column
+ * that is false on every healthy row.
+ */
+const RUN_FAILED = "run failed";
+
+/**
  * A suppression reason as the table writes it.
  *
  * The property name without its prefix, so `suppressed_monthly_cap` reads
@@ -419,6 +429,10 @@ export function reengagementCronRunsTable(rows) {
     "| Hour (UTC) | Candidates | People | Sent | Suppressed | Held | Reasons |",
     "| --- | ---: | ---: | ---: | ---: | ---: | --- |",
     ...ordered.map(({ row }) => {
+      if (row.failed === true || row.failed === 1) {
+        return `| ${utcMoment(row.run_at)} | ${wholeCount(row.candidates)} | ${wholeCount(row.people)} | ${wholeCount(row.sent)} | ${wholeCount(row.suppressed)} | ${wholeCount(row.held)} | ${RUN_FAILED} |`;
+      }
+
       const reasons = CRON_SUPPRESSION_PROPERTIES.filter(
         (property) => Number(row[property] ?? 0) > 0,
       )
