@@ -584,6 +584,14 @@ test("the cron heartbeat reads the latest run and the window sums", () => {
   );
 });
 
+test("a run that never carried the failed property is not read as failed", () => {
+  const query = buildReengagementCronRunsQuery(buildWindows(NOW));
+  // Absent has to read as false. Every heartbeat sent before the flag existed
+  // has no property here, and reading those as failures would paint the whole
+  // history red on the day this ships.
+  assert.match(query, /toString\(properties\.failed\) = 'true' AS failed/);
+});
+
 test("the cron heartbeat adds up every suppression reason the event carries", () => {
   const query = buildReengagementCronQuery(buildWindows(NOW));
   assert.deepEqual(CRON_SUPPRESSION_PROPERTIES, [

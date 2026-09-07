@@ -728,7 +728,12 @@ export function buildReengagementCronRunsQuery(windows) {
     `  ifNull(${numericProperty("people")}, 0) AS people,`,
     `  ${numericProperty("sent")} AS sent,`,
     `  ifNull(${numericProperty("held")}, 0) AS held,`,
-    "  ifNull(toBool(properties.failed), false) AS failed,",
+    // Read as a string like every other boolean in this file. Every run
+    // emitted before this shipped carries no `failed` property at all, so the
+    // missing case is the common one on the day it deploys, and a comparison
+    // that reads absent as false is what keeps those rows out of the failed
+    // bucket.
+    `  toString(properties.failed) = 'true' AS failed,`,
     ...CRON_SUPPRESSION_PROPERTIES.map(
       (property) => `  ifNull(${numericProperty(property)}, 0) AS ${property},`,
     ),
