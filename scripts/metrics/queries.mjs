@@ -632,7 +632,7 @@ export function buildPushAttributedReturnsQuery({ end, start }) {
 export const CRON_RUN_ROWS = 24;
 
 /**
- * The five ways the cron can decide against a nudge it had ready.
+ * The six ways the cron can decide against a nudge it had ready.
  *
  * Summed into one number for the run table rather than split: the split
  * already has a table of its own further down the readout, and the question

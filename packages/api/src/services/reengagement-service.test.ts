@@ -3,6 +3,7 @@ import { breedData } from "@pegada/database/fixtures/breed-data";
 import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
 import { Prisma } from "@prisma/client";
 
+import * as reengagementCadence from "./reengagement-cadence";
 import { cadenceDecision, readCadence } from "./reengagement-cadence";
 import {
   isWithinSendWindow,
@@ -1287,14 +1288,22 @@ describe("Reengagement Push Suppressed", () => {
     const close = await ReengagementService.run(WINDOW_CLOSE);
 
     expect(close.suppressed.cooldown).toBe(1);
-    expect(suppressedCalls()).toEqual([
-      [
-        "Reengagement Push Suppressed",
-        expect.objectContaining({
-          kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
-          reason: "cooldown",
-        }),
-      ],
+
+    // Both sides of the match are accounted for at the close of the window:
+    // the one the cadence held, and the one whose nudge went out in the
+    // earlier run and so has nothing left to claim. One row each, which is
+    // what "once" means here.
+    expect(
+      suppressedCalls()
+        .map(([, properties]) => properties.reason)
+        .sort(),
+    ).toEqual(["already_sent", "cooldown"]);
+    expect(suppressedCalls()).toContainEqual([
+      "Reengagement Push Suppressed",
+      expect.objectContaining({
+        kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+        reason: "cooldown",
+      }),
     ]);
   });
 
@@ -1567,6 +1576,56 @@ describe("reengagement run accounting", () => {
       expectBalanced(summary);
     } finally {
       claimed.mockRestore();
+    }
+  });
+
+  it("counts a user whose only nudge was claimed before the run started", async () => {
+    // The common case on an hourly cron, and the one that used to leave no
+    // trace: the key was claimed by an earlier run, so the person never
+    // reached the loop and appeared in nothing but a row level tally.
+    const told = await seedDueUser();
+
+    const [candidate] = await selectUnansweredMatchCandidates(NOW);
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: told.id,
+        kind: REENGAGEMENT_KINDS.UNANSWERED_MATCH,
+        dedupeKey: candidate?.dedupeKey ?? "",
+        sentAt: hoursAgo(1),
+      },
+    });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary).toMatchObject({
+      candidates: 1,
+      held: 0,
+      people: 1,
+      sent: 0,
+      skippedAlreadySent: 1,
+    });
+    expect(summary.suppressed.already_sent).toBe(1);
+    expectBalanced(summary);
+  });
+
+  it("holds a user who disappeared between the selector and the decision", async () => {
+    await seedDueUser();
+
+    // The row is gone by the time the cadence is read, which is what a delete
+    // mid run looks like from in here. Nobody is left to suppress and no
+    // reason would be honest, so it is held and still counted.
+    const vanished = jest
+      .spyOn(reengagementCadence, "readCadence")
+      .mockResolvedValue(new Map());
+
+    try {
+      const summary = await ReengagementService.run(NOW);
+
+      expect(summary).toMatchObject({ held: 1, people: 1, sent: 0 });
+      expectBalanced(summary);
+    } finally {
+      vanished.mockRestore();
     }
   });
 

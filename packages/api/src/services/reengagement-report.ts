@@ -62,6 +62,32 @@ export type ReengagementRunSummary = {
 };
 
 /**
+ * A run that has not decided anything yet.
+ *
+ * Built here rather than at the call site so the counters and the type they
+ * have to satisfy stay next to each other: a reason added to the union is a
+ * compile error in this file rather than a key quietly missing from a literal
+ * three modules away.
+ */
+export const emptyRunSummary = (): ReengagementRunSummary => ({
+  sent: 0,
+  byKind: { likes_waiting: 0, new_dogs_nearby: 0, unanswered_match: 0 },
+  candidates: 0,
+  people: 0,
+  suppressed: {
+    already_sent: 0,
+    cooldown: 0,
+    dead_token: 0,
+    gave_up: 0,
+    monthly_cap: 0,
+    window: 0,
+  },
+  held: 0,
+  skippedAlreadySent: 0,
+  skippedUnreachable: 0,
+});
+
+/**
  * Records one person the run held back: always in the summary, once a day in
  * the events.
  *
