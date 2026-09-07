@@ -1,6 +1,7 @@
 import prisma from "@pegada/database";
 import { breedData } from "@pegada/database/fixtures/breed-data";
 import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
+import { Prisma } from "@prisma/client";
 
 import { cadenceDecision, readCadence } from "./reengagement-cadence";
 import {
@@ -1370,5 +1371,256 @@ describe("Reengagement Cron Ran", () => {
     await ReengagementService.run(NOW);
 
     expect(ranCalls()).toHaveLength(2);
+  });
+});
+
+/**
+ * Every candidate the run looks at leaves it in exactly one state.
+ *
+ * The heartbeat that shipped in #288 read candidates 5, sent 0, suppressed 3
+ * on the run of 2026-09-07 06:19 UTC, and the missing two were not a rounding
+ * error: several branches used to end a person's turn without a send and
+ * without a reason. These pin the arithmetic rather than any one branch, so a
+ * new branch that forgets to count is a failure here rather than a gap in the
+ * readout nobody can see.
+ */
+describe("reengagement run accounting", () => {
+  /** Sao Paulo. Longitude -46.63 rounds to UTC-3, so NOW is 18:00 local. */
+  const SAO_PAULO_LONGITUDE = -46.63;
+  const SAO_PAULO_LATITUDE = -23.55;
+
+  /**
+   * One user who is due right now, with the partner made unreachable so the
+   * silent match yields this user and nobody else.
+   *
+   * Everything the brief asks for is here: inside the evening window, a real
+   * Expo token, last push eight days ago so the weekly floor has passed, and
+   * six days away so the five day dormancy rule is satisfied. A push eight
+   * days ago against a return six days ago also means the streak is zero, so
+   * the schedule starts over rather than owing the ten day gap.
+   */
+  const seedDueUser = async (
+    overrides: Record<string, unknown> = {},
+    pushDaysAgo: number | null = 8,
+  ) => {
+    const inSaoPaulo = reachableUser({
+      latitude: SAO_PAULO_LATITUDE,
+      longitude: SAO_PAULO_LONGITUDE,
+      lastActiveAt: daysAgo(6),
+      ...overrides,
+    });
+
+    const [{ dog: mine, user }, { dog: theirs }] = await Promise.all([
+      seedUserWithDog({ gender: "MALE" }, inSaoPaulo),
+      // No token, so this side is never a candidate and the counts below are
+      // one per seeded user rather than two.
+      seedUserWithDog({ gender: "FEMALE" }, { pushToken: null }),
+    ]);
+
+    const match = await prisma.match.create({
+      data: { requesterId: mine.id, responderId: theirs.id },
+    });
+
+    await prisma.match.update({
+      where: { id: match.id },
+      data: { createdAt: hoursAgo(25) },
+    });
+
+    if (pushDaysAgo !== null) {
+      await prisma.notificationLog.create({
+        data: {
+          userId: user.id,
+          kind: REENGAGEMENT_KINDS.NEW_DOGS_NEARBY,
+          dedupeKey: `due:${user.id}:${pushDaysAgo}`,
+          sentAt: daysAgo(pushDaysAgo),
+        },
+      });
+    }
+
+    return user;
+  };
+
+  /** The arithmetic the whole change exists to make true. */
+  const expectBalanced = (summary: {
+    held: number;
+    people: number;
+    sent: number;
+    suppressed: Record<string, number>;
+  }) => {
+    const suppressed = Object.values(summary.suppressed).reduce(
+      (total, value) => total + value,
+      0,
+    );
+
+    expect(summary.sent + suppressed + summary.held).toBe(summary.people);
+  };
+
+  it("sends to five people who pass the floor at 18:00 local", async () => {
+    await Promise.all(Array.from({ length: 5 }, () => seedDueUser()));
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary).toMatchObject({
+      candidates: 5,
+      held: 0,
+      people: 5,
+      sent: 5,
+    });
+    expect(Object.values(summary.suppressed)).toEqual([0, 0, 0, 0, 0, 0]);
+    const { enqueuePushNotification } = PushNotificationService;
+
+    expect(enqueuePushNotification).toHaveBeenCalledTimes(5);
+    expectBalanced(summary);
+  });
+
+  it("sends to a user with no coordinates, and to one that has them", async () => {
+    // There is no timezone column on User, so "no timezone" is every user:
+    // the local hour comes from the longitude when there is one and from
+    // America/Sao_Paulo when there is not. Both land inside the window at
+    // 21:00 UTC, so neither of them is where the missing candidates went.
+    await seedDueUser({ latitude: null, longitude: null });
+    await seedDueUser();
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary).toMatchObject({ held: 0, people: 2, sent: 2 });
+    expectBalanced(summary);
+  });
+
+  it("counts a user held by the monthly ceiling", async () => {
+    const capped = await seedDueUser();
+
+    // A second push inside the same thirty days. The weekly floor has passed
+    // and the user is otherwise due, so the ceiling is the only thing holding
+    // them and it has to say so.
+    await prisma.notificationLog.create({
+      data: {
+        userId: capped.id,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: `monthly:${capped.id}`,
+        sentAt: daysAgo(20),
+      },
+    });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary).toMatchObject({ held: 0, people: 1, sent: 0 });
+    expect(summary.suppressed.monthly_cap).toBe(1);
+    expectBalanced(summary);
+  });
+
+  it("counts a user the app has given up on", async () => {
+    const quiet = await seedDueUser({ lastActiveAt: daysAgo(120) }, null);
+
+    await prisma.notificationLog.createMany({
+      data: [60, 50, 40].map((days) => ({
+        userId: quiet.id,
+        kind: REENGAGEMENT_KINDS.NEW_DOGS_NEARBY,
+        dedupeKey: `gave-up:${quiet.id}:${days}`,
+        sentAt: daysAgo(days),
+      })),
+    });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary).toMatchObject({ held: 0, people: 1, sent: 0 });
+    expect(summary.suppressed.gave_up).toBe(1);
+    expectBalanced(summary);
+  });
+
+  it("counts a token Expo would refuse rather than dropping it", async () => {
+    // Not null and not empty, so the selector still reaches it, and not an
+    // Expo token either, so the send gives up on it. This used to land in
+    // `skippedUnreachable` alone, which is a row count nothing reconciles
+    // against.
+    await seedDueUser({ pushToken: "not-an-expo-token" });
+
+    const summary = await ReengagementService.run(NOW);
+
+    expect(summary).toMatchObject({
+      held: 0,
+      people: 1,
+      sent: 0,
+      skippedUnreachable: 1,
+    });
+    expect(summary.suppressed.dead_token).toBe(1);
+    expectBalanced(summary);
+  });
+
+  it("counts a user whose whole queue was claimed by a racing run", async () => {
+    await seedDueUser();
+
+    const claimed = jest
+      .spyOn(prisma.notificationLog, "create")
+      .mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError("claimed", {
+          code: "P2002",
+          clientVersion: "test",
+        }),
+      );
+
+    try {
+      const summary = await ReengagementService.run(NOW);
+
+      expect(summary).toMatchObject({ held: 0, people: 1, sent: 0 });
+      expect(summary.suppressed.already_sent).toBe(1);
+      expectBalanced(summary);
+    } finally {
+      claimed.mockRestore();
+    }
+  });
+
+  it("keeps the run and the heartbeat alive when one send throws", async () => {
+    await Promise.all(Array.from({ length: 3 }, () => seedDueUser()));
+
+    PushNotificationService.enqueuePushNotification.mockRejectedValueOnce(
+      new Error("queue is down"),
+    );
+
+    const summary = await ReengagementService.run(NOW);
+
+    // The two people behind the failure still get theirs, the one that threw
+    // is held rather than lost, and the hour still reports. Before this, the
+    // throw escaped the run and the hour looked exactly like a cron that had
+    // stopped being scheduled.
+    expect(summary).toMatchObject({ held: 1, people: 3, sent: 2 });
+    expectBalanced(summary);
+
+    expect(
+      observability.capture.mock.calls.filter(
+        ([event]) => event === "Reengagement Cron Ran",
+      ),
+    ).toHaveLength(1);
+  });
+
+  it("puts the whole accounting on the heartbeat", async () => {
+    const capped = await seedDueUser();
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: capped.id,
+        kind: REENGAGEMENT_KINDS.LIKES_WAITING,
+        dedupeKey: `heartbeat:${capped.id}`,
+        sentAt: daysAgo(20),
+      },
+    });
+
+    await seedDueUser();
+
+    await ReengagementService.run(NOW);
+
+    const ran = observability.capture.mock.calls.find(
+      ([event]) => event === "Reengagement Cron Ran",
+    );
+
+    // `people` is what makes the row readable: `candidates` counts rows and
+    // the rest count people, so the two were never subtractable from each
+    // other. This one is.
+    expect(ran?.[1]).toMatchObject({
+      held: 0,
+      people: 2,
+      sent: 1,
+      suppressed_monthly_cap: 1,
+    });
   });
 });

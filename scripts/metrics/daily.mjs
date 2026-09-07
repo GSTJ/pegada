@@ -27,6 +27,7 @@ import {
   buildOtaUpdatesQuery,
   buildPushAttributedReturnsQuery,
   buildReengagementCronQuery,
+  buildReengagementCronRunsQuery,
   buildTotalsQuery,
   buildWindows,
 } from "./queries.mjs";
@@ -80,6 +81,7 @@ export async function runDailyMetrics({
     activeUsersByCity,
     activeUsersByVersion,
     cronRun,
+    cronRuns,
     deckSupply,
     otaUpdates,
     totals,
@@ -99,6 +101,10 @@ export async function runDailyMetrics({
     run(
       "pegada daily metrics: reengagement cron runs",
       buildReengagementCronQuery(windows),
+    ),
+    run(
+      "pegada daily metrics: reengagement cron, last 24 runs",
+      buildReengagementCronRunsQuery(windows),
     ),
     run("pegada daily metrics: deck supply", buildDeckSupplyQuery(windows)),
     run(
@@ -135,6 +141,7 @@ export async function runDailyMetrics({
     activeUsersByVersion,
     breakdowns,
     cronRun,
+    cronRuns,
     deckSupply,
     generatedAt: now,
     otaUpdates,

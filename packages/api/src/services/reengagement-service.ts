@@ -1,3 +1,4 @@
+import type { CadenceFacts } from "./reengagement-cadence";
 import type { ReengagementRunSummary } from "./reengagement-report";
 import type {
   ReengagementPushKind,
@@ -17,11 +18,9 @@ import { PushNotificationService } from "./push-notification-service";
 import {
   cadenceDecision,
   MIN_GAP_DAYS,
-  POLICY_REPORT_HOUR,
   readCadence,
-  WINDOW_REPORT_HOUR,
 } from "./reengagement-cadence";
-import { reportRun } from "./reengagement-report";
+import { reportRun, suppressionRecorder } from "./reengagement-report";
 import { TranslationService } from "./translation-service";
 
 export type { ReengagementRunSummary } from "./reengagement-report";
@@ -741,13 +740,16 @@ export class ReengagementService {
         [REENGAGEMENT_KINDS.LIKES_WAITING]: 0,
       },
       candidates: candidates.length,
+      people: 0,
       suppressed: {
+        already_sent: 0,
         cooldown: 0,
         dead_token: 0,
         gave_up: 0,
         monthly_cap: 0,
         window: 0,
       },
+      held: 0,
       skippedAlreadySent: 0,
       skippedUnreachable: 0,
     };
@@ -794,57 +796,90 @@ export class ReengagementService {
 
     const cadence = await readCadence([...perUser.keys()], now);
 
+    const suppress = suppressionRecorder(summary);
+
     /**
-     * Count it always, report it once a day.
-     *
-     * See {@link POLICY_REPORT_HOUR}. The summary is per run because the cron
-     * response is read per run; the event is per person because that is the
-     * number the readout is being asked for.
+     * One person's turn, as a function rather than a loop body so that every
+     * way out of it is a return that has already counted them.
      */
-    const suppress = (
+    const settle = async (
       userId: string,
-      kind: ReengagementKind,
-      reason: ReengagementSuppressionReason,
-      localHour: number,
-    ) => {
-      summary.suppressed[reason] += 1;
-
-      const reportAt =
-        reason === "window" ? WINDOW_REPORT_HOUR : POLICY_REPORT_HOUR;
-
-      if (localHour !== reportAt) return;
-
-      captureEvent(userId, ANALYTICS_EVENTS.REENGAGEMENT_PUSH_SUPPRESSED, {
-        kind,
-        reason,
-      });
-    };
-
-    for (const [userId, { longitude, queue }] of perUser) {
-      if (summary.sent >= MAX_PUSHES_PER_RUN) break;
+      longitude: number | null,
+      queue: Candidate[],
+    ): Promise<void> => {
+      summary.people += 1;
 
       const facts = cadence.get(userId);
       const [best] = queue;
+      const localHour = localHourFor(longitude, now);
 
-      // A missing row means the user was deleted between the selector and here.
-      if (facts && best) {
-        const localHour = localHourFor(longitude, now);
-        const decision = cadenceDecision(facts, now);
-
-        // The cadence is decided before the clock, so somebody held back for a
-        // month is not also counted as "wrong hour" twenty-two times a day.
-        if (!decision.allowed) {
-          suppress(userId, best.kind, decision.reason, localHour);
-        } else if (SEND_WINDOW_HOURS.has(localHour)) {
-          // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cadence they enforce on each other.
-          await ReengagementService.#sendFirstAvailable(queue, summary, now);
-        } else {
-          suppress(userId, best.kind, "window", localHour);
-        }
+      // Two ways to reach no decision at all. The ceiling means the run is
+      // full and everyone behind it is waiting for the next one; a missing
+      // cadence row means the user was deleted between the selector and here.
+      // Neither is a judgement about the person, so neither gets a reason, and
+      // both are counted rather than walked away from.
+      if (summary.sent >= MAX_PUSHES_PER_RUN || !facts || !best) {
+        summary.held += 1;
+        return;
       }
+
+      try {
+        const reason = await ReengagementService.#decideOne(
+          facts,
+          queue,
+          localHour,
+          summary,
+          now,
+        );
+
+        if (reason) suppress(userId, best.kind, reason, localHour);
+      } catch (error) {
+        // One failed send used to take the run with it, and the run took the
+        // heartbeat with it: the hour reported nothing at all, so an outage
+        // read exactly like a cron that had stopped being scheduled. Every
+        // person after this one in the map was lost too.
+        sendError(error);
+        summary.held += 1;
+      }
+    };
+
+    for (const [userId, { longitude, queue }] of perUser) {
+      // oxlint-disable-next-line no-await-in-loop -- Each send claims its dedupe key first; running them in parallel would race the cadence they enforce on each other.
+      await settle(userId, longitude, queue);
     }
 
     return summary;
+  }
+
+  /**
+   * What to record against one user, or null when the nudge went out.
+   *
+   * Split out of the loop so every path through it returns a reason rather
+   * than falling off the end. The three that used to fall off the end are the
+   * whole bug: a queue another run had claimed, a token Expo will not take,
+   * and a send that threw.
+   */
+  static async #decideOne(
+    facts: CadenceFacts,
+    queue: Candidate[],
+    localHour: number,
+    summary: ReengagementRunSummary,
+    now: Date,
+  ): Promise<ReengagementSuppressionReason | null> {
+    // The cadence is decided before the clock, so somebody held back for a
+    // month is not also counted as "wrong hour" twenty-two times a day.
+    const decision = cadenceDecision(facts, now);
+
+    if (!decision.allowed) return decision.reason;
+    if (!SEND_WINDOW_HOURS.has(localHour)) return "window";
+
+    const outcome = await ReengagementService.#sendFirstAvailable(
+      queue,
+      summary,
+      now,
+    );
+
+    return outcome === "sent" ? null : outcome;
   }
 
   /**
@@ -853,12 +888,16 @@ export class ReengagementService {
    * The queue is already free of keys claimed before the run started; this
    * loop is what covers a key claimed *during* it, by another instance racing
    * the same candidate.
+   *
+   * The two failures are named rather than collapsed into a false, because the
+   * caller has to record one of them against the user and "it did not go" is
+   * not a reason anybody can act on.
    */
   static async #sendFirstAvailable(
     queue: Candidate[],
     summary: ReengagementRunSummary,
     now: Date,
-  ): Promise<boolean> {
+  ): Promise<"already_sent" | "dead_token" | "sent"> {
     for (const candidate of queue) {
       // A token Expo will reject is a guaranteed dropped push, and it is the
       // same token for every candidate this user has, so there is nothing left
@@ -866,7 +905,7 @@ export class ReengagementService {
       // open rate, which is the number this whole change exists to produce.
       if (!Expo.isExpoPushToken(candidate.pushToken)) {
         summary.skippedUnreachable += 1;
-        return false;
+        return "dead_token";
       }
 
       // oxlint-disable-next-line no-await-in-loop -- Sequential by design: the next candidate is only tried when this one turns out to be claimed.
@@ -875,13 +914,13 @@ export class ReengagementService {
       if (outcome === "sent") {
         summary.sent += 1;
         summary.byKind[candidate.kind] += 1;
-        return true;
+        return "sent";
       }
 
       summary.skippedAlreadySent += 1;
     }
 
-    return false;
+    return "already_sent";
   }
 
   /**

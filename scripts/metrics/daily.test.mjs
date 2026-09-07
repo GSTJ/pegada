@@ -106,6 +106,28 @@ function fakeWorld({ existingComment = null } = {}) {
           results: [[168, "2026-09-02 11:00:00", 512, 3, 1, 2, 24, 9]],
         });
       }
+      if (name.endsWith("reengagement cron, last 24 runs")) {
+        return json({
+          columns: [
+            "run_at",
+            "candidates",
+            "people",
+            "sent",
+            "held",
+            "suppressed_already_sent",
+            "suppressed_cooldown",
+            "suppressed_dead_token",
+            "suppressed_gave_up",
+            "suppressed_monthly_cap",
+            "suppressed_window",
+            "suppressed",
+          ],
+          results: [
+            ["2026-09-02 11:00:00", 3, 3, 1, 0, 0, 1, 0, 0, 0, 1, 2],
+            ["2026-09-02 10:00:00", 4, 4, 1, 0, 0, 3, 0, 0, 0, 0, 3],
+          ],
+        });
+      }
       if (name.endsWith("deck supply")) {
         return json({
           columns: [
@@ -191,7 +213,7 @@ test("a dry run renders the comment and never touches GitHub", async () => {
 test("one query goes out per metric block", async () => {
   const fetchImpl = fakeWorld();
   await runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW });
-  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 9);
+  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 10);
 });
 
 test("both push return windows are asked for separately and land in the table", async () => {
@@ -345,4 +367,28 @@ test("the cron heartbeat reaches the push section", async () => {
   assert.match(result.body, /\| Last run \| 2026-09-02 11:00 UTC \|/);
   assert.match(result.body, /\| Users in weekly floor \(last run\) \| 512 \|/);
   assert.match(result.body, /\| Sent \(last 7 days\) \| 9 \|/);
+});
+
+test("the per run table reaches the readout with its reasons", async () => {
+  const fetchImpl = fakeWorld();
+  const result = await runDailyMetrics({
+    argv: ["--dry-run"],
+    env: ENV,
+    fetchImpl,
+    now: NOW,
+  });
+
+  const call = fetchImpl.calls.find((entry) =>
+    entry.body?.name?.endsWith("reengagement cron, last 24 runs"),
+  );
+  assert.match(call.body.query.query, /ORDER BY run_at DESC/);
+  assert.match(result.body, /#### Reengagement cron, last 24 runs/);
+  assert.match(
+    result.body,
+    /\| 2026-09-02 11:00 UTC \| 3 \| 3 \| 1 \| 2 \| 0 \| cooldown 1, window 1 \|/,
+  );
+  assert.match(
+    result.body,
+    /\| 2026-09-02 10:00 UTC \| 4 \| 4 \| 1 \| 3 \| 0 \| cooldown 3 \|/,
+  );
 });

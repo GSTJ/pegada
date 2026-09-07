@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   BREAKDOWNS,
   CITY_TABLE_ROWS,
+  CRON_RUN_ROWS,
   CRON_SUPPRESSION_PROPERTIES,
   CITY_UNKNOWN_BUCKET,
   CLIENT_LIBS,
@@ -24,6 +25,7 @@ import {
   buildDeckSupplyQuery,
   buildPushAttributedReturnsQuery,
   buildReengagementCronQuery,
+  buildReengagementCronRunsQuery,
   buildTotalsQuery,
   buildWindows,
   quote,
@@ -585,6 +587,7 @@ test("the cron heartbeat reads the latest run and the window sums", () => {
 test("the cron heartbeat adds up every suppression reason the event carries", () => {
   const query = buildReengagementCronQuery(buildWindows(NOW));
   assert.deepEqual(CRON_SUPPRESSION_PROPERTIES, [
+    "suppressed_already_sent",
     "suppressed_cooldown",
     "suppressed_dead_token",
     "suppressed_gave_up",
@@ -608,4 +611,47 @@ test("the cron heartbeat reads one window and no comparison", () => {
   assert.match(query, /timestamp < toDateTime\('2026-09-02 12:00:00', 'UTC'\)/);
   assert.equal(query.includes("'current', 'previous'"), false);
   assert.equal(query.includes("GROUP BY"), false);
+});
+
+test("the per run table reads one row per run, newest first", () => {
+  const query = buildReengagementCronRunsQuery(buildWindows(NOW));
+  assert.match(query, /AND event = 'Reengagement Cron Ran'/);
+  assert.match(query, /timestamp AS run_at/);
+  assert.match(
+    query,
+    /toFloat64OrNull\(toString\(properties\.candidates\)\) AS candidates/,
+  );
+  assert.match(
+    query,
+    /toFloat64OrNull\(toString\(properties\.sent\)\) AS sent/,
+  );
+  assert.match(query, /ORDER BY run_at DESC/);
+  assert.match(query, new RegExp(`LIMIT ${CRON_RUN_ROWS}`));
+  assert.equal(CRON_RUN_ROWS, 24);
+  // One row per run, so nothing is collapsed on the way out.
+  assert.equal(query.includes("GROUP BY"), false);
+  assert.equal(query.includes("argMax"), false);
+});
+
+test("the per run table carries every suppression reason and their total", () => {
+  const query = buildReengagementCronRunsQuery(buildWindows(NOW));
+  for (const property of CRON_SUPPRESSION_PROPERTIES) {
+    assert.match(
+      query,
+      new RegExp(
+        `ifNull\\(toFloat64OrNull\\(toString\\(properties\\.${property}\\)\\), 0\\) AS ${property}`,
+      ),
+    );
+  }
+  assert.match(query, /\) AS suppressed$/m);
+});
+
+test("the per run table reads the current window only", () => {
+  const query = buildReengagementCronRunsQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /timestamp >= toDateTime\('2026-08-26 12:00:00', 'UTC'\)/,
+  );
+  assert.match(query, /timestamp < toDateTime\('2026-09-02 12:00:00', 'UTC'\)/);
+  assert.equal(query.includes("'current', 'previous'"), false);
 });

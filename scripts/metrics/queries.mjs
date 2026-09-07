@@ -624,6 +624,14 @@ export function buildPushAttributedReturnsQuery({ end, start }) {
 }
 
 /**
+ * How many runs the per run table asks for.
+ *
+ * One day of an hourly job. Enough to see a gap in the cadence without turning
+ * the readout into a log.
+ */
+export const CRON_RUN_ROWS = 24;
+
+/**
  * The five ways the cron can decide against a nudge it had ready.
  *
  * Summed into one number for the run table rather than split: the split
@@ -631,6 +639,7 @@ export function buildPushAttributedReturnsQuery({ end, start }) {
  * this row answers is only how much of the run was held back.
  */
 export const CRON_SUPPRESSION_PROPERTIES = [
+  "suppressed_already_sent",
   "suppressed_cooldown",
   "suppressed_dead_token",
   "suppressed_gave_up",
@@ -678,6 +687,57 @@ export function buildReengagementCronQuery(windows) {
     `WHERE timestamp >= toDateTime(${quote(clickhouseTime(windows.currentStart))}, 'UTC')`,
     `  AND timestamp < toDateTime(${quote(clickhouseTime(windows.currentEnd))}, 'UTC')`,
     `  AND event = ${quote(EVENTS.REENGAGEMENT_CRON_RAN)}`,
+  ].join("\n");
+}
+
+/**
+ * The last 24 cron runs, one row each.
+ *
+ * The heartbeat above collapses the whole week into one latest run, which
+ * answers whether the job is alive and nothing after that. A day where the
+ * cron ran every hour and held everybody back reads exactly like a day where
+ * it ran once and found nobody, and those two have different fixes, so this
+ * pulls the runs apart and keeps every suppression reason beside the run it
+ * belongs to.
+ *
+ * 24 rows rather than a fixed day: the job reports hourly, so this is the last
+ * day while it is healthy and reaches further back once it starts skipping
+ * hours, which is the stretch worth looking at.
+ *
+ * Newest first, because the run being asked about is almost always the last
+ * one. The reasons are read with `ifNull` for the same reason the heartbeat
+ * does it: a run that predates a reason carries no property for it, and a null
+ * in the sum would take the run's whole suppressed total with it. `people` and
+ * `held` are read the same way and for the same reason: every run older than
+ * the change that added them carries neither.
+ *
+ * `people` is the column the row is checked against. `candidates` counts rows
+ * and one person can hold several, so sent and suppressed were never meant to
+ * add up to it. They do add up to `people`, together with `held`, and a row
+ * where they do not is a run that lost somebody.
+ */
+export function buildReengagementCronRunsQuery(windows) {
+  const suppressed = CRON_SUPPRESSION_PROPERTIES.map(
+    (property) => `ifNull(${numericProperty(property)}, 0)`,
+  ).join(" + ");
+
+  return [
+    "SELECT",
+    "  timestamp AS run_at,",
+    `  ${numericProperty("candidates")} AS candidates,`,
+    `  ifNull(${numericProperty("people")}, 0) AS people,`,
+    `  ${numericProperty("sent")} AS sent,`,
+    `  ifNull(${numericProperty("held")}, 0) AS held,`,
+    ...CRON_SUPPRESSION_PROPERTIES.map(
+      (property) => `  ifNull(${numericProperty(property)}, 0) AS ${property},`,
+    ),
+    `  ${suppressed} AS suppressed`,
+    "FROM events",
+    `WHERE timestamp >= toDateTime(${quote(clickhouseTime(windows.currentStart))}, 'UTC')`,
+    `  AND timestamp < toDateTime(${quote(clickhouseTime(windows.currentEnd))}, 'UTC')`,
+    `  AND event = ${quote(EVENTS.REENGAGEMENT_CRON_RAN)}`,
+    "ORDER BY run_at DESC",
+    `LIMIT ${CRON_RUN_ROWS}`,
   ].join("\n");
 }
 
