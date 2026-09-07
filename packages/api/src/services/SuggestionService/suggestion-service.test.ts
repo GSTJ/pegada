@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import prisma from "@pegada/database";
 import { breedData } from "@pegada/database/fixtures/breed-data";
 import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake-user-with-dog";
@@ -31,11 +30,16 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-// Pulled out of the fixture literals below: nesting a faker call inside an
-// options object inside a fixture inside `Promise.all` reads worse than a name.
-const randomColor = () => faker.helpers.arrayElement(Object.values(Color));
-const randomSize = () => faker.helpers.arrayElement(Object.values(Size));
-const smallInt = () => faker.number.int({ min: 1, max: 10 });
+// Keep the large fixture below readable without pulling in a data generator.
+const first = <T>(values: readonly T[]) => {
+  const value = values[0];
+  if (value === undefined) throw new Error("Expected fixture data");
+  return value;
+};
+const fixtureColor = () => first(Object.values(Color));
+const fixtureSize = () => first(Object.values(Size));
+const fixtureSmallInt = () => 5;
+const dogImageUrl = "https://loremflickr.com/1920/1080/dogs";
 
 const LIMIT = 10;
 
@@ -110,17 +114,17 @@ describe("SuggestionService", () => {
         generateFakeUserWithDog(
           {
             gender: Gender.FEMALE,
-            color: randomColor(),
-            size: randomSize(),
-            preferredColor: randomColor(),
-            preferredMaxAge: smallInt(),
-            preferredMaxDistance: smallInt(),
-            preferredMinAge: smallInt(),
-            preferredSize: randomSize(),
-            bio: faker.lorem.paragraph(),
+            color: fixtureColor(),
+            size: fixtureSize(),
+            preferredColor: fixtureColor(),
+            preferredMaxAge: fixtureSmallInt(),
+            preferredMaxDistance: fixtureSmallInt(),
+            preferredMinAge: fixtureSmallInt(),
+            preferredSize: fixtureSize(),
+            bio: "Friendly dog looking for new friends.",
             birthDate: new Date().toISOString(),
-            name: faker.person.firstName(),
-            weight: smallInt(),
+            name: "Buddy",
+            weight: fixtureSmallInt(),
           },
           {
             latitude: 0.05,
@@ -534,8 +538,8 @@ describe("SuggestionService", () => {
         expect(primary[0]!.id).toEqual(nearDog.id);
       });
       test("breed", async () => {
-        const preferredBreedId = faker.helpers.arrayElement(breedData).id!;
-        const nonPreferredBreedId = faker.helpers.arrayElement(
+        const preferredBreedId = first(breedData).id!;
+        const nonPreferredBreedId = first(
           breedData.filter((breed) => breed.id !== preferredBreedId),
         ).id!;
 
@@ -587,7 +591,7 @@ describe("SuggestionService", () => {
               create: {
                 position: 0,
                 status: IMAGE_STATUS.REJECTED,
-                url: faker.image.urlLoremFlickr(),
+                url: dogImageUrl,
               },
             },
           }),
@@ -616,7 +620,7 @@ describe("SuggestionService", () => {
               create: {
                 position: 0,
                 status: IMAGE_STATUS.PENDING,
-                url: faker.image.urlLoremFlickr(),
+                url: dogImageUrl,
               },
             },
           }),
@@ -670,12 +674,12 @@ describe("SuggestionService", () => {
                   {
                     position: 0,
                     status: IMAGE_STATUS.PENDING,
-                    url: faker.image.urlLoremFlickr(),
+                    url: dogImageUrl,
                   },
                   {
                     position: 1,
                     status: IMAGE_STATUS.APPROVED,
-                    url: faker.image.urlLoremFlickr(),
+                    url: dogImageUrl,
                   },
                 ],
               },

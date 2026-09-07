@@ -37,7 +37,6 @@
     "postinstall": "pnpm run build"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.4.1",
     "zod": "3.25.76"
   },
   "devDependencies": {
