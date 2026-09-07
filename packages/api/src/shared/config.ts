@@ -152,9 +152,10 @@ const configSchema = z.object({
   /**
    * FREE LIKES
    *
-   * The daily like allowance for free accounts, movable without a deploy so
-   * the ceiling can be tuned against matches per swiper rather than guessed
-   * once and frozen into a build. Unset keeps the value the app shipped with.
+   * The daily like allowance for free accounts, moved by an environment
+   * variable so the ceiling can be tuned against matches per swiper rather
+   * than guessed once and frozen into a shipped build. Unset keeps the value
+   * the app shipped with.
    */
   FREE_DAILY_LIKE_LIMIT: freeDailyLikeLimitSchema,
 

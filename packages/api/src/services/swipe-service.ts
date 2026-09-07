@@ -84,8 +84,10 @@ export class SwipeService {
 
     if (!user) throw new AccountBlockedError();
 
-    // Read at call time, not at import time, so changing the environment
-    // variable takes effect on the next request instead of the next deploy.
+    // Read off `config` here rather than captured at module scope, so a test
+    // can move the ceiling the same way an operator moves the variable. The
+    // environment itself is parsed once at boot, so a change to the variable
+    // reaches this line on the next deploy.
     const likeLimit = config.FREE_DAILY_LIKE_LIMIT;
 
     // Only apply daily swipe limit to free users

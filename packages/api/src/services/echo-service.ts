@@ -64,7 +64,7 @@ export class EchoService {
 
     // The like allowance rides along on the query every launch already waits
     // on, so the number the app puts on screen is the number the server will
-    // actually enforce, without a second round trip or a new deploy.
+    // actually enforce, without a second round trip or a new app build.
     return {
       authenticated,
       forceUpdate,
