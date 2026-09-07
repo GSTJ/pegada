@@ -403,7 +403,7 @@ describe("SuggestionService", () => {
             preferredSize: Size.MEDIUM,
           }),
           generateFakeUserWithDog({ gender: Gender.FEMALE, size: Size.GIANT }),
-          Array.from({ length: numberOfMediumDogs }).map(() =>
+          ...Array.from({ length: numberOfMediumDogs }).map(() =>
             generateFakeUserWithDog({
               gender: Gender.FEMALE,
               size: Size.MEDIUM,
@@ -435,7 +435,7 @@ describe("SuggestionService", () => {
             gender: Gender.FEMALE,
             color: Color.BLACK,
           }),
-          Array.from({ length: numberOfGoldenDogs }).map(() =>
+          ...Array.from({ length: numberOfGoldenDogs }).map(() =>
             generateFakeUserWithDog({
               gender: Gender.FEMALE,
               color: Color.GOLDEN,
