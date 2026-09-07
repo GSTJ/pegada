@@ -304,10 +304,10 @@ it("keeps banned and self profiles out of the swipe deck and direct lookup", asy
 });
 
 /**
- * The ceiling is an environment variable so it can be moved without a deploy,
- * which only helps if the swipe path reads it per request. Both cases run the
- * real mutation rather than a stubbed quota, because the number has to hold at
- * the point where a like is actually written.
+ * The ceiling is an environment variable, parsed once at boot, so it reaches
+ * the swipe path on the next deploy. Both cases run the real mutation rather
+ * than a stubbed quota, because the number has to hold at the point where a
+ * like is actually written.
  */
 describe("the configured free like limit", () => {
   const shippedLimit = config.FREE_DAILY_LIKE_LIMIT;
