@@ -150,10 +150,23 @@ export type ReengagementPushKind =
  * Why a re-engagement push that had something to say was not sent.
  *
  * Restated here rather than imported for the same reason the kinds above are.
- * `window` is the only one that is not a cadence decision: the candidate was
- * due but the run caught the user outside their evening slot.
+ * Three of these are not cadence decisions. `window` is the candidate being
+ * due while the run caught the user outside their evening slot.
+ * `already_sent` is every nudge that person was due having had its dedupe key
+ * claimed already, by an earlier run or by one racing this one. It is only
+ * reported for somebody the cadence would otherwise have allowed, inside their
+ * own hour, so it reads as "due and nothing left to say" rather than burying
+ * the schedule reasons underneath it. `dead_token` doubles as the device
+ * having a token Expo will not accept at all, which is decided at the send
+ * rather than by the cadence.
+ *
+ * The list is closed on purpose: a candidate leaves a run either sent or with
+ * one of these against their name, so the two numbers add up to the people the
+ * run looked at. Anything that escaped both used to vanish, which is what made
+ * a week of zero sends unreadable.
  */
 export type ReengagementSuppressionReason =
+  | "already_sent"
   | "cooldown"
   | "dead_token"
   | "gave_up"
@@ -641,9 +654,44 @@ export type ServerEventProperties = {
    */
   [ANALYTICS_EVENTS.REENGAGEMENT_CRON_RAN]: {
     candidates: number;
+    /**
+     * The run threw before it finished deciding.
+     *
+     * A failed run reports whatever it had counted, and a failure in the
+     * selectors or the cadence read means that is zero across the board. That
+     * is the same row a quiet evening produces, so without this flag a
+     * database outage reads as an evening with nobody to nudge.
+     */
+    failed: boolean;
+    /**
+     * People the run looked at and reached no decision about.
+     *
+     * Zero in a healthy run. It is above zero when the per run push ceiling
+     * cut the loop short, when a user was deleted between the selector and the
+     * decision, or when their send threw. The first is a backlog, the other
+     * two are bugs, and before this existed all three left the person out of
+     * every count on this row.
+     */
+    held: number;
+    /**
+     * Distinct users behind `candidates`.
+     *
+     * `candidates` counts rows and one person can hold several, so the two are
+     * different units and reading `candidates` against `sent` invites the
+     * wrong subtraction. This is the number that reconciles: `people` equals
+     * `sent` plus every `suppressed_*` plus `held`, always.
+     */
+    people: number;
     sent: number;
     skipped_already_sent: number;
     skipped_unreachable: number;
+    /**
+     * Every one of these counts people once per run, including the people
+     * whose per user `Reengagement Push Suppressed` event was held back by the
+     * once a day report hour. A hold that only shows up in the events is
+     * invisible for twenty three hours out of twenty four; here it is not.
+     */
+    suppressed_already_sent: number;
     suppressed_cooldown: number;
     suppressed_dead_token: number;
     suppressed_gave_up: number;

@@ -10,13 +10,14 @@ import {
   BREAKDOWNS,
   CITY_TABLE_ROWS,
   CITY_UNKNOWN_BUCKET,
+  CRON_SUPPRESSION_PROPERTIES,
   DECK_TIERS,
   EVENTS,
   OTA_UNKNOWN_BUCKET,
   PUSH_RETURN_WINDOW_MINUTES,
   STORE_BUILD_COVERAGE,
 } from "./queries.mjs";
-import { utcMoment, utcStamp } from "./timestamps.mjs";
+import { parseTimestamp, utcMoment, utcStamp } from "./timestamps.mjs";
 
 export const COMMENT_MARKER = "<!-- pegada-daily-metrics -->";
 
@@ -325,6 +326,17 @@ export const CRON_SOURCE_NOTE =
   "The cron reports one row an hour. Users in weekly floor is how many people had already been notified inside the last week when it last ran, and they are never candidates, so a large floor next to zero sends is the cadence holding people rather than a broken job. A last run several hours old is the job.";
 
 /**
+ * A cron count, printed as whole people.
+ *
+ * The counts cross the wire as JSON and come back through `sum`, so they
+ * arrive as floats. They count people, so they are printed as whole numbers
+ * rather than with a stray decimal.
+ */
+function wholeCount(value) {
+  return number(Math.round(Number(value ?? 0)));
+}
+
+/**
  * The reengagement cron heartbeat.
  *
  * The last run rather than a window average, because the floor is a level: the
@@ -339,26 +351,99 @@ export function reengagementCronTable(rows) {
     return CRON_SILENT_LINE;
   }
 
-  // The counts cross the wire as JSON and come back through `sum`, so they
-  // arrive as floats. They are counts of people, so they are printed as whole
-  // numbers rather than with a stray decimal.
-  const count = (value) => number(Math.round(Number(value ?? 0)));
-
   const readings = [
     ["Last run", utcMoment(row.last_run_at)],
     ["Runs in the last 7 days", number(runs)],
-    ["Users in weekly floor (last run)", count(row.last_users_in_weekly_floor)],
-    ["Candidates (last run)", count(row.last_candidates)],
-    ["Sent (last run)", count(row.last_sent)],
-    ["Suppressed (last run)", count(row.last_suppressed)],
-    ["Candidates (last 7 days)", count(row.candidates)],
-    ["Sent (last 7 days)", count(row.sent)],
+    [
+      "Users in weekly floor (last run)",
+      wholeCount(row.last_users_in_weekly_floor),
+    ],
+    ["Candidates (last run)", wholeCount(row.last_candidates)],
+    ["Sent (last run)", wholeCount(row.last_sent)],
+    ["Suppressed (last run)", wholeCount(row.last_suppressed)],
+    ["Candidates (last 7 days)", wholeCount(row.candidates)],
+    ["Sent (last 7 days)", wholeCount(row.sent)],
   ];
 
   return [
     "| Reading | Value |",
     "| --- | ---: |",
     ...readings.map(([label, value]) => `| ${label} | ${value} |`),
+  ].join("\n");
+}
+
+/** What a reasons cell says when the run held nobody back. */
+const NO_REASONS = "-";
+
+/**
+ * What a reasons cell says when the run threw.
+ *
+ * A failed run reports whatever it had counted, which for a failure in the
+ * selection is zero everywhere, and that is the row a quiet evening produces
+ * too. Saying so in the cell the reader is already looking at beats a column
+ * that is false on every healthy row.
+ */
+const RUN_FAILED = "run failed";
+
+/**
+ * A suppression reason as the table writes it.
+ *
+ * The property name without its prefix, so `suppressed_monthly_cap` reads
+ * `monthly cap`. Derived rather than spelled out in a second list, so a reason
+ * added to the event shows up here without anybody remembering to add it.
+ */
+function suppressionLabel(property) {
+  return property.replace("suppressed_", "").replaceAll("_", " ");
+}
+
+/**
+ * Every cron run of the last day, one row each.
+ *
+ * The heartbeat above prints a single run, so an hour that sent nothing and a
+ * day that sent nothing look the same in it. This is the table that tells them
+ * apart: a gap in the hours is the job, and a full column of hours with zero
+ * sends is the rules. The reasons cell names which rule did the holding, which
+ * is the part a suppressed total cannot say.
+ *
+ * Only the non zero reasons are printed. A row carrying six zeroes reads the
+ * same as an empty cell and takes the width the real ones need.
+ *
+ * People rather than candidates is what sent and suppressed are checked
+ * against: candidates counts rows and a person can hold several. Held is
+ * whoever the run reached no decision about, so it should read zero, and a
+ * column of it that does not is the thing to go and look at.
+ *
+ * Sorted here as well as in the query. The rows are read newest first whatever
+ * order they arrive in, and a fixture is allowed to hand them over unsorted.
+ */
+export function reengagementCronRunsTable(rows) {
+  const ordered = (rows ?? [])
+    .map((row) => ({ at: parseTimestamp(row.run_at), row }))
+    .sort((a, b) => (b.at?.getTime() ?? 0) - (a.at?.getTime() ?? 0));
+
+  if (ordered.length === 0) {
+    return CRON_SILENT_LINE;
+  }
+
+  return [
+    "| Hour (UTC) | Candidates | People | Sent | Suppressed | Held | Reasons |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | --- |",
+    ...ordered.map(({ row }) => {
+      if (row.failed === true || row.failed === 1) {
+        return `| ${utcMoment(row.run_at)} | ${wholeCount(row.candidates)} | ${wholeCount(row.people)} | ${wholeCount(row.sent)} | ${wholeCount(row.suppressed)} | ${wholeCount(row.held)} | ${RUN_FAILED} |`;
+      }
+
+      const reasons = CRON_SUPPRESSION_PROPERTIES.filter(
+        (property) => Number(row[property] ?? 0) > 0,
+      )
+        .map(
+          (property) =>
+            `${suppressionLabel(property)} ${wholeCount(row[property])}`,
+        )
+        .join(", ");
+
+      return `| ${utcMoment(row.run_at)} | ${wholeCount(row.candidates)} | ${wholeCount(row.people)} | ${wholeCount(row.sent)} | ${wholeCount(row.suppressed)} | ${wholeCount(row.held)} | ${reasons || NO_REASONS} |`;
+    }),
   ].join("\n");
 }
 
@@ -421,6 +506,7 @@ export function buildReport({
   activeUsersByVersion,
   breakdowns,
   cronRun = [],
+  cronRuns = [],
   deckSupply,
   generatedAt,
   otaUpdates,
@@ -615,6 +701,10 @@ export function buildReport({
     reengagementCronTable(cronRun),
     "",
     CRON_SOURCE_NOTE,
+    "",
+    "#### Reengagement cron, last 24 runs",
+    "",
+    reengagementCronRunsTable(cronRuns),
     "",
     coverageNote(),
     "",

@@ -14,6 +14,7 @@ import {
   formatDelta,
   formatRateDelta,
   noCityLine,
+  reengagementCronRunsTable,
   reengagementCronTable,
 } from "./report.mjs";
 
@@ -38,6 +39,38 @@ function versions(rows) {
 
 /** The city split comes back in the same shape as the version split. */
 const cities = versions;
+
+/**
+ * One cron run, with the reasons it did not carry left at zero.
+ *
+ * `people` defaults to whatever the run accounted for, so a fixture that does
+ * not care about it still balances the way a real run has to.
+ */
+function cronRunRow(
+  runAt,
+  { candidates, failed = false, held = 0, people, sent, ...reasons },
+) {
+  const suppressed = Object.values(reasons).reduce(
+    (total, value) => total + value,
+    0,
+  );
+  return {
+    candidates,
+    failed,
+    held,
+    people: people ?? sent + suppressed + held,
+    run_at: runAt,
+    sent,
+    suppressed,
+    suppressed_already_sent: 0,
+    suppressed_cooldown: 0,
+    suppressed_dead_token: 0,
+    suppressed_gave_up: 0,
+    suppressed_monthly_cap: 0,
+    suppressed_window: 0,
+    ...reasons,
+  };
+}
 
 function otaRows(rows) {
   return rows.map(
@@ -209,6 +242,20 @@ const FIXTURE = {
       runs: 168,
       sent: 9,
     },
+  ],
+  cronRuns: [
+    cronRunRow("2026-09-02 09:00:00", { candidates: 2, sent: 2 }),
+    cronRunRow("2026-09-02 11:00:00", {
+      candidates: 3,
+      sent: 1,
+      suppressed_cooldown: 1,
+      suppressed_window: 1,
+    }),
+    cronRunRow("2026-09-02 10:00:00", {
+      candidates: 4,
+      sent: 1,
+      suppressed_cooldown: 3,
+    }),
   ],
   deckSupply: deck([
     ["current", 100, 840, 1000, 700, 90, 30, 20, 40],
@@ -808,6 +855,84 @@ test("a week with no cron run says the job is the reason, not the week", () => {
   const body = buildReport({ ...FIXTURE, cronRun: [] });
   assert.equal(body.includes(CRON_SILENT_LINE), true);
   assert.equal(body.includes("| Last run |"), false);
+});
+
+test("the per run table prints the runs newest first", () => {
+  const body = buildReport(FIXTURE);
+  const [, section] = body.split("#### Reengagement cron, last 24 runs");
+  const hours = [...section.matchAll(/\| (2026-09-02 \d{2}:00) UTC \|/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(hours, [
+    "2026-09-02 11:00",
+    "2026-09-02 10:00",
+    "2026-09-02 09:00",
+  ]);
+  assert.match(
+    section,
+    /\| Hour \(UTC\) \| Candidates \| People \| Sent \| Suppressed \| Held \| Reasons \|/,
+  );
+  assert.match(
+    section,
+    /\| --- \| ---: \| ---: \| ---: \| ---: \| ---: \| --- \|/,
+  );
+});
+
+test("the reasons cell names only the rules that held somebody", () => {
+  const table = reengagementCronRunsTable(FIXTURE.cronRuns);
+  assert.match(
+    table,
+    /\| 2026-09-02 11:00 UTC \| 3 \| 3 \| 1 \| 2 \| 0 \| cooldown 1, window 1 \|/,
+  );
+  assert.match(
+    table,
+    /\| 2026-09-02 10:00 UTC \| 4 \| 4 \| 1 \| 3 \| 0 \| cooldown 3 \|/,
+  );
+  assert.equal(table.includes("dead token"), false);
+  assert.equal(table.includes("monthly cap"), false);
+});
+
+test("a run that held nobody back prints a dash instead of a list of zeroes", () => {
+  const table = reengagementCronRunsTable([
+    cronRunRow("2026-09-02 09:00:00", { candidates: 2, sent: 2 }),
+  ]);
+  assert.match(
+    table,
+    /\| 2026-09-02 09:00 UTC \| 2 \| 2 \| 2 \| 0 \| 0 \| - \|/,
+  );
+});
+
+test("a run that reached no decision about somebody says so", () => {
+  // The number the fix exists to make visible. Held is people the run walked
+  // past, so a column of zeroes is the healthy reading and anything else is
+  // worth opening.
+  const table = reengagementCronRunsTable([
+    cronRunRow("2026-09-02 09:00:00", { candidates: 3, held: 1, sent: 2 }),
+  ]);
+  assert.match(
+    table,
+    /\| 2026-09-02 09:00 UTC \| 3 \| 3 \| 2 \| 0 \| 1 \| - \|/,
+  );
+});
+
+test("a run that threw says so instead of reading as a quiet hour", () => {
+  // A failed run reports whatever it had counted, which for a failure in the
+  // selection is zero everywhere, and that is the row a quiet evening
+  // produces too.
+  const table = reengagementCronRunsTable([
+    cronRunRow("2026-09-02 09:00:00", { candidates: 0, failed: true, sent: 0 }),
+  ]);
+  assert.match(
+    table,
+    /\| 2026-09-02 09:00 UTC \| 0 \| 0 \| 0 \| 0 \| 0 \| run failed \|/,
+  );
+});
+
+test("no runs at all reads as the job rather than a quiet day", () => {
+  assert.equal(reengagementCronRunsTable([]), CRON_SILENT_LINE);
+  assert.equal(reengagementCronRunsTable(), CRON_SILENT_LINE);
+  const body = buildReport({ ...FIXTURE, cronRuns: [] });
+  assert.equal(body.includes("| Hour (UTC) |"), false);
 });
 
 test("a heartbeat that reports no runs reads the same as no heartbeat", () => {
