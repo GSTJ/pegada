@@ -62,6 +62,14 @@ export class EchoService {
       authenticated = Boolean(user);
     }
 
-    return { authenticated, forceUpdate, minimumSupportedVersion };
+    // The like allowance rides along on the query every launch already waits
+    // on, so the number the app puts on screen is the number the server will
+    // actually enforce, without a second round trip or a new deploy.
+    return {
+      authenticated,
+      forceUpdate,
+      freeDailyLikeLimit: config.FREE_DAILY_LIKE_LIMIT,
+      minimumSupportedVersion,
+    };
   }
 }

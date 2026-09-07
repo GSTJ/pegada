@@ -33,12 +33,12 @@ const swipeUserRequest = function* ({
 
     // If the user is not premium, check if the like limit has been reached
     if (!isPremium && _swipeType !== Swipe.Dislike) {
-      const { likeLimitResetAt } = (yield select(
+      const { likeLimit, likeLimitResetAt } = (yield select(
         (state: RootReducer) => state.dogs.config,
       )) as RootReducer["dogs"]["config"];
 
       if (likeLimitResetAt && isBefore(new Date(), likeLimitResetAt)) {
-        throw new LikeLimitReachedError({ likeLimitResetAt });
+        throw new LikeLimitReachedError({ likeLimit, likeLimitResetAt });
       }
     }
 
@@ -64,12 +64,12 @@ const swipeUserRequest = function* ({
   } catch (error: unknown) {
     const likeLimitReachedError = getError(error, LikeLimitReachedError);
     if (likeLimitReachedError) {
-      const { likeLimitResetAt } = likeLimitReachedError;
-      showLikeLimitReached({ likeLimitResetAt });
+      const { likeLimit, likeLimitResetAt } = likeLimitReachedError;
+      showLikeLimitReached({ likeLimit, likeLimitResetAt });
       // Glanceable countdown outside the app: Dynamic Island/lock screen on
       // iOS, a (promoted) countdown notification on Android.
       yield call(startLikeLimitLiveStatus, likeLimitResetAt);
-      yield put(Actions.dogs.swipe.failure({ likeLimitResetAt }));
+      yield put(Actions.dogs.swipe.failure({ likeLimit, likeLimitResetAt }));
       return;
     }
 
