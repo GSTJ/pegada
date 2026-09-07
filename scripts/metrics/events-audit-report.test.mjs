@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   COMMENT_MARKER,
+  NEW_EXCEPTION_HOURS,
   buildFindings,
   buildReport,
   codeCell,
@@ -195,7 +196,9 @@ export const EXCEPTIONS = [
   {
     app_versions: "1.6.2, 1.7.2",
     exception_type: "TypeError",
+    first_seen: "2026-08-28 13:20:00",
     frame: "DogCard in src/components/DogCard.tsx",
+    last_seen: "2026-09-04 11:50:00",
     libs: "posthog-react-native",
     message: "undefined is not an object (evaluating 'dog.photos[0].url')",
     people: 14,
@@ -204,7 +207,9 @@ export const EXCEPTIONS = [
   {
     app_versions: "",
     exception_type: "PrismaClientKnownRequestError",
+    first_seen: "2026-08-29 02:05:00",
     frame: "listDogs in packages/api/src/router/dog.ts",
+    last_seen: "2026-08-31 07:10:00",
     libs: "posthog-node",
     message: "Timed out fetching a new connection from the connection pool",
     people: 6,
@@ -213,7 +218,9 @@ export const EXCEPTIONS = [
   {
     app_versions: "1.6.2",
     exception_type: "Error",
+    first_seen: "2026-09-04 06:30:00",
     frame: "",
+    last_seen: "2026-09-04 11:00:00",
     libs: "posthog-node, posthog-react-native",
     message: "Request failed | GET /api/trpc/dog.list\nstatus `500`",
     people: 3,
@@ -483,9 +490,9 @@ test("an exception seen from both sides names both", () => {
 test("a message cannot break the row it sits in", () => {
   const body = buildReport(FIXTURE);
   const row = body.split("\n").find((line) => line.includes("Request failed"));
-  // Seven columns means eight pipes. A raw pipe or a newline in the message
+  // Nine columns means ten pipes. A raw pipe or a newline in the message
   // would silently shift every column after it.
-  assert.equal(row.split(/(?<!\\)\|/u).length - 1, 8);
+  assert.equal(row.split(/(?<!\\)\|/u).length - 1, 10);
   assert.equal(row.includes("\n"), false);
   assert.match(row, /Request failed \\\| GET/);
 });
@@ -523,4 +530,52 @@ test("no exceptions in the window says so", () => {
     body,
     /### 5\. Exceptions\n\n.+\n\nNo exceptions in the window\./s,
   );
+});
+
+test("the exception table carries both ends of every group", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(body, /\| Library \| App version \| First seen \| Last seen \|/);
+  // The fault that stopped on Monday: still in the seven day total, but its
+  // last event is three days old.
+  const settled = body
+    .split("\n")
+    .find((line) => line.includes("PrismaClientKnownRequestError"));
+  assert.match(settled, /\| 2026-08-29 02:05 UTC \| 2026-08-31 07:10 UTC \|/);
+});
+
+test("a group first seen inside the last day is marked new", () => {
+  const body = buildReport(FIXTURE);
+  assert.equal(NEW_EXCEPTION_HOURS, 24);
+  const fresh = body
+    .split("\n")
+    .find((line) => line.includes("Request failed"));
+  assert.match(fresh, /\| 2026-09-04 06:30 UTC \(new\) \|/);
+});
+
+test("a group that has been there all week is not marked new", () => {
+  const body = buildReport(FIXTURE);
+  const old = body.split("\n").find((line) => line.includes("DogCard"));
+  assert.match(old, /\| 2026-08-28 13:20 UTC \| 2026-09-04 11:50 UTC \|/);
+  assert.equal(old.includes("(new)"), false);
+});
+
+test("a group with no timestamps on it still gets a row", () => {
+  const body = buildReport(FIXTURE);
+  const bare = body
+    .split("\n")
+    .find((line) => line.includes("| unknown | `unknown` |"));
+  assert.match(bare, /\| - \| - \|/);
+  assert.equal(bare.includes("(new)"), false);
+});
+
+test("a timestamp with no zone on it is read as UTC before it is marked", () => {
+  // ClickHouse sends `2026-09-04 06:30:00` with no zone. Read as local time in
+  // Sao Paulo that lands three hours out, which is enough to move a group in
+  // or out of the last day.
+  const body = buildReport({
+    ...FIXTURE,
+    exceptions: [{ ...EXCEPTIONS[0], first_seen: "2026-09-04 06:30:00" }],
+    generatedAt: new Date("2026-09-04T12:03:00.000Z"),
+  });
+  assert.match(body, /\| 2026-09-04 06:30 UTC \(new\) \|/);
 });

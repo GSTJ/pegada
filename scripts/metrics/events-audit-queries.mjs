@@ -300,6 +300,13 @@ function topFrameExpression() {
  * reason the libraries are: one fault reached by two paths is still one fault.
  * `max` picks one of them and prefers a real one, since a blank sorts below
  * every name.
+ *
+ * `first_seen` and `last_seen` are what make a seven day window readable on the
+ * day after a fix. A group counted over a week looks identical whether it is
+ * still throwing or stopped on Monday, so a total on its own turns a shipped
+ * fix into a row that appears unchanged. The two ends of the group say which
+ * one it is, and a first sighting inside the last day is a fault that arrived
+ * with something recent rather than one that has been there all along.
  */
 export function buildExceptionGroupsQuery(
   window,
@@ -327,7 +334,9 @@ export function buildExceptionGroupsQuery(
     "  count() AS total,",
     "  count(DISTINCT person_id) AS people,",
     `  arrayStringConcat(arraySort(groupUniqArray(${lib})), ', ') AS libs,`,
-    `  arrayStringConcat(arraySort(groupUniqArrayIf(${version}, ${lib} IN (${clientLibs}))), ', ') AS app_versions`,
+    `  arrayStringConcat(arraySort(groupUniqArrayIf(${version}, ${lib} IN (${clientLibs}))), ', ') AS app_versions,`,
+    "  min(timestamp) AS first_seen,",
+    "  max(timestamp) AS last_seen",
     "FROM events",
     `WHERE ${windowFilter(window)}`,
     "  AND event = '$exception'",

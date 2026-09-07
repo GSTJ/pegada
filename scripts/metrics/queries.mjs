@@ -624,6 +624,64 @@ export function buildPushAttributedReturnsQuery({ end, start }) {
 }
 
 /**
+ * The five ways the cron can decide against a nudge it had ready.
+ *
+ * Summed into one number for the run table rather than split: the split
+ * already has a table of its own further down the readout, and the question
+ * this row answers is only how much of the run was held back.
+ */
+export const CRON_SUPPRESSION_PROPERTIES = [
+  "suppressed_cooldown",
+  "suppressed_dead_token",
+  "suppressed_gave_up",
+  "suppressed_monthly_cap",
+  "suppressed_window",
+];
+
+/**
+ * The hourly heartbeat of the reengagement cron, for the current window only.
+ *
+ * The push table above it counts sends, and a week of zero sends has two very
+ * different causes that it cannot tell apart: a cron that stopped running, and
+ * a cron that ran every hour and found everybody already inside their weekly
+ * floor. This row is what separates them. No rows at all means the job did not
+ * report, a last run inside the hour with a large floor means the cadence is
+ * holding people back on purpose.
+ *
+ * `argMax` reads the latest run rather than an average of the window, because
+ * the floor is a level and not a flow: averaging it across a week describes a
+ * population that no longer exists. The two sums beside it are flows, so they
+ * are summed over the same seven days the rest of the readout uses.
+ *
+ * One window and no comparison. The previous week of a heartbeat is the push
+ * table's job; this one answers "is it alive right now, and what did it see".
+ */
+export function buildReengagementCronQuery(windows) {
+  const candidates = numericProperty("candidates");
+  const sent = numericProperty("sent");
+  const floor = numericProperty("users_in_weekly_floor");
+  const suppressed = CRON_SUPPRESSION_PROPERTIES.map(
+    (property) => `ifNull(${numericProperty(property)}, 0)`,
+  ).join(" + ");
+
+  return [
+    "SELECT",
+    "  count() AS runs,",
+    "  max(timestamp) AS last_run_at,",
+    `  argMax(${floor}, timestamp) AS last_users_in_weekly_floor,`,
+    `  argMax(${candidates}, timestamp) AS last_candidates,`,
+    `  argMax(${sent}, timestamp) AS last_sent,`,
+    `  argMax(${suppressed}, timestamp) AS last_suppressed,`,
+    `  sum(${candidates}) AS candidates,`,
+    `  sum(${sent}) AS sent`,
+    "FROM events",
+    `WHERE timestamp >= toDateTime(${quote(clickhouseTime(windows.currentStart))}, 'UTC')`,
+    `  AND timestamp < toDateTime(${quote(clickhouseTime(windows.currentEnd))}, 'UTC')`,
+    `  AND event = ${quote(EVENTS.REENGAGEMENT_CRON_RAN)}`,
+  ].join("\n");
+}
+
+/**
  * The four tiers a card can come from, in the order the deck falls back
  * through them.
  *

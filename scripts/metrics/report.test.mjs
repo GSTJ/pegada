@@ -5,6 +5,8 @@ import { STORE_BUILD_COVERAGE, buildWindows } from "./queries.mjs";
 import {
   CITY_SOURCE_NOTE,
   COMMENT_MARKER,
+  CRON_SILENT_LINE,
+  CRON_SOURCE_NOTE,
   OTA_SOURCE_NOTE,
   buildReport,
   coverageNote,
@@ -12,6 +14,7 @@ import {
   formatDelta,
   formatRateDelta,
   noCityLine,
+  reengagementCronTable,
 } from "./report.mjs";
 
 const NOW = new Date("2026-09-02T12:00:00.000Z");
@@ -195,6 +198,18 @@ const FIXTURE = {
       ["error", "current", 1],
     ]),
   },
+  cronRun: [
+    {
+      candidates: 24,
+      last_candidates: 3,
+      last_run_at: "2026-09-02 11:00:00",
+      last_sent: 1,
+      last_suppressed: 2,
+      last_users_in_weekly_floor: 512,
+      runs: 168,
+      sent: 9,
+    },
+  ],
   deckSupply: deck([
     ["current", 100, 840, 1000, 700, 90, 30, 20, 40],
     ["previous", 80, 560, 800, 560, 0, 0, 0, 48],
@@ -760,4 +775,68 @@ test("a week with no app events says so instead of rendering an empty update tab
 test("the update table survives a run made before the query existed", () => {
   const body = buildReport({ ...FIXTURE, otaUpdates: undefined });
   assert.ok(body.includes("No app events in the last 7 days."));
+});
+
+test("the cron heartbeat prints the latest run beside the window sums", () => {
+  const body = buildReport(FIXTURE);
+  assert.match(body, /#### Reengagement cron/);
+  assert.match(body, /\| Last run \| 2026-09-02 11:00 UTC \|/);
+  assert.match(body, /\| Runs in the last 7 days \| 168 \|/);
+  assert.match(body, /\| Users in weekly floor \(last run\) \| 512 \|/);
+  assert.match(body, /\| Candidates \(last run\) \| 3 \|/);
+  assert.match(body, /\| Sent \(last run\) \| 1 \|/);
+  assert.match(body, /\| Suppressed \(last run\) \| 2 \|/);
+  assert.match(body, /\| Candidates \(last 7 days\) \| 24 \|/);
+  assert.match(body, /\| Sent \(last 7 days\) \| 9 \|/);
+  assert.equal(body.includes(CRON_SOURCE_NOTE), true);
+});
+
+test("the cron heartbeat sits under the push table and above the coverage note", () => {
+  const body = buildReport(FIXTURE);
+  assert.equal(
+    body.indexOf("| Push attributed return rate") <
+      body.indexOf("#### Reengagement cron"),
+    true,
+  );
+  assert.equal(
+    body.indexOf("#### Reengagement cron") < body.indexOf("Coverage note:"),
+    true,
+  );
+});
+
+test("a week with no cron run says the job is the reason, not the week", () => {
+  const body = buildReport({ ...FIXTURE, cronRun: [] });
+  assert.equal(body.includes(CRON_SILENT_LINE), true);
+  assert.equal(body.includes("| Last run |"), false);
+});
+
+test("a heartbeat that reports no runs reads the same as no heartbeat", () => {
+  assert.equal(reengagementCronTable([{ runs: 0 }]), CRON_SILENT_LINE);
+  assert.equal(reengagementCronTable(), CRON_SILENT_LINE);
+});
+
+test("the sums arrive as floats and print as whole people", () => {
+  const table = reengagementCronTable([
+    {
+      candidates: 1240,
+      last_run_at: new Date("2026-09-02T11:30:00.000Z"),
+      last_sent: null,
+      last_users_in_weekly_floor: 512,
+      runs: 168,
+      sent: 9,
+    },
+  ]);
+  assert.match(table, /\| Candidates \(last 7 days\) \| 1,240 \|/);
+  // A run that carried nothing for a reading is a zero, not a blank cell.
+  assert.match(table, /\| Sent \(last run\) \| 0 \|/);
+  assert.match(table, /\| Last run \| 2026-09-02 11:30 UTC \|/);
+});
+
+test("a run timestamp with no zone on it is read as UTC", () => {
+  // ClickHouse sends `2026-09-02 11:00:00` with no zone, and reading that as
+  // local time moves every row by the machine's offset.
+  const table = reengagementCronTable([
+    { last_run_at: "2026-09-02 11:00:00", runs: 1 },
+  ]);
+  assert.match(table, /\| Last run \| 2026-09-02 11:00 UTC \|/);
 });

@@ -75,6 +75,8 @@ function fakeWorld({ existingComment = null, swipeName = "Swipe" } = {}) {
             "people",
             "libs",
             "app_versions",
+            "first_seen",
+            "last_seen",
           ],
           results: [
             [
@@ -85,6 +87,8 @@ function fakeWorld({ existingComment = null, swipeName = "Swipe" } = {}) {
               4,
               "posthog-react-native",
               "1.6.2",
+              "2026-09-04 09:15:00",
+              "2026-09-04 10:40:00",
             ],
           ],
         });

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   BREAKDOWNS,
   CITY_TABLE_ROWS,
+  CRON_SUPPRESSION_PROPERTIES,
   CITY_UNKNOWN_BUCKET,
   CLIENT_LIBS,
   COUNTED_EVENTS,
@@ -22,6 +23,7 @@ import {
   buildBreakdownQuery,
   buildDeckSupplyQuery,
   buildPushAttributedReturnsQuery,
+  buildReengagementCronQuery,
   buildTotalsQuery,
   buildWindows,
   quote,
@@ -552,4 +554,58 @@ test("the update split reads one window and only the app", () => {
   assert.match(query, /properties\.\$lib = 'posthog-react-native'/);
   assert.equal(query.includes("'web'"), false);
   assert.match(query, /event NOT IN \('Deck Served'/);
+});
+
+test("the cron heartbeat reads the latest run and the window sums", () => {
+  const query = buildReengagementCronQuery(buildWindows(NOW));
+  assert.match(query, /AND event = 'Reengagement Cron Ran'/);
+  assert.match(query, /count\(\) AS runs/);
+  assert.match(query, /max\(timestamp\) AS last_run_at/);
+  // The floor is a level, so the latest value is the only honest one to print.
+  assert.match(
+    query,
+    /argMax\(toFloat64OrNull\(toString\(properties\.users_in_weekly_floor\)\), timestamp\) AS last_users_in_weekly_floor/,
+  );
+  assert.match(
+    query,
+    /argMax\(.+properties\.candidates.+\) AS last_candidates/,
+  );
+  assert.match(query, /argMax\(.+properties\.sent.+\) AS last_sent/);
+  // Candidates and sends are flows, so they are summed over the same week.
+  assert.match(
+    query,
+    /sum\(toFloat64OrNull\(toString\(properties\.candidates\)\)\) AS candidates/,
+  );
+  assert.match(
+    query,
+    /sum\(toFloat64OrNull\(toString\(properties\.sent\)\)\) AS sent/,
+  );
+});
+
+test("the cron heartbeat adds up every suppression reason the event carries", () => {
+  const query = buildReengagementCronQuery(buildWindows(NOW));
+  assert.deepEqual(CRON_SUPPRESSION_PROPERTIES, [
+    "suppressed_cooldown",
+    "suppressed_dead_token",
+    "suppressed_gave_up",
+    "suppressed_monthly_cap",
+    "suppressed_window",
+  ]);
+  for (const property of CRON_SUPPRESSION_PROPERTIES) {
+    assert.match(query, new RegExp(`properties\\.${property}`));
+  }
+  // A run that never carried one of them is a zero rather than a null that
+  // would swallow the whole sum.
+  assert.match(query, /ifNull\(toFloat64OrNull/);
+});
+
+test("the cron heartbeat reads one window and no comparison", () => {
+  const query = buildReengagementCronQuery(buildWindows(NOW));
+  assert.match(
+    query,
+    /timestamp >= toDateTime\('2026-08-26 12:00:00', 'UTC'\)/,
+  );
+  assert.match(query, /timestamp < toDateTime\('2026-09-02 12:00:00', 'UTC'\)/);
+  assert.equal(query.includes("'current', 'previous'"), false);
+  assert.equal(query.includes("GROUP BY"), false);
 });
