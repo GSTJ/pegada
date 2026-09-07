@@ -45,12 +45,26 @@ export class InvalidOTPCodeError extends IntentionalError {
 
 export class LikeLimitReachedError extends IntentionalError {
   likeLimitResetAt: Date;
+  /**
+   * The allowance that was just used up. It travels with the error because the
+   * server decides it from an environment variable, so a build that hardcoded
+   * the old number would otherwise tell someone they liked ten dogs on a day
+   * they were allowed twenty five. Optional so a client reading a payload from
+   * a server that predates the field can fall back to the shipped default.
+   */
+  likeLimit?: number;
 
   static message = "You have reached the like limit";
   static error_code = "LIKE_LIMIT_REACHED";
   error_code = LikeLimitReachedError.error_code;
 
-  constructor({ likeLimitResetAt }: { likeLimitResetAt: Date }) {
+  constructor({
+    likeLimit,
+    likeLimitResetAt,
+  }: {
+    likeLimit?: number;
+    likeLimitResetAt: Date;
+  }) {
     super({
       code: "TOO_MANY_REQUESTS",
       message: LikeLimitReachedError.message,
@@ -58,6 +72,7 @@ export class LikeLimitReachedError extends IntentionalError {
 
     this.name = "LikeLimitReachedError";
     this.likeLimitResetAt = likeLimitResetAt;
+    this.likeLimit = likeLimit;
   }
 }
 

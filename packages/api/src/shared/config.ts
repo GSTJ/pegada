@@ -1,3 +1,4 @@
+import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
 import semver from "semver";
 import { z } from "zod";
 
@@ -25,6 +26,24 @@ export const optionalSemverSchema = z.preprocess(
   (value) => (value === "" ? undefined : value),
   semverSchema.optional(),
 );
+
+/**
+ * How many likes a free account gets in a rolling 24 hours.
+ *
+ * Never throws. This number decides whether a swipe is accepted, and an
+ * operator fat fingering the variable must not take the whole API down at
+ * boot: anything that is not a positive whole number falls back to the value
+ * the app has always used. Blank counts as unset for the same reason the
+ * version floors do, because Vercel keeps a variable once it has been added
+ * and clearing the box is how someone puts the default back.
+ */
+export const freeDailyLikeLimitSchema = z
+  .preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.coerce.number().int().positive().optional(),
+  )
+  .catch(undefined)
+  .transform((value) => value ?? FREE_DAILY_SWIPE_LIMIT);
 
 const configSchema = z.object({
   /** GENERAL */
@@ -173,6 +192,16 @@ const configSchema = z.object({
   MIN_APP_VERSION: semverSchema,
   MIN_APP_VERSION_IOS: optionalSemverSchema,
   MIN_APP_VERSION_ANDROID: optionalSemverSchema,
+
+  /**
+   * FREE LIKES
+   *
+   * The daily like allowance for free accounts, moved by an environment
+   * variable so the ceiling can be tuned against matches per swiper rather
+   * than guessed once and frozen into a shipped build. Unset keeps the value
+   * the app shipped with.
+   */
+  FREE_DAILY_LIKE_LIMIT: freeDailyLikeLimitSchema,
 
   /**
    * APPLE MAGIC

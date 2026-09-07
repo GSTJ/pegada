@@ -8,6 +8,7 @@ import { router } from "expo-router";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { sendError } from "@/services/error-tracking";
+import { rememberFreeDailyLikeLimit } from "@/services/free-daily-like-limit";
 import { SceneName } from "@/types/scene-name";
 
 /** The build the user is on, in the same shape the API compares against. */
@@ -60,10 +61,14 @@ export const useForceUpdateOnForeground = () => {
 
       const check = async () => {
         try {
-          const { forceUpdate, minimumSupportedVersion: minimum } =
-            await getTrcpContext().client.echo.get.query();
+          const {
+            forceUpdate,
+            freeDailyLikeLimit,
+            minimumSupportedVersion: minimum,
+          } = await getTrcpContext().client.echo.get.query();
 
           rememberMinimumSupportedVersion(minimum);
+          rememberFreeDailyLikeLimit(freeDailyLikeLimit);
 
           if (!forceUpdate) return;
 
