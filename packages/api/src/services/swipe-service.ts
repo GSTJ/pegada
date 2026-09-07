@@ -3,7 +3,6 @@ import type { Language } from "@pegada/shared/i18n/types/types";
 import type { Prisma } from "@prisma/client";
 
 import prisma from "@pegada/database";
-import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
 import {
   AccountBlockedError,
   DogUnavailableError,
@@ -15,6 +14,7 @@ import { addDays } from "date-fns/addDays";
 import { subDays } from "date-fns/subDays";
 
 import { sendError } from "../errors/errors";
+import { config } from "../shared/config";
 import MatchService from "./match-service";
 import { PushNotificationService } from "./push-notification-service";
 import { TranslationService } from "./translation-service";
@@ -86,8 +86,14 @@ export class SwipeService {
 
     if (!user) throw new AccountBlockedError();
 
+    // Read at call time, not at import time, so changing the environment
+    // variable takes effect on the next request instead of the next deploy.
+    const likeLimit = config.FREE_DAILY_LIKE_LIMIT;
+
     // Only apply daily swipe limit to free users
-    if (user.plan !== PlanType.FREE) return { remainingSwipes: Infinity };
+    if (user.plan !== PlanType.FREE) {
+      return { likeLimit, remainingSwipes: Infinity };
+    }
 
     const windowStart = subDays(new Date(), 1);
     const dailyLikeCount = await db.interest.findMany({
@@ -97,18 +103,19 @@ export class SwipeService {
       },
       orderBy: { lastPositiveAt: "desc" },
       select: { lastPositiveAt: true },
-      take: FREE_DAILY_SWIPE_LIMIT,
+      take: likeLimit,
     });
 
-    const remainingSwipes = FREE_DAILY_SWIPE_LIMIT - dailyLikeCount.length;
+    const remainingSwipes = likeLimit - dailyLikeCount.length;
 
-    if (remainingSwipes > 0) return { remainingSwipes };
+    if (remainingSwipes > 0) return { likeLimit, remainingSwipes };
 
     // If the user has reached their daily swipe limit, return the time at which the limit will reset
     const oldestLike = dailyLikeCount.at(-1);
-    if (!oldestLike?.lastPositiveAt) return { remainingSwipes };
+    if (!oldestLike?.lastPositiveAt) return { likeLimit, remainingSwipes };
 
     return {
+      likeLimit,
       remainingSwipes,
       likeLimitResetAt: addDays(oldestLike.lastPositiveAt, 1),
     };
@@ -194,6 +201,7 @@ export class SwipeService {
 
             if (remainingDailyLikes.likeLimitResetAt) {
               throw new LikeLimitReachedError({
+                likeLimit: remainingDailyLikes.likeLimit,
                 likeLimitResetAt: remainingDailyLikes.likeLimitResetAt,
               });
             }

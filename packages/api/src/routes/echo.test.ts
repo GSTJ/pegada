@@ -146,3 +146,22 @@ describe("echo.get force update", () => {
     });
   });
 });
+
+/**
+ * The app puts this number in front of the user, so it has to come from the
+ * same place the server enforces it rather than from whatever the build was
+ * compiled with.
+ */
+describe("echo.get free like limit", () => {
+  const shippedLimit = config.FREE_DAILY_LIKE_LIMIT;
+
+  afterEach(() => {
+    config.FREE_DAILY_LIKE_LIMIT = shippedLimit;
+  });
+
+  it("reports the limit the server is configured with", async () => {
+    config.FREE_DAILY_LIKE_LIMIT = 25;
+
+    await expect(echo({})).resolves.toMatchObject({ freeDailyLikeLimit: 25 });
+  });
+});

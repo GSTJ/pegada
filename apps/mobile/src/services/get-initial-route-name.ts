@@ -7,6 +7,7 @@ import Constants from "expo-constants";
 import { getTrcpContext } from "@/contexts/trcp-context";
 import { analytics } from "@/services/analytics";
 import { rememberMinimumSupportedVersion } from "@/services/force-update";
+import { rememberFreeDailyLikeLimit } from "@/services/free-daily-like-limit";
 import { getLoggedUserID } from "@/services/get-logged-user-id";
 import { getData, StorageKeys } from "@/services/storage";
 import {
@@ -162,10 +163,15 @@ const getOfflineRouteName = async () => {
 
 const resolveInitialRouteName = async (deadline: number) => {
   try {
-    const { authenticated, forceUpdate, minimumSupportedVersion } =
-      await withTransientRetry(queryLaunchState, deadline);
+    const {
+      authenticated,
+      forceUpdate,
+      freeDailyLikeLimit,
+      minimumSupportedVersion,
+    } = await withTransientRetry(queryLaunchState, deadline);
 
     rememberMinimumSupportedVersion(minimumSupportedVersion);
+    rememberFreeDailyLikeLimit(freeDailyLikeLimit);
 
     if (forceUpdate) {
       return SceneName.ForceUpdate;

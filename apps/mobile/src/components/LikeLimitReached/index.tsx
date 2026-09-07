@@ -22,11 +22,13 @@ import {
 import { CloseIcon, styles as pickerStyles } from "@/components/Picker/styles";
 import { Text } from "@/components/text";
 import { analytics } from "@/services/analytics";
+import { getFreeDailyLikeLimit } from "@/services/free-daily-like-limit";
 import { SceneName } from "@/types/scene-name";
 
 import { PinnedCloseButton } from "./styles";
 
 const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
+  likeLimit = FREE_DAILY_SWIPE_LIMIT,
   likeLimitResetAt,
 }) => {
   const timeLeft = useCountdown(likeLimitResetAt);
@@ -51,7 +53,7 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
             components={{
               b: <Text key="b" fontWeight="semibold" />,
             }}
-            values={{ count: FREE_DAILY_SWIPE_LIMIT }}
+            values={{ count: likeLimit }}
           />
         </Description>
       </View>
@@ -87,12 +89,18 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({
 };
 
 export const showLikeLimitReached = (props: LikeLimitReachedProps) => {
+  // Resolved once so the number in the copy and the number on the event are
+  // the same number, whichever source it came from.
+  const likeLimit = props.likeLimit ?? getFreeDailyLikeLimit();
+
   analytics.track({
     event_type: "Like Limit Reached",
     event_properties: {
-      likeLimit: FREE_DAILY_SWIPE_LIMIT,
+      likeLimit,
       likeLimitResetAt: props.likeLimitResetAt,
     },
   });
-  return magicModal.show(() => <LikeLimitReached {...props} />);
+  return magicModal.show(() => (
+    <LikeLimitReached {...props} likeLimit={likeLimit} />
+  ));
 };

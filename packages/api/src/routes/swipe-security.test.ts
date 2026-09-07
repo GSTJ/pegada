@@ -11,6 +11,7 @@ import { appRouter } from "../root";
 import { DogService } from "../services/dog-service";
 import { PushNotificationService } from "../services/push-notification-service";
 import { SwipeService } from "../services/swipe-service";
+import { config } from "../shared/config";
 import { createInnerTRPCContext } from "../trpc";
 
 jest.mock("../services/push-notification-service", () => ({
@@ -299,5 +300,71 @@ it("keeps banned and self profiles out of the swipe deck and direct lookup", asy
   ).rejects.toMatchObject({
     code: "NOT_FOUND",
     message: DogUnavailableError.message,
+  });
+});
+
+/**
+ * The ceiling is an environment variable so it can be moved without a deploy,
+ * which only helps if the swipe path reads it per request. Both cases run the
+ * real mutation rather than a stubbed quota, because the number has to hold at
+ * the point where a like is actually written.
+ */
+describe("the configured free like limit", () => {
+  const shippedLimit = config.FREE_DAILY_LIKE_LIMIT;
+
+  afterEach(() => {
+    config.FREE_DAILY_LIKE_LIMIT = shippedLimit;
+  });
+
+  /** Likes exactly `limit` dogs, and hands back one more nobody has liked. */
+  const likeUpToTheCeiling = async (limit: number) => {
+    config.FREE_DAILY_LIKE_LIMIT = limit;
+
+    const requester = await generateFakeUserWithDog();
+    const targets = await Promise.all(
+      Array.from({ length: limit + 1 }, () => generateFakeUserWithDog()),
+    );
+    const caller = callerFor(requester.user.id);
+
+    for (const { dog } of targets.slice(0, limit)) {
+      // Sequential on purpose: the point is the count, not concurrency.
+      // eslint-disable-next-line no-await-in-loop
+      await caller.swipe.swipe({ id: dog.id, swipeType: "INTERESTED" });
+    }
+
+    return { caller, oneMore: targets[limit]!, requester };
+  };
+
+  it("refuses the fourth like when the ceiling is three", async () => {
+    const { caller, oneMore, requester } = await likeUpToTheCeiling(3);
+
+    await expect(
+      caller.swipe.swipe({ id: oneMore.dog.id, swipeType: "INTERESTED" }),
+    ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS", likeLimit: 3 });
+
+    await expect(
+      prisma.interest.count({ where: { requesterId: requester.dog.id } }),
+    ).resolves.toBe(3);
+  });
+
+  it("lets six through, and refuses the seventh, when the ceiling is six", async () => {
+    const { caller, oneMore, requester } = await likeUpToTheCeiling(6);
+
+    await expect(
+      caller.swipe.swipe({ id: oneMore.dog.id, swipeType: "INTERESTED" }),
+    ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS", likeLimit: 6 });
+
+    await expect(
+      prisma.interest.count({ where: { requesterId: requester.dog.id } }),
+    ).resolves.toBe(6);
+  });
+
+  it("reports the configured ceiling on the remaining quota", async () => {
+    config.FREE_DAILY_LIKE_LIMIT = 25;
+    const { user } = await generateFakeUserWithDog();
+
+    await expect(
+      new SwipeService({}).getRemainingDailyLikes({ userId: user.id }),
+    ).resolves.toMatchObject({ likeLimit: 25, remainingSwipes: 25 });
   });
 });

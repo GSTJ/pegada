@@ -21,6 +21,8 @@ type IInitialState = {
     limit: number;
     hasMore: boolean;
     lastCardId?: string;
+    /** The free like allowance the server enforced when it last said no. */
+    likeLimit?: number;
     likeLimitResetAt?: Date;
   };
 };
@@ -35,6 +37,7 @@ export const initialState: IInitialState = {
     limit: 15,
     hasMore: true,
     lastCardId: undefined,
+    likeLimit: undefined,
     likeLimitResetAt: undefined,
   },
 };
@@ -51,7 +54,11 @@ const asyncActions = createAsyncAction(
   SwipeAction.SwipeDogRequest,
   SwipeAction.SwipeDogSuccess,
   SwipeAction.SwipeDogFailure,
-)<{ id: string; swipeType: Swipe }, undefined, { likeLimitResetAt?: Date }>();
+)<
+  { id: string; swipeType: Swipe },
+  undefined,
+  { likeLimit?: number; likeLimitResetAt?: Date }
+>();
 
 const swipeBack = createAction(SwipeAction.SwipeBack)();
 
@@ -92,6 +99,7 @@ const swipeUserError = (
   { payload }: ActionType<typeof asyncActions.failure>,
 ) =>
   produce(state, (draft) => {
+    draft.config.likeLimit = payload.likeLimit;
     draft.config.likeLimitResetAt = payload.likeLimitResetAt;
 
     // We should return to the last dog if we have a failure

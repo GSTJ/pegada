@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import { differenceInSeconds } from "date-fns/differenceInSeconds";
 
 export type LikeLimitReachedProps = {
+  /**
+   * The allowance the server enforced. Absent when the payload came from a
+   * server that predates the field, which falls back to the shipped default.
+   */
+  likeLimit?: number;
   likeLimitResetAt: Date;
 };
 const formatTimeLeft = (totalSeconds: number) => {

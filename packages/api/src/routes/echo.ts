@@ -20,13 +20,22 @@ export const echoRouter = createTRPCRouter({
       ctx.req.headers.get(RequestHeaders.XAppPlatform),
     ).data;
 
-    const { authenticated, forceUpdate, minimumSupportedVersion } =
-      await EchoService.get({
-        currentAppVersion,
-        platform,
-        userId: ctx.session?.user.id,
-      });
+    const {
+      authenticated,
+      forceUpdate,
+      freeDailyLikeLimit,
+      minimumSupportedVersion,
+    } = await EchoService.get({
+      currentAppVersion,
+      platform,
+      userId: ctx.session?.user.id,
+    });
 
-    return { authenticated, forceUpdate, minimumSupportedVersion };
+    return {
+      authenticated,
+      forceUpdate,
+      freeDailyLikeLimit,
+      minimumSupportedVersion,
+    };
   }),
 });
