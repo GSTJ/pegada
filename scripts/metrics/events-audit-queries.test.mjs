@@ -395,3 +395,12 @@ test("the exception query truncates the frame and keeps it out of the group", ()
     false,
   );
 });
+
+test("the exception query brings back both ends of every group", () => {
+  const query = buildExceptionGroupsQuery(buildAuditWindow(NOW));
+  assert.match(query, /min\(timestamp\) AS first_seen/);
+  assert.match(query, /max\(timestamp\) AS last_seen/);
+  // Collected inside the group, not grouped on: splitting a fault by the
+  // minute it happened would turn one fault into a row per event.
+  assert.match(query, /GROUP BY exception_type, message/);
+});

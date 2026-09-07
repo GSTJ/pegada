@@ -11,6 +11,7 @@ import {
   LIB_BUCKETS,
   MAX_EXCEPTION_GROUPS,
 } from "./events-audit-queries.mjs";
+import { parseTimestamp, utcMoment, utcStamp } from "./timestamps.mjs";
 
 export const COMMENT_MARKER = "<!-- pegada-events-audit -->";
 
@@ -22,10 +23,6 @@ const OTHER_LIB = "other";
 
 function number(value) {
   return Number(value ?? 0).toLocaleString("en-US");
-}
-
-function utcStamp(date) {
-  return `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`;
 }
 
 function percent(part, whole) {
@@ -451,6 +448,37 @@ export function codeCell(value) {
 }
 
 /**
+ * How recent the first sighting has to be for the table to call a group new.
+ *
+ * A day, so a fault that arrived with last night's deploy is marked on the
+ * morning readout rather than blending into a week of history.
+ */
+export const NEW_EXCEPTION_HOURS = 24;
+
+/** What the table puts next to a group nobody had seen a day ago. */
+export const NEW_EXCEPTION_MARKER = "(new)";
+
+/**
+ * The first sighting, marked when it is recent enough to be news.
+ *
+ * The mark goes on the stamp rather than in a column of its own: the reader is
+ * already looking at the date it is about, and a tenth column earns its width
+ * only if it says something the ninth cannot.
+ */
+function firstSeenCell(value, now) {
+  const stamp = utcMoment(value);
+  const seen = parseTimestamp(value);
+  const asOf = parseTimestamp(now);
+  if (seen === null || asOf === null) {
+    return stamp;
+  }
+  const age = asOf.getTime() - seen.getTime();
+  return age < NEW_EXCEPTION_HOURS * 60 * 60 * 1000
+    ? `${stamp} ${NEW_EXCEPTION_MARKER}`
+    : stamp;
+}
+
+/**
  * The exception table.
  *
  * Last on purpose: everything above it is about whether the instrumentation is
@@ -459,7 +487,7 @@ export function codeCell(value) {
  * the number that matters is how many people a single fault reached, and that
  * is the column a fix gets prioritised on.
  */
-function exceptionSection(exceptions) {
+function exceptionSection(exceptions, generatedAt) {
   const rows = exceptions.map((row) => [
     codeCell(row.exception_type),
     codeCell(row.message),
@@ -468,11 +496,15 @@ function exceptionSection(exceptions) {
     number(row.people),
     libLabel(row.libs),
     codeCell(row.app_versions) || "n/a",
+    firstSeenCell(row.first_seen, generatedAt),
+    utcMoment(row.last_seen),
   ]);
   return [
     "### 5. Exceptions",
     "",
     `The ${number(MAX_EXCEPTION_GROUPS)} busiest \`$exception\` groups in the window, by exception type and message. Messages are cut at ${number(EXCEPTION_MESSAGE_LENGTH)} characters, and the grouping is on the cut value, so two failures that differ only in a trailing id count as one. Frame is the line that threw, on one of the events in the group, and \`n/a\` when the exception arrived without a stack. App version is the build the phone was running, and \`n/a\` on anything the server threw.`,
+    "",
+    `First seen and last seen are the ends of the group inside the window, to the minute in UTC. They are how a fix reads: a total covering seven days looks the same whether the fault is still throwing or stopped on Monday, and a last seen several days old is one that stopped. A group first seen in the last ${number(NEW_EXCEPTION_HOURS)} hours is marked ${NEW_EXCEPTION_MARKER}.`,
     "",
     table(
       [
@@ -483,6 +515,8 @@ function exceptionSection(exceptions) {
         "People",
         "Library",
         "App version",
+        "First seen",
+        "Last seen",
       ],
       rows,
       "No exceptions in the window.",
@@ -527,6 +561,6 @@ export function buildReport({
     "",
     propertySection(summary, funnelEvents),
     "",
-    exceptionSection(exceptions),
+    exceptionSection(exceptions, generatedAt),
   ].join("\n");
 }

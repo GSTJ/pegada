@@ -91,6 +91,21 @@ function fakeWorld({ existingComment = null } = {}) {
           results: [[name.includes("previous") ? 160 : 200]],
         });
       }
+      if (name.endsWith("reengagement cron runs")) {
+        return json({
+          columns: [
+            "runs",
+            "last_run_at",
+            "last_users_in_weekly_floor",
+            "last_candidates",
+            "last_sent",
+            "last_suppressed",
+            "candidates",
+            "sent",
+          ],
+          results: [[168, "2026-09-02 11:00:00", 512, 3, 1, 2, 24, 9]],
+        });
+      }
       if (name.endsWith("deck supply")) {
         return json({
           columns: [
@@ -176,7 +191,7 @@ test("a dry run renders the comment and never touches GitHub", async () => {
 test("one query goes out per metric block", async () => {
   const fetchImpl = fakeWorld();
   await runDailyMetrics({ argv: ["--dry-run"], env: ENV, fetchImpl, now: NOW });
-  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 8);
+  assert.equal(fetchImpl.calls.length, BREAKDOWNS.length + 9);
 });
 
 test("both push return windows are asked for separately and land in the table", async () => {
@@ -311,4 +326,23 @@ test("the readout carries the updates in use through to the comment", async () =
   );
   assert.ok(query, "the readout never asked PostHog which updates are in use");
   assert.match(query.body.query.query, /properties\.ota_update_id/);
+});
+
+test("the cron heartbeat reaches the push section", async () => {
+  const fetchImpl = fakeWorld();
+  const result = await runDailyMetrics({
+    argv: ["--dry-run"],
+    env: ENV,
+    fetchImpl,
+    now: NOW,
+  });
+
+  const call = fetchImpl.calls.find((entry) =>
+    entry.body?.name?.endsWith("reengagement cron runs"),
+  );
+  assert.match(call.body.query.query, /AND event = 'Reengagement Cron Ran'/);
+  assert.match(result.body, /#### Reengagement cron/);
+  assert.match(result.body, /\| Last run \| 2026-09-02 11:00 UTC \|/);
+  assert.match(result.body, /\| Users in weekly floor \(last run\) \| 512 \|/);
+  assert.match(result.body, /\| Sent \(last 7 days\) \| 9 \|/);
 });

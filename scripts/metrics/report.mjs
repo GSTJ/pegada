@@ -16,6 +16,7 @@ import {
   PUSH_RETURN_WINDOW_MINUTES,
   STORE_BUILD_COVERAGE,
 } from "./queries.mjs";
+import { utcMoment, utcStamp } from "./timestamps.mjs";
 
 export const COMMENT_MARKER = "<!-- pegada-daily-metrics -->";
 
@@ -23,10 +24,6 @@ const MAX_BREAKDOWN_ROWS = 12;
 
 function number(value) {
   return Number(value ?? 0).toLocaleString("en-US");
-}
-
-function utcStamp(date) {
-  return `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`;
 }
 
 /**
@@ -268,29 +265,6 @@ function breakdownTable(
 const MAX_OTA_ROWS = 12;
 
 /**
- * `min(timestamp)` comes back in whatever shape the transport chose: a string
- * from the query API, a `Date` from a replayed fixture. Both become the same
- * minute stamp, and anything else becomes a dash rather than `Invalid Date`.
- *
- * ClickHouse writes `2026-09-02 06:45:00` with no zone, and `new Date` reads
- * that as local time. On a machine in Sao Paulo that silently moves every row
- * three hours, which is exactly the resolution the "did it arrive today"
- * question is asked at, so the zone is spelled out before parsing.
- */
-function firstSeen(value) {
-  if (value === null || value === undefined || value === "") {
-    return "-";
-  }
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? "-" : utcStamp(value);
-  }
-  const text = String(value).trim().replace(" ", "T");
-  const zoned = /(Z|[+-]\d{2}:?\d{2})$/.test(text) ? text : `${text}Z`;
-  const date = new Date(zoned);
-  return Number.isNaN(date.getTime()) ? "-" : utcStamp(date);
-}
-
-/**
  * Which update the app is running, per runtime.
  *
  * The row that matters on a backport day is a runtime the store build is on
@@ -302,7 +276,7 @@ function firstSeen(value) {
 export function otaUpdatesTable(rows, { limit = MAX_OTA_ROWS } = {}) {
   const ordered = (rows ?? [])
     .map((row) => ({
-      firstSeen: firstSeen(row.first_seen),
+      firstSeen: utcMoment(row.first_seen),
       launchedFrom: row.launched_from || OTA_UNKNOWN_BUCKET,
       people: Number(row.people ?? 0),
       runtime: row.runtime_version || OTA_UNKNOWN_BUCKET,
@@ -327,6 +301,64 @@ export function otaUpdatesTable(rows, { limit = MAX_OTA_ROWS } = {}) {
       (row) =>
         `| ${row.runtime} | ${row.update} | ${row.launchedFrom} | ${number(row.people)} | ${row.firstSeen} |`,
     ),
+  ].join("\n");
+}
+
+/**
+ * What an empty heartbeat means, which is the one reading the table cannot
+ * print as a number.
+ *
+ * The cron reports one row an hour whatever it decides, so no rows at all is
+ * the job itself rather than a week when nobody was due a nudge.
+ */
+export const CRON_SILENT_LINE =
+  "No cron run reported in the last 7 days. The job sends one row an hour whatever it decides, so nothing here is the cron rather than a quiet week.";
+
+/**
+ * What the readings mean, said once under the table.
+ *
+ * The point of the whole section is that the push rows above it can read zero
+ * for two opposite reasons, so the note names both rather than leaving the
+ * reader to work out which one they are looking at.
+ */
+export const CRON_SOURCE_NOTE =
+  "The cron reports one row an hour. Users in weekly floor is how many people had already been notified inside the last week when it last ran, and they are never candidates, so a large floor next to zero sends is the cadence holding people rather than a broken job. A last run several hours old is the job.";
+
+/**
+ * The reengagement cron heartbeat.
+ *
+ * The last run rather than a window average, because the floor is a level: the
+ * count of people it was holding on Tuesday says nothing about today. The two
+ * sums beside it are flows, so they cover the same seven days as everything
+ * else in the readout.
+ */
+export function reengagementCronTable(rows) {
+  const row = rows?.[0];
+  const runs = Number(row?.runs ?? 0);
+  if (!row || runs === 0) {
+    return CRON_SILENT_LINE;
+  }
+
+  // The counts cross the wire as JSON and come back through `sum`, so they
+  // arrive as floats. They are counts of people, so they are printed as whole
+  // numbers rather than with a stray decimal.
+  const count = (value) => number(Math.round(Number(value ?? 0)));
+
+  const readings = [
+    ["Last run", utcMoment(row.last_run_at)],
+    ["Runs in the last 7 days", number(runs)],
+    ["Users in weekly floor (last run)", count(row.last_users_in_weekly_floor)],
+    ["Candidates (last run)", count(row.last_candidates)],
+    ["Sent (last run)", count(row.last_sent)],
+    ["Suppressed (last run)", count(row.last_suppressed)],
+    ["Candidates (last 7 days)", count(row.candidates)],
+    ["Sent (last 7 days)", count(row.sent)],
+  ];
+
+  return [
+    "| Reading | Value |",
+    "| --- | ---: |",
+    ...readings.map(([label, value]) => `| ${label} | ${value} |`),
   ].join("\n");
 }
 
@@ -375,6 +407,7 @@ export function noCityLine(rows, activeCurrent, activePrevious) {
  * @param {Array} input.activeUsersByCity rows from the city split
  * @param {Array} input.activeUsersByVersion rows from the version split
  * @param {Record<string, Array>} input.breakdowns rows per breakdown id
+ * @param {Array} input.cronRun the one row heartbeat of the reengagement cron
  * @param {Array} input.deckSupply rows from the deck supply query, one per window
  * @param {Date} input.generatedAt when the job ran
  * @param {Array} input.otaUpdates rows from the over the air update split
@@ -387,6 +420,7 @@ export function buildReport({
   activeUsersByCity,
   activeUsersByVersion,
   breakdowns,
+  cronRun = [],
   deckSupply,
   generatedAt,
   otaUpdates,
@@ -575,6 +609,12 @@ export function buildReport({
     "### Push",
     "",
     push,
+    "",
+    "#### Reengagement cron",
+    "",
+    reengagementCronTable(cronRun),
+    "",
+    CRON_SOURCE_NOTE,
     "",
     coverageNote(),
     "",
