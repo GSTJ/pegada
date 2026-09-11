@@ -42,7 +42,7 @@
     "magic-observability": "1.0.0",
     "posthog-node": "^5.39.4",
     "semver": "^7.8.5",
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.4",
     "superjson": "^2.2.6",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
