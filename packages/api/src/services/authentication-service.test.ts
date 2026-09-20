@@ -12,6 +12,8 @@ jest.mock("../errors/errors", () => ({
   errorDebug: () => undefined,
 }));
 
+jest.mock("../queue/enqueue", () => ({ enqueue: jest.fn() }));
+
 afterAll(async () => {
   await prisma.$disconnect();
 });
@@ -50,6 +52,53 @@ describe("AuthenticationService.checkVerification", () => {
     await expect(
       prisma.user.findUnique({ where: { id: user.id } }),
     ).resolves.toMatchObject({ code: null, codeExpiresAt: null });
+  });
+
+  it("locks a code out after too many wrong guesses, even against the right code", async () => {
+    const user = await seedCode();
+
+    for (
+      let attempt = 0;
+      attempt < AuthenticationService.MAX_CODE_ATTEMPTS;
+      attempt += 1
+    ) {
+      // oxlint-disable-next-line no-await-in-loop -- Each guess has to land before the next one, or the attempt count is racy.
+      await expect(
+        AuthenticationService.checkVerification({
+          email: user.email,
+          code: "000000",
+        }),
+      ).rejects.toThrow("Invalid OTP code");
+    }
+
+    await expect(
+      prisma.user.findUnique({ where: { id: user.id } }),
+    ).resolves.toMatchObject({
+      codeAttempts: AuthenticationService.MAX_CODE_ATTEMPTS,
+    });
+
+    // The real code still fails: the cap already used up every guess.
+    await expect(
+      AuthenticationService.checkVerification({
+        email: user.email,
+        code: "123456",
+      }),
+    ).rejects.toThrow("Invalid OTP code");
+  });
+
+  it("resets the attempt count when a fresh code is sent", async () => {
+    const user = await seedCode();
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { codeAttempts: AuthenticationService.MAX_CODE_ATTEMPTS },
+    });
+
+    await new AuthenticationService({}).sendVerification(user.email);
+
+    await expect(
+      prisma.user.findUnique({ where: { id: user.id } }),
+    ).resolves.toMatchObject({ codeAttempts: 0 });
   });
 
   it("lets only one concurrent request consume each issued OTP", async () => {

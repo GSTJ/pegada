@@ -77,6 +77,10 @@ model User {
   longitude     Float?
   code          String?
   codeExpiresAt DateTime?
+  /// Wrong guesses against the current `code`, capped by
+  /// AuthenticationService.MAX_CODE_ATTEMPTS. Reset to 0 whenever a fresh
+  /// code is issued.
+  codeAttempts  Int       @default(0)
 
   // Push notifications
   pushToken String?
