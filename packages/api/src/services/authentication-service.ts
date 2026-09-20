@@ -89,6 +89,14 @@ const purgeUserByEmail = async (email: string): Promise<void> => {
 };
 
 export class AuthenticationService {
+  /**
+   * Wrong guesses a single code tolerates before it is locked out, forcing a
+   * fresh `sendVerification` call. A code is 6 digits and lives for an hour,
+   * so with no cap it was brute-forceable by anyone who could spread requests
+   * across enough IPs to outrun the per-IP limiter in `apps/nextjs`.
+   */
+  static readonly MAX_CODE_ATTEMPTS = 5;
+
   language?: Language;
 
   constructor(props: { language?: Language }) {
@@ -188,7 +196,7 @@ export class AuthenticationService {
 
     const user = await prisma.user.upsert({
       where: { email },
-      update: { code, codeExpiresAt: expiresAt },
+      update: { code, codeExpiresAt: expiresAt, codeAttempts: 0 },
       create: {
         email,
         code,
@@ -246,7 +254,10 @@ export class AuthenticationService {
 
     // Prisma 5 splits updateMany into a matching SELECT followed by an UPDATE
     // by ID. Keep the OTP predicate on the write so PostgreSQL rechecks it
-    // after taking the row lock when two requests arrive together.
+    // after taking the row lock when two requests arrive together. The
+    // attempts cap sits in the same WHERE, so a code that is out of guesses
+    // is rejected even when the right one finally comes through. The
+    // caller has to request a fresh code instead.
     const consumed = await prisma.$executeRaw`
       UPDATE "User"
       SET
@@ -256,9 +267,26 @@ export class AuthenticationService {
       WHERE "email" = ${email}
         AND "code" = ${code}
         AND "codeExpiresAt" >= CURRENT_TIMESTAMP
+        AND "codeAttempts" < ${AuthenticationService.MAX_CODE_ATTEMPTS}
     `;
 
-    if (consumed !== 1) throw new InvalidOTPCodeError();
+    if (consumed !== 1) {
+      // Count the miss. Scoped to an unexpired code so a guess against an
+      // already-dead code (or a made-up email) never writes anything.
+      // `LEAST` keeps the column from climbing past the cap across repeated
+      // failed requests.
+      await prisma.$executeRaw`
+        UPDATE "User"
+        SET "codeAttempts" = LEAST(
+          "codeAttempts" + 1,
+          ${AuthenticationService.MAX_CODE_ATTEMPTS}
+        )
+        WHERE "email" = ${email}
+          AND "codeExpiresAt" >= CURRENT_TIMESTAMP
+      `;
+
+      throw new InvalidOTPCodeError();
+    }
 
     return true;
   }
