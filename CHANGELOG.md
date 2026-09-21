@@ -2,6 +2,75 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## v1.7.3 (2026-09-21)
+
+### Features
+
+- **api:** make the free daily like limit configurable ([`ab27f37`](https://github.com/GSTJ/pegada/commit/ab27f3777e1273b93cc036c03361ec61367f00dd))
+- **ci:** explain push silence and date exceptions in the readouts ([`5afb1e8`](https://github.com/GSTJ/pegada/commit/5afb1e8723a285ee70f9e6cc93fa63db489f2967))
+- **mobile:** tag analytics with the running update ([`7d4661b`](https://github.com/GSTJ/pegada/commit/7d4661b17dc4151fd6a9759a67f736d3c7c37a41))
+- **api:** record reports instead of opening a mail draft ([`89c1416`](https://github.com/GSTJ/pegada/commit/89c14164a6051b77908488ff7b01fcbfcf6d24e1))
+- **ci:** add push suppression and deck supply rows to the daily readout ([`560f943`](https://github.com/GSTJ/pegada/commit/560f943becdf827d4aeadca4c4a94b9aff5778f1))
+- minimum app version per platform ([`5034bdc`](https://github.com/GSTJ/pegada/commit/5034bdca1b3675ff05568ffee365ee88a686810e))
+- **ci:** show active users by city in the daily readout ([`94740fd`](https://github.com/GSTJ/pegada/commit/94740fd73f18f09d09748fc8e0c122090feea2e7))
+- **api:** refill short decks with fallback tiers and a Deck Served event ([`793b9dc`](https://github.com/GSTJ/pegada/commit/793b9dc0d0d1e7339d61f28633ba5237da5c4549))
+- **ci:** split subscription events by product in the daily readout ([`2a2d3e8`](https://github.com/GSTJ/pegada/commit/2a2d3e8d050bc054b847f05f5df047d5efdc1394))
+- **mobile:** support a weekly plan and price aware savings copy ([`49a366e`](https://github.com/GSTJ/pegada/commit/49a366e7caec927ce27db8f9f2cac59ac91ed660))
+- **api:** back off reengagement pushes progressively per user ([`048f693`](https://github.com/GSTJ/pegada/commit/048f693b7655beecef1b018e0d0bbd34bf2d735b))
+- **ci:** paywall trigger and subscription period breakdowns in the daily readout ([`51cda1b`](https://github.com/GSTJ/pegada/commit/51cda1b14a9adc73fd29a79fe0c31a790780fc07))
+- **ci:** events audit readout on the tracking issue ([`1e5dc6a`](https://github.com/GSTJ/pegada/commit/1e5dc6a6e855ee42aa157781bffea786a40987ab))
+- **ci:** attribute returns to reengagement pushes in the daily readout ([`48ad0fa`](https://github.com/GSTJ/pegada/commit/48ad0fae4fae31063159a8cdab04d48fedde3c1a))
+- **ci:** daily metrics readout on the tracking issue ([`86b2d6c`](https://github.com/GSTJ/pegada/commit/86b2d6c90b3a6e074f2dfbd8c71d269cf0157129))
+- **api:** image moderation through the AI SDK ([`0d5bdbd`](https://github.com/GSTJ/pegada/commit/0d5bdbd9cf342d118291f457972dffae542b78c0))
+- **mobile:** redesign the story card with the DM aberta and rolê ticket concepts ([`cc4d1c6`](https://github.com/GSTJ/pegada/commit/cc4d1c6d55c7838763768b47a278759be3142e0f))
+
+### Fixes
+
+- **mobile:** decouple the OTA runtime from the app version ([#303](https://github.com/GSTJ/pegada/pull/303)) ([`1e4cc53`](https://github.com/GSTJ/pegada/commit/1e4cc538aaf570e8ec0b2b31222164074e65c143))
+- **api:** lock OTP codes out after too many wrong guesses ([#302](https://github.com/GSTJ/pegada/pull/302)) ([`5a26b59`](https://github.com/GSTJ/pegada/commit/5a26b59c251b64aeabbce63210c24c9df28cef88))
+- **deps:** patch next, sharp and the transitive Dependabot criticals ([#301](https://github.com/GSTJ/pegada/pull/301)) ([`aaaa6a6`](https://github.com/GSTJ/pegada/commit/aaaa6a6ccb7de9470bb719a013ac6f6ebd90a88e))
+- **api:** account for every reengagement candidate ([`bad601b`](https://github.com/GSTJ/pegada/commit/bad601b2eb731f5a472494df7c6779e7e18da283))
+- **api:** await every seeded dog in the suggestion preference tests ([`f16737b`](https://github.com/GSTJ/pegada/commit/f16737b52e9db4c9a31df2d28f54cb50195cad27))
+- **api:** stop the subscriptions webhook credential expiring on its own ([`43e331c`](https://github.com/GSTJ/pegada/commit/43e331cedb719893cfaae38b25eea275da6d5cc3))
+- **ci:** show what upgrades bought and where subscription events go missing ([`e744fe0`](https://github.com/GSTJ/pegada/commit/e744fe037509274a1389fa92ebd021f81a61f940))
+- **api:** accept real match ids in the chat routes ([`9d635a9`](https://github.com/GSTJ/pegada/commit/9d635a95471445ebbe2d239d2cfa64a2903529aa))
+- **api:** moderate photos with a model the API key can call ([`32e4aec`](https://github.com/GSTJ/pegada/commit/32e4aec457e7af029de2670d4b5a5d10c49c43fa))
+- **api:** report every reengagement cron run, not only the daily slot ([`59a9c9d`](https://github.com/GSTJ/pegada/commit/59a9c9dff84dc5d22ac51e1266fe8f6ba9658b41))
+- **mobile:** look again when the keychain is not ready at launch ([`2fe092b`](https://github.com/GSTJ/pegada/commit/2fe092b4e1250ea9f53b6abba310127ed90cd153))
+- **api:** let profile photos outlive a slow first form ([`08819e1`](https://github.com/GSTJ/pegada/commit/08819e1c6098979208329bca485c283709abf21c))
+- **mobile:** keep a signed in user out of the sign in loop ([`9b11884`](https://github.com/GSTJ/pegada/commit/9b118844698583ab3d03c55422729f2262e6a3fb))
+- **web:** bundle the Gilroy fonts with the image routes ([`2004bfa`](https://github.com/GSTJ/pegada/commit/2004bfa7990f697405b85514e5c622cfd97e4559))
+- **api:** prune dead push tokens and stop retrying them ([`a2a5f9d`](https://github.com/GSTJ/pegada/commit/a2a5f9df2f5dbb7f18398952817dacc467eefb1f))
+- **ci:** read exception names from the exception list in the events audit ([`b2fef42`](https://github.com/GSTJ/pegada/commit/b2fef42951575d78e383163a14692ad7cd744163))
+- **ci:** correct the store build coverage note and audit exceptions ([`2b52a21`](https://github.com/GSTJ/pegada/commit/2b52a21cffe972faf32dbcdf2f562a5d9a2491e9))
+- **api:** let the moderation mode alone decide whether photos are checked ([`0019875`](https://github.com/GSTJ/pegada/commit/001987571b7de0363e06decd993635a1128b370f))
+- **web:** correct type and lockup metrics on the dog share surfaces ([`43d5926`](https://github.com/GSTJ/pegada/commit/43d59264b5891c458278d5f4d35eab094a20ab2f))
+- **mobile:** story card pixel pass ([`5e86b5a`](https://github.com/GSTJ/pegada/commit/5e86b5ae811388747f933c2055dc1f7a1398a60a))
+- **web:** keep the well-known files on the apex when it stops redirecting ([`e197e5e`](https://github.com/GSTJ/pegada/commit/e197e5e02ad382eb3812fdc600984c1d83b31522))
+- **ci:** count active users from client events only in the daily readout ([`edd0656`](https://github.com/GSTJ/pegada/commit/edd065684a04ca123ecfff4022548702ca321455))
+- **web:** serve the real Apple team in the app site association ([`c69acd6`](https://github.com/GSTJ/pegada/commit/c69acd695829dfa28ba0d484b476af6a737a0081))
+- **web:** give the home page a Portuguese link preview ([`bb81316`](https://github.com/GSTJ/pegada/commit/bb81316714ba67a69a629a6029ded4eefd03ce8d))
+- **mobile:** quiet the empty deck down to one action ([`1008dcc`](https://github.com/GSTJ/pegada/commit/1008dcc3d9fd1e71d1c31aa852ffb4e2904e646c))
+- **database:** make the maestro seed idempotent ([`a5aac84`](https://github.com/GSTJ/pegada/commit/a5aac844efcaf6f54534f5a4c7c4b49bb0f5344a))
+- **shared:** put the Portuguese interface in sentence case ([`2211964`](https://github.com/GSTJ/pegada/commit/2211964e02726f4b436d9d7a6b3da7fe7304ea9b))
+- **mobile:** stop the sign in banner from cutting the hero headline ([`7dbdfaf`](https://github.com/GSTJ/pegada/commit/7dbdfaf0b2e864b84ad2eb44a9df8dec93688ed8))
+- **mobile:** make the empty deck reachable and its done state readable ([`1bbc96e`](https://github.com/GSTJ/pegada/commit/1bbc96edb9aaba9d528c7fd9d642681eb2d77400))
+- **api:** hold every re-engagement push to the local evening window ([`9dd5eee`](https://github.com/GSTJ/pegada/commit/9dd5eeeaf47ea6c63ef4d5f5164139e7b041089e))
+- **web:** send the story page to the store instead of a waitlist ([`1a5a3f2`](https://github.com/GSTJ/pegada/commit/1a5a3f2cb4a41cc615e4a8a79e14b9ce28549226))
+- **web:** localize the 404 and put it on the theme palette ([`0afe3d3`](https://github.com/GSTJ/pegada/commit/0afe3d35d314cd22230c5118d5b17c2950fafc5f))
+- **web:** restore the dog share card's link preview ([`d1a5dfc`](https://github.com/GSTJ/pegada/commit/d1a5dfc525618116559c881b222ed23bb5e1250d))
+- **nextjs:** serve the Play app signing key in assetlinks ([`9b2cf0f`](https://github.com/GSTJ/pegada/commit/9b2cf0f7b29bc57d595e87678f56799ce5570b0b))
+
+### Tests
+
+- **api:** pin the reengagement suite to one clock ([`b98cc7f`](https://github.com/GSTJ/pegada/commit/b98cc7f8cd1895ee4af6f51528348d23cfbc1388))
+
+### Chores
+
+- **ci:** run the daily readouts earlier so they land before the morning check ([`fb10910`](https://github.com/GSTJ/pegada/commit/fb10910a1d354cc65d019b5ecf2bc6061d29d525))
+
+[Full diff](https://github.com/GSTJ/pegada/compare/v1.7.2...v1.7.3)
+
 ## v1.7.2 (2026-09-02)
 
 ### Features
