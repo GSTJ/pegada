@@ -38,14 +38,31 @@ const posthogSourcemapPlugins: NonNullable<ExpoConfig["plugins"]> =
 
 const config: ExpoConfig = {
   /**
-   * Always update the version when making a native change
-   * That affects eas updates and makes sure the app doesn't
-   * break when updating Over The Air
+   * The store-facing marketing version. Bump this for every release --
+   * it's what shows up in the App Store/Play Store and what
+   * `scripts/tag-release.sh` tags -- native change or not.
+   *
+   * It used to double as the OTA runtime via `runtimeVersion: { policy:
+   * "appVersion" }`, which meant EVERY version bump (including a JS-only
+   * release with nothing native in it) moved the runtime and cut off every
+   * install still on the old one until a new store build reached them. That
+   * shipped v1.7.2's two security fixes to prod over OTA fine, but the next
+   * routine version bump would have stranded them for no reason.
+   *
+   * `runtimeVersion` below is now pinned on its own and only needs to move
+   * when a change actually requires a new native binary (new native module,
+   * config plugin, permission, entitlement -- see the process rule on #233).
    */
-  version: "1.7.2",
-  runtimeVersion: {
-    policy: "appVersion",
-  },
+  version: "1.7.3",
+  /**
+   * Pinned to what's already embedded in the last shipped binaries (Android
+   * 1.7.2 build 89 in Play production, iOS's most recent submission) so this
+   * value doesn't change just because `version` above does. Bump this only
+   * alongside an actual native-requiring change, and expect an
+   * `release/ota-<old-runtime>` backport branch (see `release/ota-1.6.2`)
+   * for whoever hasn't picked up the new binary yet.
+   */
+  runtimeVersion: "1.7.2",
   name: "Pegada",
   scheme: "pegada",
   slug: "pegada",
