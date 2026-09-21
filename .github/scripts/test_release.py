@@ -190,6 +190,42 @@ class ChangelogTest(GitRepositoryTest):
         self.assertIn("### Breaking changes", changelog)
         self.assertIn("Existing sessions need to sign in again.", changelog)
 
+    def test_breaking_change_footer_alone_is_detected_without_a_bang(self) -> None:
+        # Conventional commits spec: a `BREAKING CHANGE:` footer marks a
+        # breaking commit on its own, `feat!:`/`fix!:` is only the other way
+        # to say it. A subject with no `!` still has to surface here.
+        self.commit(
+            "feat(api): expire old sessions",
+            "BREAKING CHANGE: Existing sessions need to sign in again.",
+        )
+
+        changelog = self.changelog("--all", "--upcoming", "v2.0.0")
+        breaking = self.command(
+            sys.executable,
+            str(CHANGELOG_SCRIPT),
+            "--is-breaking",
+            "HEAD",
+            "--previous",
+            "v1.0.0",
+            check=False,
+        )
+
+        self.assertEqual(breaking.returncode, 0)
+        self.assertIn("### Breaking changes", changelog)
+        self.assertIn("Existing sessions need to sign in again.", changelog)
+
+    def test_hyphenated_breaking_change_footer_is_also_detected(self) -> None:
+        # `BREAKING-CHANGE:` is the spec's other spelling of the same footer.
+        self.commit(
+            "fix(api): drop the legacy token format",
+            "BREAKING-CHANGE: Old tokens stop validating.",
+        )
+
+        changelog = self.changelog("--all", "--upcoming", "v1.1.0")
+
+        self.assertIn("### Breaking changes", changelog)
+        self.assertIn("Old tokens stop validating.", changelog)
+
     def test_release_text_uses_plain_dashes(self) -> None:
         self.commit("fix: keep release notes readable \u2014 even from commit titles")
 
