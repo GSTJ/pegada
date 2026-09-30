@@ -4,21 +4,16 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
     "**/*.js",
     "**/*.ts",
     "**/*.tsx",
-    ".next-3020/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-3010/types/**/*.ts"
+    ".next-3020/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
