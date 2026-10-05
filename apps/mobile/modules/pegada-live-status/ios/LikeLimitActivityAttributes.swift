@@ -17,11 +17,11 @@ import Foundation
       var endDate: Date
     }
 
-    /// Localized title, provided by JS (e.g. "Likes recharging").
+    /// Localized title, provided by JS (e.g. "Free likes return in").
     var title: String
     /// Localized supporting line, provided by JS.
     var body: String
-    /// Localized label shown when the countdown has finished ("Likes are back!").
+    /// Localized label shown when the countdown has finished ("Likes are ready").
     var readyLabel: String
     /// Start of the 24h window, used to render determinate progress.
     var startDate: Date

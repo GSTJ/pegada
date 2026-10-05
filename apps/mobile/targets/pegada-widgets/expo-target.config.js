@@ -20,10 +20,15 @@ module.exports = {
   deploymentTarget: "16.2",
   frameworks: ["SwiftUI", "WidgetKit", "ActivityKit", "AppIntents"],
   colors: {
-    $accent: "#EE61A1",
-    $widgetBackground: { color: "#FFFFFF", darkColor: "#16151A" },
-    BrandPink: "#EE61A1",
-    PrimaryText: { color: "#1C1B1F", darkColor: "#F3F1F6" },
+    // The target plugin emits Display-P3 colorsets from numeric components.
+    // These values are the P3-mapped equivalents of the app's sRGB theme, so
+    // wide-gamut screens render the same intended colors instead of a more
+    // saturated approximation. The plugin's light/dark keys are required;
+    // `{ color, darkColor }` silently produces an empty colorset.
+    $accent: "rgb(222, 107, 160)",
+    $widgetBackground: { light: "rgb(255, 255, 255)", dark: "rgb(0, 0, 0)" },
+    BrandPink: { light: "rgb(222, 107, 160)", dark: "rgb(196, 97, 143)" },
+    PrimaryText: { light: "rgb(3, 8, 22)", dark: "rgb(242, 242, 242)" },
   },
   // App Groups shared with the main app; harmless for entries that don't
   // read the shared container.

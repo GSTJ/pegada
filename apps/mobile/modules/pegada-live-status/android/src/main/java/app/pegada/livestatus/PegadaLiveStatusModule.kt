@@ -29,17 +29,10 @@ class LiveStatusCountdownOptions : Record {
 }
 
 /**
- * Android side of the "live status" surface: a countdown notification for the
- * daily like limit.
- *
- * - Android 16+ (API 36, Baklava point release with Live Updates): posted as a
- *   promoted ongoing notification with `Notification.ProgressStyle`, which the
- *   system surfaces as a Live Update (status-bar chip + always-on lock-screen
- *   card) when the device supports it.
- * - Older versions: a plain, dismissable notification with a native
- *   chronometer countdown (auto-updating, no app process needed).
- *
- * Both variants auto-dismiss when the countdown ends via `setTimeoutAfter`.
+ * Quiet, dismissible countdown for the daily like limit on Android 8+. A
+ * like-refill wait does not meet Android's promoted Live Update criteria
+ * (ongoing, user-initiated and time-sensitive), so the system notification
+ * stays at low importance and auto-dismisses at the reset time.
  */
 class PegadaLiveStatusModule : Module() {
   private val context: Context
@@ -49,7 +42,8 @@ class PegadaLiveStatusModule : Module() {
     Name("PegadaLiveStatus")
 
     Function("isSupported") {
-      NotificationManagerCompat.from(context).areNotificationsEnabled()
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+        NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
     AsyncFunction("startLikeCountdown") { options: LiveStatusCountdownOptions ->
@@ -58,95 +52,80 @@ class PegadaLiveStatusModule : Module() {
 
     AsyncFunction("endLikeCountdown") {
       NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+      preferences.edit().remove(PREF_END_TIME).apply()
+    }
+
+    AsyncFunction("reconcileLikeCountdown") {
+      reconcileCountdown()
     }
   }
 
-  private fun postCountdown(options: LiveStatusCountdownOptions) {
+  private val preferences
+    get() = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+  private fun postCountdown(options: LiveStatusCountdownOptions): Boolean {
+    // Notification timeout cleanup and channels both require Android 8.
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+
     val manager = NotificationManagerCompat.from(context)
     // Notification permission is requested by the app's regular push flow;
     // if the user said no, quietly do nothing.
-    if (!manager.areNotificationsEnabled()) return
+    if (!manager.areNotificationsEnabled()) return false
 
     val now = System.currentTimeMillis()
     val endMillis = options.endTimeMillis.toLong()
-    if (endMillis <= now) return
-    val startMillis = options.startTimeMillis.toLong().coerceAtMost(now)
+    if (endMillis <= now) return false
 
     ensureChannel(options.channelName)
-
-    val notification =
-      if (supportsLiveUpdates()) {
-        buildPromotedNotification(options, startMillis, endMillis, now)
-      } else {
-        buildFallbackNotification(options, endMillis, now)
-      }
-
-    manager.notify(NOTIFICATION_ID, notification)
+    val notification = buildCountdownNotification(options, endMillis, now)
+    try {
+      manager.notify(NOTIFICATION_ID, notification)
+    } catch (_: SecurityException) {
+      // Notification permission can be revoked between the check above and
+      // posting. Keep a settings change from crashing a blocked swipe.
+      return false
+    }
+    preferences.edit().putLong(PREF_END_TIME, endMillis).apply()
+    return true
   }
 
-  /**
-   * Live Update (Android 16+): promoted ongoing notification with determinate
-   * ProgressStyle across the 24h window plus a chronometer countdown.
-   */
-  private fun buildPromotedNotification(
-    options: LiveStatusCountdownOptions,
-    startMillis: Long,
-    endMillis: Long,
-    now: Long,
-  ): Notification {
-    val total = (endMillis - startMillis).coerceAtLeast(1L)
-    val elapsed = (now - startMillis).coerceIn(0L, total)
-    // 24h in ms overflows nothing: fits comfortably in Int.
-    val progressStyle =
-      Notification.ProgressStyle()
-        .setStyledByProgress(false)
-        .setProgressSegments(
-          listOf(Notification.ProgressStyle.Segment(total.toInt()).setColor(BRAND_COLOR)),
-        )
-        .setProgress(elapsed.toInt())
-
-    return Notification.Builder(context, CHANNEL_ID)
-      .setSmallIcon(context.applicationInfo.icon)
-      .setContentTitle(options.title)
-      .setContentText(options.body)
-      .setContentIntent(buildContentIntent(options.deepLink))
-      .setStyle(progressStyle)
-      .setColor(BRAND_COLOR)
-      .setOngoing(true)
-      .setOnlyAlertOnce(true)
-      .setShowWhen(true)
-      .setWhen(endMillis)
-      .setUsesChronometer(true)
-      .setChronometerCountDown(true)
-      .setTimeoutAfter(endMillis - now)
-      .setRequestPromotedOngoing(true)
-      .build()
-  }
-
-  /**
-   * Pre-Android-16 fallback: a regular, dismissable notification whose
-   * chronometer counts down natively without waking the app.
-   */
-  private fun buildFallbackNotification(
+  private fun buildCountdownNotification(
     options: LiveStatusCountdownOptions,
     endMillis: Long,
     now: Long,
   ): Notification {
     return NotificationCompat.Builder(context, CHANNEL_ID)
-      .setSmallIcon(context.applicationInfo.icon)
+      .setSmallIcon(R.drawable.ic_like_status)
       .setContentTitle(options.title)
       .setContentText(options.body)
       .setContentIntent(buildContentIntent(options.deepLink))
       .setColor(BRAND_COLOR)
       .setOngoing(false)
+      .setAutoCancel(true)
+      .setCategory(NotificationCompat.CATEGORY_STATUS)
+      .setSilent(true)
       .setOnlyAlertOnce(true)
       .setShowWhen(true)
       .setWhen(endMillis)
       .setUsesChronometer(true)
       .setChronometerCountDown(true)
       .setTimeoutAfter(endMillis - now)
-      .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+      .setPriority(NotificationCompat.PRIORITY_LOW)
       .build()
+  }
+
+  private fun reconcileCountdown(): Double? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      preferences.edit().remove(PREF_END_TIME).apply()
+      return null
+    }
+
+    val endMillis = preferences.getLong(PREF_END_TIME, 0L)
+    if (endMillis > System.currentTimeMillis()) return endMillis.toDouble()
+
+    NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+    preferences.edit().remove(PREF_END_TIME).apply()
+    return null
   }
 
   private fun buildContentIntent(deepLink: String): PendingIntent? {
@@ -165,12 +144,14 @@ class PegadaLiveStatusModule : Module() {
   }
 
   private fun ensureChannel(channelName: String) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
     val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channel =
       NotificationChannel(
         CHANNEL_ID,
         channelName.ifEmpty { CHANNEL_ID },
-        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationManager.IMPORTANCE_LOW,
       ).apply {
         setSound(null, null)
         enableVibration(false)
@@ -178,24 +159,11 @@ class PegadaLiveStatusModule : Module() {
     manager.createNotificationChannel(channel)
   }
 
-  /**
-   * Live Updates (promoted notifications) shipped in the Android 16 minor
-   * release: API 36.1 / `VERSION_CODES_FULL.BAKLAVA_1`. The plain API 36
-   * android.jar doesn't even have `setRequestPromotedOngoing`, hence the
-   * `SDK_INT_FULL` gate (safe: `SDK_INT_FULL` itself exists since API 36,
-   * and `BAKLAVA_1` is a compile-time constant that gets inlined).
-   */
-  private fun supportsLiveUpdates(): Boolean {
-    if (Build.VERSION.SDK_INT < 36) return false
-    if (Build.VERSION.SDK_INT_FULL < Build.VERSION_CODES_FULL.BAKLAVA_1) return false
-
-    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    return manager.canPostPromotedNotifications()
-  }
-
   companion object {
     private const val CHANNEL_ID = "live-status"
     private const val NOTIFICATION_ID = 0x1157 // "LIST", live status
+    private const val PREFS_NAME = "pegada-live-status"
+    private const val PREF_END_TIME = "like-limit-end-time"
     private val BRAND_COLOR = Color.parseColor("#EE61A1")
   }
 }

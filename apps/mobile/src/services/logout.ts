@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
+import { endLikeLimitLiveStatus } from "@/services/liveStatus";
 import { payments } from "@/services/payments";
 import { queryClient } from "@/services/queryClient";
 import { store } from "@/store";
@@ -12,6 +13,7 @@ import { deleteData, StorageKeys } from "./storage";
 export const logout = async () => {
   try {
     setInitialNotification(undefined);
+    await endLikeLimitLiveStatus();
 
     await deleteData(StorageKeys.Token);
 

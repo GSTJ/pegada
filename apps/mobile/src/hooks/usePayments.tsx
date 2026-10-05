@@ -3,6 +3,7 @@ import { CustomerInfo, PurchasesPackage } from "react-native-purchases";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { identifyUser } from "@/services/getInitialRouteName";
+import { endLikeLimitLiveStatus } from "@/services/liveStatus";
 import { PaymentCacheKey, payments, UserPlan } from "@/services/payments";
 import { queryClient } from "@/services/queryClient";
 
@@ -109,6 +110,10 @@ payments.init();
 try {
   payments.addCustomerInfoUpdateListener(async (customerInfo: CustomerInfo) => {
     queryClient.setQueryData([PaymentCacheKey.CustomerInfo], customerInfo);
+
+    if (payments.getPlan(customerInfo)?.userPlan === UserPlan.Premium) {
+      await endLikeLimitLiveStatus();
+    }
   });
 } catch {
   // Listener attach failed (e.g. RC not configured because of stub API key). Safe to ignore.

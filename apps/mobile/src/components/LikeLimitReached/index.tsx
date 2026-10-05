@@ -8,11 +8,7 @@ import { FREE_DAILY_SWIPE_LIMIT } from "@pegada/shared/constants/constants";
 
 import { Description, OkButton, Title } from "@/components/DefaultModal/styles";
 import { Container, CountdownContainer, Header } from "@/components/LikeLimitReached/styles";
-import {
-  LikeLimitReachedProps,
-  useCountdown,
-  ZERO_TIME_LEFT,
-} from "@/components/LikeLimitReached/useCountdown";
+import { LikeLimitReachedProps, useCountdown } from "@/components/LikeLimitReached/useCountdown";
 import { CloseIcon } from "@/components/Picker/styles";
 import { Text } from "@/components/Text";
 import { useEligibleForTrial } from "@/hooks/usePayments";
@@ -21,7 +17,7 @@ import { SceneName } from "@/types/SceneName";
 import { CloseButton } from "@/views/UpgradeWall/styles";
 
 const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt }) => {
-  const timeLeft = useCountdown(likeLimitResetAt);
+  const { isExpired, timeLeft } = useCountdown(likeLimitResetAt);
   const { t } = useTranslation();
   const router = useRouter();
   const { hide } = useMagicModal();
@@ -30,10 +26,10 @@ const LikeLimitReached: React.FC<LikeLimitReachedProps> = ({ likeLimitResetAt })
 
   useEffect(() => {
     // Hide the modal when the time is up
-    if (timeLeft === ZERO_TIME_LEFT) {
+    if (isExpired) {
       hide();
     }
-  }, [hide, timeLeft]);
+  }, [hide, isExpired]);
 
   return (
     <Container>

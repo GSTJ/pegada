@@ -47,9 +47,12 @@ function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.req
       yield call(getTrcpContext().match.getAll.invalidate);
     }
 
-    // A successful swipe means the like limit is no longer active, take
-    // down the countdown Live Activity/notification if one is up.
-    yield call(endLikeLimitLiveStatus);
+    // A successful like/maybe proves the limit is no longer active (the
+    // window expired or the user upgraded). A dislike is always allowed and
+    // must not tear down a still-valid countdown.
+    if (_swipeType !== Swipe.Dislike) {
+      yield call(endLikeLimitLiveStatus);
+    }
 
     yield put(Actions.dogs.swipe.success());
   } catch (err: any) {
@@ -58,7 +61,7 @@ function* swipeUserRequest({ payload }: ActionType<typeof Actions.dogs.swipe.req
       const { likeLimitResetAt } = likeLimitReachedError;
       showLikeLimitReached({ likeLimitResetAt });
       // Glanceable countdown outside the app: Dynamic Island/lock screen on
-      // iOS, (promoted) countdown notification on Android.
+      // iOS, quiet native countdown notification on Android.
       yield call(startLikeLimitLiveStatus, likeLimitResetAt);
       yield put(Actions.dogs.swipe.failure({ likeLimitResetAt }));
       return;

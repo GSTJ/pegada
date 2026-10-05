@@ -1,7 +1,7 @@
 import { requireOptionalNativeModule } from "expo-modules-core";
 
 export interface LiveStatusCountdownOptions {
-  /** Localized title, e.g. "Likes recharging" */
+  /** Localized title, e.g. "Free likes return in" */
   title: string;
   /** Localized supporting line shown under the title */
   body: string;
@@ -20,16 +20,18 @@ export interface LiveStatusCountdownOptions {
 interface PegadaLiveStatusModule {
   /**
    * iOS: true on iOS 16.2+ when the user hasn't disabled Live Activities.
-   * Android: true when the app is allowed to post notifications.
+   * Android: true on Android 8+ when the app can post notifications.
    */
   isSupported(): boolean;
-  startLikeCountdown(options: LiveStatusCountdownOptions): Promise<void>;
+  startLikeCountdown(options: LiveStatusCountdownOptions): Promise<boolean>;
   endLikeCountdown(): Promise<void>;
+  /** Restores a future countdown and removes native state that already expired. */
+  reconcileLikeCountdown(): Promise<number | null>;
 }
 
 /**
  * Native "live status" surface: an ActivityKit Live Activity (Dynamic Island +
- * lock screen) on iOS, a promoted/ongoing countdown notification on Android.
- * Null when the native module isn't present (e.g. Expo Go).
+ * lock screen) on iOS, or a quiet countdown notification on Android. Null when
+ * the native module isn't present (e.g. Expo Go).
  */
 export default requireOptionalNativeModule<PegadaLiveStatusModule>("PegadaLiveStatus");

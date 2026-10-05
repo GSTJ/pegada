@@ -2,15 +2,9 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-// MARK: - Palette
-
 private enum Palette {
-  /// Pegada brand pink (#EE61A1).
-  static let pink = Color(red: 238 / 255, green: 97 / 255, blue: 161 / 255)
-  static let pinkSoft = pink.opacity(0.18)
+  static let pink = Color("BrandPink")
 }
-
-// MARK: - Widget
 
 struct LikeLimitLiveActivity: Widget {
   var body: some WidgetConfiguration {
@@ -20,20 +14,22 @@ struct LikeLimitLiveActivity: Widget {
     } dynamicIsland: { context in
       DynamicIsland {
         DynamicIslandExpandedRegion(.leading) {
-          PawBadge(size: 40)
+          StatusIcon(context: context, size: 28)
             .padding(.leading, 4)
+            .accessibilityHidden(true)
         }
         DynamicIslandExpandedRegion(.trailing) {
           CountdownText(context: context)
             .font(.title2.weight(.bold))
             .foregroundStyle(Palette.pink)
-            .frame(maxWidth: 72)
+            .frame(maxWidth: 76)
             .padding(.trailing, 4)
         }
         DynamicIslandExpandedRegion(.center) {
-          Text(context.attributes.title)
+          StatusTitle(context: context)
             .font(.headline)
             .lineLimit(1)
+            .accessibilityHidden(true)
         }
         DynamicIslandExpandedRegion(.bottom) {
           VStack(alignment: .leading, spacing: 6) {
@@ -46,16 +42,16 @@ struct LikeLimitLiveActivity: Widget {
           .padding(.horizontal, 4)
         }
       } compactLeading: {
-        Image(systemName: "pawprint.fill")
-          .foregroundStyle(Palette.pink)
+        StatusIcon(context: context, size: 16)
+          .accessibilityHidden(true)
       } compactTrailing: {
         CountdownText(context: context)
           .font(.caption2.weight(.semibold))
           .foregroundStyle(Palette.pink)
           .frame(maxWidth: 44)
       } minimal: {
-        Image(systemName: "pawprint.fill")
-          .foregroundStyle(Palette.pink)
+        StatusIcon(context: context, size: 16)
+          .accessibilityLabel(accessibilityStatus(for: context))
       }
       .widgetURL(deepLink(for: context))
       .keylineTint(Palette.pink)
@@ -67,19 +63,20 @@ struct LikeLimitLiveActivity: Widget {
   }
 }
 
-// MARK: - Lock screen / banner
-
 private struct LockScreenView: View {
   let context: ActivityViewContext<LikeLimitActivityAttributes>
 
   var body: some View {
     VStack(spacing: 12) {
       HStack(spacing: 12) {
-        PawBadge(size: 44)
+        StatusIcon(context: context, size: 28)
+          .frame(width: 40, height: 40)
+          .accessibilityHidden(true)
 
         VStack(alignment: .leading, spacing: 2) {
-          Text(context.attributes.title)
+          StatusTitle(context: context)
             .font(.headline)
+            .accessibilityHidden(true)
           Text(context.attributes.body)
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -90,68 +87,103 @@ private struct LockScreenView: View {
 
         CountdownText(context: context)
           .font(.title2.weight(.bold))
-          .monospacedDigit()
           .multilineTextAlignment(.trailing)
-          .frame(maxWidth: 84)
+          .frame(maxWidth: 88)
           .foregroundStyle(Palette.pink)
       }
 
       RechargeProgressBar(context: context)
     }
     .padding(16)
-    .activitySystemActionForegroundColor(Palette.pink)
   }
 }
 
-// MARK: - Pieces
-
-private struct PawBadge: View {
-  var size: CGFloat
+private struct StatusIcon: View {
+  let context: ActivityViewContext<LikeLimitActivityAttributes>
+  let size: CGFloat
 
   var body: some View {
-    ZStack {
-      Circle()
-        .fill(Palette.pinkSoft)
-      Image(systemName: "pawprint.fill")
-        .font(.system(size: size * 0.5, weight: .semibold))
-        .foregroundStyle(Palette.pink)
-    }
-    .frame(width: size, height: size)
+    Image(systemName: isReady(context) ? "checkmark.circle.fill" : "pawprint.fill")
+      .font(.system(size: size, weight: .semibold))
+      .foregroundStyle(Palette.pink)
   }
 }
 
-/// Auto-updating countdown; switches to the "ready" label once the
-/// activity goes stale (the timer ended while the app was closed).
+private struct StatusTitle: View {
+  let context: ActivityViewContext<LikeLimitActivityAttributes>
+
+  var body: some View {
+    Text(isReady(context) ? context.attributes.readyLabel : context.attributes.title)
+  }
+}
+
 private struct CountdownText: View {
   let context: ActivityViewContext<LikeLimitActivityAttributes>
 
   var body: some View {
-    if context.isStale || context.state.endDate <= Date() {
-      Text(context.attributes.readyLabel)
-        .font(.caption.weight(.semibold))
-        .minimumScaleFactor(0.6)
-    } else {
-      Text(timerInterval: Date()...context.state.endDate, countsDown: true)
-        .monospacedDigit()
+    let now = Date()
+    let ready = isReady(context, at: now)
+
+    Group {
+      if ready {
+        Image(systemName: "checkmark.circle.fill")
+          .accessibilityHidden(true)
+      } else {
+        Text(timerInterval: now...context.state.endDate, countsDown: true)
+          .monospacedDigit()
+      }
     }
+    .lineLimit(1)
+    .minimumScaleFactor(0.7)
+    .accessibilityLabel(accessibilityStatus(for: context, at: now))
+    .accessibilityValue(accessibilityCountdownValue(for: context, at: now))
   }
 }
 
-/// Determinate progress across the 24h like-limit window, animated by the
-/// system without any app process running.
 private struct RechargeProgressBar: View {
   let context: ActivityViewContext<LikeLimitActivityAttributes>
 
   var body: some View {
-    let end = max(context.state.endDate, context.attributes.startDate.addingTimeInterval(1))
+    let start = min(context.attributes.startDate, context.state.endDate)
+    let end = max(context.state.endDate, start.addingTimeInterval(1))
 
     ProgressView(
-      timerInterval: context.attributes.startDate...end,
+      timerInterval: start...end,
       countsDown: false,
       label: { EmptyView() },
       currentValueLabel: { EmptyView() }
     )
     .progressViewStyle(.linear)
     .tint(Palette.pink)
+    .accessibilityHidden(true)
   }
+}
+
+private func isReady(
+  _ context: ActivityViewContext<LikeLimitActivityAttributes>,
+  at date: Date = Date()
+) -> Bool {
+  context.isStale || context.state.endDate <= date
+}
+
+private func accessibilityStatus(
+  for context: ActivityViewContext<LikeLimitActivityAttributes>,
+  at date: Date = Date()
+) -> Text {
+  if isReady(context, at: date) {
+    return Text(context.attributes.readyLabel)
+  }
+
+  return Text(context.attributes.title)
+}
+
+private func accessibilityCountdownValue(
+  for context: ActivityViewContext<LikeLimitActivityAttributes>,
+  at date: Date = Date()
+) -> Text {
+  if isReady(context, at: date) {
+    return Text("")
+  }
+
+  return Text(timerInterval: date...context.state.endDate, countsDown: true)
 }

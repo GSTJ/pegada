@@ -8,10 +8,10 @@
     "getPremium": "Descubra o Premium"
   },
   "liveStatus": {
-    "title": "Curtidas recarregando",
-    "body": "Suas curtidas grátis voltam quando o tempo acabar",
-    "ready": "Curtidas de volta!",
-    "channelName": "Contagem do limite de curtidas"
+    "title": "Curtidas grátis em",
+    "body": "Toque para voltar a deslizar",
+    "ready": "Curtidas liberadas",
+    "channelName": "Contagem das curtidas grátis"
   },
   "appReview": {
     "areYouLikingTheAppModal": {

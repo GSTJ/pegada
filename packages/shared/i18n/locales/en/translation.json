@@ -8,10 +8,10 @@
     "getPremium": "Discover Premium"
   },
   "liveStatus": {
-    "title": "Likes recharging",
-    "body": "Your free likes come back when the timer ends",
-    "ready": "Likes are back!",
-    "channelName": "Like limit countdown"
+    "title": "Free likes return in",
+    "body": "Tap to return to swiping",
+    "ready": "Likes are ready",
+    "channelName": "Free like countdown"
   },
   "appReview": {
     "areYouLikingTheAppModal": {

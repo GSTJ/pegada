@@ -18,7 +18,9 @@ import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useTrackScreens } from "@/hooks/useTrackScreens";
 import { sendError } from "@/services/errorTracking";
 import { useGetInitialNotifications } from "@/services/linking";
+import { endLikeLimitLiveStatus, initializeLikeLimitLiveStatus } from "@/services/liveStatus";
 import { store } from "@/store";
+import { SceneName } from "@/types/SceneName";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);
@@ -39,6 +41,18 @@ const App = () => {
 
   useTrackScreens();
   useGetInitialNotifications();
+
+  useEffect(() => {
+    if (!initialRouteName) return;
+
+    if (initialRouteName === SceneName.Swipe) {
+      void initializeLikeLimitLiveStatus();
+    } else {
+      // Never keep another account's countdown on signed-out, setup, or
+      // forced-update surfaces where its Swipe deep link is not actionable.
+      void endLikeLimitLiveStatus();
+    }
+  }, [initialRouteName]);
 
   // MAESTRO_E2E only: render magic modals inside the main window instead
   // of RNScreens' FullWindowOverlay. The overlay is a separate native
