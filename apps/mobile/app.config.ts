@@ -306,6 +306,9 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    // Used by @bacons/apple-targets to sign the pegada-widgets/NSE extension
+    // targets. LOCAL-ONLY addition for this build -- not committed upstream.
+    appleTeamId: "TWHC5L37B2",
     entitlements: {
       // Communication-notification styling for chat pushes (the
       // notification-service target carries the same entitlement; both need
