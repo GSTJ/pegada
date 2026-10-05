@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro Max - iOS 26.4 - 6351098E-9A58-413F-AB1E-CDC012000632" tests="1" failures="1" time="56.0">
+    <testcase id="Account creation — end-to-end user journey (sign-in → CreateProfile → CompleteProfile → AskForLocation → Swipe)" name="Account creation — end-to-end user journey (sign-in → CreateProfile → CompleteProfile → AskForLocation → Swipe)" classname="Account creation — end-to-end user journey (sign-in → CreateProfile → CompleteProfile → AskForLocation → Swipe)" time="56.0" status="ERROR">
+      <properties>
+        <property name="tags" value="smoke, regression"/>
+      </properties>
+      <failure>Element not found: Id matching regex: add-photo-0</failure>
+    </testcase>
+  </testsuite>
+</testsuites>
