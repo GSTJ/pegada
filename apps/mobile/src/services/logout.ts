@@ -7,11 +7,13 @@ import { store } from "@/store";
 import { Actions } from "@/store/reducers/dogs";
 import { SceneName } from "@/types/SceneName";
 import { setInitialNotification } from "./linking/handlers/initialNotification";
+import { clearPendingReplyActions } from "./linking/handlers/notificationResponseState";
 import { deleteData, StorageKeys } from "./storage";
 
 export const logout = async () => {
   try {
     setInitialNotification(undefined);
+    clearPendingReplyActions();
 
     await deleteData(StorageKeys.Token);
 

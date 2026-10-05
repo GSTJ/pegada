@@ -1,5 +1,7 @@
-export let initialNotification: string | undefined;
+import type * as Notifications from "expo-notifications";
 
-export const setInitialNotification = (url?: string) => {
-  initialNotification = url;
+export let initialNotification: Notifications.NotificationResponse | undefined;
+
+export const setInitialNotification = (response?: Notifications.NotificationResponse) => {
+  initialNotification = response;
 };

@@ -14,6 +14,7 @@ const allByMatchSchema = z.object({
 const sendSchema = z.object({
   matchId: z.string(),
   content: z.string(),
+  clientMessageId: z.string().min(1).max(255).optional(),
 });
 
 const deleteSchema = z.object({
@@ -37,12 +38,12 @@ export const messageRouter = createTRPCRouter({
     return messages;
   }),
   send: protectedProcedure.input(sendSchema).mutation(async ({ ctx, input }) => {
-    const { matchId, content } = input;
+    const { matchId, content, clientMessageId } = input;
 
     const dog = await DogService.getDogByUserId(ctx.session.user.id);
 
     const messageService = new MessageService({ language: ctx.language });
-    const newMessage = await messageService.sendMessage(content, dog.id, matchId);
+    const newMessage = await messageService.sendMessage(content, dog.id, matchId, clientMessageId);
 
     return newMessage;
   }),

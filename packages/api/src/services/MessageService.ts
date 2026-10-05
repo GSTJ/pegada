@@ -42,7 +42,7 @@ class MessageService {
     return messages;
   }
 
-  async sendMessage(content: string, senderId: string, matchId: string) {
+  async sendMessage(content: string, senderId: string, matchId: string, clientMessageId?: string) {
     const match = await prisma.match.findUnique({
       where: { id: matchId, deletedAt: null },
     });
@@ -53,33 +53,63 @@ class MessageService {
 
     const otherDogId = match.requesterId === senderId ? match.responderId : match.requesterId;
 
-    const newMessage = await prisma.message.create({
-      data: {
-        content,
-        senderId,
-        receiverId: otherDogId,
-        matchId,
-      },
-      include: {
-        sender: {
-          select: {
-            name: true,
-            images: true,
-          },
+    const data = {
+      content,
+      senderId,
+      receiverId: otherDogId,
+      matchId,
+    };
+    const include = {
+      sender: {
+        select: {
+          name: true,
+          images: true,
         },
-        receiver: {
-          select: {
-            name: true,
-            user: {
-              select: {
-                id: true,
-                pushToken: true,
-              },
+      },
+      receiver: {
+        select: {
+          name: true,
+          user: {
+            select: {
+              id: true,
+              pushToken: true,
             },
           },
         },
       },
-    });
+    } as const;
+
+    let created = true;
+    const newMessage = clientMessageId
+      ? await (async () => {
+          const result = await prisma.message.createMany({
+            data: { id: clientMessageId, ...data },
+            skipDuplicates: true,
+          });
+          created = result.count === 1;
+
+          const message = await prisma.message.findUnique({
+            where: { id: clientMessageId },
+            include,
+          });
+
+          if (
+            !message ||
+            message.content !== content ||
+            message.senderId !== senderId ||
+            message.receiverId !== otherDogId ||
+            message.matchId !== matchId
+          ) {
+            throw new Error("Invalid clientMessageId");
+          }
+
+          return message;
+        })()
+      : await prisma.message.create({ data, include });
+
+    // A notification response can be delivered again after a process death.
+    // Return the original message without notifying the receiver twice.
+    if (!created) return newMessage;
 
     const otherDog = newMessage.receiver;
 

@@ -8,6 +8,7 @@ import { LightTheme } from "@pegada/shared/themes/themes";
 
 import { getTrcpContext } from "@/contexts/trcpContext";
 import i18n from "@/i18n";
+import { sendError } from "@/services/errorTracking";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -47,6 +48,32 @@ const registerNotificationCategories = async () => {
   ]);
 };
 
+const registerLocalizedChatNotificationSurfaces = async () => {
+  if (Platform.OS === "android") {
+    // Re-registering updates the channel's user-visible name without changing
+    // its stable ID, so an in-app language switch reaches system settings too.
+    await Notifications.setNotificationChannelAsync("messages", {
+      name: i18n.t("chat.notificationChannelName"),
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: Color(LightTheme.colors.primary).alpha(0.7).hex(),
+    });
+  }
+
+  await registerNotificationCategories();
+};
+
+let watchesNotificationLanguage = false;
+
+const watchNotificationLanguage = () => {
+  if (watchesNotificationLanguage) return;
+
+  watchesNotificationLanguage = true;
+  i18n.on("languageChanged", () => {
+    registerLocalizedChatNotificationSurfaces().catch(sendError);
+  });
+};
+
 export const getPushNotificationToken = async () => {
   if (!Device.isDevice) return;
 
@@ -57,18 +84,12 @@ export const getPushNotificationToken = async () => {
       vibrationPattern: [0, 250, 250, 250],
       lightColor: Color(LightTheme.colors.primary).alpha(0.7).hex(),
     });
-
-    // Dedicated channel for chat-message pushes, matched server-side by
-    // `channelId: "messages"` (see MessageService).
-    await Notifications.setNotificationChannelAsync("messages", {
-      name: i18n.t("chat.notificationChannelName"),
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: Color(LightTheme.colors.primary).alpha(0.7).hex(),
-    });
   }
 
-  await registerNotificationCategories();
+  // Native category/channel labels follow the user's in-app language, both
+  // now and after a runtime language switch.
+  await registerLocalizedChatNotificationSurfaces();
+  watchNotificationLanguage();
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
