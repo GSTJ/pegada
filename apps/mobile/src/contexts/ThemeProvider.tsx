@@ -114,13 +114,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactElement }> = ({ chil
     };
   }, [theme]);
 
-  const handleActiveThemeChange = async (theme: ActiveTheme) => {
-    if (theme) Appearance.setColorScheme(theme as ColorSchemeName);
-    persistNativeThemeOverride(theme);
-    setActiveTheme(theme);
+  const handleActiveThemeChange = async (activeThemeChoice: ActiveTheme) => {
+    // Unlike the cold-start path above, this is an explicit user action.
+    // RN 0.83 uses "unspecified" (not null) to remove a forced native scheme.
+    // This also refreshes useColorScheme from the device immediately, without
+    // waiting for an app restart.
+    Appearance.setColorScheme(activeThemeChoice ?? "unspecified");
+    persistNativeThemeOverride(activeThemeChoice);
+    setActiveTheme(activeThemeChoice);
 
-    if (!theme) return deleteData(StorageKeys.Theme);
-    return storeData(StorageKeys.Theme, theme);
+    if (!activeThemeChoice) return deleteData(StorageKeys.Theme);
+    return storeData(StorageKeys.Theme, activeThemeChoice);
   };
 
   return (
