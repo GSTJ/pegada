@@ -3,10 +3,12 @@ import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import Location from "@/assets/images/Location.svg";
+import type { BlurEffectPolicy } from "@/components/BlurView";
 import { SwipeDog } from "@/store/reducers/dogs/swipe";
 import { Container, Content, DistanceText } from "./styles";
 
 interface DistanceProps {
+  blurEffectPolicy?: BlurEffectPolicy;
   dog: SwipeDog;
 }
 
@@ -30,19 +32,19 @@ const formatDistance = (distance: number, locale: string) => {
   );
 };
 
-const Distance: React.FC<DistanceProps> = ({ dog }) => {
+const Distance: React.FC<DistanceProps> = ({ blurEffectPolicy, dog }) => {
   const [_t, i18n] = useTranslation();
 
   if (dog.distance === null || dog.distance === undefined) {
     return (
-      <Container>
+      <Container blurEffectPolicy={blurEffectPolicy}>
         <View />
       </Container>
     );
   }
 
   return (
-    <Container>
+    <Container blurEffectPolicy={blurEffectPolicy}>
       <Content>
         <Location width={14} height={14} fill="#fff" />
         <DistanceText>{formatDistance(dog.distance ?? 0, i18n.language)}</DistanceText>

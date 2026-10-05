@@ -94,6 +94,7 @@ const CompleteProfile = () => {
           {...scrollViewProps}
           contentContainerStyle={{
             paddingHorizontal: theme.spacing[4],
+            paddingTop: Platform.OS === "ios" ? headerHeight : 0,
             paddingBottom: theme.spacing[8] + scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           keyboardDismissMode="interactive"

@@ -7,6 +7,7 @@ import { BlurView } from "@/components/BlurView";
 export const Container = styled(BlurView).attrs({
   intensity: 90,
 })`
+  border-radius: ${(props) => props.theme.radii.round}px;
   overflow: hidden;
 `;
 

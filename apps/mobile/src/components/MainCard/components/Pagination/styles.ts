@@ -18,13 +18,10 @@ export const Container = styled(TransparentGlassOrDarkBlurView)`
   overflow: hidden;
 `;
 
-interface IDot {
-  active: boolean;
-}
-
-export const Dot = styled(Animated.View)<IDot>`
+export const Dot = styled(Animated.View)`
+  width: 8px;
+  height: 8px;
   background-color: #fff;
-  opacity: ${(props) => (props.active ? 1 : 0.6)};
   border-radius: ${(props) => props.theme.radii.md}px;
   margin: ${(props) => props.theme.spacing[1]}px;
 `;

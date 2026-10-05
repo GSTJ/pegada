@@ -1,6 +1,7 @@
 import "@/config";
 
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
 import { PostHogProvider } from "posthog-react-native";
@@ -12,6 +13,7 @@ import styled from "styled-components/native";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { config } from "@/services/config";
 import { posthog } from "@/services/posthog";
+import { useReduceTransparencyEnabled } from "@/services/reduceTransparency";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { TRPCProvider } from "@/contexts/TRPCProvider";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
@@ -29,13 +31,15 @@ const AppContainer = styled(GestureHandlerRootView)`
 
 const App = () => {
   const { initialRouteName } = useProtectedRoute();
+  const reduceTransparencyEnabled = useReduceTransparencyEnabled();
+  const blurPreferenceReady = Platform.OS !== "ios" || reduceTransparencyEnabled !== null;
 
   useEffect(() => {
-    if (initialRouteName) {
+    if (initialRouteName && blurPreferenceReady) {
       SplashScreen.hideAsync()?.catch(sendError);
       router.replace(initialRouteName);
     }
-  }, [initialRouteName]);
+  }, [blurPreferenceReady, initialRouteName]);
 
   useTrackScreens();
   useGetInitialNotifications();
@@ -68,7 +72,7 @@ const App = () => {
             <BottomSheetModalProvider>
               <NetworkBoundary>
                 <Provider store={store}>
-                  <Stack screenOptions={{ headerShown: false }}>
+                  <Stack screenOptions={{ headerShown: false, animation: "none" }}>
                     <Stack.Screen name="index" />
                     <Stack.Screen name="(app)" />
                     <Stack.Screen name="(auth)" />

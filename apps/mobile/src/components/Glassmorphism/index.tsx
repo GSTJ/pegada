@@ -1,12 +1,18 @@
 import * as React from "react";
-import { BlurViewProps } from "expo-blur";
 
+import { PegadaBlurViewProps, useBlurSurfaceMode } from "@/components/BlurView";
 import { Container, Gradient } from "./styles";
 
-const Glassmorphism: React.FC<BlurViewProps> = ({ children, ...props }) => {
+const GlassmorphismContent: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const surfaceMode = useBlurSurfaceMode();
+
+  return surfaceMode === "legacy" ? <Gradient>{children}</Gradient> : <>{children}</>;
+};
+
+const Glassmorphism: React.FC<PegadaBlurViewProps> = ({ children, ...props }) => {
   return (
     <Container {...props}>
-      <Gradient>{children}</Gradient>
+      <GlassmorphismContent>{children}</GlassmorphismContent>
     </Container>
   );
 };

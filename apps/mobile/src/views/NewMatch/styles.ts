@@ -1,8 +1,8 @@
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Color from "color";
 import styled from "styled-components/native";
 
+import { TransparentGlassOrDarkBlurView } from "@/components/BlurView";
 import { Image } from "@/components/Image";
 
 export const Container = styled.View`
@@ -27,9 +27,9 @@ export const RotatedImageRight = styled(RotatedImageLeft)`
   position: absolute;
 `;
 
-export const HeartEyesContainer = styled.View`
+export const HeartEyesContainer = styled(TransparentGlassOrDarkBlurView)`
   border-radius: ${(props) => props.theme.radii.round}px;
-  background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.5).rgb().string()};
+  overflow: hidden;
   padding: ${(props) => props.theme.spacing[1.5]}px;
   margin-top: -35px;
   margin-bottom: ${(props) => props.theme.spacing[2]}px;

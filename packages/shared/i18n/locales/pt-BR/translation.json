@@ -37,6 +37,7 @@
   "chat": {
     "sendAMessageToStart": "Envie uma mensagem para iniciar a conversa",
     "today": "Hoje",
+    "viewDogProfile": "Ver perfil do doguinho",
     "yesterday": "Ontem",
     "youMatched": "Vocês deram Match!"
   },
@@ -50,6 +51,7 @@
   },
   "common": {
     "back": "Voltar",
+    "close": "Fechar",
     "nearYou": "Perto de você",
     "ok": "Ok",
     "oops": "Oops",
@@ -59,6 +61,10 @@
     "tryAgainLater": "Tente novamente mais tarde.",
     "somethingWentWrongTryAgainLater": "Alguma coisa deu errado. Tente novamente mais tarde.",
     "unknown": "Desconhecido"
+  },
+  "photoPagination": {
+    "label": "Fotos",
+    "position": "Foto {{current}} de {{total}}"
   },
   "completeProfile": {
     "additionalInfo": "Assim como você poderá selecionar suas preferências para dogs, os outros doguinhos também podem.\n\nEssas informações servem para que possamos te mostrar para os melhores matches!",
@@ -160,7 +166,7 @@
     "accountCode": "Vamos enviar um código de 6 dígitos para autorizar sua conta. Se ainda não tem uma, vamos criá-la.",
     "continue": "Continuar",
     "emailPlaceholder": "oi@email.com",
-    "findDogsNearYou": "<view><title>Encontre </title><highlight>Dogs</highlight></view><view><title>perto de </title><highlight>Você</highlight><view/>",
+    "findDogsNearYou": "<view><title>Encontre </title><highlight>Dogs</highlight></view><view><title>perto de </title><highlight>Você</highlight></view>",
     "insertEmail": "Insira seu <1>email</1>",
     "loginError": "Ocorreu um erro ao fazer login.",
     "validEmail": "Insira um email válido"
@@ -322,6 +328,11 @@
     "emptyDescription": "Mas calma! Acabamos de lançar e ainda temos poucos usuários.\n\nEstamos trabalhando para garantir um espaço cheio de doguinhos logo logo 🐶\n\nTente ajustar suas preferências ou volte mais tarde! 😉",
     "emptyTitle": "Parece que os doguinhos acabaram!",
     "preferencesButton": "Ver Preferências"
+  },
+  "swipeActions": {
+    "pass": "Passar",
+    "maybe": "Talvez",
+    "like": "Curtir"
   },
   "themes": {
     "automatic": "Automático",

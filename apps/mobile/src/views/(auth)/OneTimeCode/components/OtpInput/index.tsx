@@ -43,7 +43,7 @@ const OTPInput = forwardRef<OtpInputRef, OtpInputProps>(({ length, value, onChan
     if (!digit || digit.match(/[^0-9]/g)) return;
     changeDigit(digit, index);
 
-    const nextIndex = Math.min(index + digit.length - 1, length - 1);
+    const nextIndex = Math.min(index + digit.length, length - 1);
 
     inputRefs.current?.[nextIndex]?.focus();
   };

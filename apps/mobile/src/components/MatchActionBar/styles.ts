@@ -56,13 +56,16 @@ export const ActionItem = styled(PressableArea).attrs({
   justify-content: center;
 `;
 
-export const ActionItemFallbackBackground = styled.View`
+export const ActionItemFallbackBackground = styled.View<{ $opaque?: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${(props) => Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
+  background-color: ${(props) =>
+    props.$opaque
+      ? props.theme.colors.card
+      : Color(props.theme.colors.primary).alpha(0.1).rgb().string()};
 `;
 
 export const ConfusedEmoji = styled(Image).attrs({

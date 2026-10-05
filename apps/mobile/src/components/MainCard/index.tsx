@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
+import type { BlurEffectPolicy } from "@/components/BlurView";
 import { PressableArea } from "@/components/PressableArea";
 import { SceneName } from "@/types/SceneName";
 import Distance from "./components/Distance";
@@ -30,12 +31,15 @@ const START_IMAGE_INDEX = 0;
 
 export interface VisitingCardProps extends React.ComponentProps<typeof Container> {
   dog: SwipeDog;
+  /** Use `opacity-safe` while the shared chrome ancestor is alpha-hidden. */
+  chromeBlurEffectPolicy?: BlurEffectPolicy;
   shouldShowPersonalInfo?: boolean;
   startImageIndex?: number;
 }
 
 const VisitingCard: React.FC<VisitingCardProps> = ({
   dog,
+  chromeBlurEffectPolicy = "stable",
   shouldShowPersonalInfo = true,
   startImageIndex = START_IMAGE_INDEX,
   ...props
@@ -105,9 +109,18 @@ const VisitingCard: React.FC<VisitingCardProps> = ({
         colors={["rgba(0, 0, 0, .5)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
       />
       <UpperPart>
-        <Distance dog={dog} />
-        <Pagination pages={images.length} currentPage={currentImage} />
-        <CarouselContainer>
+        <Distance blurEffectPolicy={chromeBlurEffectPolicy} dog={dog} />
+        <Pagination
+          blurEffectPolicy={chromeBlurEffectPolicy}
+          pages={images.length}
+          currentPage={currentImage}
+          onDecrement={gotoPreviousImage}
+          onIncrement={gotoNextImage}
+        />
+        <CarouselContainer
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
           <PreviousImage onPress={gotoPreviousImage} />
           <NextImage onPress={gotoNextImage} />
         </CarouselContainer>

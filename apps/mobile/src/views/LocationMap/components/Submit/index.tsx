@@ -7,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 
-import { BottomAction } from "@/components/BottomAction";
+import { BottomAction, useBottomActionStyle } from "@/components/BottomAction";
 import { StyledButton } from "./styles";
 
 interface SubmitProps {
@@ -18,19 +18,14 @@ interface SubmitProps {
 
 export const Submit: React.FC<SubmitProps> = ({ loading, onPress, dragging }) => {
   const { t } = useTranslation();
+  const { height } = useBottomActionStyle();
 
   const buttonAnimatedStyle = useAnimatedStyle(() => {
     "worklet";
-    const opacity = interpolate(
-      dragging.value,
-      [0, 1],
-      // 1.5 so it goes a little faster
-      [1.5, 0],
-      Extrapolation.CLAMP,
-    );
+    const translateY = interpolate(dragging.value, [0, 1], [0, height], Extrapolation.CLAMP);
 
-    return { opacity };
-  });
+    return { transform: [{ translateY }] };
+  }, [height]);
 
   return (
     <Animated.View style={buttonAnimatedStyle}>

@@ -183,6 +183,8 @@ const UpgradeWall: React.FC = () => {
         <RestorePurchases />
         <CloseButton
           testID="upgrade-wall-close"
+          accessibilityRole="button"
+          accessibilityLabel={t("common.close")}
           // Generous hitSlop — the visible target is 32x32 (theme.spacing[8])
           // which is below Apple's 44pt minimum; Maestro's tap-by-id resolves
           // to the *center* of the view, but human taps (and validator

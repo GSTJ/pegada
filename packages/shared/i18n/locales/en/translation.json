@@ -37,6 +37,7 @@
   "chat": {
     "sendAMessageToStart": "Send a message to start the conversation",
     "today": "Today",
+    "viewDogProfile": "View dog profile",
     "yesterday": "Yesterday",
     "youMatched": "You two matched!"
   },
@@ -50,6 +51,7 @@
   },
   "common": {
     "back": "Back",
+    "close": "Close",
     "nearYou": "Near you",
     "ok": "Ok",
     "oops": "Oops",
@@ -59,6 +61,10 @@
     "tryAgainLater": "Please try again later.",
     "somethingWentWrongTryAgainLater": "Something went wrong. Please try again later.",
     "unknown": "unknown"
+  },
+  "photoPagination": {
+    "label": "Photos",
+    "position": "Photo {{current}} of {{total}}"
   },
   "completeProfile": {
     "additionalInfo": "Just like you can select your preferences, other dogs can do the same.\n\nThese information are used to show the best matches 🐶",
@@ -160,7 +166,7 @@
     "accountCode": "We will send a 6-digit code to authorize your account. If you don't have one yet, we'll create it.",
     "continue": "Continue",
     "emailPlaceholder": "hi@email.com",
-    "findDogsNearYou": "<view><title>Find </title><highlight>Dogs</highlight></view><view><title>Near </title><highlight>You</highlight><view/>",
+    "findDogsNearYou": "<view><title>Find </title><highlight>Dogs</highlight></view><view><title>Near </title><highlight>You</highlight></view>",
     "insertEmail": "Insert your <1>email</1>",
     "loginError": "An error occurred while logging in.",
     "validEmail": "Please enter a valid email"
@@ -322,6 +328,11 @@
     "emptyDescription": "But hang tight! We've just launched and still have small user base.\n\nWe're working hard to ensure a space filled with doggos very soon 🐶\n\nTry adjusting your preferences or check back later! 😉",
     "emptyTitle": "We couldn't find any more dogs!",
     "preferencesButton": "View Preferences"
+  },
+  "swipeActions": {
+    "pass": "Pass",
+    "maybe": "Maybe",
+    "like": "Like"
   },
   "themes": {
     "automatic": "Automatic",

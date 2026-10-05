@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Platform } from "react-native";
-import { BlurViewProps } from "expo-blur";
 import { useTheme } from "styled-components/native";
 
+import { PegadaBlurViewProps } from "@/components/BlurView";
 import { useKeyboardAwareSafeAreaInsets } from "../../hooks/useKeyboardAwareSafeAreaInsets";
 import { BUTTON_HEIGHT } from "../Button/styles";
 import * as S from "./styles";
@@ -43,7 +43,7 @@ export const useBottomActionStyle = () => {
   };
 };
 
-const Container: React.FC<BlurViewProps> = React.forwardRef((props, ref) => {
+const Container: React.FC<PegadaBlurViewProps> = React.forwardRef((props, ref) => {
   const { height, paddingBottom } = useBottomActionStyle();
 
   return (

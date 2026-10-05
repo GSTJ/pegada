@@ -5,6 +5,7 @@ import styled from "styled-components/native";
 import { BreedSlug } from "@pegada/shared/i18n/i18n";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
+import type { BlurEffectPolicy } from "@/components/BlurView";
 import Glassmorphism from "@/components/Glassmorphism";
 import { Text } from "@/components/Text";
 import { SwipeDog } from "@/store/reducers/dogs/swipe";
@@ -22,13 +23,16 @@ const ViewStyled = styled(View)`
   padding-bottom: ${(props) => props.theme.spacing[2.5]}px;
 `;
 
-export const BreedTag = (props: { breed: SwipeDog["breed"] }) => {
+export const BreedTag = (props: {
+  blurEffectPolicy?: BlurEffectPolicy;
+  breed: SwipeDog["breed"];
+}) => {
   const { t } = useTranslation(Namespace.Breed);
 
   if (!props.breed?.slug) return null;
 
   return (
-    <GlassmorphismStyled>
+    <GlassmorphismStyled blurEffectPolicy={props.blurEffectPolicy}>
       <ViewStyled>
         <Text fontWeight="medium">{t(props.breed.slug as BreedSlug)}</Text>
       </ViewStyled>

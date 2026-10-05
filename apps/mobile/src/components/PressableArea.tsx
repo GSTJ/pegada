@@ -1,8 +1,18 @@
 import * as React from "react";
-import { Pressable, PressableProps } from "react-native";
+import { Pressable, PressableProps, StyleProp, ViewStyle } from "react-native";
 
 const ACTIVE_OPACITY = 0.9;
-export const PressableArea: React.FC<PressableProps> = ({ style, ...rest }) => {
+interface PressableAreaProps extends PressableProps {
+  disableActiveOpacity?: boolean;
+  pressedStyle?: StyleProp<ViewStyle>;
+}
+
+export const PressableArea: React.FC<PressableAreaProps> = ({
+  disableActiveOpacity,
+  pressedStyle,
+  style,
+  ...rest
+}) => {
   return (
     <Pressable
       {...rest}
@@ -10,7 +20,11 @@ export const PressableArea: React.FC<PressableProps> = ({ style, ...rest }) => {
         const appliedStyle = typeof style === "function" ? style(args) : style;
 
         if (args.pressed) {
-          return [appliedStyle, { opacity: ACTIVE_OPACITY }];
+          return [
+            appliedStyle,
+            disableActiveOpacity ? undefined : { opacity: ACTIVE_OPACITY },
+            pressedStyle,
+          ];
         }
 
         return appliedStyle;

@@ -5,7 +5,6 @@ import { PressableArea } from "@/components/PressableArea";
 const BACK_CONTAINER_SIZE = 60;
 
 export const Container = styled(PressableArea).attrs({
-  pointerEvents: "box-only",
   hitSlop: {
     top: 15,
     bottom: 15,
@@ -15,6 +14,8 @@ export const Container = styled(PressableArea).attrs({
 })`
   margin-top: ${-BACK_CONTAINER_SIZE / 2}px;
   right: ${(props) => props.theme.spacing[4]}px;
+  width: ${BACK_CONTAINER_SIZE}px;
+  height: ${BACK_CONTAINER_SIZE}px;
   border-radius: ${BACK_CONTAINER_SIZE}px;
   overflow: hidden;
 

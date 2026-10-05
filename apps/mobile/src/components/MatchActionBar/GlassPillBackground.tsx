@@ -1,13 +1,15 @@
 import * as React from "react";
-import { GlassView } from "expo-glass-effect";
 import styled from "styled-components/native";
 
-const StyledGlassView = styled(GlassView)`
+import { LiquidGlassView } from "@/components/BlurView";
+
+const StyledGlassView = styled(LiquidGlassView)`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  border-radius: 999px;
 `;
 
 interface GlassPillBackgroundProps {
@@ -15,15 +17,12 @@ interface GlassPillBackgroundProps {
   colorScheme: "light" | "dark";
 }
 
-/**
- * Only ever rendered after the caller has checked `isLiquidGlassAvailableSafe()`.
- */
+/** Only rendered when the shared blur policy resolves to native glass. */
 export const GlassPillBackground: React.FC<GlassPillBackgroundProps> = ({
   tintColor,
   colorScheme,
 }) => (
   <StyledGlassView
-    key={colorScheme}
     glassEffectStyle="regular"
     isInteractive
     tintColor={tintColor}

@@ -110,7 +110,8 @@ const CreateProfile = () => {
           style={{ flex: 1 }}
           {...scrollViewProps}
           contentContainerStyle={{
-            padding: theme.spacing[4],
+            paddingHorizontal: theme.spacing[4],
+            paddingTop: theme.spacing[4] + (Platform.OS === "ios" ? headerHeight : 0),
             paddingBottom: theme.spacing[4] + scrollViewProps.contentContainerStyle.paddingBottom,
           }}
           scrollEnabled={gesturesEnabled}
