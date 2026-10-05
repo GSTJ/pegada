@@ -255,9 +255,7 @@ const config: ExpoConfig = {
     // transparent background, per Apple's spec -- iOS supplies the dark
     // backdrop itself.
     //
-    // `tinted` is deliberately NOT configured here even though
-    // src/assets/images/icon-tinted.png exists (transparent glyph, ready to
-    // go): Expo SDK 55's prebuild plugin
+    // `tinted` is deliberately NOT configured here: Expo SDK 55's prebuild plugin
     // (@expo/prebuild-config/build/plugins/icons/withIosIcons.js,
     // generateUniversalIconAsync) hardcodes `removeTransparency: appearance
     // !== 'dark'` and forces a solid white `backgroundColor` for every
@@ -267,10 +265,7 @@ const config: ExpoConfig = {
     // white square with a faint gray glyph -- worse than not shipping the
     // variant at all, since omitting `tinted` makes iOS fall back to the
     // normal full-color icon in tinted mode (see `getIcons()` in the same
-    // plugin). Flagged as a blocker to Gabriel in the PR description rather
-    // than shipped silently. Revisit once Expo fixes
-    // `generateUniversalIconAsync`, or patch it via patch-package if that's
-    // worth it later -- icon-tinted.png is already generated and correct.
+    // plugin).
     icon: {
       light: "./src/assets/images/icon.png",
       dark: "./src/assets/images/icon-dark.png",
