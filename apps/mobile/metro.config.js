@@ -10,6 +10,9 @@ const workspaceRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(__dirname);
 
+// Temporary local simulator verification override; removed after capture.
+config.resolver.useWatchman = false;
+
 config.watcher = {
   // +73.3
   ...config.watcher,

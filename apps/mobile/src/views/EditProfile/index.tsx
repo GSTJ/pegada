@@ -119,7 +119,7 @@ const EditProfile = () => {
       analytics.track({ event_type: "Save Profile Pressed" });
     },
     onSuccess: (data) => {
-      dispatch(Actions.dogs.list.refetch());
+      dispatch(Actions.dogs.list.criteriaRefetch());
       getTrcpContext().myDog.get.setData(undefined, data);
       magicToast.success(t("editProfile.profileUpdated"), 1000);
       router.back();

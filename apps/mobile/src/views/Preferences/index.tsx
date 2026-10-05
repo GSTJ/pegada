@@ -79,7 +79,7 @@ const Preferences: React.FC = () => {
       analytics.track({ event_type: "Save Preferences Pressed" });
     },
     onSuccess: (data) => {
-      dispatch(Actions.dogs.list.refetch());
+      dispatch(Actions.dogs.list.criteriaRefetch());
       getTrcpContext().myDog.get.setData(undefined, data);
       magicToast.success(t("preferences.preferencesUpdated"), 1000);
       router.back();

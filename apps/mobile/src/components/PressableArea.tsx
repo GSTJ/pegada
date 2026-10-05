@@ -1,10 +1,11 @@
 import * as React from "react";
-import { Pressable, PressableProps } from "react-native";
+import { Pressable, type PressableProps, type View } from "react-native";
 
 const ACTIVE_OPACITY = 0.9;
-export const PressableArea: React.FC<PressableProps> = ({ style, ...rest }) => {
+export const PressableArea = React.forwardRef<View, PressableProps>(({ style, ...rest }, ref) => {
   return (
     <Pressable
+      ref={ref}
       {...rest}
       style={(args) => {
         const appliedStyle = typeof style === "function" ? style(args) : style;
@@ -17,4 +18,6 @@ export const PressableArea: React.FC<PressableProps> = ({ style, ...rest }) => {
       }}
     />
   );
-};
+});
+
+PressableArea.displayName = "PressableArea";

@@ -98,6 +98,9 @@
     "profileInfoError": "⚠️ Loading Error. Try again later.",
     "cancel": "Cancel",
     "dogProfile": "Dog Profile",
+    "nextPhoto": "Next photo of {{name}}",
+    "openProfile": "Open {{name}}'s profile",
+    "previousPhoto": "Previous photo of {{name}}",
     "report": "Report",
     "reportBody": "I would like to report account number {{id}}, owned by {{name}} for:\n",
     "reportMessage": "By reporting a profile, you are helping us to keep the community safe. Would you like to proceed?",
@@ -322,6 +325,11 @@
     "emptyDescription": "But hang tight! We've just launched and still have small user base.\n\nWe're working hard to ensure a space filled with doggos very soon 🐶\n\nTry adjusting your preferences or check back later! 😉",
     "emptyTitle": "We couldn't find any more dogs!",
     "preferencesButton": "View Preferences"
+  },
+  "swipeActions": {
+    "like": "Like",
+    "maybe": "Maybe",
+    "pass": "Pass"
   },
   "themes": {
     "automatic": "Automatic",

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { ThinkingEmoji } from "@/components/MatchActionBar/styles";
 import { Text } from "@/components/Text";
 import { SceneName } from "@/types/SceneName";
-import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/useSwipeGesture";
+import { Swipe } from "@/store/swipeTypes";
 import { Match } from "../..";
 import { Container, EmojiContainer, Picture } from "./styles";
 

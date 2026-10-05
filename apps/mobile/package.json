@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
+    "verify:hero-transition": "tsx ./scripts/verify-hero-transition.ts",
+    "verify:profile-swipe-intent": "tsx ./scripts/verify-profile-swipe-intent.ts",
     "preinstall": "pnpm setup:secret:files"
   },
   "dependencies": {

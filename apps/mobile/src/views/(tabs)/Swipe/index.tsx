@@ -4,6 +4,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 
 import { MatchActionBar } from "@/components/MatchActionBar";
+import {
+  cancelNonCurrentSwipeHeroOwner,
+  useIsSwipeSurfaceHeroLocked,
+} from "@/components/HeroTransition/store";
 import { sendError } from "@/services/errorTracking";
 import { trackUser } from "@/services/getInitialRouteName";
 import {
@@ -13,11 +17,13 @@ import {
 } from "@/services/getPushNotificationToken";
 import { processLinks } from "@/services/linking";
 import { Actions } from "@/store/reducers/dogs";
-import { getCards, getCurrentCardId } from "@/store/selectors";
+import { getCurrentCardId, getRenderableCards } from "@/store/selectors";
+import { cancelSwipeRestoreFlight, useIsSwipeActionInFlight } from "@/store/swipeActionFlight";
 import { ChangeLocation } from "./components/ChangeLocation";
+import ProfileSwipeIntentConsumer from "./components/ProfileSwipeIntentConsumer";
 import SwipeBackButton from "./components/SwipeBackButton";
 import SwipeHandler, { swipeHandlerRef } from "./components/SwipeHandler";
-import { Swipe } from "./components/SwipeHandler/hooks/useSwipeGesture";
+import { Swipe } from "@/store/swipeTypes";
 import SwipeRequestFeedback from "./components/SwipeRequestFeedback";
 import { Container } from "./styles";
 
@@ -31,25 +37,43 @@ const MatchActionBarWrapper = () => {
 
   if (!currentCard) return null;
 
+  const swipeCurrentCard = (swipeType: Swipe) => {
+    const handler = swipeHandlerRef.current;
+    if (handler?.dogId !== currentCard) return;
+    handler.gotoDirection(swipeType);
+  };
+
   return (
     <MatchActionBar
       sharedDogId={currentCard}
       sharedRole="source"
-      onNope={() => swipeHandlerRef.current?.gotoDirection(Swipe.Dislike)}
-      onYep={() => swipeHandlerRef.current?.gotoDirection(Swipe.Like)}
-      onMaybe={() => swipeHandlerRef.current?.gotoDirection(Swipe.Maybe)}
+      onNope={() => swipeCurrentCard(Swipe.Dislike)}
+      onYep={() => swipeCurrentCard(Swipe.Like)}
+      onMaybe={() => swipeCurrentCard(Swipe.Maybe)}
       animated
     />
   );
 };
 
-/** For performance reasons, we only render the first 4 cards */
-const MAX_TO_RENDER = 4;
-
 const Matches = () => {
   const topInset = useCustomTopInset();
   const dispatch = useDispatch();
-  const cards = useSelector(getCards);
+  const cards = useSelector(getRenderableCards);
+  const currentCardId = useSelector(getCurrentCardId);
+  const swipeHeroLocked = useIsSwipeSurfaceHeroLocked();
+  const swipeActionInFlight = useIsSwipeActionInFlight();
+  const swipeSurfaceLocked = swipeHeroLocked || swipeActionInFlight;
+
+  React.useLayoutEffect(() => {
+    cancelNonCurrentSwipeHeroOwner(currentCardId);
+  }, [currentCardId]);
+
+  React.useLayoutEffect(
+    () => () => {
+      cancelSwipeRestoreFlight();
+    },
+    [],
+  );
 
   useEffect(() => {
     trackUser();
@@ -73,15 +97,22 @@ const Matches = () => {
   }, [dispatch]);
 
   return (
-    <Container testID="swipe-screen" style={{ paddingTop: topInset }}>
+    <Container
+      testID="swipe-screen"
+      // Keep the ACTIVE pan's ancestor interactive while its exact gesture
+      // lease owns the action token. Every sibling/child surface consumes the
+      // action lock independently; hero ownership can still disable the root.
+      pointerEvents={swipeHeroLocked ? "none" : "auto"}
+      accessibilityElementsHidden={swipeSurfaceLocked}
+      importantForAccessibility={swipeSurfaceLocked ? "no-hide-descendants" : "auto"}
+      style={{ paddingTop: topInset }}
+    >
+      <ProfileSwipeIntentConsumer />
       <ChangeLocation />
       <Container>
         <SwipeBackButton />
         <SwipeRequestFeedback />
-        {cards
-          .map((card) => <SwipeHandler key={card.id} card={card} />)
-          .slice(0, MAX_TO_RENDER)
-          .reverse()}
+        {cards.map((card) => <SwipeHandler key={card.id} card={card} />).reverse()}
       </Container>
       <MatchActionBarWrapper />
     </Container>

@@ -1,7 +1,6 @@
-import { produce } from "immer";
 import { ActionType, createAction, createReducer } from "typesafe-actions";
 
-import { initialState } from "@/store/reducers/dogs/swipe";
+import { createInitialState, initialState } from "@/store/reducers/dogs/swipe";
 
 export enum LogoutAction {
   Logout = "LOGOUT",
@@ -11,12 +10,7 @@ const logout = createAction(LogoutAction.Logout)();
 
 export const Actions = { logout };
 
-const logoutHandler = (state = initialState) =>
-  produce(state, (draft) => {
-    draft = initialState;
-
-    return draft;
-  });
+const logoutHandler = (state = initialState) => createInitialState(state.config.sessionId + 1);
 
 export default createReducer<typeof initialState, ActionType<typeof Actions>>(
   initialState,

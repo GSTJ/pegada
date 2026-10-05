@@ -98,6 +98,9 @@
     "profileInfoError": "⚠️ Oops. Tente novamente mais tarde.",
     "cancel": "Cancelar",
     "dogProfile": "Perfil do Doguinho",
+    "nextPhoto": "Próxima foto de {{name}}",
+    "openProfile": "Abrir perfil de {{name}}",
+    "previousPhoto": "Foto anterior de {{name}}",
     "report": "Denunciar",
     "reportBody": "Eu gostaria de denunciar a conta número {{id}}, pertencente a {{name}} por:\n",
     "reportMessage": "Ao denunciar um perfil, você estará nos ajudando a manter a comunidade segura. Deseja continuar?",
@@ -322,6 +325,11 @@
     "emptyDescription": "Mas calma! Acabamos de lançar e ainda temos poucos usuários.\n\nEstamos trabalhando para garantir um espaço cheio de doguinhos logo logo 🐶\n\nTente ajustar suas preferências ou volte mais tarde! 😉",
     "emptyTitle": "Parece que os doguinhos acabaram!",
     "preferencesButton": "Ver Preferências"
+  },
+  "swipeActions": {
+    "like": "Curtir",
+    "maybe": "Talvez",
+    "pass": "Passar"
   },
   "themes": {
     "automatic": "Automático",

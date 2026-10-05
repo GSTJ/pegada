@@ -45,7 +45,7 @@ const LocationMap = () => {
     mutationFn: async () => {
       if (!location.latitude || !location.longitude) return;
       await updateUserLocation(location);
-      dispatch(Actions.dogs.list.refetch());
+      dispatch(Actions.dogs.list.criteriaRefetch());
     },
     onSuccess: () => {
       magicToast.success("Localização atualizada com sucesso!", 1000);

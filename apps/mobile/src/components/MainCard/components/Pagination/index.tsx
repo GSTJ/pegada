@@ -1,6 +1,12 @@
 import * as React from "react";
-import { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
+import { useReduceMotion } from "@/hooks/useReduceMotion";
 import { Container, Content, Dot } from "./styles";
 
 const DotComponent: React.FC<{
@@ -8,12 +14,22 @@ const DotComponent: React.FC<{
   currentPage: number;
 }> = ({ index, currentPage }) => {
   const active = index === currentPage;
+  const reduceMotion = useReduceMotion();
+  const size = useSharedValue(active ? 8 : 6);
+  const mounted = React.useRef(false);
 
-  const style = useAnimatedStyle(() => {
-    "worklet";
-    const size = withTiming(active ? 8 : 6, { duration: 200 });
-    return { width: size, height: size };
-  });
+  React.useEffect(() => {
+    const target = active ? 8 : 6;
+    if (!mounted.current || reduceMotion) {
+      cancelAnimation(size);
+      size.value = target;
+      mounted.current = true;
+      return;
+    }
+    size.value = withTiming(target, { duration: 200 });
+  }, [active, reduceMotion, size]);
+
+  const style = useAnimatedStyle(() => ({ width: size.value, height: size.value }));
 
   return <Dot key={index} active={active} style={style} />;
 };

@@ -22,6 +22,10 @@ export const Age = styled(Name).attrs({
   font-size: 18px;
 `;
 
+export const TitleAnchor = styled.View`
+  margin-bottom: ${(props) => props.theme.spacing[1]}px;
+`;
+
 export const Description = styled(Text)`
   color: #fff;
 `;

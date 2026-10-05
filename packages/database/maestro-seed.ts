@@ -309,6 +309,38 @@ async function ensureMatchMeWithPreLike(rexId: string) {
     });
   }
 
+  // Shared-photo transition fixture: keep exactly three approved, ordered,
+  // visually distinct photos so A → B/C → Back is deterministic on a fresh
+  // local Maestro database (not dependent on leftovers from a prior run).
+  const matchMeImageUrls = [
+    "https://placedog.net/640/480?id=22",
+    "https://placedog.net/640/480?id=23",
+    "https://placedog.net/640/480?id=24",
+  ];
+  await prisma.image.deleteMany({
+    where: { dogId: matchMe.id, url: { notIn: matchMeImageUrls } },
+  });
+  const existingImages = await prisma.image.findMany({ where: { dogId: matchMe.id } });
+  const retainedImageIds: string[] = [];
+  for (const [position, url] of matchMeImageUrls.entries()) {
+    const existing = existingImages.find((image) => image.url === url);
+    if (existing) {
+      const retained = await prisma.image.update({
+        where: { id: existing.id },
+        data: { position, status: "APPROVED" },
+      });
+      retainedImageIds.push(retained.id);
+    } else {
+      const retained = await prisma.image.create({
+        data: { dogId: matchMe.id, position, status: "APPROVED", url },
+      });
+      retainedImageIds.push(retained.id);
+    }
+  }
+  await prisma.image.deleteMany({
+    where: { dogId: matchMe.id, id: { notIn: retainedImageIds } },
+  });
+
   // Tear down any state from a previous run so the swipe stack and match
   // creation behave deterministically.
   await prisma.message.deleteMany({

@@ -8,7 +8,12 @@ import Location from "@/assets/images/Location.svg";
 import { NetworkBoundary } from "@/components/NetworkBoundary";
 import { PressableArea } from "@/components/PressableArea";
 import { Text } from "@/components/Text";
+import {
+  isSwipeSurfaceHeroLocked,
+  useIsSwipeSurfaceHeroLocked,
+} from "@/components/HeroTransition/store";
 import { SceneName } from "@/types/SceneName";
+import { getIsSwipeActionInFlight, useIsSwipeActionInFlight } from "@/store/swipeActionFlight";
 import { useCurrentCityText } from "../../../../hooks/useCurrentCityText";
 
 const CurrentLocation = () => {
@@ -47,10 +52,17 @@ const CurrentLocationLoading = () => {
 export const ChangeLocation = () => {
   const theme = useTheme();
   const router = useRouter();
+  const swipeHeroLocked = useIsSwipeSurfaceHeroLocked();
+  const swipeActionInFlight = useIsSwipeActionInFlight();
+  const interactionLocked = swipeHeroLocked || swipeActionInFlight;
 
   return (
     <PressableArea
+      disabled={interactionLocked}
+      accessibilityElementsHidden={interactionLocked}
+      importantForAccessibility={interactionLocked ? "no-hide-descendants" : "auto"}
       onPress={() => {
+        if (getIsSwipeActionInFlight() || isSwipeSurfaceHeroLocked()) return;
         router.push(SceneName.LocationMap);
       }}
       style={{

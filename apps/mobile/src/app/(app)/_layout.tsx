@@ -4,6 +4,24 @@ import Color from "color";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "styled-components/native";
 
+import { markHeroDestinationPresented } from "@/components/HeroTransition/store";
+
+type ProfileRouteParams = {
+  id?: string;
+  heroRunId?: string;
+  heroTransition?: string;
+  heroSceneTransition?: string;
+};
+
+const profileScreenListeners = ({ route }: { route: { params?: object } }) => ({
+  transitionEnd: ({ data }: { data: { closing: boolean } }) => {
+    const params = route.params as ProfileRouteParams | undefined;
+    const runId = Number(params?.heroRunId);
+    if (!params?.id || !Number.isSafeInteger(runId) || runId <= 0) return;
+    markHeroDestinationPresented({ id: params.id, runId, closing: data.closing });
+  },
+});
+
 export default () => {
   const theme = useTheme();
 
@@ -56,16 +74,34 @@ export default () => {
       />
       <Stack.Screen
         name="profile/[id]"
-        options={({ route }) => ({
-          // The photo overlay is the forward transition from Swipe. Running
-          // the stack fade at the same time duplicates the whole card behind
-          // it. The same route-level opt-out lets the shared elements reverse
-          // cleanly on Back without a competing stack animation.
-          animation:
-            (route.params as { heroTransition?: string } | undefined)?.heroTransition === "1"
-              ? "none"
-              : "fade",
-        })}
+        listeners={profileScreenListeners}
+        options={({ route }) => {
+          const params = route.params as ProfileRouteParams | undefined;
+          const usesHeroSceneTransition = params?.heroSceneTransition === "1";
+          const hasActiveHeroOverlay = params?.heroTransition === "1";
+
+          if (usesHeroSceneTransition) {
+            return {
+              // The mutable overlay flag may switch off after settling or
+              // invalidation, but the route's scene structure stays unchanged.
+              presentation: "transparentModal",
+              contentStyle: { backgroundColor: "transparent" },
+              animation: hasActiveHeroOverlay ? "none" : "fade",
+              ...(Platform.OS === "ios" && { animationDuration: 320 }),
+              // Manual hero scenes own both forward and reverse motion.
+              gestureEnabled: false,
+            };
+          }
+
+          return {
+            // Keep scene structure immutable for the route's lifetime. The
+            // ordinary profile route keeps the app theme and native gesture.
+            presentation: "card",
+            contentStyle: { backgroundColor: theme.colors.background },
+            animation: "fade",
+            gestureEnabled: true,
+          };
+        }}
       />
       <Stack.Screen
         name="preferences"

@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import Color from "color";
 import { clamp } from "lodash";
+import Animated from "react-native-reanimated";
 import styled from "styled-components/native";
 
 import { PressableArea } from "@/components/PressableArea";
@@ -14,7 +15,12 @@ const IDEAL_HEIGHT = width * ASPECT_RATIO;
 
 export const CARD_HEIGHT = clamp(IDEAL_HEIGHT, MIN_HEIGHT, MAX_HEIGHT);
 
-export const Container = styled.ScrollView.attrs({
+export const Scene = styled(Animated.View)`
+  flex: 1;
+  background-color: ${(props) => props.theme.colors.background};
+`;
+
+export const Container = styled(Animated.ScrollView).attrs({
   bounces: false,
 })`
   flex-grow: 1;

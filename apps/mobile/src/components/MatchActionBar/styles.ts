@@ -15,6 +15,7 @@ const MIN_TOUCH_TARGET = 44;
 interface ContainerProps {
   $hidden?: boolean;
   $inline?: boolean;
+  $interactionLocked?: boolean;
 }
 
 export const Container = styled(Animated.View).attrs<ContainerProps>((props) => ({
@@ -22,7 +23,7 @@ export const Container = styled(Animated.View).attrs<ContainerProps>((props) => 
   // pannable in the gaps, but lifts the bar above the card visually so
   // each ActionItem reliably wins taps over the card's PersonalInfo
   // pressable that sits underneath.
-  pointerEvents: props.$hidden ? "none" : "box-none",
+  pointerEvents: props.$hidden || props.$interactionLocked ? "none" : "box-none",
 }))<ContainerProps>`
   width: 100%;
 

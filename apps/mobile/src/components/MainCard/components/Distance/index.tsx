@@ -11,7 +11,7 @@ interface DistanceProps {
 }
 
 // TODO: Use i18n properly
-const formatDistance = (distance: number, locale: string) => {
+export const formatDistance = (distance: number, locale: string) => {
   // Countries that use miles instead of kilometers
   const countriesUsingMiles = ["US", "GB", "LR", "MM"]; // United States, United Kingdom, Liberia, Myanmar
   const usesMiles = countriesUsingMiles.some((countryCode) => locale.includes(countryCode));
