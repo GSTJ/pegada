@@ -15,19 +15,31 @@ export const useProtectedRoute = (): {
 
   const inAuthGroup = segments[0] === "(auth)";
 
+  // Re-resolve at the auth boundary so a deep link cannot bypass the
+  // authentication flow.
   useEffect(() => {
+    let cancelled = false;
+
+    // The previous route is no longer authoritative once the auth-group
+    // boundary changes. Clear it immediately while the new state resolves so
+    // authenticated-only integrations cannot remain enabled during logout.
+    setInitialRouteName(undefined);
+
     const handleRouting = async () => {
       // It is safe to call this without a try/catch because the
       // `getInitialRouteName` function will always return a valid route name.
-      const initialRouteName = await getInitialRouteName();
+      const resolvedRouteName = await getInitialRouteName();
 
-      setInitialRouteName(initialRouteName);
+      if (!cancelled) {
+        setInitialRouteName(resolvedRouteName);
+      }
     };
 
     void handleRouting();
 
-    // Makes sure the user cannot bypass the authentication flow
-    // when entering via a deeplink
+    return () => {
+      cancelled = true;
+    };
   }, [inAuthGroup]);
 
   return { initialRouteName };

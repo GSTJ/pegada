@@ -217,8 +217,8 @@
     "years": "0-{{maxYears}}+ anos"
   },
   "quickActions": {
-    "matches": "Matches",
-    "editProfile": "Editar perfil"
+    "findDogs": "Encontrar cachorros",
+    "matches": "Abrir matches"
   },
   "links": {
     "termsOfUse": "https://www.pegada.app/pt-br/terms-of-use",

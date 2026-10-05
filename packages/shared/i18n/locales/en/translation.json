@@ -217,8 +217,8 @@
     "years": "0-{{maxYears}}+ years"
   },
   "quickActions": {
-    "matches": "Matches",
-    "editProfile": "Edit profile"
+    "findDogs": "Find dogs",
+    "matches": "Open matches"
   },
   "plans": {
     "FREE": "Free",

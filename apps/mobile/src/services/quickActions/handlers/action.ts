@@ -1,22 +1,32 @@
-import * as QuickActions from "expo-quick-actions";
+import type * as QuickActions from "expo-quick-actions";
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
 import { SceneName } from "@/types/SceneName";
+import { createPendingQuickActionCoordinator } from "../coordinator";
 
 export enum QuickActionId {
+  FindDogs = "findDogs",
   Matches = "matches",
-  EditProfile = "editProfile",
 }
 
-// Holds a quick action tapped before we know whether the user is
-// authenticated and fully onboarded (mirrors `initialNotification` in
-// `services/linking/handlers/initialNotification.ts`). Cleared once
-// consumed so it doesn't replay on a later, unrelated auth resolution.
-let pendingQuickAction: QuickActions.Action | undefined;
+// Dynamic shortcuts can survive an app update until the new binary runs and
+// replaces them. Keep handling the removed action during that migration so a
+// cached shortcut still does what its label promised without advertising it.
+const LEGACY_EDIT_PROFILE_ACTION_ID = "editProfile";
+
+const pendingQuickAction = createPendingQuickActionCoordinator<QuickActions.Action>();
+
+export const captureInitialQuickAction = (action?: QuickActions.Action | null) => {
+  pendingQuickAction.captureInitial(action);
+};
 
 export const setPendingQuickAction = (action?: QuickActions.Action | null) => {
-  pendingQuickAction = action ?? undefined;
+  pendingQuickAction.queue(action);
+};
+
+export const clearPendingQuickAction = () => {
+  pendingQuickAction.clear();
 };
 
 const handleUnknownQuickAction = (id: string) => {
@@ -26,12 +36,16 @@ const handleUnknownQuickAction = (id: string) => {
 export const customQuickActionHandler = (action?: QuickActions.Action | null) => {
   if (!action) return;
 
-  if (action.id === QuickActionId.Matches) {
-    return router.push(SceneName.Messages);
+  if (action.id === QuickActionId.FindDogs) {
+    return router.navigate(SceneName.Swipe);
   }
 
-  if (action.id === QuickActionId.EditProfile) {
-    return router.push(SceneName.EditProfile);
+  if (action.id === QuickActionId.Matches) {
+    return router.navigate(SceneName.Messages);
+  }
+
+  if (action.id === LEGACY_EDIT_PROFILE_ACTION_ID) {
+    return router.navigate(SceneName.EditProfile);
   }
 
   handleUnknownQuickAction(action.id);
@@ -43,7 +57,5 @@ export const customQuickActionHandler = (action?: QuickActions.Action | null) =>
 // `services/linking`'s `processLinks` gets from only being called inside
 // the Swipe screen.
 export const flushPendingQuickAction = () => {
-  const action = pendingQuickAction;
-  pendingQuickAction = undefined;
-  customQuickActionHandler(action);
+  pendingQuickAction.consume(customQuickActionHandler);
 };
