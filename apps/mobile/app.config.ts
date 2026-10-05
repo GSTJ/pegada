@@ -11,18 +11,53 @@ const defaultLocaleNativeStrings = require("@pegada/shared/i18n/locales/en/nativ
 // into the generated Xcode "Bundle React Native code and images" build phase
 // and the Android Gradle release bundle task (see posthog-react-native's
 // tooling/posthog-xcode.sh and tooling/posthog.gradle). The Gradle side
-// already skips debug variants on its own; the Xcode side does not -- it
-// would run (and hard-fail the build) on ANY config, including a Debug
-// build on a real device, if posthog-cli can't authenticate.
+// skips debug variants; the Xcode wrapper is injected into every config and
+// skips upload only when the build itself sets SKIP_BUNDLING. A raw local
+// Release build would otherwise perform a real upload.
 //
-// Only apply the plugin when POSTHOG_CLI_API_KEY is present so a bare local
-// `expo prebuild`/`expo run:ios`/`expo run:android` (no EAS env, no
-// POSTHOG_CLI_* exported) never gets the upload step injected at all -- the
-// generated native project simply doesn't contain it, so there's nothing to
-// fail. CI (release-mobile.yml's `eas build --local`) and EAS-managed builds
-// pull POSTHOG_CLI_API_KEY from the EAS "production" environment, so the
-// plugin activates there automatically.
-const posthogSourcemapsEnabled = Boolean(process.env.POSTHOG_CLI_API_KEY);
+// Only apply the plugin inside a production EAS Build worker. EAS sets
+// EAS_BUILD for both cloud builds and `eas build --local`, but not while
+// running raw local `expo prebuild`/`expo run:*`/Xcode builds. The production
+// profile's explicit marker keeps development builds out and prevents a
+// pulled production `.env.local` from turning a local Release simulator build
+// into a real PostHog upload.
+const posthogSourcemapsRequired = process.env.PEGADA_POSTHOG_SOURCEMAPS_REQUIRED === "1";
+const posthogSourcemapConfigurationError = (() => {
+  const missingVariables = [
+    "POSTHOG_CLI_API_KEY",
+    "POSTHOG_CLI_HOST",
+    "POSTHOG_CLI_PROJECT_ID",
+  ].filter((variableName) => !process.env[variableName]);
+  if (missingVariables.length > 0) {
+    return `missing ${missingVariables.join(", ")}`;
+  }
+  if (!process.env.POSTHOG_CLI_API_KEY?.startsWith("phx_")) {
+    return "POSTHOG_CLI_API_KEY is not a personal API key";
+  }
+  if (!process.env.POSTHOG_CLI_HOST?.startsWith("https://")) {
+    return "POSTHOG_CLI_HOST is not an HTTPS URL";
+  }
+  if (!/^\d+$/.test(process.env.POSTHOG_CLI_PROJECT_ID ?? "")) {
+    return "POSTHOG_CLI_PROJECT_ID is not numeric";
+  }
+  if (process.env.POSTHOG_CLI_DRY_RUN === "true") {
+    return "POSTHOG_CLI_DRY_RUN must be disabled";
+  }
+  return undefined;
+})();
+if (
+  process.env.EAS_BUILD === "true" &&
+  posthogSourcemapsRequired &&
+  posthogSourcemapConfigurationError
+) {
+  throw new Error(
+    `Invalid PostHog sourcemap configuration: ${posthogSourcemapConfigurationError}. Fix the EAS production environment before building.`,
+  );
+}
+const posthogSourcemapsEnabled =
+  process.env.EAS_BUILD === "true" &&
+  posthogSourcemapsRequired &&
+  !posthogSourcemapConfigurationError;
 
 const config: ExpoConfig = {
   /**
@@ -30,7 +65,7 @@ const config: ExpoConfig = {
    * That affects eas updates and makes sure the app doesn't
    * break when updating Over The Air
    */
-  version: "1.4.0",
+  version: "1.5.0",
   runtimeVersion: {
     policy: "appVersion",
   },

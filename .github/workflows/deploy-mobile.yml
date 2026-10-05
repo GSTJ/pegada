@@ -81,13 +81,10 @@ jobs:
         run: eas update --auto --non-interactive --environment production
         working-directory: apps/mobile
 
-      # `eas update` publishes the OTA bundle but never uploads sourcemaps
-      # anywhere (that's a separate step per PostHog's docs). `eas env:exec`
-      # pulls POSTHOG_CLI_API_KEY/HOST/PROJECT_ID from the EAS "production"
-      # environment (POSTHOG_CLI_API_KEY is stored there as "sensitive", not
-      # "secret", so it IS readable by the CLI here) and injects them into
-      # the script's shell env; the script itself no-ops if the key is
-      # somehow still missing.
+      # `eas update` leaves the exact published bundles and private sourcemaps
+      # in dist. Upload that unchanged directory so PostHog receives the same
+      # debug IDs users run. `eas env:exec` injects the production PostHog CLI
+      # credentials without exposing their values in this workflow.
       - name: 🗺️ Upload PostHog sourcemaps (OTA)
-        run: eas env:exec production 'pnpm run sourcemaps:upload:ota' --non-interactive
+        run: eas env:exec production 'corepack pnpm run sourcemaps:upload:ota' --non-interactive
         working-directory: apps/mobile

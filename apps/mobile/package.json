@@ -12,6 +12,7 @@
     "expo:prebuild": "expo prebuild",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
     "preinstall": "pnpm setup:secret:files",
+    "sourcemaps:check-env": "../../scripts/validate-posthog-sourcemap-env.sh",
     "sourcemaps:upload:ota": "../../scripts/upload-posthog-sourcemaps-ota.sh"
   },
   "dependencies": {

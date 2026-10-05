@@ -23,6 +23,9 @@
       "extends": "fast",
       "node": "20.10.0",
       "environment": "production",
+      "env": {
+        "PEGADA_POSTHOG_SOURCEMAPS_REQUIRED": "1"
+      },
       "channel": "main",
       "autoIncrement": true
     }

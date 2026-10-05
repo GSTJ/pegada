@@ -196,6 +196,10 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Validate PostHog sourcemap credentials
+        working-directory: apps/mobile
+        run: eas env:exec production 'corepack pnpm run sourcemaps:check-env' --non-interactive
+
       - name: EAS build (iOS, production, local)
         working-directory: apps/mobile
         run: |
@@ -312,6 +316,10 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Validate PostHog sourcemap credentials
+        working-directory: apps/mobile
+        run: eas env:exec production 'corepack pnpm run sourcemaps:check-env' --non-interactive
 
       # Root cause of the rc6 hang: the Gradle DAEMON hit its default
       # metaspace ceiling (~512 MiB, per Gradle's own
