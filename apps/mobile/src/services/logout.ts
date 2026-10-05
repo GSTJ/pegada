@@ -1,17 +1,21 @@
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
+import { unregisterPushNotifications } from "@/services/getPushNotificationToken";
 import { payments } from "@/services/payments";
 import { queryClient } from "@/services/queryClient";
 import { store } from "@/store";
 import { Actions } from "@/store/reducers/dogs";
 import { SceneName } from "@/types/SceneName";
 import { setInitialNotification } from "./linking/handlers/initialNotification";
+import { clearPendingReplyActions } from "./linking/handlers/notificationResponseState";
 import { deleteData, StorageKeys } from "./storage";
 
 export const logout = async () => {
   try {
     setInitialNotification(undefined);
+    clearPendingReplyActions();
+    await unregisterPushNotifications();
 
     await deleteData(StorageKeys.Token);
 

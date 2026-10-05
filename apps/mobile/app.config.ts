@@ -233,6 +233,9 @@ const config: ExpoConfig = {
     appStoreUrl: "https://apps.apple.com/app/id6450865592",
     infoPlist: {
       CFBundleAllowMixedLocalizations: true,
+      // Required by iOS to surface INSendMessageIntent-backed
+      // communication notifications. Keep Expo Router's activity type too.
+      NSUserActivityTypes: ["INSendMessageIntent", "$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route"],
     },
     splash: {
       backgroundColor: "#FFFFFF",

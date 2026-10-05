@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export enum StorageKeys {
   Token = "token",
+  PushToken = "pushToken",
   Theme = "theme",
   Language = "language",
   AppReviewRequestDate = "appReviewRequestDate",
@@ -17,6 +18,7 @@ export enum Theme {
 
 export interface StorageDataTypes {
   [StorageKeys.Token]: string;
+  [StorageKeys.PushToken]: string;
   [StorageKeys.Theme]: Theme;
   [StorageKeys.Language]: string;
   [StorageKeys.AppReviewRequestDate]: string;

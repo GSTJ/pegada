@@ -3,16 +3,50 @@ import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
 import { SceneName } from "@/types/SceneName";
+import { getNotificationResponseId } from "./notificationResponseState";
 
 export enum NotificationUrl {
   Match = "match/",
   Chat = "chat/",
 }
 
+type ParsedNotificationUrl = {
+  type: NotificationUrl;
+  matchId: string;
+  dogId: string;
+};
+
 export const getNotificationUrl = (
   response: Notifications.NotificationResponse,
 ): string | undefined => {
-  return response.notification.request.content.data?.url as string | undefined;
+  const url = response.notification.request.content.data?.url;
+  return typeof url === "string" ? url : undefined;
+};
+
+export const clearLastNotificationResponseIfMatching = async (responseId: string) => {
+  const lastResponse = await Notifications.getLastNotificationResponseAsync();
+
+  // Never clear a newer response that arrived while this intent was handled.
+  if (!lastResponse || getNotificationResponseId(lastResponse) !== responseId) return;
+
+  Notifications.clearLastNotificationResponse();
+};
+
+export const parseNotificationUrl = (url?: string): ParsedNotificationUrl | undefined => {
+  if (!url) return undefined;
+
+  const [type, matchId, dogId, ...extraParts] = url.split("/");
+  if (!matchId || !dogId || extraParts.length > 0) return undefined;
+
+  if (`${type}/` === NotificationUrl.Match) {
+    return { type: NotificationUrl.Match, matchId, dogId };
+  }
+
+  if (`${type}/` === NotificationUrl.Chat) {
+    return { type: NotificationUrl.Chat, matchId, dogId };
+  }
+
+  return undefined;
 };
 
 const handleUnknownNotification = (url: string) => {
@@ -20,14 +54,14 @@ const handleUnknownNotification = (url: string) => {
 };
 
 const handleMatchNotification = async (matchId: string, dogId: string) => {
-  return router.push({
+  return router.navigate({
     pathname: SceneName.NewMatch,
     params: { matchDogId: dogId, matchId: matchId },
   });
 };
 
 const handleChatNotification = async (matchId: string, dogId: string) => {
-  return router.push({
+  return router.navigate({
     pathname: `${SceneName.Chat}/[matchId]`,
     params: { dogId, matchId },
   });
@@ -36,23 +70,17 @@ const handleChatNotification = async (matchId: string, dogId: string) => {
 export const customNotificationHandler = async (url?: string) => {
   if (!url) return;
 
-  if (url.startsWith(NotificationUrl.Match)) {
-    const data = url.replace(NotificationUrl.Match, "");
-    const [matchId, dogId] = data.split("/");
-
-    if (!matchId || !dogId) throw new Error("Invalid notification url");
-
-    return handleMatchNotification(matchId, dogId);
+  const parsedUrl = parseNotificationUrl(url);
+  if (!parsedUrl) {
+    handleUnknownNotification(url);
+    return;
   }
 
-  if (url.startsWith(NotificationUrl.Chat)) {
-    const data = url.replace(NotificationUrl.Chat, "");
-    const [matchId, dogId] = data.split("/");
-
-    if (!matchId || !dogId) throw new Error("Invalid notification url");
-
-    return handleChatNotification(matchId, dogId);
+  if (parsedUrl.type === NotificationUrl.Match) {
+    return handleMatchNotification(parsedUrl.matchId, parsedUrl.dogId);
   }
 
-  handleUnknownNotification(url);
+  if (parsedUrl.type === NotificationUrl.Chat) {
+    return handleChatNotification(parsedUrl.matchId, parsedUrl.dogId);
+  }
 };

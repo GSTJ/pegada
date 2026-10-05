@@ -37,6 +37,8 @@
   "chat": {
     "notificationChannelName": "Messages",
     "replyAction": "Reply",
+    "replyFailed": "Couldn't send reply. Try again.",
+    "replySent": "Reply sent",
     "sendAMessageToStart": "Send a message to start the conversation",
     "today": "Today",
     "yesterday": "Yesterday",
@@ -196,6 +198,9 @@
     "sendMessage": "Send a Message",
     "youGotA": "You got a",
     "youLikedEachOther": "You and {{name}} liked each other!"
+  },
+  "notifications": {
+    "defaultChannelName": "Notifications"
   },
   "oneTimeCode": {
     "insertCode": "Insert the verification code we sent to:",

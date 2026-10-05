@@ -15,7 +15,7 @@ module.exports = {
   bundleIdentifier: ".notificationservice",
   // INSendMessageIntent + UNNotificationContent.updating(from:) need iOS 15+.
   deploymentTarget: "15.1",
-  frameworks: ["UserNotifications", "Intents"],
+  frameworks: ["UserNotifications", "Intents", "ImageIO", "UniformTypeIdentifiers"],
   entitlements: {
     // Communication-notification styling. Must also be enabled on the App ID
     // in the Apple Developer portal for device builds (simulator doesn't

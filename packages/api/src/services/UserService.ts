@@ -52,12 +52,54 @@ export class UserService {
   static blacklistPushToken(pushToken: string) {
     return prisma.user.updateMany({
       where: { pushToken },
-      data: { pushToken: "" },
+      data: { pushToken: null },
     });
+  }
+
+  /**
+   * Moves a physical device token to the currently authenticated account.
+   *
+   * Expo/APNs tokens identify an app installation, not a user. Serializing
+   * claims for the same token prevents two concurrent account logins from
+   * leaving that installation attached to both accounts.
+   */
+  static claimPushToken(userId: string, pushToken: string) {
+    return prisma.$transaction(async (tx) => {
+      // PostgreSQL advisory locks are transaction-scoped. Hash collisions only
+      // serialize unrelated registrations; they cannot weaken ownership.
+      await tx.$queryRaw`
+        SELECT pg_advisory_xact_lock(hashtext(${pushToken})::bigint)::text
+      `;
+      await tx.user.updateMany({
+        where: { pushToken, id: { not: userId } },
+        data: { pushToken: null },
+      });
+
+      return tx.user.update({
+        where: { id: userId },
+        data: { pushToken },
+      });
+    });
+  }
+
+  /** Clears only the token this device previously registered. */
+  static async clearPushToken(userId: string, expectedPushToken: string) {
+    await prisma.user.updateMany({
+      where: { id: userId, pushToken: expectedPushToken },
+      data: { pushToken: null },
+    });
+
+    return prisma.user.findUniqueOrThrow({ where: { id: userId } });
   }
 
   static getUserById(id: string) {
     return prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
+  static getUserByIdOrThrow(id: string) {
+    return prisma.user.findUniqueOrThrow({
       where: { id },
     });
   }

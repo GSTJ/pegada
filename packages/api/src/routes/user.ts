@@ -10,13 +10,30 @@ export const userSchema = z.object({
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
   pushToken: z.string().optional().nullable(),
+  expectedPushToken: z.string().optional(),
 });
 
 export const userRouter = createTRPCRouter({
   update: protectedProcedure.input(userSchema).mutation(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
-    const updatedDog = await UserService.updateUserById(userId, input);
-    return updatedDog;
+    const { pushToken, expectedPushToken, ...profile } = input;
+
+    const updatedProfile =
+      Object.keys(profile).length > 0
+        ? await UserService.updateUserById(userId, profile)
+        : undefined;
+
+    if (pushToken === null) {
+      if (!expectedPushToken)
+        throw new Error("expectedPushToken is required to clear a push token");
+      return UserService.clearPushToken(userId, expectedPushToken);
+    }
+
+    if (pushToken !== undefined) {
+      return UserService.claimPushToken(userId, pushToken);
+    }
+
+    return updatedProfile ?? UserService.getUserByIdOrThrow(userId);
   }),
 
   /**

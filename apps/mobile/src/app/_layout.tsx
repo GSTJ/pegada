@@ -17,8 +17,10 @@ import { TRPCProvider } from "@/contexts/TRPCProvider";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useTrackScreens } from "@/hooks/useTrackScreens";
 import { sendError } from "@/services/errorTracking";
+import { deactivateDeviceNotifications } from "@/services/getPushNotificationToken";
 import { useGetInitialNotifications } from "@/services/linking";
 import { store } from "@/store";
+import { SceneName } from "@/types/SceneName";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);
@@ -35,10 +37,16 @@ const App = () => {
       SplashScreen.hideAsync()?.catch(sendError);
       router.replace(initialRouteName);
     }
+
+    if (initialRouteName === SceneName.SignIn) {
+      void deactivateDeviceNotifications();
+    }
   }, [initialRouteName]);
 
   useTrackScreens();
-  useGetInitialNotifications();
+  useGetInitialNotifications(
+    initialRouteName === undefined ? undefined : initialRouteName === SceneName.Swipe,
+  );
 
   // MAESTRO_E2E only: render magic modals inside the main window instead
   // of RNScreens' FullWindowOverlay. The overlay is a separate native

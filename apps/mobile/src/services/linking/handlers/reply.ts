@@ -1,18 +1,47 @@
 import * as Notifications from "expo-notifications";
 
+import { showStatusToast } from "@/components/StatusToast";
 import { getTrcpContext } from "@/contexts/trcpContext";
+import i18n from "@/i18n";
 import { sendError } from "@/services/errorTracking";
 import { NotificationAction, NotificationCategory } from "@/services/getPushNotificationToken";
-import { getNotificationUrl, NotificationUrl } from "./notification";
+import {
+  clearLastNotificationResponseIfMatching,
+  getNotificationUrl,
+  NotificationUrl,
+  parseNotificationUrl,
+} from "./notification";
+import {
+  areNotificationResponsesEnabled,
+  getNotificationReplyClientMessageId,
+  getNotificationResponseId,
+  queuePendingReplyAction,
+  takePendingReplyActions,
+} from "./notificationResponseState";
 
-// Chat-message pushes carry `chat/<matchId>/<dogId>` in `data.url` (see
-// MessageService, server-side). Reused here to know which match the
-// "Reply" text-input action should send to.
+const handledReplyResponseIds = new Set<string>();
+const inFlightReplyActions = new Map<string, Promise<ReplyActionResult>>();
+const MAX_HANDLED_REPLY_RESPONSES = 100;
+
+export enum ReplyActionResult {
+  Sent = "sent",
+  Queued = "queued",
+  Duplicate = "duplicate",
+  Invalid = "invalid",
+}
+
+const rememberHandledReplyResponse = (responseId: string) => {
+  handledReplyResponseIds.add(responseId);
+
+  if (handledReplyResponseIds.size <= MAX_HANDLED_REPLY_RESPONSES) return;
+
+  const oldestResponseId = handledReplyResponseIds.values().next().value;
+  if (oldestResponseId) handledReplyResponseIds.delete(oldestResponseId);
+};
+
 const getMatchIdFromUrl = (url?: string): string | undefined => {
-  if (!url?.startsWith(NotificationUrl.Chat)) return undefined;
-
-  const [matchId] = url.replace(NotificationUrl.Chat, "").split("/");
-  return matchId;
+  const parsedUrl = parseNotificationUrl(url);
+  return parsedUrl?.type === NotificationUrl.Chat ? parsedUrl.matchId : undefined;
 };
 
 export const isReplyAction = (response: Notifications.NotificationResponse) => {
@@ -24,25 +53,102 @@ export const isReplyAction = (response: Notifications.NotificationResponse) => {
   );
 };
 
+const cleanUpHandledReply = async (
+  response: Notifications.NotificationResponse,
+  responseId: string,
+) => {
+  await clearLastNotificationResponseIfMatching(responseId).catch(sendError);
+  await Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(
+    sendError,
+  );
+};
+
 /**
- * Handles the "Reply" text-input action on a chat-message notification by
- * sending the typed text through the same tRPC mutation the Chat screen
- * uses, so it works without that screen being mounted.
- *
- * Fires for foreground and backgrounded apps. If the app was killed,
- * `opensAppToForeground` (default true on the action) brings it to the
- * foreground first so this listener can run - there is no reliable way
- * with expo-notifications alone to send the reply without doing that.
+ * Sends a notification text reply through the same tRPC mutation as Chat.
+ * The stable client message ID makes native response replay safe even after
+ * process death; the server returns the original row without pushing twice.
  */
 export const handleReplyAction = async (response: Notifications.NotificationResponse) => {
-  const content = response.userText?.trim();
-  const url = getNotificationUrl(response);
-  const matchId = getMatchIdFromUrl(url);
+  const responseId = getNotificationResponseId(response);
+  if (handledReplyResponseIds.has(responseId)) return ReplyActionResult.Duplicate;
 
-  if (!content || !matchId) {
-    sendError(new Error("Invalid reply notification: missing content or matchId"));
-    return;
+  const existingRequest = inFlightReplyActions.get(responseId);
+  if (existingRequest) return existingRequest;
+
+  const request = (async () => {
+    const content = response.userText?.trim();
+    const matchId = getMatchIdFromUrl(getNotificationUrl(response));
+
+    if (!content || !matchId) {
+      sendError(new Error("Invalid reply notification: missing content or matchId"));
+      showStatusToast(i18n.t("chat.replyFailed"), "error");
+      rememberHandledReplyResponse(responseId);
+      await cleanUpHandledReply(response, responseId);
+      return ReplyActionResult.Invalid;
+    }
+
+    try {
+      await getTrcpContext().client.message.send.mutate({
+        matchId,
+        content,
+        clientMessageId: getNotificationReplyClientMessageId(matchId, response),
+      });
+    } catch (error) {
+      showStatusToast(i18n.t("chat.replyFailed"), "error");
+      throw error;
+    }
+
+    rememberHandledReplyResponse(responseId);
+    await cleanUpHandledReply(response, responseId);
+    showStatusToast(i18n.t("chat.replySent"), "success");
+    return ReplyActionResult.Sent;
+  })();
+
+  inFlightReplyActions.set(responseId, request);
+
+  try {
+    return await request;
+  } finally {
+    inFlightReplyActions.delete(responseId);
+  }
+};
+
+export const routeReplyAction = (response: Notifications.NotificationResponse) => {
+  if (!areNotificationResponsesEnabled()) {
+    queuePendingReplyAction(response);
+    return Promise.resolve(ReplyActionResult.Queued);
   }
 
-  await getTrcpContext().client.message.send.mutate({ matchId, content });
+  return handleReplyAction(response);
+};
+
+export const flushPendingReplyActions = async () => {
+  const responses = takePendingReplyActions();
+
+  for (const [index, response] of responses.entries()) {
+    try {
+      // Replies are authored actions. Preserve their order when several were
+      // queued while authentication resolved.
+      // eslint-disable-next-line no-await-in-loop
+      await handleReplyAction(response);
+    } catch (error) {
+      // Preserve this response and every response behind it for the next
+      // authenticated linking mount.
+      for (const unhandledResponse of responses.slice(index)) {
+        queuePendingReplyAction(unhandledResponse);
+      }
+
+      throw error;
+    }
+  }
+};
+
+export const discardReplyAction = async (response: Notifications.NotificationResponse) => {
+  const responseId = getNotificationResponseId(response);
+  rememberHandledReplyResponse(responseId);
+  await cleanUpHandledReply(response, responseId);
+};
+
+export const discardPendingReplyActions = async () => {
+  await Promise.all(takePendingReplyActions().map(discardReplyAction));
 };
