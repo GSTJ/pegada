@@ -331,6 +331,7 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "app.pegada",
+    appleTeamId: "TWHC5L37B2",
     // Communication-notification styling for chat pushes (the
     // notification-service target carries the same entitlement; both need
     // the capability enabled on their App IDs in the Apple Developer
