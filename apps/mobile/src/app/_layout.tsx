@@ -28,14 +28,16 @@ const AppContainer = styled(GestureHandlerRootView)`
 `;
 
 const App = () => {
-  const { initialRouteName } = useProtectedRoute();
+  const { initialRouteName, shouldReplaceInitialRoute } = useProtectedRoute();
 
   useEffect(() => {
     if (initialRouteName) {
       SplashScreen.hideAsync()?.catch(sendError);
-      router.replace(initialRouteName);
+      if (shouldReplaceInitialRoute) {
+        router.replace(initialRouteName);
+      }
     }
-  }, [initialRouteName]);
+  }, [initialRouteName, shouldReplaceInitialRoute]);
 
   useTrackScreens();
   useGetInitialNotifications();

@@ -5,9 +5,9 @@
   "NSCameraUsageDescription": "The app allows you to take photos for your doggie's profile.",
   "ios": {
     "Localizable.strings": {
-      "appIntents_startSwiping_title": "Start Swiping",
-      "appIntents_startSwiping_description": "Opens Pegada ready to meet new dogs.",
-      "appIntents_openMatches_title": "Open Matches",
+      "appIntents_findDogs_title": "Find dogs",
+      "appIntents_findDogs_description": "Opens Pegada to find new dogs.",
+      "appIntents_openMatches_title": "Open matches",
       "appIntents_openMatches_description": "Opens your matches and conversations."
     }
   }

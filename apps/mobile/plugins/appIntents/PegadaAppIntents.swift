@@ -20,10 +20,20 @@ import UIKit
 /// Opens the app on the given deep-link path. These intents run inside the
 /// main app process (openAppWhenRun foregrounds the app first), so routing
 /// goes through UIApplication -> RCTLinkingManager -> expo-router.
+private enum DeepLinkOpenError: Error {
+  case invalidPath(String)
+  case rejected(URL)
+}
+
 @MainActor
-private func openDeepLink(path: String) {
-  guard let url = URL(string: "pegada://\(path)") else { return }
-  UIApplication.shared.open(url, options: [:], completionHandler: nil)
+private func openDeepLink(path: String) async throws {
+  guard let url = URL(string: "pegada://\(path)") else {
+    throw DeepLinkOpenError.invalidPath(path)
+  }
+
+  guard await UIApplication.shared.open(url) else {
+    throw DeepLinkOpenError.rejected(url)
+  }
 }
 
 // NOTE: identifier-style keys (not English text) because Expo's
@@ -32,18 +42,22 @@ private func openDeepLink(path: String) {
 // `defaultValue` keeps a readable English fallback if a lookup ever misses.
 
 @available(iOS 16.0, *)
-struct StartSwipingIntent: AppIntent {
+struct FindDogsIntent: AppIntent {
   static let title = LocalizedStringResource(
-    "appIntents_startSwiping_title", defaultValue: "Start Swiping")
+    "appIntents_findDogs_title", defaultValue: "Find dogs")
   static let description = IntentDescription(
     LocalizedStringResource(
-      "appIntents_startSwiping_description",
-      defaultValue: "Opens Pegada ready to meet new dogs."))
+      "appIntents_findDogs_description",
+      defaultValue: "Opens Pegada to find new dogs."))
+  // `supportedModes` replaces `openAppWhenRun` on iOS 26. Keep the legacy
+  // property for iOS 16-25, where IntentModes is unavailable.
   static let openAppWhenRun: Bool = true
+  @available(iOS 26.0, *)
+  static let supportedModes: IntentModes = .foreground
 
   @MainActor
   func perform() async throws -> some IntentResult {
-    openDeepLink(path: "swipe")
+    try await openDeepLink(path: "swipe")
     return .result()
   }
 }
@@ -51,16 +65,20 @@ struct StartSwipingIntent: AppIntent {
 @available(iOS 16.0, *)
 struct OpenMatchesIntent: AppIntent {
   static let title = LocalizedStringResource(
-    "appIntents_openMatches_title", defaultValue: "Open Matches")
+    "appIntents_openMatches_title", defaultValue: "Open matches")
   static let description = IntentDescription(
     LocalizedStringResource(
       "appIntents_openMatches_description",
       defaultValue: "Opens your matches and conversations."))
+  // `supportedModes` replaces `openAppWhenRun` on iOS 26. Keep the legacy
+  // property for iOS 16-25, where IntentModes is unavailable.
   static let openAppWhenRun: Bool = true
+  @available(iOS 26.0, *)
+  static let supportedModes: IntentModes = .foreground
 
   @MainActor
   func perform() async throws -> some IntentResult {
-    openDeepLink(path: "messages")
+    try await openDeepLink(path: "messages")
     return .result()
   }
 }
@@ -69,23 +87,23 @@ struct OpenMatchesIntent: AppIntent {
 struct PegadaAppShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(
-      intent: StartSwipingIntent(),
+      intent: FindDogsIntent(),
       phrases: [
-        "Start swiping in \(.applicationName)",
         "Find dogs in \(.applicationName)",
+        "Show dogs in \(.applicationName)",
       ],
       shortTitle: LocalizedStringResource(
-        "appIntents_startSwiping_title", defaultValue: "Start Swiping"),
+        "appIntents_findDogs_title", defaultValue: "Find dogs"),
       systemImageName: "pawprint.fill"
     )
     AppShortcut(
       intent: OpenMatchesIntent(),
       phrases: [
         "Open my matches in \(.applicationName)",
-        "Show my \(.applicationName) matches",
+        "Show my matches in \(.applicationName)",
       ],
       shortTitle: LocalizedStringResource(
-        "appIntents_openMatches_title", defaultValue: "Open Matches"),
+        "appIntents_openMatches_title", defaultValue: "Open matches"),
       systemImageName: "heart.fill"
     )
   }

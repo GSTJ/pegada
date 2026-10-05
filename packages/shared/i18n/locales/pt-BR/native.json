@@ -5,9 +5,9 @@
   "NSCameraUsageDescription": "O app permite tirar fotos para o perfil do seu doguinho.",
   "ios": {
     "Localizable.strings": {
-      "appIntents_startSwiping_title": "Procurar Doguinhos",
-      "appIntents_startSwiping_description": "Abre o Pegada pronto para conhecer novos doguinhos.",
-      "appIntents_openMatches_title": "Abrir Matches",
+      "appIntents_findDogs_title": "Encontrar cachorros",
+      "appIntents_findDogs_description": "Abre o Pegada para encontrar novos cachorros.",
+      "appIntents_openMatches_title": "Abrir matches",
       "appIntents_openMatches_description": "Abre seus matches e conversas."
     }
   }
