@@ -22,3 +22,4 @@ executionOrder:
     - 16-upgrade-wall
     - 17-location-map
     - 18-new-match
+    - 19-chat-message-order

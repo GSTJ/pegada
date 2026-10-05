@@ -1,0 +1,59 @@
+appId: ${APP_ID}
+name: E — Profile edit and preferences round-trip
+tags:
+  - smoke
+---
+# Login returning → Profile → Edit Profile → change name → Save → back →
+# Preferences → save → back. Replaces 13 (profile-view), 14 (profile-edit), 15 (preferences).
+# Hash-diff verification: ≥5 distinct screenshots prove edit + prefs rendered.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: /tmp/scenario-E-01-after-login
+# Profile tab
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-E-02-on-profile
+# Edit Profile row (first settings entry, ~50%, 40%)
+- tapOn:
+    point: "50%, 40%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-E-03-on-edit
+# Name field (~50%, 38%)
+- tapOn:
+    point: "50%, 38%"
+- waitForAnimationToEnd
+- eraseText: 30
+- inputText: "Buddy Maestro"
+- takeScreenshot: /tmp/scenario-E-04-edit-typed
+# Save (~50%, 60% with keyboard up)
+- tapOn:
+    point: "50%, 60%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_save__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/scenario-E-05-after-save
+# Back to profile
+- runFlow: utils/back.yaml
+- takeScreenshot: /tmp/scenario-E-06-back-on-profile
+# Preferences row (~50%, 47%)
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-E-07-on-prefs
+# Save (~50%, 92%)
+- tapOn:
+    point: "50%, 92%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_prefs__"
+    timeout: 10000
+    optional: true
+- takeScreenshot: /tmp/scenario-E-08-after-prefs-save
+- runFlow: utils/back.yaml
+- takeScreenshot: /tmp/scenario-E-09-final-on-profile

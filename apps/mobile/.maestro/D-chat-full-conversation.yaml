@@ -1,0 +1,56 @@
+appId: ${APP_ID}
+name: D — Chat full conversation (2 messages + back)
+tags:
+  - smoke
+---
+# Login returning → Messages tab → open first chat → send 2 messages → back to list.
+# Replaces 11 (messages-list), 12 (chat-conversation) with deeper coverage.
+# Hash-diff verification: ≥5 distinct screenshots prove input + send rendered.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: /tmp/scenario-D-01-after-login
+# Messages tab
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-D-02-messages
+# First chat row at ~50%, 25%
+- tapOn:
+    point: "50%, 25%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-D-03-on-chat
+# Tap input field at bottom (~50%, 92% when keyboard down)
+- tapOn:
+    point: "50%, 92%"
+- waitForAnimationToEnd
+- inputText: "Hello from Maestro"
+- takeScreenshot: /tmp/scenario-D-04-typed-1
+# Send button (right of input). With keyboard up the input moves up; send at ~92%, 70%
+- tapOn:
+    point: "92%, 70%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_send__"
+    timeout: 5000
+    optional: true
+- takeScreenshot: /tmp/scenario-D-05-after-send-1
+# Second message
+- tapOn:
+    point: "50%, 70%"
+- waitForAnimationToEnd
+- inputText: "Test 2"
+- takeScreenshot: /tmp/scenario-D-06-typed-2
+- tapOn:
+    point: "92%, 70%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_send2__"
+    timeout: 5000
+    optional: true
+- takeScreenshot: /tmp/scenario-D-07-after-send-2
+# Back to messages list
+- runFlow: utils/back.yaml
+- takeScreenshot: /tmp/scenario-D-08-back-on-messages

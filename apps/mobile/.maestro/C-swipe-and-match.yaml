@@ -1,0 +1,46 @@
+appId: ${APP_ID}
+name: "C — Swipe deck: like, dislike, like (3 cards)"
+tags:
+  - smoke
+---
+# Login returning → on Swipe tap LIKE → next card → DISLIKE → next card → LIKE.
+# Replaces 08 (swipe-like), 09 (swipe-dislike). May trigger match modal (hint of 18).
+# Hash-diff verification: ≥4 distinct screenshots prove cards advanced.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: /tmp/scenario-C-01-after-login
+# Ensure on swipe tab
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-C-02-card-1
+# LIKE button right side of action bar at ~75%, 86%
+- tapOn:
+    point: "75%, 86%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_next__"
+    timeout: 5000
+    optional: true
+- takeScreenshot: /tmp/scenario-C-03-card-2
+# DISLIKE button left side at ~25%, 86%
+- tapOn:
+    point: "25%, 86%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_next__"
+    timeout: 5000
+    optional: true
+- takeScreenshot: /tmp/scenario-C-04-card-3
+# LIKE again
+- tapOn:
+    point: "75%, 86%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_next__"
+    timeout: 5000
+    optional: true
+- takeScreenshot: /tmp/scenario-C-05-final

@@ -1,0 +1,42 @@
+appId: ${APP_ID}
+name: F — Deep link modal coverage (upgrade wall + location map)
+tags:
+  - smoke
+---
+# Login returning → deep link upgrade-wall → close → deep link location-map → close.
+# Replaces 16 (upgrade-wall), 17 (location-map). Exercises Stack routing.
+# Hash-diff verification: ≥4 distinct screenshots prove modals rendered.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      location: inuse
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: /tmp/scenario-F-01-after-login
+# Upgrade wall deep link
+- openLink: ${APP_SCHEME}://upgrade-wall
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_upgrade__"
+    timeout: 8000
+    optional: true
+- takeScreenshot: /tmp/scenario-F-02-on-upgrade
+# Close (try top-right X)
+- tapOn:
+    point: "92%, 7%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-F-03-after-upgrade-close
+# Location map deep link
+- openLink: ${APP_SCHEME}://location-map
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: "__wait_map__"
+    timeout: 8000
+    optional: true
+- takeScreenshot: /tmp/scenario-F-04-on-map
+# Close (try top-left back)
+- tapOn:
+    point: "10%, 9%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-F-05-after-map-close

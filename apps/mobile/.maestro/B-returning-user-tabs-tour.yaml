@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+name: B — Returning user tabs tour (swipe → messages → profile → swipe)
+tags:
+  - smoke
+---
+# Login returning → cycle through all 3 tabs → back to swipe.
+# Replaces 07 (tabs), 11 (messages list), 13 (profile view).
+# Hash-diff verification: each tab should produce a distinct screenshot hash.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+- runFlow: utils/login-returning.yaml
+- takeScreenshot: /tmp/scenario-B-01-after-login
+# Should be on swipe by default
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-B-02-swipe
+# Messages tab (center)
+- tapOn:
+    point: "50%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-B-03-messages
+# Profile tab (right)
+- tapOn:
+    point: "83%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-B-04-profile
+# Back to swipe (left)
+- tapOn:
+    point: "17%, 95%"
+- waitForAnimationToEnd
+- takeScreenshot: /tmp/scenario-B-05-back-to-swipe
