@@ -51,7 +51,8 @@ tags:
 # Type a unique name + bio. Capture a single timestamp into output so
 # every later reference uses the same value (Date.now() re-evaluated
 # inline would drift by a few ms between steps).
-- evalScript: ${output.profileJourney = { ts: Date.now() }}
+- evalScript: |-
+    output.profileJourney = { ts: Date.now() }
 
 - tapOn:
     id: "edit-profile-name"
