@@ -1,10 +1,10 @@
 import "@/config";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { magicModal, MagicModalPortal } from "react-native-magic-modal";
 import { PostHogProvider } from "posthog-react-native";
-import { router, SplashScreen, Stack } from "expo-router";
+import { router, SplashScreen, Stack, useSegments } from "expo-router";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Provider } from "react-redux";
 import styled from "styled-components/native";
@@ -19,6 +19,7 @@ import { useTrackScreens } from "@/hooks/useTrackScreens";
 import { sendError } from "@/services/errorTracking";
 import { useGetInitialNotifications } from "@/services/linking";
 import { store } from "@/store";
+import { SceneName } from "@/types/SceneName";
 
 // Wait for the assets to load before hiding the SplashScreen
 SplashScreen.preventAutoHideAsync()?.catch(sendError);
@@ -29,13 +30,28 @@ const AppContainer = styled(GestureHandlerRootView)`
 
 const App = () => {
   const { initialRouteName } = useProtectedRoute();
+  const segments = useSegments();
+  const routeGroup = segments[0];
+  const lastHandledInitialRouteRef = useRef(initialRouteName);
 
   useEffect(() => {
-    if (initialRouteName) {
+    if (initialRouteName && lastHandledInitialRouteRef.current !== initialRouteName) {
+      // Segment changes alone must never replay a stale auth destination. In
+      // particular, logout enters `(auth)` before its async route check has
+      // replaced the previous `/swipe` result.
+      lastHandledInitialRouteRef.current = initialRouteName;
       SplashScreen.hideAsync()?.catch(sendError);
-      router.replace(initialRouteName);
+
+      // Once authentication and onboarding are complete, keep a valid app
+      // deep link (for example the matches widget opening Messages) instead
+      // of replacing it with the default Swipe tab.
+      const canKeepAppDeepLink = initialRouteName === SceneName.Swipe && routeGroup === "(app)";
+
+      if (!canKeepAppDeepLink) {
+        router.replace(initialRouteName);
+      }
     }
-  }, [initialRouteName]);
+  }, [initialRouteName, routeGroup]);
 
   useTrackScreens();
   useGetInitialNotifications();

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="pegada_widget_label">Matches</string>
-  <string name="pegada_widget_description">Veja os matches esperando sua resposta.</string>
-  <string name="pegada_widget_placeholder">Abra o Pegada para ver seus matches aqui</string>
+  <string name="pegada_widget_description">Veja matches prontos para conversar.</string>
+  <string name="pegada_widget_placeholder">Abra o Pegada para carregar seus matches</string>
+  <string name="pegada_widget_placeholder_primary">Abra o Pegada</string>
+  <string name="pegada_widget_placeholder_secondary">para carregar seus matches</string>
+  <string name="pegada_widget_preview_primary">Responder a Luna</string>
+  <string name="pegada_widget_preview_secondary">3 prontos pra conversar</string>
 </resources>

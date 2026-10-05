@@ -329,10 +329,15 @@
     "light": "Light"
   },
   "widget": {
-    "waitingForReply": "{{count}} match waiting for your reply",
-    "waitingForReply_plural": "{{count}} matches waiting for your reply",
-    "waitingForReplyCountless": "matches waiting for your reply",
-    "allCaughtUp": "All caught up! Go make new friends",
-    "signedOut": "Sign in to see your matches here"
+    "matchesReadyToChat": "{{count}} ready to chat",
+    "matchesReadyToChat_plural": "{{count}} ready to chat",
+    "replyTo": "Reply to {{name}}",
+    "sayHiTo": "Say hi to {{name}}",
+    "caughtUp": "All caught up",
+    "findMoreDogs": "Find more dogs",
+    "findDogs": "Find dogs",
+    "noMatchesYet": "No matches yet",
+    "signIn": "Sign in",
+    "seeYourMatches": "See your matches"
   }
 }

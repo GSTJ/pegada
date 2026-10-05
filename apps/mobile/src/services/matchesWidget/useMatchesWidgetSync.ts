@@ -4,6 +4,7 @@ import { AppState, AppStateStatus } from "react-native";
 import { api } from "@/contexts/TRPCProvider";
 import { sendError } from "@/services/errorTracking";
 import { syncMatchesWidget } from "./index";
+import { widgetSyncCoordinator } from "./syncCoordinator";
 
 /**
  * Keeps the home-screen widget in sync with the matches list. Mounted once
@@ -22,6 +23,10 @@ export const useMatchesWidgetSync = () => {
 
   useEffect(() => {
     let disposed = false;
+
+    // A new authenticated layout is the only event that reopens signed-in
+    // widget writes after logout. This runs before the session's first fetch.
+    widgetSyncCoordinator.beginSignedInSession();
 
     const syncFromServer = () => {
       utils.match.getAll

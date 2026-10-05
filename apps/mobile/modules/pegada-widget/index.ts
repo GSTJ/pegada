@@ -15,27 +15,28 @@ export const WIDGET_APP_GROUP = "group.app.pegada";
  * iOS, inside the app's document directory on Android.
  */
 export type WidgetSnapshotDog = {
+  matchId: string;
+  dogId: string;
   name: string;
   avatar: string | null;
+  prompt: string | null;
 };
+
+export type WidgetSnapshotState = "attention" | "caughtUp" | "noMatches" | "signedOut";
 
 /**
  * All user-facing strings arrive pre-localized from JS (i18next), so the
- * native side stays data-driven and never hardcodes copy. `message` always
- * matches the current state (waiting count, all caught up, or logged out).
- *
- * `messageCountless` is the same "waiting for reply" copy without the
- * leading count (e.g. "matches waiting for your reply"). Layouts that
- * already show the count as a standalone numeral (MEDIUM) use this instead
- * of `message` so the count isn't printed twice; it's `null` whenever
- * `message` isn't the "waiting for reply" variant (all caught up, logged
- * out).
+ * native side stays data-driven and never hardcodes signed-in copy. `state`,
+ * `primary`, and `secondary` drive the current layouts; `message` preserves
+ * compatibility with widget code from older app builds.
  */
 export type WidgetSnapshot = {
+  state: WidgetSnapshotState;
   loggedIn: boolean;
   count: number;
+  primary: string;
+  secondary: string;
   message: string;
-  messageCountless: string | null;
   dogs: WidgetSnapshotDog[];
 };
 

@@ -1,7 +1,10 @@
 import { router } from "expo-router";
 
 import { sendError } from "@/services/errorTracking";
-import { syncMatchesWidgetLoggedOut } from "@/services/matchesWidget";
+import {
+  invalidateMatchesWidgetSignedInWork,
+  syncMatchesWidgetLoggedOut,
+} from "@/services/matchesWidget";
 import { payments } from "@/services/payments";
 import { queryClient } from "@/services/queryClient";
 import { store } from "@/store";
@@ -14,6 +17,10 @@ export const logout = async () => {
   try {
     setInitialNotification(undefined);
 
+    // Close the privacy barrier before the first asynchronous logout step.
+    invalidateMatchesWidgetSignedInWork();
+    const widgetLogout = syncMatchesWidgetLoggedOut();
+
     await deleteData(StorageKeys.Token);
 
     // Clear redux store
@@ -21,14 +28,11 @@ export const logout = async () => {
 
     router.replace(SceneName.SignIn);
 
-    await payments.logOut();
-
-    // Leave a localized sign-in prompt on the home-screen widget and wipe
-    // the cached avatars.
-    await syncMatchesWidgetLoggedOut();
-
-    // Clear request caches
+    // Never leave the previous account's matches available to a newly mounted
+    // authenticated tree, even if the independent payments SDK fails.
     queryClient.clear();
+
+    await Promise.all([payments.logOut().catch(sendError), widgetLogout]);
   } catch (error) {
     sendError(error);
   }

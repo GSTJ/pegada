@@ -10,4 +10,5 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
+    android:previewLayout="@layout/pegada_widget_preview"
     android:initialLayout="@layout/glance_default_loading_layout" />

@@ -329,10 +329,15 @@
     "light": "Claro"
   },
   "widget": {
-    "waitingForReply": "{{count}} match esperando sua resposta",
-    "waitingForReply_plural": "{{count}} matches esperando sua resposta",
-    "waitingForReplyCountless": "matches esperando sua resposta",
-    "allCaughtUp": "Tudo respondido! Bora fazer novos amigos",
-    "signedOut": "Entre para ver seus matches aqui"
+    "matchesReadyToChat": "{{count}} pronto pra conversar",
+    "matchesReadyToChat_plural": "{{count}} prontos pra conversar",
+    "replyTo": "Responder a {{name}}",
+    "sayHiTo": "Dar oi pra {{name}}",
+    "caughtUp": "Tudo em dia",
+    "findMoreDogs": "Encontrar mais cachorros",
+    "findDogs": "Encontrar cachorros",
+    "noMatchesYet": "Nenhum match ainda",
+    "signIn": "Entrar",
+    "seeYourMatches": "Ver seus matches"
   }
 }

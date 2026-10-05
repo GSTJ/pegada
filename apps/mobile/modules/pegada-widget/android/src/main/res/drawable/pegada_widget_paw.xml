@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Paw print (Material Symbols "pets", Apache 2.0). Base fill is the brand
-  pink; Glance tints it per-theme at render time.
--->
+<!-- Material Symbols "pets" (Apache 2.0), tinted per theme by Glance. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="pegada_widget_preview_background">#FF000000</color>
+  <color name="pegada_widget_preview_brand">#FFD35A90</color>
+  <color name="pegada_widget_preview_brand_faint">#2ED35A90</color>
+  <color name="pegada_widget_preview_text">#FFF2F2F2</color>
+  <color name="pegada_widget_preview_subtitle">#FF999999</color>
+</resources>

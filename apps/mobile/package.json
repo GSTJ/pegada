@@ -10,6 +10,7 @@
     "eject": "expo eject",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "expo:prebuild": "expo prebuild",
+    "verify:widget": "node scripts/verify-widget-sync-races.mjs && node scripts/verify-widget-contract.mjs",
     "setup:secret:files": "[ ! -s ./google-services.json ] && printf '%s' \"$GOOGLE_SERVICES_JSON\" > ./google-services.json || echo \"\" ; [ ! -s ./GoogleService-Info.plist ] && printf '%s' \"$GOOGLE_SERVICE_INFO_PLIST\" > ./GoogleService-Info.plist || echo \"\"",
     "preinstall": "pnpm setup:secret:files"
   },

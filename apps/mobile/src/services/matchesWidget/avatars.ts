@@ -60,6 +60,7 @@ const hash = (value: string) => {
  */
 export const downloadWidgetAvatars = async (
   sources: WidgetAvatarSource[],
+  isLatest: () => boolean = () => true,
 ): Promise<Map<string, string>> => {
   const avatarPathByDogId = new Map<string, string>();
 
@@ -89,6 +90,11 @@ export const downloadWidgetAvatars = async (
       }
     }),
   );
+
+  // Another sync or logout may have been requested while a download was in
+  // flight. That newer generation owns cleanup; stale work must never delete
+  // its avatar files.
+  if (!isLatest()) return avatarPathByDogId;
 
   try {
     for (const entry of directory.list()) {
