@@ -63,6 +63,7 @@ overrides:
   uuid: ^11.1.1
   ws@7: ^7.5.11
   ws@8: ^8.21.0
+  handlebars: ^4.7.10
 
 # pnpm 11 refuses to resolve a version published less than `minimumReleaseAge`
 # ago. These exact versions were already reviewed and committed before the
@@ -72,6 +73,15 @@ minimumReleaseAgeExclude:
   - "@emnapi/runtime@1.11.3"
   - "@eslint-community/eslint-utils@4.10.1"
   - "@next/env@15.5.22"
+  - "@next/env@15.5.27"
+  - "@next/swc-darwin-arm64@15.5.27"
+  - "@next/swc-darwin-x64@15.5.27"
+  - "@next/swc-linux-arm64-gnu@15.5.27"
+  - "@next/swc-linux-arm64-musl@15.5.27"
+  - "@next/swc-linux-x64-gnu@15.5.27"
+  - "@next/swc-linux-x64-musl@15.5.27"
+  - "@next/swc-win32-arm64-msvc@15.5.27"
+  - "@next/swc-win32-x64-msvc@15.5.27"
   - "@next/swc-darwin-arm64@15.5.22"
   - "@next/swc-darwin-x64@15.5.22"
   - "@next/swc-linux-arm64-gnu@15.5.22"
@@ -98,7 +108,9 @@ minimumReleaseAgeExclude:
   - "@img/sharp-*"
   - "magic-*"
   - nanoid@3.3.18
+  - handlebars@4.7.10
   - next@15.5.22
+  - next@15.5.27
   - node-stream-zip@1.16.0
   - postcss@8.5.23
   - posthog-js@1.407.2
