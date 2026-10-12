@@ -52,6 +52,7 @@ overrides:
   on-headers: ^1.1.0
   picomatch@2: ^2.3.2
   postcss: ^8.5.18
+  postcss-selector-parser: ^7.1.6
   source-map-js: ^1.2.2
   tinypool: ^2.1.2
   compression: ^1.8.2
