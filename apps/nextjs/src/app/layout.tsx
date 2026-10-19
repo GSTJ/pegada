@@ -30,10 +30,10 @@ const SITE_URL = new URL("https://www.pegada.app");
  * into WhatsApp. One file per locale, same as the story page's card.
  */
 const OG_IMAGE_BY_LOCALE: Record<string, string> = {
-  "pt-br": "/og-image-pt-br.png",
+  "pt-br": "/og-image-pt-br-v2.png",
 };
 
-const OG_IMAGE_FALLBACK = "/og-image.png";
+const OG_IMAGE_FALLBACK = "/og-image-v2.png";
 
 const ogImage = (locale: string) => ({
   url: OG_IMAGE_BY_LOCALE[locale] ?? OG_IMAGE_FALLBACK,
