@@ -36,7 +36,24 @@
     "hero": {
       "title": "Amigos pro seu dog",
       "description": "Aqui do lado tem cachorro da mesma raça que o seu.",
-      "storyLink": "Faz o story do seu dog"
+      "storyLink": "Faz o story do seu dog",
+      "deckLabel": "Cachorros perto de você",
+      "deckRole": "pilha de cards",
+      "deckKeys": "Seta pra esquerda passa, seta pra cima é talvez, seta pra direita curte. Enter vira o card.",
+      "hint": "Arrasta o card pra esquerda pra passar, pra cima pra talvez, pra direita pra curtir. Toca nele pra ler o perfil.",
+      "note": "Cachorros das telas do próprio Pegada. Aqui, a Nina curte o seu de volta.",
+      "skip": "Passar",
+      "maybe": "Talvez",
+      "like": "Curtir",
+      "skipped": "Você passou {{name}}.",
+      "maybed": "{{name}} ficou no talvez.",
+      "liked": "Você curtiu {{name}}.",
+      "profile": "Perfil de {{name}}.",
+      "photo": "Foto de {{name}}.",
+      "away": "a {{km}} km",
+      "yourDog": "Seu dog",
+      "reshuffle": "Embaralhar de novo",
+      "shuffled": "Cards embaralhados."
     },
     "profile": {
       "title": "O perfil é do seu cachorro",
