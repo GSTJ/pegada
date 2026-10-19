@@ -1,0 +1,613 @@
+/*
+ * The hero: the pitch on the left, the app's deck on the right (below it on a
+ * phone). Card motion values are the app's (`hero-swipe.ts`).
+ */
+
+.grid {
+  display: grid;
+  gap: 28px;
+  grid-template-areas:
+    "copy"
+    "play"
+    "story";
+}
+
+.copy {
+  grid-area: copy;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.story {
+  grid-area: story;
+  justify-self: center;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas:
+      ". play"
+      "copy play"
+      "story play"
+      ". play";
+    column-gap: 48px;
+    row-gap: 20px;
+    align-items: center;
+  }
+
+  .copy {
+    gap: 26px;
+    padding-top: 0;
+  }
+
+  .story {
+    justify-self: start;
+    align-self: start;
+  }
+}
+
+/* ---------- The deck ---------- */
+
+.play {
+  grid-area: play;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.deck {
+  /* The app's card is 90% of the screen; the page keeps a margin. */
+  --deck-w: min(88vw, 400px);
+  position: relative;
+  width: var(--deck-w);
+  aspect-ratio: 0.7;
+  border-radius: 24px;
+}
+
+@media (min-width: 1024px) {
+  .deck {
+    --deck-w: 420px;
+  }
+}
+
+.deck:focus-visible {
+  outline: 3px solid rgb(var(--ink));
+  outline-offset: 10px;
+  border-radius: 28px;
+}
+
+/* How the cards under the top one sit: dropped, shrunk, tilted. */
+.card {
+  position: absolute;
+  inset: 0;
+  z-index: calc(10 - var(--depth));
+  perspective: 1400px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate3d(0, calc(var(--depth) * 12px), 0)
+    scale(calc(1 - var(--depth) * 0.045)) rotate(var(--tilt, 0deg));
+  transition: transform 230ms var(--ease-drawer);
+}
+
+.card[data-top] {
+  cursor: grab;
+}
+
+.card[data-dragging] {
+  cursor: grabbing;
+  transition: none;
+}
+
+.card[hidden] {
+  display: none;
+}
+
+.inner {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 280ms var(--ease-in-out);
+}
+
+.card[data-flipped] .inner {
+  transform: rotateY(180deg);
+}
+
+.front,
+.back {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.front {
+  background: #1b1b1b;
+  color: #fff;
+}
+
+/*
+ * Unpainted until the card turns: a back face hidden only by
+ * `backface-visibility` still counts as the page's largest paint (LCP).
+ * On the way back it stays up until the turn has finished.
+ */
+.back {
+  transform: rotateY(180deg);
+  visibility: hidden;
+  transition: visibility 0s 280ms;
+}
+
+.card[data-flipped] .back {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.back > * {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.front::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 52%;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0));
+  pointer-events: none;
+}
+
+.distance {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.45);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.pin {
+  width: 11px;
+  height: 14px;
+}
+
+.caption {
+  position: absolute;
+  /* Clear of the reactions, which sit on the card's bottom edge. */
+  inset: auto 18px 64px;
+  z-index: 1;
+}
+
+.who {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.who b {
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.bio {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.92);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* `FeedbackCard`: a wash in the reaction's color with its emoji. */
+.feedback {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 230ms var(--ease-drawer);
+}
+
+.card[data-dragging] .feedback {
+  transition: none;
+}
+
+.feedback img {
+  width: 34%;
+  height: auto;
+}
+
+.feedback[data-feedback="like"] {
+  background: #cbffd0;
+}
+
+.feedback[data-feedback="nope"] {
+  background: #ffcecb;
+}
+
+.feedback[data-feedback="maybe"] {
+  background: #fffacb;
+}
+
+/* The app's three reactions, floating on the card's bottom edge as in the app. */
+.reactions {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: -56px;
+  transition: opacity 160ms var(--ease-out);
+}
+
+/* Out of the way while the match or the empty deck has the frame. */
+.reactions[data-idle] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reaction {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-print);
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease-out),
+    opacity 160ms var(--ease-out);
+}
+
+.reaction img {
+  width: 40px;
+  height: 40px;
+}
+
+.reaction[data-kind="maybe"] {
+  width: 52px;
+  height: 52px;
+}
+
+.reaction[data-kind="maybe"] img {
+  width: 28px;
+  height: 28px;
+}
+
+.reaction:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.reaction:focus-visible {
+  outline-color: rgb(var(--ink));
+}
+
+.reaction:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .reaction:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+}
+
+.hint {
+  max-width: 22em;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.note {
+  max-width: 26em;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  color: rgb(var(--ink));
+}
+
+/* ---------- Match and empty: in the deck's own frame ---------- */
+
+.panel {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Its own size units only reach its children, so these are plain. */
+  gap: 10px;
+  padding: 20px 18px;
+  border-radius: 24px;
+  background: #fff;
+  color: #172448;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  animation: panel-in 240ms var(--ease-out) both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.pair {
+  position: relative;
+  width: 100%;
+  height: 40cqh;
+  margin-bottom: 1cqh;
+}
+
+/* Two cards stacked, fanning open from their bottom edge like the app's. */
+.fan {
+  position: absolute;
+  left: 50%;
+  bottom: 6cqh;
+  width: 36cqi;
+  aspect-ratio: 2 / 3;
+  margin-left: -18cqi;
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: var(--shadow-print);
+  transform-origin: 50% 100%;
+  animation: 500ms var(--ease-out) 120ms both;
+}
+
+.fan img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mine {
+  display: grid;
+  /* The match's card covers the left of this one, so the content keeps right. */
+  place-content: center end;
+  justify-items: center;
+  padding-right: 9%;
+  white-space: nowrap;
+  gap: 6px;
+  background: #fdebf3;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4a5576;
+  transform: rotate(18deg);
+  animation-name: fan-right;
+}
+
+.minePaw {
+  width: 30cqi;
+  max-width: 44px;
+  color: #ee6aa7;
+}
+
+.theirs {
+  transform: rotate(-18deg);
+  animation-name: fan-left;
+}
+
+@keyframes fan-left {
+  from {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes fan-right {
+  from {
+    transform: rotate(0deg);
+  }
+}
+
+.heart {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 16cqi;
+  height: auto;
+  margin-left: -8cqi;
+  filter: drop-shadow(0 6px 10px rgb(23 36 72 / 0.25));
+}
+
+.gotA {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-size: clamp(16px, 5cqi, 19px);
+  line-height: 1.2;
+}
+
+.gotA:focus {
+  outline: none;
+}
+
+.wordmark {
+  width: 46cqi;
+  height: auto;
+}
+
+.panelTitle {
+  font-size: clamp(19px, 7cqi, 24px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.panelTitle:focus {
+  outline: none;
+}
+
+.panelText {
+  font-size: clamp(14px, 4.4cqi, 16px);
+  line-height: 1.4;
+  color: #4a5576;
+  text-wrap: balance;
+}
+
+.emptyPaw {
+  width: 22cqi;
+  color: #ee6aa7;
+}
+
+.panelActions {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin-top: 1cqh;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+
+.primary:active,
+.secondary:active {
+  transform: scale(0.97);
+}
+
+.primary {
+  background: #ee6aa7;
+  color: #172448;
+}
+
+.secondary {
+  background: #fff;
+  color: #be1e68;
+  box-shadow: inset 0 0 0 1.5px #ee6aa7;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5576;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.panel :focus-visible {
+  outline-color: #172448;
+}
+
+/* ---------- Motion budget ---------- */
+
+/*
+ * The cards under the lead one are dealt in behind it, once on first paint
+ * and again on a reshuffle. The lead card holds still: its photo is the LCP,
+ * and any smaller first paint would hand that to the card under it.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .card:not([data-lead]) {
+    animation: deal 520ms var(--ease-out) backwards;
+    animation-delay: calc(120ms + (2 - var(--depth)) * 90ms);
+  }
+}
+
+@keyframes deal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0) scale(0.92) rotate(-4deg);
+  }
+}
+
+/* Reduced motion: no deal, no turn, no fan. Faces crossfade, panels fade. */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card[data-dragging] {
+    transition: none;
+  }
+
+  .inner,
+  .card[data-flipped] .inner {
+    transform: none;
+  }
+
+  .front {
+    transition: opacity 160ms ease;
+  }
+
+  .back {
+    transform: none;
+    opacity: 0;
+    transition:
+      opacity 160ms ease,
+      visibility 0s 160ms;
+  }
+
+  .card[data-flipped] .back {
+    opacity: 1;
+  }
+
+  .card[data-flipped] .front {
+    opacity: 0;
+  }
+
+  .fan {
+    animation: none;
+  }
+
+  .panel {
+    animation-name: fade-in;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}

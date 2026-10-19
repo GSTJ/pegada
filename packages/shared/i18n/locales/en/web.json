@@ -36,7 +36,24 @@
     "hero": {
       "title": "Friends for your doggie",
       "description": "Pawfect matches by breed, close enough to walk to.",
-      "storyLink": "Make your dog's story"
+      "storyLink": "Make your dog's story",
+      "deckLabel": "Dogs near you",
+      "deckRole": "card deck",
+      "deckKeys": "Left arrow skips, up arrow is maybe, right arrow likes. Enter turns the card over.",
+      "hint": "Drag a card left to skip, up for maybe, right to like. Tap it to read the profile.",
+      "note": "Dogs from Pegada's own screenshots. Here, Nina likes you back.",
+      "skip": "Skip",
+      "maybe": "Maybe",
+      "like": "Like",
+      "skipped": "Skipped {{name}}.",
+      "maybed": "{{name}} saved as maybe.",
+      "liked": "Liked {{name}}.",
+      "profile": "{{name}}'s profile.",
+      "photo": "{{name}}'s photo.",
+      "away": "{{km}} km away",
+      "yourDog": "Your dog",
+      "reshuffle": "Shuffle the deck again",
+      "shuffled": "Deck shuffled."
     },
     "profile": {
       "title": "The profile is your dog's",
