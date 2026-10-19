@@ -245,9 +245,16 @@
   transition: none;
 }
 
-.feedback img {
-  width: 34%;
-  height: auto;
+/* Text emoji: sized by the card, not the type scale. */
+.emoji {
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.feedback .emoji {
+  font-size: calc(var(--deck-w) * 0.3);
 }
 
 .feedback[data-feedback="like"] {
@@ -293,9 +300,8 @@
     opacity 160ms var(--ease-out);
 }
 
-.reaction img {
-  width: 40px;
-  height: 40px;
+.reaction .emoji {
+  font-size: 34px;
 }
 
 .reaction[data-kind="maybe"] {
@@ -303,9 +309,8 @@
   height: 52px;
 }
 
-.reaction[data-kind="maybe"] img {
-  width: 28px;
-  height: 28px;
+.reaction[data-kind="maybe"] .emoji {
+  font-size: 24px;
 }
 
 .reaction:active:not(:disabled) {
@@ -445,9 +450,8 @@
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: 16cqi;
-  height: auto;
-  margin-left: -8cqi;
+  font-size: 14cqi;
+  transform: translateX(-50%);
   filter: drop-shadow(0 6px 10px rgb(23 36 72 / 0.25));
 }
 

@@ -96,11 +96,15 @@ const STACK = [0, -2, 2.5].map(
 /** Reanimated's default `withTiming` curve (quad in-out), for button throws. */
 const EASE_QUAD_IN_OUT = "cubic-bezier(0.45, 0, 0.55, 1)";
 
+/**
+ * The app's reactions as text emoji, drawn by the visitor's own system font:
+ * the app ships Apple's artwork, which isn't licensed for the web.
+ */
 const REACTIONS = [
-  { kind: "nope", icon: "/landing/hero/confused.webp" },
-  { kind: "maybe", icon: "/landing/hero/thinking.webp" },
-  { kind: "like", icon: "/landing/hero/heart-eyes.webp" },
-] as const satisfies { kind: SwipeKind; icon: string }[];
+  { kind: "nope", emoji: "😕" },
+  { kind: "maybe", emoji: "🤔" },
+  { kind: "like", emoji: "😍" },
+] as const satisfies { kind: SwipeKind; emoji: string }[];
 
 const LABEL: Record<SwipeKind, "skip" | "maybe" | "like"> = {
   nope: "skip",
@@ -124,7 +128,7 @@ type Drag = {
   samples: { t: number; x: number; y: number }[];
 };
 
-/** A small static webp (the app's emoji and wordmark): no image pipeline needed. */
+/** A small static webp (the app's wordmark): no image pipeline needed. */
 const Sticker = ({
   src,
   alt = "",
@@ -547,14 +551,14 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
                       <p className={styles.bio}>{inLocale(dog.bio, locale)}</p>
                     ) : null}
                   </div>
-                  {REACTIONS.map(({ kind, icon }) => (
+                  {REACTIONS.map(({ kind, emoji }) => (
                     <span
                       key={kind}
                       data-feedback={kind}
                       className={styles.feedback}
                       aria-hidden
                     >
-                      {ready ? <Sticker src={icon} /> : null}
+                      <span className={styles.emoji}>{emoji}</span>
                     </span>
                   ))}
                 </div>
@@ -576,10 +580,7 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
               <span className={cn(styles.fan, styles.theirs)}>
                 <DogPhoto dog={nina} alt="" />
               </span>
-              <Sticker
-                className={styles.heart}
-                src="/landing/hero/heart-eyes.webp"
-              />
+              <span className={cn(styles.emoji, styles.heart)}>😍</span>
             </div>
             <p ref={panelHeadingRef} tabIndex={-1} className={styles.gotA}>
               {copy.youGotA}{" "}
@@ -650,7 +651,7 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
       ) : null}
 
       <div className={styles.reactions} data-idle={Boolean(panel) || undefined}>
-        {REACTIONS.map(({ kind, icon }) => (
+        {REACTIONS.map(({ kind, emoji }) => (
           <button
             key={kind}
             type="button"
@@ -660,7 +661,9 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
             disabled={Boolean(panel) || !top}
             onClick={onReaction}
           >
-            <Sticker src={icon} />
+            <span className={styles.emoji} aria-hidden>
+              {emoji}
+            </span>
           </button>
         ))}
       </div>
