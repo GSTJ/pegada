@@ -1,82 +1,132 @@
 {
   "metadata": {
-    "title": "Pegada - Dog Dating App",
-    "description": "Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS.",
+    "title": "Pegada - Meetups for doggies",
+    "description": "Pegada finds friends for your dog nearby, to walk and play. Set up their profile, like the dogs that suit yours and chat after a match. Free on iPhone and Android.",
     "ogImageAlt": "An iPhone running Pegada, showing the profile of a golden retriever named Maui, beside the words “Friends For Your Doggie” and “Pawfect Matches”."
   },
-  "home": {
-    "title": "Friends For Your Doggie",
-    "description": "Pawfect matches by breed and personality, close enough to walk to.",
-    "cta": {
+  "landing": {
+    "chrome": {
+      "skipToContent": "Skip to content",
+      "home": "Pegada, home",
+      "navLabel": "Main",
+      "walk": "How it works",
+      "story": "Your dog's story",
+      "getTheApp": "Get the app",
+      "appStore": "App Store",
       "googlePlay": "Google Play",
-      "appStore": "App Store"
+      "languageLabel": "Language",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
+      "deleteAccount": "Delete account",
+      "productHunt": "Product Hunt",
+      "madeWithLoveBy": "Made with love by"
     },
-    "madeWithLoveBy": "Made with ❤️ by ",
-    "features": {
-      "title": "Built for dogs",
-      "match": {
-        "title": "Dogs that suit yours",
-        "description": "Breed, personality, and how far you'd actually walk. That's what we sort by."
-      },
-      "profile": {
-        "title": "The profile is your dog's",
-        "description": "Photos, age, the stuff they hate. You just hold the phone."
-      },
-      "inclusive": {
-        "title": "Mutts welcome",
-        "description": "Pedigree or no papers at all, everyone gets the same shot."
-      },
-      "messaging": {
-        "title": "You decide who talks to your dog",
-        "description": "The chat opens only after a match. Unmatch or report any time."
+    "idCard": {
+      "of": "{{name}}'s dog profile",
+      "kind": "Dog profile",
+      "name": "Name",
+      "age": "Age",
+      "breed": "Breed",
+      "distance": "Distance",
+      "bio": "Bio",
+      "signature": "Signature",
+      "photo": "Your dog's photo",
+      "blank": "A blank Pegada dog profile with the paw print already in the signature box, waiting for your dog's name, age, breed and photo."
+    },
+    "hero": {
+      "title": "Friends for your doggie",
+      "description": "Pawfect matches by breed, close enough to walk to.",
+      "storyLink": "Make your dog's story"
+    },
+    "profile": {
+      "title": "The profile is your dog's",
+      "description": "Photos, age, the stuff they hate. You just hold the phone.",
+      "legend": {
+        "photos": {
+          "title": "The dog up top.",
+          "body": "Their photos lead the profile, same as the cards in the deck."
+        },
+        "fields": {
+          "title": "Breed, age, bio.",
+          "body": "Tap the card to read everything their owner wrote."
+        },
+        "actions": {
+          "title": "Share or report.",
+          "body": "Every profile has both."
+        }
       }
     },
-    "howItWorks": {
+    "breeds": {
+      "title": "Mutts welcome",
+      "description": "Pedigree or no papers at all, everyone gets the same shot.",
+      "caption": "That's the breed list in the app, all 45 of them. Mixed Breed sits in the same list at the same size."
+    },
+    "preferences": {
+      "title": "Dogs that suit yours",
+      "description": "Breed, size, age, color, and how far you'd actually walk.",
+      "tags": {
+        "maxDistance": {
+          "label": "Maximum distance",
+          "value": "1-300+ km"
+        },
+        "ageRange": {
+          "label": "Age range",
+          "value": "0-10+ years"
+        },
+        "size": {
+          "label": "Size",
+          "value": "Extra Small to Giant"
+        },
+        "color": {
+          "label": "Color",
+          "value": "Any color"
+        }
+      }
+    },
+    "walk": {
       "title": "From profile to first walk",
-      "profile": {
+      "steps": {
+        "profile": {
+          "title": "Set up the profile",
+          "description": "Name, breed, a few photos.",
+          "alt": "A dog's profile in Pegada, showing breed, age and a short bio under the photo."
+        },
+        "swipe": {
+          "title": "See who's nearby",
+          "description": "One dog at a time, from your neighborhood. Like or skip.",
+          "alt": "The Pegada swipe screen: one dog's card filling the screen, the distance in the corner, the name and age across the bottom."
+        },
+        "match": {
+          "title": "Wait for the match",
+          "description": "If the other dog likes yours back, you both hear about it.",
+          "alt": "Pegada's match screen, with two dog photos overlapping under the word Match."
+        },
+        "chat": {
+          "title": "Say hi",
+          "description": "Pick a park, pick a time.",
+          "alt": "A Pegada chat between two owners settling on a morning at the park."
+        }
+      },
+      "rules": {
+        "title": "You decide who talks to your dog",
+        "description": "The chat opens only after a match. Unmatch or report any time.",
+        "share": "Share {{name}}'s profile",
+        "report": "Report {{name}}",
+        "unmatch": "Unmatch"
+      }
+    },
+    "storyCta": {
+      "story": {
+        "title": "Make your dog's story",
+        "description": "Pick the photos, the app builds it, you post it.",
+        "link": "See how it works"
+      },
+      "cta": {
         "title": "Set up the profile",
-        "description": "Name, breed, a few photos."
-      },
-      "swipe": {
-        "title": "See who's nearby",
-        "description": "One dog at a time, from your neighborhood. Like or skip."
-      },
-      "match": {
-        "title": "Wait for the match",
-        "description": "If the other dog likes yours back, you both hear about it."
-      },
-      "chat": {
-        "title": "Say hi",
-        "description": "Pick a park, pick a time."
+        "description": "Name, breed, a few photos.",
+        "free": "It's free on iPhone and Android."
       }
-    },
-    "screens": {
-      "title": "What it looks like",
-      "swipe": {
-        "title": "Who's nearby",
-        "description": "Their photo, their age, the distance.",
-        "alt": "The Pegada swipe screen: one dog's card filling the screen, the distance in the corner, the name and age across the bottom."
-      },
-      "profile": {
-        "title": "The full profile",
-        "description": "Tap the card to read everything their owner wrote.",
-        "alt": "A dog's profile in Pegada, showing breed, age and a short bio under the photo."
-      },
-      "match": {
-        "title": "The match",
-        "description": "Both dogs said yes. You can talk now.",
-        "alt": "Pegada's match screen, with two dog photos overlapping under the word Match."
-      },
-      "chat": {
-        "title": "Sorting out the walk",
-        "description": "Where to meet, and when.",
-        "alt": "A Pegada chat between two owners settling on a morning at the park."
-      }
-    },
-    "footer": {
-      "story": "Your dog's story"
-    },
-    "storyLink": "Make your dog's story"
+    }
   },
   "story": {
     "metadata": {

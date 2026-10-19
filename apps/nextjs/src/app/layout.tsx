@@ -1,11 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
-import { Epilogue } from "next/font/google";
-
 import { Analytics } from "@vercel/analytics/react";
 
 import { Providers } from "@/app/providers";
+import { dmMono, gilroy } from "@/lib/fonts";
 import { getRequestPathname, getSafeLocale } from "@/lib/get-safe-locale";
 import {
   LOCALE_SEGMENTS,
@@ -16,12 +15,6 @@ import {
 } from "@/lib/locales";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
-
-// oxlint-disable-next-line new-cap -- next/font loaders are capitalised functions, not constructors
-const epilogue = Epilogue({
-  variable: "--font-epilogue",
-  subsets: ["latin"],
-});
 
 /**
  * Every relative URL below (canonical, hreflang, `og:image`) is resolved
@@ -80,12 +73,16 @@ export const generateMetadata = () => {
     icons,
     alternates: {
       canonical,
-      languages: Object.fromEntries(
-        LOCALE_SEGMENTS.map((segment) => [
-          toLanguage(segment),
-          toLocalePath(segment, routePath),
-        ]),
-      ),
+      languages: {
+        ...Object.fromEntries(
+          LOCALE_SEGMENTS.map((segment) => [
+            toLanguage(segment),
+            toLocalePath(segment, routePath),
+          ]),
+        ),
+        // The unprefixed URL is the one that negotiates a language.
+        "x-default": routePath,
+      },
     },
     // No `title`/`description` here on purpose: Next falls back to the ones
     // above, and those are overridden per route (privacy policy, terms, …).
@@ -111,7 +108,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang={locale}>
       <Analytics />
-      <body className={cn(epilogue.variable, "font-epilogue")}>
+      <body className={cn(gilroy.variable, dmMono.variable)}>
         <Providers>{children}</Providers>
       </body>
     </html>

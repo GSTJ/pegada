@@ -22,7 +22,7 @@ import { getPostHog, getWebClient } from "magic-observability/web";
 export const DOWNLOAD_CTA_CLICKED = "Download CTA Clicked";
 
 /** Which page the button was on. */
-export type DownloadCtaPage = "landing" | "dog_share" | "story";
+export type DownloadCtaPage = "landing" | "dog_share" | "story" | "legal";
 
 /**
  * Where the click sends the visitor. `auto` is the `/store` route handler,

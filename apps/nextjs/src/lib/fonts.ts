@@ -1,53 +1,34 @@
 import localFont from "next/font/local";
 
 /**
- * The app is set in Gilroy (see `packages/shared/themes/themes.ts`); the rest
- * of this site is Epilogue (`src/app/layout.tsx`). Loaded here rather than in
- * the root layout, so only the pages that exist to look like the app they are
- * advertising pay for it: the dog share card and the story landing page.
+ * Gilroy is the app's own face (`packages/shared/themes/fonts`), and the whole
+ * site is set in it. These are those TTFs subset to Latin (which covers every
+ * pt-BR accent) and converted to woff2, about 23KB a weight instead of 140KB.
+ * The TTFs stay where they are for the OG image routes: satori cannot read
+ * woff2.
  *
- * The weights below are the ones those pages set: secondary copy in light,
- * body copy in medium, CTAs and taglines in semibold, headlines in
- * bold/extrabold.
- *
- * Light is here because `/dog/[id]` sets `font-light` on the card bio, the
- * "next step" line and the reassurance under the CTA. Without the face those
- * three fell back to Medium, which is the weight of the tagline sitting right
- * above the bio, so the two lines that were meant to differ were the same
- * stroke with different opacity.
- *
- * The TTFs live in `packages/shared/themes/fonts`, outside this app. That path
- * survives `next build` (verified via `pnpm -F @pegada/nextjs build`), so there
- * was no need to duplicate the files under `src/fonts`.
+ * Light is only here for `/dog/[id]`, which sets the card bio and the lines
+ * around the CTA in it. Semibold is the story page's button weight.
  */
 export const gilroy = localFont({
   variable: "--font-gilroy",
   display: "swap",
   src: [
-    {
-      path: "../../../../packages/shared/themes/fonts/Gilroy-Light.ttf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../../../../packages/shared/themes/fonts/Gilroy-Medium.ttf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../../../packages/shared/themes/fonts/Gilroy-SemiBold.ttf",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../../../../packages/shared/themes/fonts/Gilroy-Bold.ttf",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../../../../packages/shared/themes/fonts/Gilroy-ExtraBold.ttf",
-      weight: "800",
-      style: "normal",
-    },
+    { path: "../fonts/gilroy-300.woff2", weight: "300", style: "normal" },
+    { path: "../fonts/gilroy-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/gilroy-600.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/gilroy-700.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/gilroy-800.woff2", weight: "800", style: "normal" },
   ],
+});
+
+/**
+ * DM Mono (OFL) for machine data only: the MRZ line on the dog's ID card and
+ * numeric readouts. Never preloaded, nothing above the fold is set in it.
+ */
+export const dmMono = localFont({
+  variable: "--font-mono",
+  display: "swap",
+  preload: false,
+  src: [{ path: "../fonts/dm-mono-500.woff2", weight: "500", style: "normal" }],
 });

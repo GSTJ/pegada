@@ -2,11 +2,14 @@ import { NextRequest } from "next/server";
 
 import createMiddleware from "next-intl/middleware";
 
+import { LOCALE_COOKIE, localeCookiePolicy } from "@/lib/locale-cookie";
 import {
   DEFAULT_LOCALE_SEGMENT,
   LOCALE_SEGMENTS,
   PATHNAME_HEADER,
 } from "@/lib/locales";
+
+const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
 const handleI18nRouting = createMiddleware({
   // A list of all locales that are supported
@@ -18,7 +21,21 @@ const handleI18nRouting = createMiddleware({
 
   // If this locale is matched, pathnames work without a prefix (e.g. `/about`)
   defaultLocale: DEFAULT_LOCALE_SEGMENT,
+
+  // next-intl v4 makes it a session cookie. It only ever holds a choice the
+  // visitor made in the language switch now, so it should outlive the tab.
+  localeCookie: { maxAge: ONE_YEAR_IN_SECONDS },
 });
+
+/** Drops a `Set-Cookie` next-intl queued, without expiring the browser's copy. */
+const dropQueuedCookie = (response: Response, name: string) => {
+  const kept = response.headers
+    .getSetCookie()
+    .filter((cookie) => !cookie.startsWith(`${name}=`));
+
+  response.headers.delete("set-cookie");
+  for (const cookie of kept) response.headers.append("set-cookie", cookie);
+};
 
 /**
  * next-intl rewrites `/privacy-policy` to `/en-us/privacy-policy` before Next
@@ -33,7 +50,23 @@ const middleware = (request: NextRequest) => {
   const headers = new Headers(request.headers);
   headers.set(PATHNAME_HEADER, request.nextUrl.pathname);
 
-  return handleI18nRouting(new NextRequest(request, { headers }));
+  const response = handleI18nRouting(new NextRequest(request, { headers }));
+
+  const policy = localeCookiePolicy(
+    request.nextUrl.pathname,
+    DEFAULT_LOCALE_SEGMENT,
+    LOCALE_SEGMENTS,
+  );
+
+  if (policy !== "persist") dropQueuedCookie(response, LOCALE_COOKIE);
+  if (policy === "clear" && request.cookies.has(LOCALE_COOKIE)) {
+    response.headers.append(
+      "set-cookie",
+      `${LOCALE_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`,
+    );
+  }
+
+  return response;
 };
 
 export default middleware;

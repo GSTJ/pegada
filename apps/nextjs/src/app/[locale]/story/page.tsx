@@ -133,7 +133,7 @@ const StoreBadges = ({
         src="/app-store-icon.svg"
         alt="App Store"
       />
-      <StoreButton.Text>{t("home.cta.appStore")}</StoreButton.Text>
+      <StoreButton.Text>{t("landing.chrome.appStore")}</StoreButton.Text>
     </StoreButton>
     <StoreButton
       href={storeUrlFor({ target: "android", campaign: { ref: STORY_REF } })}
@@ -149,7 +149,7 @@ const StoreBadges = ({
         src="/google-play-icon.svg"
         alt="Google Play"
       />
-      <StoreButton.Text>{t("home.cta.googlePlay")}</StoreButton.Text>
+      <StoreButton.Text>{t("landing.chrome.googlePlay")}</StoreButton.Text>
     </StoreButton>
   </div>
 );

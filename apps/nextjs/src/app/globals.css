@@ -3,65 +3,142 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * The landing palette: app pink, plus the navy and yellow off the app's own
+   * story cards. Channels rather than hex so Tailwind's opacity modifiers work
+   * (tailwind.config.ts). White on pink is 2.89:1, so pink never carries
+   * white text; navy on pink is 5.25:1.
+   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    color-scheme: light dark;
+    accent-color: #ee6aa7;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --page: 255 255 255;
+    --paper: 255 255 255;
+    --ink: 23 36 72;
+    --ink-muted: 74 85 118;
+    --field: 238 106 167;
+    --blush: 253 235 243;
+    --pink-ink: 190 30 104;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --shadow-card:
+      0 22px 44px -18px rgb(23 36 72 / 0.5), 0 2px 6px rgb(23 36 72 / 0.16);
+    --shadow-print:
+      0 14px 30px -14px rgb(23 36 72 / 0.45), 0 1px 3px rgb(23 36 72 / 0.14);
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* A paw print pressed into the ground (PawPrint `pressed`). */
+    --print-floor: 238 196 214;
+    --print-wall: 196 140 166;
+    --print-lip: 255 255 255;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  /* The pink fields turn navy at night; ID cards stay paper. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: 11 16 34;
+      --paper: 24 33 63;
+      --ink: 243 241 247;
+      --ink-muted: 185 190 211;
+      --field: 23 36 72;
+      --blush: 20 27 54;
+      --pink-ink: 242 139 187;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+      --shadow-card:
+        0 22px 44px -18px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.4);
+      --shadow-print:
+        0 14px 30px -14px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.4);
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+      --print-floor: 62 76 132;
+      --print-wall: 8 12 28;
+      --print-lip: 92 106 168;
+    }
+  }
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+  body {
+    @apply bg-page font-sans text-body font-medium text-ink antialiased;
+  }
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+  ::selection {
+    background: #f6d34d;
+    color: #172448;
+  }
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+  /* The ring takes the text color, so it reads on pink, navy and paper alike. */
+  :focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+  [tabindex="-1"]:focus {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* The page column every landing section and the chrome sit in. */
+  .wrap {
+    @apply mx-auto w-full max-w-page px-gutter;
+  }
+}
+
+/*
+ * Reveal choreography (components/landing/reveal.tsx). A block marked
+ * `data-reveal` is hidden until it scrolls in, and its `data-role` children
+ * arrive in reading order. The hidden state only exists once the observer has
+ * taken over (`data-reveal-ready` on <html>) and only without a reduced-motion
+ * preference, so no JS or a failed script leaves the page fully visible.
+ *
+ * The transition sits in `:where()` so it carries no specificity: an element
+ * that declares its own transition keeps it.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :where([data-reveal-ready] [data-reveal] [data-role]) {
+    transition:
+      opacity 500ms var(--ease-out) var(--reveal-delay, 0ms),
+      transform 700ms var(--ease-out) var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal-ready] [data-reveal]:not([data-revealed]) [data-role] {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+
+  [data-reveal-ready] [data-reveal]:not([data-revealed]) [data-role="stamp"] {
+    transform: rotate(-14deg) scale(1.35);
+  }
+
+  [data-role="lede"] {
+    --reveal-delay: 80ms;
+  }
+
+  [data-role="body"] {
+    --reveal-delay: 120ms;
+  }
+
+  [data-role="card"] {
+    --reveal-delay: calc(160ms + var(--i, 0) * 60ms);
+  }
+
+  [data-role="action"] {
+    --reveal-delay: 240ms;
+  }
+
+  [data-role="stamp"] {
+    --reveal-delay: 420ms;
   }
 }

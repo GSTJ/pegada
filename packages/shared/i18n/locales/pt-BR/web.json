@@ -1,82 +1,132 @@
 {
   "metadata": {
-    "title": "Pegada - Aplicativo de relacionamento para cachorros",
-    "description": "Pegada é um aplicativo de relacionamento para cachorros. Com ele, você pode encontrar outros cachorros para passear, brincar e até mesmo namorar. O aplicativo é gratuito e está disponível para Android e iOS.",
+    "title": "Pegada - Amizades para doguinhos",
+    "description": "O Pegada encontra amigos pro seu cachorro aqui perto, pra passear e brincar. Cria o perfil dele, curte os cachorros que combinam e conversa depois do match. Grátis no iPhone e no Android.",
     "ogImageAlt": "Um iPhone com o Pegada aberto, mostrando o perfil de uma golden retriever chamada Maui, ao lado dos dizeres “Amigos pro seu dog” e “Cachorro aqui do lado”."
   },
-  "home": {
-    "title": "Amigos pro seu dog",
-    "description": "Aqui do lado tem cachorro da mesma raça e com o mesmo jeito do seu.",
-    "cta": {
+  "landing": {
+    "chrome": {
+      "skipToContent": "Pular para o conteúdo",
+      "home": "Pegada, início",
+      "navLabel": "Principal",
+      "walk": "Como funciona",
+      "story": "O story do seu dog",
+      "getTheApp": "Baixar o app",
+      "appStore": "App Store",
       "googlePlay": "Google Play",
-      "appStore": "App Store"
+      "languageLabel": "Idioma",
+      "privacy": "Política de privacidade",
+      "terms": "Termos de uso",
+      "deleteAccount": "Excluir conta",
+      "productHunt": "Product Hunt",
+      "madeWithLoveBy": "Feito com carinho por"
     },
-    "madeWithLoveBy": "Feito com ❤️ por ",
-    "features": {
-      "title": "Feito pro cachorro",
-      "match": {
-        "title": "Cachorro que combina com o seu",
-        "description": "Raça, jeito e distância que dá pra ir a pé."
-      },
-      "profile": {
-        "title": "O perfil é do seu cachorro",
-        "description": "Foto, idade, o que ele detesta. Você só segura o celular."
-      },
-      "inclusive": {
-        "title": "Vira-lata é bem-vindo",
-        "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito."
-      },
-      "messaging": {
-        "title": "Você decide quem fala com ele",
-        "description": "Conversa só depois do match. E dá pra desfazer o match ou denunciar a qualquer hora."
+    "idCard": {
+      "of": "Perfil de {{name}}",
+      "kind": "Perfil do cachorro",
+      "name": "Nome",
+      "age": "Idade",
+      "breed": "Raça",
+      "distance": "Distância",
+      "bio": "Bio",
+      "signature": "Assinatura",
+      "photo": "A foto do seu dog",
+      "blank": "Um perfil de cachorro do Pegada em branco, com a pegada já no campo da assinatura, esperando o nome, a idade, a raça e a foto do seu dog."
+    },
+    "hero": {
+      "title": "Amigos pro seu dog",
+      "description": "Aqui do lado tem cachorro da mesma raça que o seu.",
+      "storyLink": "Faz o story do seu dog"
+    },
+    "profile": {
+      "title": "O perfil é do seu cachorro",
+      "description": "Foto, idade, o que ele detesta. Você só segura o celular.",
+      "legend": {
+        "photos": {
+          "title": "O cachorro vem primeiro.",
+          "body": "As fotos dele abrem o perfil, igual nos cards do deck."
+        },
+        "fields": {
+          "title": "Raça, idade, bio.",
+          "body": "Toca no card pra ler tudo que o dono escreveu."
+        },
+        "actions": {
+          "title": "Compartilha ou denuncia.",
+          "body": "Todo perfil tem os dois."
+        }
       }
     },
-    "howItWorks": {
+    "breeds": {
+      "title": "Vira-lata é bem-vindo",
+      "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito.",
+      "caption": "Essa é a lista de raças do app, as 45. Sem raça definida tá na mesma lista, do mesmo tamanho."
+    },
+    "preferences": {
+      "title": "Cachorro que combina com o seu",
+      "description": "Raça, tamanho, idade, cor e a distância que dá pra ir a pé.",
+      "tags": {
+        "maxDistance": {
+          "label": "Distância máxima",
+          "value": "1-300+ km"
+        },
+        "ageRange": {
+          "label": "Faixa etária",
+          "value": "0-10+ anos"
+        },
+        "size": {
+          "label": "Tamanho",
+          "value": "De extra pequeno a gigante"
+        },
+        "color": {
+          "label": "Cor",
+          "value": "Qualquer cor"
+        }
+      }
+    },
+    "walk": {
       "title": "Do perfil ao primeiro passeio",
-      "profile": {
+      "steps": {
+        "profile": {
+          "title": "Cria o perfil",
+          "description": "Nome, raça, umas fotos.",
+          "alt": "O perfil de um cachorro no Pegada, com raça, idade e uma descrição curta abaixo da foto."
+        },
+        "swipe": {
+          "title": "Vê quem tá perto",
+          "description": "Um cachorro por vez, do seu bairro. Curte ou passa.",
+          "alt": "A tela de swipe do Pegada: o card de um cachorro ocupando a tela, a distância no canto, o nome e a idade embaixo."
+        },
+        "match": {
+          "title": "Espera o match",
+          "description": "Se o outro cachorro curtir o seu, os dois ficam sabendo.",
+          "alt": "A tela de match do Pegada, com as fotos dos dois cachorros sobrepostas embaixo da palavra Match."
+        },
+        "chat": {
+          "title": "Puxa assunto",
+          "description": "Escolhe o parque, marca a hora.",
+          "alt": "Uma conversa no Pegada entre dois donos combinando uma manhã no parque."
+        }
+      },
+      "rules": {
+        "title": "Você decide quem fala com ele",
+        "description": "Conversa só depois do match. E dá pra desfazer o match ou denunciar a qualquer hora.",
+        "share": "Compartilhar perfil de {{name}}",
+        "report": "Denunciar {{name}}",
+        "unmatch": "Desfazer Match"
+      }
+    },
+    "storyCta": {
+      "story": {
+        "title": "Faz o story do seu dog",
+        "description": "Escolhe as fotos, o app monta e você posta.",
+        "link": "Ver como funciona"
+      },
+      "cta": {
         "title": "Cria o perfil",
-        "description": "Nome, raça, umas fotos."
-      },
-      "swipe": {
-        "title": "Vê quem tá perto",
-        "description": "Um cachorro por vez, do seu bairro. Curte ou passa."
-      },
-      "match": {
-        "title": "Espera o match",
-        "description": "Se o outro cachorro curtir o seu, os dois ficam sabendo."
-      },
-      "chat": {
-        "title": "Puxa assunto",
-        "description": "Escolhe o parque, marca a hora."
+        "description": "Nome, raça, umas fotos.",
+        "free": "É grátis no iPhone e no Android."
       }
-    },
-    "screens": {
-      "title": "Como é na tela",
-      "swipe": {
-        "title": "Quem tá por perto",
-        "description": "A foto, a idade, a distância.",
-        "alt": "A tela de swipe do Pegada: o card de um cachorro ocupando a tela, a distância no canto, o nome e a idade embaixo."
-      },
-      "profile": {
-        "title": "O perfil completo",
-        "description": "Toca no card pra ler tudo que o dono escreveu.",
-        "alt": "O perfil de um cachorro no Pegada, com raça, idade e uma descrição curta abaixo da foto."
-      },
-      "match": {
-        "title": "O match",
-        "description": "Os dois curtiram. Já dá pra conversar.",
-        "alt": "A tela de match do Pegada, com as fotos dos dois cachorros sobrepostas embaixo da palavra Match."
-      },
-      "chat": {
-        "title": "Combinando o passeio",
-        "description": "Onde se encontrar e a que horas.",
-        "alt": "Uma conversa no Pegada entre dois donos combinando uma manhã no parque."
-      }
-    },
-    "footer": {
-      "story": "O story do seu dog"
-    },
-    "storyLink": "Faz o story do seu dog"
+    }
   },
   "story": {
     "metadata": {
