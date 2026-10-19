@@ -55,7 +55,7 @@ export const SiteHeader = () => {
           <LanguageSwitch variant="compact" className="text-[15px]" />
           <a
             href={`${home}#get`}
-            className="inline-flex min-h-11 items-center rounded-xl bg-navy px-[18px] text-[15px] font-bold text-white transition-transform duration-150 ease-out active:scale-[0.97] dark:bg-pink dark:text-navy"
+            className="inline-flex min-h-11 items-center rounded-xl bg-navy px-[18px] text-[15px] font-bold text-white transition-transform duration-150 ease-out active:scale-[0.97] dark:bg-pink dark:text-navy focus-visible:outline-ink"
           >
             {t("landing.chrome.getTheApp")}
           </a>

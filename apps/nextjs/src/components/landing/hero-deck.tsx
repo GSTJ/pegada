@@ -461,7 +461,7 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
       )[event.key];
       if (kind) {
         event.preventDefault();
-        commit(kind, "button");
+        commit(kind, "key");
       } else if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         flip();
@@ -472,7 +472,11 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
 
   const onReaction = useCallback(
     (event: MouseEvent<HTMLButtonElement>) =>
-      commit(event.currentTarget.dataset.kind as SwipeKind, "button"),
+      commit(
+        event.currentTarget.dataset.kind as SwipeKind,
+        // `detail` is 0 when Enter or Space pressed the button.
+        event.detail === 0 ? "key" : "button",
+      ),
     [commit],
   );
 
@@ -635,6 +639,9 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
         <button
           type="button"
           className="sr-only"
+          // Out of the tab order: the deck is the keyboard stop and Enter on
+          // it flips, so a focused invisible button would only lose the ring.
+          tabIndex={-1}
           aria-pressed={flipped}
           onClick={flip}
         >

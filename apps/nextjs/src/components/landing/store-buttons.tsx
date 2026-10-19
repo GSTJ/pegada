@@ -52,7 +52,7 @@ export const StoreButtons = ({
         placement={placement}
         store={store}
         referral={campaign?.ref ?? undefined}
-        className="inline-flex min-h-[52px] flex-1 whitespace-nowrap items-center justify-center gap-2.5 rounded-button bg-white px-[22px] text-base font-bold tracking-[-0.01em] text-navy shadow-print transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-card active:scale-[0.97] sm:flex-none"
+        className="inline-flex min-h-[52px] flex-1 whitespace-nowrap items-center justify-center gap-2.5 rounded-button bg-white px-[22px] focus-visible:outline-ink text-base font-bold tracking-[-0.01em] text-navy shadow-print transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-card active:scale-[0.97] sm:flex-none"
       >
         <Image
           src={icon}

@@ -12,8 +12,11 @@ export const ACTION_VELOCITY = 1;
 export const ROTATION_PER_PX = 8 / ACTION_OFFSET;
 /** A thrown card travels 1.7x the deck (`CARD_OUT_WIDTH`, `CARD_OUT_HEIGHT`). */
 export const OUT_FACTOR = 1.7;
-/** A drag throws in 250ms; a button press glides out in 500ms. */
-export const THROW_MS = { gesture: 250, button: 500 } as const;
+/**
+ * A drag throws in 250ms; a button press glides out in 500ms. Keys commit at
+ * once: the app has no keyboard, and a keyed action that waits feels slow.
+ */
+export const THROW_MS = { gesture: 250, button: 500, key: 0 } as const;
 /** The snap-back spring's duration (`SNAP_BACK_SPRING`). */
 export const SNAP_BACK_MS = 230;
 
