@@ -1,0 +1,171 @@
+/*
+ * The story section: the app's share sheet with the finished story lifting
+ * out of its "Share to story" row. One moment, played once on reveal: the
+ * sheet rises (the shared `card` role), the row takes the tap, the story
+ * comes out of it.
+ */
+
+.story :focus-visible {
+  outline-color: #f6d34d;
+}
+
+.link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #ee6aa7;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  transition:
+    transform 160ms var(--ease-out),
+    text-underline-offset 160ms var(--ease-out);
+}
+
+.link:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    text-underline-offset: 8px;
+  }
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  width: min(100%, 520px);
+  justify-self: center;
+  padding-bottom: 12%;
+}
+
+.lift {
+  width: 58%;
+  justify-self: end;
+  margin-right: 4%;
+  rotate: 3deg;
+}
+
+/* Only the reveal animates; the hidden state applies instantly. */
+[data-revealed] .lift {
+  transition:
+    translate 640ms var(--ease-out) 640ms,
+    scale 640ms var(--ease-out) 640ms,
+    rotate 640ms var(--ease-out) 640ms,
+    opacity 360ms var(--ease-out) 640ms;
+}
+
+.storyCard {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  border-radius: 14px;
+  box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.75);
+}
+
+.sheetSlot {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(68%, 340px);
+  z-index: 1;
+}
+
+/* Paper in light, the app's dark sheet at night, like the app itself. */
+.sheet {
+  display: grid;
+  padding: 10px 6px 6px;
+  border-radius: 22px;
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  box-shadow: 0 24px 50px -20px rgb(0 0 0 / 0.7);
+  rotate: -2deg;
+}
+
+.handle {
+  justify-self: center;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(var(--ink) / 0.2);
+}
+
+.sheetTitle {
+  margin: 12px 0 4px;
+  padding: 0 14px 10px;
+  border-bottom: 1px solid rgb(var(--ink) / 0.1);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  isolation: isolate;
+}
+
+.row + .row {
+  border-top: 1px solid rgb(var(--ink) / 0.08);
+}
+
+.rowIcon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+/* The tap: a pink wash fills the row before the story comes out of it. */
+.picked::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgb(238 106 167 / 0.2);
+}
+
+[data-revealed] .picked::before {
+  transition: clip-path 320ms var(--ease-out) 380ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .lift {
+    translate: -8% 26%;
+    scale: 0.9;
+    rotate: 0deg;
+    opacity: 0;
+  }
+
+  :global([data-reveal-ready])
+    [data-reveal]:not([data-revealed])
+    .picked::before {
+    clip-path: inset(0 100% 0 0 round 14px);
+  }
+}
+
+/* Reduced motion: the story still arrives after the sheet, as a fade. */
+@media (prefers-reduced-motion: reduce) {
+  [data-revealed] .lift {
+    transition: opacity 200ms ease 200ms;
+  }
+
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .lift {
+    opacity: 0;
+  }
+}
