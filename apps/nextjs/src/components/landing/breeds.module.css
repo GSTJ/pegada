@@ -1,0 +1,164 @@
+/*
+ * The breed wall: every breed the app's picker offers, set as one block of
+ * type at one size, slashes between the names. Mixed Breed carries the pink
+ * highlighter; while the visitor searches, it moves to what they found.
+ */
+.wall {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-weight: 800;
+  font-size: clamp(1.375rem, 2vw + 0.9rem, 2.875rem);
+  line-height: 1.16;
+  letter-spacing: -0.028em;
+  text-wrap: pretty;
+}
+
+.wall li {
+  display: inline;
+  transition: opacity 200ms var(--ease-out);
+}
+
+/* Large text (22px+ at 800), so half strength still clears 3:1 on yellow. */
+.wall li[data-dim] {
+  opacity: 0.55;
+}
+
+/*
+ * The separator rides on the name before it (glued by a no-break space), so
+ * a line never opens with one; `data-eol` hides the one that ends a line.
+ */
+.wall li:not(:last-child)::after {
+  content: "\00a0/ ";
+  padding-inline: 0.04em 0.1em;
+  color: rgb(23 36 72 / 0.3);
+  font-weight: 500;
+}
+
+.wall li[data-eol]::after {
+  visibility: hidden;
+}
+
+.name {
+  position: relative;
+  z-index: 0;
+  white-space: nowrap;
+}
+
+/* A marker stroke: a hair skewed and tilted, wider than the word. */
+.name::before {
+  content: "";
+  position: absolute;
+  inset: 0.12em -0.14em 0.02em;
+  z-index: -1;
+  background: #ee6aa7;
+  transform: skewX(-6deg) rotate(-1.2deg);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 180ms var(--ease-out);
+}
+
+[data-mark] > .name::before {
+  clip-path: inset(0 0 0 0);
+}
+
+/*
+ * The first time the wall scrolls in, Mixed Breed gets inked: the highlighter
+ * wipes left to right once the names have landed. It only waits unpainted
+ * when JS runs the reveal and motion is welcome; with reduced motion (or no
+ * JS) it is simply there.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal-ready]
+    [data-reveal]:not([data-revealed])
+    [data-mark]
+    > .name::before {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .wall:not([data-live]) [data-mark] > .name::before {
+    transition: clip-path 520ms var(--ease-out) 620ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name::before {
+    transition: none;
+  }
+}
+
+.finder {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 26rem;
+  margin-bottom: 1rem;
+}
+
+.finder:not([data-ready]) {
+  visibility: hidden;
+}
+
+.finderLabel {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.finderInput {
+  min-height: 3.25rem;
+  padding: 0 0.75rem 0 1rem;
+  border: 2px solid #172448;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.55);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.1875rem;
+  letter-spacing: -0.01em;
+  appearance: none;
+}
+
+.finderInput::placeholder {
+  color: rgb(23 36 72 / 0.72);
+  font-weight: 500;
+}
+
+/* The ring sits on the border, reading as one thicker rule. */
+.finderInput:focus-visible {
+  outline: 2px solid #172448;
+  outline-offset: 0;
+  background: rgb(255 255 255 / 0.8);
+}
+
+/* The native clear button, redrawn in navy so it reads on both schemes. */
+.finderInput::-webkit-search-cancel-button {
+  width: 1.25rem;
+  height: 1.25rem;
+  background: #172448;
+  cursor: pointer;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 5l10 10M15 5L5 15' stroke='black' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  appearance: none;
+}
+
+.finderStatus {
+  /* Room for the longest message, so the wall never jumps while typing. */
+  min-height: 3.1em;
+  font-size: 0.9375rem;
+  text-wrap: pretty;
+}
+
+@media (min-width: 48rem) {
+  .finder {
+    margin-bottom: 1.75rem;
+  }
+
+  .finderStatus {
+    min-height: 1.55em;
+  }
+}
+
+.caption {
+  max-width: 34em;
+  margin-top: 2.5rem;
+  font-size: 0.9375rem;
+  text-wrap: pretty;
+}

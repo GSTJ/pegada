@@ -59,7 +59,14 @@
     "breeds": {
       "title": "Vira-lata é bem-vindo",
       "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito.",
-      "caption": "Essa é a lista de raças do app, as 45. Sem raça definida tá na mesma lista, do mesmo tamanho."
+      "caption": "Essa é a lista de raças do app, as {{total}}, na ordem em que o app mostra. {{mixed}} tá na mesma lista, do mesmo tamanho.",
+      "finder": {
+        "label": "Procura a raça do seu cachorro",
+        "placeholder": "Tenta “vira-lata”",
+        "foundOne": "{{n}} raça na lista",
+        "foundMany": "{{n}} raças na lista",
+        "none": "Nenhuma raça com “{{query}}”. Vira-lata entra como Sem raça definida."
+      }
     },
     "preferences": {
       "title": "Cachorro que combina com o seu",
