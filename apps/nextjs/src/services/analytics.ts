@@ -3,22 +3,82 @@ import type {
   WebEventName,
   WebEventProperties,
 } from "@pegada/shared/analytics/events";
+import type { ErrorContext } from "magic-observability";
+// oxlint-disable-next-line import/no-namespace -- type only; the module itself is loaded with `import()` below.
+import type * as WebAnalyticsModule from "magic-observability/web";
 
 import { ANALYTICS_EVENTS } from "@pegada/shared/analytics/events";
-import { getPostHog, getWebClient } from "magic-observability/web";
 
 /**
  * Product analytics for the marketing site.
  *
  * Without `NEXT_PUBLIC_POSTHOG_KEY` the shared client is the no-op one, so a
- * call here is a function call and nothing else: no network, no queue, nothing
- * written to the console. Setting that variable on Vercel is the only step
- * needed to start receiving these events.
+ * call here sends nothing: no queue, nothing written to the console. Setting
+ * that variable on Vercel is the only step needed to start receiving these
+ * events.
  *
  * The mobile app is growing its own event catalogue under
  * `packages/shared/analytics`. This name lives here until that lands, and
  * should move into it then so both clients share one source of truth.
  */
+
+type WebAnalytics = typeof WebAnalyticsModule;
+type WebAnalyticsOptions = Parameters<WebAnalytics["initWebAnalytics"]>[0];
+
+let options: WebAnalyticsOptions;
+let loading: Promise<WebAnalytics> | undefined;
+let loaded: WebAnalytics | undefined;
+
+/**
+ * `posthog-js` is ~75KB gzipped, and on a phone it was sharing the network
+ * with the hero photo (the LCP). So it is never in the first bundle: it is
+ * imported and initialised here, once, either when the page has loaded and
+ * gone idle or on the first event that needs it, whichever comes first. The
+ * initial `$pageview` is captured by `init` itself, and later ones by
+ * PostHog's own history listener, so nothing is counted twice.
+ */
+const loadWebAnalytics = () =>
+  (loading ??= import("magic-observability/web").then((web) => {
+    web.initWebAnalytics(options);
+    loaded = web;
+    return web;
+  }));
+
+/** Called from `instrumentation-client.ts`, before hydration. */
+export const startWebAnalytics = (initOptions: WebAnalyticsOptions) => {
+  options = initOptions;
+  const idle = () => {
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => void loadWebAnalytics(), { timeout: 4000 });
+    } else {
+      setTimeout(() => void loadWebAnalytics(), 1000);
+    }
+  };
+  if (document.readyState === "complete") idle();
+  else window.addEventListener("load", idle, { once: true });
+};
+
+/**
+ * Runs `send` against a live client only. Synchronous once PostHog is in, so
+ * a beacon still leaves inside the click that triggered it; before that, the
+ * event waits for the import instead of being dropped.
+ *
+ * `posthog-js` warns when it is called before `init`, which is every event
+ * until the key is set, so the shared client is asked first.
+ */
+const whenEnabled = (send: (web: WebAnalytics) => void) => {
+  const run = (web: WebAnalytics) => {
+    if (web.getWebClient().enabled) send(web);
+  };
+  if (loaded) run(loaded);
+  else void loadWebAnalytics().then(run);
+};
+
+/** For error boundaries: reported once PostHog is in, a no-op without a key. */
+export const captureError = (error: unknown, context?: ErrorContext) => {
+  whenEnabled((web) => web.captureError(error, context));
+};
+
 export const DOWNLOAD_CTA_CLICKED = "Download CTA Clicked";
 
 /** Which page the button was on. */
@@ -73,16 +133,16 @@ export const downloadCtaProperties = (click: DownloadCtaClick) => ({
  *
  * So the event skips the queue and goes out over `sendBeacon`, which the
  * browser is obliged to deliver even after the page is gone. The shared facade
- * takes no per-event options, hence the raw handle, and it is only reached for
- * once the facade reports a live client: `posthog-js` warns when it is called
- * before `init`, which is every click until the key is set.
+ * takes no per-event options, hence the raw handle.
  */
 export const trackDownloadCtaClicked = (click: DownloadCtaClick) => {
-  if (!getWebClient().enabled) return;
-
-  getPostHog().capture(DOWNLOAD_CTA_CLICKED, downloadCtaProperties(click), {
-    transport: "sendBeacon",
-    send_instantly: true,
+  whenEnabled((web) => {
+    web
+      .getPostHog()
+      .capture(DOWNLOAD_CTA_CLICKED, downloadCtaProperties(click), {
+        transport: "sendBeacon",
+        send_instantly: true,
+      });
   });
 };
 
@@ -125,17 +185,11 @@ export const aiStoryProperties = ({
   ...(utmSource === undefined ? {} : { utm_source: utmSource }),
 });
 
-/**
- * `posthog-js` warns when it is called before `init`, which is every event
- * until the key is set, so the shared client is asked first.
- */
 const captureWeb = <Name extends WebEventName>(
   name: Name,
   properties: WebEventProperties[Name],
 ) => {
-  if (!getWebClient().enabled) return;
-
-  getPostHog().capture(name, properties);
+  whenEnabled((web) => web.getPostHog().capture(name, properties));
 };
 
 /** Denominator of the experiment: one per view of the AI story landing page. */
