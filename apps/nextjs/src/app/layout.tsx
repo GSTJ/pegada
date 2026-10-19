@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 
 import { Providers } from "@/app/providers";
+import { PawSprite } from "@/components/landing/paw-print";
 import { dmMono, gilroy } from "@/lib/fonts";
 import { getRequestPathname, getSafeLocale } from "@/lib/get-safe-locale";
 import {
@@ -109,6 +110,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     <html lang={locale}>
       <Analytics />
       <body className={cn(gilroy.variable, dmMono.variable)}>
+        <PawSprite />
         <Providers>{children}</Providers>
       </body>
     </html>

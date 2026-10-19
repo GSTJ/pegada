@@ -32,9 +32,17 @@ export const LanguageSwitch = ({
     variant === "compact"
       ? LOCALE_SEGMENTS.filter((segment) => segment !== locale)
       : LOCALE_SEGMENTS;
+  // One link in the header; the footer's full list is the page's one
+  // language landmark (two navs with the same name fail landmark-unique).
+  const Wrapper = variant === "compact" ? "div" : "nav";
 
   return (
-    <nav aria-label={t("landing.chrome.languageLabel")} className={className}>
+    <Wrapper
+      aria-label={
+        variant === "compact" ? undefined : t("landing.chrome.languageLabel")
+      }
+      className={className}
+    >
       <ul className="flex gap-1.5">
         {segments.map((segment) => (
           <li key={segment}>
@@ -53,6 +61,6 @@ export const LanguageSwitch = ({
           </li>
         ))}
       </ul>
-    </nav>
+    </Wrapper>
   );
 };

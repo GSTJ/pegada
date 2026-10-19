@@ -100,12 +100,41 @@
  * Reveal choreography (components/landing/reveal.tsx). A block marked
  * `data-reveal` is hidden until it scrolls in, and its `data-role` children
  * arrive in reading order. The hidden state only exists once the observer has
- * taken over (`data-reveal-ready` on <html>) and only without a reduced-motion
- * preference, so no JS or a failed script leaves the page fully visible.
+ * taken over (`data-reveal-ready` on <html>), so no JS or a failed script
+ * leaves the page fully visible. Reduced motion keeps a short opacity fade and
+ * drops the travel and the stamp's drop.
  *
  * The transition sits in `:where()` so it carries no specificity: an element
  * that declares its own transition keeps it.
  */
+:where([data-reveal-ready] [data-reveal] [data-role]) {
+  transition: opacity 300ms var(--ease-out) var(--reveal-delay, 0ms);
+}
+
+[data-reveal-ready] [data-reveal]:not([data-revealed]) [data-role] {
+  opacity: 0;
+}
+
+[data-role="lede"] {
+  --reveal-delay: 80ms;
+}
+
+[data-role="body"] {
+  --reveal-delay: 120ms;
+}
+
+[data-role="card"] {
+  --reveal-delay: calc(160ms + var(--i, 0) * 60ms);
+}
+
+[data-role="action"] {
+  --reveal-delay: 240ms;
+}
+
+[data-role="stamp"] {
+  --reveal-delay: 420ms;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   :where([data-reveal-ready] [data-reveal] [data-role]) {
     transition:
@@ -114,31 +143,10 @@
   }
 
   [data-reveal-ready] [data-reveal]:not([data-revealed]) [data-role] {
-    opacity: 0;
     transform: translate3d(0, 16px, 0);
   }
 
   [data-reveal-ready] [data-reveal]:not([data-revealed]) [data-role="stamp"] {
     transform: rotate(-14deg) scale(1.35);
-  }
-
-  [data-role="lede"] {
-    --reveal-delay: 80ms;
-  }
-
-  [data-role="body"] {
-    --reveal-delay: 120ms;
-  }
-
-  [data-role="card"] {
-    --reveal-delay: calc(160ms + var(--i, 0) * 60ms);
-  }
-
-  [data-role="action"] {
-    --reveal-delay: 240ms;
-  }
-
-  [data-role="stamp"] {
-    --reveal-delay: 420ms;
   }
 }

@@ -81,7 +81,7 @@ const ROUTE_PATH = "/story";
 const STEPS = ["app", "photos", "post"] as const;
 
 const PRIMARY_BUTTON =
-  "inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-center text-lg font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:transition-none motion-reduce:hover:scale-100";
+  "inline-flex items-center justify-center rounded-full bg-[#BE1E68] px-8 py-4 text-center text-lg font-semibold text-white transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BE1E68]";
 
 /**
  * The form's words. `t()` reads the locale off the request, so the copy has to
@@ -131,7 +131,7 @@ const StoreBadges = ({
         width={20}
         height={20}
         src="/app-store-icon.svg"
-        alt="App Store"
+        alt=""
       />
       <StoreButton.Text>{t("landing.chrome.appStore")}</StoreButton.Text>
     </StoreButton>
@@ -147,7 +147,7 @@ const StoreBadges = ({
         width={24}
         height={24}
         src="/google-play-icon.svg"
-        alt="Google Play"
+        alt=""
       />
       <StoreButton.Text>{t("landing.chrome.googlePlay")}</StoreButton.Text>
     </StoreButton>
@@ -201,7 +201,7 @@ const StoryPage = async ({ searchParams }: StoryPageProps) => {
          * content instead of letting the strip scroll, and the whole page ends
          * up horizontally scrollable.
          */}
-        <div className="flex w-full min-w-0 flex-1 flex-col gap-14 px-6 py-10 sm:px-10 sm:py-14 lg:gap-20 lg:py-20">
+        <main className="flex w-full min-w-0 flex-1 flex-col gap-14 px-6 py-10 sm:px-10 sm:py-14 lg:gap-20 lg:py-20">
           {/*
            * The mark is the way back to the rest of the site. This page is
            * reached from an Instagram bio as often as from the homepage, so a
@@ -272,7 +272,12 @@ const StoryPage = async ({ searchParams }: StoryPageProps) => {
              * the strip bleed to both edges of the screen while the padding
              * keeps the first frame lined up with the headline above it.
              */}
-            <ul className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:max-w-2xl sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0">
+            <ul
+              // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scroll container has to take focus to be scrolled by keys.
+              tabIndex={0}
+              aria-label={t("story.examples.title")}
+              className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:max-w-2xl sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0"
+            >
               {EXAMPLES.map(({ key, src }, index) => (
                 <li
                   key={key}
@@ -339,7 +344,7 @@ const StoryPage = async ({ searchParams }: StoryPageProps) => {
 
             <StoreBadges className="hidden sm:flex" placement="footer" />
           </section>
-        </div>
+        </main>
       </Restricter>
     </div>
   );
