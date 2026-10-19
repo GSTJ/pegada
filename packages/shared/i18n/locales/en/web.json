@@ -99,30 +99,34 @@
         "profile": {
           "title": "Set up the profile",
           "description": "Name, breed, a few photos.",
-          "alt": "A dog's profile in Pegada, showing breed, age and a short bio under the photo."
+          "alt": "Maui's profile in Pegada: his photo, Golden Retriever, his name and age, and the link to share it."
         },
         "swipe": {
           "title": "See who's nearby",
           "description": "One dog at a time, from your neighborhood. Like or skip.",
-          "alt": "The Pegada swipe screen: one dog's card filling the screen, the distance in the corner, the name and age across the bottom."
+          "alt": "Lua's card on the Pegada deck: her photo, 3 km away, her name, age and bio, and the three reaction buttons."
         },
         "match": {
           "title": "Wait for the match",
           "description": "If the other dog likes yours back, you both hear about it.",
-          "alt": "Pegada's match screen, with two dog photos overlapping under the word Match."
+          "alt": "Pegada's match screen: Lua's and Maui's photos side by side, and the line saying they liked each other."
         },
         "chat": {
           "title": "Say hi",
           "description": "Pick a park, pick a time.",
-          "alt": "A Pegada chat between two owners settling on a morning at the park."
+          "alt": "A Pegada chat with Lua: one owner asks about the park tomorrow morning, the other says 9 works."
         }
+      },
+      "together": "Same walk",
+      "match": "Match",
+      "chat": {
+        "sent": "Hi Lua! Park tomorrow morning?",
+        "reply": "Hi Maui! Sure. Is 9 ok?"
       },
       "rules": {
         "title": "You decide who talks to your dog",
         "description": "The chat opens only after a match. Unmatch or report any time.",
-        "share": "Share {{name}}'s profile",
-        "report": "Report {{name}}",
-        "unmatch": "Unmatch"
+        "where": "At the bottom of Lua's profile, once they've matched"
       }
     },
     "storyCta": {

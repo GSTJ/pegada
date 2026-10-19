@@ -99,30 +99,34 @@
         "profile": {
           "title": "Cria o perfil",
           "description": "Nome, raça, umas fotos.",
-          "alt": "O perfil de um cachorro no Pegada, com raça, idade e uma descrição curta abaixo da foto."
+          "alt": "O perfil do Maui no Pegada: a foto, Golden Retriever, o nome, a idade e o link pra compartilhar."
         },
         "swipe": {
           "title": "Vê quem tá perto",
           "description": "Um cachorro por vez, do seu bairro. Curte ou passa.",
-          "alt": "A tela de swipe do Pegada: o card de um cachorro ocupando a tela, a distância no canto, o nome e a idade embaixo."
+          "alt": "O card da Lua no Pegada: a foto, a 3 km, o nome, a idade, a descrição e os três botões de reação."
         },
         "match": {
           "title": "Espera o match",
           "description": "Se o outro cachorro curtir o seu, os dois ficam sabendo.",
-          "alt": "A tela de match do Pegada, com as fotos dos dois cachorros sobrepostas embaixo da palavra Match."
+          "alt": "A tela de match do Pegada: as fotos da Lua e do Maui lado a lado e a frase dizendo que os dois se curtiram."
         },
         "chat": {
           "title": "Puxa assunto",
           "description": "Escolhe o parque, marca a hora.",
-          "alt": "Uma conversa no Pegada entre dois donos combinando uma manhã no parque."
+          "alt": "Uma conversa com a Lua no Pegada: um dono chama pro parque amanhã de manhã, o outro topa às 9h."
         }
+      },
+      "together": "Mesmo passeio",
+      "match": "Match",
+      "chat": {
+        "sent": "Oi Lua! Bora no parque amanhã de manhã?",
+        "reply": "Oi Maui! Bora sim. Umas 9h tá bom?"
       },
       "rules": {
         "title": "Você decide quem fala com ele",
         "description": "Conversa só depois do match. E dá pra desfazer o match ou denunciar a qualquer hora.",
-        "share": "Compartilhar perfil de {{name}}",
-        "report": "Denunciar {{name}}",
-        "unmatch": "Desfazer Match"
+        "where": "No fim do perfil da Lua, depois do match"
       }
     },
     "storyCta": {
