@@ -41,18 +41,29 @@
     "profile": {
       "title": "The profile is your dog's",
       "description": "Photos, age, the stuff they hate. You just hold the phone.",
-      "legend": {
-        "photos": {
-          "title": "The dog up top.",
-          "body": "Their photos lead the profile, same as the cards in the deck."
+      "phone": "{{name}}'s profile in the Pegada app: her photo with the distance, her breed, name and age, her bio, and the buttons to share or report her profile.",
+      "inApp": "{{name}} in the app",
+      "asId": "{{name}}'s ID, signed with her paw",
+      "notes": {
+        "photo": {
+          "title": "Photos",
+          "body": "One to six. The first one leads, same as on the card."
         },
-        "fields": {
-          "title": "Breed, age, bio.",
-          "body": "Tap the card to read everything their owner wrote."
+        "name": {
+          "title": "Name and age",
+          "body": "You enter the birthday, the app does the math."
         },
-        "actions": {
-          "title": "Share or report.",
-          "body": "Every profile has both."
+        "breed": {
+          "title": "Breed",
+          "body": "45 to pick from, Mixed Breed included."
+        },
+        "bio": {
+          "title": "Bio",
+          "body": "Up to 500 characters, in your dog's words."
+        },
+        "signature": {
+          "title": "Signature",
+          "body": "The paw print. That's what Pegada means."
         }
       }
     },
