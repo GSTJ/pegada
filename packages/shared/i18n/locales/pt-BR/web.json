@@ -63,24 +63,16 @@
     },
     "preferences": {
       "title": "Cachorro que combina com o seu",
-      "description": "Raça, tamanho, idade, cor e a distância que dá pra ir a pé.",
-      "tags": {
-        "maxDistance": {
-          "label": "Distância máxima",
-          "value": "1-300+ km"
-        },
-        "ageRange": {
-          "label": "Faixa etária",
-          "value": "0-10+ anos"
-        },
-        "size": {
-          "label": "Tamanho",
-          "value": "De extra pequeno a gigante"
-        },
-        "color": {
-          "label": "Cor",
-          "value": "Qualquer cor"
-        }
+      "description": "Raça, tamanho, idade, cor e a distância que dá pra ir a pé. São os filtros do app, do jeito que eles vêm.",
+      "anyBreedNote": "ou uma das {{count}}",
+      "distance": {
+        "noLimit": "sem limite",
+        "deck": "Sua lista de doguinhos",
+        "onDeck": "Na sua lista",
+        "outside": "Fora da sua distância",
+        "left": "{name} saiu da sua lista",
+        "back": "{name} voltou pra sua lista",
+        "note": "O mesmo controle do app: de 1 a 300 km, de 5 em 5, e 300+ pra não ter limite. A Lua tá a 3 km, dá pra ir a pé."
       }
     },
     "walk": {

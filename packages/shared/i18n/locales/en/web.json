@@ -63,24 +63,16 @@
     },
     "preferences": {
       "title": "Dogs that suit yours",
-      "description": "Breed, size, age, color, and how far you'd actually walk.",
-      "tags": {
-        "maxDistance": {
-          "label": "Maximum distance",
-          "value": "1-300+ km"
-        },
-        "ageRange": {
-          "label": "Age range",
-          "value": "0-10+ years"
-        },
-        "size": {
-          "label": "Size",
-          "value": "Extra Small to Giant"
-        },
-        "color": {
-          "label": "Color",
-          "value": "Any color"
-        }
+      "description": "Breed, size, age, color, and how far you'd actually walk. These are the app's own filters, set the way they start.",
+      "anyBreedNote": "or one of {{count}}",
+      "distance": {
+        "noLimit": "no limit",
+        "deck": "Your deck",
+        "onDeck": "On your deck",
+        "outside": "Outside your distance",
+        "left": "{name} left your deck",
+        "back": "{name} is back on your deck",
+        "note": "Same slider as the app: 1 to 300 km in steps of 5, then 300+ for no limit. Lua is 3 km away, close enough to walk to."
       }
     },
     "walk": {
