@@ -38,7 +38,7 @@ export const Profile = () => (
     id="profile"
     aria-labelledby="profile-title"
     data-reveal
-    className={cn("py-section", styles.section)}
+    className={cn("bg-blush py-section", styles.section)}
   >
     <div className="wrap">
       <div className="grid max-w-[40rem] gap-[18px]">
