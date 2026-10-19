@@ -2,9 +2,10 @@ import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { DogPhoto } from "@/components/landing/dog-photo";
 import { DOGS, inLocale } from "@/components/landing/dogs";
-import styles from "@/components/landing/walk.module.css";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { t } from "@/lib/translate";
+
+import styles from "@/components/landing/walk.module.css";
 
 /*
  * The four moments, rebuilt from the app's own screens with the app's own

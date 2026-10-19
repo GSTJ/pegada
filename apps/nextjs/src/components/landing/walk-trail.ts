@@ -72,7 +72,8 @@ const gutters = (step: number, count: number): Draft[] =>
     Array.from({ length: count }, (_, index) => ({
       t: (index + (side === 1 ? 0.55 : 0.1)) / count,
       c: side + (index % 2 ? PHONE_GAIT : -PHONE_GAIT),
-      kind: step === 0 && side === 1 ? ("faint" as const) : ("pressed" as const),
+      kind:
+        step === 0 && side === 1 ? ("faint" as const) : ("pressed" as const),
       turn: wobble(index, step, side),
     })),
   );

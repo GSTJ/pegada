@@ -183,12 +183,18 @@
     transition-duration: 200ms, 420ms;
   }
 
-  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .foot :global(svg) {
+  :global([data-reveal-ready])
+    [data-reveal]:not([data-revealed])
+    .foot
+    :global(svg) {
     opacity: 0;
     transform: scale(1.22);
   }
 
-  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .stamp :global(svg) {
+  :global([data-reveal-ready])
+    [data-reveal]:not([data-revealed])
+    .stamp
+    :global(svg) {
     opacity: 0;
     transform: scale(1.6) rotate(-14deg);
   }
@@ -239,8 +245,14 @@
     transition: opacity 240ms ease-out calc(var(--delay) / 2);
   }
 
-  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .foot :global(svg),
-  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .stamp :global(svg),
+  :global([data-reveal-ready])
+    [data-reveal]:not([data-revealed])
+    .foot
+    :global(svg),
+  :global([data-reveal-ready])
+    [data-reveal]:not([data-revealed])
+    .stamp
+    :global(svg),
   :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .together {
     opacity: 0;
   }

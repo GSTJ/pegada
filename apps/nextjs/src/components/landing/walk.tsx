@@ -1,11 +1,11 @@
 import type { CSSProperties } from "react";
+
 import { Fragment } from "react";
 
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { DOGS } from "@/components/landing/dogs";
 import { PawPrint } from "@/components/landing/paw-print";
-import styles from "@/components/landing/walk.module.css";
 import { SCREENS } from "@/components/landing/walk-screens";
 import {
   DESKTOP_STAMP,
@@ -14,6 +14,8 @@ import {
   PHONE_TRAIL,
 } from "@/components/landing/walk-trail";
 import { t } from "@/lib/translate";
+
+import styles from "@/components/landing/walk.module.css";
 
 const STEPS = ["profile", "swipe", "match", "chat"] as const;
 
