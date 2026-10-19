@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 
 import { Providers } from "@/app/providers";
 import { PawSprite } from "@/components/landing/paw-print";
-import { dmMono, gilroy } from "@/lib/fonts";
+import { dmMono, gilroy, gilroyDisplay } from "@/lib/fonts";
 import { getRequestPathname, getSafeLocale } from "@/lib/get-safe-locale";
 import {
   LOCALE_SEGMENTS,
@@ -109,7 +109,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang={locale}>
       <Analytics />
-      <body className={cn(gilroy.variable, dmMono.variable)}>
+      <body
+        className={cn(gilroy.variable, gilroyDisplay.variable, dmMono.variable)}
+      >
         <PawSprite />
         <Providers>{children}</Providers>
       </body>
