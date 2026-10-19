@@ -1,0 +1,194 @@
+/*
+ * The app's DogProfile screen at the app's own sizes. `--u` is one point of
+ * a 390pt-wide iPhone screen, so every measure below is the number from the
+ * mobile styles (theme spacing 4pt, type 16/18/24) times `--u`. Colors are
+ * the app's light and dark themes (`packages/shared/themes/themes.ts`).
+ */
+.phone {
+  container-type: inline-size;
+  position: relative;
+  /* Percentages: `cqi` here would measure the page, not this phone. */
+  padding: 2.6%;
+  border-radius: 14% / 6.5%;
+  background: #0f1324;
+  box-shadow: var(--shadow-card);
+
+  --u: calc(94.8cqi / 390);
+  --bg: #fff;
+  --text: hsl(222.2 84% 4.9%);
+  --primary: hsl(333 81% 66%);
+  /* The app's pink is 3:1 on white; this is its story CTA pink, nudged to 4.5:1. */
+  --primary-text: #d0337a;
+  --card: hsl(0 0% 97.5%);
+  --border: hsl(214.3 31.8% 91.4%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .phone {
+    background: #2a3150;
+
+    --bg: #000;
+    --text: hsl(0 0% 95%);
+    --primary: hsl(333 58% 59%);
+    --primary-text: var(--primary);
+    --card: hsl(0 0% 15%);
+    --border: hsl(0 0% 12%);
+  }
+}
+
+.screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  border-radius: calc(46 * var(--u));
+  background: var(--bg);
+  color: var(--text);
+  font-size: calc(16 * var(--u));
+  line-height: 1.25;
+  user-select: none;
+}
+
+/* CARD_HEIGHT: 4:3 of the width, capped at half the screen. */
+.photo {
+  position: relative;
+  flex: none;
+  height: 50%;
+  background: #000;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(rgb(0 0 0 / 0.5), rgb(0 0 0 / 0) 33%);
+}
+
+.distance {
+  position: absolute;
+  z-index: 2;
+  top: calc(62 * var(--u));
+  left: calc(24 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(4 * var(--u));
+  padding: calc(8 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: rgb(0 0 0 / 0.35);
+  color: #fff;
+  font-weight: 600;
+  font-size: calc(15 * var(--u));
+}
+
+.distance svg {
+  width: calc(14 * var(--u));
+  fill: currentColor;
+}
+
+/* GoBack: a 60pt glass circle half over the photo. */
+.close {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  align-self: flex-end;
+  width: calc(60 * var(--u));
+  height: calc(60 * var(--u));
+  margin: calc(-30 * var(--u)) calc(16 * var(--u)) 0 0;
+  padding-top: calc(4 * var(--u));
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  box-shadow: 0 calc(4 * var(--u)) calc(12 * var(--u)) rgb(0 0 0 / 0.08);
+}
+
+.close svg {
+  width: calc(24 * var(--u));
+  fill: var(--primary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(-8 * var(--u));
+  padding: 0 calc(16 * var(--u));
+}
+
+.breed {
+  align-self: flex-start;
+  margin-bottom: calc(12 * var(--u));
+  padding: calc(8 * var(--u)) calc(16 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(12 * var(--u));
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-weight: 500;
+}
+
+.name {
+  margin: 0 0 calc(4 * var(--u));
+  font-weight: 500;
+  font-size: calc(18 * var(--u));
+  white-space: nowrap;
+}
+
+.name b {
+  font-weight: 800;
+  font-size: calc(24 * var(--u));
+  letter-spacing: -0.01em;
+}
+
+.bio {
+  margin: calc(8 * var(--u)) 0 calc(36 * var(--u));
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.share,
+.report {
+  margin: 0 0 calc(28 * var(--u));
+  text-align: center;
+  font-weight: 700;
+}
+
+.share {
+  color: var(--primary-text);
+}
+
+/* MatchActionBar, sitting on the screen's bottom fade. */
+.reactions {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: calc(56 * var(--u)) calc(8 * var(--u)) calc(48 * var(--u));
+  background: linear-gradient(
+    color-mix(in srgb, var(--bg) 0%, transparent),
+    var(--bg) 40%
+  );
+}
+
+.reactions span {
+  display: grid;
+  place-items: center;
+  width: calc(75 * var(--u));
+  height: calc(75 * var(--u));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  font-size: calc(46 * var(--u));
+  line-height: 1;
+}
+
+.reactions .maybe {
+  width: calc(55 * var(--u));
+  height: calc(55 * var(--u));
+  font-size: calc(29 * var(--u));
+}

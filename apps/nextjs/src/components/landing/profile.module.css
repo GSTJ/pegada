@@ -1,0 +1,227 @@
+/*
+ * The same dog twice: the app's profile screen, then its ID card with the
+ * notes. On a wide card the notes are callouts whose leaders draw in from
+ * the field they name; on a narrow one they are a plain list under it.
+ */
+.pair {
+  display: grid;
+  gap: 32px;
+  margin-top: 56px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .pair {
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 72px;
+  }
+}
+
+.pair figure {
+  margin: 0;
+}
+
+.phone {
+  justify-self: center;
+  width: min(62vw, 250px);
+}
+
+@media (min-width: 1024px) {
+  .phone {
+    width: 100%;
+  }
+}
+
+.caption {
+  margin-top: 16px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: rgb(var(--ink-muted));
+}
+
+.specimen {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-width: 640px;
+}
+
+/* Narrow: card, caption, then the notes as a list. */
+.stage {
+  display: contents;
+}
+
+.specimen .caption {
+  order: 1;
+}
+
+.notes {
+  order: 2;
+  display: grid;
+  gap: 10px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(var(--ink-muted));
+}
+
+.note {
+  position: relative;
+  padding-left: 18px;
+
+  --d: calc(640ms + var(--n) * 70ms);
+}
+
+/* The same pink dot the callouts put on the card. */
+.note::after {
+  content: "";
+  position: absolute;
+  top: 0.6em;
+  left: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ee6aa7;
+}
+
+.noteText b {
+  font-weight: 700;
+  color: rgb(var(--ink));
+}
+
+/* Callouts once the card is wide enough to carry them. */
+@container (min-width: 520px) {
+  .section .stage {
+    position: relative;
+    display: block;
+    --step: 2.75rem;
+    --lift: calc(3 * var(--step) + 0.5rem);
+    --drop: calc(2 * var(--step) + 0.5rem);
+
+    padding-block: var(--lift) var(--drop);
+  }
+
+  .section .notes {
+    position: absolute;
+    inset: var(--lift) 0 var(--drop);
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .section .note {
+    position: absolute;
+    padding: 0;
+    left: var(--x);
+    display: flex;
+    font-size: 0.875rem;
+    line-height: 1.3;
+  }
+
+  .section .note[data-side="top"] {
+    top: calc(var(--level) * var(--step) * -1);
+    bottom: calc(100% - var(--y));
+    align-items: flex-start;
+  }
+
+  .section .note[data-side="bottom"] {
+    top: var(--y);
+    bottom: calc(var(--level) * var(--step) * -1);
+    align-items: flex-end;
+  }
+
+  .section .noteText {
+    display: block;
+    width: max-content;
+    white-space: nowrap;
+    padding: 0 0 0 10px;
+  }
+
+  .section .noteText b {
+    display: block;
+  }
+
+  /* The leader, from the label to the field. */
+  .section .note::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -0.5px;
+    width: 1px;
+    background: #ee6aa7;
+  }
+
+  /* The dot on the field it names. */
+  .section .note::after {
+    left: -4px;
+    box-shadow: 0 0 0 2px #fff;
+  }
+
+  .section .note[data-side="top"]::after {
+    top: auto;
+    bottom: -4px;
+  }
+
+  .section .note[data-side="bottom"]::after {
+    top: -4px;
+  }
+
+  .section .note[data-side="top"]::before {
+    transform-origin: 50% 100%;
+  }
+
+  .section .note[data-side="bottom"]::before {
+    transform-origin: 50% 0;
+  }
+}
+
+/*
+ * Once the card has landed and the stamp is down, each leader draws out of
+ * the field it names, then its label shows. Reduced motion keeps the order
+ * as a fade, with no travel.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @container (min-width: 520px) {
+    .section .note::before {
+      transition: transform 360ms var(--ease-out) var(--d);
+    }
+
+    .section .note::after {
+      transition:
+        opacity 200ms var(--ease-out) var(--d),
+        transform 200ms var(--ease-out) var(--d);
+    }
+
+    .noteText {
+      transition: opacity 260ms var(--ease-out) calc(var(--d) + 180ms);
+    }
+
+    :global([data-reveal-ready]) .section:not([data-revealed]) .note::before {
+      transform: scaleY(0);
+    }
+
+    :global([data-reveal-ready]) .section:not([data-revealed]) .note::after {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+
+    :global([data-reveal-ready]) .section:not([data-revealed]) .noteText {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @container (min-width: 520px) {
+    .section .note {
+      transition: opacity 300ms ease var(--d);
+    }
+
+    :global([data-reveal-ready]) .section:not([data-revealed]) .note {
+      opacity: 0;
+    }
+  }
+}

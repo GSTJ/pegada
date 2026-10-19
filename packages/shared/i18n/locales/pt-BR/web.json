@@ -41,18 +41,29 @@
     "profile": {
       "title": "O perfil é do seu cachorro",
       "description": "Foto, idade, o que ele detesta. Você só segura o celular.",
-      "legend": {
-        "photos": {
-          "title": "O cachorro vem primeiro.",
-          "body": "As fotos dele abrem o perfil, igual nos cards do deck."
+      "phone": "O perfil da {{name}} no app do Pegada: a foto com a distância, a raça, o nome e a idade, a bio e os botões pra compartilhar ou denunciar o perfil.",
+      "inApp": "A {{name}} no app",
+      "asId": "O RG da {{name}}, assinado com a pata",
+      "notes": {
+        "photo": {
+          "title": "Fotos",
+          "body": "De uma a seis. A primeira vai na frente, igual no card."
         },
-        "fields": {
-          "title": "Raça, idade, bio.",
-          "body": "Toca no card pra ler tudo que o dono escreveu."
+        "name": {
+          "title": "Nome e idade",
+          "body": "Você põe o aniversário e o app faz a conta."
         },
-        "actions": {
-          "title": "Compartilha ou denuncia.",
-          "body": "Todo perfil tem os dois."
+        "breed": {
+          "title": "Raça",
+          "body": "São 45 pra escolher, Sem raça definida também."
+        },
+        "bio": {
+          "title": "Bio",
+          "body": "Até 500 caracteres, com a voz do seu dog."
+        },
+        "signature": {
+          "title": "Assinatura",
+          "body": "A pegada. É daí que vem o nome."
         }
       }
     },
