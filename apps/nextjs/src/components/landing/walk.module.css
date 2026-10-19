@@ -1,0 +1,749 @@
+/*
+ * Phones: the steps stack in a centered column and the two trails walk down
+ * the gutters either side of it, then cross a band above the match to meet.
+ * Desktop: the steps sit in a row under a rail and the trails walk across.
+ * Each step's rail reaches into the gap after it, so the stretches join up.
+ */
+.steps {
+  --gap: 3rem;
+  --col: 232px;
+  --lane: min(calc(50% - 22px), calc(var(--col) / 2 + 34px));
+  --band: 200px;
+  --size: 18px;
+
+  display: grid;
+  gap: var(--gap);
+  margin-top: 3.5rem;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, var(--col));
+  justify-content: center;
+  row-gap: 1.25rem;
+}
+
+/* The meeting band. */
+.step:nth-child(3) {
+  padding-top: var(--band);
+}
+
+@media (min-width: 1024px) {
+  .steps {
+    --gap: 2.5rem;
+    --rail-h: 104px;
+    --lane: 26px;
+    --size: 20px;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 3rem;
+  }
+
+  .step,
+  .step:nth-child(3) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-top: calc(var(--rail-h) + 0.75rem);
+  }
+
+  .copy {
+    min-height: 6.25rem;
+  }
+}
+
+/* ---------- The trail ---------- */
+
+.rail {
+  position: absolute;
+  inset: 0 0 calc(var(--gap) * -1);
+  pointer-events: none;
+}
+
+.step:last-child .rail {
+  bottom: 0;
+}
+
+.foot,
+.stamp,
+.together {
+  position: absolute;
+  left: calc(50% + var(--c) * var(--lane));
+  top: calc(var(--t) * 100%);
+  translate: -50% -50%;
+}
+
+.foot,
+.stamp {
+  width: var(--size);
+  rotate: var(--turn, 0deg);
+}
+
+.rail [data-box="band"] {
+  top: calc(var(--t) * var(--band));
+}
+
+.rail [data-box="rest"] {
+  top: calc(var(--band) + var(--t) * (100% - var(--band)));
+}
+
+.foot[data-kind="faint"] {
+  opacity: 0.45;
+}
+
+.foot[data-kind="ink"],
+.stamp {
+  color: #ee6aa7;
+}
+
+.stamp {
+  --turn: -8deg;
+  width: calc(var(--size) * 2.4);
+}
+
+/* The ripple when the two meet. Only ever seen mid-animation. */
+.stamp::after {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.together {
+  left: calc(50% + 2.25rem);
+  translate: 0 -50%;
+  color: rgb(var(--pink-ink));
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.rail [data-on="desktop"] {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .rail {
+    right: calc(var(--gap) * -1);
+    bottom: auto;
+    height: var(--rail-h);
+  }
+
+  .step:last-child .rail {
+    right: 0;
+  }
+
+  .rail [data-on="phone"] {
+    display: none;
+  }
+
+  .rail [data-on="desktop"] {
+    display: block;
+  }
+
+  /* Walking right: the toes lead. */
+  .foot,
+  .stamp,
+  .together {
+    left: calc(var(--t) * 100%);
+    top: calc(50% + var(--c) * var(--lane));
+  }
+
+  .foot,
+  .stamp {
+    rotate: calc(var(--turn, 0deg) - 90deg);
+  }
+
+  .together {
+    top: calc(50% + 2.4rem);
+    translate: -50% -50%;
+    font-size: 14px;
+  }
+}
+
+/*
+ * The prints press in one footfall after another: on desktop as a trot along
+ * the row once it scrolls in, on phones each one as it scrolls into view.
+ * Reduced motion never hides them, so the trails are simply there.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .foot :global(svg),
+  .stamp :global(svg),
+  .together {
+    transition:
+      opacity 180ms ease-out var(--delay),
+      transform 260ms var(--ease-out) var(--delay);
+  }
+
+  .stamp :global(svg) {
+    transition-duration: 200ms, 420ms;
+  }
+
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .foot :global(svg) {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .stamp :global(svg) {
+    opacity: 0;
+    transform: scale(1.6) rotate(-14deg);
+  }
+
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .together {
+    opacity: 0;
+  }
+
+  :global([data-reveal-ready]) [data-revealed] .stamp::after {
+    animation: ripple 700ms var(--ease-out) calc(var(--delay) + 180ms);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (max-width: 1023px) {
+      .foot :global(svg) {
+        animation: press linear both;
+        animation-timeline: view();
+        animation-range: cover 8% cover 16%;
+      }
+
+      .stamp :global(svg) {
+        animation: stamp var(--ease-out) both;
+        animation-timeline: view();
+        animation-range: cover 22% cover 34%;
+      }
+
+      .stamp::after,
+      :global([data-reveal-ready]) [data-revealed] .stamp::after {
+        animation: ripple linear;
+        animation-timeline: view();
+        animation-range: cover 30% cover 44%;
+      }
+
+      .together {
+        animation: arrive linear both;
+        animation-timeline: view();
+        animation-range: cover 30% cover 38%;
+      }
+    }
+  }
+}
+
+/* Reduced motion: no press or scale, the prints just fade in where they are. */
+@media (prefers-reduced-motion: reduce) {
+  .foot :global(svg),
+  .stamp :global(svg),
+  .together {
+    transition: opacity 240ms ease-out calc(var(--delay) / 2);
+  }
+
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .foot :global(svg),
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .stamp :global(svg),
+  :global([data-reveal-ready]) [data-reveal]:not([data-revealed]) .together {
+    opacity: 0;
+  }
+}
+
+@keyframes press {
+  from {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.6) rotate(-14deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.6;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- The prints of the four screens ---------- */
+
+.print {
+  /* The screen inside sizes its type off this box, like a phone would. */
+  container-type: inline-size;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgb(var(--paper));
+  box-shadow: var(--shadow-print);
+}
+
+@media (min-width: 1024px) {
+  .print {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .step:nth-child(1) .print {
+    rotate: -1.6deg;
+  }
+
+  .step:nth-child(2) .print {
+    rotate: 1.2deg;
+  }
+
+  .step:nth-child(3) .print {
+    rotate: -0.8deg;
+  }
+
+  .step:nth-child(4) .print {
+    rotate: 1.8deg;
+  }
+}
+
+/*
+ * The app's own theme (`packages/shared/themes`), light and dark. Sizes are
+ * in container units so the screen reads like a phone at any print width.
+ */
+.screen {
+  --app-bg: #fff;
+  --app-text: #020817;
+  --app-sub: #5a5f6d;
+  --app-card: #f9f9f9;
+  --app-primary: #ef62a1;
+  /* The app's white-on-pink is 3.02:1; the copy keeps its text at AA. */
+  --app-primary-text: #be1e68;
+  --app-on-primary: #020817;
+  --app-border: #e2e8f0;
+
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 9 / 16;
+  border-radius: 5px;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-size: 3.6cqw;
+  line-height: 1.3;
+}
+
+@media (prefers-color-scheme: dark) {
+  .screen {
+    --app-bg: #000;
+    --app-text: #f2f2f2;
+    --app-sub: #999;
+    --app-card: #262626;
+    --app-primary: #d35a90;
+    --app-primary-text: #f28bbb;
+    --app-on-primary: #000;
+    --app-border: #1f1f1f;
+  }
+}
+
+.screen > div {
+  height: 100%;
+}
+
+.screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.name {
+  font-size: 4.4cqw;
+}
+
+.name b {
+  font-size: 5.4cqw;
+  font-weight: 800;
+}
+
+.pin {
+  width: 3.6cqw;
+  height: 3.6cqw;
+  flex: none;
+}
+
+/* Profile */
+.profile {
+  display: flex;
+  flex-direction: column;
+}
+
+.profilePhoto {
+  position: relative;
+  height: 70%;
+}
+
+.dots {
+  position: absolute;
+  top: 3cqw;
+  right: 3cqw;
+  left: 3cqw;
+  display: flex;
+  gap: 1.5cqw;
+}
+
+.dots i {
+  flex: 1;
+  height: 0.9cqw;
+  border-radius: 1cqw;
+  background: rgb(255 255 255 / 0.45);
+}
+
+.dots i[data-on] {
+  background: #fff;
+}
+
+.chevron {
+  position: absolute;
+  right: 4cqw;
+  bottom: -5.5cqw;
+  display: grid;
+  place-items: center;
+  width: 11cqw;
+  height: 11cqw;
+  border-radius: 50%;
+  background: var(--app-bg);
+  color: var(--app-primary);
+  box-shadow: 0 1cqw 3cqw rgb(0 0 0 / 0.16);
+}
+
+.chevron svg {
+  width: 55%;
+}
+
+.profileBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3cqw;
+  padding: 5cqw 4.5cqw 7cqw;
+}
+
+.chip {
+  padding: 1.6cqw 3cqw;
+  border-radius: 2.5cqw;
+  background: var(--app-bg);
+  box-shadow: 0 0.5cqw 3cqw rgb(0 0 0 / 0.14);
+  font-size: 3.4cqw;
+}
+
+.share {
+  align-self: center;
+  margin-top: auto;
+  color: var(--app-primary-text);
+  font-weight: 700;
+}
+
+/* Swipe */
+.swipe {
+  display: flex;
+  flex-direction: column;
+  padding: 0 2.5cqw 2.5cqw;
+}
+
+.where {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  padding: 3.5cqw 0;
+  font-weight: 700;
+}
+
+.where .pin {
+  color: var(--app-primary);
+}
+
+.card {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 6cqw;
+  background: #1b1b1b;
+  color: #fff;
+}
+
+.card img {
+  position: absolute;
+  inset: 0;
+}
+
+.distance {
+  position: absolute;
+  top: 4cqw;
+  left: 4cqw;
+  display: inline-flex;
+  align-items: center;
+  gap: 1cqw;
+  padding: 1.5cqw 2.5cqw;
+  border-radius: 2.5cqw;
+  background: rgb(0 0 0 / 0.55);
+  font-size: 3.4cqw;
+  font-weight: 600;
+}
+
+.scrim {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  gap: 1.2cqw;
+  padding: 16cqw 4.5cqw 3.5cqw;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.78) 45%);
+  font-size: 3.2cqw;
+}
+
+.reactions {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 2cqw;
+  font-size: 9cqw;
+  line-height: 1;
+}
+
+.reactions .maybe {
+  font-size: 6cqw;
+}
+
+/* Match */
+.match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5cqw 5cqw 5cqw;
+  text-align: center;
+}
+
+.pair {
+  position: relative;
+  width: 100%;
+  height: 50%;
+  flex: none;
+}
+
+.back,
+.front {
+  position: absolute;
+  top: 6%;
+  width: 54%;
+  height: 84%;
+  overflow: hidden;
+  border-radius: 6cqw;
+  box-shadow: 0 3cqw 8cqw rgb(0 0 0 / 0.22);
+}
+
+.back {
+  right: 7%;
+  rotate: 9deg;
+}
+
+.front {
+  top: 9%;
+  left: 7%;
+  rotate: -8deg;
+}
+
+.heart {
+  position: absolute;
+  bottom: -4%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 16cqw;
+  height: 16cqw;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: var(--app-bg);
+  box-shadow: 0 0 0 1.4cqw rgb(239 98 161 / 0.3);
+  font-size: 11cqw;
+  line-height: 1;
+}
+
+.gotA {
+  display: grid;
+  margin-top: 8cqw;
+  font-size: 4.4cqw;
+}
+
+.gotA b {
+  font-size: 12cqw;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.liked {
+  max-width: 62cqw;
+  margin-top: 1.5cqw;
+  color: var(--app-sub);
+}
+
+.primary,
+.secondary {
+  width: 100%;
+  padding: 3cqw;
+  border: 0.5cqw solid var(--app-primary);
+  border-radius: 3cqw;
+  font-weight: 700;
+}
+
+.primary {
+  margin-top: auto;
+  background: var(--app-primary);
+  color: var(--app-on-primary);
+}
+
+.secondary {
+  margin-top: 2.5cqw;
+  color: var(--app-primary-text);
+}
+
+/* Chat */
+.chat {
+  display: flex;
+  flex-direction: column;
+  background: var(--app-card);
+}
+
+.chatHead {
+  display: flex;
+  align-items: center;
+  gap: 2.5cqw;
+  padding: 4cqw 4cqw 3cqw;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-bg);
+  font-size: 4.2cqw;
+}
+
+.chatHead svg {
+  width: 5cqw;
+}
+
+.avatar {
+  width: 8cqw;
+  height: 8cqw;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.thread {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2.5cqw;
+  padding: 4cqw;
+}
+
+.day {
+  align-self: center;
+  padding: 1cqw 3cqw;
+  border-radius: 2cqw;
+  background: var(--app-bg);
+  color: var(--app-sub);
+  font-size: 3cqw;
+}
+
+.sent,
+.received {
+  max-width: 74%;
+  padding: 2.5cqw 3.2cqw;
+  border-radius: 3cqw;
+  background: var(--app-bg);
+  box-shadow: 0 0.3cqw 1cqw rgb(0 0 0 / 0.07);
+}
+
+.sent {
+  align-self: flex-end;
+  border-bottom-right-radius: 0.8cqw;
+}
+
+.received {
+  align-self: flex-start;
+  border-bottom-left-radius: 0.8cqw;
+}
+
+.compose {
+  margin: 0 3cqw 4cqw;
+  padding: 3cqw 4cqw;
+  border-radius: 3cqw;
+  background: var(--app-bg);
+  color: var(--app-sub);
+}
+
+/* ---------- Who gets to talk ---------- */
+
+.rules {
+  display: grid;
+  gap: 2rem;
+  margin-top: 4.5rem;
+  padding-top: 2.5rem;
+  border-top: 1.5px solid rgb(var(--ink) / 0.15);
+}
+
+@media (min-width: 1024px) {
+  .rules {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 72px;
+  }
+}
+
+.actions {
+  justify-self: start;
+  width: min(100%, 360px);
+  padding: 22px 20px 16px;
+  border-radius: 18px;
+  background: rgb(var(--paper));
+  box-shadow: var(--shadow-print);
+  text-align: center;
+}
+
+.actions ul {
+  display: grid;
+  gap: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  list-style: none;
+}
+
+.actions li[data-tone="pink"] {
+  color: rgb(var(--pink-ink));
+}
+
+.actions figcaption {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(var(--ink) / 0.1);
+  color: rgb(var(--ink-muted));
+  font-size: 14px;
+}
