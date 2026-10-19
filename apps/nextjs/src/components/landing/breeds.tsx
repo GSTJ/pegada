@@ -4,18 +4,26 @@ import breedNames from "@pegada/shared/i18n/locales/en/breed.json";
 import { Namespace } from "@pegada/shared/i18n/types/types";
 
 import { t } from "@/lib/translate";
-import { cn } from "@/lib/utils";
 
-/** The app's breed picker, in its own order. Only the keys are read here. */
+import { BreedsFinder } from "./breeds-finder";
+
+import styles from "./breeds.module.css";
+
+/**
+ * The app's breed picker, in its own order: the picker lists `breed.findMany()`
+ * unsorted, which is the seed's insert order, and the locale files keep the
+ * same keys in the same order. Only the keys are read here.
+ */
 const BREEDS = Object.keys(breedNames) as BreedSlug[];
 
-/** Placeholder: the full breed list with Mixed Breed marked. */
+const breedName = (slug: BreedSlug) => t(slug, { ns: Namespace.Breed });
+
 export const Breeds = () => (
   <section
     id="breeds"
     aria-labelledby="breeds-title"
     data-reveal
-    className="bg-yellow py-section text-navy"
+    className="bg-yellow py-section text-navy [color-scheme:light]"
   >
     <div className="wrap">
       <div className="grid max-w-[40rem] gap-[18px]">
@@ -26,28 +34,37 @@ export const Breeds = () => (
         >
           {t("landing.breeds.title")}
         </h2>
-        <p data-role="lede" className="text-lg">
+        <p data-role="lede" className="text-lede">
           {t("landing.breeds.description")}
         </p>
       </div>
-      <ul
-        data-role="body"
-        className="mt-12 flex flex-wrap gap-x-[0.5em] text-[clamp(1.375rem,1.6vw+0.875rem,2.5rem)] font-extrabold leading-[1.22] tracking-[-0.025em]"
-      >
-        {BREEDS.map((slug) => (
-          <li
-            key={slug}
-            className={cn(
-              "whitespace-nowrap",
-              slug === "mixed-breed" && "bg-pink px-[0.12em]",
-            )}
-          >
-            {t(slug, { ns: Namespace.Breed })}
-          </li>
-        ))}
-      </ul>
-      <p data-role="action" className="mt-7 max-w-[34em] text-[15px]">
-        {t("landing.breeds.caption")}
+      <div className="mt-12">
+        {/* The finder fills the placeholders in as the visitor types. */}
+        <BreedsFinder
+          label={t("landing.breeds.finder.label")}
+          placeholder={t("landing.breeds.finder.placeholder")}
+          foundOne={t("landing.breeds.finder.foundOne", { n: "{{n}}" })}
+          foundMany={t("landing.breeds.finder.foundMany", { n: "{{n}}" })}
+          none={t("landing.breeds.finder.none", { query: "{{query}}" })}
+        >
+          <ul data-role="body" className={styles.wall}>
+            {BREEDS.map((slug) => (
+              <li
+                key={slug}
+                data-slug={slug}
+                data-mark={slug === "mixed-breed" || undefined}
+              >
+                <span className={styles.name}>{breedName(slug)}</span>
+              </li>
+            ))}
+          </ul>
+        </BreedsFinder>
+      </div>
+      <p data-role="action" className={styles.caption}>
+        {t("landing.breeds.caption", {
+          total: BREEDS.length,
+          mixed: breedName("mixed-breed"),
+        })}
       </p>
     </div>
   </section>
