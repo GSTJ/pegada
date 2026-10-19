@@ -72,7 +72,7 @@
         },
         "breed": {
           "title": "Raça",
-          "body": "São 45 pra escolher, Sem raça definida também."
+          "body": "São 45 pra escolher. Vira-lata entra como Sem raça definida, na mesma lista."
         },
         "bio": {
           "title": "Bio",
@@ -82,18 +82,6 @@
           "title": "Assinatura",
           "body": "A pegada. É daí que vem o nome."
         }
-      }
-    },
-    "breeds": {
-      "title": "Vira-lata é bem-vindo",
-      "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito.",
-      "caption": "Essa é a lista de raças do app, as {{total}}, na ordem em que o app mostra. {{mixed}} tá na mesma lista, do mesmo tamanho.",
-      "finder": {
-        "label": "Procura a raça do seu cachorro",
-        "placeholder": "Tenta “vira-lata”",
-        "foundOne": "{{n}} raça na lista",
-        "foundMany": "{{n}} raças na lista",
-        "none": "Nenhuma raça com “{{query}}”. Vira-lata entra como Sem raça definida."
       }
     },
     "preferences": {

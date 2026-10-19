@@ -72,7 +72,7 @@
         },
         "breed": {
           "title": "Breed",
-          "body": "45 to pick from, Mixed Breed included."
+          "body": "45 to pick from. Mutts go in as Mixed Breed, same list."
         },
         "bio": {
           "title": "Bio",
@@ -82,18 +82,6 @@
           "title": "Signature",
           "body": "The paw print. That's what Pegada means."
         }
-      }
-    },
-    "breeds": {
-      "title": "Mutts welcome",
-      "description": "Pedigree or no papers at all, everyone gets the same shot.",
-      "caption": "That’s the breed list in the app, all {{total}} of them, in the app’s own order. {{mixed}} sits in the same list at the same size.",
-      "finder": {
-        "label": "Find your dog’s breed",
-        "placeholder": "Try “mutt”",
-        "foundOne": "{{n}} breed in the list",
-        "foundMany": "{{n}} breeds in the list",
-        "none": "No “{{query}}” in the list. Mutts and mixes go in as Mixed Breed."
       }
     },
     "preferences": {

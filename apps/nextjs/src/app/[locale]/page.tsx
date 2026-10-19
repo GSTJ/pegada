@@ -3,7 +3,6 @@ import {
   PLAY_STORE_URL,
   readCampaign,
 } from "@/app/store/store-urls";
-import { Breeds } from "@/components/landing/breeds";
 import { SiteFooter } from "@/components/landing/footer";
 import { SiteHeader } from "@/components/landing/header";
 import { Hero } from "@/components/landing/hero";
@@ -59,7 +58,6 @@ const LandingPage = async ({
       <main id="main" tabIndex={-1}>
         <Hero campaign={campaign} />
         <Profile />
-        <Breeds />
         <Preferences />
         <Walk />
         <StoryAndCta campaign={campaign} />
