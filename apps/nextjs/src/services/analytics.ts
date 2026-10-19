@@ -38,20 +38,33 @@ let loaded: WebAnalytics | undefined;
  * PostHog's own history listener, so nothing is counted twice.
  */
 const loadWebAnalytics = () =>
-  (loading ??= import("magic-observability/web").then((web) => {
-    web.initWebAnalytics(options);
-    loaded = web;
-    return web;
-  }));
+  (loading ??= import("magic-observability/web").then(
+    (web) => {
+      web.initWebAnalytics(options);
+      loaded = web;
+      return web;
+    },
+    (error: unknown) => {
+      // A failed chunk (flaky network, a deploy swapping chunks) must not
+      // disable analytics for the rest of the visit: the next event retries.
+      loading = undefined;
+      throw error;
+    },
+  ));
+
+/** Whether an event sent now leaves synchronously, inside the same task. */
+export const isWebAnalyticsLoaded = () => loaded !== undefined;
 
 /** Called from `instrumentation-client.ts`, before hydration. */
 export const startWebAnalytics = (initOptions: WebAnalyticsOptions) => {
   options = initOptions;
   const idle = () => {
     if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => void loadWebAnalytics(), { timeout: 4000 });
+      requestIdleCallback(() => void loadWebAnalytics().catch(() => {}), {
+        timeout: 4000,
+      });
     } else {
-      setTimeout(() => void loadWebAnalytics(), 1000);
+      setTimeout(() => void loadWebAnalytics().catch(() => {}), 1000);
     }
   };
   if (document.readyState === "complete") idle();
@@ -66,17 +79,20 @@ export const startWebAnalytics = (initOptions: WebAnalyticsOptions) => {
  * `posthog-js` warns when it is called before `init`, which is every event
  * until the key is set, so the shared client is asked first.
  */
-const whenEnabled = (send: (web: WebAnalytics) => void) => {
+const whenEnabled = (send: (web: WebAnalytics) => void): Promise<void> => {
   const run = (web: WebAnalytics) => {
     if (web.getWebClient().enabled) send(web);
   };
-  if (loaded) run(loaded);
-  else void loadWebAnalytics().then(run);
+  if (loaded) {
+    run(loaded);
+    return Promise.resolve();
+  }
+  return loadWebAnalytics().then(run, () => {});
 };
 
 /** For error boundaries: reported once PostHog is in, a no-op without a key. */
 export const captureError = (error: unknown, context?: ErrorContext) => {
-  whenEnabled((web) => web.captureError(error, context));
+  void whenEnabled((web) => web.captureError(error, context));
 };
 
 export const DOWNLOAD_CTA_CLICKED = "Download CTA Clicked";
@@ -135,7 +151,7 @@ export const downloadCtaProperties = (click: DownloadCtaClick) => ({
  * browser is obliged to deliver even after the page is gone. The shared facade
  * takes no per-event options, hence the raw handle.
  */
-export const trackDownloadCtaClicked = (click: DownloadCtaClick) => {
+export const trackDownloadCtaClicked = (click: DownloadCtaClick) =>
   whenEnabled((web) => {
     web
       .getPostHog()
@@ -144,7 +160,6 @@ export const trackDownloadCtaClicked = (click: DownloadCtaClick) => {
         send_instantly: true,
       });
   });
-};
 
 /**
  * How the visitor arrived, read off the query string on the server and handed
@@ -189,7 +204,7 @@ const captureWeb = <Name extends WebEventName>(
   name: Name,
   properties: WebEventProperties[Name],
 ) => {
-  whenEnabled((web) => web.getPostHog().capture(name, properties));
+  void whenEnabled((web) => web.getPostHog().capture(name, properties));
 };
 
 /** Denominator of the experiment: one per view of the AI story landing page. */
