@@ -1,8 +1,12 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import createMiddleware from "next-intl/middleware";
 
-import { LOCALE_COOKIE, localeCookiePolicy } from "@/lib/locale-cookie";
+import {
+  LOCALE_CHOICE_PARAM,
+  LOCALE_COOKIE,
+  localeCookiePolicy,
+} from "@/lib/locale-cookie";
 import {
   DEFAULT_LOCALE_SEGMENT,
   LOCALE_SEGMENTS,
@@ -47,24 +51,31 @@ const dropQueuedCookie = (response: Response, name: string) => {
  * the rewrite it emits, so the value survives into the render.
  */
 const middleware = (request: NextRequest) => {
+  const policy = localeCookiePolicy(
+    request.nextUrl.pathname,
+    DEFAULT_LOCALE_SEGMENT,
+    LOCALE_SEGMENTS,
+    request.nextUrl.search,
+  );
+
+  if (policy === "choose") {
+    const url = request.nextUrl.clone();
+    url.searchParams.delete(LOCALE_CHOICE_PARAM);
+    const response = NextResponse.redirect(url);
+    response.cookies.set(
+      LOCALE_COOKIE,
+      request.nextUrl.pathname.split("/")[1]?.toLowerCase() ?? "",
+      { path: "/", maxAge: ONE_YEAR_IN_SECONDS, sameSite: "lax" },
+    );
+    return response;
+  }
+
   const headers = new Headers(request.headers);
   headers.set(PATHNAME_HEADER, request.nextUrl.pathname);
 
   const response = handleI18nRouting(new NextRequest(request, { headers }));
 
-  const policy = localeCookiePolicy(
-    request.nextUrl.pathname,
-    DEFAULT_LOCALE_SEGMENT,
-    LOCALE_SEGMENTS,
-  );
-
   if (policy !== "persist") dropQueuedCookie(response, LOCALE_COOKIE);
-  if (policy === "clear" && request.cookies.has(LOCALE_COOKIE)) {
-    response.headers.append(
-      "set-cookie",
-      `${LOCALE_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`,
-    );
-  }
 
   return response;
 };

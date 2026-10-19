@@ -2,14 +2,15 @@
  * The app's Maximum Distance control, drawn for the web: a 4px track, a white
  * marker with a pink ring, and the value bubble under it (Slider in
  * apps/mobile). The thumb box is 44px for touch; the gradients draw the 26px
- * marker and its shadow inside it.
+ * marker and its shadow inside it. Ring and fill use the deeper pink: the
+ * app's #EE6AA7 is 2.5:1 on blush, under the 3:1 a control's edge needs.
  */
 .range {
   --marker:
     radial-gradient(
       circle,
       #fff 0 10.5px,
-      #ee6aa7 11px 13px,
+      rgb(var(--pink-ink)) 11px 13px,
       transparent 13.5px
     ),
     radial-gradient(
@@ -45,7 +46,7 @@
   border-radius: 99px;
   background: linear-gradient(
     to right,
-    #ee6aa7 calc(22px + (100% - 44px) * var(--fill)),
+    rgb(var(--pink-ink)) calc(22px + (100% - 44px) * var(--fill)),
     rgb(var(--ink) / 0.18) 0
   );
 }
@@ -59,7 +60,7 @@
 .range::-moz-range-progress {
   height: 4px;
   border-radius: 99px;
-  background: #ee6aa7;
+  background: rgb(var(--pink-ink));
 }
 
 .range::-webkit-slider-thumb {

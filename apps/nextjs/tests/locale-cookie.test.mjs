@@ -11,18 +11,26 @@ import { test } from "node:test";
  */
 const { localeCookiePolicy } = await import("../src/lib/locale-cookie.ts");
 
-const policy = (pathname) =>
-  localeCookiePolicy(pathname, "en-us", ["en-us", "pt-br"]);
+const policy = (pathname, search) =>
+  localeCookiePolicy(pathname, "en-us", ["en-us", "pt-br"], search);
 
-test("a Portuguese visit never pins the cookie to Portuguese", () => {
+test("a shared Portuguese link neither pins nor clears the cookie", () => {
   for (const path of [
     "/pt-br",
     "/pt-br/",
     "/pt-br/story",
     "/PT-BR/terms-of-use",
   ]) {
-    assert.equal(policy(path), "clear", path);
+    assert.equal(policy(path), "ignore", path);
+    assert.equal(policy(path, "?ref=ig"), "ignore", path);
   }
+});
+
+test("choosing Portuguese in the switch sticks", () => {
+  for (const path of ["/pt-br", "/pt-br/story"]) {
+    assert.equal(policy(path, "?lang"), "choose", path);
+  }
+  assert.equal(policy("/story", "?lang"), "ignore");
 });
 
 test("choosing English in the switch sticks", () => {

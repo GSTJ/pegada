@@ -215,6 +215,10 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
   const [announcement, setAnnouncement] = useState("");
   // The photos under the top card, the ID backs and the drag reactions.
   const loaded = useSyncExternalStore(subscribeLoad, isLoaded, notLoaded);
+  // A visitor who flips or swipes before the page's load event shouldn't
+  // meet a blank back or a card with no photo.
+  const [engaged, setEngaged] = useState(false);
+  const ready = loaded || engaged;
 
   const deckRef = useRef<HTMLDivElement>(null);
   const panelHeadingRef = useRef<HTMLParagraphElement>(null);
@@ -232,6 +236,7 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
 
   const touch = useCallback(() => {
     touched.current = true;
+    setEngaged(true);
     for (const animation of nudge.current) animation.cancel();
   }, []);
 
@@ -487,7 +492,7 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
         // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- a card stack, not a form fieldset.
         role="group"
         aria-roledescription={copy.roleDescription}
-        aria-label={top ? `${copy.label}: ${top.label}` : copy.label}
+        aria-label={top && !panel ? `${copy.label}: ${top.label}` : copy.label}
         aria-describedby={`${hintId} ${keysId}`}
         className={styles.deck}
         onKeyDown={onKeyDown}
@@ -505,7 +510,8 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
               data-lead={dog.id === DECK[0]?.id || undefined}
               data-flipped={isFlipped || undefined}
               hidden={depth === -1}
-              aria-hidden={!isTop}
+              // Under a panel the next card is covered, so it's hidden too.
+              aria-hidden={!isTop || Boolean(panel)}
               className={styles.card}
               style={STACK[Math.max(depth, 0)]}
               onPointerDown={onPointerDown}
@@ -515,7 +521,7 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
             >
               <div className={styles.inner}>
                 <div className={styles.front} aria-hidden={isFlipped}>
-                  {loaded || dog.id === DECK[0]?.id ? (
+                  {ready || dog.id === DECK[0]?.id ? (
                     <DogPhoto
                       dog={dog}
                       alt={inLocale(dog.alt, locale)}
@@ -544,12 +550,12 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
                       className={styles.feedback}
                       aria-hidden
                     >
-                      {loaded ? <Sticker src={icon} /> : null}
+                      {ready ? <Sticker src={icon} /> : null}
                     </span>
                   ))}
                 </div>
                 <div className={styles.back} aria-hidden={!isFlipped}>
-                  {loaded ? backs[dog.id] : null}
+                  {ready ? backs[dog.id] : null}
                 </div>
               </div>
             </div>
@@ -623,6 +629,18 @@ export const HeroDeck = ({ locale, copy, backs }: HeroDeckProps) => {
           </div>
         ) : null}
       </div>
+
+      {/* The tap that turns the card, as a control a screen reader can name. */}
+      {top && !panel ? (
+        <button
+          type="button"
+          className="sr-only"
+          aria-pressed={flipped}
+          onClick={flip}
+        >
+          {top.profile}
+        </button>
+      ) : null}
 
       <div className={styles.reactions} data-idle={Boolean(panel) || undefined}>
         {REACTIONS.map(({ kind, icon }) => (

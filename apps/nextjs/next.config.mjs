@@ -33,9 +33,10 @@ const devDistDir = () => {
 const nextConfig = {
   reactStrictMode: true,
 
-  // Every `generateMetadata` here is synchronous (strings and the request
-  // path), so streaming it buys nothing and only moved the description into
-  // <body> for browsers, which Lighthouse reads as a missing description.
+  // Streaming metadata moved the description into <body> for browsers, which
+  // Lighthouse reads as missing. It buys nothing here: every route's metadata
+  // is plain strings except `/dog/[id]`, and that page awaits the same cached
+  // `getDog` at its top level with no Suspense, so nothing flushes earlier.
   htmlLimitedBots: /.*/,
 
   ...devDistDir(),

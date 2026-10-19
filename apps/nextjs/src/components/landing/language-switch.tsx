@@ -1,5 +1,11 @@
 import { getRequestPathname, getSafeLocale } from "@/lib/get-safe-locale";
-import { LOCALE_SEGMENTS, toLanguage, toRoutePath } from "@/lib/locales";
+import { LOCALE_CHOICE_PARAM } from "@/lib/locale-cookie";
+import {
+  DEFAULT_LOCALE_SEGMENT,
+  LOCALE_SEGMENTS,
+  toLanguage,
+  toRoutePath,
+} from "@/lib/locales";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +23,9 @@ type LanguageSwitchProps = {
 
 /**
  * The same page in the other language. Every link carries the locale prefix,
- * `/en-us` included: that spelling is what tells the middleware this was a
- * choice (`lib/locale-cookie.ts`), so English sticks for a visitor whose
- * browser asks for Portuguese. Plain anchors, so the middleware sees a fresh
+ * `/en-us` included, and Portuguese adds `?lang`: that is what tells the
+ * middleware this was a choice (`lib/locale-cookie.ts`), so it sticks for a
+ * visitor whose browser asks for the other language. Plain anchors, so the middleware sees a fresh
  * request and can set the cookie on the redirect.
  */
 export const LanguageSwitch = ({
@@ -47,7 +53,11 @@ export const LanguageSwitch = ({
         {segments.map((segment) => (
           <li key={segment}>
             <a
-              href={`/${segment}${routePath === "/" ? "" : routePath}`}
+              href={`/${segment}${routePath === "/" ? "" : routePath}${
+                segment === DEFAULT_LOCALE_SEGMENT
+                  ? ""
+                  : `?${LOCALE_CHOICE_PARAM}`
+              }`}
               hrefLang={toLanguage(segment)}
               lang={toLanguage(segment)}
               aria-current={segment === locale ? "page" : undefined}
