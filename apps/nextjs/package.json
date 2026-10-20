@@ -16,7 +16,6 @@
     "@pegada/api": "workspace:*",
     "@pegada/database": "workspace:*",
     "@pegada/shared": "workspace:*",
-    "@posthog/react": "^1.10.3",
     "@tailwindcss/typography": "^0.5.19",
     "@types/mdx": "^2.0.13",
     "@upstash/ratelimit": "^2.0.8",

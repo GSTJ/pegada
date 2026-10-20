@@ -2,9 +2,8 @@
 
 import { useEffect } from "react";
 
-import { captureError } from "magic-observability/web";
-
 import { SomethingWentWrong } from "@/components/something-went-wrong";
+import { captureError } from "@/services/analytics";
 
 /**
  * Next's route-level error boundary. It is a client component, so it reports
