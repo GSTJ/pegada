@@ -31,6 +31,28 @@
       "figLabel": "The app's Match screen: You got a Match. You and Nina liked each other!",
       "youGotA": "You got a",
       "likedNina": "You and Nina liked each other!"
+    },
+    "profile": {
+      "title": "A few photos, the name, and what they're like.",
+      "desc": "First, the profile. It's what other owners see when they tap your dog's card, and you can change it later in Edit profile.",
+      "photosKey": "Photos",
+      "photosValue": "1 to 6. At least one with you in it.",
+      "nameKey": "Name",
+      "nameValue": "The one they answer to.",
+      "birthdayKey": "Birthday",
+      "birthdayValue": "The app works out the age by itself, every year.",
+      "breedKey": "Breed",
+      "breedValue": "45 options. Mutts are welcome: they go in as <b>Mixed Breed</b>.",
+      "bioKey": "Bio",
+      "bioValue": "Up to 500 characters about what they love.",
+      "fine": "Under Details you also add size, color and gender.",
+      "replay": "Build it again",
+      "screenLabel": "The app's profile screen: Lua's photo, breed Border Collie, Lua, 3 years, the bio, Share Lua's profile, Report Lua and the 😕 🤔 😍 buttons",
+      "luaBirthday": "10/07/2023",
+      "luaAge": "3 years",
+      "luaBio": "I love playing fetch and stealing socks! Looking for someone to play and have fun with! 🐶",
+      "luaShare": "Share Lua's profile",
+      "luaReport": "Report Lua"
     }
   },
   "home": {

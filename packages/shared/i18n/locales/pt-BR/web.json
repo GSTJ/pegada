@@ -31,6 +31,28 @@
       "figLabel": "A tela de Match do app: Você deu um Match. Você e Nina se curtiram!",
       "youGotA": "Você deu um",
       "likedNina": "Você e Nina se curtiram!"
+    },
+    "profile": {
+      "title": "Umas fotos, o nome e o jeito dele.",
+      "desc": "Primeiro, o perfil. É o que os outros tutores veem quando tocam no card do seu cachorro, e dá pra mudar depois em Editar perfil.",
+      "photosKey": "Fotos",
+      "photosValue": "De 1 a 6. Pelo menos uma com você junto.",
+      "nameKey": "Nome",
+      "nameValue": "Do jeito que ele atende quando você chama.",
+      "birthdayKey": "Aniversário",
+      "birthdayValue": "A idade o app calcula sozinho, todo ano.",
+      "breedKey": "Raça",
+      "breedValue": "São 45 opções. Vira-lata é bem-vindo: entra como <b>Sem raça definida</b>.",
+      "bioKey": "Bio",
+      "bioValue": "Até 500 caracteres pra contar do que ele gosta.",
+      "fine": "Em Detalhes ainda entram porte, cor e sexo.",
+      "replay": "Montar de novo",
+      "screenLabel": "Tela de perfil do app: foto da Lua, raça Border Collie, Lua, 3 anos, a bio, Compartilhar perfil de Lua, Denunciar Lua e os botões 😕 🤔 😍",
+      "luaBirthday": "07/10/2023",
+      "luaAge": "3 anos",
+      "luaBio": "Adoro brincar de pegar e roubar meias! Procurando alguém para brincar e se divertir! 🐶",
+      "luaShare": "Compartilhar perfil de Lua",
+      "luaReport": "Denunciar Lua"
     }
   },
   "home": {

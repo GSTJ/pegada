@@ -2,6 +2,7 @@ import { clsx } from "clsx";
 
 import { readCampaign } from "@/app/store/store-urls";
 import { Hero } from "@/components/landing/hero";
+import { Profile } from "@/components/landing/profile";
 import { Reveal } from "@/components/landing/reveal";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
@@ -28,6 +29,7 @@ const LandingPage = async ({
       <SiteHeader route="/" campaign={campaign} />
       <main id="main" tabIndex={-1} className={b.main}>
         <Hero campaign={campaign} />
+        <Profile />
       </main>
       <SiteFooter route="/" page="landing" campaign={campaign} />
       <Reveal />
