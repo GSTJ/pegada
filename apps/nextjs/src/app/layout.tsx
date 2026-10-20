@@ -80,12 +80,16 @@ export const generateMetadata = () => {
     icons,
     alternates: {
       canonical,
-      languages: Object.fromEntries(
-        LOCALE_SEGMENTS.map((segment) => [
-          toLanguage(segment),
-          toLocalePath(segment, routePath),
-        ]),
-      ),
+      languages: {
+        ...Object.fromEntries(
+          LOCALE_SEGMENTS.map((segment) => [
+            toLanguage(segment),
+            toLocalePath(segment, routePath),
+          ]),
+        ),
+        // The unprefixed URL is the one that negotiates a language.
+        "x-default": routePath,
+      },
     },
     // No `title`/`description` here on purpose: Next falls back to the ones
     // above, and those are overridden per route (privacy policy, terms, …).
