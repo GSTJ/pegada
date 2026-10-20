@@ -1,21 +1,56 @@
-import { readCampaign } from "@/app/store/store-urls";
-import { Cta } from "@/components/cta";
-import { Footer } from "@/components/footer";
-import { HeroImage } from "@/components/hero-image";
-import { Logo } from "@/components/logo";
-import { Restricter } from "@/components/restricter";
-import { Features } from "@/components/sections/features";
-import { HowItWorks } from "@/components/sections/how-it-works";
-import { Screens } from "@/components/sections/screens";
+import { clsx } from "clsx";
+
+import {
+  APP_STORE_URL,
+  PLAY_STORE_URL,
+  readCampaign,
+} from "@/app/store/store-urls";
+import { Chat } from "@/components/landing/chat";
+import { Closing } from "@/components/landing/closing";
+import { Deck } from "@/components/landing/deck";
+import { Faq } from "@/components/landing/faq";
+import { Hero } from "@/components/landing/hero";
+import { Profile } from "@/components/landing/profile";
+import { Radius } from "@/components/landing/radius";
+import { Reveal } from "@/components/landing/reveal";
+import { SiteFooter } from "@/components/landing/site-footer";
+import { SiteHeader } from "@/components/landing/site-header";
+import { Story } from "@/components/landing/story";
+import { getSafeLocale } from "@/lib/get-safe-locale";
+import { toLanguage, toLocalePath } from "@/lib/locales";
 import { t } from "@/lib/translate";
 
-const App = async ({
+import b from "@/components/landing/landing.module.css";
+
+/**
+ * Only fields the stores back up. No `offers` or `aggregateRating`: the app
+ * has in-app purchases and the repo has no rating to cite.
+ */
+const appJsonLd = (locale: string) => ({
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  name: "Pegada",
+  url: new URL(toLocalePath(locale, "/"), "https://www.pegada.app").href,
+  description: t("metadata.description"),
+  inLanguage: toLanguage(locale),
+  image: "https://www.pegada.app/icon-512.png",
+  operatingSystem: "iOS 15.1 or later, Android",
+  applicationCategory: "SocialNetworkingApplication",
+  sameAs: [APP_STORE_URL, PLAY_STORE_URL],
+  author: {
+    "@type": "Person",
+    name: "Gabriel Taveira",
+    url: "https://gabrieltaveira.dev",
+  },
+});
+
+const LandingPage = async ({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) => {
   // `/store` redirects desktop visitors here with whatever campaign they
-  // arrived on, so the store badges below can carry it the rest of the way.
+  // arrived on, so the store buttons can carry it the rest of the way.
   const campaign = readCampaign(
     new URLSearchParams(
       Object.entries((await searchParams) ?? {}).flatMap(([key, value]) =>
@@ -25,47 +60,32 @@ const App = async ({
   );
 
   return (
-    <>
-      <Restricter>
-        <div className="flex flex-1 min-h-screen flex-wrap flex-col lg:flex-row">
-          <div className="p-12 flex flex-col flex-1 gap-20 justify-between items-center lg:items-start">
-            <Logo />
-            <Cta campaign={campaign} />
-            <div className="gap-4 flex flex-col items-center lg:items-start">
-              <a
-                href="https://www.producthunt.com/posts/pegada?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-pegada"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {/* oxlint-disable-next-line nextjs/no-img-element -- Product Hunt's embed is served from their host and must stay an <img>. */}
-                <img
-                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=465930&theme=light"
-                  alt="Pegada - Find&#0032;a&#0032;Match&#0032;For&#0032;Your&#0032;Dog | Product Hunt"
-                  className="h-12"
-                />
-              </a>
-              <p className="text-center lg:text-left">
-                {t("home.madeWithLoveBy")}
-                <a
-                  href="https://gabrieltaveira.dev"
-                  target="_blank"
-                  className="text-blue-500 hover:underline"
-                  rel="noreferrer"
-                >
-                  <b>Gabriel Taveira</b>
-                </a>
-              </p>
-            </div>
-          </div>
-          <HeroImage />
-        </div>
-      </Restricter>
-      <Features />
-      <HowItWorks />
-      <Screens />
-      <Footer />
-    </>
+    <div className={clsx(b.landing, b.page)}>
+      <SiteHeader route="/" campaign={campaign} />
+      <main id="main" tabIndex={-1} className={b.main}>
+        <Hero campaign={campaign} />
+        <Profile />
+        <Deck />
+        <Radius />
+        <Chat />
+        <Story />
+        <Faq />
+        <Closing campaign={campaign} />
+      </main>
+      <SiteFooter route="/" page="landing" campaign={campaign} />
+      <Reveal />
+      <script
+        type="application/ld+json"
+        // oxlint-disable-next-line react/no-danger, react-perf/jsx-no-new-object-as-prop -- JSON-LD has to be inline text, and a server component never re-renders; `<` is escaped so the payload cannot close the tag.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(appJsonLd(getSafeLocale())).replaceAll(
+            "<",
+            String.raw`\u003c`,
+          ),
+        }}
+      />
+    </div>
   );
 };
 
-export default App;
+export default LandingPage;

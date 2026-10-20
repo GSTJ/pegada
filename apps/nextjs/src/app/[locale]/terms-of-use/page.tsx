@@ -10,7 +10,7 @@ const pageKey = "termsOfUse";
 export const generateMetadata = () => generateLocalizedMdxMetadata(pageKey);
 
 const TermsOfUse: React.FC = () => {
-  return <LocalizedMdxScreen pageKey={pageKey} />;
+  return <LocalizedMdxScreen pageKey={pageKey} route="/terms-of-use" />;
 };
 
 export default TermsOfUse;

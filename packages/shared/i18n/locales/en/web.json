@@ -1,82 +1,176 @@
 {
   "metadata": {
-    "title": "Pegada - Dog Dating App",
-    "description": "Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS.",
-    "ogImageAlt": "An iPhone running Pegada, showing the profile of a golden retriever named Maui, beside the words “Friends For Your Doggie” and “Pawfect Matches”."
+    "title": "Pegada: a new friend for your dog, nearby",
+    "description": "Make your dog's profile, swipe through dogs near you, and when you both like each other, the chat opens. Free on iPhone and Android.",
+    "ogImageAlt": "Pegada: “Find your dog a friend nearby. Free on iPhone and Android.” beside the app's Match screen, two dog photos fanned over “You got a Match. You and Nina liked each other!”"
   },
-  "home": {
-    "title": "Friends For Your Doggie",
-    "description": "Pawfect matches by breed and personality, close enough to walk to.",
-    "cta": {
-      "googlePlay": "Google Play",
-      "appStore": "App Store"
+  "landing": {
+    "chrome": {
+      "brandLabel": "Pegada, home",
+      "skip": "Skip to content",
+      "navLabel": "Sections",
+      "navHow": "How it works",
+      "navFaq": "Questions",
+      "getApp": "Get the app",
+      "langLabel": "Language",
+      "appStorePre": "Download on the",
+      "playPre": "Get it on",
+      "footLabel": "Footer",
+      "tagline": "Meetups for Doggies.",
+      "colApp": "The app",
+      "colLegal": "Legal",
+      "colContact": "Contact",
+      "story": "Your dog's story",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
+      "delete": "Delete account"
     },
-    "madeWithLoveBy": "Made with ❤️ by ",
-    "features": {
-      "title": "Built for dogs",
-      "match": {
-        "title": "Dogs that suit yours",
-        "description": "Breed, personality, and how far you'd actually walk. That's what we sort by."
+    "hero": {
+      "title": "Find your dog a friend nearby.",
+      "lede": "Make your dog's profile, swipe through dogs near you, and when you both like each other, the chat opens. Free on iPhone and Android.",
+      "figLabel": "The app's Match screen: You got a Match. You and Nina liked each other!",
+      "youGotA": "You got a",
+      "likedNina": "You and Nina liked each other!"
+    },
+    "profile": {
+      "title": "A few photos, the name, and what they're like.",
+      "desc": "First, the profile. It's what other owners see when they tap your dog's card, and you can change it later in Edit profile.",
+      "photosKey": "Photos",
+      "photosValue": "1 to 6. At least one with you in it.",
+      "nameKey": "Name",
+      "nameValue": "The one they answer to.",
+      "birthdayKey": "Birthday",
+      "birthdayValue": "The app works out the age by itself, every year.",
+      "breedKey": "Breed",
+      "breedValue": "45 options. Mutts are welcome: they go in as <b>Mixed Breed</b>.",
+      "bioKey": "Bio",
+      "bioValue": "Up to 500 characters about what they love.",
+      "fine": "Under Details you also add size, color and gender.",
+      "replay": "Build it again",
+      "screenLabel": "The app's profile screen: Lua's photo, breed Border Collie, Lua, 3 years, the bio, Share Lua's profile, Report Lua and the 😕 🤔 😍 buttons",
+      "luaBirthday": "10/07/2023",
+      "luaAge": "3 years",
+      "luaBio": "I love playing fetch and stealing socks! Looking for someone to play and have fun with! 🐶",
+      "luaShare": "Share Lua's profile",
+      "luaReport": "Report Lua"
+    },
+    "deck": {
+      "title": "One dog at a time.",
+      "desc": "Dogs near you show up as cards, one at a time. Right to like, left to pass, up for maybe. Try it with Nina.",
+      "maybe": "Maybe",
+      "maybeDesc": "Not sure? Maybe still counts as interest. If they like you, it's a match all the same.",
+      "nope": "Pass",
+      "nopeDesc": "Not this one. The card goes and the next dog comes up.",
+      "like": "Like",
+      "likeDesc": "If they like you back, it's a match and your chat opens.",
+      "keyUp": "up arrow",
+      "keyLeft": "left arrow",
+      "keyRight": "right arrow",
+      "deckRole": "card stack",
+      "deckLabel": "Demo deck. Arrows: left passes, up maybe, right likes.",
+      "emptyTitle": "We couldn't find any more dogs!",
+      "emptyDesc": "Still not many people nearby. We'll let you know when a new dog shows up.",
+      "seeAgain": "See it again",
+      "sendMessage": "Send a Message",
+      "keepSwiping": "Keep Swiping",
+      "hintFine": "Drag the card, or click it and use <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd>.",
+      "hintTouch": "Drag the card sideways. For maybe, tap the middle button.",
+      "upTop": "That's the one up top ↑",
+      "now": "Now: {{name}}, {{age}}, {{dist}} away.",
+      "back": "Back to the start. {{name}}, {{age}}.",
+      "matchLive": "It's a match! You and Nina liked each other.",
+      "none": "No more dogs.",
+      "demoNote": "In the app, this opens your chat with Nina. On this page it's just a demo.",
+      "nina": {
+        "age": "2 years",
+        "bio": "Chases anything that flies. Ball, leaf, bird.",
+        "alt": "Nina, a gray dog with light eyes",
+        "nope": "You passed on Nina.",
+        "maybe": "Maybe counts too. Nina had already liked Lua: it's a match.",
+        "like": "Nina had already liked Lua: it's a match."
       },
-      "profile": {
-        "title": "The profile is your dog's",
-        "description": "Photos, age, the stuff they hate. You just hold the phone."
-      },
-      "inclusive": {
-        "title": "Mutts welcome",
-        "description": "Pedigree or no papers at all, everyone gets the same shot."
-      },
-      "messaging": {
-        "title": "You decide who talks to your dog",
-        "description": "The chat opens only after a match. Unmatch or report any time."
+      "maui": {
+        "age": "1 year and 7 months",
+        "alt": "Maui, a Golden Retriever with his tongue out",
+        "nope": "You passed on Maui.",
+        "maybe": "Maui is a maybe. If he likes Lua, it's a match.",
+        "like": "Like sent. If Maui likes Lua back, it's a match."
       }
     },
-    "howItWorks": {
-      "title": "From profile to first walk",
-      "profile": {
-        "title": "Set up the profile",
-        "description": "Name, breed, a few photos."
-      },
-      "swipe": {
-        "title": "See who's nearby",
-        "description": "One dog at a time, from your neighborhood. Like or skip."
-      },
-      "match": {
-        "title": "Wait for the match",
-        "description": "If the other dog likes yours back, you both hear about it."
-      },
-      "chat": {
-        "title": "Say hi",
-        "description": "Pick a park, pick a time."
-      }
+    "radius": {
+      "title": "You draw the radius.",
+      "desc": "In Maximum Distance you pick how far to go, from 1 to 300+ km. Whoever is inside the circle shows up in your deck, closest first.",
+      "breedKey": "Breed",
+      "breedValue": "Any breed, or just one",
+      "sizeKey": "Size",
+      "sizeValue": "From Extra Small to Giant",
+      "colorKey": "Color",
+      "colorValue": "Black, White, Brown, Tricolor, Albino or Golden",
+      "ageKey": "Age",
+      "ageValue": "0 to 10+ years",
+      "fine": "If your radius runs short, the app fills the deck with dogs farther away, after these.",
+      "figLabel": "Diagram: you in the middle, Nina 3 km away, Bento 12 km and Maui 246 km",
+      "you": "You",
+      "note": "Not to scale: the rings squeeze together so 300 km fits on screen.",
+      "maxDist": "Maximum Distance",
+      "upTo": "Up to {{km}} km",
+      "noLimit": "No limit, 300+ km",
+      "countNone": "No dogs in your radius",
+      "countAll": "All <b>{{n}}</b> dogs are in your radius",
+      "countSome": "<b>{{n}}</b> of {{total}} dogs in your radius"
     },
-    "screens": {
-      "title": "What it looks like",
-      "swipe": {
-        "title": "Who's nearby",
-        "description": "Their photo, their age, the distance.",
-        "alt": "The Pegada swipe screen: one dog's card filling the screen, the distance in the corner, the name and age across the bottom."
-      },
-      "profile": {
-        "title": "The full profile",
-        "description": "Tap the card to read everything their owner wrote.",
-        "alt": "A dog's profile in Pegada, showing breed, age and a short bio under the photo."
-      },
-      "match": {
-        "title": "The match",
-        "description": "Both dogs said yes. You can talk now.",
-        "alt": "Pegada's match screen, with two dog photos overlapping under the word Match."
-      },
-      "chat": {
-        "title": "Sorting out the walk",
-        "description": "Where to meet, and when.",
-        "alt": "A Pegada chat between two owners settling on a morning at the park."
-      }
+    "chat": {
+      "title": "Matched? Now it's just the two of you talking.",
+      "desc": "On the Match screen, tap Send a Message and the chat with the other dog's human opens. It's plain text chat. If you hit it off, you two sort out the rest.",
+      "onlyAfterKey": "Only after a match",
+      "onlyAfterValue": "Nobody can message you until you've both liked each other.",
+      "unmatchKey": "Unmatch",
+      "unmatchValue": "It's on the dog's profile. The chat closes for both of you.",
+      "reportKey": "Report",
+      "reportValue": "You pick a reason. The profile is never told who reported it.",
+      "screenLabel": "The app's chat screen with Nina. Example conversation: Hi! Saw that Nina chases anything that flies. Lua's exactly the same. Reply: Haha really? Here it's balls, leaves, birds, whatever shows up. Lua also steals socks. If one goes missing, you know who. Reply: Lol they're going to get along great.",
+      "matched": "You two matched!",
+      "start": "Send a message to start the conversation",
+      "today": "Today",
+      "m1": "Hi! Saw that Nina chases anything that flies. Lua's exactly the same",
+      "m2": "Haha really? Here it's balls, leaves, birds, whatever shows up",
+      "m3": "Lua also steals socks. If one goes missing, you know who",
+      "m4": "Lol they're going to get along great 😂",
+      "typeMessage": "Type a message",
+      "caption": "Example conversation",
+      "playAgain": "Play again"
     },
-    "footer": {
-      "story": "Your dog's story"
+    "story": {
+      "title": "Put your dog in your story.",
+      "desc": "On the profile, tap <b>Share profile</b> and pick <b>Share to story</b>. The app builds a portrait image with up to 4 photos of your dog and opens your phone's share menu. Then just pick where to post.",
+      "note": "You can also just send the profile link.",
+      "more": "See how it works",
+      "phoneLabel": "Nina's story open on a phone: the \"DMs open to the whole pack\" image the app made from her photos. Hold to pause.",
+      "reply": "Send message",
+      "caption": "The actual image the app made for Nina's profile."
     },
-    "storyLink": "Make your dog's story"
+    "faq": {
+      "title": "Before you download",
+      "desc": "The questions we hear the most. If yours isn't here, write to <mail>support@pegada.app</mail>.",
+      "q1": "Is it free?",
+      "a1": "Yes. Downloading and using it costs nothing: profile, swiping, matches and chat. The free version has a daily like limit and shows an ad after a match. Premium is optional: it gives you unlimited likes, removes the ads, lets you rewind to the last doggie and puts your dog first in line for the dogs you liked.",
+      "q2": "Does it work on my phone?",
+      "a2": "It works on iPhone and Android. Just get it on the App Store or Google Play. There's no browser version, Pegada is a phone app.",
+      "q3": "Can I add a mutt?",
+      "a3": "Of course. When you pick the breed, choose Mixed Breed. It's one of the 45 options on the list.",
+      "q4": "Do I need a password?",
+      "a4": "No. You type your email and we send you a 6-digit code. Type it in and you're in. If you don't have an account yet, it's created right there. The code works for one hour.",
+      "q5": "Can people see where I live?",
+      "a5": "No. The card only shows how far away you are, rounded, like 3km. Your address and your spot on the map don't show up for anyone.",
+      "q6": "How do I delete my account?",
+      "a6": "In the app, go to your profile, scroll to the bottom and tap Delete account. It's permanent, there's no undo. Without the app, do it <web>on the web</web>: send an email to <mail>support@pegada.app</mail> asking for the deletion.",
+      "q7": "Is it in Portuguese too?",
+      "a7": "Yes. The app is in English and Portuguese. It follows your phone's language, and you can switch it on your profile, under Language."
+    },
+    "closing": {
+      "title": "Lua already found Nina. Now it's your dog's turn.",
+      "desc": "Free on iPhone and Android."
+    }
   },
   "story": {
     "metadata": {
@@ -142,19 +236,22 @@
   },
   "privacyPolicy": {
     "metadata": {
-      "title": "Pegada | Privacy Policy"
+      "title": "Pegada | Privacy Policy",
+      "description": "How Pegada collects, uses and protects your data."
     },
     "content": "### Privacy Policy of the Application\n\nThe privacy policy describes how we collect, use, protect, and share information about you and your pet. Please read this policy carefully before using our application.\n\n#### Information Collection\n\nWe collect information in two ways:\n\n- **Information you provide:** This includes your pet's profile information, such as name, breed, age, and photos. We may also collect your contact information to facilitate communication.\n- **Usage and device information:** We automatically collect information about how you use the application and about the device you use to access our service. This may include your IP address, device type, and activity in the application.\n\n#### Use of Information\n\nWe use the information collected to:\n\n- Facilitate matches between pets.\n- Improve our application and personalize your experience.\n- Communicate with you.\n- Protect the security of our users and prevent fraud.\n\n#### Information Sharing\n\nWe do not sell or share your personal information with third parties for marketing purposes without your explicit consent. We may share information with service providers who help us operate and improve our application. These service providers have access only to the information necessary to perform their functions and are obligated to protect your information.\n\n#### Security\n\nWe take reasonable security measures to protect your information, but no system is completely secure. While we do our best to protect your information, we cannot guarantee its absolute security.\n\n#### Changes to the Privacy Policy\n\nWe may change this privacy policy from time to time. If we make changes, we will notify you through an update in the application or by email.\n\n#### Contact\n\nIf you have any questions about this privacy policy, please contact us at the email [support@pegada.app](mailto:support@pegada.app).\n\nBy using our application, you agree to the collection, use, and sharing of your information as described in this privacy policy.\n\nLast updated: July 2, 2023."
   },
   "termsOfUse": {
     "metadata": {
-      "title": "Pegada | Terms of Use"
+      "title": "Pegada | Terms of Use",
+      "description": "The terms for using Pegada."
     },
     "content": "### \"Pegada\" Terms of Use\n\n1. **Definitions:** \"Pegada\" refers to the relationship app for dogs, including all associated features, services, and interfaces. \"User\" refers to any person who registers and uses the app.\n\n2. **Acceptance of Terms:** By accessing and using Pegada, you agree, without restriction or reservation, to these Terms of Use. If you do not agree with any part of these terms, you should not use Pegada.\n\n3. **Eligibility:** Pegada has no age restrictions for registration; however, we recommend that minors obtain consent from their legal guardians before using the app.\n\n4. **Responsible Use and User Content:**\n   a. Users must provide true and accurate information when creating profiles for their pets.\n   b. Any type of offensive, discriminatory, defamatory, or content promoting illegal activities is prohibited.\n   c. Pegada reserves the right to moderate, remove, or refuse any content posted by users that may be deemed inappropriate.\n\n5. **Child Safety and Prohibition of Child Sexual Abuse and Exploitation (CSAE):** Pegada has zero tolerance for child sexual abuse and exploitation. Any content, conduct, or material that sexualizes, exploits, or endangers minors, including child sexual abuse material (CSAM), is strictly prohibited. Users can report violating content or behavior at any time from within the app or by contacting our support team. Upon becoming aware of any such content, Pegada will remove it, take action against the responsible accounts, and report it to the National Center for Missing & Exploited Children (NCMEC) and the competent Brazilian authorities as required by applicable law. Our child safety point of contact can be reached at contato@gabrieltaveira.dev.\n\n6. **Privacy and Communication:** After a \"match,\" users can exchange messages within the platform. Offensive language, harassment, or inappropriate behavior will not be tolerated and may result in disciplinary action, including account suspension or termination.\n\n7. **Match Preferences:** Users have the freedom to set preferences for finding matches for their pets. Although Pegada strives to suggest relevant matches, we do not guarantee that all matches will meet the defined preferences.\n\n8. **Limitation of Liability:** Pegada will not be liable for any injury, loss, or damage that may result from meetings organized through the app. All users are encouraged to exercise discernment and caution when meeting other users.\n\n9. **Indemnification:** You agree to indemnify and hold Pegada, its directors, employees, and agents, harmless from any claims, liabilities, damages, losses, and expenses, including, without limitation, attorney’s fees and costs, resulting from or in any way related to your use of the app.\n\n10. **Modifications:** We reserve the right to revise and update these Terms of Use periodically, without prior notice. Continued use of the app after such modifications will constitute your acceptance of the revised terms.\n\n11. **Applicable Law and Jurisdiction:** These Terms of Use will be governed and interpreted in accordance with the laws of Brazil. Any dispute related to Pegada will be resolved in the competent courts of Brazil.\n\n12. **Contact:** For questions, doubts, or feedback about these Terms of Use, please contact Pegada's support team.\n\nBy creating an account and using Pegada, you agree to all the above terms and conditions."
   },
   "deleteAccount": {
     "metadata": {
-      "title": "Pegada | Request Data Deletion"
+      "title": "Pegada | Request Data Deletion",
+      "description": "How to delete your Pegada account and its data."
     },
     "content": "### Request Data Deletion\n\nTo request account and data deletion outside the app, please send an\nemail to [support@pegada.app](mailto:support@pegada.app) and your request will be processed shortly."
   },

@@ -430,9 +430,6 @@ importers:
       '@pegada/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@posthog/react':
-        specifier: ^1.10.3
-        version: 1.10.3(@types/react@19.2.17)(posthog-js@1.407.2)(react@19.2.0)
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@3.4.7(ts-node@10.9.2(@swc/core@1.15.43)(@types/node@22.1.0)(typescript@5.4.5)))
@@ -6695,6 +6692,7 @@ packages:
 
   react-native-edge-to-edge@1.8.1:
     resolution: {integrity: sha512-bhvsKqeX9PGkY9wBUk9vni/tJNJdKtLPbs/j3e/3CdV4JmUWfTXYYoL+4Hc8Wmej+5eJxkc8KOFa454ruFWBCA==}
+    deprecated: This package is deprecated. Set edgeToEdgeEnabled=true in android/gradle.properties instead.
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -9940,6 +9938,7 @@ snapshots:
       react: 19.2.0
     optionalDependencies:
       '@types/react': 19.2.17
+    optional: true
 
   '@posthog/types@1.398.0': {}
 

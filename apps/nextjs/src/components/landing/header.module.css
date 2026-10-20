@@ -1,0 +1,126 @@
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--bar-h);
+}
+.bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 10px;
+  background: rgb(255 255 255 / 0.86);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid var(--hair);
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+.bar.is-scrolled::before {
+  opacity: 1;
+}
+.bar-row {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: translate 0.3s var(--ease-out);
+}
+.bar.is-scrolled .bar-row {
+  translate: 0 -5px;
+}
+.bar-start,
+.bar-end {
+  display: flex;
+  align-items: center;
+}
+.bar-start {
+  gap: 40px;
+}
+.bar-end {
+  gap: 12px;
+}
+
+.nav {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+.nav a {
+  position: relative;
+  z-index: 1;
+  height: 36px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 0.2s ease-out;
+}
+.nav a::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+.nav a[aria-current] {
+  color: var(--ink);
+}
+.nav-pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 36px;
+  width: var(--w, 0);
+  border-radius: 999px;
+  background: var(--well-2);
+  translate: var(--x, 0) 0;
+  opacity: 0;
+  transition:
+    translate 0.45s var(--ease-out),
+    width 0.45s var(--ease-out),
+    opacity 0.25s ease-out;
+}
+.nav.has-active .nav-pill {
+  opacity: 1;
+}
+.nav.no-anim .nav-pill {
+  transition: opacity 0.25s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .nav a:hover {
+    color: var(--ink);
+  }
+}
+
+.btn-sm {
+  height: 40px;
+  padding: 0 18px;
+  font-size: 15px;
+  letter-spacing: -0.005em;
+  position: relative;
+}
+.btn-sm::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+
+@media (max-width: 760px) {
+  .nav {
+    display: none;
+  }
+  .bar-end {
+    gap: 8px;
+  }
+  .bar.is-scrolled .bar-row {
+    translate: 0 -4px;
+  }
+  .btn-sm {
+    padding: 0 16px;
+  }
+}

@@ -1,0 +1,417 @@
+/* 01 perfil: the profile assembles, field by field, in the bezel */
+.pf-replay {
+  margin-top: 32px;
+}
+.pf-sync .mark {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  transition:
+    box-shadow 0.3s ease-out,
+    background-color 0.3s ease-out;
+}
+.pf-sync .mark::after {
+  content: "";
+  position: absolute;
+  left: 5.5px;
+  top: 3px;
+  width: 3.5px;
+  height: 7px;
+  border: solid #fff;
+  border-width: 0 1.7px 1.7px 0;
+  rotate: 45deg;
+  transition:
+    opacity 0.2s ease-out,
+    scale 0.5s var(--spring-pop);
+}
+:global(.js) .is-building .row:not(.is-done) .mark {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px #cfcfd4;
+}
+:global(.js) .is-building .row:not(.is-done) .mark::after {
+  opacity: 0;
+  scale: 0.5;
+}
+:global(.js) .is-building .row.is-now .mark {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+:global(.js) .is-building .row.is-now .mark::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: mark-in 0.5s var(--spring-pop) both;
+}
+@keyframes mark-in {
+  from {
+    scale: 0;
+  }
+}
+
+.pf-screen {
+  container-type: inline-size;
+}
+.pv {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #fff;
+  color: var(--ink);
+  letter-spacing: 0;
+  line-height: 1.35;
+  font-size: calc(100cqw / 28.2);
+}
+:where(.pv) p {
+  margin: 0;
+  text-wrap: auto;
+}
+.pv-photo {
+  position: relative;
+  height: 30.6em;
+  background: var(--well-2);
+  overflow: hidden;
+}
+.pv-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 32%;
+}
+.pv-chev {
+  position: absolute;
+  z-index: 2;
+  right: 1em;
+  top: 28.7em;
+  width: 3.8em;
+  height: 3.8em;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f7f7f7;
+  color: var(--pink);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.03),
+    0 0.5em 1.2em -0.5em rgb(0 0 0 / 0.22);
+}
+.pv-chev svg {
+  width: 1.75em;
+  height: 1.75em;
+}
+.pv-body {
+  padding: 1.5em 1.05em 0;
+}
+.pv-breed {
+  display: inline-block;
+  padding: 0.62em 1.05em 0.72em;
+  border-radius: 0.85em;
+  background: #fafafa;
+  border: 1px solid rgb(0 0 0 / 0.045);
+  box-shadow: 0 0.7em 1.6em -0.7em rgb(0 0 0 / 0.2);
+  font-weight: 500;
+  font-size: 1.02em;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+.nm {
+  font-size: 1.2em;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+}
+.nm b {
+  font-size: 1.375em;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.pv-name {
+  margin-top: 0.95em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pv-bio {
+  margin-top: 0.55em;
+  font-size: 1.04em;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pv-share,
+.pv-report {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pv-share {
+  margin-top: 4.4em;
+  color: #d4317a;
+}
+.pv-report {
+  margin-top: 1.95em;
+}
+.pv::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 11em;
+  background: linear-gradient(
+    rgb(255 255 255 / 0),
+    rgb(255 255 255 / 0.8) 35%,
+    rgb(255 255 255 / 0.8) 70%,
+    #fff
+  );
+  pointer-events: none;
+}
+.rx {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rx span {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  flex: none;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.035),
+    0 0.5em 1.3em -0.45em rgb(0 0 0 / 0.2);
+}
+.rx i {
+  font-style: normal;
+  line-height: 1;
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+.rx .lg {
+  width: 4.8em;
+  height: 4.8em;
+}
+.rx .sm {
+  width: 3.5em;
+  height: 3.5em;
+}
+.rx .lg i {
+  font-size: 3.5em;
+}
+.rx .sm i {
+  font-size: 2.25em;
+}
+.pv-rx {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 5.2em;
+  padding-inline: 2.9em;
+}
+.age-box {
+  display: inline-grid;
+  vertical-align: baseline;
+}
+.age-box > span {
+  grid-area: 1 / 1;
+}
+.age-date {
+  opacity: 0;
+  visibility: hidden;
+  font-weight: 500;
+  font-size: 0.86em;
+  padding: 0.12em 0.45em 0.18em;
+  margin-left: -0.1em;
+  border-radius: 0.4em;
+  background: var(--well);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  font-variant-numeric: tabular-nums;
+  align-self: center;
+  justify-self: start;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(.js) [data-build].is-armed [data-a] {
+    transition:
+      opacity 0.45s ease-out,
+      color 0.35s ease-out,
+      background-color 0.35s ease-out,
+      box-shadow 0.35s ease-out,
+      scale 0.9s var(--spring-pop),
+      translate 0.76s var(--spring-settle),
+      filter 0.5s var(--ease-out);
+  }
+  :global(.js) [data-build].is-armed .pv-photo img {
+    opacity: 0;
+    scale: 1.1;
+    filter: blur(12px);
+    transition:
+      opacity 0.5s ease-out,
+      scale 1.2s var(--ease-out),
+      filter 0.7s var(--ease-out);
+  }
+  :global(.js) [data-build].is-armed .pv-photo.on img {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+  :global(.js) [data-build].is-armed [data-sb] {
+    color: var(--ink);
+    transition: color 0.5s ease-out;
+  }
+  :global(.js) [data-build].is-armed:has(.pv-photo.on) [data-sb] {
+    color: #fff;
+  }
+  :global(.js) [data-build].is-armed .tx {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    border-radius: 0.3em;
+    transition:
+      color 0.35s ease-out,
+      background-color 0.35s ease-out;
+  }
+  :global(.js) [data-build].is-armed [data-a]:not(.on) .tx,
+  :global(.js) [data-build].is-armed .tx[data-a]:not(.on) {
+    color: transparent;
+    background: #efeff2;
+  }
+  :global(.js) [data-build].is-armed .pv-breed:not(.on) {
+    color: transparent;
+    background: #efeff2;
+    box-shadow: none;
+    border-color: transparent;
+  }
+  :global(.js) [data-build].is-armed .pv-breed:not(.on) .tx {
+    background: none;
+  }
+  :global(.js) [data-build].is-armed .pv-breed {
+    transition:
+      box-shadow 0.5s ease-out,
+      background-color 0.35s ease-out,
+      scale 0.9s var(--spring-pop);
+  }
+  :global(.js) [data-build].is-armed .pv-breed.pop {
+    animation: pill-pop 0.9s var(--spring-pop);
+  }
+  :global(.js) [data-build].is-armed .tx.roll-in {
+    animation: roll-in 0.16s var(--ease-out);
+  }
+  :global(.js) [data-build].is-armed .typing::after {
+    content: "";
+    display: inline-block;
+    width: 0.09em;
+    height: 0.95em;
+    margin-left: 0.06em;
+    vertical-align: -0.1em;
+    background: var(--ink);
+    animation: caret 0.9s steps(1) infinite;
+  }
+  :global(.js) [data-build].is-armed .age:not(.on):not(.is-date) {
+    color: transparent;
+  }
+  :global(.js) [data-build].is-armed .age:not(.on):not(.is-date) .age-val {
+    background: #efeff2;
+  }
+  :global(.js) [data-build].is-armed .age.is-date .age-date {
+    visibility: visible;
+    opacity: 1;
+    animation: date-in 0.7s var(--spring-pop) both;
+  }
+  :global(.js) [data-build].is-armed .age.is-date .age-val {
+    opacity: 0;
+  }
+  :global(.js) [data-build].is-armed .age.on .age-date {
+    visibility: visible;
+    opacity: 0;
+    filter: blur(4px);
+    translate: 0 -0.3em;
+    transition:
+      opacity 0.3s ease-out,
+      filter 0.3s ease-out,
+      translate 0.4s var(--ease-out);
+  }
+  :global(.js) [data-build].is-armed .age.on .age-val {
+    opacity: 1;
+    animation: val-in 0.5s var(--ease-out) both;
+  }
+  :global(.js) [data-build].is-armed .w {
+    transition:
+      opacity 0.4s ease-out,
+      filter 0.4s ease-out;
+    transition-delay: calc(var(--i) * 34ms);
+  }
+  :global(.js) [data-build].is-armed [data-words].on:not(.shown) .w {
+    opacity: 0;
+    filter: blur(3px);
+  }
+  :global(.js) [data-build].is-armed [data-a="tail"]:not(.on) {
+    opacity: 0;
+  }
+  :global(.js) [data-build].is-armed .pv-rx:not(.on) {
+    opacity: 1;
+  }
+  :global(.js) [data-build].is-armed .pv-rx:not(.on) span {
+    opacity: 0;
+    scale: 0.6;
+  }
+  :global(.js) [data-build].is-armed .pv-rx span {
+    transition:
+      opacity 0.25s ease-out,
+      scale 0.9s var(--spring-pop);
+  }
+  :global(.js) [data-build].is-armed .pv-rx span:nth-child(2) {
+    transition-delay: 70ms;
+  }
+  :global(.js) [data-build].is-armed .pv-rx span:nth-child(3) {
+    transition-delay: 140ms;
+  }
+  :global(.js) [data-build].is-armed .pv-chev:not(.on) {
+    scale: 0.6;
+  }
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes pill-pop {
+  from {
+    scale: 0.9;
+  }
+}
+@keyframes roll-in {
+  from {
+    translate: 0 0.5em;
+    opacity: 0.2;
+  }
+}
+@keyframes date-in {
+  from {
+    opacity: 0;
+    scale: 0.85;
+    filter: blur(3px);
+  }
+}
+@keyframes val-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    translate: 0 0.3em;
+  }
+}
+
+@media (max-width: 480px) {
+  .pf-sync .row dd {
+    padding-left: 26px;
+  }
+}

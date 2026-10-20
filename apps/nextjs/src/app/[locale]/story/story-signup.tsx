@@ -159,7 +159,7 @@ export const StorySignup = ({
       <button
         type="button"
         onClick={handleCtaClick}
-        className="rounded-full bg-primary px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:transition-none motion-reduce:hover:scale-100"
+        className="rounded-full bg-[#C2306F] px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C2306F] motion-reduce:transition-none motion-reduce:hover:scale-100"
       >
         {copy.cta}
       </button>
@@ -223,7 +223,7 @@ export const StorySignup = ({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-2xl bg-primary px-6 py-3 text-base font-semibold text-white transition-opacity duration-200 disabled:opacity-60"
+          className="rounded-2xl bg-[#C2306F] px-6 py-3 text-base font-semibold text-white transition-opacity duration-200 disabled:opacity-60"
         >
           {isPending ? copy.form.submitting : copy.form.submit}
         </button>

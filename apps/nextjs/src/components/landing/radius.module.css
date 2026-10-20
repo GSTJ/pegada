@@ -1,0 +1,311 @@
+/* 03 raio: the radius diagram on white, the real slider under it */
+.ra-stage {
+  width: min(100%, 480px);
+}
+.ra .map {
+  margin: 0 0 28px;
+}
+.ra .map-plot {
+  position: relative;
+  width: min(100%, 440px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  container-type: size;
+}
+.ra .ring,
+.ra .disc,
+.ra .me,
+.ra .me-label,
+.ra .dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+.ra .ring {
+  z-index: 1;
+  width: calc(var(--r) * 100%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid #dcdce1;
+}
+.ra .ring i {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% -50%;
+  padding: 0 6px;
+  background: #fff;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ra .disc {
+  width: 100%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  scale: var(--r);
+  background: rgb(11 11 15 / 0.045);
+  box-shadow: inset 0 0 0 calc(1.5px / var(--r)) rgb(11 11 15 / 0.32);
+  transition:
+    scale 0.76s var(--spring-settle),
+    box-shadow 0.76s var(--spring-settle);
+}
+.ra .me {
+  width: 28px;
+  height: 28px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 2px 6px rgb(0 0 0 / 0.2);
+  z-index: 2;
+}
+.ra .me svg {
+  width: 14px;
+  height: 14px;
+  fill: #fff;
+}
+.ra .me-label {
+  translate: -50% 22px;
+  font-weight: 600;
+  font-size: 12.5px;
+  z-index: 2;
+}
+.ra .dot {
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  transform: rotate(var(--a)) translateX(calc(var(--p) * 50cqw))
+    rotate(calc(var(--a) * -1));
+}
+.ra .dot img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 3px 8px -2px rgb(0 0 0 / 0.3);
+  transition:
+    opacity 0.35s var(--ease-out),
+    filter 0.35s var(--ease-out);
+}
+.ra .dot-l {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 7px);
+  translate: -50% 0;
+  white-space: nowrap;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+  color: var(--ink-2);
+  box-shadow: 0 0 0 1px var(--hair);
+  font-variant-numeric: tabular-nums;
+}
+.ra .dot-l b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.ra .dot-r .dot-l {
+  left: calc(100% + 8px);
+  top: 50%;
+  translate: 0 -50%;
+}
+.ra .dot.is-out img {
+  opacity: 0.45;
+  filter: saturate(0);
+}
+.ra .dot.is-out .dot-l b {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.ra .map-note {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-2);
+  text-wrap: balance;
+}
+
+.ra .dist-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.015em;
+}
+.ra .dist-range {
+  position: relative;
+  --f: 1;
+  --thumb: 22px;
+  margin-top: 2px;
+  padding-bottom: 38px;
+}
+.ra .dist-range input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.ra .dist-range input:focus {
+  outline: none;
+}
+.ra .dist-range input::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--pink) calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--f)),
+    var(--track) 0
+  );
+}
+.ra .dist-range input::-moz-range-track {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--track);
+}
+.ra .dist-range input::-moz-range-progress {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--pink);
+}
+.ra .dist-range input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc(var(--thumb) / -2 + 1.5px);
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--pink);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.14);
+  transition: transform 0.15s var(--ease-out);
+}
+.ra .dist-range input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--pink);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.14);
+}
+.ra .dist-range input:active::-webkit-slider-thumb {
+  transform: scale(0.97);
+}
+.ra .dist-range input:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 2.5px #fff,
+    0 0 0 5px var(--ink);
+}
+.ra .dist-range input:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 0 0 2.5px #fff,
+    0 0 0 5px var(--ink);
+}
+.ra .dist-bubble {
+  position: absolute;
+  top: 40px;
+  left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--f));
+  translate: calc(-50% + (0.5 - var(--f)) * 60%) 0;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.18);
+  pointer-events: none;
+}
+.ra .dist-bubble::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: calc(50% - (0.5 - var(--f)) * 60%);
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  background: inherit;
+  border-radius: 1.5px;
+  rotate: 45deg;
+}
+.ra .count {
+  margin-top: 14px;
+  font-size: 15px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.ra .count b {
+  display: inline-block;
+  color: var(--ink);
+  font-weight: 700;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ra .count b.tick {
+    animation: tick 0.26s var(--ease-out);
+  }
+}
+@keyframes tick {
+  from {
+    opacity: 0.2;
+    translate: 0 -5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ra .disc {
+    transition: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .ra .map-plot {
+    width: 88%;
+  }
+  .ra .dot-far .dot-l {
+    left: auto;
+    right: -2px;
+    translate: 0 0;
+  }
+}
+@media (max-width: 480px) {
+  .ra .dot {
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+  }
+  .ra .dot-l {
+    font-size: 11px;
+  }
+  .ra .me {
+    width: 24px;
+    height: 24px;
+  }
+  .ra .ring i {
+    font-size: 10.5px;
+  }
+  .ra .dist-head {
+    font-size: 16px;
+  }
+}

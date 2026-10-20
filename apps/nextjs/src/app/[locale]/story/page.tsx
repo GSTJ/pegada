@@ -80,8 +80,9 @@ const ROUTE_PATH = "/story";
 
 const STEPS = ["app", "photos", "post"] as const;
 
+/** White on the brand pink is 3.1:1 and fails AA; the landing's deeper pink is 5.3:1. */
 const PRIMARY_BUTTON =
-  "inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-center text-lg font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:transition-none motion-reduce:hover:scale-100";
+  "inline-flex items-center justify-center rounded-full bg-[#C2306F] px-8 py-4 text-center text-lg font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C2306F] motion-reduce:transition-none motion-reduce:hover:scale-100";
 
 /**
  * The form's words. `t()` reads the locale off the request, so the copy has to
@@ -131,9 +132,9 @@ const StoreBadges = ({
         width={20}
         height={20}
         src="/app-store-icon.svg"
-        alt="App Store"
+        alt=""
       />
-      <StoreButton.Text>{t("home.cta.appStore")}</StoreButton.Text>
+      <StoreButton.Text>App Store</StoreButton.Text>
     </StoreButton>
     <StoreButton
       href={storeUrlFor({ target: "android", campaign: { ref: STORY_REF } })}
@@ -147,9 +148,9 @@ const StoreBadges = ({
         width={24}
         height={24}
         src="/google-play-icon.svg"
-        alt="Google Play"
+        alt=""
       />
-      <StoreButton.Text>{t("home.cta.googlePlay")}</StoreButton.Text>
+      <StoreButton.Text>Google Play</StoreButton.Text>
     </StoreButton>
   </div>
 );

@@ -6,7 +6,13 @@ import type { ComponentProps } from "react";
 
 import { useCallback } from "react";
 
-import { trackDownloadCtaClicked } from "@/services/analytics";
+import {
+  isWebAnalyticsLoaded,
+  trackDownloadCtaClicked,
+} from "@/services/analytics";
+
+/** How long a click before PostHog is in may hold the navigation. */
+const HOLD_MS = 500;
 
 /**
  * Every "get the app" link on the site, so all of them report the same event
@@ -17,8 +23,11 @@ import { trackDownloadCtaClicked } from "@/services/analytics";
  * the pages using it stay server components and pass nothing that has to be
  * serialised structurally.
  *
- * The capture is fire-and-forget and the anchor keeps its normal navigation:
- * it goes out over `sendBeacon`, which survives the unload that follows.
+ * Once PostHog is in, the capture is fire-and-forget and the anchor keeps its
+ * normal navigation: it goes out over `sendBeacon`, which survives the unload
+ * that follows. Before that (PostHog loads after the page goes idle), a plain
+ * same-tab click is held until the import lands and the beacon is out, at
+ * most {@link HOLD_MS}, then navigates. Otherwise that click would be lost.
  *
  * `rel` is defaulted rather than left to the call sites. Every link here
  * points at a store, so every one of them is a candidate for `target="_blank"`
@@ -39,10 +48,30 @@ export const DownloadCta = ({
 }: ComponentProps<"a"> & DownloadCtaClick) => {
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
-      trackDownloadCtaClicked({ page, placement, store, dogId, referral });
+      const holdForAnalytics =
+        !isWebAnalyticsLoaded() &&
+        href !== undefined &&
+        (target === undefined || target === "_self") &&
+        event.button === 0 &&
+        !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey);
+      const sent = trackDownloadCtaClicked({
+        page,
+        placement,
+        store,
+        dogId,
+        referral,
+      });
       onClick?.(event);
+      if (!holdForAnalytics || event.defaultPrevented) return;
+      event.preventDefault();
+      void Promise.race([
+        sent,
+        new Promise((resolve) => {
+          setTimeout(resolve, HOLD_MS);
+        }),
+      ]).then(() => window.location.assign(href));
     },
-    [page, placement, store, dogId, referral, onClick],
+    [href, target, page, placement, store, dogId, referral, onClick],
   );
 
   return (

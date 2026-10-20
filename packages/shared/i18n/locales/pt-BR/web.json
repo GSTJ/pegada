@@ -1,82 +1,176 @@
 {
   "metadata": {
-    "title": "Pegada - Aplicativo de relacionamento para cachorros",
-    "description": "Pegada é um aplicativo de relacionamento para cachorros. Com ele, você pode encontrar outros cachorros para passear, brincar e até mesmo namorar. O aplicativo é gratuito e está disponível para Android e iOS.",
-    "ogImageAlt": "Um iPhone com o Pegada aberto, mostrando o perfil de uma golden retriever chamada Maui, ao lado dos dizeres “Amigos pro seu dog” e “Cachorro aqui do lado”."
+    "title": "Pegada: um amigo novo pro seu cachorro, aqui perto",
+    "description": "Monte o perfil do seu dog, deslize pelos cachorros da sua região e, quando os dois curtirem, o chat abre. Grátis no iPhone e no Android.",
+    "ogImageAlt": "Pegada: “Ache um amigo pro seu cachorro aqui perto. Grátis no iPhone e no Android.” ao lado da tela de Match do app, duas fotos de cachorro em leque sobre “Você deu um Match. Você e Nina se curtiram!”"
   },
-  "home": {
-    "title": "Amigos pro seu dog",
-    "description": "Aqui do lado tem cachorro da mesma raça e com o mesmo jeito do seu.",
-    "cta": {
-      "googlePlay": "Google Play",
-      "appStore": "App Store"
+  "landing": {
+    "chrome": {
+      "brandLabel": "Pegada, início",
+      "skip": "Pular para o conteúdo",
+      "navLabel": "Seções",
+      "navHow": "Como funciona",
+      "navFaq": "Perguntas",
+      "getApp": "Baixar o app",
+      "langLabel": "Idioma",
+      "appStorePre": "Baixar na",
+      "playPre": "Disponível no",
+      "footLabel": "Rodapé",
+      "tagline": "Amizades para doguinhos.",
+      "colApp": "O app",
+      "colLegal": "Legal",
+      "colContact": "Contato",
+      "story": "O story do seu dog",
+      "privacy": "Política de privacidade",
+      "terms": "Termos de uso",
+      "delete": "Apagar conta"
     },
-    "madeWithLoveBy": "Feito com ❤️ por ",
-    "features": {
-      "title": "Feito pro cachorro",
-      "match": {
-        "title": "Cachorro que combina com o seu",
-        "description": "Raça, jeito e distância que dá pra ir a pé."
+    "hero": {
+      "title": "Ache um amigo pro seu cachorro aqui perto.",
+      "lede": "Monte o perfil do seu dog, deslize pelos cachorros da sua região e, quando os dois curtirem, o chat abre. Grátis no iPhone e no Android.",
+      "figLabel": "A tela de Match do app: Você deu um Match. Você e Nina se curtiram!",
+      "youGotA": "Você deu um",
+      "likedNina": "Você e Nina se curtiram!"
+    },
+    "profile": {
+      "title": "Umas fotos, o nome e o jeito dele.",
+      "desc": "Primeiro, o perfil. É o que os outros tutores veem quando tocam no card do seu cachorro, e dá pra mudar depois em Editar perfil.",
+      "photosKey": "Fotos",
+      "photosValue": "De 1 a 6. Pelo menos uma com você junto.",
+      "nameKey": "Nome",
+      "nameValue": "Do jeito que ele atende quando você chama.",
+      "birthdayKey": "Aniversário",
+      "birthdayValue": "A idade o app calcula sozinho, todo ano.",
+      "breedKey": "Raça",
+      "breedValue": "São 45 opções. Vira-lata é bem-vindo: entra como <b>Sem raça definida</b>.",
+      "bioKey": "Bio",
+      "bioValue": "Até 500 caracteres pra contar do que ele gosta.",
+      "fine": "Em Detalhes ainda entram porte, cor e sexo.",
+      "replay": "Montar de novo",
+      "screenLabel": "Tela de perfil do app: foto da Lua, raça Border Collie, Lua, 3 anos, a bio, Compartilhar perfil de Lua, Denunciar Lua e os botões 😕 🤔 😍",
+      "luaBirthday": "07/10/2023",
+      "luaAge": "3 anos",
+      "luaBio": "Adoro brincar de pegar e roubar meias! Procurando alguém para brincar e se divertir! 🐶",
+      "luaShare": "Compartilhar perfil de Lua",
+      "luaReport": "Denunciar Lua"
+    },
+    "deck": {
+      "title": "Um cachorro de cada vez.",
+      "desc": "Os cachorros perto de você aparecem em cards, um por vez. Pra direita você curte, pra esquerda passa, pra cima fica no talvez. Testa aqui com a Nina.",
+      "maybe": "Talvez",
+      "maybeDesc": "Ficou na dúvida? Talvez também conta como interesse. Se o outro lado curtir, dá match igual.",
+      "nope": "Passar",
+      "nopeDesc": "Não rolou. O card sai e vem o próximo cachorro.",
+      "like": "Curtir",
+      "likeDesc": "Se o outro lado curtir de volta, deu match e o chat de vocês abre.",
+      "keyUp": "seta pra cima",
+      "keyLeft": "seta pra esquerda",
+      "keyRight": "seta pra direita",
+      "deckRole": "pilha de cards",
+      "deckLabel": "Deck de demonstração. Setas: esquerda passa, cima talvez, direita curte.",
+      "emptyTitle": "Parece que os doguinhos acabaram!",
+      "emptyDesc": "Ainda tem pouca gente por perto. A gente te avisa quando chegar dog novo.",
+      "seeAgain": "Ver de novo",
+      "sendMessage": "Enviar mensagem",
+      "keepSwiping": "Continue deslizando",
+      "hintFine": "Arrasta o card, ou clica nele e usa <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd>.",
+      "hintTouch": "Arrasta o card pro lado. Pra talvez, toca no botão do meio.",
+      "upTop": "É aquele lá de cima ↑",
+      "now": "Agora: {{name}}, {{age}}, a {{dist}}.",
+      "back": "De volta ao começo. {{name}}, {{age}}.",
+      "matchLive": "Deu match! Você e Nina se curtiram.",
+      "none": "Os doguinhos acabaram.",
+      "demoNote": "No app, aqui abre a conversa com a Nina. Nesta página é só demonstração.",
+      "nina": {
+        "age": "2 anos",
+        "bio": "Corre atrás de tudo que voa. Bola, folha, passarinho.",
+        "alt": "Nina, cachorra de pelo cinza e olhos claros",
+        "nope": "Você passou a Nina.",
+        "maybe": "Talvez também conta. A Nina já tinha curtido a Lua: deu match.",
+        "like": "A Nina já tinha curtido a Lua: deu match."
       },
-      "profile": {
-        "title": "O perfil é do seu cachorro",
-        "description": "Foto, idade, o que ele detesta. Você só segura o celular."
-      },
-      "inclusive": {
-        "title": "Vira-lata é bem-vindo",
-        "description": "Com pedigree ou sem papel nenhum, faz amizade do mesmo jeito."
-      },
-      "messaging": {
-        "title": "Você decide quem fala com ele",
-        "description": "Conversa só depois do match. E dá pra desfazer o match ou denunciar a qualquer hora."
+      "maui": {
+        "age": "1 ano e 7 meses",
+        "alt": "Maui, um Golden Retriever de língua de fora",
+        "nope": "Você passou o Maui.",
+        "maybe": "O Maui ficou no talvez. Se ele curtir a Lua, dá match.",
+        "like": "Curtida enviada. Se o Maui curtir a Lua de volta, dá match."
       }
     },
-    "howItWorks": {
-      "title": "Do perfil ao primeiro passeio",
-      "profile": {
-        "title": "Cria o perfil",
-        "description": "Nome, raça, umas fotos."
-      },
-      "swipe": {
-        "title": "Vê quem tá perto",
-        "description": "Um cachorro por vez, do seu bairro. Curte ou passa."
-      },
-      "match": {
-        "title": "Espera o match",
-        "description": "Se o outro cachorro curtir o seu, os dois ficam sabendo."
-      },
-      "chat": {
-        "title": "Puxa assunto",
-        "description": "Escolhe o parque, marca a hora."
-      }
+    "radius": {
+      "title": "O raio é você que desenha.",
+      "desc": "Em Distância máxima você escolhe até onde ir, de 1 a 300+ km. Quem está dentro do círculo aparece no seu deck, os mais perto primeiro.",
+      "breedKey": "Raça",
+      "breedValue": "Qualquer raça, ou uma só",
+      "sizeKey": "Tamanho",
+      "sizeValue": "De Extra pequeno a Gigante",
+      "colorKey": "Cor",
+      "colorValue": "Preto, Branco, Marrom, Tricolor, Albino ou Golden",
+      "ageKey": "Idade",
+      "ageValue": "De 0 a 10+ anos",
+      "fine": "Se faltar cachorro no seu raio, o app completa o deck com quem está mais longe, depois desses.",
+      "figLabel": "Diagrama: você no centro, Nina a 3 km, Bento a 12 km e Maui a 246 km",
+      "you": "Você",
+      "note": "Fora de escala: os anéis se apertam pra 300 km caber na tela.",
+      "maxDist": "Distância máxima",
+      "upTo": "Até {{km}} km",
+      "noLimit": "Sem limite, 300+ km",
+      "countNone": "Nenhum cachorro no seu raio",
+      "countAll": "Os <b>{{n}}</b> cachorros estão no seu raio",
+      "countSome": "<b>{{n}}</b> de {{total}} cachorros no seu raio"
     },
-    "screens": {
-      "title": "Como é na tela",
-      "swipe": {
-        "title": "Quem tá por perto",
-        "description": "A foto, a idade, a distância.",
-        "alt": "A tela de swipe do Pegada: o card de um cachorro ocupando a tela, a distância no canto, o nome e a idade embaixo."
-      },
-      "profile": {
-        "title": "O perfil completo",
-        "description": "Toca no card pra ler tudo que o dono escreveu.",
-        "alt": "O perfil de um cachorro no Pegada, com raça, idade e uma descrição curta abaixo da foto."
-      },
-      "match": {
-        "title": "O match",
-        "description": "Os dois curtiram. Já dá pra conversar.",
-        "alt": "A tela de match do Pegada, com as fotos dos dois cachorros sobrepostas embaixo da palavra Match."
-      },
-      "chat": {
-        "title": "Combinando o passeio",
-        "description": "Onde se encontrar e a que horas.",
-        "alt": "Uma conversa no Pegada entre dois donos combinando uma manhã no parque."
-      }
+    "chat": {
+      "title": "Deu match? Agora o papo é entre vocês.",
+      "desc": "Na tela do Match, toque em Enviar mensagem e abre a conversa com o tutor do outro dog. É chat de texto, simples. Se o papo rolar, o resto vocês combinam.",
+      "onlyAfterKey": "Só depois do match",
+      "onlyAfterValue": "Ninguém consegue mandar mensagem antes de vocês dois curtirem.",
+      "unmatchKey": "Desfazer Match",
+      "unmatchValue": "Fica no perfil do dog. A conversa fecha pros dois lados.",
+      "reportKey": "Denunciar",
+      "reportValue": "Você escolhe o motivo. O perfil não fica sabendo quem denunciou.",
+      "screenLabel": "Tela de chat do app com a Nina. Conversa de exemplo: Oi! Vi que a Nina corre atrás de tudo que voa. A Lua é igualzinha. Resposta: Haha sério? Aqui é bola, folha, passarinho, o que aparecer. A Lua ainda rouba meia. Se sumir uma, já sabe. Resposta: Kkkk vão se dar bem demais.",
+      "matched": "Vocês deram Match!",
+      "start": "Envie uma mensagem para iniciar a conversa",
+      "today": "Hoje",
+      "m1": "Oi! Vi que a Nina corre atrás de tudo que voa. A Lua é igualzinha",
+      "m2": "Haha sério? Aqui é bola, folha, passarinho, o que aparecer",
+      "m3": "A Lua ainda rouba meia. Se sumir uma, já sabe",
+      "m4": "Kkkk vão se dar bem demais 😂",
+      "typeMessage": "Digite uma mensagem",
+      "caption": "Conversa de exemplo",
+      "playAgain": "Ver de novo"
     },
-    "footer": {
-      "story": "O story do seu dog"
+    "story": {
+      "title": "Bota o seu dog no story.",
+      "desc": "No perfil, toque em <b>Compartilhar perfil</b> e escolha <b>Compartilhar no story</b>. O app monta uma imagem em pé com até 4 fotos do seu cachorro e abre o compartilhar do celular. Daí é só escolher onde postar.",
+      "note": "Se preferir, dá pra mandar só o link do perfil.",
+      "more": "Ver como funciona",
+      "phoneLabel": "O story da Nina aberto no celular: a imagem DM aberta pra cachorrada, gerada pelo app com as fotos dela. Segure para pausar.",
+      "reply": "Enviar mensagem",
+      "caption": "A imagem de verdade que o app gerou pro perfil da Nina."
     },
-    "storyLink": "Faz o story do seu dog"
+    "faq": {
+      "title": "Antes de baixar",
+      "desc": "As perguntas que mais aparecem. Se a sua não tá aqui, escreve pra <mail>support@pegada.app</mail>.",
+      "q1": "É de graça?",
+      "a1": "É. Baixar e usar não custa nada: perfil, deslizar, match e chat. Na versão grátis tem um limite de curtidas por dia e aparece um anúncio depois de um match. O Premium é opcional: libera curtidas ilimitadas, tira os anúncios, deixa voltar no último doguinho e coloca seu dog primeiro na fila de quem você curtiu.",
+      "q2": "Funciona no meu celular?",
+      "a2": "Funciona no iPhone e no Android. É só baixar na App Store ou no Google Play. Não tem versão pra navegador, o Pegada é app de celular.",
+      "q3": "Vira-lata pode?",
+      "a3": "Claro que pode. Na hora de escolher a raça, marca Sem raça definida. É uma das 45 opções da lista.",
+      "q4": "Preciso criar senha?",
+      "a4": "Não. Você coloca seu e-mail e a gente manda um código de 6 dígitos. Digitou, entrou. Se ainda não tem conta, ela é criada na hora. O código vale por uma hora.",
+      "q5": "Os outros veem onde eu moro?",
+      "a5": "Não. O card mostra só a distância até você, arredondada, tipo 3km. Seu endereço e seu ponto no mapa não aparecem pra ninguém.",
+      "q6": "Como eu apago minha conta?",
+      "a6": "No app, vai no seu perfil, desce até o fim e toca em Apagar conta. É definitivo, não dá pra desfazer. Sem o app, é <web>pela web</web>: manda um e-mail pra <mail>support@pegada.app</mail> pedindo a exclusão.",
+      "q7": "Tem em inglês?",
+      "a7": "Tem. O app é em português e em inglês. Ele segue o idioma do celular, e dá pra trocar no seu perfil, em Linguagem."
+    },
+    "closing": {
+      "title": "A Lua já achou a Nina. Agora é a vez do seu dog.",
+      "desc": "Grátis no iPhone e no Android."
+    }
   },
   "story": {
     "metadata": {
@@ -142,19 +236,22 @@
   },
   "privacyPolicy": {
     "metadata": {
-      "title": "Pegada | Política de privacidade"
+      "title": "Pegada | Política de privacidade",
+      "description": "Como o Pegada coleta, usa e protege os seus dados."
     },
     "content": "### Política de Privacidade do Aplicativo\n\nA política de privacidade descreve como coletamos, usamos, protegemos e compartilhamos as informações sobre você e seu pet. Por favor, leia cuidadosamente esta política antes de usar nosso aplicativo.\n\n#### Coleta de Informações\n\nColetamos informações de duas maneiras:\n\n- **Informações que você fornece:** Isso inclui as informações do perfil do seu pet, como nome, raça, idade e fotos. Também podemos coletar suas informações de contato para facilitar a comunicação.\n- **Informações de uso e do dispositivo:** Coletamos automaticamente informações sobre como você usa o aplicativo e sobre o dispositivo que você usa para acessar o nosso serviço. Isso pode incluir seu endereço IP, tipo de dispositivo e atividade no aplicativo.\n\n#### Uso das Informações\n\nUsamos as informações coletadas para:\n\n- Facilitar as correspondências entre os pets.\n- Melhorar nosso aplicativo e personalizar sua experiência.\n- Comunicar-se com você.\n- Proteger a segurança dos nossos usuários e prevenir fraudes.\n\n#### Compartilhamento de Informações\n\nNão vendemos nem compartilhamos suas informações pessoais com terceiros para fins de marketing sem o seu consentimento explícito. Podemos compartilhar informações com prestadores de serviços que nos ajudam a operar e melhorar nosso aplicativo. Esses prestadores de serviços têm acesso apenas às informações necessárias para realizar suas funções e estão obrigados a proteger suas informações.\n\n#### Segurança\n\nAdotamos medidas de segurança razoáveis para proteger suas informações, mas nenhum sistema é completamente seguro. Embora façamos o nosso melhor para proteger suas informações, não podemos garantir a sua segurança absoluta.\n\n#### Alterações à Política de Privacidade\n\nPodemos alterar esta política de privacidade de tempos em tempos. Se fizermos alterações, notificaremos você por meio de uma atualização no aplicativo ou por e-mail.\n\n#### Contato\n\nSe tiver alguma dúvida sobre esta política de privacidade, entre em contato conosco pelo e-mail: [suporte@pegada.app](mailto:suporte@pegada.app)\n\nAo utilizar o nosso aplicativo, você concorda com a coleta, uso e compartilhamento de suas informações conforme descrito nesta política de privacidade.\n\nÚltima atualização: 2 de julho de 2023."
   },
   "termsOfUse": {
     "metadata": {
-      "title": "Pegada | Termos de uso"
+      "title": "Pegada | Termos de uso",
+      "description": "Os termos de uso do Pegada."
     },
     "content": "### Termos de Uso do Aplicativo \"Pegada\"\n\n1. **Definições:** \"Pegada\" refere-se ao aplicativo de relacionamento destinado para cães, incluindo todas as funcionalidades, serviços e interfaces associados. \"Usuário\" refere-se a qualquer pessoa que registre e use o aplicativo.\n\n2. **Aceitação dos Termos:** Ao acessar e usar o Pegada, você concorda, sem restrição ou reserva, com estes Termos de Uso. Se não concordar com qualquer parte destes termos, não deve usar o Pegada.\n\n3. **Elegibilidade:** O Pegada não possui restrições de idade para registro; no entanto, recomendamos que menores de idade obtenham o consentimento de seus responsáveis legais antes de usar o aplicativo.\n\n4. **Uso Responsável e Conteúdo do Usuário:**\n   a. Os usuários devem fornecer informações verdadeiras e precisas ao criar perfis para seus pets.\n   b. É proibido qualquer tipo de conteúdo ofensivo, discriminatório, difamatório ou que promova atividades ilegais.\n   c. O Pegada reserva-se o direito de moderar, remover ou recusar qualquer conteúdo postado pelos usuários que possa ser considerado inapropriado.\n\n5. **Segurança Infantil e Proibição de Abuso e Exploração Sexual Infantil (CSAE):** O Pegada tem tolerância zero com o abuso e a exploração sexual infantil. É estritamente proibido qualquer conteúdo, conduta ou material que sexualize, explore ou coloque em risco menores de idade, incluindo material de abuso sexual infantil (CSAM). Os usuários podem denunciar conteúdo ou comportamento que viole esta política a qualquer momento dentro do aplicativo ou entrando em contato com nossa equipe de suporte. Ao tomar conhecimento de tal conteúdo, o Pegada irá removê-lo, tomar medidas contra as contas responsáveis e reportá-lo ao National Center for Missing & Exploited Children (NCMEC) e às autoridades brasileiras competentes, conforme exigido pela legislação aplicável. Nosso ponto de contato para segurança infantil pode ser acessado em contato@gabrieltaveira.dev.\n\n6. **Privacidade e Comunicação:** Após um \"match\", os usuários podem trocar mensagens dentro da plataforma. Linguagem ofensiva, assédio ou comportamento inadequado não serão tolerados e podem resultar em ação disciplinar, incluindo a suspensão ou encerramento da conta.\n\n7. **Preferências de Match:** Os usuários têm a liberdade de definir preferências para encontrar matches para seus pets. Embora o Pegada se esforce para sugerir matches relevantes, não garantimos que todos os matches atendam às preferências definidas.\n\n8. **Limitação de Responsabilidade:** O Pegada não será responsável por qualquer lesão, perda ou dano que possa resultar de encontros organizados através do aplicativo. Todos os usuários são incentivados a exercer discernimento e precaução ao se encontrarem com outros usuários.\n\n9. **Indenização:** Você concorda em indenizar e isentar o Pegada, seus diretores, funcionários e agentes, de quaisquer reivindicações, responsabilidades, danos, perdas e despesas, incluindo, sem limitação, honorários advocatícios e custos, resultantes de ou de alguma forma relacionados ao seu uso do aplicativo.\n\n10. **Modificações:** Reservamo-nos o direito de revisar e atualizar estes Termos de Uso periodicamente, sem aviso prévio. A continuação do uso do aplicativo após tais modificações constituirá a sua aceitação dos termos revisados.\n\n11. **Legislação Aplicável e Jurisdição:** Estes Termos de Uso serão regidos e interpretados de acordo com as leis do Brasil. Qualquer litígio relacionado ao Pegada será resolvido nos tribunais competentes do Brasil.\n\n12. **Contato:** Para perguntas, dúvidas ou feedback sobre estes Termos de Uso, entre em contato com a equipe de suporte do Pegada.\n\nAo criar uma conta e usar o Pegada, você concorda com todos os termos e condições acima estabelecidos."
   },
   "deleteAccount": {
     "metadata": {
-      "title": "Pegada | Solicitar exclusão de conta"
+      "title": "Pegada | Solicitar exclusão de conta",
+      "description": "Como apagar sua conta do Pegada e os dados dela."
     },
     "content": "### Solicitar Exclusão de Conta\n\nPara solicitar a exclusão da conta e dos dados fora do aplicativo, envie um e-mail para [support@pegada.app](mailto:support@pegada.app) e sua solicitação será processada em breve."
   },
