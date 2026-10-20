@@ -196,7 +196,7 @@ const buildFallbackImage = ({ fonts, logoDataUri }: OgAssets) =>
     <div style={fallbackContainerStyle}>
       <LogoMark src={logoDataUri} style={fallbackLogoMarkStyle} />
       <div style={fallbackWordmarkStyle}>Pegada</div>
-      <div style={fallbackTaglineStyle}>{t("home.title")}</div>
+      <div style={fallbackTaglineStyle}>{t("landing.chrome.tagline")}</div>
     </div>,
     { ...size, fonts },
   );
