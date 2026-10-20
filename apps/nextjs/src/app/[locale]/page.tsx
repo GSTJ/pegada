@@ -4,6 +4,7 @@ import { readCampaign } from "@/app/store/store-urls";
 import { Deck } from "@/components/landing/deck";
 import { Hero } from "@/components/landing/hero";
 import { Profile } from "@/components/landing/profile";
+import { Radius } from "@/components/landing/radius";
 import { Reveal } from "@/components/landing/reveal";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
@@ -32,6 +33,7 @@ const LandingPage = async ({
         <Hero campaign={campaign} />
         <Profile />
         <Deck />
+        <Radius />
       </main>
       <SiteFooter route="/" page="landing" campaign={campaign} />
       <Reveal />

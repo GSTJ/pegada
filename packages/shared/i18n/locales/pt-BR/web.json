@@ -96,6 +96,28 @@
         "maybe": "O Maui ficou no talvez. Se ele curtir a Lua, dá match.",
         "like": "Curtida enviada. Se o Maui curtir a Lua de volta, dá match."
       }
+    },
+    "radius": {
+      "title": "O raio é você que desenha.",
+      "desc": "Em Distância máxima você escolhe até onde ir, de 1 a 300+ km. Quem está dentro do círculo aparece no seu deck, os mais perto primeiro.",
+      "breedKey": "Raça",
+      "breedValue": "Qualquer raça, ou uma só",
+      "sizeKey": "Tamanho",
+      "sizeValue": "De Extra pequeno a Gigante",
+      "colorKey": "Cor",
+      "colorValue": "Preto, Branco, Marrom, Tricolor, Albino ou Golden",
+      "ageKey": "Idade",
+      "ageValue": "De 0 a 10+ anos",
+      "fine": "Se faltar cachorro no seu raio, o app completa o deck com quem está mais longe, depois desses.",
+      "figLabel": "Diagrama: você no centro, Nina a 3 km, Bento a 12 km e Maui a 246 km",
+      "you": "Você",
+      "note": "Fora de escala: os anéis se apertam pra 300 km caber na tela.",
+      "maxDist": "Distância máxima",
+      "upTo": "Até {{km}} km",
+      "noLimit": "Sem limite, 300+ km",
+      "countNone": "Nenhum cachorro no seu raio",
+      "countAll": "Os <b>{{n}}</b> cachorros estão no seu raio",
+      "countSome": "<b>{{n}}</b> de {{total}} cachorros no seu raio"
     }
   },
   "home": {

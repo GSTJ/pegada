@@ -96,6 +96,28 @@
         "maybe": "Maui is a maybe. If he likes Lua, it's a match.",
         "like": "Like sent. If Maui likes Lua back, it's a match."
       }
+    },
+    "radius": {
+      "title": "You draw the radius.",
+      "desc": "In Maximum Distance you pick how far to go, from 1 to 300+ km. Whoever is inside the circle shows up in your deck, closest first.",
+      "breedKey": "Breed",
+      "breedValue": "Any breed, or just one",
+      "sizeKey": "Size",
+      "sizeValue": "From Extra Small to Giant",
+      "colorKey": "Color",
+      "colorValue": "Black, White, Brown, Tricolor, Albino or Golden",
+      "ageKey": "Age",
+      "ageValue": "0 to 10+ years",
+      "fine": "If your radius runs short, the app fills the deck with dogs farther away, after these.",
+      "figLabel": "Diagram: you in the middle, Nina 3 km away, Bento 12 km and Maui 246 km",
+      "you": "You",
+      "note": "Not to scale: the rings squeeze together so 300 km fits on screen.",
+      "maxDist": "Maximum Distance",
+      "upTo": "Up to {{km}} km",
+      "noLimit": "No limit, 300+ km",
+      "countNone": "No dogs in your radius",
+      "countAll": "All <b>{{n}}</b> dogs are in your radius",
+      "countSome": "<b>{{n}}</b> of {{total}} dogs in your radius"
     }
   },
   "home": {
