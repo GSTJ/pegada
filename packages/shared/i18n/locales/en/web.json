@@ -148,6 +148,28 @@
       "phoneLabel": "Nina's story open on a phone: the \"DMs open to the whole pack\" image the app made from her photos. Hold to pause.",
       "reply": "Send message",
       "caption": "The actual image the app made for Nina's profile."
+    },
+    "faq": {
+      "title": "Before you download",
+      "desc": "The questions we hear the most. If yours isn't here, write to <mail>support@pegada.app</mail>.",
+      "q1": "Is it free?",
+      "a1": "Yes. Downloading and using it costs nothing: profile, swiping, matches and chat. The free version has a daily like limit and shows an ad after a match. Premium is optional: it gives you unlimited likes, removes the ads, lets you rewind to the last doggie and puts your dog first in line for the dogs you liked.",
+      "q2": "Does it work on my phone?",
+      "a2": "It works on iPhone and Android. Just get it on the App Store or Google Play. There's no browser version, Pegada is a phone app.",
+      "q3": "Can I add a mutt?",
+      "a3": "Of course. When you pick the breed, choose Mixed Breed. It's one of the 45 options on the list.",
+      "q4": "Do I need a password?",
+      "a4": "No. You type your email and we send you a 6-digit code. Type it in and you're in. If you don't have an account yet, it's created right there. The code works for one hour.",
+      "q5": "Can people see where I live?",
+      "a5": "No. The card only shows how far away you are, rounded, like 3km. Your address and your spot on the map don't show up for anyone.",
+      "q6": "How do I delete my account?",
+      "a6": "In the app, go to your profile, scroll to the bottom and tap Delete account. It's permanent, there's no undo. Without the app, do it <web>on the web</web>: send an email to <mail>support@pegada.app</mail> asking for the deletion.",
+      "q7": "Is it in Portuguese too?",
+      "a7": "Yes. The app is in English and Portuguese. It follows your phone's language, and you can switch it on your profile, under Language."
+    },
+    "closing": {
+      "title": "Lua already found Nina. Now it's your dog's turn.",
+      "desc": "Free on iPhone and Android."
     }
   },
   "home": {

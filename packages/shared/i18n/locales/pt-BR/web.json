@@ -148,6 +148,28 @@
       "phoneLabel": "O story da Nina aberto no celular: a imagem DM aberta pra cachorrada, gerada pelo app com as fotos dela. Segure para pausar.",
       "reply": "Enviar mensagem",
       "caption": "A imagem de verdade que o app gerou pro perfil da Nina."
+    },
+    "faq": {
+      "title": "Antes de baixar",
+      "desc": "As perguntas que mais aparecem. Se a sua não tá aqui, escreve pra <mail>support@pegada.app</mail>.",
+      "q1": "É de graça?",
+      "a1": "É. Baixar e usar não custa nada: perfil, deslizar, match e chat. Na versão grátis tem um limite de curtidas por dia e aparece um anúncio depois de um match. O Premium é opcional: libera curtidas ilimitadas, tira os anúncios, deixa voltar no último doguinho e coloca seu dog primeiro na fila de quem você curtiu.",
+      "q2": "Funciona no meu celular?",
+      "a2": "Funciona no iPhone e no Android. É só baixar na App Store ou no Google Play. Não tem versão pra navegador, o Pegada é app de celular.",
+      "q3": "Vira-lata pode?",
+      "a3": "Claro que pode. Na hora de escolher a raça, marca Sem raça definida. É uma das 45 opções da lista.",
+      "q4": "Preciso criar senha?",
+      "a4": "Não. Você coloca seu e-mail e a gente manda um código de 6 dígitos. Digitou, entrou. Se ainda não tem conta, ela é criada na hora. O código vale por uma hora.",
+      "q5": "Os outros veem onde eu moro?",
+      "a5": "Não. O card mostra só a distância até você, arredondada, tipo 3km. Seu endereço e seu ponto no mapa não aparecem pra ninguém.",
+      "q6": "Como eu apago minha conta?",
+      "a6": "No app, vai no seu perfil, desce até o fim e toca em Apagar conta. É definitivo, não dá pra desfazer. Sem o app, é <web>pela web</web>: manda um e-mail pra <mail>support@pegada.app</mail> pedindo a exclusão.",
+      "q7": "Tem em inglês?",
+      "a7": "Tem. O app é em português e em inglês. Ele segue o idioma do celular, e dá pra trocar no seu perfil, em Linguagem."
+    },
+    "closing": {
+      "title": "A Lua já achou a Nina. Agora é a vez do seu dog.",
+      "desc": "Grátis no iPhone e no Android."
     }
   },
   "home": {
