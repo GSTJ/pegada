@@ -45,7 +45,7 @@ export const Hero = ({ campaign }: { campaign?: StoreCampaign }) => {
         <p
           className={clsx(b.lede, s["hero-lede"])}
           data-in=""
-          style={cssVars({ "--d": "90ms" })}
+          style={cssVars({ "--d": "50ms" })}
         >
           {t("landing.hero.lede")}
         </p>
@@ -55,7 +55,7 @@ export const Hero = ({ campaign }: { campaign?: StoreCampaign }) => {
           placement="hero"
           campaign={campaign}
           data-in=""
-          style={cssVars({ "--d": "170ms" })}
+          style={cssVars({ "--d": "100ms" })}
         />
 
         <figure className={s.moment} aria-label={t("landing.hero.figLabel")}>

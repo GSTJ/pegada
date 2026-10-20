@@ -629,11 +629,13 @@
     translate: 0 18px;
     filter: blur(6px);
   }
+  /* --d is authored in 70ms steps; 0.7 turns that into ~50ms staggers */
   :global(html[data-reveal-ready]) .landing [data-reveal] {
+    --rd: calc(var(--d, 0ms) * 0.7);
     transition:
-      opacity 0.7s var(--ease-out) var(--d, 0ms),
-      translate 0.9s var(--ease-out) var(--d, 0ms),
-      filter 0.7s var(--ease-out) var(--d, 0ms);
+      opacity 0.4s var(--ease-out) var(--rd),
+      translate 0.5s var(--ease-out) var(--rd),
+      filter 0.4s var(--ease-out) var(--rd);
   }
 }
 

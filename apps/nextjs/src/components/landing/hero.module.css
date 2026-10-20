@@ -1,4 +1,4 @@
-/* 00 hero: headline band, the Match centered, lede left and stores right */
+/* 00 hero: one copy stack (headline, lede, stores) beside the Match poster; stacked on a phone */
 .hero {
   --k: 1.86;
   padding-block: 20px 40px;
@@ -108,35 +108,27 @@
     display: grid;
     align-content: center;
     min-height: calc(100svh - var(--bar-h));
-    --h: clamp(280px, (100svh - var(--bar-h) - 200px) / var(--k), 400px);
+    --h: clamp(280px, (100svh - var(--bar-h) - 72px) / var(--k), 420px);
   }
   .hero-grid {
-    grid-template-columns: minmax(0, 1fr) calc(var(--h) * 1.22) minmax(0, 1fr);
-    column-gap: 40px;
-    grid-template-areas: "title title title" "lede moment stores";
+    grid-template-columns: minmax(0, 1fr) calc(var(--h) * 1.22);
+    grid-template-rows: 1fr auto auto auto 1fr;
+    column-gap: clamp(40px, 6vw, 112px);
+    grid-template-areas: ". moment" "title moment" "lede moment" "stores moment" ". moment";
+    align-items: start;
   }
   .hero .hero-title {
-    justify-self: center;
-    text-align: center;
-    font-size: clamp(44px, 20px + 2.4vw, 56px);
-    max-width: 15em;
-  }
-  .moment {
-    margin-top: 12px;
+    font-size: clamp(44px, 16px + 3.2vw, 64px);
+    max-width: 10em;
+    text-wrap: balance;
   }
   .hero .hero-lede {
-    align-self: end;
-    justify-self: start;
-    max-width: 17em;
-    font-size: 17px;
-    margin: 0 0 calc(var(--h) * 0.02);
+    max-width: 25em;
+    margin-top: var(--gap-h1);
+    text-wrap: pretty;
   }
   .hero .hero-stores {
-    align-self: end;
-    justify-self: end;
-    flex-direction: column;
-    align-items: stretch;
-    margin: 0 0 calc(var(--h) * 0.012);
+    margin-top: var(--gap-cta);
   }
 }
 @media (max-width: 960px) {
@@ -164,31 +156,33 @@
     margin-top: var(--gap-cta);
   }
 }
+/* The whole poster lands inside ~1s: both cards rise and fan together so the
+   Match reads as two dogs from the first frame, then the badge and the lettering. */
 @media (prefers-reduced-motion: no-preference) {
   :global(.js) .hero [data-in] {
-    animation: h-in 0.9s var(--ease-out) var(--d, 0ms) both;
+    animation: h-in 0.5s var(--ease-out) var(--d, 0ms) both;
   }
   :global(.js) .mcard {
     animation:
-      card-rise 0.95s var(--ease-ios) 0.38s both,
-      card-fan 0.82s var(--spring-fan) 0.95s both;
+      card-rise 0.5s var(--ease-ios) 0.1s both,
+      card-fan 0.6s var(--spring-fan) 0.14s both;
   }
   :global(.js) .mcard-back {
-    animation-delay: 0.32s, 0.95s;
+    animation-delay: 0.06s, 0.1s;
   }
   :global(.js) .badge {
     animation:
-      fade 0.2s ease-out 1.45s both,
-      badge-pop 0.9s var(--spring-pop) 1.45s both;
+      fade 0.15s ease-out 0.42s both,
+      badge-pop 0.45s var(--spring-pop) 0.42s both;
   }
   :global(.js) .got {
-    animation: h-in 0.8s var(--ease-out) 1.6s both;
+    animation: h-in 0.4s var(--ease-out) 0.5s both;
   }
   :global(.js) .wordmark {
-    animation: write 0.85s var(--ease-draw) 1.72s both;
+    animation: write 0.45s var(--ease-draw) 0.55s both;
   }
   :global(.js) .liked {
-    animation: h-in 0.8s var(--ease-out) 2.15s both;
+    animation: h-in 0.4s var(--ease-out) 0.66s both;
   }
 }
 @keyframes h-in {
@@ -201,7 +195,7 @@
 @keyframes card-rise {
   from {
     opacity: 0;
-    translate: 0 56px;
+    translate: 0 40px;
     scale: 0.96;
   }
 }
