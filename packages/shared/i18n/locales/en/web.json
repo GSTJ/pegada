@@ -53,6 +53,49 @@
       "luaBio": "I love playing fetch and stealing socks! Looking for someone to play and have fun with! 🐶",
       "luaShare": "Share Lua's profile",
       "luaReport": "Report Lua"
+    },
+    "deck": {
+      "title": "One dog at a time.",
+      "desc": "Dogs near you show up as cards, one at a time. Right to like, left to pass, up for maybe. Try it with Nina.",
+      "maybe": "Maybe",
+      "maybeDesc": "Not sure? Maybe still counts as interest. If they like you, it's a match all the same.",
+      "nope": "Pass",
+      "nopeDesc": "Not this one. The card goes and the next dog comes up.",
+      "like": "Like",
+      "likeDesc": "If they like you back, it's a match and your chat opens.",
+      "keyUp": "up arrow",
+      "keyLeft": "left arrow",
+      "keyRight": "right arrow",
+      "deckRole": "card stack",
+      "deckLabel": "Demo deck. Arrows: left passes, up maybe, right likes.",
+      "emptyTitle": "We couldn't find any more dogs!",
+      "emptyDesc": "Still not many people nearby. We'll let you know when a new dog shows up.",
+      "seeAgain": "See it again",
+      "sendMessage": "Send a Message",
+      "keepSwiping": "Keep Swiping",
+      "hintFine": "Drag the card, or click it and use <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd>.",
+      "hintTouch": "Drag the card sideways. For maybe, tap the middle button.",
+      "upTop": "That's the one up top ↑",
+      "now": "Now: {{name}}, {{age}}, {{dist}} away.",
+      "back": "Back to the start. {{name}}, {{age}}.",
+      "matchLive": "It's a match! You and Nina liked each other.",
+      "none": "No more dogs.",
+      "demoNote": "In the app, this opens your chat with Nina. On this page it's just a demo.",
+      "nina": {
+        "age": "2 years",
+        "bio": "Chases anything that flies. Ball, leaf, bird.",
+        "alt": "Nina, a gray dog with light eyes",
+        "nope": "You passed on Nina.",
+        "maybe": "Maybe counts too. Nina had already liked Lua: it's a match.",
+        "like": "Nina had already liked Lua: it's a match."
+      },
+      "maui": {
+        "age": "1 year and 7 months",
+        "alt": "Maui, a Golden Retriever with his tongue out",
+        "nope": "You passed on Maui.",
+        "maybe": "Maui is a maybe. If he likes Lua, it's a match.",
+        "like": "Like sent. If Maui likes Lua back, it's a match."
+      }
     }
   },
   "home": {

@@ -53,6 +53,49 @@
       "luaBio": "Adoro brincar de pegar e roubar meias! Procurando alguém para brincar e se divertir! 🐶",
       "luaShare": "Compartilhar perfil de Lua",
       "luaReport": "Denunciar Lua"
+    },
+    "deck": {
+      "title": "Um cachorro de cada vez.",
+      "desc": "Os cachorros perto de você aparecem em cards, um por vez. Pra direita você curte, pra esquerda passa, pra cima fica no talvez. Testa aqui com a Nina.",
+      "maybe": "Talvez",
+      "maybeDesc": "Ficou na dúvida? Talvez também conta como interesse. Se o outro lado curtir, dá match igual.",
+      "nope": "Passar",
+      "nopeDesc": "Não rolou. O card sai e vem o próximo cachorro.",
+      "like": "Curtir",
+      "likeDesc": "Se o outro lado curtir de volta, deu match e o chat de vocês abre.",
+      "keyUp": "seta pra cima",
+      "keyLeft": "seta pra esquerda",
+      "keyRight": "seta pra direita",
+      "deckRole": "pilha de cards",
+      "deckLabel": "Deck de demonstração. Setas: esquerda passa, cima talvez, direita curte.",
+      "emptyTitle": "Parece que os doguinhos acabaram!",
+      "emptyDesc": "Ainda tem pouca gente por perto. A gente te avisa quando chegar dog novo.",
+      "seeAgain": "Ver de novo",
+      "sendMessage": "Enviar mensagem",
+      "keepSwiping": "Continue deslizando",
+      "hintFine": "Arrasta o card, ou clica nele e usa <kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd>.",
+      "hintTouch": "Arrasta o card pro lado. Pra talvez, toca no botão do meio.",
+      "upTop": "É aquele lá de cima ↑",
+      "now": "Agora: {{name}}, {{age}}, a {{dist}}.",
+      "back": "De volta ao começo. {{name}}, {{age}}.",
+      "matchLive": "Deu match! Você e Nina se curtiram.",
+      "none": "Os doguinhos acabaram.",
+      "demoNote": "No app, aqui abre a conversa com a Nina. Nesta página é só demonstração.",
+      "nina": {
+        "age": "2 anos",
+        "bio": "Corre atrás de tudo que voa. Bola, folha, passarinho.",
+        "alt": "Nina, cachorra de pelo cinza e olhos claros",
+        "nope": "Você passou a Nina.",
+        "maybe": "Talvez também conta. A Nina já tinha curtido a Lua: deu match.",
+        "like": "A Nina já tinha curtido a Lua: deu match."
+      },
+      "maui": {
+        "age": "1 ano e 7 meses",
+        "alt": "Maui, um Golden Retriever de língua de fora",
+        "nope": "Você passou o Maui.",
+        "maybe": "O Maui ficou no talvez. Se ele curtir a Lua, dá match.",
+        "like": "Curtida enviada. Se o Maui curtir a Lua de volta, dá match."
+      }
     }
   },
   "home": {
