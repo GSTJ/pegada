@@ -4,21 +4,35 @@ import type { ReactNode } from "react";
 
 import { useEffect, useRef } from "react";
 
-import { prefersReducedMotion, whileSeen } from "./while-seen";
+import { prefersReducedMotion } from "./while-seen";
 
 import s from "./profile.module.css";
 
 const c = (name: string) => s[name] ?? name;
 
-/** Gaps between the breeds the pill rolls through, slowing into Lua's. */
-const ROLL_GAP = [0, 110, 105, 120, 160, 230];
+const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+/** A computed length like "630px" as a number. */
+const px = (value: string) => Number(value.replace("px", "")) || 0;
+
+/** Where each field starts filling in, as a share of the section's scroll. */
+const STEPS = [
+  ["foto", 0.04],
+  ["nome", 0.16],
+  ["idade", 0.32],
+  ["raca", 0.46],
+  ["bio", 0.62],
+  ["tail", 0.82],
+] as const;
+const END = 0.88;
 
 /**
- * Section 01. While the phone is on screen, Lua's profile fills in field by
+ * Section 01. Scrolling through the section fills Lua's profile in, field by
  * field (photo, typed name, birthday turning into an age, a breed roll, the
- * bio word by word, then the buttons) and the matching row on the left ticks.
- * It plays once; hovering pauses it, the button replays it. With reduced
- * motion the profile is simply complete.
+ * bio word by word, then the buttons), and the matching row on the left
+ * ticks. On a tall desktop the whole split pins while it builds; elsewhere the
+ * phone's own trip up the screen drives it. Scrolling back reverses it. With
+ * reduced motion or no JS the profile is simply complete.
  */
 export const ProfileBuild = ({
   className,
@@ -36,8 +50,8 @@ export const ProfileBuild = ({
     const find = (selector: string) =>
       section?.querySelector<HTMLElement>(selector) ?? undefined;
     const pv = find("[data-build]");
+    const pin = find("[data-pin]");
     const stage = find("[data-stage]");
-    const replay = find("[data-replay]");
     const photo = find('[data-a="foto"]');
     const name = find("[data-type]");
     const age = find('[data-a="idade"]');
@@ -47,192 +61,130 @@ export const ProfileBuild = ({
     if (
       !section ||
       !pv ||
+      !pin ||
       !stage ||
-      !replay ||
       !photo ||
       !name ||
       !age ||
       !breed ||
       !rolling ||
-      !bio
+      !bio ||
+      prefersReducedMotion()
     ) {
       return;
     }
     const tail = [...pv.querySelectorAll<HTMLElement>('[data-a="tail"]')];
-    const facts = new Map(
-      [...section.querySelectorAll<HTMLElement>("[data-k]")].map((row) => [
-        row.dataset.k,
-        row,
-      ]),
-    );
+    const rows = [...section.querySelectorAll<HTMLElement>("[data-k]")];
     const NAME = name.textContent ?? "";
     const BREED = rolling.textContent ?? "";
-    const parts = [photo, name, age, breed, bio, ...tail];
+    const words = bio.children.length;
 
-    const now = (key: string) => {
-      for (const [k, row] of facts)
-        row.classList.toggle(c("is-now"), k === key);
+    const setText = (el: HTMLElement, text: string) => {
+      if (el.textContent !== text) el.textContent = text;
     };
-    const done = (key: string) => {
-      facts.get(key)?.classList.remove(c("is-now"));
-      facts.get(key)?.classList.add(c("is-done"));
-    };
-
-    const events: [number, () => void][] = [];
-    const at = (time: number, run: () => void) => events.push([time, run]);
-    at(250, () => {
-      now("foto");
-      photo.classList.add(c("on"));
-    });
-    at(1150, () => done("foto"));
-    at(1250, () => {
-      now("nome");
-      name.classList.add(c("on"), c("typing"));
-      name.textContent = "";
-    });
-    for (const [index, char] of [...NAME].entries()) {
-      at(1450 + index * 120, () => {
-        name.textContent += char;
-      });
-    }
-    at(1450 + NAME.length * 120 + 200, () => {
-      name.classList.remove(c("typing"));
-      done("nome");
-    });
-    at(2050, () => {
-      now("idade");
-      age.classList.add(c("is-date"));
-    });
-    at(2950, () => {
-      age.classList.remove(c("is-date"));
-      age.classList.add(c("on"));
-    });
-    at(3350, () => done("idade"));
-    let time = 3550;
-    at(time, () => {
-      now("raca");
-      breed.classList.add(c("on"));
-    });
-    for (const [index, gap] of ROLL_GAP.entries()) {
-      time += gap;
-      at(time, () => {
-        rolling.textContent = roll[index] ?? BREED;
-        rolling.classList.remove(c("roll-in"));
-        void rolling.offsetWidth;
-        rolling.classList.add(c("roll-in"));
-      });
-    }
-    at(time + 10, () => breed.classList.add(c("pop")));
-    at(time + 500, () => done("raca"));
-    at(time + 650, () => {
-      now("bio");
-      bio.classList.add(c("on"));
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => bio.classList.add(c("shown"))),
-      );
-    });
-    at(time + 1500, () => done("bio"));
-    at(time + 1650, () => {
-      for (const el of tail) el.classList.add(c("on"));
-    });
-    at(time + 2400, () => {
-      section.classList.remove(c("is-building"));
-      demo.done();
-    });
-    events.sort((a, b) => a[0] - b[0]);
-
-    let elapsed = 0;
-    let next = 0;
-    let seen = false;
-    let hovering = false;
-    let frame = 0;
-    let previous = 0;
-    const clear = () => {
-      for (const el of parts) {
-        el.classList.remove(
-          c("on"),
-          c("is-date"),
-          c("shown"),
-          c("typing"),
-          c("pop"),
+    let shownRoll = -1;
+    const render = (progress: number) => {
+      const sub = (index: number) => {
+        const start = STEPS[index]?.[1] ?? 1;
+        return clamp01(
+          (progress - start) / ((STEPS[index + 1]?.[1] ?? END) - start),
         );
-      }
-      for (const row of facts.values()) {
-        row.classList.remove(c("is-now"), c("is-done"));
-      }
-      name.textContent = NAME;
-      rolling.textContent = BREED;
-    };
-    const arm = () => {
-      pv.classList.add(c("is-armed"));
-      section.classList.add(c("is-building"));
-      clear();
-      elapsed = 0;
-      next = 0;
-    };
-    const loop = (stamp: number) => {
-      if (seen && !hovering) {
-        elapsed += Math.min(64, stamp - previous);
-        while (next < events.length && (events[next]?.[0] ?? 0) <= elapsed) {
-          events[next++]?.[1]();
-        }
-      }
-      previous = stamp;
-      frame = seen && next < events.length ? requestAnimationFrame(loop) : 0;
-    };
-    const kick = () => {
-      if (frame || next >= events.length) return;
-      previous = performance.now();
-      frame = requestAnimationFrame(loop);
-    };
-    const demo = whileSeen(
-      stage,
-      () => {
-        seen = true;
-        kick();
-      },
-      () => {
-        seen = false;
-      },
-      0.5,
-    );
+      };
+      const [foto, nome, idade, raca, words01, rest] = STEPS.map((_, index) =>
+        sub(index),
+      ) as [number, number, number, number, number, number];
 
+      photo.classList.toggle(c("on"), foto > 0);
+
+      const typed = Math.min(NAME.length, Math.ceil(nome * 1.3 * NAME.length));
+      name.classList.toggle(c("on"), nome > 0);
+      name.classList.toggle(c("typing"), nome > 0 && typed < NAME.length);
+      setText(name, nome > 0 ? NAME.slice(0, typed) : NAME);
+
+      age.classList.toggle(c("is-date"), idade > 0 && idade < 0.5);
+      age.classList.toggle(c("on"), idade >= 0.5);
+
+      // The pill rolls through the other breeds and lands on Lua's.
+      const step = raca > 0 ? Math.floor(raca * 1.2 * (roll.length + 1)) : -1;
+      const index = Math.min(step, roll.length);
+      breed.classList.toggle(c("on"), raca > 0);
+      if (index !== shownRoll) {
+        setText(rolling, roll[index] ?? BREED);
+        if (index >= 0) {
+          rolling.classList.remove(c("roll-in"));
+          void rolling.offsetWidth;
+          rolling.classList.add(c("roll-in"));
+        }
+        breed.classList.toggle(c("pop"), index === roll.length);
+        shownRoll = index;
+      }
+
+      bio.classList.toggle(c("on"), words01 > 0);
+      bio.style.setProperty(
+        "--k",
+        words01 > 0 ? (words01 * 1.2 * words).toFixed(2) : "99",
+      );
+
+      for (const el of tail) el.classList.toggle(c("on"), rest > 0);
+
+      for (const [at, row] of rows.entries()) {
+        const value = sub(at);
+        row.classList.toggle(c("is-now"), value > 0 && value < 1);
+        row.classList.toggle(c("is-done"), value >= 1);
+      }
+    };
+
+    let pinned = false;
+    let track = 0;
+    let padTop = 0;
+    let barH = 0;
+    const measure = () => {
+      const style = getComputedStyle(pin);
+      pinned = style.position === "sticky";
+      track = px(getComputedStyle(section, "::after").height);
+      barH = px(style.top);
+      padTop = px(getComputedStyle(section).paddingTop);
+    };
+    const progress = () => {
+      const vh = innerHeight;
+      if (pinned) {
+        // From a little before the split pins until it lets go.
+        const lead = vh * 0.45;
+        const held = barH - (section.getBoundingClientRect().top + padTop);
+        return clamp01((held + lead) / (track + lead));
+      }
+      const rect = stage.getBoundingClientRect();
+      const begin = vh * 0.8;
+      const end = Math.max(barH, (vh - rect.height) / 2);
+      return clamp01((begin - rect.top) / Math.max(1, begin - end));
+    };
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      render(progress());
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const resize = () => {
+      measure();
+      schedule();
+    };
+
+    pv.classList.add(c("is-armed"));
+    section.classList.add(c("is-building"));
+    measure();
+    update();
     const listeners = new AbortController();
     const { signal } = listeners;
-    if (!prefersReducedMotion()) {
-      arm();
-      stage.addEventListener(
-        "pointerenter",
-        (event) => {
-          if (event.pointerType === "mouse") hovering = true;
-        },
-        { signal },
-      );
-      stage.addEventListener(
-        "pointerleave",
-        () => {
-          hovering = false;
-        },
-        { signal },
-      );
-    }
-    replay.addEventListener(
-      "click",
-      () => {
-        if (prefersReducedMotion()) return;
-        arm();
-        demo.again();
-        // Let the empty frame paint before the build restarts.
-        requestAnimationFrame(() => requestAnimationFrame(kick));
-      },
-      { signal },
-    );
+    addEventListener("scroll", schedule, { passive: true, signal });
+    addEventListener("resize", resize, { signal });
 
     return () => {
       listeners.abort();
-      demo.dispose();
       cancelAnimationFrame(frame);
-      clear();
+      render(1);
       pv.classList.remove(c("is-armed"));
       section.classList.remove(c("is-building"));
     };

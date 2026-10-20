@@ -45,7 +45,7 @@ export const Profile = () => {
   return (
     // oxlint-disable-next-line react-perf/jsx-no-new-array-as-prop -- a server component renders once per request; there is no re-render to save.
     <ProfileBuild className={clsx(b.sec, s.pf)} roll={ROLL.map(breed)}>
-      <div className={clsx(b.wrap, b.split)}>
+      <div className={clsx(b.wrap, b.split, s["pf-pin"])} data-pin="">
         <div className={b["split-copy"]}>
           <h2 id="pf-title" className={b.h2} data-reveal="">
             {t("landing.profile.title")}
@@ -53,14 +53,14 @@ export const Profile = () => {
           <p
             className={b.desc}
             data-reveal=""
-            style={cssVars({ "--d": "70ms" })}
+            style={cssVars({ "--d": "50ms" })}
           >
             {t("landing.profile.desc")}
           </p>
           <dl
             className={clsx(b.rows, s["pf-sync"])}
             data-reveal=""
-            style={cssVars({ "--d": "140ms" })}
+            style={cssVars({ "--d": "100ms" })}
           >
             {FACTS.map(({ key, label }) => (
               <div key={key} className={clsx(b.row, s.row)} data-k={key}>
@@ -75,36 +75,17 @@ export const Profile = () => {
           <p
             className={b.fine}
             data-reveal=""
-            style={cssVars({ "--d": "210ms" })}
+            style={cssVars({ "--d": "150ms" })}
           >
             {t("landing.profile.fine")}
           </p>
-          <button
-            className={clsx(b.btn, b["btn-line"], s["pf-replay"])}
-            type="button"
-            data-replay=""
-            data-reveal=""
-            style={cssVars({ "--d": "260ms" })}
-          >
-            <svg viewBox="0 0 20 20" aria-hidden="true">
-              <path
-                d="M3.8 10a6.2 6.2 0 1 0 1.9-4.5M3.6 2.9v3.4H7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>{t("landing.profile.replay")}</span>
-          </button>
         </div>
 
         <div
           className={clsx(b["split-object"], s["pf-stage"])}
           data-stage=""
           data-reveal=""
-          style={cssVars({ "--d": "120ms" })}
+          style={cssVars({ "--d": "80ms" })}
         >
           <div className={b.phone}>
             <div
