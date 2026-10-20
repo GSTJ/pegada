@@ -19,7 +19,7 @@ export const Reveal = () => {
           observer.unobserve(entry.target);
         }
       },
-      { rootMargin: "0px 0px -8% 0px" },
+      { rootMargin: "0px 0px -4% 0px" },
     );
     const fold = innerHeight * 0.92;
     for (const block of blocks) {

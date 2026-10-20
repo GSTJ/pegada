@@ -7,7 +7,7 @@ import { clsx } from "clsx";
 
 import { cssVars } from "./css-vars";
 import { StatusBar } from "./status-bar";
-import { prefersReducedMotion, whileSeen } from "./while-seen";
+import { prefersReducedMotion } from "./while-seen";
 
 import s from "./chat.module.css";
 import b from "./landing.module.css";
@@ -22,19 +22,17 @@ export type ChatCopy = {
   messages: ChatMessage[];
   typeMessage: string;
   caption: string;
-  playAgain: string;
 };
 
-/** When each beat lands after the first: the day chip, then Lua's human, Nina's, Lua's, Nina's. */
-const BEAT_AT = [0, 80, 930, 1780, 2630];
-const OPEN_MS = 900;
+/** The beats fill in while the phone's center climbs from 90% to 50% of the viewport. */
+const SCROLL_FROM = 0.9;
+const SCROLL_TO = 0.5;
 const SENDING_MS = 450;
-const REPLAY_AFTER_MS = 500;
 
 /**
  * Section 04's phone: the chat opens on its empty state and fills bubble by
- * bubble while it is on screen, each sent one showing the clock before its
- * ticks. It plays once, then offers a replay. With reduced motion, or before
+ * bubble as the visitor scrolls to it, each sent one showing the clock before
+ * its ticks. Scrolling back empties it again. With reduced motion, or before
  * this runs, the whole conversation is simply there.
  */
 export const ChatDemo = ({
@@ -44,105 +42,55 @@ export const ChatDemo = ({
   className: string;
   copy: ChatCopy;
 }) => {
-  const figureRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const replayRef = useRef<HTMLButtonElement>(null);
   const [armed, setArmed] = useState(false);
   const [shown, setShown] = useState(0);
   const [sending, setSending] = useState<number>();
-  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
-    const figure = figureRef.current;
     const stage = stageRef.current;
-    const replay = replayRef.current;
-    if (!figure || !stage || !replay || prefersReducedMotion()) return;
-    const beats = BEAT_AT.length;
-    const timers = new Set<number>();
-    const later = (run: () => void, ms: number) => {
-      const id = window.setTimeout(() => {
-        timers.delete(id);
-        run();
-      }, ms);
-      timers.add(id);
-      return id;
-    };
-    let next = -1;
-    let timer = 0;
-    let seen = false;
-    let forced = false;
-    const runnable = () => (seen || forced) && !document.hidden;
-    const show = (beat: number) => {
-      setShown(beat + 1);
-      if (copy.messages[beat - 1]?.side === "sent") {
-        setSending(beat);
-        later(() => setSending(undefined), SENDING_MS);
+    if (!stage || prefersReducedMotion()) return;
+    const beats = copy.messages.length + 1;
+    let frame = 0;
+    let last = -1;
+    let clock = 0;
+    const follow = () => {
+      frame = 0;
+      const { top, height } = stage.getBoundingClientRect();
+      const progress =
+        (innerHeight * SCROLL_FROM - (top + height / 2)) /
+        (innerHeight * (SCROLL_FROM - SCROLL_TO));
+      const next = Math.min(beats, Math.max(0, Math.ceil(progress * beats)));
+      if (next === last) return;
+      // Only a bubble that arrives on its own gets the clock; a jump past
+      // several lands them already delivered.
+      if (
+        last !== -1 &&
+        next === last + 1 &&
+        copy.messages[next - 2]?.side === "sent"
+      ) {
+        clearTimeout(clock);
+        setSending(next - 1);
+        clock = window.setTimeout(() => setSending(undefined), SENDING_MS);
       }
+      last = next;
+      setShown(next);
     };
-    const step = () => {
-      clearTimeout(timer);
-      if (!runnable() || next >= beats) return;
-      if (next === -1) {
-        timer = later(() => {
-          next = 0;
-          step();
-        }, OPEN_MS);
-        return;
-      }
-      const wait =
-        next === 0 ? 0 : (BEAT_AT[next] ?? 0) - (BEAT_AT[next - 1] ?? 0);
-      timer = later(() => {
-        show(next);
-        next += 1;
-        if (next === beats) {
-          later(() => {
-            setFinished(true);
-            forced = false;
-            demo.done();
-          }, REPLAY_AFTER_MS);
-        }
-        step();
-      }, wait);
+    const onScroll = () => {
+      frame ||= requestAnimationFrame(follow);
     };
-    const reset = () => {
-      clearTimeout(timer);
-      next = -1;
-      setShown(0);
-      setSending(undefined);
-      setFinished(false);
-    };
-    const demo = whileSeen(
-      stage,
-      () => {
-        seen = true;
-        step();
-      },
-      () => {
-        seen = false;
-        if (!forced) clearTimeout(timer);
-      },
-      0.6,
-    );
+    follow();
     setArmed(true);
     const listeners = new AbortController();
-    document.addEventListener("visibilitychange", step, {
+    addEventListener("scroll", onScroll, {
+      passive: true,
       signal: listeners.signal,
     });
-    replay.addEventListener(
-      "click",
-      () => {
-        reset();
-        forced = true;
-        figure.focus({ preventScroll: true });
-        step();
-      },
-      { signal: listeners.signal },
-    );
+    addEventListener("resize", onScroll, { signal: listeners.signal });
     return () => {
       listeners.abort();
-      demo.dispose();
-      for (const id of timers) clearTimeout(id);
-      reset();
+      cancelAnimationFrame(frame);
+      clearTimeout(clock);
       setArmed(false);
     };
   }, [copy]);
@@ -152,10 +100,8 @@ export const ChatDemo = ({
 
   return (
     <figure
-      ref={figureRef}
       className={clsx(className, shown > 0 && s["has-msg"])}
       data-armed={armed ? "" : undefined}
-      tabIndex={armed ? -1 : undefined}
       data-reveal=""
       style={cssVars({ "--d": "120ms" })}
     >
@@ -227,27 +173,7 @@ export const ChatDemo = ({
           </div>
         </div>
       </div>
-      <figcaption className={b.cap}>
-        <span>{copy.caption}</span>
-        <button
-          ref={replayRef}
-          className={s.replay}
-          type="button"
-          hidden={!finished}
-        >
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-            <path
-              d="M2.6 8a5.4 5.4 0 1 0 1.6-3.8M2.4 1.8v3h3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>{copy.playAgain}</span>
-        </button>
-      </figcaption>
+      <figcaption className={b.cap}>{copy.caption}</figcaption>
     </figure>
   );
 };

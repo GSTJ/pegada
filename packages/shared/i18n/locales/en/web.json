@@ -46,7 +46,6 @@
       "bioKey": "Bio",
       "bioValue": "Up to 500 characters about what they love.",
       "fine": "Under Details you also add size, color and gender.",
-      "replay": "Build it again",
       "screenLabel": "The app's profile screen: Lua's photo, breed Border Collie, Lua, 3 years, the bio, Share Lua's profile, Report Lua and the 😕 🤔 😍 buttons",
       "luaBirthday": "10/07/2023",
       "luaAge": "3 years",
@@ -95,11 +94,39 @@
         "nope": "You passed on Maui.",
         "maybe": "Maui is a maybe. If he likes Lua, it's a match.",
         "like": "Like sent. If Maui likes Lua back, it's a match."
+      },
+      "tofu": {
+        "age": "3 years",
+        "alt": "Tofu, a little white dog with curly fur",
+        "nope": "You passed on Tofu.",
+        "maybe": "Tofu is a maybe. If he likes Lua, it's a match.",
+        "like": "Like sent. If Tofu likes Lua back, it's a match."
+      },
+      "mel": {
+        "age": "5 months",
+        "alt": "Mel, a black and white Shih Tzu puppy",
+        "nope": "You passed on Mel.",
+        "maybe": "Mel is a maybe. If she likes Lua, it's a match.",
+        "like": "Like sent. If Mel likes Lua back, it's a match."
+      },
+      "bento": {
+        "age": "4 years",
+        "alt": "Bento, a pug sitting on the sidewalk",
+        "nope": "You passed on Bento.",
+        "maybe": "Bento is a maybe. If he likes Lua, it's a match.",
+        "like": "Like sent. If Bento likes Lua back, it's a match."
+      },
+      "pipoca": {
+        "age": "6 years",
+        "alt": "Pipoca, a Jack Russell lying down and looking at the camera",
+        "nope": "You passed on Pipoca.",
+        "maybe": "Pipoca is a maybe. If she likes Lua, it's a match.",
+        "like": "Like sent. If Pipoca likes Lua back, it's a match."
       }
     },
     "radius": {
-      "title": "You draw the radius.",
-      "desc": "In Maximum Distance you pick how far to go, from 1 to 300+ km. Whoever is inside the circle shows up in your deck, closest first.",
+      "title": "You pick how far.",
+      "desc": "In Maximum Distance you drag the radius anywhere from 1 to 300+ km. Dogs inside it show up in your deck, closest first.",
       "breedKey": "Breed",
       "breedValue": "Any breed, or just one",
       "sizeKey": "Size",
@@ -137,8 +164,7 @@
       "m3": "Lua also steals socks. If one goes missing, you know who",
       "m4": "Lol they're going to get along great 😂",
       "typeMessage": "Type a message",
-      "caption": "Example conversation",
-      "playAgain": "Play again"
+      "caption": "Example chat between Lua's human and Nina's"
     },
     "story": {
       "title": "Put your dog in your story.",

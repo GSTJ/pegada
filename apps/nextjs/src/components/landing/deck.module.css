@@ -340,15 +340,57 @@
 .dk .fb img {
   width: 64px;
   height: 64px;
+  filter: drop-shadow(0 4px 12px rgb(0 0 0 / 0.18));
 }
+/* The app's tints, kept light enough that the dog still shows through. */
 .dk .fb-like {
-  background: #cbffd0;
+  background: rgb(203 255 208 / 0.34);
 }
 .dk .fb-nope {
-  background: #ffcecb;
+  background: rgb(255 206 203 / 0.34);
 }
 .dk .fb-maybe {
-  background: #fffacb;
+  background: rgb(255 250 203 / 0.34);
+}
+
+/* The hint's hand: its fingertip sits on the card, under the reaction emoji. */
+.dk .hand {
+  position: absolute;
+  z-index: 3;
+  left: calc(50% - 22px);
+  top: 58%;
+  width: 52px;
+  height: 65px;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: 22px 8px;
+  filter: drop-shadow(0 6px 14px rgb(11 11 15 / 0.28));
+  will-change: transform, opacity;
+}
+.dk .hand svg {
+  display: block;
+  overflow: visible;
+}
+.dk .hand-body {
+  fill: #fff;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.dk .hand-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+.dk .hand-tap {
+  fill: rgb(255 255 255 / 0.55);
+  stroke: rgb(255 255 255 / 0.9);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: var(--press, 0);
+  scale: calc(0.5 + var(--press, 0) * 0.5);
 }
 .dk .fb-maybe img {
   width: 48px;
@@ -575,30 +617,30 @@
     animation: m-out 0.18s ease-out both;
   }
   .dk .match.is-entering .mc {
-    animation: card-fan 0.5s var(--spring-fan) 0.12s both;
+    animation: card-fan 0.42s var(--spring-fan) 0.06s both;
   }
   .dk .match.is-entering .match-badge {
-    animation: pop 0.6s var(--spring-pop) 0.3s both;
+    animation: pop 0.45s var(--spring-pop) 0.16s both;
   }
   .dk .match.is-entering .match-pre,
   .dk .match.is-entering .match-cap,
   .dk .match.is-entering .match-btns {
-    animation: h-in 0.6s var(--ease-out) both;
+    animation: h-in 0.4s var(--ease-out) both;
   }
   .dk .match.is-entering .match-word {
-    animation: write 0.6s var(--ease-draw) 0.42s both;
+    animation: write 0.42s var(--ease-draw) 0.22s both;
   }
   .dk .match.is-entering .match-pre {
-    animation-delay: 0.34s;
+    animation-delay: 0.18s;
   }
   .dk .match.is-entering .match-cap {
-    animation-delay: 0.52s;
+    animation-delay: 0.3s;
   }
   .dk .match.is-entering .match-btns {
-    animation-delay: 0.6s;
+    animation-delay: 0.36s;
   }
   .dk .empty.is-entering {
-    animation: h-in 0.5s var(--ease-out) both;
+    animation: h-in 0.4s var(--ease-out) both;
   }
 }
 @keyframes m-in {

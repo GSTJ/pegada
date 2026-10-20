@@ -17,7 +17,7 @@ import {
   sweepValue,
 } from "./radius-scale";
 import { parseRich } from "./rich";
-import { prefersReducedMotion, whileSeen } from "./while-seen";
+import { prefersReducedMotion } from "./while-seen";
 
 import s from "./radius.module.css";
 
@@ -34,15 +34,16 @@ export type RadiusCopy = {
 };
 
 const RINGS = [10, 50, 300];
-const SWEEP_MS = 1600;
-const SWEEP_DELAY_MS = 650;
+/** The sweep runs while the slider, at the stage's bottom, climbs from 98% to 60% of the viewport. */
+const SCROLL_FROM = 0.98;
+const SCROLL_TO = 0.6;
 
 /**
  * Section 03's map and the app's Maximum Distance slider, on one value: the
  * disc grows and shrinks with it, the dogs outside go gray, and the count
- * under it ticks. The first time it owns the screen the slider sweeps once
- * from 300+ in to 50 km, so Maui steps out as it passes 246; touching the
- * slider stops that for good.
+ * under it ticks. Scrolling through the section pulls the slider from 300+
+ * in to 10 km, so Maui steps out, then Bento; scrolling back opens it again.
+ * Touching the slider hands it over for good.
  */
 export const RadiusDemo = ({
   className,
@@ -53,7 +54,7 @@ export const RadiusDemo = ({
 }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState(50);
+  const [value, setValue] = useState(() => sweepValue(1));
   const [ticks, setTicks] = useState(false);
   const slide = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setValue(Number(event.currentTarget.value));
@@ -64,62 +65,34 @@ export const RadiusDemo = ({
     const stage = stageRef.current;
     const input = inputRef.current;
     if (!stage || !input || prefersReducedMotion()) return;
-    setValue(RADIUS_MAX);
-    let touched = false;
-    let swept = false;
-    let progress = 0;
-    let last = 0;
     let frame = 0;
-    let wait = 0;
-    const step = (now: number) => {
-      if (touched) return;
-      progress += Math.min(64, now - last);
-      last = now;
-      const t = Math.min(1, progress / SWEEP_MS);
-      setValue(sweepValue(t));
-      setTicks(true);
-      if (t < 1) {
-        frame = requestAnimationFrame(step);
-      } else {
-        swept = true;
-        demo.done();
-      }
+    const follow = () => {
+      frame = 0;
+      const { bottom } = stage.getBoundingClientRect();
+      setValue(
+        sweepValue(
+          (innerHeight * SCROLL_FROM - bottom) /
+            (innerHeight * (SCROLL_FROM - SCROLL_TO)),
+        ),
+      );
     };
-    const demo = whileSeen(
-      stage,
-      () => {
-        if (touched || swept) return;
-        wait = window.setTimeout(
-          () => {
-            last = performance.now();
-            frame = requestAnimationFrame(step);
-          },
-          progress ? 0 : SWEEP_DELAY_MS,
-        );
-      },
-      () => {
-        clearTimeout(wait);
-        cancelAnimationFrame(frame);
-      },
-      0.55,
-    );
+    const onScroll = () => {
+      setTicks(true);
+      frame ||= requestAnimationFrame(follow);
+    };
+    follow();
     const listeners = new AbortController();
+    const { signal } = listeners;
+    addEventListener("scroll", onScroll, { passive: true, signal });
+    addEventListener("resize", onScroll, { signal });
     const touch = () => {
-      if (touched) return;
-      touched = true;
-      clearTimeout(wait);
+      listeners.abort();
       cancelAnimationFrame(frame);
-      demo.done();
     };
     for (const type of ["pointerdown", "keydown", "focus"]) {
-      input.addEventListener(type, touch, { signal: listeners.signal });
+      input.addEventListener(type, touch, { signal });
     }
-    return () => {
-      listeners.abort();
-      demo.dispose();
-      clearTimeout(wait);
-      cancelAnimationFrame(frame);
-    };
+    return touch;
   }, []);
 
   const all = value >= RADIUS_MAX;
@@ -138,7 +111,7 @@ export const RadiusDemo = ({
           {RINGS.map((ring) => (
             <span
               key={ring}
-              className={s.ring}
+              className={clsx(s.ring, !all && ring > km && s["is-out"])}
               style={cssVars({ "--r": ringOf(ring).toFixed(2) })}
             >
               <i>{ring} km</i>
