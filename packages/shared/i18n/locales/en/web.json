@@ -24,6 +24,13 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Use",
       "delete": "Delete account"
+    },
+    "hero": {
+      "title": "Find your dog a friend nearby.",
+      "lede": "Make your dog's profile, swipe through dogs near you, and when you both like each other, the chat opens. Free on iPhone and Android.",
+      "figLabel": "The app's Match screen: You got a Match. You and Nina liked each other!",
+      "youGotA": "You got a",
+      "likedNina": "You and Nina liked each other!"
     }
   },
   "home": {

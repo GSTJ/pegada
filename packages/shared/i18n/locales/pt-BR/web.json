@@ -24,6 +24,13 @@
       "privacy": "Política de privacidade",
       "terms": "Termos de uso",
       "delete": "Apagar conta"
+    },
+    "hero": {
+      "title": "Ache um amigo pro seu cachorro aqui perto.",
+      "lede": "Monte o perfil do seu dog, deslize pelos cachorros da sua região e, quando os dois curtirem, o chat abre. Grátis no iPhone e no Android.",
+      "figLabel": "A tela de Match do app: Você deu um Match. Você e Nina se curtiram!",
+      "youGotA": "Você deu um",
+      "likedNina": "Você e Nina se curtiram!"
     }
   },
   "home": {
