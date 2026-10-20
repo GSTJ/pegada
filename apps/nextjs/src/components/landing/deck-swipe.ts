@@ -5,7 +5,7 @@
  */
 export type Swipe = "nope" | "maybe" | "like";
 
-export const ACTION_OFFSET = 100;
+const ACTION_OFFSET = 100;
 const ROTATION = 8;
 const FLICK = 0.11;
 const FLICK_MIN = 24;

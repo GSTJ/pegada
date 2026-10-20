@@ -12,7 +12,7 @@ import { prefersReducedMotion, whileSeen } from "./while-seen";
 import s from "./chat.module.css";
 import b from "./landing.module.css";
 
-export type ChatMessage = { side: "sent" | "got"; text: string; time: string };
+type ChatMessage = { side: "sent" | "got"; text: string; time: string };
 
 export type ChatCopy = {
   screenLabel: string;

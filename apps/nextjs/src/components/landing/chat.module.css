@@ -99,7 +99,6 @@
   align-self: flex-start;
   border-bottom-left-radius: 0;
   transform-origin: 0 100%;
-  /* The approved page sets received bubbles light, with a tighter meta line. */
   font-weight: 300;
   line-height: 1.1;
   letter-spacing: -0.01em;

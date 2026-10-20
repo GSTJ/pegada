@@ -193,7 +193,7 @@
   }
 }
 
-/* the page root: what body was in the prototype */
+/* the page root, standing in for body so the other pages keep theirs */
 .page {
   background: var(--bg);
   overflow-x: clip;

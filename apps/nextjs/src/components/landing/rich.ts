@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { createElement, Fragment } from "react";
 
-export type RichPart = string | { tag: string; text: string };
+type RichPart = string | { tag: string; text: string };
 
 /**
  * Splits a translated string around its inline tags, so a sentence with a bold
