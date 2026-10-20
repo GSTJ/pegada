@@ -28,7 +28,7 @@ const END = 0.88;
 
 /**
  * Section 01. Scrolling through the section fills Lua's profile in, field by
- * field (photo, typed name, birthday turning into an age, a breed roll, the
+ * field (photo, typed name, birthday turning into an age, the breed, the
  * bio word by word, then the buttons), and the matching row on the left
  * ticks. On a tall desktop the whole split pins while it builds; elsewhere the
  * phone's own trip up the screen drives it. Scrolling back reverses it. With
@@ -36,11 +36,9 @@ const END = 0.88;
  */
 export const ProfileBuild = ({
   className,
-  roll,
   children,
 }: {
   className: string | undefined;
-  roll: string[];
   children: ReactNode;
 }) => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -56,7 +54,6 @@ export const ProfileBuild = ({
     const name = find("[data-type]");
     const age = find('[data-a="idade"]');
     const breed = find('[data-a="raca"]');
-    const rolling = find("[data-roll]");
     const bio = find("[data-words]");
     if (
       !section ||
@@ -67,7 +64,6 @@ export const ProfileBuild = ({
       !name ||
       !age ||
       !breed ||
-      !rolling ||
       !bio ||
       prefersReducedMotion()
     ) {
@@ -76,13 +72,11 @@ export const ProfileBuild = ({
     const tail = [...pv.querySelectorAll<HTMLElement>('[data-a="tail"]')];
     const rows = [...section.querySelectorAll<HTMLElement>("[data-k]")];
     const NAME = name.textContent ?? "";
-    const BREED = rolling.textContent ?? "";
     const words = bio.children.length;
 
     const setText = (el: HTMLElement, text: string) => {
       if (el.textContent !== text) el.textContent = text;
     };
-    let shownRoll = -1;
     const render = (progress: number) => {
       const sub = (index: number) => {
         const start = STEPS[index]?.[1] ?? 1;
@@ -104,20 +98,8 @@ export const ProfileBuild = ({
       age.classList.toggle(c("is-date"), idade > 0 && idade < 0.5);
       age.classList.toggle(c("on"), idade >= 0.5);
 
-      // The pill rolls through the other breeds and lands on Lua's.
-      const step = raca > 0 ? Math.floor(raca * 1.2 * (roll.length + 1)) : -1;
-      const index = Math.min(step, roll.length);
       breed.classList.toggle(c("on"), raca > 0);
-      if (index !== shownRoll) {
-        setText(rolling, roll[index] ?? BREED);
-        if (index >= 0) {
-          rolling.classList.remove(c("roll-in"));
-          void rolling.offsetWidth;
-          rolling.classList.add(c("roll-in"));
-        }
-        breed.classList.toggle(c("pop"), index === roll.length);
-        shownRoll = index;
-      }
+      breed.classList.toggle(c("pop"), raca > 0);
 
       bio.classList.toggle(c("on"), words01 > 0);
       bio.style.setProperty(
@@ -188,7 +170,7 @@ export const ProfileBuild = ({
       pv.classList.remove(c("is-armed"));
       section.classList.remove(c("is-building"));
     };
-  }, [roll]);
+  }, []);
 
   return (
     <section

@@ -319,9 +319,6 @@
   :global(.js) [data-build].is-armed .pv-breed.pop {
     animation: pill-pop 0.45s var(--spring-pop);
   }
-  :global(.js) [data-build].is-armed .tx.roll-in {
-    animation: roll-in 0.12s var(--ease-out);
-  }
   :global(.js) [data-build].is-armed .typing::after {
     content: "";
     display: inline-block;
@@ -402,12 +399,6 @@
 @keyframes pill-pop {
   from {
     scale: 0.9;
-  }
-}
-@keyframes roll-in {
-  from {
-    translate: 0 0.5em;
-    opacity: 0.2;
   }
 }
 @keyframes date-in {

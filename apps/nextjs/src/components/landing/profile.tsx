@@ -19,16 +19,6 @@ import s from "./profile.module.css";
 const breed = (slug: BreedSlug) =>
   t<Namespace.Breed>(slug, { ns: Namespace.Breed });
 
-/** The breeds the pill rolls through before it lands on Lua's. */
-const ROLL = [
-  "mixed-breed",
-  "beagle",
-  "labrador",
-  "shih-tzu",
-  "german-shepherd",
-  "border-collie",
-] as const satisfies readonly BreedSlug[];
-
 const BOLD = { b: (text: string) => <b>{text}</b> };
 
 const FACTS = [
@@ -43,8 +33,7 @@ export const Profile = () => {
   const bioWords: string[] = t("landing.profile.luaBio").split(" ");
 
   return (
-    // oxlint-disable-next-line react-perf/jsx-no-new-array-as-prop -- a server component renders once per request; there is no re-render to save.
-    <ProfileBuild className={clsx(b.sec, s.pf)} roll={ROLL.map(breed)}>
+    <ProfileBuild className={clsx(b.sec, s.pf)}>
       <div className={clsx(b.wrap, b.split, s["pf-pin"])} data-pin="">
         <div className={b["split-copy"]}>
           <h2 id="pf-title" className={b.h2} data-reveal="">
@@ -119,9 +108,7 @@ export const Profile = () => {
                 </span>
                 <div className={s["pv-body"]}>
                   <span className={s["pv-breed"]} data-a="raca">
-                    <span className={s.tx} data-roll="">
-                      {breed("border-collie")}
-                    </span>
+                    <span className={s.tx}>{breed("border-collie")}</span>
                   </span>
                   <p className={clsx(s["pv-name"], s.nm)}>
                     <b className={s.tx} data-a="nome" data-type="">
