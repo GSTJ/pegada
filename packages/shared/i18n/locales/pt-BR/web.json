@@ -139,6 +139,15 @@
       "typeMessage": "Digite uma mensagem",
       "caption": "Conversa de exemplo",
       "playAgain": "Ver de novo"
+    },
+    "story": {
+      "title": "Bota o seu dog no story.",
+      "desc": "No perfil, toque em <b>Compartilhar perfil</b> e escolha <b>Compartilhar no story</b>. O app monta uma imagem em pé com até 4 fotos do seu cachorro e abre o compartilhar do celular. Daí é só escolher onde postar.",
+      "note": "Se preferir, dá pra mandar só o link do perfil.",
+      "more": "Ver como funciona",
+      "phoneLabel": "O story da Nina aberto no celular: a imagem DM aberta pra cachorrada, gerada pelo app com as fotos dela. Segure para pausar.",
+      "reply": "Enviar mensagem",
+      "caption": "A imagem de verdade que o app gerou pro perfil da Nina."
     }
   },
   "home": {

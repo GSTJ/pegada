@@ -9,6 +9,7 @@ import { Radius } from "@/components/landing/radius";
 import { Reveal } from "@/components/landing/reveal";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
+import { Story } from "@/components/landing/story";
 
 import b from "@/components/landing/landing.module.css";
 
@@ -36,6 +37,7 @@ const LandingPage = async ({
         <Deck />
         <Radius />
         <Chat />
+        <Story />
       </main>
       <SiteFooter route="/" page="landing" campaign={campaign} />
       <Reveal />

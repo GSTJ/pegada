@@ -139,6 +139,15 @@
       "typeMessage": "Type a message",
       "caption": "Example conversation",
       "playAgain": "Play again"
+    },
+    "story": {
+      "title": "Put your dog in your story.",
+      "desc": "On the profile, tap <b>Share profile</b> and pick <b>Share to story</b>. The app builds a portrait image with up to 4 photos of your dog and opens your phone's share menu. Then just pick where to post.",
+      "note": "You can also just send the profile link.",
+      "more": "See how it works",
+      "phoneLabel": "Nina's story open on a phone: the \"DMs open to the whole pack\" image the app made from her photos. Hold to pause.",
+      "reply": "Send message",
+      "caption": "The actual image the app made for Nina's profile."
     }
   },
   "home": {
