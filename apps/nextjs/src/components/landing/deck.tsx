@@ -16,6 +16,10 @@ const KEYCAP = { kbd: (text: string) => <kbd>{text}</kbd> };
 /** Lua is your dog, so she is never in the deck. Nina is the hero's match. */
 const DOGS = [
   { id: "nina", name: "Nina", dist: "3km", likedYou: true },
+  { id: "tofu", name: "Tofu", dist: "2km", likedYou: false },
+  { id: "mel", name: "Mel", dist: "5km", likedYou: false },
+  { id: "bento", name: "Bento", dist: "12km", likedYou: false },
+  { id: "pipoca", name: "Pipoca", dist: "8km", likedYou: false },
   { id: "maui", name: "Maui", dist: "246km", likedYou: false },
 ] as const;
 

@@ -22,7 +22,7 @@ import s from "./deck.module.css";
 import b from "./landing.module.css";
 
 export type DeckDog = {
-  id: "nina" | "maui";
+  id: string;
   name: string;
   age: string;
   dist: string;
@@ -57,7 +57,6 @@ export type DeckCopy = {
 };
 
 type Outcome = { text: string; upTop: boolean };
-type Ease = "in-out" | "out";
 
 const EMOJI = {
   maybe: "/landing/thinking.webp",
@@ -87,26 +86,58 @@ const IN_OUT_QUAD = "cubic-bezier(.455, .03, .515, .955)";
 const EASE_IOS = "cubic-bezier(.32, .72, 0, 1)";
 const EASE_OUT = "cubic-bezier(.23, 1, .32, 1)";
 
-/** The lean it plays while nobody has touched the deck: right, left, up. */
-const TUTOR: [x: number, y: number, ms: number, ease?: Ease][] = [
-  [0, 0, 700],
-  [72, 0, 640, "in-out"],
-  [72, 0, 520],
-  [0, 0, 560, "out"],
-  [0, 0, 380],
-  [-72, 0, 640, "in-out"],
-  [-72, 0, 520],
-  [0, 0, 560, "out"],
-  [0, 0, 380],
-  [0, -64, 640, "in-out"],
-  [0, -64, 520],
-  [0, 0, 560, "out"],
-  [0, 0, 1700],
-];
-const TUTOR_MS = TUTOR.reduce((sum, step) => sum + step[2], 0);
-const EASES: Record<Ease, (t: number) => number> = {
-  "in-out": (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2),
-  out: (t) => 1 - (1 - t) ** 3,
+/**
+ * Until the first touch, a hand drags the top card partway right, then left
+ * (tilt and all, short of the 100px commit), letting it spring back each time.
+ */
+const HINT = {
+  delay: 350,
+  show: 180,
+  press: 120,
+  drag: 520,
+  hold: 140,
+  back: 460,
+  rest: 900,
+};
+const HINT_X = 84;
+const HINT_CYCLE =
+  HINT.show + HINT.press + HINT.drag + HINT.hold + HINT.back + HINT.rest;
+const HINT_RUNS = 2;
+const inOut = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+/** A little overshoot past center, like the card settling on a spring. */
+const backOut = (t: number) => 1 + 2.2 * (t - 1) ** 3 + 1.2 * (t - 1) ** 2;
+const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
+
+/** The card's x and the hand's state, `t` ms into one hint cycle. */
+const hintAt = (t: number) => {
+  const pressAt = HINT.show;
+  const dragAt = pressAt + HINT.press;
+  const holdAt = dragAt + HINT.drag;
+  const backAt = holdAt + HINT.hold;
+  if (t < dragAt) {
+    return {
+      x: 0,
+      opacity: clamp01(t / HINT.show),
+      scale:
+        1.08 -
+        0.08 * clamp01(t / HINT.show) -
+        0.08 * clamp01((t - pressAt) / HINT.press),
+    };
+  }
+  if (t < backAt) {
+    return {
+      x: HINT_X * inOut(clamp01((t - dragAt) / HINT.drag)),
+      opacity: 1,
+      scale: 0.92,
+    };
+  }
+  const k = clamp01((t - backAt) / HINT.back);
+  return {
+    x: HINT_X * (1 - backOut(k)),
+    handX: HINT_X,
+    opacity: 1 - clamp01((t - backAt) / 200),
+    scale: 0.92 + 0.12 * clamp01((t - backAt) / 200),
+  };
 };
 
 const c = (name: string) => s[name] ?? name;
@@ -234,6 +265,7 @@ export const DeckDemo = ({
     const cards = cardsRef.current;
     const matchScreen = matchRef.current;
     const reset = deck?.querySelector<HTMLElement>("[data-reset]");
+    const hand = deck?.querySelector<HTMLElement>("[data-hand]");
     const send = matchScreen?.querySelector<HTMLElement>("[data-send]");
     const keepSwiping =
       matchScreen?.querySelector<HTMLElement>("[data-continue]");
@@ -243,6 +275,7 @@ export const DeckDemo = ({
       !deck ||
       !cards ||
       !reset ||
+      !hand ||
       !send ||
       !keepSwiping
     ) {
@@ -359,31 +392,42 @@ export const DeckDemo = ({
     };
 
     let tutorSeen = false;
-    let hover = false;
     let focus = false;
     let tutorDone = false;
     let frame = 0;
     let t0 = 0;
-    const canTutor = () =>
-      tutorSeen && !hover && !focus && !tutorDone && idle();
+    let runs = 0;
+    const showHand = (handX: number, opacity: number, scale: number) => {
+      hand.style.opacity = opacity.toFixed(3);
+      hand.style.transform = `translateX(${handX}px) scale(${scale})`;
+      hand.style.setProperty("--press", clamp01((1 - scale) / 0.08).toFixed(3));
+    };
+    const canTutor = () => tutorSeen && !focus && !tutorDone && idle();
+    // The hint ran its course or someone touched the deck: it never plays again.
+    const finishTutor = () => {
+      tutorDone = true;
+      cancelAnimationFrame(frame);
+      frame = 0;
+      showHand(0, 0, 1);
+      demo.done();
+    };
     const tutorFrame = (now: number) => {
       if (!canTutor()) {
         frame = 0;
         return;
       }
-      let t = (now - t0) % TUTOR_MS;
-      let fromX = 0;
-      let fromY = 0;
-      for (const [toX, toY, ms, ease] of TUTOR) {
-        if (t < ms) {
-          const k = ease ? EASES[ease](t / ms) : 1;
-          paint(fromX + (toX - fromX) * k, fromY + (toY - fromY) * k);
-          break;
-        }
-        t -= ms;
-        fromX = toX;
-        fromY = toY;
+      const t = now - t0 - HINT.delay;
+      if (t >= (HINT_RUNS - runs) * HINT_CYCLE) {
+        paint(0, 0);
+        finishTutor();
+        return;
       }
+      const at = hintAt(Math.max(0, t) % HINT_CYCLE);
+      // Odd runs drag left, so the hint teaches Passar as well as Curtir.
+      const side =
+        (runs + Math.floor(Math.max(0, t) / HINT_CYCLE)) % 2 ? -1 : 1;
+      paint(side * at.x, 0);
+      showHand(side * (at.handX ?? at.x), t < 0 ? 0 : at.opacity, at.scale);
       frame = requestAnimationFrame(tutorFrame);
     };
     const syncTutor = () => {
@@ -393,7 +437,11 @@ export const DeckDemo = ({
       } else if (!canTutor() && frame) {
         cancelAnimationFrame(frame);
         frame = 0;
-        if (!tutorDone && idle()) snapBack(360);
+        runs += Math.floor(
+          Math.max(0, performance.now() - t0 - HINT.delay) / HINT_CYCLE,
+        );
+        showHand(0, 0, 1);
+        if (!tutorDone && idle()) snapBack();
       }
     };
     const demo = whileSeen(
@@ -409,11 +457,7 @@ export const DeckDemo = ({
     );
     // Stops for good on the first touch.
     const stopTutor = () => {
-      if (tutorDone) return;
-      tutorDone = true;
-      cancelAnimationFrame(frame);
-      frame = 0;
-      demo.done();
+      if (!tutorDone) finishTutor();
     };
 
     const openMatch = () => {
@@ -629,23 +673,6 @@ export const DeckDemo = ({
     );
     keepSwiping.addEventListener("click", closeMatch, { signal });
     well.addEventListener(
-      "pointerenter",
-      (event) => {
-        if (event.pointerType !== "mouse") return;
-        hover = true;
-        syncTutor();
-      },
-      { signal },
-    );
-    well.addEventListener(
-      "pointerleave",
-      () => {
-        hover = false;
-        syncTutor();
-      },
-      { signal },
-    );
-    well.addEventListener(
       "focusin",
       () => {
         focus = true;
@@ -747,6 +774,19 @@ export const DeckDemo = ({
                     <Card key={dog.id} dog={dog} />
                   ))}
                 </div>
+                <span className={s.hand} data-hand="" aria-hidden="true">
+                  <svg width="52" height="65" viewBox="0 0 40 50">
+                    <circle className={s["hand-tap"]} cx="17" cy="6" r="9" />
+                    <path
+                      className={s["hand-body"]}
+                      d="M13 29V7a4 4 0 0 1 8 0v12a3.75 3.75 0 0 1 7.5 0v2a3.5 3.5 0 0 1 7 0v11c0 8-5 14-11.5 14h-2.5c-4 0-6.5-1.8-8.7-5l-6.6-9.4c-1.2-1.8-.8-4 .9-5 1.8-1 4.1-.4 5.2 1.3Z"
+                    />
+                    <path
+                      className={s["hand-line"]}
+                      d="M21 19v6.5M28.5 21v5.5"
+                    />
+                  </svg>
+                </span>
                 <div
                   className={clsx(s.empty, s["is-entering"])}
                   hidden={!empty}
