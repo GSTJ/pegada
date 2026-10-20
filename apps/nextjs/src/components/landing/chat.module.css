@@ -4,9 +4,6 @@
   flex-direction: column;
   align-items: center;
 }
-.cv-object:focus {
-  outline: none;
-}
 .cv-well {
   padding: 48px clamp(40px, 6vw, 88px);
   display: grid;
@@ -87,7 +84,7 @@
   border-radius: var(--r);
 }
 .cv .msg p {
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: 1.36;
 }
 .cv .msg.sent {
@@ -109,7 +106,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3em;
-  font-size: 8px;
+  font-size: 8.5px;
   color: #6e6e76;
   font-variant-numeric: tabular-nums;
 }
@@ -164,44 +161,6 @@
   font-size: 10px;
   color: #6b6b73;
 }
-.replay {
-  all: unset;
-  position: relative;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: var(--well-2);
-  color: var(--ink);
-  font-weight: 600;
-  font-size: 13px;
-  transition:
-    transform 0.12s ease-out,
-    background-color 0.2s ease-out;
-}
-.replay::after {
-  content: "";
-  position: absolute;
-  inset: -7px -4px;
-}
-.replay[hidden] {
-  display: none;
-}
-.replay:active {
-  transform: scale(0.97);
-}
-.replay:focus-visible {
-  outline: 2.5px solid var(--ink);
-  outline-offset: 2px;
-}
-@media (hover: hover) and (pointer: fine) {
-  .replay:hover {
-    background: var(--hair);
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   .cv [data-armed] [data-beat]:not(.on) {
     opacity: 0;
@@ -218,9 +177,9 @@
   }
   .cv [data-armed] [data-beat] {
     transition:
-      opacity 0.3s ease-out,
-      translate 0.76s var(--spring-settle),
-      scale 0.9s var(--spring-pop);
+      opacity 0.2s var(--ease-out),
+      translate 0.45s var(--spring-settle),
+      scale 0.45s var(--spring-pop);
   }
   .cv [data-armed] .ch-empty {
     display: flex;

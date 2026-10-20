@@ -29,9 +29,20 @@ test("a dog is in when it is within the radius, and 300 has no limit", () => {
   assert.equal(inRadius(0, 3), false);
 });
 
-test("the sweep runs from 300 to 50 in steps of 5", () => {
+test("the scroll sweep runs from 300 to 10 in steps of 5, Maui out before Bento", () => {
   assert.equal(sweepValue(0), 300);
-  assert.equal(sweepValue(1), 50);
+  assert.equal(sweepValue(1), 10);
+  assert.equal(sweepValue(-1), 300);
+  assert.equal(sweepValue(2), 10);
+  const mauiOut = [...Array(101).keys()].find(
+    (i) => !inRadius(sweepValue(i / 100), 246),
+  );
+  const bentoOut = [...Array(101).keys()].find(
+    (i) => !inRadius(sweepValue(i / 100), 12),
+  );
+  assert.ok(mauiOut > 15 && mauiOut < 40, `Maui out at ${mauiOut}%`);
+  assert.ok(bentoOut > 70 && bentoOut < 90, `Bento out at ${bentoOut}%`);
+  assert.ok(inRadius(sweepValue(1), 3));
   assert.equal(sweepValue(0.5) % 5, 0);
   assert.ok(sweepValue(0.25) > sweepValue(0.75));
 });

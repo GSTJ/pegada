@@ -25,7 +25,6 @@ const readCopy = (): ChatCopy => ({
   ],
   typeMessage: t("landing.chat.typeMessage"),
   caption: t("landing.chat.caption"),
-  playAgain: t("landing.chat.playAgain"),
 });
 
 export const Chat = () => (
