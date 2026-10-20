@@ -4,6 +4,28 @@
     "description": "Pegada é um aplicativo de relacionamento para cachorros. Com ele, você pode encontrar outros cachorros para passear, brincar e até mesmo namorar. O aplicativo é gratuito e está disponível para Android e iOS.",
     "ogImageAlt": "Um iPhone com o Pegada aberto, mostrando o perfil de uma golden retriever chamada Maui, ao lado dos dizeres “Amigos pro seu dog” e “Cachorro aqui do lado”."
   },
+  "landing": {
+    "chrome": {
+      "brandLabel": "Pegada, início",
+      "skip": "Pular para o conteúdo",
+      "navLabel": "Seções",
+      "navHow": "Como funciona",
+      "navFaq": "Perguntas",
+      "getApp": "Baixar o app",
+      "langLabel": "Idioma",
+      "appStorePre": "Baixar na",
+      "playPre": "Disponível no",
+      "footLabel": "Rodapé",
+      "tagline": "Amizades para doguinhos.",
+      "colApp": "O app",
+      "colLegal": "Legal",
+      "colContact": "Contato",
+      "story": "O story do seu dog",
+      "privacy": "Política de privacidade",
+      "terms": "Termos de uso",
+      "delete": "Apagar conta"
+    }
+  },
   "home": {
     "title": "Amigos pro seu dog",
     "description": "Aqui do lado tem cachorro da mesma raça e com o mesmo jeito do seu.",

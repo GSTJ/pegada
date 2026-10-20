@@ -10,7 +10,7 @@ const pageKey = "deleteAccount";
 export const generateMetadata = () => generateLocalizedMdxMetadata(pageKey);
 
 const DeleteAccount: React.FC = () => {
-  return <LocalizedMdxScreen pageKey={pageKey} />;
+  return <LocalizedMdxScreen pageKey={pageKey} route="/delete-account" />;
 };
 
 export default DeleteAccount;

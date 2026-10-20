@@ -4,12 +4,14 @@ import type { ParseKeys } from "i18next";
 import type { ComponentProps } from "react";
 
 import { CustomMDX } from "@/components/custom-mdx";
-import { Logo } from "@/components/logo";
-import { Restricter } from "@/components/restricter";
+import { SiteFooter } from "@/components/landing/site-footer";
+import { SiteHeader } from "@/components/landing/site-header";
 import { t } from "@/lib/translate";
 
 type DataProps = {
   pageKey: string;
+  /** The page's path without the locale, for the language switch. */
+  route: string;
 };
 
 export const getLocalizedMdxData = (pageKey: string) => {
@@ -44,15 +46,22 @@ const components = {
   ),
 };
 
-export const LocalizedMdxScreen = ({ pageKey }: DataProps) => {
+export const LocalizedMdxScreen = ({ pageKey, route }: DataProps) => {
   const source = getLocalizedMdxData(pageKey).content;
 
   return (
-    <Restricter>
-      <main id="main" tabIndex={-1} className="prose max-w-none w-full p-12">
-        <Logo />
-        <CustomMDX source={source} components={components} />
+    <>
+      <SiteHeader route={route} />
+      <main
+        id="main"
+        tabIndex={-1}
+        className="mx-auto max-w-[1200px] px-5 py-12 outline-none sm:px-10 sm:py-16"
+      >
+        <div className="prose max-w-[70ch]">
+          <CustomMDX source={source} components={components} />
+        </div>
       </main>
-    </Restricter>
+      <SiteFooter route={route} page="legal" />
+    </>
   );
 };

@@ -1,0 +1,81 @@
+.lang {
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--well-2);
+}
+.lang a {
+  position: relative;
+  z-index: 1;
+  min-width: 38px;
+  height: 30px;
+  padding: 0 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-radius: 999px;
+  transition: color 0.2s ease-out;
+}
+.lang a::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+.lang a[aria-current] {
+  color: var(--ink);
+}
+.lang a:focus-visible {
+  outline-offset: 0;
+}
+.lang-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  height: 30px;
+  width: var(--w, 38px);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.04),
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 4px 8px -6px rgb(0 0 0 / 0.2);
+  translate: var(--x, 0) 0;
+  transition:
+    translate 0.76s var(--spring-settle),
+    width 0.45s var(--ease-out);
+}
+/* before the knob is measured (and with no JS) the current link carries the knob's look */
+.lang:not(.is-placed) .lang-knob {
+  visibility: hidden;
+}
+.lang:not(.is-placed) a[aria-current] {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.04),
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 4px 8px -6px rgb(0 0 0 / 0.2);
+}
+.lang a:active {
+  scale: 0.94;
+  transition: scale 0.12s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lang a:not([aria-current]):hover {
+    color: var(--ink);
+  }
+}
+.lang-lg a {
+  height: 34px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 14px;
+  letter-spacing: -0.005em;
+}
+.lang-lg .lang-knob {
+  height: 34px;
+}

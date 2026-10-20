@@ -1,11 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
-import { Epilogue } from "next/font/google";
-
 import { Analytics } from "@vercel/analytics/react";
 
 import { Providers } from "@/app/providers";
+import { gilroy, gilroyBold } from "@/lib/fonts";
 import { getRequestPathname, getSafeLocale } from "@/lib/get-safe-locale";
 import {
   LOCALE_SEGMENTS,
@@ -16,12 +15,6 @@ import {
 } from "@/lib/locales";
 import { t } from "@/lib/translate";
 import { cn } from "@/lib/utils";
-
-// oxlint-disable-next-line new-cap -- next/font loaders are capitalised functions, not constructors
-const epilogue = Epilogue({
-  variable: "--font-epilogue",
-  subsets: ["latin"],
-});
 
 /**
  * Every relative URL below (canonical, hreflang, `og:image`) is resolved
@@ -113,9 +106,23 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const locale = getSafeLocale();
 
   return (
-    <html lang={locale}>
+    // The class is added before first paint; it is not React's to reconcile.
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        {/*
+         * Marks a page whose scripts run, before anything paints: the hero's
+         * arrival choreography starts hidden only under it, so without JS the
+         * page is simply there.
+         */}
+        <script
+          // oxlint-disable-next-line react/no-danger, react-perf/jsx-no-new-object-as-prop -- a constant one-liner that has to run inline, before the body paints.
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
       <Analytics />
-      <body className={cn(epilogue.variable, "font-epilogue")}>
+      <body className={cn(gilroy.variable, gilroyBold.variable, "font-gilroy")}>
         <Providers>{children}</Providers>
       </body>
     </html>

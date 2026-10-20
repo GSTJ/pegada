@@ -10,7 +10,7 @@ const pageKey = "privacyPolicy";
 export const generateMetadata = () => generateLocalizedMdxMetadata(pageKey);
 
 const PrivacyPolicy: React.FC = () => {
-  return <LocalizedMdxScreen pageKey={pageKey} />;
+  return <LocalizedMdxScreen pageKey={pageKey} route="/privacy-policy" />;
 };
 
 export default PrivacyPolicy;

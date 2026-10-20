@@ -4,6 +4,28 @@
     "description": "Pegada is a dog dating app. With it, you can find other dogs to walk, play and even date. The app is free and available for Android and iOS.",
     "ogImageAlt": "An iPhone running Pegada, showing the profile of a golden retriever named Maui, beside the words “Friends For Your Doggie” and “Pawfect Matches”."
   },
+  "landing": {
+    "chrome": {
+      "brandLabel": "Pegada, home",
+      "skip": "Skip to content",
+      "navLabel": "Sections",
+      "navHow": "How it works",
+      "navFaq": "Questions",
+      "getApp": "Get the app",
+      "langLabel": "Language",
+      "appStorePre": "Download on the",
+      "playPre": "Get it on",
+      "footLabel": "Footer",
+      "tagline": "Meetups for Doggies.",
+      "colApp": "The app",
+      "colLegal": "Legal",
+      "colContact": "Contact",
+      "story": "Your dog's story",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
+      "delete": "Delete account"
+    }
+  },
   "home": {
     "title": "Friends For Your Doggie",
     "description": "Pawfect matches by breed and personality, close enough to walk to.",
