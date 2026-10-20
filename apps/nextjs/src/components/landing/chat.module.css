@@ -1,0 +1,246 @@
+/* 04 conversa: the real chat screen, bubbles arriving, on the well */
+.cv-object {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cv-object:focus {
+  outline: none;
+}
+.cv-well {
+  padding: 48px clamp(40px, 6vw, 88px);
+  display: grid;
+  place-items: center;
+}
+.cv-screen {
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+}
+.cv .ch-head {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 14px 2px 16px;
+  background: #fbfbfb;
+  border-bottom: 1px solid #efeff1;
+  box-shadow: 0 6px 10px -10px rgb(0 0 0 / 0.25);
+}
+.cv .ch-back {
+  margin-right: 4px;
+}
+.cv .ch-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.cv .ch-head b {
+  font-weight: 700;
+  font-size: 12.5px;
+}
+.cv .ch-body {
+  --r: 9px;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 8px;
+  overflow: hidden;
+}
+.cv .ch-body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url(/landing/chat-pattern.webp) 0 0 / 560px;
+  opacity: 0.045;
+  pointer-events: none;
+}
+.cv .ch-day {
+  position: relative;
+  align-self: center;
+  font-weight: 500;
+  font-size: 9.5px;
+  padding: 2px 9px 3px;
+  margin-bottom: 6px;
+  color: var(--ink-2);
+  background: var(--well-2);
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+}
+.cv .msg {
+  position: relative;
+  max-width: 70%;
+  padding: 5px 8px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  column-gap: 0.5em;
+  background: var(--well);
+  border: 1px solid var(--hair);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.05);
+  border-radius: var(--r);
+}
+.cv .msg p {
+  font-size: 11.5px;
+  line-height: 1.36;
+}
+.cv .msg.sent {
+  align-self: flex-end;
+  border-bottom-right-radius: 0;
+  transform-origin: 100% 100%;
+}
+.cv .msg.got {
+  align-self: flex-start;
+  border-bottom-left-radius: 0;
+  transform-origin: 0 100%;
+  /* The approved page sets received bubbles light, with a tighter meta line. */
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.cv .meta {
+  margin-left: auto;
+  margin-top: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 8px;
+  color: #6e6e76;
+  font-variant-numeric: tabular-nums;
+}
+.cv .st {
+  width: 1.25em;
+  height: 0.85em;
+  background: #b4b4ba;
+  -webkit-mask: var(--tick) center / contain no-repeat;
+  mask: var(--tick) center / contain no-repeat;
+}
+.cv .msg.sending .st {
+  --tick: var(--clock);
+  width: 0.95em;
+  height: 0.95em;
+}
+.cv {
+  --tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11.316 6.108'%3E%3Cg transform='translate(-8.063 -48.506)'%3E%3Cpath d='M16.147,48.7a.707.707,0,0,0-.977,0l-4.245,4.245L9.241,51.265a.686.686,0,0,0-.488-.2h0a.691.691,0,0,0-.487,1.179l2.173,2.169a.691.691,0,0,0,.977,0l4.733-4.733a.691.691,0,0,0,0-.977Z' transform='translate(3.029 0)'/%3E%3Cpath d='M16.147,48.7a.707.707,0,0,0-.977,0l-4.245,4.245L9.241,51.265a.686.686,0,0,0-.488-.2h0a.691.691,0,0,0-.487,1.179l2.173,2.169a.691.691,0,0,0,.977,0l4.733-4.733a.691.691,0,0,0,0-.977Z'/%3E%3C/g%3E%3C/svg%3E");
+  --clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='4.9' fill='none' stroke='black' stroke-width='1.3'/%3E%3Cpath d='M6 3.4V6l1.7 1.1' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.cv .ch-empty {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+.cv .ch-empty b {
+  font-weight: 700;
+  font-size: 11px;
+}
+.cv .ch-send {
+  flex: none;
+  height: 62px;
+  padding: 9px 7px 0;
+  background: #fbfbfb;
+  border-top: 1px solid #efeff1;
+}
+.cv .ch-send span {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--well);
+  border: 1px solid var(--hair);
+  font-size: 10px;
+  color: #6b6b73;
+}
+.replay {
+  all: unset;
+  position: relative;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--well-2);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13px;
+  transition:
+    transform 0.12s ease-out,
+    background-color 0.2s ease-out;
+}
+.replay::after {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
+}
+.replay[hidden] {
+  display: none;
+}
+.replay:active {
+  transform: scale(0.97);
+}
+.replay:focus-visible {
+  outline: 2.5px solid var(--ink);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .replay:hover {
+    background: var(--hair);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cv [data-armed] [data-beat]:not(.on) {
+    opacity: 0;
+    scale: 0.94;
+  }
+  .cv [data-armed] .msg.sent[data-beat]:not(.on) {
+    translate: 14px 6px;
+  }
+  .cv [data-armed] .msg.got[data-beat]:not(.on) {
+    translate: -14px 6px;
+  }
+  .cv [data-armed] .ch-day[data-beat]:not(.on) {
+    translate: 0 6px;
+  }
+  .cv [data-armed] [data-beat] {
+    transition:
+      opacity 0.3s ease-out,
+      translate 0.76s var(--spring-settle),
+      scale 0.9s var(--spring-pop);
+  }
+  .cv [data-armed] .ch-empty {
+    display: flex;
+    transition:
+      opacity 0.2s ease-out,
+      filter 0.2s ease-out;
+  }
+  .cv [data-armed].has-msg .ch-empty {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+@media (max-width: 600px) {
+  .cv-object {
+    width: 100%;
+  }
+  .cv-well {
+    width: 100%;
+    padding: 32px 0;
+  }
+}

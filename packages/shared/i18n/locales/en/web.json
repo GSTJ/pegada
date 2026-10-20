@@ -118,6 +118,27 @@
       "countNone": "No dogs in your radius",
       "countAll": "All <b>{{n}}</b> dogs are in your radius",
       "countSome": "<b>{{n}}</b> of {{total}} dogs in your radius"
+    },
+    "chat": {
+      "title": "Matched? Now it's just the two of you talking.",
+      "desc": "On the Match screen, tap Send a Message and the chat with the other dog's human opens. It's plain text chat. If you hit it off, you two sort out the rest.",
+      "onlyAfterKey": "Only after a match",
+      "onlyAfterValue": "Nobody can message you until you've both liked each other.",
+      "unmatchKey": "Unmatch",
+      "unmatchValue": "It's on the dog's profile. The chat closes for both of you.",
+      "reportKey": "Report",
+      "reportValue": "You pick a reason. The profile is never told who reported it.",
+      "screenLabel": "The app's chat screen with Nina. Example conversation: Hi! Saw that Nina chases anything that flies. Lua's exactly the same. Reply: Haha really? Here it's balls, leaves, birds, whatever shows up. Lua also steals socks. If one goes missing, you know who. Reply: Lol they're going to get along great.",
+      "matched": "You two matched!",
+      "start": "Send a message to start the conversation",
+      "today": "Today",
+      "m1": "Hi! Saw that Nina chases anything that flies. Lua's exactly the same",
+      "m2": "Haha really? Here it's balls, leaves, birds, whatever shows up",
+      "m3": "Lua also steals socks. If one goes missing, you know who",
+      "m4": "Lol they're going to get along great 😂",
+      "typeMessage": "Type a message",
+      "caption": "Example conversation",
+      "playAgain": "Play again"
     }
   },
   "home": {

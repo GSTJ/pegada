@@ -118,6 +118,27 @@
       "countNone": "Nenhum cachorro no seu raio",
       "countAll": "Os <b>{{n}}</b> cachorros estão no seu raio",
       "countSome": "<b>{{n}}</b> de {{total}} cachorros no seu raio"
+    },
+    "chat": {
+      "title": "Deu match? Agora o papo é entre vocês.",
+      "desc": "Na tela do Match, toque em Enviar mensagem e abre a conversa com o tutor do outro dog. É chat de texto, simples. Se o papo rolar, o resto vocês combinam.",
+      "onlyAfterKey": "Só depois do match",
+      "onlyAfterValue": "Ninguém consegue mandar mensagem antes de vocês dois curtirem.",
+      "unmatchKey": "Desfazer Match",
+      "unmatchValue": "Fica no perfil do dog. A conversa fecha pros dois lados.",
+      "reportKey": "Denunciar",
+      "reportValue": "Você escolhe o motivo. O perfil não fica sabendo quem denunciou.",
+      "screenLabel": "Tela de chat do app com a Nina. Conversa de exemplo: Oi! Vi que a Nina corre atrás de tudo que voa. A Lua é igualzinha. Resposta: Haha sério? Aqui é bola, folha, passarinho, o que aparecer. A Lua ainda rouba meia. Se sumir uma, já sabe. Resposta: Kkkk vão se dar bem demais.",
+      "matched": "Vocês deram Match!",
+      "start": "Envie uma mensagem para iniciar a conversa",
+      "today": "Hoje",
+      "m1": "Oi! Vi que a Nina corre atrás de tudo que voa. A Lua é igualzinha",
+      "m2": "Haha sério? Aqui é bola, folha, passarinho, o que aparecer",
+      "m3": "A Lua ainda rouba meia. Se sumir uma, já sabe",
+      "m4": "Kkkk vão se dar bem demais 😂",
+      "typeMessage": "Digite uma mensagem",
+      "caption": "Conversa de exemplo",
+      "playAgain": "Ver de novo"
     }
   },
   "home": {

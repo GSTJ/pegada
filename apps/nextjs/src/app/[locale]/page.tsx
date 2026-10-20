@@ -1,6 +1,7 @@
 import { clsx } from "clsx";
 
 import { readCampaign } from "@/app/store/store-urls";
+import { Chat } from "@/components/landing/chat";
 import { Deck } from "@/components/landing/deck";
 import { Hero } from "@/components/landing/hero";
 import { Profile } from "@/components/landing/profile";
@@ -34,6 +35,7 @@ const LandingPage = async ({
         <Profile />
         <Deck />
         <Radius />
+        <Chat />
       </main>
       <SiteFooter route="/" page="landing" campaign={campaign} />
       <Reveal />
