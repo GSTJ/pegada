@@ -53,8 +53,9 @@ test("every llms.txt link is a sitemap page or a store link", () => {
 });
 
 test("llms.txt links the indexable pages and not the noindexed ones", () => {
-  assert.ok(urls.includes("https://www.pegada.app/"));
-  assert.ok(urls.includes("https://www.pegada.app/pt-br/privacy-policy"));
+  const linked = new Set(urls);
+  assert.ok(linked.has("https://www.pegada.app/"));
+  assert.ok(linked.has("https://www.pegada.app/pt-br/privacy-policy"));
   for (const url of urls)
     assert.doesNotMatch(url, /terms-of-use|delete-account/);
 });
