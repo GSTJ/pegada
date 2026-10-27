@@ -21,13 +21,6 @@
   color: var(--ink-2);
   font-size: 15.5px;
 }
-.foot-brand .foot-also {
-  max-width: 34ch;
-  font-size: 14px;
-}
-.foot-also a {
-  color: var(--ink);
-}
 .foot-lang {
   margin-top: 18px;
 }

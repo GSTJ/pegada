@@ -17,8 +17,6 @@
       "playPre": "Disponível no",
       "footLabel": "Rodapé",
       "tagline": "Amizades para doguinhos.",
-      "alsoBy": "Outro projeto do Gabriel:",
-      "curvinha": "Curvinha: decore sua casa com móveis de loja de verdade",
       "colApp": "O app",
       "colLegal": "Legal",
       "colContact": "Contato",
@@ -202,7 +200,7 @@
     "curvinha": {
       "kicker": "Do mesmo criador",
       "title": "Conheça a Curvinha, um app para decorar a casa",
-      "desc": "Escaneie o ambiente com o iPhone e receba móveis de lojas de verdade, com a lista de compras e o preço e o link de cada peça.",
+      "desc": "Escaneie o ambiente com o iPhone e receba móveis de lojas de verdade, com a lista de compras, o preço e o link de cada peça.",
       "storeLabel": "Baixar a Curvinha na App Store",
       "link": "Ver no curvinha.app",
       "shotAlt": "A proposta da Curvinha no app: o ambiente em 3D com as peças numeradas e a lista com a loja e o preço de cada uma."
