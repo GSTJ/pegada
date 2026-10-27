@@ -1,19 +1,19 @@
 /**
- * The defect: this guard threw a bare `Error`, and tRPC has nowhere to put an
- * uncoded throw except INTERNAL_SERVER_ERROR, so a user who already held a
- * session got a 500. The app retries an uncoded 5xx twice (see
- * apps/mobile/src/services/transient-retry.ts), so a single tap on Continue
- * became three requests and three exception rows in the audit.
+ * The defect: login refused any request that carried a verifying token. A
+ * token outlives its account (deleted accounts, and the iOS keychain keeps it
+ * across reinstalls), echo.get then sends the app to sign in, and every
+ * attempt from there answered "Already logged in". No way back in.
  *
- * The guard itself is unchanged: it still refuses. What is pinned here is that
- * it refuses with a code, and that the code lands in the 4xx range the client
- * treats as final.
+ * Pinned here: a request with a session still gets to the login flow.
  */
-import { TRPCError } from "@trpc/server";
-import { getHTTPStatusCodeFromError } from "@trpc/server/http";
-
 import { createInnerTRPCContext } from "../trpc";
 import { authenticationRouter } from "./authentication";
+
+const login = jest.fn();
+
+jest.mock("../services/authentication-service", () => ({
+  AuthenticationService: jest.fn(() => ({ login })),
+}));
 
 jest.mock("../shared/observability", () => ({
   observability: {
@@ -38,23 +38,17 @@ jest.mock("superjson", () => ({
   },
 }));
 
-const loginAsSignedInUser = () =>
-  authenticationRouter
+it("lets a request holding a dead account's token sign in again", async () => {
+  login.mockResolvedValue({ id: "user-2" });
+
+  const result = await authenticationRouter
     .createCaller(
-      createInnerTRPCContext({ session: { user: { id: "user-1" } } }),
+      createInnerTRPCContext({ session: { user: { id: "deleted-user" } } }),
     )
-    .login({ email: "someone@pegada.app" });
+    .login({ email: "someone@pegada.app", code: "123456" });
 
-it("refuses a login from a session that already exists", async () => {
-  await expect(loginAsSignedInUser()).rejects.toBeInstanceOf(TRPCError);
-});
-
-it("carries a code the client will not retry", async () => {
-  const caught = await loginAsSignedInUser().catch((error: unknown) => error);
-
-  expect(caught).toBeInstanceOf(TRPCError);
-  expect((caught as TRPCError).code).toBe("CONFLICT");
-  // 409, not 500. `shouldRetryTransient` on the app retries a 5xx that carries
-  // no error code, which is what turned one tap into three requests.
-  expect(getHTTPStatusCodeFromError(caught as TRPCError)).toBe(409);
+  expect(login).toHaveBeenCalledWith(
+    expect.objectContaining({ email: "someone@pegada.app", code: "123456" }),
+  );
+  expect(result.token).toEqual(expect.any(String));
 });

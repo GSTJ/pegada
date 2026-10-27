@@ -2,7 +2,6 @@ import {
   REFERRAL_ID_REGEX,
   REFERRAL_REF_REGEX,
 } from "@pegada/shared/utils/referral";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { AuthenticationService } from "../services/authentication-service";
@@ -35,23 +34,12 @@ export const authenticationRouter = createTRPCRouter({
   login: publicProcedure
     .input(authenticationBodySchema)
     .mutation(async ({ ctx, input }) => {
-      const alreadyLoggedIn = Boolean(ctx.session?.user.id);
-
-      // Prevents malicious users from exploiting the lack of
-      // rate limiting for logged in users
-      //
-      // Coded, not a bare Error: an uncoded throw leaves tRPC no choice but
-      // INTERNAL_SERVER_ERROR, and the app retries an uncoded 5xx twice (see
-      // apps/mobile/src/services/transient-retry.ts). One tap by someone who
-      // already had a session cost three requests and logged three
-      // exceptions. CONFLICT maps to 409, which the client treats as final.
-      if (alreadyLoggedIn) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Already logged in",
-        });
-      }
-
+      // No "already logged in" refusal here. A token whose account was
+      // deleted still verifies, the app lands on sign in for it (echo.get
+      // says unauthenticated) and the keychain keeps it across reinstalls,
+      // so refusing locked those people out for good. The rate limit that
+      // refusal stood in for now covers login regardless of session (see
+      // apps/nextjs/src/app/api/trpc/[trpc]/route.ts).
       const authenticationService = new AuthenticationService({
         language: ctx.language,
       });
