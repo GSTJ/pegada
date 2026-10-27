@@ -17,8 +17,6 @@
       "playPre": "Get it on",
       "footLabel": "Footer",
       "tagline": "Meetups for Doggies.",
-      "alsoBy": "Another project by Gabriel:",
-      "curvinha": "Curvinha: furnish your home with real store furniture",
       "colApp": "The app",
       "colLegal": "Legal",
       "colContact": "Contact",
@@ -198,6 +196,14 @@
     "closing": {
       "title": "Lua already found Nina. Now it's your dog's turn.",
       "desc": "Free on iPhone and Android."
+    },
+    "curvinha": {
+      "kicker": "From the same maker",
+      "title": "Meet Curvinha, an app for decorating your home",
+      "desc": "Scan your room with your iPhone and get furniture from real stores, plus a shopping list with the price and link for each piece.",
+      "storeLabel": "Download Curvinha on the App Store",
+      "link": "See it on curvinha.app",
+      "shotAlt": "Curvinha's proposal screen: the room in 3D with numbered furniture, and a list with the store and price of each piece."
     }
   },
   "story": {

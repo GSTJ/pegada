@@ -7,6 +7,7 @@ import {
 } from "@/app/store/store-urls";
 import { Chat } from "@/components/landing/chat";
 import { Closing } from "@/components/landing/closing";
+import { Curvinha } from "@/components/landing/curvinha";
 import { Deck } from "@/components/landing/deck";
 import { Faq } from "@/components/landing/faq";
 import { Hero } from "@/components/landing/hero";
@@ -54,6 +55,7 @@ const LandingPage = async ({
         <Story />
         <Faq />
         <Closing campaign={campaign} />
+        <Curvinha />
       </main>
       <SiteFooter route="/" page="landing" campaign={campaign} />
       <Reveal />

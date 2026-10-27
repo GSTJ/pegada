@@ -1,0 +1,186 @@
+/* Curvinha cross-promo: the only place her butter and olive show up, so every color lives here.
+   Smaller than the closing well on purpose (shorter, a lighter heading) so it never competes with it. */
+.sec {
+  padding-bottom: clamp(64px, 40px + 4vw, 112px);
+}
+.card {
+  --butter-1: #fff6d2;
+  --butter-2: #ffeaa3;
+  --olive-ink: #4a5526;
+  --brown: #2b2618;
+  --brown-2: #4f4732;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  border-radius: var(--well-r);
+  color: var(--brown);
+  background:
+    radial-gradient(
+      50% 60% at 80% 35%,
+      rgb(255 255 255 / 0.55),
+      transparent 70%
+    ),
+    linear-gradient(165deg, var(--butter-1), var(--butter-2));
+  box-shadow: inset 0 0 0 1px rgb(160 120 20 / 0.14);
+}
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 40px 24px 8px;
+}
+.icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 20px;
+}
+.kicker {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--olive-ink);
+}
+.title {
+  margin-top: 10px;
+  max-width: 13em;
+  font-size: clamp(28px, 24px + 1.1vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.desc {
+  margin-top: 14px;
+  max-width: 28em;
+  font-size: 17px;
+  line-height: 1.55;
+  letter-spacing: -0.013em;
+  color: var(--brown-2);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 24px;
+  margin-top: 28px;
+}
+/* the shared black store pill already clears 44px; only the focus ring changes on butter */
+.store {
+  white-space: nowrap;
+}
+.store:focus-visible,
+.link:focus-visible {
+  outline: 2.5px solid var(--olive-ink);
+  outline-offset: 3px;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--olive-ink);
+  text-decoration: none;
+}
+.link::after {
+  content: "→";
+  margin-left: 6px;
+  transition: translate 0.25s var(--ease-out);
+}
+.link:hover {
+  text-decoration: underline;
+}
+.link:hover::after {
+  translate: 3px 0;
+}
+
+/* the phone sits on the card's bottom edge, which crops it */
+.stage {
+  position: relative;
+  height: 300px;
+}
+.phone {
+  position: absolute;
+  left: 50%;
+  top: 76px;
+  translate: -50% 0;
+  width: 232px;
+  padding: 8px;
+  border-radius: 40px 40px 0 0;
+  background: #1e1c19;
+  box-shadow:
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.1),
+    0 24px 40px -22px rgb(110 80 0 / 0.35);
+}
+.shot {
+  width: 100%;
+  border-radius: 32px 32px 0 0;
+  background: #f4f6f8;
+}
+.mascot {
+  position: absolute;
+  z-index: 1;
+  right: 20px;
+  top: -66px;
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 6px 6px rgb(30 20 5 / 0.22));
+}
+
+@media (min-width: 900px) {
+  .card[data-layout="card"] {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .card[data-layout="card"] .copy {
+    justify-content: center;
+    padding: 64px 0 64px 64px;
+  }
+  .card[data-layout="card"] .stage {
+    height: auto;
+    min-height: 400px;
+  }
+  .card[data-layout="card"] .phone {
+    top: 96px;
+    width: 256px;
+  }
+  .card[data-layout="card"] .mascot {
+    width: 88px;
+    height: 88px;
+    top: -76px;
+  }
+}
+
+/* B: compact and centered, the icon leads, the phone peeks from below */
+.card[data-layout="centered"] {
+  max-width: 760px;
+  margin-inline: auto;
+  justify-items: center;
+  text-align: center;
+}
+.card[data-layout="centered"] .copy {
+  align-items: center;
+  padding-top: 48px;
+}
+.card[data-layout="centered"] .icon {
+  width: 88px;
+  height: 88px;
+  margin-bottom: 22px;
+}
+.card[data-layout="centered"] .actions {
+  justify-content: center;
+}
+.card[data-layout="centered"] .stage {
+  width: 100%;
+  height: 210px;
+}
+.card[data-layout="centered"] .phone {
+  top: 32px;
+  width: 220px;
+}
+.card[data-layout="centered"] .mascot {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .copy {
+    padding-inline: 20px;
+  }
+}
