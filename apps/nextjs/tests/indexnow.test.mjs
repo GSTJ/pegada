@@ -8,9 +8,8 @@ import { test } from "node:test";
  * the key. The key lives in `src/lib/indexnow.ts` and is served from
  * `public/`, so the two copies are compared here.
  */
-const { INDEXNOW_KEY, indexNowPayload } = await import(
-  "../src/lib/indexnow.ts"
-);
+const { INDEXNOW_KEY, indexNowPayload } =
+  await import("../src/lib/indexnow.ts");
 
 test("the key is 32 hex characters", () => {
   assert.match(INDEXNOW_KEY, /^[a-f0-9]{32}$/);
