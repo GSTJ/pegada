@@ -9,15 +9,10 @@ const LOCALES = ["en-us", "pt-br"] as const;
 // (en-us) is served unprefixed and every other locale is prefixed.
 const DEFAULT_LOCALE: (typeof LOCALES)[number] = "en-us";
 
-// Static, indexable pages. `/dog/[id]` is excluded on purpose: those pages
+// Static, indexable pages. `terms-of-use` and `delete-account` are noindex
+// (see `generateLocalizedMdxMetadata`), so they stay out of the sitemap. `/dog/[id]` is excluded on purpose: those pages
 // are per-swipe-card and not meant to be crawled or ranked individually.
-const PAGES = [
-  "",
-  "story",
-  "privacy-policy",
-  "terms-of-use",
-  "delete-account",
-] as const;
+const PAGES = ["", "story", "privacy-policy"] as const;
 
 const localizedPath = (
   locale: (typeof LOCALES)[number],
@@ -28,6 +23,8 @@ const localizedPath = (
   return page === "" ? prefix || "/" : `${prefix}/${page}`;
 };
 
+// No `lastModified` on purpose: the site has no dated content, and a made-up
+// date is worse than none.
 const sitemap = (): MetadataRoute.Sitemap => {
   return PAGES.flatMap((page) => {
     const languages = Object.fromEntries(
