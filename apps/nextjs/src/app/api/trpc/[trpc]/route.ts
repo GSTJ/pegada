@@ -38,9 +38,13 @@ const handleRatelimiter = async ({
   session: Session | null;
 }) => {
   const isLoggedIn = Boolean(session?.user.id);
+  // A batched call names every procedure in the path, comma separated.
+  const procedures = req.nextUrl.pathname.split("/").pop()?.split(",") ?? [];
 
-  // We rate limit logged out users
-  if (isLoggedIn) {
+  // We rate limit logged out users, and login for everyone: a token on the
+  // request proves nothing about who is asking for a code, since the account
+  // behind it may be gone.
+  if (isLoggedIn && !procedures.includes("authentication.login")) {
     return;
   }
 

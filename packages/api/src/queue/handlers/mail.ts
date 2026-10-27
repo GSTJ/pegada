@@ -22,6 +22,7 @@ export const handleMail = async ({ code, language, email }: IMailJobData) => {
     }),
     text: TranslationService.translate("server:mail.verifyCode.text", {
       lng: language,
+      code,
     }),
   });
 };
