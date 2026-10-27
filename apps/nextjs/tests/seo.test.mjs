@@ -39,8 +39,11 @@ test("robots allows exactly the listed AI crawlers and keeps the sitemap", () =>
       "CCBot",
     ],
   );
-  assert.equal(rules[0].disallow, "/api/");
-  for (const rule of rules) assert.equal(rule.allow, "/");
+  // Every group, since a crawler with its own group never reads the `*` one.
+  for (const rule of rules) {
+    assert.equal(rule.allow, "/");
+    assert.equal(rule.disallow, "/api/");
+  }
   assert.equal(sitemapUrl, "https://www.pegada.app/sitemap.xml");
 });
 

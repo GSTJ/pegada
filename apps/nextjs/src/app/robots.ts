@@ -27,7 +27,12 @@ const robots = (): MetadataRoute.Robots => {
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow: "/api/" },
-      ...AI_CRAWLERS.map((userAgent) => ({ userAgent, allow: "/" })),
+      // A crawler with its own group skips the `*` one, so each repeats the disallow.
+      ...AI_CRAWLERS.map((userAgent) => ({
+        userAgent,
+        allow: "/",
+        disallow: "/api/",
+      })),
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
   };
