@@ -29,8 +29,19 @@ export const getLocalizedMdxData = (pageKey: string) => {
   };
 };
 
-export const generateLocalizedMdxMetadata = (pageKey: string) => {
-  return getLocalizedMdxData(pageKey).metadata;
+/**
+ * `noindex` is for secondary legal pages that should stay reachable (follow)
+ * but not compete with the privacy policy in search results.
+ */
+export const generateLocalizedMdxMetadata = (
+  pageKey: string,
+  { noindex = false }: { noindex?: boolean } = {},
+) => {
+  const { metadata } = getLocalizedMdxData(pageKey);
+
+  return noindex
+    ? { ...metadata, robots: { index: false, follow: true } }
+    : metadata;
 };
 
 /**
