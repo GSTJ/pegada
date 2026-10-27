@@ -15,6 +15,9 @@ import s from "./footer.module.css";
 import b from "./landing.module.css";
 
 const SUPPORT_EMAIL = "support@pegada.app";
+// The other app by the same maker. curvinha.app reads the utm_* params, and utm_campaign becomes its App Store ct.
+const CURVINHA_URL =
+  "https://curvinha.app/?utm_source=pegada&utm_medium=referral&utm_campaign=pegada-site";
 
 export const SiteFooter = ({
   route,
@@ -88,6 +91,10 @@ export const SiteFooter = ({
               <span>Pegada</span>
             </a>
             <p>{t("landing.chrome.tagline")}</p>
+            <p className={s["foot-also"]}>
+              {t("landing.chrome.alsoBy")}{" "}
+              <a href={CURVINHA_URL}>{t("landing.chrome.curvinha")}</a>
+            </p>
             <LanguageSwitch
               large
               route={route}
