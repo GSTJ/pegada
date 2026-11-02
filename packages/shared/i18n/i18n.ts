@@ -2,11 +2,11 @@ import type { LanguageResources } from "./types/types";
 import type { i18n } from "i18next";
 
 import { z } from "zod";
-import { makeZodI18nMap } from "zod-i18n-map";
 
 import en from "./locales/en";
 import ptBr from "./locales/pt-BR";
 import { Language, Namespace } from "./types/types";
+import { localizedZodError } from "./zod-error";
 
 const resources: Record<Language, LanguageResources> = {
   [Language.EnUs]: en,
@@ -15,14 +15,7 @@ const resources: Record<Language, LanguageResources> = {
 
 export type BreedSlug = keyof (typeof en)["breed"];
 
-z.setErrorMap(
-  makeZodI18nMap({
-    ns: [Namespace.Zod, Namespace.Translation],
-    handlePath: {
-      keyPrefix: "paths",
-    },
-  }),
-);
+z.config({ customError: localizedZodError });
 
 export const initI18n = (i18n: i18n) => {
   return i18n.init({

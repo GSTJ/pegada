@@ -28,6 +28,7 @@ patchedDependencies:
   react-native-unistyles@3.3.0: patches/react-native-unistyles@3.3.0.patch
 
 overrides:
+  zod: 4.6.6
   "@react-native-async-storage/async-storage": 2.2.0
   react-native-svg: 15.15.3
   "@xmldom/xmldom": ^0.8.15

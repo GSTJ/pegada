@@ -1,6 +1,9 @@
 import type { ProfileImagesUploaderProps } from "@/components/ProfileImageUploader";
 import type { Picture } from "@/components/ProfileImageUploader/utils";
-import type { RouterInputs } from "@/contexts/trpc-provider";
+import type {
+  DogClientInput,
+  DogClientSchema,
+} from "@pegada/shared/schemas/dog-schema";
 
 import { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
@@ -45,28 +48,28 @@ import { Actions } from "@/store/reducers";
 
 import { MultilineInput, styles } from "./styles";
 
-type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
-type EditProfileForm = Partial<MyDogUpdateMutation>;
-
 const EditProfile = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const { control, handleSubmit, setValue, getValues } =
-    useForm<EditProfileForm>({
-      defaultValues: {
-        name: "",
-        bio: "",
-        gender: "MALE",
-        weight: undefined,
-        birthDate: "",
-        breedId: "",
-        color: undefined,
-        size: undefined,
-        images: pictures,
-      },
-      resolver: zodResolver(dogClientSchema),
-    });
+  const { control, handleSubmit, setValue, getValues } = useForm<
+    DogClientInput,
+    unknown,
+    DogClientSchema
+  >({
+    defaultValues: {
+      name: "",
+      bio: "",
+      gender: "MALE",
+      weight: undefined,
+      birthDate: "",
+      breedId: "",
+      color: undefined,
+      size: undefined,
+      images: pictures,
+    },
+    resolver: zodResolver(dogClientSchema),
+  });
 
   const [dog] = api.myDog.get.useSuspenseQuery(undefined, {
     refetchOnMount: false,

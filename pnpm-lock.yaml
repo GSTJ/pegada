@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  zod: 4.6.6
   '@react-native-async-storage/async-storage': 2.2.0
   react-native-svg: 15.15.3
   '@xmldom/xmldom': ^0.8.15
@@ -97,8 +98,8 @@ importers:
         specifier: ~55.0.11
         version: 55.0.11(@expo/dom-webview@55.0.6)(expo@55.0.24)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
       '@hookform/resolvers':
-        specifier: ^3.9.0
-        version: 3.9.0(react-hook-form@7.52.2(react@19.2.0))
+        specifier: 5.2.2
+        version: 5.2.2(react-hook-form@7.62.0(react@19.2.0))
       '@pegada/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -277,8 +278,8 @@ importers:
         specifier: ^4.0.13
         version: 4.0.13(react@19.2.0)
       react-hook-form:
-        specifier: 7.52.2
-        version: 7.52.2(react@19.2.0)
+        specifier: 7.62.0
+        version: 7.62.0(react@19.2.0)
       react-i18next:
         specifier: ^15.0.0
         version: 15.0.0(i18next@23.12.2)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
@@ -364,8 +365,8 @@ importers:
         specifier: ^11.1.1
         version: 11.1.1
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.6
+        version: 4.6.6
     devDependencies:
       '@babel/core':
         specifier: ^7.29.0
@@ -529,10 +530,10 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: 4.0.47
-        version: 4.0.47(zod@3.25.76)
+        version: 4.0.47(zod@4.6.6)
       '@ai-sdk/openai':
         specifier: 4.0.44
-        version: 4.0.44(zod@3.25.76)
+        version: 4.0.44(zod@4.6.6)
       '@aws-sdk/client-s3':
         specifier: ^3.1045.0
         version: 3.1049.0
@@ -562,7 +563,7 @@ importers:
         version: 0.3.1
       ai:
         specifier: 7.0.69
-        version: 7.0.69(zod@3.25.76)
+        version: 7.0.69(zod@4.6.6)
       blurhash:
         specifier: ^2.0.5
         version: 2.0.5
@@ -612,8 +613,8 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.43)(@types/node@22.1.0)(typescript@5.4.5)
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.6
+        version: 4.6.6
     devDependencies:
       '@babel/plugin-transform-modules-commonjs':
         specifier: ^7.29.7
@@ -649,8 +650,8 @@ importers:
         specifier: ^10.5.0
         version: 10.6.0
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.6
+        version: 4.6.6
     devDependencies:
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
@@ -675,7 +676,7 @@ importers:
         version: 3.6.0
       zod-i18n-map:
         specifier: ^2.27.0
-        version: 2.27.0(i18next@23.12.2)(zod@3.25.76)
+        version: 2.27.0(i18next@23.12.2)(zod@4.6.6)
     devDependencies:
       '@total-typescript/ts-reset':
         specifier: ^0.5.1
@@ -687,8 +688,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.6.6
+        version: 4.6.6
 
 packages:
 
@@ -696,31 +697,31 @@ packages:
     resolution: {integrity: sha512-7WP/nlDz2BkXFlZzwF3w5JgCvktyHC++LP4PZ4mQpbvxrq+M7OdNslevlkuddHhJ+62BZu4oiL/afXlsWOSJZQ==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: 4.6.6
 
   '@ai-sdk/google@4.0.47':
     resolution: {integrity: sha512-Aj/VRSDpNmxjC0mU1qWNI9BydRoRI3INVHv1KZcFj3lI7rdxmXuenhUfXw8KnfZlREWX3J3rM9JNF1khuxGfnw==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: 4.6.6
 
   '@ai-sdk/openai@4.0.44':
     resolution: {integrity: sha512-x3XjhKu5r7DKELWwE5WzCAKePkAqZXlgvat4eIiSm37MaQHk+n3qeJxmVcfqJWlQ2kkAld8+f7G3E3yjG+4ShQ==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: 4.6.6
 
   '@ai-sdk/provider-utils@5.0.27':
     resolution: {integrity: sha512-EzAn4pdgG5g0xXtH6lE2zyNmfjDQIDjATkfqzuidEI35g++hh4+07vnjzkT/RmGmIClPZiRj/Q2GMPV2V7mkHw==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: 4.6.6
 
   '@ai-sdk/provider-utils@5.0.28':
     resolution: {integrity: sha512-TnHUyd/rCYQqHg5RuiOaz/hUql6U+kbUaBW0Rp+0N5UhnAInA9CzzV0HXvuAAPwppDsK6fAx9Rd+tRawpJ/3pg==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: 4.6.6
 
   '@ai-sdk/provider@4.0.7':
     resolution: {integrity: sha512-6or44XprPzKbr8zkmzosowSE0pxkvJcoojBL+mCZvPUt3kvXp3XSNqeVun9golb1acEfSo6yaEBRT18h2VU+1Q==}
@@ -1751,10 +1752,10 @@ packages:
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
-  '@hookform/resolvers@3.9.0':
-    resolution: {integrity: sha512-bU0Gr4EepJ/EQsH/IwEzYLsT/PEj5C0ynLQ4m+GSHS+xKH4TfSelhluTgOaoc4kA5s7eCsQbM4wvZLzELmWzUg==}
+  '@hookform/resolvers@5.2.2':
+    resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
     peerDependencies:
-      react-hook-form: ^7.0.0
+      react-hook-form: ^7.55.0
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3031,6 +3032,7 @@ packages:
   '@smithy/core@3.24.3':
     resolution: {integrity: sha512-Ep/7tPamGY8mgESE3LyLKtxJyy6U52WWAqr/3wial47Sj4u3PiIF73AOGI27UyLy9duTkhZbgzodOfLV4TduZg==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.3.3':
     resolution: {integrity: sha512-I2Bti0DKFo2IJyN28ijCsx51BAumEYR4/1yZ1FXyBygy9MqbnMqCev4JPth/MbpRfBSRAX35hITSnAdJRo1u5w==}
@@ -3066,6 +3068,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@svgr/babel-plugin-add-jsx-attribute@8.0.0':
     resolution: {integrity: sha512-b9MIk7yhdS1pMCZM8VeNfUlSKVRhsHZNMl5O9SfaX0l0t5wjdgu4IDzGB8bpnGBBOjGST3rRFVsaaEtI4W6f7g==}
@@ -3560,7 +3565,7 @@ packages:
     resolution: {integrity: sha512-gudEqQYt/FuRpQkckLHPYKOh5M5v5ayPmzQAk5xyZOaWkUM0ArNGdXQiBGEuZA7GCwYOjzmWxB44ZW0CyRhHfQ==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: 4.6.6
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
@@ -6659,8 +6664,8 @@ packages:
     peerDependencies:
       react: '>=17.0.0'
 
-  react-hook-form@7.52.2:
-    resolution: {integrity: sha512-pqfPEbERnxxiNMPd0bzmt1tuaPcVccywFDpyk2uV5xCIBphHV5T8SVnX9/o3kplPE1zzKt77+YIoq+EMwJp56A==}
+  react-hook-form@7.62.0:
+    resolution: {integrity: sha512-7KWFejc98xqG/F4bAxpL41NB3o1nnvQO1RWZT3TqRZYL8RryQETGfEdVnJN2fy1crCiBLLjkRBVK05j24FxJGA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -7833,55 +7838,52 @@ packages:
     resolution: {integrity: sha512-ORu9XpiVh3WDiEUs5Cr9siGgnpeODoBsTIgSD8sQCH9B//f9KowlzqHUEdPYb3vFonaSH8yPvPCOFM4niwp3Sg==}
     peerDependencies:
       i18next: '>=21.3.0'
-      zod: '>=3.17.0'
+      zod: 4.6.6
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.1.11:
-    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
 
-  '@ai-sdk/gateway@4.0.55(zod@3.25.76)':
+  '@ai-sdk/gateway@4.0.55(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.7
-      '@ai-sdk/provider-utils': 5.0.27(zod@3.25.76)
+      '@ai-sdk/provider-utils': 5.0.27(zod@4.6.6)
       '@vercel/oidc': 3.2.0
-      zod: 3.25.76
+      zod: 4.6.6
 
-  '@ai-sdk/google@4.0.47(zod@3.25.76)':
+  '@ai-sdk/google@4.0.47(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.7
-      '@ai-sdk/provider-utils': 5.0.28(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 5.0.28(zod@4.6.6)
+      zod: 4.6.6
 
-  '@ai-sdk/openai@4.0.44(zod@3.25.76)':
+  '@ai-sdk/openai@4.0.44(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.7
-      '@ai-sdk/provider-utils': 5.0.28(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 5.0.28(zod@4.6.6)
+      zod: 4.6.6
 
-  '@ai-sdk/provider-utils@5.0.27(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 4.0.7
-      '@standard-schema/spec': 1.1.0
-      '@workflow/serde': 4.1.0
-      eventsource-parser: 3.1.1
-      undici: 7.30.1
-      zod: 3.25.76
-
-  '@ai-sdk/provider-utils@5.0.28(zod@3.25.76)':
+  '@ai-sdk/provider-utils@5.0.27(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.7
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.1
       undici: 7.30.1
-      zod: 3.25.76
+      zod: 4.6.6
+
+  '@ai-sdk/provider-utils@5.0.28(zod@4.6.6)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.7
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.1
+      undici: 7.30.1
+      zod: 4.6.6
 
   '@ai-sdk/provider@4.0.7':
     dependencies:
@@ -8981,7 +8983,7 @@ snapshots:
       toqr: 0.1.1
       wrap-ansi: 7.0.0
       ws: 8.21.1
-      zod: 3.25.76
+      zod: 4.6.6
     optionalDependencies:
       expo-router: 55.0.14(cda63964b4377ec86701fe3437763bb4)
       react-native: 0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1)
@@ -9295,9 +9297,10 @@ snapshots:
       '@hapi/hoek': 9.3.0
     optional: true
 
-  '@hookform/resolvers@3.9.0(react-hook-form@7.52.2(react@19.2.0))':
+  '@hookform/resolvers@5.2.2(react-hook-form@7.62.0(react@19.2.0))':
     dependencies:
-      react-hook-form: 7.52.2(react@19.2.0)
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.62.0(react@19.2.0)
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -10732,6 +10735,8 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
+  '@standard-schema/utils@0.3.0': {}
+
   '@svgr/babel-plugin-add-jsx-attribute@8.0.0(@babel/core@7.29.7(supports-color@8.1.1))':
     dependencies:
       '@babel/core': 7.29.7(supports-color@8.1.1)
@@ -11108,7 +11113,7 @@ snapshots:
   '@vercel/cli-config@0.2.0':
     dependencies:
       xdg-app-paths: 5.5.1
-      zod: 4.1.11
+      zod: 4.6.6
 
   '@vercel/cli-exec@1.0.0':
     dependencies:
@@ -11168,12 +11173,12 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  ai@7.0.69(zod@3.25.76):
+  ai@7.0.69(zod@4.6.6):
     dependencies:
-      '@ai-sdk/gateway': 4.0.55(zod@3.25.76)
+      '@ai-sdk/gateway': 4.0.55(zod@4.6.6)
       '@ai-sdk/provider': 4.0.7
-      '@ai-sdk/provider-utils': 5.0.27(zod@3.25.76)
-      zod: 3.25.76
+      '@ai-sdk/provider-utils': 5.0.27(zod@4.6.6)
+      zod: 4.6.6
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
@@ -14969,7 +14974,7 @@ snapshots:
     dependencies:
       react: 19.2.0
 
-  react-hook-form@7.52.2(react@19.2.0):
+  react-hook-form@7.62.0(react@19.2.0):
     dependencies:
       react: 19.2.0
 
@@ -16173,13 +16178,11 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-i18n-map@2.27.0(i18next@23.12.2)(zod@3.25.76):
+  zod-i18n-map@2.27.0(i18next@23.12.2)(zod@4.6.6):
     dependencies:
       i18next: 23.12.2
-      zod: 3.25.76
+      zod: 4.6.6
 
-  zod@3.25.76: {}
-
-  zod@4.1.11: {}
+  zod@4.6.6: {}
 
   zwitch@2.0.4: {}
