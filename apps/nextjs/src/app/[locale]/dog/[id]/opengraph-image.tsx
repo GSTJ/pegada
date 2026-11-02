@@ -4,6 +4,7 @@ import { ImageResponse } from "next/og";
 
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { getOgAssets } from "@/lib/og-assets";
+import { loadOgPhoto } from "@/lib/og-photo";
 import { t } from "@/lib/translate";
 
 import { getDog, getDogImage, getDogTagline } from "./get-dog";
@@ -217,6 +218,8 @@ const Image = async ({ params }: Props) => {
     return buildFallbackImage(assets);
   }
 
+  const photo = await loadOgPhoto(dogImage, PHOTO_WIDTH, PHOTO_HEIGHT);
+  if (!photo) return buildFallbackImage(assets);
   const lng = getSafeLocale();
   const tagline = getDogTagline(dog, lng);
 
@@ -225,7 +228,7 @@ const Image = async ({ params }: Props) => {
       <div style={photoFrameStyle}>
         {/* oxlint-disable-next-line nextjs/no-img-element -- satori (next/og) renders its own <img>, not next/image */}
         <img
-          src={dogImage}
+          src={photo}
           width={PHOTO_WIDTH}
           height={PHOTO_HEIGHT}
           alt=""

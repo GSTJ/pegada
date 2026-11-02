@@ -214,7 +214,7 @@ const StoryPage = async ({ searchParams }: StoryPageProps) => {
               aria-label="Pegada"
               className="inline-flex w-fit"
             >
-              <Logo />
+              <Logo wordmark />
             </Link>
           </header>
 
