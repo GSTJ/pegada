@@ -1,12 +1,17 @@
 import type { RootReducer } from "@/store/reducers";
 
+import { router } from "expo-router";
+
+import { DogProfileRequiredError } from "@pegada/shared/errors/errors";
 import { all, call, put, select, takeLatest } from "redux-saga/effects";
 
 import { getTrcpContext } from "@/contexts/trcp-context";
 import i18n from "@/i18n";
 import { sendError } from "@/services/error-tracking";
+import { getError } from "@/services/get-error";
 import { Actions } from "@/store/reducers";
 import { ListAction } from "@/store/reducers/dogs/list";
+import { SceneName } from "@/types/scene-name";
 
 // Without marking as unknown, saga complains about the swipe all type inference
 export function* fetchUsersRequest(): unknown {
@@ -34,6 +39,11 @@ export function* fetchUsersRequest(): unknown {
       }),
     );
   } catch (error) {
+    if (getError(error, DogProfileRequiredError)) {
+      yield put(Actions.dogs.list.profileRequired());
+      router.replace(SceneName.CreateProfile);
+      return;
+    }
     sendError(error);
 
     const failure = { message: i18n.t("common.somethingWrong") };

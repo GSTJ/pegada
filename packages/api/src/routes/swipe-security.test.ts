@@ -4,6 +4,7 @@ import { generateFakeUserWithDog } from "@pegada/database/fixtures/generate-fake
 import {
   AccountBlockedError,
   DogUnavailableError,
+  DogProfileRequiredError,
 } from "@pegada/shared/errors/errors";
 import { Gender } from "@prisma/client";
 
@@ -367,4 +368,24 @@ describe("the configured free like limit", () => {
       new SwipeService({}).getRemainingDailyLikes({ userId: user.id }),
     ).resolves.toMatchObject({ likeLimit: 25, remainingSwipes: 25 });
   });
+});
+
+it("returns a coded prerequisite for an owner without a dog", async () => {
+  const { user, dog } = await generateFakeUserWithDog();
+  await prisma.image.deleteMany({ where: { dogId: dog.id } });
+  await prisma.dog.delete({ where: { id: dog.id } });
+  const caller = callerFor(user.id);
+  await Promise.all(
+    [
+      () => caller.swipe.all({ limit: 10 }),
+      () =>
+        caller.swipe.swipe({ id: "missing-target", swipeType: "INTERESTED" }),
+    ].map(async (request) => {
+      await expect(request()).rejects.toMatchObject({
+        code: "PRECONDITION_FAILED",
+        error_code: DogProfileRequiredError.error_code,
+      });
+    }),
+  );
+  expect(await prisma.interest.count()).toBe(0);
 });
