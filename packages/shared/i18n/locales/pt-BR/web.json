@@ -210,7 +210,7 @@
     "metadata": {
       "title": "Pegada | O story do seu dog",
       "description": "O Pegada monta um story com as fotos do seu cachorro. Você escolhe as fotos, ele fica pronto no celular e você posta.",
-      "ogImageAlt": "Fundo bege com a marca Pegada, os dizeres “O story do seu dog” e, ao lado, dois stories verticais: uma conversa amarela e um passe de rolê em papel creme sobre azul-marinho."
+      "ogImageAlt": "Pegada, o título Faz o story do seu dog e fotos do mesmo tamanho de Nina e Tofu."
     },
     "headline": "Faz o story do seu dog",
     "subline": "Escolhe as fotos, o app monta e você posta.",
@@ -262,6 +262,7 @@
     "cta": {
       "button": "Curtir {{article}} {{name}}",
       "reassurance": "Você vai precisar do app. É de graça e leva um minuto.",
+      "mobileButton": "Baixar Pegada",
       "mobileContext": "{{pronoun}} quer fazer amigos."
     },
     "og": {

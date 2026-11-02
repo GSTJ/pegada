@@ -1,13 +1,11 @@
-import type { BreedSlug } from "@pegada/shared/i18n/i18n";
-
 import type { Metadata } from "next";
 
 import { notFound } from "next/navigation";
 
-import { Namespace } from "@pegada/shared/i18n/types/types";
 import { isReferralRef } from "@pegada/shared/utils/referral";
 
 import { DownloadCta } from "@/components/download-cta";
+import { Logo } from "@/components/logo";
 import { gilroy } from "@/lib/fonts";
 import { getSafeLocale } from "@/lib/get-safe-locale";
 import { toLocalePath, toOpenGraphLocale } from "@/lib/locales";
@@ -159,19 +157,15 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
        * between the two columns.
        */}
       <header className="relative z-10 mx-auto w-full max-w-5xl px-4 md:px-8">
-        {/* oxlint-disable-next-line nextjs/no-img-element -- A static SVG needs no next/image pipeline. */}
-        <img
-          src="/logo.svg"
-          draggable="false"
-          alt=""
-          className="mx-auto mt-4 h-8 select-none md:mx-0 md:mt-8 md:h-9"
-        />
+        <div className="mx-auto mt-4 w-fit md:mx-0 md:mt-8">
+          <Logo wordmark />
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-start gap-6 px-4 pb-24 pt-4 md:grid md:grid-cols-[minmax(0,400px)_1fr] md:items-center md:justify-normal md:gap-16 md:px-8 md:pb-16 md:pt-0">
         {/* The card: this page's entire pitch is "here is the product, with your friend's dog already in it." */}
-        <div className="flex w-full max-w-[380px] flex-1 flex-col fill-mode-both animate-in fade-in slide-in-from-bottom-4 duration-700 motion-reduce:animate-none md:max-w-none md:flex-none">
-          <div className="relative w-full flex-1 overflow-hidden rounded-[28px] bg-gradient-to-b from-primary via-[#FB6E90] to-[#DC5791] shadow-[0_20px_60px_-15px_rgba(220,87,145,0.45)] md:aspect-[4/5] md:flex-none">
+        <div className="flex w-full max-w-[380px] flex-none flex-col fill-mode-both animate-in fade-in slide-in-from-bottom-4 duration-700 motion-reduce:animate-none md:max-w-none md:flex-none">
+          <div className="relative aspect-[4/5] w-full flex-none overflow-hidden rounded-3xl bg-gradient-to-b from-primary via-[#FB6E90] to-[#DC5791] shadow-[0_20px_60px_-15px_rgba(220,87,145,0.45)]">
             {dogImage ? (
               // This photo is the page: it is the LCP element on every
               // /dog/[id] view. A plain <img> in the initial HTML is
@@ -200,22 +194,6 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
               </div>
             )}
 
-            {Boolean(dog.breed?.name) && (
-              // Same frosted pill as the app's breed tag (`breed-tag.tsx` +
-              // `Glassmorphism`), with the fill inverted. In the app that tag
-              // sits on a photo the deck has already darkened; here it sits on
-              // the raw photo, and a white tint on a white dog leaves white
-              // text on white. A dark fill carries its own contrast, so it
-              // reads on a snow shot and on a black lab alike.
-              <div className="absolute right-4 top-4 flex h-8 items-center rounded-xl border border-white/15 bg-black/55 px-3 leading-none text-white backdrop-blur-md">
-                <span className="text-sm font-medium">
-                  {t(`${dog.breed?.slug as BreedSlug}`, {
-                    ns: Namespace.Breed,
-                  })}
-                </span>
-              </div>
-            )}
-
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/85 via-black/35 to-transparent px-5 pb-5 pt-16">
               {/*
                * The leading is restated at every size that changes the size.
@@ -224,7 +202,7 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
                * `leading-tight` here was overridden by `md:text-3xl` and the
                * name rendered at a leading of 1.
                */}
-              <h1 className="text-2xl font-extrabold leading-[1.15] text-white md:text-3xl md:leading-[1.1]">
+              <h1 className="text-2xl font-extrabold tracking-[-0.02em] leading-[1.25] text-white md:text-3xl md:leading-[1.25]">
                 {dog.name}
               </h1>
               {tagline ? (
@@ -242,7 +220,7 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
         <div className="hidden fill-mode-both animate-in fade-in slide-in-from-bottom-2 delay-150 duration-700 motion-reduce:animate-none md:flex md:max-w-md md:flex-col md:gap-5">
           {/* Same reason as the `h1` above: `lg:text-5xl` was resetting the
               leading to 1, and a long name makes this four lines. */}
-          <h2 className="text-4xl font-extrabold leading-[1.1] text-text lg:text-5xl lg:leading-[1.05]">
+          <h2 className="text-4xl font-extrabold tracking-[-0.02em] leading-[1.25] text-text lg:text-5xl lg:leading-[1.25]">
             {invite}
           </h2>
           <p className="text-lg font-light text-subtitle">{nextStep}</p>
@@ -268,7 +246,7 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
 
       {/* Mobile sticky CTA bar. `main`'s bottom padding above reserves room for it so it never covers the card. */}
       <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 border-t border-border bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_30px_-15px_rgba(15,23,42,0.2)] backdrop-blur md:hidden">
-        <p className="flex-1 truncate text-sm font-medium text-text">
+        <p className="min-w-0 flex-1 text-sm font-medium text-text">
           {mobileContext}
         </p>
         <DownloadCta
@@ -280,7 +258,7 @@ const DogProfile = async ({ params, searchParams }: DogProfileProps) => {
           referral={referral}
           className="shrink-0 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-transform duration-200 ease-in-out hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
-          {ctaButton}
+          {t("dog.cta.mobileButton")}
         </DownloadCta>
       </div>
     </div>
