@@ -36,10 +36,10 @@ overrides:
   decode-uri-component: ^0.5.0
   diff@4: ^4.0.4
   esbuild: ^0.28.1
-  fast-uri: ^3.1.8
+  fast-uri: ^3.1.9
   fast-xml-parser: ^5.7.0
   form-data: ^4.0.6
-  dompurify: ^3.4.16
+  dompurify: ^3.4.17
   image-size@1: ^1.2.1
   joi: ^17.13.8
   js-yaml@3: ^3.15.2
@@ -59,7 +59,7 @@ overrides:
   sharp: ^0.35.5
   shell-quote: ^1.11.0
   svgo@3: ^3.3.5
-  undici@7: ^7.29.1
+  undici@7: ^7.30.1
   uuid: ^11.1.1
   ws@7: ^7.5.11
   ws@8: ^8.21.0
@@ -70,6 +70,8 @@ overrides:
 # 14-day guard landed; future versions still have to age normally.
 minimumReleaseAge: 20160
 minimumReleaseAgeExclude:
+  # Reviewed security fix, published less than 14 days ago (four open alerts).
+  - fast-uri@3.1.9
   - "@emnapi/runtime@1.11.3"
   - "@eslint-community/eslint-utils@4.10.1"
   - "@next/env@15.5.22"
