@@ -98,3 +98,18 @@ it("rejects oversized collections before validating their elements", () => {
   expect(result.success).toBe(false);
   expect(validateElement).not.toHaveBeenCalled();
 });
+
+it.each(["en-US", "pt-BR"])(
+  "identifies failed numeric coercion in %s",
+  async (language) => {
+    await i18next.changeLanguage(language);
+    const result = await zodResolver(dogClientSchema)(
+      { ...valid, weight: "invalid" },
+      {},
+      options,
+    );
+    expect(result.errors).toMatchObject({
+      weight: { message: expect.stringContaining("nan") },
+    });
+  },
+);

@@ -10,6 +10,7 @@ const joinValues = (values: readonly unknown[]) =>
     .join(" | ");
 
 const receivedType = (input: unknown) => {
+  if (typeof input === "number" && Number.isNaN(input)) return "nan";
   if (input === null) return "null";
   if (Array.isArray(input)) return "array";
   return typeof input;
