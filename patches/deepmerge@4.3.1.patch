@@ -1,0 +1,54 @@
+diff --git a/dist/cjs.js b/dist/cjs.js
+index 7c36cbdd06cc22c92d590be3f87a08a91ca06b40..d93c19f9529b17b391bda951e54ec27946f02f54 100644
+--- a/dist/cjs.js
++++ b/dist/cjs.js
+@@ -80,11 +80,12 @@ function mergeObject(target, source, options) {
+ 	var destination = {};
+ 	if (options.isMergeableObject(target)) {
+ 		getKeys(target).forEach(function(key) {
++			if (key === "__proto__") return
+ 			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+ 		});
+ 	}
+ 	getKeys(source).forEach(function(key) {
+-		if (propertyIsUnsafe(target, key)) {
++		if (key === "__proto__" || propertyIsUnsafe(target, key)) {
+ 			return
+ 		}
+ 
+diff --git a/dist/umd.js b/dist/umd.js
+index 4071e7c56ec8e5273fe166f6e723ac460fab8b72..16369db8e10750e18f274ad4cb681e194f0d9dd0 100644
+--- a/dist/umd.js
++++ b/dist/umd.js
+@@ -84,11 +84,12 @@
+ 		var destination = {};
+ 		if (options.isMergeableObject(target)) {
+ 			getKeys(target).forEach(function(key) {
++			if (key === "__proto__") return
+ 				destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+ 			});
+ 		}
+ 		getKeys(source).forEach(function(key) {
+-			if (propertyIsUnsafe(target, key)) {
++			if (key === "__proto__" || propertyIsUnsafe(target, key)) {
+ 				return
+ 			}
+ 
+diff --git a/index.js b/index.js
+index 77968aed5d456cccc294f60912ef381fa1e52a7b..9a62da865016d6ed8757507ac1b88f610a55f4ad 100644
+--- a/index.js
++++ b/index.js
+@@ -55,11 +55,12 @@ function mergeObject(target, source, options) {
+ 	var destination = {}
+ 	if (options.isMergeableObject(target)) {
+ 		getKeys(target).forEach(function(key) {
++			if (key === "__proto__") return
+ 			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options)
+ 		})
+ 	}
+ 	getKeys(source).forEach(function(key) {
+-		if (propertyIsUnsafe(target, key)) {
++		if (key === "__proto__" || propertyIsUnsafe(target, key)) {
+ 			return
+ 		}
+ 
