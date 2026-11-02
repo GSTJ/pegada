@@ -14,6 +14,7 @@ export enum ListAction {
   FetchDogsRequest = "FETCH_DOGS_REQUEST",
   RefetchDogsRequest = "REFETCH_DOGS_REQUEST",
   FetchDogsSuccess = "FETCH_SUCCESS",
+  ProfileRequired = "DOG_PROFILE_REQUIRED",
   FetchDogsFailure = "FETCH_FAILURE",
 }
 
@@ -25,7 +26,9 @@ const asyncActions = createAsyncAction(
 
 const refetch = createAction(ListAction.RefetchDogsRequest)();
 
-export const Actions = { ...asyncActions, refetch };
+const profileRequired = createAction(ListAction.ProfileRequired)();
+
+export const Actions = { ...asyncActions, refetch, profileRequired };
 
 const fetchUsersRequest = (state = initialState) =>
   produce(state, (draft) => {
@@ -74,6 +77,10 @@ const fetchUsersFailure = (
 export default createReducer<typeof initialState, ActionType<typeof Actions>>(
   initialState,
 )
+  .handleAction(Actions.profileRequired, () => ({
+    request: { data: [], loading: false, error: undefined },
+    config: { ...initialState.config, hasMore: false },
+  }))
   .handleAction(Actions.request, fetchUsersRequest)
   .handleAction(Actions.success, fetchUsersSuccess)
   .handleAction(Actions.failure, fetchUsersFailure)

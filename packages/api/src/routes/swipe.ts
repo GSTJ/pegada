@@ -1,3 +1,5 @@
+import { DogProfileRequiredError } from "@pegada/shared/errors/errors";
+
 import { DogService } from "../services/dog-service";
 import { SuggestionService } from "../services/SuggestionService/suggestion-service";
 import { SwipeService } from "../services/swipe-service";
@@ -8,10 +10,12 @@ export const swipeRouter = createTRPCRouter({
   all: protectedProcedure
     .input(swipeQueryInputSchema)
     .query(async ({ ctx, input }) => {
-      const dog = await DogService.getDogByUserId(ctx.session.user.id);
+      const dog = await ctx.db.dog.findFirst({
+        where: { userId: ctx.session.user.id, banned: false, deletedAt: null },
+      });
 
       if (!dog) {
-        throw new Error("Dog not found");
+        throw new DogProfileRequiredError();
       }
 
       const potentialMatches = await SuggestionService.getPotentialMatches(
@@ -28,7 +32,7 @@ export const swipeRouter = createTRPCRouter({
       const dog = await DogService.getFullDogByUserId(ctx.session.user.id);
 
       if (!dog) {
-        throw new Error("Dog not found");
+        throw new DogProfileRequiredError();
       }
 
       const swipeService = new SwipeService({ language: ctx.language });

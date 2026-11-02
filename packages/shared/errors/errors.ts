@@ -91,6 +91,20 @@ export class AccountBlockedError extends IntentionalError {
   }
 }
 
+export class DogProfileRequiredError extends IntentionalError {
+  static message = "Create your dog profile to continue.";
+  static error_code = "DOG_PROFILE_REQUIRED";
+  error_code = DogProfileRequiredError.error_code;
+
+  constructor() {
+    super({
+      code: "PRECONDITION_FAILED",
+      message: DogProfileRequiredError.message,
+    });
+    this.name = "DogProfileRequiredError";
+  }
+}
+
 export class DogUnavailableError extends IntentionalError {
   static message = "This profile is unavailable.";
   static error_code = "DOG_UNAVAILABLE";

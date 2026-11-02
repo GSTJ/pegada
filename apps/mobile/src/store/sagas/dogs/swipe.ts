@@ -3,7 +3,10 @@ import type { ActionType } from "typesafe-actions";
 
 import { router } from "expo-router";
 
-import { LikeLimitReachedError } from "@pegada/shared/errors/errors";
+import {
+  DogProfileRequiredError,
+  LikeLimitReachedError,
+} from "@pegada/shared/errors/errors";
 import { isBefore } from "date-fns/isBefore";
 import { all, call, fork, put, select, takeLatest } from "redux-saga/effects";
 
@@ -21,7 +24,7 @@ import { SwipeAction } from "@/store/reducers/dogs/swipe";
 import { SceneName } from "@/types/scene-name";
 import { Swipe } from "@/views/(tabs)/Swipe/components/SwipeHandler/hooks/use-swipe-gesture";
 
-const swipeUserRequest = function* ({
+export const swipeUserRequest = function* ({
   payload,
 }: ActionType<typeof Actions.dogs.swipe.request>): Generator {
   const { id, swipeType: _swipeType } = payload;
@@ -62,6 +65,12 @@ const swipeUserRequest = function* ({
 
     yield put(Actions.dogs.swipe.success());
   } catch (error: unknown) {
+    if (getError(error, DogProfileRequiredError)) {
+      yield put(Actions.dogs.swipe.failure({}));
+      yield put(Actions.dogs.list.profileRequired());
+      router.replace(SceneName.CreateProfile);
+      return;
+    }
     const likeLimitReachedError = getError(error, LikeLimitReachedError);
     if (likeLimitReachedError) {
       const { likeLimit, likeLimitResetAt } = likeLimitReachedError;
