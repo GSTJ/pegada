@@ -10,7 +10,9 @@
     "parity:manual": "tsx src/parity-manual.ts",
     "snapshots": "tsx test/run.ts",
     "fixtures": "tsx test/generate.ts",
-    "test": "tsx test/run.ts && tsx src/parity.ts && tsx src/parity-manual.ts"
+    "test": "tsx test/run.ts && tsx src/parity.ts && tsx src/parity-manual.ts && npm run test:security",
+    "test:security": "node test/security.mjs",
+    "test:history": "node test/history.mjs"
   },
   "dependencies": {
     "css-to-react-native": "3.2.0",
@@ -19,6 +21,12 @@
     "tsx": "4.20.6"
   },
   "overrides": {
-    "postcss": "8.5.23"
+    "postcss": "8.5.23",
+    "@ts-morph/common": {
+      "minimatch": "11.0.4"
+    }
+  },
+  "engines": {
+    "node": "20 || >=22"
   }
 }
