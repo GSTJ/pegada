@@ -70,21 +70,39 @@ it("preserves successful transforms, nulls and optional fields", async () => {
   ).toEqual({ birthDate: "", breedId: null });
 });
 
-it.each(["en-US", "pt-BR"])(
+it.each([
+  [
+    "en-US",
+    [
+      "Expected string, received number",
+      "Invalid enum value. Expected 'MALE' | 'FEMALE', received 'other'",
+      "Invalid email",
+      "String must contain at least 5 character(s)",
+    ],
+  ],
+  [
+    "pt-BR",
+    [
+      "O dado deve ser do tipo string, porém foi enviado number",
+      "Enum no formato inválido. Foi esperado 'MALE' | 'FEMALE', porém foi recebido 'other'",
+      "E-mail inválido",
+      "Texto deve conter pelo menos 5 caracter(es)",
+    ],
+  ],
+])(
   "translates generic errors in %s without v3 runtime APIs",
-  async (language) => {
+  async (language, messages) => {
     await i18next.changeLanguage(language);
-    for (const [schema, input] of [
+    const cases = [
       [z.string(), 42],
       [z.enum(["MALE", "FEMALE"]), "other"],
       [z.string().email(), "bad"],
       [z.string().min(5), "a"],
-    ] as const) {
-      const error = schema.safeParse(input).error;
-      expect(error?.issues[0]?.message).toEqual(expect.any(String));
-      expect(error?.issues[0]?.message).not.toMatch(
-        /errors\.|types\.|undefined/,
-      );
+    ] as const;
+    for (const [index, [schema, input]] of cases.entries()) {
+      const result = schema.safeParse(input);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe(messages[index]);
     }
   },
 );
