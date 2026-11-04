@@ -8,6 +8,7 @@ on:
       - "packages/shared/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/deploy-mobile.yml"
+      - ".github/scripts/mobile-update-needed.py"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,7 +18,24 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Check mobile bundle inputs
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.changes.outputs.publish }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - id: changes
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: python3 .github/scripts/mobile-update-needed.py "$BEFORE" "$AFTER" >> "$GITHUB_OUTPUT"
+
   update:
+    needs: changes
+    if: needs.changes.outputs.publish == 'true'
     name: Create Update
     runs-on: ubuntu-latest
     environment: production
@@ -32,7 +50,7 @@ jobs:
       - name: 🏗 Get PNPM store directory
         id: pnpm-cache
         run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "pnpm_cache_dir=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: 🏗 Setup PNPM cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
