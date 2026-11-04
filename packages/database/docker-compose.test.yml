@@ -47,7 +47,10 @@ services:
   # routinely up at the same time.
   minio:
     container_name: pegada-minio-test
-    image: minio/minio:latest
+    image: pegada-minio:7aac2a2-mc77f82e1
+    build:
+      context: ./docker/minio
+    pull_policy: build
     command: server /data
     restart: always
     environment:
@@ -69,7 +72,10 @@ services:
   # No container_name, same as the dev compose: the clean-slate verifier runs
   # this file under a throwaway project name and a fixed one would collide.
   minio-init:
-    image: minio/mc:latest
+    image: pegada-minio:7aac2a2-mc77f82e1
+    build:
+      context: ./docker/minio
+    pull_policy: build
     depends_on:
       minio:
         condition: service_healthy

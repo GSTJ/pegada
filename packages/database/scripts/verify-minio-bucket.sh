@@ -51,7 +51,7 @@ echo "==> clean slate: tearing down any previous $PROJECT"
 compose down -v --remove-orphans >/dev/null 2>&1 || true
 
 echo "==> docker compose up (minio + its init)"
-if ! compose up -d --wait minio; then
+if ! compose up -d --build --wait minio; then
   echo "FAIL - minio never became healthy" >&2
   compose logs --no-color minio >&2 || true
   exit 1
@@ -77,7 +77,7 @@ compose logs --no-color --tail 4 minio-init | sed 's/^/    /'
 ENDPOINT="http://host.docker.internal:${HOST_PORT}"
 mc() {
   docker run --rm --add-host host.docker.internal:host-gateway \
-    --entrypoint /bin/sh minio/mc:latest -c \
+    --entrypoint /bin/sh "$(compose images -q minio | head -n 1)" -c \
     "mc alias set probe $ENDPOINT pegada-dev pegada-dev-secret >/dev/null && $*"
 }
 
