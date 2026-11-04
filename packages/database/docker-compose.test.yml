@@ -18,6 +18,14 @@ services:
       POSTGRES_DB: pegada
     ports:
       - "3355:5432"
+    healthcheck:
+      # TCP stays unavailable during the entrypoint's temporary init server.
+      test:
+        ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "tony", "-d", "pegada"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 3s
 
   redis:
     container_name: pegada-redis-test
@@ -47,7 +55,10 @@ services:
   # routinely up at the same time.
   minio:
     container_name: pegada-minio-test
-    image: minio/minio:latest
+    image: pegada-minio:7aac2a2-mc77f82e1
+    build:
+      context: ./docker/minio
+    pull_policy: build
     command: server /data
     restart: always
     environment:
@@ -69,7 +80,10 @@ services:
   # No container_name, same as the dev compose: the clean-slate verifier runs
   # this file under a throwaway project name and a fixed one would collide.
   minio-init:
-    image: minio/mc:latest
+    image: pegada-minio:7aac2a2-mc77f82e1
+    build:
+      context: ./docker/minio
+    pull_policy: build
     depends_on:
       minio:
         condition: service_healthy

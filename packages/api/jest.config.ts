@@ -1,4 +1,6 @@
 module.exports = {
+  // One-shot runs must not wait on a shared worktree Watchman crawl.
+  watchman: false,
   preset: "ts-jest",
   // Owned by the runner rather than repeated as `jest.clearAllMocks()` in every
   // suite's beforeEach, where it is easy to forget one.

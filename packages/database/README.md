@@ -49,6 +49,18 @@ pnpm database test
 
 ## Local object storage
 
+MinIO community distribution is source-only, and both Docker Hub images are
+unavailable. Both compose files build the server and client from pinned upstream
+commits in `docker/minio/Dockerfile`, using pinned multi-platform base images.
+The first start needs network access to Docker Hub, the Go module proxy and
+Alpine package repositories, plus time to compile Go dependencies. Later starts
+reuse Docker's build cache. No host Go installation is required.
+
+The verifier checks bucket initialization, authenticated upload and anonymous
+read, and removes only its throwaway compose project on exit. These source
+builds are for local development and tests; upstream community maintenance has
+ended. See the [upstream distribution notes](https://github.com/minio/minio#source-only-distribution).
+
 `docker-compose.yml` runs MinIO as an S3 stand-in on `localhost:9002`, and a
 one-shot `minio-init` container creates the bucket the API is configured for
 (`AWS_S3_BUCKET_NAME`, default `pegada-dev`) and opens it for anonymous reads.

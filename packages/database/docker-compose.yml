@@ -41,7 +41,10 @@ services:
   # Port 9002 to avoid clashing with other local MinIO/S3 tooling on 9000.
   minio:
     container_name: pegada-minio
-    image: minio/minio:latest
+    image: pegada-minio:7aac2a2-mc77f82e1
+    build:
+      context: ./docker/minio
+    pull_policy: build
     command: server /data
     restart: always
     environment:
@@ -69,7 +72,10 @@ services:
   # `mc anonymous set download` matches how the app reads images back: the API
   # hands the client a plain bucket URL, not a presigned GET.
   minio-init:
-    image: minio/mc:latest
+    image: pegada-minio:7aac2a2-mc77f82e1
+    build:
+      context: ./docker/minio
+    pull_policy: build
     depends_on:
       minio:
         condition: service_healthy
