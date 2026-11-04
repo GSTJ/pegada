@@ -37,38 +37,16 @@ const MAX_WEIGHT = 150;
 
 const dogSharedSchema = {
   name: z
-    .string({
-      errorMap: (a) => {
-        if (a.code === "too_small") {
-          return {
-            message: t("formErrors.nameTooShort", { length: MIN_NAME_LENGTH }),
-          };
-        }
-
-        if (a.code === "too_big") {
-          return {
-            message: t("formErrors.nameTooLong", { length: MAX_NAME_LENGTH }),
-          };
-        }
-
-        return { message: a.message ?? "" };
-      },
+    .string()
+    .min(2, {
+      error: () => t("formErrors.nameTooShort", { length: MIN_NAME_LENGTH }),
     })
-    .min(2)
-    .max(50),
-  bio: z
-    .string({
-      errorMap: (a) => {
-        if (a.code === "too_big") {
-          return {
-            message: t("formErrors.bioTooLong", { length: MAX_BIO_LENGTH }),
-          };
-        }
-
-        return { message: a.message ?? "" };
-      },
-    })
-    .max(MAX_BIO_LENGTH),
+    .max(50, {
+      error: () => t("formErrors.nameTooLong", { length: MAX_NAME_LENGTH }),
+    }),
+  bio: z.string().max(MAX_BIO_LENGTH, {
+    error: () => t("formErrors.bioTooLong", { length: MAX_BIO_LENGTH }),
+  }),
   birthDate: z
     .string()
     .transform((value) => {
@@ -114,20 +92,7 @@ const dogSharedSchema = {
     .optional()
     .nullable()
     .or(z.literal("")),
-  breedId: z
-    .string({
-      errorMap: (a) => {
-        if (a.code === "too_small") {
-          return { message: t("formErrors.selectBreed") };
-        }
-
-        return { message: a.message ?? "" };
-      },
-    })
-    .min(1)
-    .optional()
-    .nullable()
-    .or(z.literal("")),
+  breedId: z.string().min(1).optional().nullable().or(z.literal("")),
   color: z.enum(DOG_COLORS).optional().nullable(),
   size: z.enum(DOG_SIZES).optional().nullable(),
   gender: z.enum(DOG_GENDERS),
@@ -138,18 +103,10 @@ const dogSharedSchema = {
   preferredMaxDistance: z.number().nullable().optional(),
   preferredBreedId: z.string().nullable().optional(),
   weight: z.coerce
-    .number({
-      errorMap: (a) => {
-        if (a.code === "too_big") {
-          return {
-            message: t("formErrors.weightTooBig", { weight: MAX_WEIGHT }),
-          };
-        }
-
-        return { message: a.message ?? "" };
-      },
+    .number()
+    .max(MAX_WEIGHT, {
+      error: () => t("formErrors.weightTooBig", { weight: MAX_WEIGHT }),
     })
-    .max(MAX_WEIGHT)
     .optional()
     .nullable(),
 } as const;
@@ -247,6 +204,8 @@ export const dogCompleteClientSchema = z.object({
 });
 
 export type DogServerSchema = z.infer<typeof dogServerSchema>;
+
+export type DogClientInput = z.input<typeof dogClientSchema>;
 
 export type DogClientSchema = z.infer<typeof dogClientSchema>;
 
