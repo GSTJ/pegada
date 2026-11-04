@@ -18,6 +18,14 @@ services:
       POSTGRES_DB: pegada
     ports:
       - "3355:5432"
+    healthcheck:
+      # TCP stays unavailable during the entrypoint's temporary init server.
+      test:
+        ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "tony", "-d", "pegada"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 3s
 
   redis:
     container_name: pegada-redis-test

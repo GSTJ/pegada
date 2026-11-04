@@ -83,6 +83,7 @@ mc() {
 
 echo "==> the bucket exists"
 if ! mc "mc ls probe/$BUCKET" >/dev/null 2>&1; then
+  mc "mc ls probe/$BUCKET" >&2 || true
   echo "FAIL - bucket '$BUCKET' is missing after a clean up" >&2
   echo "       (this is the original defect: the API presigns into a bucket" >&2
   echo "        that was never created, and the device's PUT 404s)" >&2
