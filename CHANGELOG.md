@@ -2,6 +2,12 @@
 
 Generated from conventional commits by `.github/scripts/changelog.py`. Run `pnpm changelog` to refresh it.
 
+## Unreleased
+
+### Breaking changes
+
+- Migrate validation to Zod 4.6.6 and React Hook Form resolvers 5.2.2. Callers consuming raw validation errors must read `issues` instead of `errors`, use `invalid_value` for enum/literal failures and `invalid_format` for string-format failures. Replace `errorMap` with `error` on each constraint. Forms with transforms must declare separate `z.input` and `z.output` types. Use the shared localized error map instead of the Zod 3 runtime in `zod-i18n-map`; its existing English and Portuguese JSON catalogs remain unchanged. Preferences require number arrays and valid color/size values, matching the controls. The API request and response shapes stay the same.
+
 ## v1.7.3 (2026-09-21)
 
 ### Features

@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.5.0",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
