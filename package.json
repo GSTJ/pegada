@@ -16,7 +16,7 @@
     "database:test": "dotenv -e .env.test -- pnpm -F @pegada/database",
     "test": "dotenv -e .env.test -- turbo test && pnpm test:release && pnpm test:security && pnpm test:metrics",
     "test:release": "python3 -m unittest discover -s .github/scripts -p 'test_*.py'",
-    "test:security": "node scripts/test-image-size-patch.cjs && node scripts/test-transitive-security.cjs",
+    "test:security": "node scripts/test-image-size-patch.cjs && node scripts/test-transitive-security.cjs && node scripts/test-forge-xml-security.cjs",
     "test:metrics": "node --test scripts/metrics/*.test.mjs",
     "metrics:daily": "node scripts/metrics/daily.mjs",
     "metrics:events-audit": "node scripts/metrics/events-audit.mjs",
