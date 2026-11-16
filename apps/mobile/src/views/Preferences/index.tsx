@@ -1,5 +1,4 @@
 import type { RouterInputs } from "@/contexts/trpc-provider";
-import type { Resolver } from "react-hook-form";
 
 import { useEffect } from "react";
 import * as React from "react";
@@ -8,6 +7,7 @@ import { Dimensions, View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DOG_COLORS, DOG_SIZES } from "@pegada/shared/schemas/dog-schema";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { t } from "i18next";
 import { Controller, useForm } from "react-hook-form";
@@ -38,13 +38,7 @@ const { width } = Dimensions.get("window");
 type MyDogUpdateMutation = RouterInputs["myDog"]["update"];
 export const MAX_FILTER_DISTANCE = 300;
 export const MAX_FILTER_AGE = 10;
-type Preference = {
-  preferredMaxDistance: number[];
-  preferredAgeRange: number[];
-} & Pick<
-  MyDogUpdateMutation,
-  "preferredBreedId" | "preferredColor" | "preferredSize"
->;
+type Preference = z.infer<typeof schema>;
 
 /**
  * The fields the save comparison already walked, named once so the diff sent to
@@ -59,18 +53,13 @@ const PREFERENCE_FIELDS = [
   "preferredMaxAge",
 ] as const;
 
-const schema = z
-  .object({
-    preferredColor: z.string().nullable().optional(),
-    preferredSize: z.string().nullable().optional(),
-    preferredMaxDistance: z.array(z.number().nullable()).nullable().optional(),
-    preferredBreedId: z.string().nullable().optional(),
-    preferredAgeRange: z
-      .array(z.number().nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .optional();
+const schema = z.object({
+  preferredColor: z.enum(DOG_COLORS).nullable().optional(),
+  preferredSize: z.enum(DOG_SIZES).nullable().optional(),
+  preferredMaxDistance: z.array(z.number()),
+  preferredBreedId: z.string().nullable().optional(),
+  preferredAgeRange: z.array(z.number()),
+});
 
 const Preferences: React.FC = () => {
   const router = useRouter();
@@ -96,9 +85,7 @@ const Preferences: React.FC = () => {
       preferredBreedId: undefined,
       preferredAgeRange: [0, MAX_FILTER_AGE],
     },
-    // The zod/@hookform resolver types disagree about the refined schema's
-    // output; the form's own generic is what actually types the values.
-    resolver: zodResolver(schema) as Resolver<Preference>,
+    resolver: zodResolver(schema),
   });
 
   const dispatch = useDispatch();
