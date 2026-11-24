@@ -245,8 +245,8 @@ importers:
         specifier: ~55.0.16
         version: 55.0.16(expo@55.0.24)(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))
       i18next:
-        specifier: ^23.12.2
-        version: 23.12.2
+        specifier: ^26.3.4
+        version: 26.3.4(typescript@5.4.5)
       immer:
         specifier: ^10.1.1
         version: 10.1.1
@@ -285,7 +285,7 @@ importers:
         version: 7.52.2(react@19.2.0)
       react-i18next:
         specifier: ^15.0.0
-        version: 15.0.0(i18next@23.12.2)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
+        version: 15.0.0(i18next@26.3.4(typescript@5.4.5))(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0)
       react-native:
         specifier: 0.83.6
         version: 0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1)
@@ -468,8 +468,8 @@ importers:
         specifier: ^1.7.3
         version: 1.7.3(handlebars@4.7.10)
       i18next:
-        specifier: ^23.12.2
-        version: 23.12.2
+        specifier: ^26.3.4
+        version: 26.3.4(typescript@5.4.5)
       lucide-react:
         specifier: ^0.424.0
         version: 0.424.0(react@19.2.0)
@@ -589,8 +589,8 @@ importers:
         specifier: ^4.7.10
         version: 4.7.10
       i18next:
-        specifier: ^23.12.2
-        version: 23.12.2
+        specifier: ^26.3.4
+        version: 26.3.4(typescript@5.4.5)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.1.0)(supports-color@8.1.1)(ts-node@10.9.2(@swc/core@1.15.43)(@types/node@22.1.0)(typescript@5.4.5))
@@ -682,14 +682,14 @@ importers:
         version: 3.6.0
       zod-i18n-map:
         specifier: ^2.27.0
-        version: 2.27.0(i18next@23.12.2)(zod@3.25.76)
+        version: 2.27.0(i18next@26.3.4(typescript@5.4.5))(zod@3.25.76)
     devDependencies:
       '@total-typescript/ts-reset':
         specifier: ^0.5.1
         version: 0.5.1
       i18next:
-        specifier: ^23.12.2
-        version: 23.12.2
+        specifier: ^26.3.4
+        version: 26.3.4(typescript@5.4.5)
       magic-tsconfig:
         specifier: ^1.2.0
         version: 1.2.0
@@ -5078,8 +5078,13 @@ packages:
   hyphenate-style-name@1.0.5:
     resolution: {integrity: sha512-fedL7PRwmeVkgyhu9hLeTBaI6wcGk7JGJswdaRsa5aUbkXI1kr1xZwTPBtaYPpwf56878iDek6VbVnuWMebJmw==}
 
-  i18next@23.12.2:
-    resolution: {integrity: sha512-XIeh5V+bi8SJSWGL3jqbTEBW5oD6rbP5L+E7dVQh1MNTxxYef0x15rhJVcRb7oiuq4jLtgy2SD8eFlf6P2cmqg==}
+  i18next@26.3.4:
+    resolution: {integrity: sha512-pa7m0d7pBDqGHZxljT+WPFeyFgQ7P7SciPPo1tTqYuO0z4sqADYhwnBESmmGp/wEof1inwdls/k8ZgTg8rxFHA==}
+    peerDependencies:
+      typescript: ^5 || ^6
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   icu-minify@4.13.1:
     resolution: {integrity: sha512-nFYW2im0WJ3RUVZwabd71J8QTZRtkK1xxZBY7klg7a6KS/os17LZSj9q1VhbRSnk3S8Mv2I7F1izr/aEJ6cUsw==}
@@ -6486,6 +6491,7 @@ packages:
 
   posthog-react-native-session-replay@1.6.0:
     resolution: {integrity: sha512-OCaei77mtgg7JT+TgHSCgpWeKq2XXENUOPNxGbjhXZa/aJpptOW5VsBqjtH4BPzM2c1veS1DK4/Fb/uV4Rb3cg==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -12858,9 +12864,9 @@ snapshots:
 
   hyphenate-style-name@1.0.5: {}
 
-  i18next@23.12.2:
-    dependencies:
-      '@babel/runtime': 7.29.7
+  i18next@26.3.4(typescript@5.4.5):
+    optionalDependencies:
+      typescript: 5.4.5
 
   icu-minify@4.13.1:
     dependencies:
@@ -14894,11 +14900,11 @@ snapshots:
     dependencies:
       react: 19.2.0
 
-  react-i18next@15.0.0(i18next@23.12.2)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0):
+  react-i18next@15.0.0(i18next@26.3.4(typescript@5.4.5))(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@13.6.9(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.17)(react@19.2.0)(supports-color@8.1.1))(react@19.2.0):
     dependencies:
       '@babel/runtime': 7.29.7
       html-parse-stringify: 3.0.1
-      i18next: 23.12.2
+      i18next: 26.3.4(typescript@5.4.5)
       react: 19.2.0
     optionalDependencies:
       react-dom: 19.2.0(react@19.2.0)
@@ -16078,9 +16084,9 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-i18n-map@2.27.0(i18next@23.12.2)(zod@3.25.76):
+  zod-i18n-map@2.27.0(i18next@26.3.4(typescript@5.4.5))(zod@3.25.76):
     dependencies:
-      i18next: 23.12.2
+      i18next: 26.3.4(typescript@5.4.5)
       zod: 3.25.76
 
   zod@3.25.76: {}

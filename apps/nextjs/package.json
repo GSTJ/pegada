@@ -28,7 +28,7 @@
     "clsx": "^2.1.1",
     "critters": "^0.0.25",
     "handlebars-loader": "^1.7.3",
-    "i18next": "^23.12.2",
+    "i18next": "^26.3.4",
     "lucide-react": "^0.424.0",
     "magic-observability": "1.0.0",
     "next": "15.5.28",

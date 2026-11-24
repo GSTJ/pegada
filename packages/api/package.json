@@ -36,7 +36,7 @@
     "expo-server-sdk": "^3.10.0",
     "geolib": "^3.3.14",
     "handlebars": "^4.7.9",
-    "i18next": "^23.12.2",
+    "i18next": "^26.3.4",
     "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.3",
     "magic-observability": "1.0.0",
