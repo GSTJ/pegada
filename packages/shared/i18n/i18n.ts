@@ -28,7 +28,6 @@ export const initI18n = (i18n: i18n) => {
   return i18n.init({
     resources,
     fallbackLng: Language.Default,
-    compatibilityJSON: "v3", // v4 would require an Intl.PluralRules polyfill, and we aren't using it yet
     ns: Object.keys(resources[Language.EnUs]),
     defaultNS: Namespace.Translation,
     interpolation: {

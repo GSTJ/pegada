@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@total-typescript/ts-reset": "^0.5.1",
-    "i18next": "^23.12.2",
+    "i18next": "26.3.4",
     "magic-tsconfig": "^1.2.0",
     "zod": "3.25.76"
   },
