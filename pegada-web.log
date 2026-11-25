@@ -92,3 +92,4 @@ Error: ENOENT: no such file or directory, open '/Users/gabrieltaveira/.t3/worktr
 Import trace for requested module:
 ./node_modules/clsx/dist/clsx.mjs
 ./src/components/landing/chat-demo.tsx
+[?25h
