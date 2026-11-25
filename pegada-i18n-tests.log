@@ -1,0 +1,11 @@
+Error: Jest: Failed to parse the TypeScript config file /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/packages/api/jest.config.ts
+  Error: Cannot find module 'typescript'
+Require stack:
+- /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/ts-node/dist/util.js
+- /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/ts-node/dist/index.js
+    at readConfigFileAndSetRootDir (/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/jest-config/build/readConfigFileAndSetRootDir.js:116:13)
+    at async readInitialOptions (/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/jest-config/build/index.js:392:15)
+    at async readConfig (/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/jest-config/build/index.js:147:48)
+    at async readConfigs (/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/jest-config/build/index.js:424:26)
+    at async runCLI (/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/@jest/core/build/cli/index.js:151:59)
+    at async Object.run (/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/jest-cli/build/run.js:130:37)

@@ -1,0 +1,5 @@
+Source head: 172aabce5b7c2a87ef4d190bd1f1cb24182772a0
+PT screenshot: local Next dev server on port3125, real landing page.
+No production build or native runtime proof. Background recording and EN screenshot fail because screenshot frames unavailable; advised foreground retry prohibited.
+Full suite initial attempt failed due concurrent Compose creation; serial retry logged separately.
+Latest release v1.7.3. Latest production deployment success e9a6057e3216c3d3ee87fbf7057277bc9532fbdb. No deployment executed this pass.

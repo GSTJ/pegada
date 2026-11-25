@@ -1,0 +1,24 @@
+Scope: all 6 workspace projects
+✓ Lockfile passes supply-chain policies (verified 35s ago)
+Progress: resolved 1, reused 0, downloaded 0, added 0
+apps/mobile                              | [WARN] deprecated react-native-edge-to-edge@1.8.1
+apps/mobile                              | [WARN] deprecated react-native-magic-modal@10.2.0
+apps/nextjs                              | [WARN] deprecated critters@0.0.25
+Progress: resolved 129, reused 0, downloaded 0, added 0
+Progress: resolved 134, reused 0, downloaded 0, added 0
+apps/mobile                              | [WARN] deprecated posthog-react-native-session-replay@1.6.0
+Progress: resolved 154, reused 0, downloaded 0, added 0
+Progress: resolved 163, reused 0, downloaded 0, added 0
+Progress: resolved 164, reused 0, downloaded 0, added 0
+Progress: resolved 539, reused 0, downloaded 0, added 0
+Progress: resolved 553, reused 0, downloaded 0, added 0
+Progress: resolved 659, reused 0, downloaded 0, added 0
+Progress: resolved 939, reused 0, downloaded 0, added 0
+Progress: resolved 940, reused 0, downloaded 0, added 0
+[WARN] deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Progress: resolved 1464, reused 0, downloaded 0, added 0
+[WARN] 7 deprecated subdependencies found: @smithy/core@3.24.3, glob@7.2.3, inflight@1.0.6, node-domexception@1.0.0, path-dirname@1.0.2, rimraf@3.0.2, sudo-prompt@9.2.1
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+
+Done in 14.4s using pnpm v11.17.0
+Progress: resolved 1538, reused 0, downloaded 0, added 0

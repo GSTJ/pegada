@@ -1,0 +1,10 @@
+PASS src/shared/i18n-security.test.ts
+  ✓ initializes the shipped en-US resources (3 ms)
+  ✓ initializes the shipped pt-BR resources
+  ✓ does not recurse into inherited built-ins when merging resource bundles (32 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        0.188 s
+Ran all test suites matching /src\/shared\/i18n-security.test.ts/i.

@@ -1,0 +1,5 @@
+$ oxlint --report-unused-disable-directives
+packages/api/src/shared/i18n-security.test.ts:33:5: error eslint(no-extend-native): Object prototype is read-only, properties should not be added. help: Consider using a utility function or a class that extends the built-in object instead of defining properties on the prototype.
+packages/api/src/shared/i18n-security.test.ts:9:5: error eslint(no-await-in-loop): Unexpected `await` inside a loop. help: Collect all promises into an array and use `Promise.all()` to run them in parallel, rather than awaiting each one sequentially inside the loop.
+packages/api/src/shared/i18n-security.test.ts:31:12: error eslint(prefer-object-has-own): Disallow use of `Object.prototype.hasOwnProperty.call()` and prefer use of `Object.hasOwn()`. help: Replace `Object.prototype.hasOwnProperty.call` with `Object.hasOwn`.
+[ELIFECYCLE] Command failed with exit code 1.

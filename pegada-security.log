@@ -1,0 +1,16 @@
+$ node scripts/test-image-size-patch.cjs && node scripts/test-transitive-security.cjs && node scripts/test-forge-xml-security.cjs
+PASS ICNS zero-length entry
+PASS JXL zero-length box
+PASS HEIF zero-length box
+PASS node-forge signature round trip
+PASS URI decoder
+PASS Joi multiple emails
+PASS legacy minimatch
+PASS modern minimatch
+PASS glob cancellation stops traversal
+PASS Ed25519 small-order key
+PASS TLS record without session
+PASS TLS unsupported compression
+PASS HTTP whitespace header and cookie
+PASS XML unterminated stop node
+PASS Expo manifest signing and AWS XML

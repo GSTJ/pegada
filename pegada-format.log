@@ -1,0 +1,8 @@
+$ oxfmt --check .
+Checking formatting...
+
+apps/nextjs/tsconfig.json (0ms)
+
+Format issues found in above 1 files. Run without `--check` to fix.
+Finished in 279ms on 798 files using 18 threads.
+[ELIFECYCLE] Command failed with exit code 1.

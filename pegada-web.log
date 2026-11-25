@@ -1,0 +1,94 @@
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/gabrieltaveira/pnpm-lock.yaml as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/pnpm-lock.yaml
+   * /Users/gabrieltaveira/.t3/worktrees/pnpm-lock.yaml
+
+   ▲ Next.js 15.5.29
+   - Local:        http://localhost:3125
+   - Network:      http://192.168.11.73:3125
+   - Experiments (use with caution):
+     ✓ optimizeCss
+
+ ✓ Starting...
+
+   We detected TypeScript in your project and reconfigured your tsconfig.json file for you. Strict-mode is set to false by default.
+   The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+   	- include was updated to add '.next-3125/types/**/*.ts'
+
+ ✓ Compiled /instrumentation in 330ms (177 modules)
+ ✓ Ready in 3.5s
+ ✓ Compiled /middleware in 234ms (209 modules)
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/next-intl/dist/esm/production/extractor/format/index.js for build dependencies failed at 'import(t)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+ ○ Compiling /[locale] ...
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/next-intl/dist/esm/production/extractor/format/index.js for build dependencies failed at 'import(t)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+ ✓ Compiled /[locale] in 2.6s (1179 modules)
+ ✓ Compiled in 167ms (311 modules)
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of /Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/node_modules/next-intl/dist/esm/production/extractor/format/index.js for build dependencies failed at 'import(t)'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+Error: Route "/[locale]" used `headers().get('x-next-intl-locale')`. `headers()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at createHeadersAccessError (../../../src/server/request/headers.ts:484:10)
+    at syncIODev (../../../src/server/request/headers.ts:472:3)
+    at Promise.get (../../../src/server/request/headers.ts:314:9)
+    at getSafeLocale (src/lib/get-safe-locale.tsx:15:25)
+    at RootLayout (src/app/layout.tsx:106:31)
+  482 | ) {
+  483 |   const prefix = route ? `Route "${route}" ` : 'This route '
+> 484 |   return new Error(
+      |          ^
+  485 |     `${prefix}used ${expression}. ` +
+  486 |       `\`headers()\` should be awaited before using its value. ` +
+  487 |       `Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis`
+Error: Route "/[locale]" used `headers().get('x-pathname')`. `headers()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at createHeadersAccessError (../../../src/server/request/headers.ts:484:10)
+    at syncIODev (../../../src/server/request/headers.ts:472:3)
+    at Promise.get (../../../src/server/request/headers.ts:314:9)
+    at getRequestPathname (src/lib/get-safe-locale.tsx:26:23)
+    at Module.generateMetadata (src/app/layout.tsx:64:51)
+  482 | ) {
+  483 |   const prefix = route ? `Route "${route}" ` : 'This route '
+> 484 |   return new Error(
+      |          ^
+  485 |     `${prefix}used ${expression}. ` +
+  486 |       `\`headers()\` should be awaited before using its value. ` +
+  487 |       `Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis`
+ GET /pt-br 200 in 3346ms
+ ✓ Compiled in 218ms (1239 modules)
+Error: Route "/[locale]" used `headers().get('x-next-intl-locale')`. `headers()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at createHeadersAccessError (../../../src/server/request/headers.ts:484:10)
+    at syncIODev (../../../src/server/request/headers.ts:472:3)
+    at Promise.get (../../../src/server/request/headers.ts:314:9)
+    at getSafeLocale (src/lib/get-safe-locale.tsx:15:25)
+    at RootLayout (src/app/layout.tsx:106:31)
+  482 | ) {
+  483 |   const prefix = route ? `Route "${route}" ` : 'This route '
+> 484 |   return new Error(
+      |          ^
+  485 |     `${prefix}used ${expression}. ` +
+  486 |       `\`headers()\` should be awaited before using its value. ` +
+  487 |       `Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis`
+Error: Route "/[locale]" used `headers().get('x-pathname')`. `headers()` should be awaited before using its value. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+    at createHeadersAccessError (../../../src/server/request/headers.ts:484:10)
+    at syncIODev (../../../src/server/request/headers.ts:472:3)
+    at Promise.get (../../../src/server/request/headers.ts:314:9)
+    at getRequestPathname (src/lib/get-safe-locale.tsx:26:23)
+    at Module.generateMetadata (src/app/layout.tsx:64:51)
+  482 | ) {
+  483 |   const prefix = route ? `Route "${route}" ` : 'This route '
+> 484 |   return new Error(
+      |          ^
+  485 |     `${prefix}used ${expression}. ` +
+  486 |       `\`headers()\` should be awaited before using its value. ` +
+  487 |       `Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis`
+ GET / 200 in 374ms
+ ⨯ ./node_modules/clsx/dist/clsx.mjs
+Error: ENOENT: no such file or directory, open '/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/apps/nextjs/node_modules/clsx/dist/clsx.mjs'
+
+Import trace for requested module:
+./node_modules/clsx/dist/clsx.mjs
+./src/components/landing/chat-demo.tsx

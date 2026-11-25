@@ -1,0 +1,46 @@
+Scope: all 6 workspace projects
+✓ Lockfile passes supply-chain policies (verified 46s ago)
+Progress: resolved 1, reused 0, downloaded 0, added 0
+apps/mobile                              | [WARN] deprecated react-native-edge-to-edge@1.8.1
+apps/mobile                              | [WARN] deprecated posthog-react-native-session-replay@1.6.0
+apps/mobile                              | [WARN] deprecated react-native-magic-modal@10.2.0
+apps/nextjs                              | [WARN] deprecated critters@0.0.25
+Progress: resolved 165, reused 0, downloaded 0, added 0
+Progress: resolved 718, reused 0, downloaded 0, added 0
+[WARN] deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Progress: resolved 1462, reused 0, downloaded 0, added 0
+[WARN] 7 deprecated subdependencies found: @smithy/core@3.24.3, glob@7.2.3, inflight@1.0.6, node-domexception@1.0.0, path-dirname@1.0.2, rimraf@3.0.2, sudo-prompt@9.2.1
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+
+Packages: +1503
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1538, reused 0, downloaded 0, added 0
+Progress: resolved 1538, reused 1412, downloaded 1, added 46
+Progress: resolved 1538, reused 1412, downloaded 1, added 140
+Progress: resolved 1538, reused 1412, downloaded 1, added 197
+Progress: resolved 1538, reused 1412, downloaded 1, added 376
+Progress: resolved 1538, reused 1412, downloaded 1, added 585
+Progress: resolved 1538, reused 1412, downloaded 1, added 750
+Progress: resolved 1538, reused 1412, downloaded 1, added 883
+Progress: resolved 1538, reused 1412, downloaded 1, added 1004
+Progress: resolved 1538, reused 1412, downloaded 1, added 1207
+Progress: resolved 1538, reused 1412, downloaded 1, added 1307
+Progress: resolved 1538, reused 1412, downloaded 1, added 1407
+Progress: resolved 1538, reused 1412, downloaded 1, added 1495
+Progress: resolved 1538, reused 1412, downloaded 1, added 1496
+Progress: resolved 1538, reused 1412, downloaded 1, added 1498
+Progress: resolved 1538, reused 1412, downloaded 2, added 1498
+Progress: resolved 1538, reused 1412, downloaded 2, added 1499
+[ERROR] Command was killed with SIGTERM (Termination): '/Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/pnpm' install
+
+pnpm: Command was killed with SIGTERM (Termination): '/Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/pnpm' install
+    at getFinalError (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:88203:14)
+    at makeError (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:90510:21)
+    at getSyncResult (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:92354:10)
+    at spawnSubprocessSync (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:92314:14)
+    at execaCoreSync (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:92244:23)
+    at callBoundExeca (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:94772:23)
+    at boundExeca (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:94749:49)
+    at sync2 (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:94908:10)
+    at runPnpmCli (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:249519:5)
+    at runDepsStatusCheck (file:///Users/gabrieltaveira/Library/pnpm/package-manager-store/v11/links/@pnpm/exe/11.17.0/923ceec1c4a5bc9d1178684ed7b01a4218dea2210e1ad74b20042691707d6f78/node_modules/@pnpm/exe/dist/pnpm.mjs:251287:7)

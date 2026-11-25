@@ -1,0 +1,60 @@
+Scope: all 6 workspace projects
+✓ Lockfile passes supply-chain policies (verified 4s ago)
+Lockfile is up to date, resolution step is skipped
+Packages: +1504
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Progress: resolved 0, reused 1413, downloaded 0, added 35
+Progress: resolved 0, reused 1413, downloaded 0, added 70
+Progress: resolved 0, reused 1413, downloaded 0, added 86
+Progress: resolved 0, reused 1413, downloaded 0, added 103
+Progress: resolved 0, reused 1413, downloaded 0, added 131
+Progress: resolved 0, reused 1413, downloaded 0, added 172
+Progress: resolved 0, reused 1413, downloaded 0, added 208
+Progress: resolved 0, reused 1413, downloaded 0, added 359
+Progress: resolved 0, reused 1413, downloaded 0, added 682
+Progress: resolved 0, reused 1413, downloaded 0, added 1008
+Progress: resolved 0, reused 1413, downloaded 0, added 1304
+Progress: resolved 0, reused 1413, downloaded 0, added 1496
+Progress: resolved 0, reused 1413, downloaded 0, added 1499
+Progress: resolved 0, reused 1413, downloaded 1, added 1499
+Progress: resolved 0, reused 1413, downloaded 1, added 1500
+Progress: resolved 0, reused 1413, downloaded 2, added 1500
+Progress: resolved 0, reused 1413, downloaded 2, added 1501
+Progress: resolved 0, reused 1413, downloaded 3, added 1501
+Progress: resolved 0, reused 1413, downloaded 4, added 1503
+Progress: resolved 0, reused 1413, downloaded 5, added 1504, done
+node_modules/@swc/core postinstall$ node postinstall.js
+node_modules/@parcel/watcher install$ node scripts/build-from-source.js
+node_modules/@parcel/watcher install: Done
+node_modules/@swc/core postinstall: Done
+node_modules/prisma preinstall$ node scripts/preinstall-entry.js
+node_modules/prisma preinstall: Done
+node_modules/@prisma/client postinstall$ node scripts/postinstall.js
+node_modules/@prisma/client postinstall: prisma:warn We could not find your Prisma schema in the default locations (see: https://pris.ly/d/prisma-schema-location).
+node_modules/@prisma/client postinstall: If you have a Prisma schema file in a custom path, you will need to run
+node_modules/@prisma/client postinstall: `prisma generate --schema=./path/to/your/schema.prisma` to generate Prisma Client.
+node_modules/@prisma/client postinstall: If you do not have a Prisma schema file yet, you can ignore this message.
+node_modules/@prisma/client postinstall: Done
+
+packages/database postinstall$ pnpm run build
+packages/database postinstall: $ npx prisma generate
+packages/database postinstall: npm notice run npx
+packages/database postinstall: npm notice run 'prisma' generate
+packages/database postinstall: Prisma schema loaded from schema.prisma
+packages/database postinstall: ✔ Generated Prisma Client (v5.17.0) to ./../../node_modules/@prisma/client in 79ms
+packages/database postinstall: Start by importing your Prisma Client (See: http://pris.ly/d/importing-client)
+packages/database postinstall: Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+packages/database postinstall: Done
+apps/mobile preinstall$ pnpm setup:secret:files
+apps/mobile preinstall: $ bash ./scripts/setup-secret-files.sh
+apps/mobile preinstall: setup:secret:files: $GOOGLE_SERVICES_JSON is unset, using the local stub for google-services.json
+apps/mobile preinstall:                     (fake project id and keys — fine to build and run
+apps/mobile preinstall:                      against, not fine to ship; push notifications and
+apps/mobile preinstall:                      anything else Firebase-backed will not work)
+apps/mobile preinstall: setup:secret:files: $GOOGLE_SERVICE_INFO_PLIST is unset, using the local stub for GoogleService-Info.plist
+apps/mobile preinstall:                     (fake project id and keys — fine to build and run
+apps/mobile preinstall:                      against, not fine to ship; push notifications and
+apps/mobile preinstall:                      anything else Firebase-backed will not work)
+apps/mobile preinstall: Done
+Done in 55.2s using pnpm v11.17.0

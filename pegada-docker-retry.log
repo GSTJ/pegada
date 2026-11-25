@@ -1,0 +1,90 @@
+time="2026-11-25T09:09:54-03:00" level=warning msg="/Users/gabrieltaveira/.t3/worktrees/pegada/t3-32f3631f-4e9760e19a2c933d/packages/database/docker-compose.test.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image pegada-minio:7aac2a2-mc77f82e1 Building 
+ Image pegada-minio:7aac2a2-mc77f82e1 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.30kB done
+#1 DONE 0.0s
+
+#2 [minio-init internal] load build definition from Dockerfile
+#2 transferring dockerfile: 795B done
+#2 DONE 0.0s
+
+#3 [minio-init internal] load metadata for docker.io/library/golang:1.26.8-alpine@sha256:8ac98ca534ac3f51e1f420a1dd2c15e74c75cfa0f23f3ad27eb5d7236c349a0c
+#3 DONE 0.0s
+
+#4 [minio internal] load metadata for docker.io/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
+#4 DONE 0.0s
+
+#5 [minio internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [minio stage-1 1/5] FROM docker.io/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
+#6 resolve docker.io/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 done
+#6 DONE 0.0s
+
+#7 [minio build 1/3] FROM docker.io/library/golang:1.26.8-alpine@sha256:8ac98ca534ac3f51e1f420a1dd2c15e74c75cfa0f23f3ad27eb5d7236c349a0c
+#7 resolve docker.io/library/golang:1.26.8-alpine@sha256:8ac98ca534ac3f51e1f420a1dd2c15e74c75cfa0f23f3ad27eb5d7236c349a0c done
+#7 DONE 0.0s
+
+#8 [minio-init stage-1 3/5] COPY --from=build /go/bin/minio /go/bin/mc /usr/bin/
+#8 CACHED
+
+#9 [minio-init build 2/3] RUN go install github.com/minio/minio@7aac2a2c5b7c882e68c1ce017d8256be2feea27f
+#9 CACHED
+
+#10 [minio-init stage-1 4/5] COPY --from=build /go/pkg/mod/github.com/minio/minio@*/LICENSE /licenses/minio-LICENSE
+#10 CACHED
+
+#11 [minio-init build 3/3] RUN go install github.com/minio/mc@77f82e18b5401a65958f1619df6ebb994634bd88
+#11 CACHED
+
+#12 [minio-init stage-1 2/5] RUN apk add --no-cache ca-certificates curl
+#12 CACHED
+
+#13 [minio-init stage-1 5/5] COPY --from=build /go/pkg/mod/github.com/minio/mc@*/LICENSE /licenses/mc-LICENSE
+#13 CACHED
+
+#14 [minio] exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:2479e8bc05114d9e7db98363ad04bb281a6e72e264b186bfb143234215186441 done
+#14 exporting config sha256:c21363294dfd77ebe270d9f8208e86d986eb8af8d0c6fb2e97d66dac76688313 done
+#14 exporting attestation manifest sha256:e1b830a6fa53ad99425df64e0c6958b09ff31e77b805503cd98bdfa7c59982b6 done
+#14 exporting manifest list sha256:aed40b596d4613455cc7a30453a37cc87d586f5188c24c30a316377f3391d3d6 done
+#14 naming to docker.io/library/pegada-minio:7aac2a2-mc77f82e1 done
+#14 unpacking to docker.io/library/pegada-minio:7aac2a2-mc77f82e1 done
+#14 DONE 0.0s
+
+#15 [minio-init] exporting to image
+#15 exporting layers done
+#15 exporting manifest sha256:60328da976b7fedbc19ae0736f659d86b504d8d7221af648213cbecec379d52e done
+#15 exporting config sha256:e840c70b2f8a8c7d350a0c6bf45b710fde1b10c4acd6e2c99860d3ffc719f245 done
+#15 exporting attestation manifest sha256:6957fea3a498313818843b3e751c55b65486f6a860578c4d7f3821b28d0f5344 done
+#15 exporting manifest list sha256:ff870b549357c09427f8ae66558064da5ab26309b802dcef8c84bc32a38c6c6d done
+#15 naming to docker.io/library/pegada-minio:7aac2a2-mc77f82e1 done
+#15 unpacking to docker.io/library/pegada-minio:7aac2a2-mc77f82e1 done
+#15 DONE 0.0s
+
+#16 [minio] resolving provenance for metadata file
+#16 DONE 0.0s
+
+#17 [minio-init] resolving provenance for metadata file
+#17 DONE 0.0s
+ Image pegada-minio:7aac2a2-mc77f82e1 Built 
+ Image pegada-minio:7aac2a2-mc77f82e1 Built 
+ Container pegada-minio-test Recreate 
+ Container pegada-minio-test Recreated 
+ Container pegada-test-environment-minio-init-1 Creating 
+ Container pegada-test-environment-minio-init-1 Created 
+ Container pegada-redis-serverless-test Starting 
+ Container pegada-minio-test Starting 
+ Container pegada-postgres-test Starting 
+ Container pegada-redis-test Starting 
+ Container pegada-redis-serverless-test Started 
+ Container pegada-minio-test Started 
+ Container pegada-minio-test Waiting 
+ Container pegada-postgres-test Started 
+ Container pegada-redis-test Started 
+ Container pegada-minio-test Healthy 
+ Container pegada-test-environment-minio-init-1 Starting 
+ Container pegada-test-environment-minio-init-1 Started 

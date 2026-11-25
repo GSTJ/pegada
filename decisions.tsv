@@ -1,0 +1,28 @@
+scope	decision	evidence_or_blocker
+alerts570-583	fix in PR344; no dismissals	next15.5.29 i18next26.3.4; exact age exceptions; hosted pending
+alerts546,551,552,559	remain open	PR330 requires native localized profile and preference save/reopen
+PR339,340,342,343	retain pending PR344 acceptance	do not close the only active fixes before replacement validated
+PR341	retain draft	project plugin configuration belongs to author workflow, no security urgency
+release	no release/deployment executed	latest v1.7.3; current production deployment success at e9a6057e; served SHA not verified
+runtime	PT web screenshot captured	background recording/EN screenshot failed: browser not producing screenshot frames; suggested foreground conflicts no-focus rule
+native	device discovery/open succeeds	opened simulator has no Pegada app installed; no profile flow executed
+issue273	retain; no implementation this pass	Seeded team dogs MVP: 10 disclosed Equipe Pegada dogs that like back and reply, one week; security fixes prioritized; existing product/provider/experiment gates not established
+issue270	retain; no implementation this pass	Deck supply: artificial volume assessment and refill plan; security fixes prioritized; existing product/provider/experiment gates not established
+issue268	retain; no implementation this pass	Pricing and revenue plan; security fixes prioritized; existing product/provider/experiment gates not established
+issue256	retain; no implementation this pass	Stop paying for external services; security fixes prioritized; existing product/provider/experiment gates not established
+issue243	retain; no implementation this pass	Design QA backlog after v1.7.2; security fixes prioritized; existing product/provider/experiment gates not established
+issue235	retain; no implementation this pass	Story card variant picker: let people choose between DM aberta and Rolê ticket; security fixes prioritized; existing product/provider/experiment gates not established
+issue216	retain; no implementation this pass	Design: invite a friend and both get 7 days premium, gated by the fake door; security fixes prioritized; existing product/provider/experiment gates not established
+issue211	retain; no implementation this pass	Instagram: fix the dead link in bio, 14 day repost calendar and the first boost; security fixes prioritized; existing product/provider/experiment gates not established
+issue210	retain; no implementation this pass	ASO audit: keyworded titles, age rating and category fix, 6 screenshots (pt-BR); security fixes prioritized; existing product/provider/experiment gates not established
+issue209	retain; no implementation this pass	Web SEO: share page, universal links and a gated breed pilot; security fixes prioritized; existing product/provider/experiment gates not established
+issue208	retain; no implementation this pass	Meta Ads R$500 install test (staged, attribution first); security fixes prioritized; existing product/provider/experiment gates not established
+issue206	retain; no implementation this pass	Five reels under 15 seconds from the story card and Remotion variants, with ref attribution; security fixes prioritized; existing product/provider/experiment gates not established
+issue205	retain; no implementation this pass	Acquisition channel plan: seven channels for Brazilian dog owners, smallest test and kill number each; security fixes prioritized; existing product/provider/experiment gates not established
+issue204	retain; no implementation this pass	Release train v1.7.0: JavaScript first over the air, then one native build for share and universal links; security fixes prioritized; existing product/provider/experiment gates not established
+issue203	retain; no implementation this pass	AI story: proactive free generation prompt and notification; security fixes prioritized; existing product/provider/experiment gates not established
+issue202	retain; no implementation this pass	AI story: Remotion render service design; security fixes prioritized; existing product/provider/experiment gates not established
+issue201	retain; no implementation this pass	AI story: evaluate Hugging Face Inference for cheaper image and short animation; security fixes prioritized; existing product/provider/experiment gates not established
+issue200	retain; no implementation this pass	AI story: Gemini 2.5 Flash Image generation behind a flag; security fixes prioritized; existing product/provider/experiment gates not established
+issue199	retain; no implementation this pass	AI story: web landing experiment with email capture (pre-MVP validation); security fixes prioritized; existing product/provider/experiment gates not established
+issue195	retain; no implementation this pass	Premium reminder when a free user receives a like; security fixes prioritized; existing product/provider/experiment gates not established
