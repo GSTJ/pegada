@@ -1,35 +1,37 @@
+import { execFileSync } from "node:child_process";
+
 import { initI18n } from "@pegada/shared/i18n/i18n";
 import { Language } from "@pegada/shared/i18n/types/types";
 import { createInstance } from "i18next";
 
-it("initializes the shipped English and Portuguese resources", async () => {
-  const instance = createInstance();
-  await initI18n(instance);
-  for (const language of [Language.EnUs, Language.PtBr]) {
+it.each([Language.EnUs, Language.PtBr])(
+  "initializes the shipped %s resources",
+  async (language) => {
+    const instance = createInstance();
+    await initI18n(instance);
     await instance.changeLanguage(language);
     const result = instance.t("likeLimit.description", { count: 3 });
-    expect(result).not.toBe("likeLimit.description");
+    expect(result).toContain(language === Language.PtBr ? "Você" : "You");
+    expect(result).toContain("3");
     expect(result).not.toContain("{{count}}");
-  }
-});
+  },
+);
 
-it("does not recurse into inherited built-ins when merging resource bundles", async () => {
-  const instance = createInstance();
-  await initI18n(instance);
-  const originalCall = Object.prototype.hasOwnProperty.call;
-  try {
-    instance.addResourceBundle(
-      "en",
-      "security-probe",
-      {
-        hasOwnProperty: { call: "corrupted" },
-      },
-      true,
-      true,
-    );
-    expect(Object.prototype.hasOwnProperty.call).toBe(originalCall);
-    expect(Object.prototype.hasOwnProperty.call({}, "missing")).toBe(false);
-  } finally {
-    Object.prototype.hasOwnProperty.call = originalCall;
-  }
+it("does not recurse into inherited built-ins when merging resource bundles", () => {
+  // Isolate the exploit so a vulnerable dependency cannot corrupt Jest itself.
+  expect(() =>
+    execFileSync(process.execPath, [
+      "-e",
+      `
+    const assert = require('node:assert/strict');
+    const i18next = require(${JSON.stringify(require.resolve("i18next"))});
+    const original = Object.prototype.hasOwnProperty.call;
+    i18next.init({ lng: 'en', resources: { en: { translation: {} } } });
+    i18next.addResourceBundle('en', 'translation', {
+      hasOwnProperty: { call: 'corrupted' },
+    }, true, true);
+    assert.equal(Object.prototype.hasOwnProperty.call, original);
+  `,
+    ]),
+  ).not.toThrow();
 });
