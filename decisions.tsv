@@ -1,7 +1,7 @@
 scope	decision	evidence_or_blocker
 alerts570-583	fix in PR344; no dismissals	next15.5.29 i18next26.3.4; exact age exceptions; hosted pending
 alerts546,551,552,559	remain open	PR330 requires native localized profile and preference save/reopen
-PR339,340,342,343	retain pending PR344 acceptance	do not close the only active fixes before replacement validated
+PR339,340,342,343	closed as superseded	PR344 exact head172aabce; full local tests pass; hosted dedupe/lint/typecheck/test pass; native/video gates remain
 PR341	retain draft	project plugin configuration belongs to author workflow, no security urgency
 release	no release/deployment executed	latest v1.7.3; current production deployment success at e9a6057e; served SHA not verified
 runtime	PT web screenshot captured	background recording/EN screenshot failed: browser not producing screenshot frames; suggested foreground conflicts no-focus rule
@@ -26,3 +26,4 @@ issue201	retain; no implementation this pass	AI story: evaluate Hugging Face Inf
 issue200	retain; no implementation this pass	AI story: Gemini 2.5 Flash Image generation behind a flag; security fixes prioritized; existing product/provider/experiment gates not established
 issue199	retain; no implementation this pass	AI story: web landing experiment with email capture (pre-MVP validation); security fixes prioritized; existing product/provider/experiment gates not established
 issue195	retain; no implementation this pass	Premium reminder when a free user receives a like; security fixes prioritized; existing product/provider/experiment gates not established
+verification	full local suite passed	API375 mobile391 web81 release36 metrics196 and security probes; uncached5 workspace typechecks; lint/format

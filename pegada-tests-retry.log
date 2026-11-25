@@ -5406,3 +5406,2098 @@ $ dotenv -e .env.test -- turbo test && pnpm test:release && pnpm test:security &
 @pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
 @pegada/api:test:       at Object.<anonymous> (src/services/SuggestionService/suggestion-service.test.ts:1044:34)
 @pegada/api:test: 
+@pegada/api:test: PASS src/routes/swipe-security.test.ts
+@pegada/api:test:   ● Console
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:77:49)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:93:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:94:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:95:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:120:50)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:122:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:122:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:156:50)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:158:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:158:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:205:50)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:207:61
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:207:11)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:235:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:236:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:261:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:264:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:288:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:289:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:290:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:324:52)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:340:50)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:340:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:340:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:340:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:340:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:324:52)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:352:50)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at src/routes/swipe-security.test.ts:326:70
+@pegada/api:test:           at Array.from (<anonymous>)
+@pegada/api:test:       at likeUpToTheCeiling (src/routes/swipe-security.test.ts:326:13)
+@pegada/api:test:       at async Object.<anonymous> (src/routes/swipe-security.test.ts:352:44)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:365:51)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/swipe-security.test.ts:374:54)
+@pegada/api:test: 
+@pegada/api:test: PASS src/services/image-moderation-service.test.ts
+@pegada/api:test: PASS src/queue/handlers/push.test.ts
+@pegada/api:test: PASS src/services/subscription-event-service.test.ts
+@pegada/api:test: PASS src/queue/handlers/process-image.test.ts
+@pegada/api:test: PASS src/services/image-service.test.ts
+@pegada/api:test: PASS src/services/image-processing-service.test.ts
+@pegada/api:test: PASS src/services/referral-attribution.test.ts
+@pegada/api:test: PASS src/routes/report.test.ts
+@pegada/api:test:   ● Console
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:55:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:56:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:78:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:79:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:97:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:98:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:115:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:116:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:131:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:132:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:145:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:146:57)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:168:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:182:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:183:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:202:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:217:64)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:231:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:245:59)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:246:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:261:48)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:277:64)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:278:65)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/report.test.ts:279:48)
+@pegada/api:test: 
+@pegada/api:test: PASS src/maestro-seed.test.ts
+@pegada/api:test: PASS src/services/payment-service.test.ts
+@pegada/api:test: PASS src/services/user-service.test.ts
+@pegada/api:test: PASS src/shared/last-active.test.ts
+@pegada/api:test: PASS src/shared/dog-input-schema.test.ts
+@pegada/api:test: PASS src/services/subscription-metrics-service.test.ts
+@pegada/api:test: PASS src/routes/echo.test.ts
+@pegada/api:test: PASS src/queue/enqueue.test.ts
+@pegada/api:test: PASS src/shared/file-upload.test.ts
+@pegada/api:test: PASS src/routes/input-validation.test.ts
+@pegada/api:test: PASS src/routes/feature-interest.test.ts
+@pegada/api:test:   ● Console
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:58:49)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:77:49)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:95:49)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:119:49)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:131:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:132:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/feature-interest.test.ts:146:49)
+@pegada/api:test: 
+@pegada/api:test: PASS src/routes/private-output.test.ts
+@pegada/api:test:   ● Console
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/private-output.test.ts:71:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/private-output.test.ts:72:28)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/private-output.test.ts:113:30)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at Object.<anonymous> (src/routes/private-output.test.ts:114:30)
+@pegada/api:test: 
+@pegada/api:test: PASS src/services/authentication-service.test.ts
+@pegada/api:test: PASS src/services/feature-interest-lead-service.test.ts
+@pegada/api:test: PASS src/shared/image-url.test.ts
+@pegada/api:test: PASS src/services/message-service.test.ts
+@pegada/api:test:   ● Console
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:43:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:65:39)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:44:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:65:39)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:43:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:80:41)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:44:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:80:41)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:43:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:97:30)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:44:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:97:30)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:43:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:108:39)
+@pegada/api:test: 
+@pegada/api:test:     console.warn
+@pegada/api:test:       [@faker-js/faker]: faker.image.urlLoremFlickr() is deprecated since v10.1.0 and will be removed in v11.0.0. Please use faker.image.url() instead.
+@pegada/api:test: 
+@pegada/api:test:       16 |   let blurhash: string | undefined;
+@pegada/api:test:       17 |
+@pegada/api:test:     > 18 |   const url = faker.image.urlLoremFlickr({
+@pegada/api:test:          |                           ^
+@pegada/api:test:       19 |     category: "dogs",
+@pegada/api:test:       20 |     width: (16 / 9) * 1080,
+@pegada/api:test:       21 |     height: 1080,
+@pegada/api:test: 
+@pegada/api:test:       at Re (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:10495)
+@pegada/api:test:       at ze.urlLoremFlickr (../../node_modules/@faker-js/faker/dist/base-BpJm8uRb.js:7:11244)
+@pegada/api:test:       at generateFakeUserWithDog (../database/fixtures/generate-fake-user-with-dog.ts:18:27)
+@pegada/api:test:       at seedConversation (src/services/message-service.test.ts:44:28)
+@pegada/api:test:       at Object.<anonymous> (src/services/message-service.test.ts:108:39)
+@pegada/api:test: 
+@pegada/api:test: PASS src/services/dog-service.test.ts
+@pegada/api:test: PASS src/shared/s3-timeouts.test.ts
+@pegada/api:test: PASS src/shared/analytics.test.ts
+@pegada/api:test: PASS src/shared/revenuecat-auth.test.ts
+@pegada/api:test: PASS src/shared/cron-auth.test.ts
+@pegada/api:test: PASS src/queue/handlers/upload.test.ts
+@pegada/api:test: PASS src/routes/authentication.test.ts
+@pegada/api:test: PASS src/shared/config.test.ts
+@pegada/api:test: PASS src/shared/auth-token.test.ts
+@pegada/api:test: PASS src/queue/handlers/mail.test.ts
+@pegada/api:test: PASS src/shared/i18n-security.test.ts
+@pegada/api:test: 
+@pegada/api:test: Test Suites: 38 passed, 38 total
+@pegada/api:test: Tests:       375 passed, 375 total
+@pegada/api:test: Snapshots:   0 total
+@pegada/api:test: Time:        18.271 s
+@pegada/api:test: Ran all test suites.
+
+ Tasks:    3 successful, 3 total
+Cached:    0 cached, 3 total
+  Time:    26.319s 
+
+$ python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+....................................
+----------------------------------------------------------------------
+Ran 36 tests in 19.249s
+
+OK
+$ node scripts/test-image-size-patch.cjs && node scripts/test-transitive-security.cjs && node scripts/test-forge-xml-security.cjs
+PASS ICNS zero-length entry
+PASS JXL zero-length box
+PASS HEIF zero-length box
+PASS node-forge signature round trip
+PASS URI decoder
+PASS Joi multiple emails
+PASS legacy minimatch
+PASS modern minimatch
+PASS glob cancellation stops traversal
+PASS Ed25519 small-order key
+PASS TLS record without session
+PASS TLS unsupported compression
+PASS HTTP whitespace header and cookie
+PASS XML unterminated stop node
+PASS Expo manifest signing and AWS XML
+$ node --test scripts/metrics/*.test.mjs
+✔ a dry run renders the comment and never touches GitHub (27.488916ms)
+✔ one query goes out per metric block (0.826625ms)
+✔ both push return windows are asked for separately and land in the table (1.099166ms)
+✔ the deck supply query fills the deck table (0.858167ms)
+✔ a full run posts the readout once (0.783375ms)
+✔ a run that finds yesterday's comment edits it (0.712625ms)
+✔ a missing PostHog key stops the run before any query (0.225ms)
+✔ one broken query fails the whole run (0.445125ms)
+✔ the readout carries the updates in use through to the comment (1.813292ms)
+✔ the cron heartbeat reaches the push section (0.721375ms)
+✔ the per run table reaches the readout with its reasons (0.648833ms)
+✔ comments go, string contents stay (0.490375ms)
+✔ every catalogue name becomes an event (7.071042ms)
+✔ optional keys are told apart from required ones (0.264125ms)
+✔ an event with no properties has no keys (0.170041ms)
+✔ the keys of a nested value are not keys of the event (0.14375ms)
+✔ an intersection picks up the keys of the alias it extends (8.835375ms)
+✔ a key only one surface sends is not required of the other (0.160291ms)
+✔ a catalogue without the events object is refused (0.203125ms)
+✔ the catalogue on disk parses, and the funnel events keep their shape (1.323084ms)
+✔ the window is the seven days ending at now (6.498958ms)
+✔ quote escapes what would otherwise end the literal early (0.155125ms)
+✔ the totals query counts every event, not a list of them (0.143833ms)
+✔ the totals query counts anonymous rows by the shape of the distinct id (0.058083ms)
+✔ the split query breaks down by library and app version at once (0.079292ms)
+✔ the property query asks PostHog which keys the payload had (0.074167ms)
+✔ the library buckets are the three SDKs, and node is never a client (0.342166ms)
+✔ the funnel covers the six events the audit is asked about (0.061125ms)
+✔ the catalogue name wins whenever it has volume (0.10225ms)
+✔ an alias is used only when the catalogue name is silent (0.128666ms)
+✔ every query states its own row limit (0.166083ms)
+✔ the exception query asks for fifteen groups of type and message (0.1695ms)
+✔ the exception query truncates the message before grouping on it (0.094292ms)
+✔ the exception query keeps the libraries and versions inside the group (0.104542ms)
+✔ the exception query stays inside its own seven days (0.096292ms)
+✔ the exception query reads the name and message out of the list (1.212083ms)
+✔ the exception query takes the frame that threw, not the entry point (0.393875ms)
+✔ the exception query still reads the flat properties as a fallback (0.060458ms)
+✔ the exception query truncates the frame and keeps it out of the group (0.057333ms)
+✔ the exception query brings back both ends of every group (0.039917ms)
+✔ events are sorted by volume and matched to the catalogue (1.042166ms)
+✔ autocapture is kept apart from names the catalogue simply lacks (0.1745ms)
+✔ catalogue events with no rows at all are listed (0.089416ms)
+✔ library counts land in their own bucket and app versions add up (0.074875ms)
+✔ server events get no app version rows (0.059ms)
+✔ findings name the zero volume events, the unknown ones and the gaps (7.891375ms)
+✔ an event nobody signed in for is flagged, a server event is not (0.10175ms)
+✔ a renamed funnel event is called out by both names (0.662833ms)
+✔ a clean window says so instead of printing an empty list (0.067167ms)
+✔ the body carries the marker and every section (16.29875ms)
+✔ the volume table splits every event by library (0.2545ms)
+✔ the property section reports the share missing each required key (0.160583ms)
+✔ a funnel event with no rows says so rather than dividing by zero (0.12475ms)
+✔ an event the catalogue gives no required properties says that too (0.11425ms)
+✔ the body has no em dashes or en dashes (0.124042ms)
+✔ an event the property query never covered is not called incomplete (0.05525ms)
+✔ the exception table reports counts, library and app version (0.121125ms)
+✔ a server exception is labelled server and has no app version (0.148125ms)
+✔ an exception seen from both sides names both (0.123542ms)
+✔ a message cannot break the row it sits in (0.190167ms)
+✔ a code cell survives backticks, pipes and blank values (0.041209ms)
+✔ an exception with no stack says so instead of leaving a gap (0.153333ms)
+✔ the frame column names the line that threw (0.131875ms)
+✔ an exception with nothing on it still gets a row (0.156125ms)
+✔ no exceptions in the window says so (0.145875ms)
+✔ the exception table carries both ends of every group (0.173292ms)
+✔ a group first seen inside the last day is marked new (0.36525ms)
+✔ a group that has been there all week is not marked new (0.114625ms)
+✔ a group with no timestamps on it still gets a row (0.1075ms)
+✔ a timestamp with no zone on it is read as UTC before it is marked (0.085875ms)
+✔ a dry run prints the body and never touches GitHub (19.182625ms)
+✔ the exception query goes out with the first round (0.41075ms)
+✔ the property query only runs once the event names are known (0.250583ms)
+✔ a funnel event sent under another name is audited under that name (4.440958ms)
+✔ the comment is created the first time and edited after that (0.643834ms)
+✔ a missing key stops the run instead of publishing an empty audit (0.256208ms)
+✔ the previous readout is found by its marker (0.589625ms)
+✔ the search keeps paging while pages come back full (0.184416ms)
+✔ no marker anywhere returns nothing rather than a wrong comment (0.666625ms)
+✔ the first run creates the comment (0.479791ms)
+✔ every run after that edits the same comment instead of adding one (0.1255ms)
+✔ a missing token fails before any request (0.233458ms)
+✔ a refused request fails loudly with the status (0.111333ms)
+✔ rows come back keyed by column name, not by position (0.739334ms)
+✔ a response without columns is treated as a failed query (0.203166ms)
+✔ the query posts HogQL to the project query endpoint with a bearer key (0.22525ms)
+✔ a trailing slash on the host does not double up in the path (0.146083ms)
+✔ a missing key fails before anything is sent (0.197667ms)
+✔ a rejected query names itself in the failure (0.092208ms)
+✔ an error carried inside a 200 still fails the run (0.095875ms)
+✔ a body that is not JSON fails rather than parsing to nothing (0.07975ms)
+✔ the windows are two adjacent seven day halves ending at now (8.73125ms)
+✔ quote escapes what would otherwise end the literal early (0.131042ms)
+✔ the active users query buckets by the current window start (0.168542ms)
+✔ the active users query counts only events a person caused (0.151083ms)
+✔ posthog-node never counts as a client library (0.099792ms)
+✔ the events the API emits are all on the deny list (0.065791ms)
+✔ the version split counts distinct people per build, client events only (0.101041ms)
+✔ the city split prefers the city the person gave us over the IP guess (0.498084ms)
+✔ the city split leaves the state out so one city stays one row (0.053625ms)
+✔ the city split counts distinct people over the same client events as the headline (0.111083ms)
+✔ the city split asks for every city and leaves the trimming to the report (0.056833ms)
+✔ the totals query still counts server events, which are volume not activity (0.05225ms)
+✔ the totals query asks for every counted event once (0.065375ms)
+✔ the totals query restricts to the listed events (0.031208ms)
+✔ a breakdown collapses missing and empty property values into one bucket (0.111958ms)
+✔ every breakdown names an event the totals query also counts (0.186333ms)
+✔ the upgrade breakdowns say what was bought and whether it was real (0.412917ms)
+✔ the suppression breakdown reads why a nudge was withheld (0.826541ms)
+✔ the deck supply query sums the tiers and counts the short pages (0.146917ms)
+✔ the deck tiers name the property the Deck Served event really carries (0.74075ms)
+✔ the pricing breakdowns ask the paywall and the subscription the right thing (0.099792ms)
+✔ the product breakdown reads the property the server actually sends (0.178125ms)
+✔ every event name still exists in the shared analytics catalogue (0.195834ms)
+✔ the push returns query pairs a send with what the person did after it (0.073791ms)
+✔ the push returns query counts app events only, never the browser (0.033417ms)
+✔ the sends stay inside the window and the activity reaches past its end (0.033666ms)
+✔ the previous window asks about its own seven days (0.036458ms)
+✔ the coverage list holds real event names and no server event (0.035959ms)
+✔ the over the air list is a subset of the gap and carries the day it shipped (0.043459ms)
+✔ the coverage list leaves out the events the store build does send (0.027ms)
+✔ the update split counts distinct people per runtime and update prefix (0.070625ms)
+✔ the update split separates a downloaded bundle from the embedded one (0.060292ms)
+✔ the update split reads one window and only the app (0.049ms)
+✔ the cron heartbeat reads the latest run and the window sums (0.103667ms)
+✔ a run that never carried the failed property is not read as failed (0.062667ms)
+✔ the cron heartbeat adds up every suppression reason the event carries (0.066833ms)
+✔ the cron heartbeat reads one window and no comparison (0.035709ms)
+✔ the per run table reads one row per run, newest first (0.043792ms)
+✔ the per run table carries every suppression reason and their total (0.061167ms)
+✔ the per run table reads the current window only (0.036042ms)
+✔ a delta carries a plain sign and a percentage (9.797ms)
+✔ a delta against an empty previous window says new instead of dividing by zero (0.071458ms)
+✔ a rate delta is reported in percentage points (0.0545ms)
+✔ the report opens with the marker so tomorrow's run can find it (4.550708ms)
+✔ the report states both windows and when it ran (0.257167ms)
+✔ the core table reports counts, distinct people and deltas (0.194375ms)
+✔ successful upgrades come from the upgrade breakdown, not the raw event count (0.167083ms)
+✔ the story shares are split out of Share Completed (0.192125ms)
+✔ the app version table splits the active users by build (0.18875ms)
+✔ a missing app version split says so instead of rendering an empty table (0.233667ms)
+✔ the city table names the top ten and stops there (0.197041ms)
+✔ the unplaced people are a share of the headline, not of the table (0.151541ms)
+✔ a week nobody used the app reports no share rather than a division (0.026958ms)
+✔ every active user counts as unplaced when no city ever arrives (0.251208ms)
+✔ a missing city split says so instead of rendering an empty table (0.128917ms)
+✔ the push table reports how many people a send reached (0.122792ms)
+✔ the push open rate is opens over sends (0.104208ms)
+✔ the push open rate is n/a rather than infinite when nothing was sent (0.102959ms)
+✔ the push ok rate is a share of the tickets in each window (0.115083ms)
+✔ the push table counts the nudges the cadence held back (0.219084ms)
+✔ the suppression reasons separate the caps from a dead phone (0.153958ms)
+✔ the deck table reports the pages, the page size and the tiers behind it (0.157042ms)
+✔ the deck table sits between the sharing table and the push table (0.128ms)
+✔ a week the deck served nothing reports no page size rather than a division (0.127125ms)
+✔ the deck rows survive a query that answered with no rows at all (1.185583ms)
+✔ an average delta is a plain difference, not a percentage (0.090959ms)
+✔ every breakdown gets its own table, ordered by the current window (0.256458ms)
+✔ the pricing tables split the paywall by trigger and the subscription by period (0.187459ms)
+✔ the cancel reason table separates a refund from a voluntary cancel (0.161083ms)
+✔ the product table separates yearly from monthly and weekly (0.14325ms)
+✔ an empty breakdown says so instead of rendering an empty table (0.112666ms)
+✔ no emoji reaches the comment (0.180958ms)
+✔ push attributed returns land in the push table over the people reached (0.158709ms)
+✔ a window nobody was pushed in reports no rate rather than a division (0.160666ms)
+✔ the returns row survives a query that answered with no rows at all (0.145125ms)
+✔ the coverage note sits under the push table and names the store build (0.137625ms)
+✔ the coverage note lists every event the store build cannot send (0.037833ms)
+✔ the coverage note does not excuse an event 1.6.2 is really sending (0.028041ms)
+✔ the coverage note says the update closed the gap on the phones that took it (0.029ms)
+✔ the coverage note leaves the exception out when no update has shipped (0.030334ms)
+✔ the coverage note says so plainly once the store build sends everything (0.022416ms)
+✔ the update table says which bundle each runtime is actually running (0.361291ms)
+✔ the busiest update leads the table and a device with no timestamp gets a dash (0.16025ms)
+✔ the update table sits above the city table so the two are not confused (0.140208ms)
+✔ a week with no app events says so instead of rendering an empty update table (0.157375ms)
+✔ the update table survives a run made before the query existed (0.113042ms)
+✔ the cron heartbeat prints the latest run beside the window sums (0.139667ms)
+✔ the cron heartbeat sits under the push table and above the coverage note (0.123959ms)
+✔ a week with no cron run says the job is the reason, not the week (0.115667ms)
+✔ the per run table prints the runs newest first (0.486459ms)
+✔ the reasons cell names only the rules that held somebody (0.045166ms)
+✔ a run that held nobody back prints a dash instead of a list of zeroes (0.035709ms)
+✔ a run that reached no decision about somebody says so (0.036333ms)
+✔ a run that threw says so instead of reading as a quiet hour (0.027542ms)
+✔ no runs at all reads as the job rather than a quiet day (0.138667ms)
+✔ a heartbeat that reports no runs reads the same as no heartbeat (0.024792ms)
+✔ the sums arrive as floats and print as whole people (0.042125ms)
+✔ a run timestamp with no zone on it is read as UTC (0.029292ms)
+▶ parseTimestamp
+  ✔ reads a bare ClickHouse stamp as UTC, whatever the machine zone is (4.0235ms)
+  ✔ keeps an explicit zone instead of forcing UTC (0.120917ms)
+  ✔ passes a Date through, and reads an invalid one as nothing (3.395667ms)
+  ✔ reads empty inputs as nothing (0.089625ms)
+✔ parseTimestamp (8.121042ms)
+▶ utcStamp and utcMoment
+  ✔ prints the only stamp shape either readout uses (0.069625ms)
+  ✔ prints a dash instead of Invalid Date when there is nothing to read (0.042917ms)
+  ✔ prints a bare stamp through the shared path (0.037084ms)
+✔ utcStamp and utcMoment (0.849375ms)
+ℹ tests 196
+ℹ suites 2
+ℹ pass 196
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 115.698708
